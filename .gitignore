@@ -13,6 +13,8 @@ Thumbs.db
 .claude/
 
 # Secrets
+.env
+**/.env
 **/application-dev.yaml
 
 HELP.md

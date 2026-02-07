@@ -7,9 +7,11 @@ import fr.kksdev.budget.api.dto.RegisterRequest;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -20,6 +22,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
+            log.warn("Registration failed: email already exists: {}", request.email());
             throw new IllegalArgumentException("Email déjà utilisé");
         }
 
@@ -30,6 +33,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        log.info("User registered: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthResponse(token, user.getEmail(), user.getName());
@@ -37,12 +41,17 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Email ou mot de passe incorrect"));
+                .orElseThrow(() -> {
+                    log.error("Login failed for email: {}", request.email());
+                    return new IllegalArgumentException("Email ou mot de passe incorrect");
+                });
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            log.error("Login failed for email: {}", request.email());
             throw new IllegalArgumentException("Email ou mot de passe incorrect");
         }
 
+        log.info("User logged in: {}", user.getEmail());
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthResponse(token, user.getEmail(), user.getName());
     }
