@@ -1,7 +1,7 @@
 # Backlog Conformité Budget App
 
 > Dernière analyse : 2026-02-07
-> Score global : 80% | Services : 1 (API Backend)
+> Score global : 96% | Services : 1 (API Backend)
 > Constitution : v2.0.0 | Fichiers Java : 22
 
 ---
@@ -12,75 +12,22 @@ Aucun écart critique restant.
 
 ---
 
-## 🟠 MAJEUR (score: 65%)
-
-### Tests
-
-- [ ] **api** : TEST-001 — Couverture de tests insuffisante
-  - Fichier : `src/test/java/fr/kksdev/budget/api/ApiApplicationTests.java`
-  - Attendu : Tests d'intégration pour endpoints, tests unitaires pour services
-  - Actuel : Un seul test trivial `contextLoads()`
-  - Impact : Aucune garantie de non-régression
-  - Correction : Créer :
-    - `AuthControllerTest.java` : tests POST /auth/register, POST /auth/login (201, 200, 400, 409)
-    - `AuthServiceTest.java` : tests unitaires avec mock de `UserRepository`, `PasswordEncoder`, `JwtUtil`
-    - Cas à couvrir : email déjà existant, mot de passe incorrect, validation Bean Validation
-
-- [ ] **api** : TEST-002 — Repositories non testés
-  - Fichiers : `TransactionRepository.java`, `SubscriptionRepository.java`, `DebtRepository.java`
-  - Attendu : Tests des méthodes de requêtes personnalisées
-  - Actuel : Aucun test
-  - Impact : Risque de requêtes SQL incorrectes non détectées
-  - Correction : Créer tests d'intégration avec `@DataJpaTest` pour vérifier :
-    - `findByUserIdOrderByDateDesc` retourne bien les transactions triées
-    - Isolation par `userId` (pas de fuites cross-user)
+## 🟠 MAJEUR (score: 95%)
 
 ### API-First
 
 - [ ] **api** : API-001 — Absence de DTOs pour Transaction, Subscription, Debt
   - Fichiers : Entités `Transaction.java`, `Subscription.java`, `Debt.java` (modèle exposé directement)
   - Attendu : DTOs de request/response pour isoler la couche API
-  - Actuel : Aucun controller créé, mais repositories prêts
+  - Actuel : DTOs créés localement mais non commitées (pas de controllers encore)
   - Impact : Futur risque d'exposition d'entités JPA directement
-  - Correction : Créer :
-    - `TransactionRequest.java`, `TransactionResponse.java`
-    - `SubscriptionRequest.java`, `SubscriptionResponse.java`
-    - `DebtRequest.java`, `DebtResponse.java`
-
-### Configuration
-
-- [ ] **api** : CONF-001 — Secrets en clair dans application-dev.yaml
-  - Fichier : `application-dev.yaml:5,15`
-  - Attendu : Variables d'environnement même en dev (ou au minimum un commentaire de warning)
-  - Actuel : Password DB `REDACTED` hardcodé, JWT secret hardcodé
-  - Risque : MAJEUR si application-dev.yaml committé (ce qui est le cas)
-  - Correction :
-    1. Ajouter `.env` au `.gitignore`
-    2. Créer `.env.example` avec placeholders
-    3. Migrer vers `${DB_PASSWORD:dev-password}` même en dev
-    4. Documenter dans README
+  - Correction : Commiter les DTOs lors de la création des controllers correspondants
 
 ---
 
-## 🟢 MINEUR (score: 80%)
+## 🟢 MINEUR (score: 100%)
 
-### Architecture
-
-- [ ] **api** : ARCH-001 — Entités sans @UpdateTimestamp
-  - Fichiers : `Transaction.java`, `Subscription.java`, `Debt.java`
-  - Attendu : `@UpdateTimestamp` sur champ `updatedAt` pour traçabilité
-  - Actuel : Seulement `@CreationTimestamp` sur `User`
-  - Impact : Impossible de savoir quand une transaction a été modifiée
-  - Correction : Ajouter `private LocalDateTime updatedAt` avec `@UpdateTimestamp` sur toutes les entités
-
-### Bean Validation
-
-- [ ] **api** : VAL-001 — Validation manquante sur RegisterRequest.name
-  - Fichier : `RegisterRequest.java:10`
-  - Attendu : `@Size(min = 1, max = 100)` ou `@NotBlank`
-  - Actuel : Champ `name` nullable sans contrainte
-  - Impact : Possible enregistrement d'utilisateurs sans nom
-  - Correction : Décider si `name` est obligatoire et ajouter validation
+Aucun écart mineur restant.
 
 ---
 
@@ -93,6 +40,7 @@ Aucun écart critique restant.
 | JWT sur routes protégées | ✅ | `SecurityConfig.java:29-31` | Routes `/auth/**` et `/error` publiques, reste authentifié |
 | BCrypt pour mots de passe | ✅ | `SecurityConfig.java:37-39`, `AuthService.java:28` | `BCryptPasswordEncoder` configuré et utilisé |
 | Secrets via variables env (prod) | ✅ | `application-prod.yaml:3-5,15` | `${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}`, `${JWT_SECRET}` |
+| Secrets via variables env (dev) | ✅ | `application-dev.yaml:3-5,18` | `${DB_URL:...}`, `${DB_PASSWORD:...}`, `${JWT_SECRET:...}` avec defaults |
 | Bean Validation activée | ✅ | `pom.xml:47`, `AuthController.java:24,29` | `@Valid` sur endpoints |
 | Context path `/api` | ✅ | `application.yaml:20` | `server.servlet.context-path: /api` |
 | GlobalExceptionHandler | ✅ | `GlobalExceptionHandler.java` | `@RestControllerAdvice` avec gestion 400/404/500, logging intégré |
@@ -105,6 +53,17 @@ Aucun écart critique restant.
 | Logging SLF4J | ✅ | `AuthService.java`, `AuthController.java`, `JwtFilter.java` | `@Slf4j` + log.info/warn/error sur actions clés |
 | Configuration Logback | ✅ | `logback-spring.xml` | Profil dev (console, DEBUG) + prod (console + fichier rotatif 10MB/30j) |
 
+### Testabilité
+
+| Critère | Statut | Fichier | Commentaire |
+|---------|--------|---------|-------------|
+| Tests unitaires AuthService | ✅ | `AuthServiceTest.java` | 5 tests : register OK/KO, login OK/KO email/KO password |
+| Tests intégration AuthController | ✅ | `AuthControllerTest.java` | 7 tests : 201, 200, 400 validation, 400 email existant, 400 login KO |
+| Tests TransactionRepository | ✅ | `TransactionRepositoryTest.java` | 3 tests : tri date desc, isolation userId, filtre date between |
+| Tests SubscriptionRepository | ✅ | `SubscriptionRepositoryTest.java` | 2 tests : tri nom, filtre actifs |
+| Tests DebtRepository | ✅ | `DebtRepositoryTest.java` | 2 tests : tri date desc, filtre non remboursés |
+| Base de test H2 | ✅ | `application-test.yaml` | H2 in-memory, profil test dédié |
+
 ### Architecture
 
 | Critère | Statut | Fichier | Commentaire |
@@ -115,6 +74,8 @@ Aucun écart critique restant.
 | Lombok activé | ✅ | `pom.xml:82-83`, entités | `@Builder`, `@Getter`, `@Setter`, `@RequiredArgsConstructor` |
 | Un seul module Maven | ✅ | `pom.xml` | Pas de multi-module |
 | Controller → Service → Repository | ✅ | `AuthController.java:21` → `AuthService.java:17-19` | Architecture en couches respectée |
+| @UpdateTimestamp sur entités | ✅ | `Transaction.java`, `Subscription.java`, `Debt.java` | Champ `updatedAt` avec `@UpdateTimestamp` pour traçabilité |
+| Validation RegisterRequest.name | ✅ | `RegisterRequest.java:10` | `@Size(max = 100)` — champ optionnel avec contrainte de longueur |
 
 ### Database
 
@@ -123,9 +84,9 @@ Aucun écart critique restant.
 | Entités avec UUID | ✅ | `User.java:20-21`, autres entités | `@GeneratedValue(strategy = GenerationType.UUID)` |
 | DDL dev : create-drop | ✅ | `application-dev.yaml:12` | `ddl-auto: create-drop` |
 | DDL prod : validate | ✅ | `application-prod.yaml:12` | `ddl-auto: validate` |
-| Relations JPA correctes | ✅ | `Transaction.java:41-43`, `Subscription.java:40-42`, `Debt.java:40-42` | `@ManyToOne` avec `@JoinColumn(name = "user_id")` |
+| Relations JPA correctes | ✅ | `Transaction.java`, `Subscription.java`, `Debt.java` | `@ManyToOne` avec `@JoinColumn(name = "user_id")` |
 | PostgreSQL seule dépendance | ✅ | `pom.xml:76-79` | Driver PostgreSQL en runtime |
-| Migrations Flyway | ✅ | `V1__init_schema.sql`, `pom.xml` | Flyway configuré, script initial avec 4 tables + index, activé en prod |
+| Migrations Flyway | ✅ | `V1__init_schema.sql`, `V2__add_updated_at.sql` | Flyway configuré, 2 migrations, activé en prod |
 
 ### Configuration
 
@@ -133,6 +94,8 @@ Aucun écart critique restant.
 |---------|--------|---------|-------------|
 | Profils Spring dev/prod | ✅ | `application.yaml:5`, fichiers séparés | `spring.profiles.active: dev` |
 | Isolation des configs | ✅ | `application-dev.yaml`, `application-prod.yaml` | Fichiers séparés |
+| `.env.example` documenté | ✅ | `.env.example` | Placeholders pour DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET |
+| `.env` dans `.gitignore` | ✅ | `.gitignore` | `.env` et `**/.env` exclus |
 
 ### Dette technique
 
@@ -152,14 +115,14 @@ Aucun écart critique restant.
 | II. Sécurité par défaut | 100% | 0 | 0 | 0 |
 | III. Simplicité & YAGNI | 100% | 0 | 0 | 0 |
 | IV. Mobile-First UX | N/A | — | — | — |
-| V. Testabilité | 20% | 0 | 2 | 0 |
+| V. Testabilité | 100% | 0 | 0 | 0 |
 | VI. Observabilité | 100% | 0 | 0 | 0 |
-| VII. Self-Hosted Ready | 85% | 0 | 1 | 0 |
+| VII. Self-Hosted Ready | 100% | 0 | 0 | 0 |
 
-**Score global pondéré** : 80%
+**Score global pondéré** : 96%
 - CRITIQUE (×3) : 0 écart → 0 points
-- MAJEUR (×2) : 4 écarts → -8 points
-- MINEUR (×1) : 2 écarts → -2 points
+- MAJEUR (×2) : 1 écart → -2 points
+- MINEUR (×1) : 0 écart → 0 points
 
 ---
 
@@ -172,19 +135,22 @@ Aucun écart critique restant.
 3. ~~**SEC-001** : Créer GlobalExceptionHandler~~ → `@RestControllerAdvice` avec 400/404/500
 4. ~~**DB-001** : Migrer vers Flyway~~ → `V1__init_schema.sql` + config dev/prod
 
-### Top 3 priorité MAJEUR (amélioration qualité)
+### ✅ Majeurs résolus
 
-1. **TEST-001** : Créer tests d'intégration pour `AuthController`
-   - Gain : Filet de sécurité pour non-régression
-   - Effort : 4h
+5. ~~**TEST-001** : Tests AuthController + AuthService~~ → 12 tests (5 unitaires + 7 intégration)
+6. ~~**TEST-002** : Tests repositories~~ → 7 tests @DataJpaTest avec H2
+7. ~~**CONF-001** : Secrets vers variables d'environnement~~ → `${VAR:default}` + `.env.example`
 
-2. **CONF-001** : Migrer secrets vers variables d'environnement en dev
-   - Gain : Sécurité du repository
-   - Effort : 1h
+### ✅ Mineurs résolus
 
-3. **API-001** : Créer DTOs pour Transaction, Subscription, Debt
-   - Gain : Respect du principe API-First
-   - Effort : 2h (futur, lors de création des controllers)
+8. ~~**ARCH-001** : @UpdateTimestamp sur entités~~ → `updatedAt` sur Transaction, Subscription, Debt + migration V2
+9. ~~**VAL-001** : Validation RegisterRequest.name~~ → `@Size(max = 100)` sur champ optionnel
+
+### Restant
+
+10. **API-001** : DTOs pour Transaction, Subscription, Debt
+    - Statut : DTOs prêts localement, à commiter avec les controllers
+    - Effort : inclus dans le développement des controllers
 
 ---
 
@@ -200,7 +166,10 @@ Le projet respecte bien les fondations :
 - Structure de packages conforme
 - Observabilité en place (SLF4J + Logback)
 - Exceptions gérées globalement
-- Migrations Flyway prêtes pour la prod
+- Migrations Flyway prêtes pour la prod (V1 + V2)
+- Suite de tests complète (19 tests)
+- Secrets externalisés en dev et prod
+- Traçabilité des modifications (@UpdateTimestamp)
 
 ### Points positifs remarquables
 
@@ -210,6 +179,7 @@ Le projet respecte bien les fondations :
 - Pas de dette technique (TODO/FIXME/System.out)
 - Enums bien placés dans package dédié
 - Messages d'erreur de login unifiés (pas d'énumération d'emails)
+- 19 tests couvrant controllers, services et repositories
 
 ### Priorité d'actions
 
@@ -218,14 +188,16 @@ Le projet respecte bien les fondations :
 2. ~~GlobalExceptionHandler (SEC-001)~~
 3. ~~Migrations Flyway (DB-001)~~
 
-**Phase 2 (amélioration) :**
-4. Tests (TEST-001, TEST-002)
-5. Sécurité secrets (CONF-001)
+**Phase 2 (amélioration) : ✅ TERMINÉE**
+4. ~~Tests (TEST-001, TEST-002)~~
+5. ~~Sécurité secrets (CONF-001)~~
 
-**Phase 3 (futur) :**
-6. DTOs pour nouvelles entités (API-001)
-7. UpdateTimestamp (ARCH-001)
-8. Validation name (VAL-001)
+**Phase 3 (mineurs) : ✅ TERMINÉE**
+6. ~~UpdateTimestamp (ARCH-001)~~
+7. ~~Validation name (VAL-001)~~
+
+**Phase 4 (futur) :**
+8. DTOs pour nouvelles entités (API-001) — avec les controllers
 
 ---
 
