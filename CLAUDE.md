@@ -167,6 +167,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 ## Active Technologies
 - Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
 - Frontend : Angular 21, TypeScript, SCSS
+- TypeScript 5.8+ (Angular 21) + Angular 21 (HttpClient, Router, Signals), RxJS (HTTP uniquement) (002-auth-service)
+- localStorage (clé `budget_token`) (002-auth-service)
 
 ## Recent Changes
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
