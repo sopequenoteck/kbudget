@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.TransactionRequest;
 import fr.kksdev.budget.api.dto.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
@@ -144,6 +145,44 @@ class TransactionServiceTest {
 
         assertThat(response).isNotNull();
         verify(transactionRepository).save(existing);
+    }
+
+    @Test
+    void should_return_monthly_summary_with_correct_totals() {
+        var user = buildUser();
+        var depense = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("50.00"))
+                .type(TransactionType.DEPENSE).date(LocalDate.of(2026, 2, 10))
+                .libelle("Courses").user(user).build();
+        var recette = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("2000.00"))
+                .type(TransactionType.RECETTE).date(LocalDate.of(2026, 2, 1))
+                .libelle("Salaire").user(user).build();
+
+        when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
+                userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
+                .thenReturn(List.of(depense, recette));
+
+        MonthlySummaryResponse summary = transactionService.getMonthlySummary(2, 2026, userId);
+
+        assertThat(summary.month()).isEqualTo(2);
+        assertThat(summary.year()).isEqualTo(2026);
+        assertThat(summary.totalRecettes()).isEqualByComparingTo("2000.00");
+        assertThat(summary.totalDepenses()).isEqualByComparingTo("50.00");
+        assertThat(summary.solde()).isEqualByComparingTo("1950.00");
+    }
+
+    @Test
+    void should_return_zero_summary_when_no_transactions() {
+        when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
+                userId, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)))
+                .thenReturn(List.of());
+
+        MonthlySummaryResponse summary = transactionService.getMonthlySummary(3, 2026, userId);
+
+        assertThat(summary.totalRecettes()).isEqualByComparingTo("0");
+        assertThat(summary.totalDepenses()).isEqualByComparingTo("0");
+        assertThat(summary.solde()).isEqualByComparingTo("0");
     }
 
     @Test

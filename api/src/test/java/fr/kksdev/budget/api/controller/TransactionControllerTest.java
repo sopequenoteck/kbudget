@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
+import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.TransactionRequest;
 import fr.kksdev.budget.api.dto.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
@@ -154,6 +155,25 @@ class TransactionControllerTest {
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Transaction non trouvée"));
+    }
+
+    @Test
+    void should_return_200_when_get_monthly_summary() throws Exception {
+        var summary = new MonthlySummaryResponse(2, 2026,
+                new BigDecimal("2000.00"), new BigDecimal("50.00"), new BigDecimal("1950.00"));
+
+        when(transactionService.getMonthlySummary(2, 2026, userId)).thenReturn(summary);
+
+        mockMvc.perform(get("/transactions/summary")
+                        .param("month", "2")
+                        .param("year", "2026")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.month").value(2))
+                .andExpect(jsonPath("$.year").value(2026))
+                .andExpect(jsonPath("$.totalRecettes").value(2000.00))
+                .andExpect(jsonPath("$.totalDepenses").value(50.00))
+                .andExpect(jsonPath("$.solde").value(1950.00));
     }
 
     @Test

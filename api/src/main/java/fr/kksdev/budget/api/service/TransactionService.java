@@ -1,7 +1,9 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.TransactionRequest;
 import fr.kksdev.budget.api.dto.TransactionResponse;
+import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.TransactionRepository;
@@ -10,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,6 +72,31 @@ public class TransactionService {
         Transaction transaction = findByIdAndUser(id, userId);
         transactionRepository.delete(transaction);
         log.info("Transaction supprimée: {}", id);
+    }
+
+    public MonthlySummaryResponse getMonthlySummary(int month, int year, UUID userId) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate from = yearMonth.atDay(1);
+        LocalDate to = yearMonth.atEndOfMonth();
+
+        List<Transaction> transactions = transactionRepository
+                .findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to);
+
+        BigDecimal totalRecettes = transactions.stream()
+                .filter(t -> t.getType() == TransactionType.RECETTE)
+                .map(Transaction::getMontant)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalDepenses = transactions.stream()
+                .filter(t -> t.getType() == TransactionType.DEPENSE)
+                .map(Transaction::getMontant)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        log.info("Bilan mensuel {}/{} pour userId={}: recettes={}, dépenses={}",
+                month, year, userId, totalRecettes, totalDepenses);
+
+        return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
+                totalRecettes.subtract(totalDepenses));
     }
 
     private Transaction findByIdAndUser(UUID id, UUID userId) {
