@@ -90,7 +90,7 @@ class TransactionRepositoryTest {
 
         assertThat(user1Transactions).hasSize(2);
         assertThat(user2Transactions).hasSize(1);
-        assertThat(user2Transactions.get(0).getLibelle()).isEqualTo("Loyer");
+        assertThat(user2Transactions.getFirst().getLibelle()).isEqualTo("Loyer");
     }
 
     @Test
@@ -101,6 +101,6 @@ class TransactionRepositoryTest {
                 LocalDate.of(2026, 1, 31));
 
         assertThat(transactions).hasSize(1);
-        assertThat(transactions.get(0).getLibelle()).isEqualTo("Courses");
+        assertThat(transactions.getFirst().getLibelle()).isEqualTo("Courses");
     }
 }
