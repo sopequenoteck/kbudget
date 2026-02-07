@@ -12,12 +12,12 @@ Implémenter un AuthService Angular signals-first qui gère l'authentification J
 **Language/Version**: TypeScript 5.8+ (Angular 21)
 **Primary Dependencies**: Angular 21 (HttpClient, Router, Signals), RxJS (HTTP uniquement)
 **Storage**: localStorage (clés `budget_token` et `budget_user`)
-**Testing**: Karma/Jasmine (Angular CLI default, hors scope contraintes constitution — celles-ci ciblent le backend Java)
+**Testing**: Karma/Jasmine (Angular CLI default). Les outils constitution (JUnit 5) ciblent le backend Java, mais les exigences de qualité (pattern AAA, nommage `should_[résultat]_when_[condition]`) s'appliquent aussi au frontend (cf. spec.md Test Framework)
 **Target Platform**: Web PWA (mobile-first, navigateurs modernes)
 **Project Type**: Web application (monorepo `api/` + `app/`)
 **Performance Goals**: État auth mis à jour de manière synchrone (même tick, cf. SC-001)
 **Constraints**: Pas de librairie externe pour décoder le JWT (utiliser `atob`), signals-first (pas de BehaviorSubject)
-**Scale/Scope**: Single-user, 1 service + 2 interfaces + 2 modèles
+**Scale/Scope**: Single-user, 1 service + 4 interfaces (LoginRequest, RegisterRequest, AuthResponse, UserInfo)
 
 ## Constitution Check
 
