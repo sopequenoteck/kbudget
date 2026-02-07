@@ -2,9 +2,9 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
-import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
-import fr.kksdev.budget.api.dto.TransactionRequest;
-import fr.kksdev.budget.api.dto.TransactionResponse;
+import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
+import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -80,7 +80,7 @@ class TransactionControllerTest {
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
                 LocalDate.of(2026, 2, 7), "Alimentation", null);
 
-        when(transactionService.create(any(TransactionRequest.class), any(User.class))).thenReturn(response);
+        when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(post("/transactions")
                         .header("Authorization", BEARER_TOKEN)

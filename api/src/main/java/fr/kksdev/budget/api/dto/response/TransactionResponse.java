@@ -1,4 +1,4 @@
-package fr.kksdev.budget.api.dto;
+package fr.kksdev.budget.api.dto.response;
 
 import fr.kksdev.budget.api.enums.TransactionType;
 

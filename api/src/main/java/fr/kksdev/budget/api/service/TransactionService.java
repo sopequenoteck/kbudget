@@ -1,12 +1,12 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
-import fr.kksdev.budget.api.dto.TransactionRequest;
-import fr.kksdev.budget.api.dto.TransactionResponse;
+import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
+import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
-import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.TransactionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +24,9 @@ import java.util.UUID;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
-    public TransactionResponse create(TransactionRequest request, User user) {
+    public TransactionResponse create(TransactionRequest request, UUID userId) {
         Transaction transaction = Transaction.builder()
                 .montant(request.montant())
                 .libelle(request.libelle())
@@ -33,11 +34,11 @@ public class TransactionService {
                 .date(request.date())
                 .categorie(request.categorie())
                 .note(request.note())
-                .user(user)
+                .user(userRepository.getReferenceById(userId))
                 .build();
 
         transaction = transactionRepository.save(transaction);
-        log.info("Transaction créée: {} pour user {}", transaction.getId(), user.getEmail());
+        log.info("Transaction créée: {} pour userId {}", transaction.getId(), userId);
         return toResponse(transaction);
     }
 

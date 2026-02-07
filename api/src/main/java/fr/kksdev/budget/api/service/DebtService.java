@@ -1,10 +1,10 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.DebtRequest;
-import fr.kksdev.budget.api.dto.DebtResponse;
+import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.model.Debt;
-import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.DebtRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +19,20 @@ import java.util.UUID;
 public class DebtService {
 
     private final DebtRepository debtRepository;
+    private final UserRepository userRepository;
 
-    public DebtResponse create(DebtRequest request, User user) {
+    public DebtResponse create(DebtRequest request, UUID userId) {
         Debt debt = Debt.builder()
                 .personne(request.personne())
                 .montant(request.montant())
                 .sens(request.sens())
                 .date(request.date())
                 .rembourse(request.rembourse() != null ? request.rembourse() : false)
-                .user(user)
+                .user(userRepository.getReferenceById(userId))
                 .build();
 
         debt = debtRepository.save(debt);
-        log.info("Dette créée: {} pour user {}", debt.getId(), user.getEmail());
+        log.info("Dette créée: {} pour userId {}", debt.getId(), userId);
         return toResponse(debt);
     }
 

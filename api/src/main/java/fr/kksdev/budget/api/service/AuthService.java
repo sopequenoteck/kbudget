@@ -1,9 +1,9 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.config.JwtUtil;
-import fr.kksdev.budget.api.dto.AuthResponse;
-import fr.kksdev.budget.api.dto.LoginRequest;
-import fr.kksdev.budget.api.dto.RegisterRequest;
+import fr.kksdev.budget.api.dto.request.LoginRequest;
+import fr.kksdev.budget.api.dto.request.RegisterRequest;
+import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

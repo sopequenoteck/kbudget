@@ -1,10 +1,10 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.SubscriptionRequest;
-import fr.kksdev.budget.api.dto.SubscriptionResponse;
+import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.model.Subscription;
-import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +19,20 @@ import java.util.UUID;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
-    public SubscriptionResponse create(SubscriptionRequest request, User user) {
+    public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
         Subscription subscription = Subscription.builder()
                 .nom(request.nom())
                 .montant(request.montant())
                 .frequence(request.frequence())
                 .dateDebut(request.dateDebut())
                 .actif(request.actif() != null ? request.actif() : true)
-                .user(user)
+                .user(userRepository.getReferenceById(userId))
                 .build();
 
         subscription = subscriptionRepository.save(subscription);
-        log.info("Abonnement créé: {} pour user {}", subscription.getId(), user.getEmail());
+        log.info("Abonnement créé: {} pour userId {}", subscription.getId(), userId);
         return toResponse(subscription);
     }
 

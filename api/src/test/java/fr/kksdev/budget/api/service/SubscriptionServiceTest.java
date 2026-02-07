@@ -1,11 +1,12 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.SubscriptionRequest;
-import fr.kksdev.budget.api.dto.SubscriptionResponse;
+import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,9 @@ class SubscriptionServiceTest {
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private SubscriptionService subscriptionService;
@@ -60,9 +64,10 @@ class SubscriptionServiceTest {
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null);
         var saved = buildSubscription(user);
 
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
-        SubscriptionResponse response = subscriptionService.create(request, user);
+        SubscriptionResponse response = subscriptionService.create(request, userId);
 
         assertThat(response.id()).isEqualTo(subscriptionId);
         assertThat(response.nom()).isEqualTo("Netflix");

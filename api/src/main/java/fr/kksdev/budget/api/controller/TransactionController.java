@@ -1,9 +1,8 @@
 package fr.kksdev.budget.api.controller;
 
-import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
-import fr.kksdev.budget.api.dto.TransactionRequest;
-import fr.kksdev.budget.api.dto.TransactionResponse;
-import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
+import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +26,15 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> create(
             @Valid @RequestBody TransactionRequest request,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(transactionService.create(request, user));
+                .body(transactionService.create(request, userId));
     }
 
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAll(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(transactionService.getAllByUser(user.getId()));
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(transactionService.getAllByUser(userId));
     }
 
     @GetMapping("/summary")
@@ -43,19 +42,19 @@ public class TransactionController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UUID userId = (UUID) authentication.getPrincipal();
         LocalDate now = LocalDate.now();
         int m = month != null ? month : now.getMonthValue();
         int y = year != null ? year : now.getYear();
-        return ResponseEntity.ok(transactionService.getMonthlySummary(m, y, user.getId()));
+        return ResponseEntity.ok(transactionService.getMonthlySummary(m, y, userId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getById(
             @PathVariable UUID id,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(transactionService.getById(id, user.getId()));
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(transactionService.getById(id, userId));
     }
 
     @PutMapping("/{id}")
@@ -63,16 +62,16 @@ public class TransactionController {
             @PathVariable UUID id,
             @Valid @RequestBody TransactionRequest request,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(transactionService.update(id, request, user.getId()));
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(transactionService.update(id, request, userId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        transactionService.delete(id, user.getId());
+        UUID userId = (UUID) authentication.getPrincipal();
+        transactionService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

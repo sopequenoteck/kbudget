@@ -1,12 +1,13 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.MonthlySummaryResponse;
-import fr.kksdev.budget.api.dto.TransactionRequest;
-import fr.kksdev.budget.api.dto.TransactionResponse;
+import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
+import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.TransactionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,9 @@ class TransactionServiceTest {
 
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -63,9 +67,10 @@ class TransactionServiceTest {
                 LocalDate.of(2026, 2, 7), "Alimentation", "Supermarché");
         var saved = buildTransaction(user);
 
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
 
-        TransactionResponse response = transactionService.create(request, user);
+        TransactionResponse response = transactionService.create(request, userId);
 
         assertThat(response.id()).isEqualTo(transactionId);
         assertThat(response.montant()).isEqualByComparingTo("50.00");

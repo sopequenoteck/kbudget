@@ -4,6 +4,9 @@ spring:
   profiles:
     active: dev
 
+  flyway:
+    enabled: true
+
   jpa:
     open-in-view: false
     properties:

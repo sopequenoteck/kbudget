@@ -1,11 +1,12 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.DebtRequest;
-import fr.kksdev.budget.api.dto.DebtResponse;
+import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.DebtRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,9 @@ class DebtServiceTest {
 
     @Mock
     private DebtRepository debtRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private DebtService debtService;
@@ -60,9 +64,10 @@ class DebtServiceTest {
                 DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), null);
         var saved = buildDebt(user);
 
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
 
-        DebtResponse response = debtService.create(request, user);
+        DebtResponse response = debtService.create(request, userId);
 
         assertThat(response.id()).isEqualTo(debtId);
         assertThat(response.personne()).isEqualTo("Alice");

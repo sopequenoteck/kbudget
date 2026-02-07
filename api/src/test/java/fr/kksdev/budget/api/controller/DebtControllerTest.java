@@ -2,8 +2,8 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
-import fr.kksdev.budget.api.dto.DebtRequest;
-import fr.kksdev.budget.api.dto.DebtResponse;
+import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -77,7 +77,7 @@ class DebtControllerTest {
                 debtId, "Alice", new BigDecimal("100.00"),
                 DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), false);
 
-        when(debtService.create(any(DebtRequest.class), any(User.class))).thenReturn(response);
+        when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(post("/debts")
                         .header("Authorization", BEARER_TOKEN)

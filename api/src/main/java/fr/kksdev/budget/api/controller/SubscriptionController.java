@@ -1,8 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
-import fr.kksdev.budget.api.dto.SubscriptionRequest;
-import fr.kksdev.budget.api.dto.SubscriptionResponse;
-import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,28 +24,28 @@ public class SubscriptionController {
     public ResponseEntity<SubscriptionResponse> create(
             @Valid @RequestBody SubscriptionRequest request,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(subscriptionService.create(request, user));
+                .body(subscriptionService.create(request, userId));
     }
 
     @GetMapping
     public ResponseEntity<List<SubscriptionResponse>> getAll(
             @RequestParam(required = false) Boolean actif,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UUID userId = (UUID) authentication.getPrincipal();
         if (Boolean.TRUE.equals(actif)) {
-            return ResponseEntity.ok(subscriptionService.getActiveByUser(user.getId()));
+            return ResponseEntity.ok(subscriptionService.getActiveByUser(userId));
         }
-        return ResponseEntity.ok(subscriptionService.getAllByUser(user.getId()));
+        return ResponseEntity.ok(subscriptionService.getAllByUser(userId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionResponse> getById(
             @PathVariable UUID id,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(subscriptionService.getById(id, user.getId()));
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(subscriptionService.getById(id, userId));
     }
 
     @PutMapping("/{id}")
@@ -54,16 +53,16 @@ public class SubscriptionController {
             @PathVariable UUID id,
             @Valid @RequestBody SubscriptionRequest request,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(subscriptionService.update(id, request, user.getId()));
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(subscriptionService.update(id, request, userId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        subscriptionService.delete(id, user.getId());
+        UUID userId = (UUID) authentication.getPrincipal();
+        subscriptionService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

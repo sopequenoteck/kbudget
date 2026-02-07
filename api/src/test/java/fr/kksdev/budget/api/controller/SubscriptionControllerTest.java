@@ -2,8 +2,8 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
-import fr.kksdev.budget.api.dto.SubscriptionRequest;
-import fr.kksdev.budget.api.dto.SubscriptionResponse;
+import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -77,7 +77,7 @@ class SubscriptionControllerTest {
                 subscriptionId, "Netflix", new BigDecimal("13.99"),
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true);
 
-        when(subscriptionService.create(any(SubscriptionRequest.class), any(User.class))).thenReturn(response);
+        when(subscriptionService.create(any(SubscriptionRequest.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(post("/subscriptions")
                         .header("Authorization", BEARER_TOKEN)

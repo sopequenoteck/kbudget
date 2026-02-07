@@ -1,4 +1,4 @@
-package fr.kksdev.budget.api.dto;
+package fr.kksdev.budget.api.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -44,9 +44,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             userRepository.findByEmail(email).ifPresent(user -> {
                 var auth = new UsernamePasswordAuthenticationToken(
-                        user, null, List.of());
+                        user.getId(), null, List.of());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                log.debug("User authenticated via JWT: {}", email);
             });
         } else {
             log.warn("Invalid JWT token on request: {} {}", request.getMethod(), request.getRequestURI());
