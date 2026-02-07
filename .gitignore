@@ -12,6 +12,9 @@ Thumbs.db
 # Claude
 .claude/
 
+# Secrets
+**/application-dev.yaml
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
