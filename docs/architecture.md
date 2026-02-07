@@ -76,6 +76,37 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
+## Architecture frontend
+
+### Projet Angular : `budget-app` (dossier `app/`)
+
+```
+app/src/app/
+├── core/              # Services singleton, guards, interceptors
+│   ├── auth/          # AuthService, AuthGuard, JwtInterceptor
+│   └── api/           # Services HTTP par domaine
+├── shared/            # Composants, pipes, directives reutilisables
+└── features/          # Modules lazy-loaded
+    ├── auth/          # Login
+    ├── dashboard/     # Tableau de bord
+    ├── transactions/  # CRUD transactions
+    ├── subscriptions/ # CRUD abonnements
+    └── debts/         # CRUD dettes
+```
+
+### Principes
+
+- **Lazy loading** : chaque feature est un module charge a la demande
+- **PWA** : Service Worker pour usage offline et installation mobile
+- **Standalone components** : composants Angular standalone (pas de NgModule par feature)
+- **Reactive** : formulaires reactifs, RxJS pour les appels HTTP
+
+### Communication avec l'API
+
+- `apiUrl` relatif (`/api`) — le reverse proxy Caddy route vers Spring Boot
+- Intercepteur HTTP ajoute le token JWT a chaque requete
+- Guard protege les routes authentifiees
+
 ## Frontend — Ecrans prevus
 
 | Ecran | Route | Role |
@@ -98,3 +129,24 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 - Le filtre `JwtFilter` de Spring Security intercepte toutes les routes `/api/**`
 - Cote Angular : intercepteur HTTP ajoute le token, guard protege les routes, ecran login dedie
 - Un seul utilisateur, credentials stockes en base (BCrypt)
+
+## Schema de deploiement
+
+```
+                    budget.kksdev.fr
+                          |
+                        Caddy (auto-HTTPS)
+                       /          \
+          handle /api/*          handle /*
+               |                     |
+        reverse_proxy          fichiers statiques
+        localhost:8080         /opt/budget-app/dist
+         (Spring Boot)        + SPA fallback → index.html
+               |
+           PostgreSQL
+```
+
+- **Caddy** : reverse proxy + serveur de fichiers statiques, certificats Let's Encrypt automatiques
+- **Frontend** : fichiers statiques Angular (`dist/`) servis directement par Caddy
+- **Backend** : Spring Boot sur `localhost:8080`, accessible uniquement via `/api/*`
+- **Domaine unique** : `budget.kksdev.fr` pour frontend et API

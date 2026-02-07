@@ -4,39 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-Application personnelle de gestion de budget (transactions, abonnements, dettes). API REST Spring Boot, self-hosted, single-user. PWA Angular mobile-first prévue comme frontend.
+Application personnelle de gestion de budget (transactions, abonnements, dettes). Self-hosted, single-user. Monorepo avec deux modules :
+
+- `api/` — Backend Spring Boot (API REST)
+- `app/` — Frontend Angular PWA mobile-first (`budget-app`)
 
 ## Commandes
 
+### Backend (api/)
+
 ```bash
-# Build
-cd api && mvn clean compile
-
-# Lancer l'application (profil dev)
-cd api && mvn spring-boot:run
-
-# Tests
-cd api && mvn test
-
-# Test unique
-cd api && mvn test -Dtest=NomDuTest
-
-# Build complet avec tests
-cd api && mvn clean install
+cd api && mvn clean compile       # Build
+cd api && mvn spring-boot:run     # Lancer (profil dev)
+cd api && mvn test                # Tests
+cd api && mvn test -Dtest=NomDuTest  # Test unique
+cd api && mvn clean install       # Build complet avec tests
 ```
 
 Le module Maven est dans `api/`. Toutes les commandes Maven doivent être exécutées depuis ce répertoire.
+
+### Frontend (app/)
+
+```bash
+cd app && ng serve                # Dev server (http://localhost:4200)
+cd app && ng build                # Build
+cd app && ng test                 # Tests unitaires
+cd app && ng build --configuration production  # Build prod
+```
+
+Le projet Angular est dans `app/`. Toutes les commandes Angular CLI doivent être exécutées depuis ce répertoire.
 
 ## Architecture
 
 ### Stack
 
-- Java 21, Spring Boot 4.0.2, Maven
-- PostgreSQL 15+, Spring Data JPA
-- Spring Security + JWT (jjwt 0.12.6)
+- **Backend** : Java 21, Spring Boot 4.0.2, Maven
+- **Frontend** : Angular 19, TypeScript, SCSS
+- **BDD** : PostgreSQL 15+, Spring Data JPA
+- **Auth** : Spring Security + JWT (jjwt 0.12.6)
+- **Infra** : Caddy (reverse proxy, auto-HTTPS)
 - Lombok pour le boilerplate
 
-### Couches
+### Couches backend
 
 ```
 Controller (@RestController) → Service (@Service) → Repository (JpaRepository)
@@ -56,6 +65,25 @@ fr.kksdev.budget.api/
 ├── dto/           # Request/Response DTOs
 └── enums/         # TransactionType, Frequency, DebtType
 ```
+
+### Structure frontend
+
+```
+app/src/
+├── app/
+│   ├── core/          # Services singleton, guards, interceptors (auth)
+│   ├── shared/        # Composants/pipes/directives réutilisables
+│   └── features/      # Modules lazy-loaded par feature
+├── environments/      # Config dev/prod (apiUrl)
+└── styles/            # SCSS globaux
+```
+
+### Environnements
+
+| Environnement | Frontend | API | apiUrl |
+|---------------|----------|-----|--------|
+| dev | `http://localhost:4200` | `http://localhost:8080/api` | `/api` (proxy dev) |
+| prod | `https://budget.kksdev.fr` | `https://budget.kksdev.fr/api` | `/api` |
 
 ### Entités
 
@@ -100,8 +128,8 @@ Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de référ
 - Branches feature : `feature/<nom>`
 
 ## Active Technologies
-- Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1 (001-springdoc-openapi)
-- N/A (pas de nouvelles donnees) (001-springdoc-openapi)
+- Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
+- Frontend : Angular 19, TypeScript, SCSS
 
 ## Recent Changes
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1

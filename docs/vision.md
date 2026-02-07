@@ -34,11 +34,13 @@ Hebergee en self-hosted sur serveur personnel.
 
 | Couche | Choix |
 |--------|-------|
-| Backend | Spring Boot (API REST, Java) |
-| Frontend | Angular (PWA pour usage mobile) |
-| Base de donnees | PostgreSQL |
+| Backend | Spring Boot 4.0.2 (API REST, Java 21) |
+| Frontend | Angular 19 PWA (`budget-app`, dossier `app/`) |
+| Base de donnees | PostgreSQL 15+ |
 | Auth | Spring Security + JWT |
+| Reverse proxy | Caddy (auto-HTTPS) |
 | Hebergement | Serveur personnel (self-hosted) |
+| URL | `https://budget.kksdev.fr` |
 
 ## Hors scope v1 (pour plus tard)
 

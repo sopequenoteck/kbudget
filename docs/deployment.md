@@ -1,11 +1,12 @@
-# Deploiement Budget API
+# Deploiement Budget
 
 ## Prerequis
 
 - Serveur Linux (Ubuntu 22.04+, Debian 12+ recommande)
 - **Option A** : Docker Engine 24+ et Docker Compose v2
 - **Option B** : Java 21 JRE + PostgreSQL 15+
-- Nom de domaine (pour HTTPS)
+- Node.js 20+ et npm 10+ (pour le build frontend)
+- Nom de domaine : `budget.kksdev.fr`
 
 ## Variables d'environnement
 
@@ -26,6 +27,20 @@ Generer un `JWT_SECRET` securise :
 
 ```bash
 openssl rand -base64 64
+```
+
+## Build frontend
+
+```bash
+cd app
+npm ci
+ng build --configuration production
+```
+
+Le build genere les fichiers statiques dans `app/dist/budget-app/browser/`. Ces fichiers doivent etre copies sur le serveur dans `/opt/budget-app/dist/`.
+
+```bash
+scp -r app/dist/budget-app/browser/* serveur:/opt/budget-app/dist/
 ```
 
 ## Option A : Docker Compose (recommande)
@@ -133,14 +148,21 @@ curl http://localhost:8080/api/actuator/health
 
 ### Caddy (auto-HTTPS, recommande)
 
-Caddy gere automatiquement les certificats Let's Encrypt.
+Caddy gere automatiquement les certificats Let's Encrypt. Il sert a la fois le frontend Angular (fichiers statiques) et le reverse proxy vers l'API Spring Boot.
 
 ```bash
 sudo apt install -y caddy
+
+# Copier les fichiers frontend
+sudo mkdir -p /opt/budget-app/dist
+sudo cp -r app/dist/budget-app/browser/* /opt/budget-app/dist/
+
+# Installer le Caddyfile
 sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
-# Editer /etc/caddy/Caddyfile : remplacer budget.example.com par votre domaine
 sudo systemctl reload caddy
 ```
+
+Le Caddyfile route `/api/*` vers Spring Boot (`localhost:8080`) et sert les fichiers Angular pour toutes les autres routes, avec SPA fallback vers `index.html`.
 
 Fichier de reference : [`deploy/Caddyfile`](../deploy/Caddyfile)
 
@@ -150,12 +172,12 @@ Fichier de reference : [`deploy/Caddyfile`](../deploy/Caddyfile)
 sudo apt install -y nginx
 sudo cp deploy/nginx.conf /etc/nginx/sites-available/budget-api
 sudo ln -s /etc/nginx/sites-available/budget-api /etc/nginx/sites-enabled/
-# Editer : remplacer budget.example.com par votre domaine
+# Editer : remplacer budget.kksdev.fr par votre domaine
 sudo nginx -t && sudo systemctl reload nginx
 
 # Generer le certificat SSL
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d budget.example.com
+sudo certbot --nginx -d budget.kksdev.fr
 ```
 
 Fichier de reference : [`deploy/nginx.conf`](../deploy/nginx.conf)
@@ -213,11 +235,19 @@ docker compose up -d
 ### Bare-metal
 
 ```bash
-# Sur la machine de dev
+# Build backend
 cd api && mvn clean package -DskipTests
 
-# Transfert et redemarrage
-scp target/api-*.jar serveur:/opt/budget-api/api.jar
+# Build frontend
+cd app && npm ci && ng build --configuration production
+
+# Transfert backend
+scp api/target/api-*.jar serveur:/opt/budget-api/api.jar
+
+# Transfert frontend
+scp -r app/dist/budget-app/browser/* serveur:/opt/budget-app/dist/
+
+# Redemarrage
 ssh serveur "sudo systemctl restart budget-api"
 ```
 

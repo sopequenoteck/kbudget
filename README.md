@@ -1,23 +1,27 @@
-# Budget API
+# Budget
 
-API REST de gestion de budget personnel : transactions (depenses/recettes), abonnements recurrents et suivi de dettes. Application single-user, self-hosted.
+Application personnelle de gestion de budget : transactions (depenses/recettes), abonnements recurrents et suivi de dettes. Single-user, self-hosted.
+
+Monorepo avec deux modules :
+
+- `api/` — Backend Spring Boot (API REST)
+- `app/` — Frontend Angular PWA (mobile-first)
 
 ## Stack technique
 
 | Couche | Technologie |
 |--------|-------------|
-| Runtime | Java 21 |
-| Framework | Spring Boot 4.0.2 |
-| Build | Maven |
+| Backend | Java 21, Spring Boot 4.0.2, Maven |
+| Frontend | Angular 19, TypeScript, SCSS |
 | Base de donnees | PostgreSQL 15+ |
 | Auth | Spring Security + JWT (jjwt 0.12.6) |
 | Migrations | Flyway |
+| Reverse proxy | Caddy (auto-HTTPS) |
 
 ## Prerequis
 
-- Java 21+
-- Maven 3.9+
-- PostgreSQL 15+
+- Java 21+, Maven 3.9+, PostgreSQL 15+
+- Node.js 20+, npm 10+
 
 ## Installation
 
@@ -67,6 +71,8 @@ L'API demarre sur `http://localhost:8080/api`.
 
 ## Commandes
 
+### Backend (api/)
+
 ```bash
 cd api
 
@@ -75,6 +81,17 @@ mvn test                   # Tests
 mvn test -Dtest=NomDuTest  # Test unique
 mvn clean install          # Build complet
 mvn spring-boot:run        # Lancement
+```
+
+### Frontend (app/)
+
+```bash
+cd app
+
+ng serve                   # Dev server (http://localhost:4200)
+ng build                   # Build
+ng test                    # Tests unitaires
+ng build --configuration production  # Build prod
 ```
 
 ## Endpoints API
@@ -123,6 +140,18 @@ Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](
 
 ## Architecture
 
+### Structure monorepo
+
+```
+budget/
+├── api/           # Backend Spring Boot
+├── app/           # Frontend Angular PWA (budget-app)
+├── deploy/        # Caddyfile, systemd, scripts
+└── docs/          # Documentation
+```
+
+### Backend (api/)
+
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
@@ -134,6 +163,18 @@ api/src/main/java/fr/kksdev/budget/api/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
 └── enums/         # TransactionType, Frequency, DebtType
+```
+
+### Frontend (app/)
+
+```
+app/src/
+├── app/
+│   ├── core/          # Services singleton, guards, interceptors
+│   ├── shared/        # Composants/pipes/directives reutilisables
+│   └── features/      # Modules lazy-loaded par feature
+├── environments/      # Config dev/prod (apiUrl)
+└── styles/            # SCSS globaux
 ```
 
 Architecture en couches : Controller -> Service -> Repository. Les entites JPA ne sont jamais exposees directement — toujours via DTOs.
