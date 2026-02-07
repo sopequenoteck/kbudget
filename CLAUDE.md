@@ -127,6 +127,43 @@ Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de référ
 - Les inputs sont validés via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
 - Branches feature : `feature/<nom>`
 
+## Conventions Frontend (Angular)
+
+### Signals-First
+
+Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
+
+| Besoin | Utiliser | Ne PAS utiliser |
+|--------|----------|-----------------|
+| State | `signal()` | Variables classiques |
+| Derived state | `computed()` | Getters manuels |
+| Side effects | `effect()` | `ngOnChanges` |
+| Inputs | `input()` / `input.required()` | `@Input()` |
+| Outputs | `output()` | `@Output()` + `EventEmitter` |
+| Queries | `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()` | `@ViewChild()`, `@ContentChild()` |
+| Two-way binding | `model()` | `@Input()` + `@Output()` combo |
+
+### Injection
+
+- `inject()` uniquement (pas de constructor injection)
+
+### Composants
+
+- Standalone obligatoire (défaut Angular 21)
+- `ChangeDetectionStrategy.OnPush` sur tous les composants
+- Pas de `subscribe()` manuel — utiliser `toSignal()` ou pipe `async`
+
+### Reactive (RxJS)
+
+- `toSignal()` pour convertir Observable → Signal
+- `toObservable()` si besoin inverse
+- RxJS limité aux flux HTTP et opérateurs complexes
+
+### Linting
+
+- ESLint + @angular-eslint configuré (`ng lint`)
+- Prettier configuré (`npm run format` / `npm run format:check`)
+
 ## Active Technologies
 - Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
 - Frontend : Angular 21, TypeScript, SCSS
