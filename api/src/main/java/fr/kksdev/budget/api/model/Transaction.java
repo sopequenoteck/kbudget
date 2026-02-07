@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
