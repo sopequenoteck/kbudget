@@ -71,9 +71,10 @@ L'utilisateur est connecté depuis un moment. Son token expire. Lors de sa proch
 ### Edge Cases
 
 - Que se passe-t-il si le localStorage est indisponible (navigation privée sur certains navigateurs) ? Le système bascule en mode session volatile (état en mémoire uniquement, perdu au rechargement) et logge un `console.error` au démarrage. Pas de signalement UI — le service fonctionne normalement sans persistance.
-- Que se passe-t-il si le serveur est injoignable lors de la connexion ? Le système doit afficher un message d'erreur réseau distinct du message d'identifiants invalides (message retourné : "Impossible de contacter le serveur").
-- Que se passe-t-il si le token stocké a un format invalide (manipulation manuelle) ? Le système doit le supprimer et considérer l'utilisateur comme non connecté.
+- Que se passe-t-il si le serveur est injoignable lors de la connexion ? Le système doit afficher un message d'erreur réseau distinct du message d'identifiants invalides (message retourné : "Impossible de contacter le serveur") et logger `console.error` pour traçabilité.
+- Que se passe-t-il si le token stocké a un format invalide (manipulation manuelle) ? Le système doit le supprimer, logger `console.error('Token corrompu')`, et considérer l'utilisateur comme non connecté.
 - Que se passe-t-il si deux appels de connexion sont faits simultanément ? Le dernier token reçu doit être celui stocké, sans corruption. Limitation acceptée (single-user) : pas de mutex/debounce, pas de test automatisé pour ce cas.
+- Que se passe-t-il si le quota localStorage est dépassé (QuotaExceededError) ? Le try/catch autour de `setItem` intercepte l'erreur, logge `console.error('localStorage quota dépassé')`, et le service continue en mode session volatile (signal mis à jour mais pas de persistance). Même comportement que localStorage indisponible.
 
 ## Requirements *(mandatory)*
 
@@ -84,9 +85,9 @@ L'utilisateur est connecté depuis un moment. Son token expire. Lors de sa proch
 - **FR-003**: Le système DOIT stocker le token de session dans le localStorage sous la clé `budget_token` et les informations utilisateur (nom, email) sous la clé `budget_user` (JSON) après une connexion ou inscription réussie
 - **FR-004**: Le système DOIT exposer un état d'authentification réactif (signal) qui se met à jour automatiquement lors de la connexion, déconnexion ou expiration
 - **FR-005**: Le système DOIT permettre à un utilisateur connecté de se déconnecter, supprimant le token et redirigeant vers `/auth`
-- **FR-006**: Le système DOIT décoder le token localement (sans appel serveur) pour vérifier son expiration
+- **FR-006**: Le système DOIT décoder le token localement (sans appel serveur) pour vérifier son expiration. Si le payload décodé ne contient pas de champ `exp`, le token est considéré comme expiré (comportement défensif)
 - **FR-007**: Le système DOIT fournir une méthode pour récupérer le token stocké (pour usage par l'intercepteur HTTP et le guard)
-- **FR-008**: Le système DOIT retourner les messages d'erreur du backend de manière compréhensible pour l'utilisateur (email déjà pris, identifiants invalides, erreur réseau) — cf. SC-004 pour le critère mesurable
+- **FR-008**: Le système DOIT mapper les erreurs backend en messages compréhensibles : HTTP 400 → `error.error.message` tel quel ("Email ou mot de passe incorrect", "Email déjà utilisé", ou concaténation Bean Validation "field: message; field: message"), erreur réseau (status 0) → "Impossible de contacter le serveur", HTTP 500+ → "Une erreur est survenue". Cf. SC-004 pour le critère mesurable
 - **FR-009**: Le système DOIT vérifier l'état du token au démarrage de l'application et restaurer la session si le token est valide
 - **FR-010**: Le système DOIT exposer les informations de l'utilisateur connecté (nom, email) extraites de la réponse d'authentification
 
@@ -101,7 +102,7 @@ L'utilisateur est connecté depuis un moment. Son token expire. Lors de sa proch
 
 ### Measurable Outcomes
 
-- **SC-001**: L'état d'authentification se met à jour de manière synchrone (dans le même tick) après connexion, déconnexion ou détection d'expiration — vérifiable via tests unitaires. La latence totale perçue (réseau + backend + frontend) est hors scope de cette feature.
+- **SC-001**: L'état d'authentification (signal `currentUser`) est mis à jour de manière synchrone dans `saveAuth()`/`clearAuth()` — c'est-à-dire que le signal reflète le nouvel état avant que l'Observable login/register ne complète côté appelant. Vérifiable via tests unitaires. La latence totale perçue (réseau + backend + frontend) est hors scope de cette feature.
 - **SC-002**: L'utilisateur peut s'inscrire et être automatiquement connecté en une seule action
 - **SC-003**: Le rechargement de la page restaure la session sans reconnexion si le token est valide
 - **SC-004**: 100% des erreurs d'authentification affichent un message compréhensible pour l'utilisateur (pas de message technique brut)
