@@ -1,30 +1,28 @@
 # Budget App — Architecture technique
 
-## Stack
+Ce document couvre les decisions techniques, le modele de donnees et la vision frontend. Pour la stack, les endpoints API et le quickstart, voir le [`README.md`](../README.md).
 
-| Couche | Technologie |
-|--------|-------------|
-| Backend | Spring Boot (Java 21) — API REST |
-| Build | Maven |
-| Frontend | Angular PWA (mobile first) |
-| Base de donnees | PostgreSQL |
-| Auth | Spring Security + JWT |
-| Hebergement | Serveur personnel |
+## Decisions architecturales
 
-## Backend — Structure par couches
+### JWT stateless (pas de sessions/cookies)
 
-Package de base : `fr.kksdev.budget.api`
+L'API utilise des tokens JWT sans etat serveur. Chaque requete porte son token dans le header `Authorization: Bearer <token>`. Pas de table de sessions en base, pas de cookies — le backend reste completement stateless, ce qui simplifie le deploiement et le scaling.
 
-```
-src/main/java/fr/kksdev/budget/api/
-├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # AuthController, TransactionController, SubscriptionController, DebtController
-├── service/       # Logique metier
-├── repository/    # Acces donnees (Spring Data JPA)
-├── model/         # Entites JPA
-├── dto/           # Objets de transfert (request/ + response/)
-└── enums/         # TransactionType, Frequency, DebtType
-```
+### Un seul module Maven (pas de multi-module)
+
+Le projet tient dans un seul module Maven. La separation se fait par packages (`controller/`, `service/`, `repository/`, etc.), pas par modules. Un multi-module n'apporterait que de la complexite de build sans benefice reel pour une application single-user.
+
+### Flyway pour les migrations (pas de ddl-auto en prod)
+
+En production, le schema est gere par Flyway via des scripts SQL versiones. `ddl-auto=validate` s'assure que le code et le schema sont alignes sans jamais modifier la base automatiquement. Seul le profil test utilise `create-drop` avec H2 en memoire.
+
+### DTOs obligatoires (jamais d'entite JPA exposee)
+
+Les entites JPA ne sont jamais retournees directement par les controllers. Des DTOs dedies (request/response) isolent la couche API de la couche persistance. Cela evite d'exposer des champs internes et permet de faire evoluer le schema sans casser le contrat API.
+
+### Pas de CQRS, DDD tactique ou Event Sourcing
+
+L'architecture reste en couches simples : Controller → Service → Repository. Ces patterns complexes n'apportent aucune valeur pour une application single-user de gestion de budget. Si un besoin le justifie, il devra etre documente dans le plan avant implementation.
 
 ## Modele de donnees
 
@@ -78,7 +76,7 @@ src/main/java/fr/kksdev/budget/api/
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
-## Frontend — Ecrans
+## Frontend — Ecrans prevus
 
 | Ecran | Route | Role |
 |-------|-------|------|
@@ -94,47 +92,9 @@ src/main/java/fr/kksdev/budget/api/
 - Ouvre un formulaire minimal : montant + libelle + type
 - Saisie en 2-3 taps
 
-## Authentification
+## Flux d'authentification
 
-- `POST /api/auth/login` → retourne un JWT
-- Filtre Spring Security sur toutes les routes `/api/**`
-- Angular : intercepteur HTTP (ajoute le token), guard sur les routes, ecran login
-- Un seul user, credentials en base
-
-## Endpoints API
-
-### Auth
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/auth/register` | Inscription, retourne JWT |
-| POST | `/api/auth/login` | Connexion, retourne JWT |
-
-### Transactions
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/transactions` | Liste (avec filtres date, type) |
-| GET | `/api/transactions/{id}` | Detail |
-| POST | `/api/transactions` | Creer |
-| PUT | `/api/transactions/{id}` | Modifier |
-| DELETE | `/api/transactions/{id}` | Supprimer |
-| GET | `/api/transactions/summary` | Bilan mensuel |
-
-### Subscriptions
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/subscriptions` | Liste |
-| POST | `/api/subscriptions` | Creer |
-| PUT | `/api/subscriptions/{id}` | Modifier |
-| DELETE | `/api/subscriptions/{id}` | Supprimer |
-
-### Debts
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/debts` | Liste |
-| POST | `/api/debts` | Creer |
-| PUT | `/api/debts/{id}` | Modifier |
-| DELETE | `/api/debts/{id}` | Supprimer |
+- `POST /api/auth/login` retourne un JWT (valide 24h)
+- Le filtre `JwtFilter` de Spring Security intercepte toutes les routes `/api/**`
+- Cote Angular : intercepteur HTTP ajoute le token, guard protege les routes, ecran login dedie
+- Un seul utilisateur, credentials stockes en base (BCrypt)
