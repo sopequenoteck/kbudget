@@ -3,9 +3,11 @@ package fr.kksdev.budget.api.model;
 import fr.kksdev.budget.api.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +39,9 @@ public class Transaction {
     private String categorie;
 
     private String note;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
