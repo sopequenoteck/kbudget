@@ -1,204 +1,273 @@
-# Backlog Conformité Budget App
+# Backlog Conformité Budget API
 
 > Dernière analyse : 2026-02-07
-> Score global : 96% | Services : 1 (API Backend)
-> Constitution : v2.0.0 | Fichiers Java : 22
+> Score global : 89% | Fichiers source : 34 | Tests : 11 | Services : API (Spring Boot)
 
 ---
 
-## 🔴 CRITIQUE (score: 100%)
+## Score : 95% - Critique
 
-Aucun écart critique restant.
-
----
-
-## 🟠 MAJEUR (score: 95%)
-
-### API-First
-
-- [ ] **api** : API-001 — Absence de DTOs pour Transaction, Subscription, Debt
-  - Fichiers : Entités `Transaction.java`, `Subscription.java`, `Debt.java` (modèle exposé directement)
-  - Attendu : DTOs de request/response pour isoler la couche API
-  - Actuel : DTOs créés localement mais non commitées (pas de controllers encore)
-  - Impact : Futur risque d'exposition d'entités JPA directement
-  - Correction : Commiter les DTOs lors de la création des controllers correspondants
+Aucun écart CRITIQUE détecté.
 
 ---
 
-## 🟢 MINEUR (score: 100%)
+## Score : 85% - Majeur (sprint en cours)
 
-Aucun écart mineur restant.
+- [ ] **api** : ARCH-001 - Entité User exposée dans les contrôleurs
+  - Fichiers : `TransactionController.java:30,37,46,57,66,74`, `SubscriptionController.java:28,37,48,57,65`, `DebtController.java:28,37,48,57,65`
+  - Attendu : Les contrôleurs doivent extraire l'email/ID du User et passer uniquement des types primitifs aux services
+  - Actuel : Les contrôleurs castent `Authentication.getPrincipal()` en `User` et passent l'entité JPA directement aux services
+  - Impact : Violation du principe API-First (séparation couches)
+  - Correction suggérée :
+    ```java
+    // Au lieu de :
+    User user = (User) authentication.getPrincipal();
+    transactionService.create(request, user);
+
+    // Faire :
+    String userEmail = authentication.getName();
+    transactionService.create(request, userEmail);
+    // Ou extraire l'ID si nécessaire
+    ```
+
+- [ ] **api** : LOMBOK-001 - Utilisation de @Getter/@Setter au lieu de @Data sur les entités
+  - Fichiers : `User.java:12-13`, `Transaction.java:15-16`, `Subscription.java:15-16`, `Debt.java:15-16`
+  - Attendu : Utiliser `@Data` (combine @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor)
+  - Actuel : Utilisation de `@Getter` et `@Setter` séparément
+  - Impact : Code plus verbeux, annotations redondantes
+  - Correction suggérée : Remplacer `@Getter @Setter` par `@Data`
+
+- [ ] **api** : LOG-001 - Logs manquants dans le JwtFilter en cas de succès
+  - Fichier : `JwtFilter.java:42-50`
+  - Attendu : Logger au niveau DEBUG/INFO quand un user s'authentifie avec succès
+  - Actuel : Seuls les tokens invalides sont loggés (niveau WARN)
+  - Impact : Manque de traçabilité des connexions réussies
+  - Correction suggérée :
+    ```java
+    userRepository.findByEmail(email).ifPresent(user -> {
+        log.debug("User authenticated via JWT: {}", email);
+        // ... auth
+    });
+    ```
+
+- [ ] **api** : TEST-001 - Couverture de tests insuffisante
+  - Constat : 11 fichiers de test pour 34 fichiers source (ratio 32%)
+  - Attendu : Tests pour chaque service, contrôleur et repository
+  - Manquants :
+    - `JwtUtil` (pas de tests unitaires)
+    - `GlobalExceptionHandler` (pas de tests dédiés)
+    - Tests d'intégration end-to-end manquants
+  - Impact : Risque de régression
+  - Correction suggérée : Ajouter tests unitaires pour `JwtUtil` et tests d'intégration complets
+
+- [ ] **api** : DB-001 - Migrations Flyway désactivées en profil dev
+  - Fichier : `application-dev.yaml:9`
+  - Attendu : Flyway activé en dev pour tester les migrations
+  - Actuel : `flyway.enabled: false` et `ddl-auto: create-drop`
+  - Impact : Divergence dev/prod, migrations non testées localement
+  - Correction suggérée : Activer Flyway en dev et passer `ddl-auto: validate`
 
 ---
 
-## ✅ CONFORME (score: 100%)
+## Score : 90% - Mineur (à planifier)
+
+- [ ] **api** : CONFIG-001 - application-dev.yaml devrait être ignoré par git
+  - Fichier : `.gitignore:18`
+  - Attendu : Le fichier est bien dans .gitignore
+  - Actuel : Le fichier `application-dev.yaml` est tracké dans git (contient des valeurs par défaut)
+  - Impact : Risque de commit de secrets en dev
+  - Note : Le fichier contient actuellement uniquement des valeurs de fallback sécurisées, mais pour cohérence avec .gitignore, il devrait être supprimé du tracking
+  - Correction suggérée :
+    ```bash
+    git rm --cached api/src/main/resources/application-dev.yaml
+    ```
+
+- [ ] **api** : VALID-001 - Validation de taille manquante sur certains champs
+  - Fichiers : `TransactionRequest.java`, `SubscriptionRequest.java`, `DebtRequest.java`
+  - Attendu : Annotations `@Size` sur les champs String pour limiter la longueur
+  - Actuel : Seul `RegisterRequest.password` a `@Size(min = 6)`
+  - Impact : Pas de validation côté API, risque de données trop longues en DB
+  - Correction suggérée : Ajouter `@Size(max = 255)` sur libelle, nom, personne, categorie, note
+
+- [ ] **api** : ARCH-002 - Pas de séparation des DTOs Request et Response dans les packages
+  - Fichier : `dto/` (tous dans le même package)
+  - Attendu : Sous-packages `dto/request/` et `dto/response/` pour clarifier le sens des flux
+  - Actuel : Tous les DTOs dans le même package plat
+  - Impact : Organisation moins claire à grande échelle
+  - Priorité : Faible (optionnel, amélioration structurelle)
+
+- [ ] **api** : LOG-002 - Pas de logs dans ApiApplication au démarrage
+  - Fichier : `ApiApplication.java:10`
+  - Attendu : Logger le démarrage avec profil actif et port
+  - Actuel : Aucun log custom
+  - Impact : Faible observabilité au boot
+  - Correction suggérée :
+    ```java
+    @Slf4j
+    @SpringBootApplication
+    public class ApiApplication {
+        public static void main(String[] args) {
+            SpringApplication.run(ApiApplication.class, args);
+            log.info("Budget API started");
+        }
+    }
+    ```
+
+---
+
+## Dette technique
+
+Aucune dette technique critique détectée.
+
+- **TODO/FIXME** : 0 occurrence
+- **Code commenté** : 0 bloc détecté
+- **System.out.println** : 0 occurrence (SLF4J utilisé partout)
+
+---
+
+## Conforme
 
 ### Sécurité
 
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| JWT sur routes protégées | ✅ | `SecurityConfig.java:29-31` | Routes `/auth/**` et `/error` publiques, reste authentifié |
-| BCrypt pour mots de passe | ✅ | `SecurityConfig.java:37-39`, `AuthService.java:28` | `BCryptPasswordEncoder` configuré et utilisé |
-| Secrets via variables env (prod) | ✅ | `application-prod.yaml:3-5,15` | `${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}`, `${JWT_SECRET}` |
-| Secrets via variables env (dev) | ✅ | `application-dev.yaml:3-5,18` | `${DB_URL:...}`, `${DB_PASSWORD:...}`, `${JWT_SECRET:...}` avec defaults |
-| Bean Validation activée | ✅ | `pom.xml:47`, `AuthController.java:24,29` | `@Valid` sur endpoints |
-| Context path `/api` | ✅ | `application.yaml:20` | `server.servlet.context-path: /api` |
-| GlobalExceptionHandler | ✅ | `GlobalExceptionHandler.java` | `@RestControllerAdvice` avec gestion 400/404/500, logging intégré |
-| Messages d'erreur login unifiés | ✅ | `AuthService.java:40,44` | Message identique "Email ou mot de passe incorrect" pour les 2 cas |
-
-### Observabilité
-
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| Logging SLF4J | ✅ | `AuthService.java`, `AuthController.java`, `JwtFilter.java` | `@Slf4j` + log.info/warn/error sur actions clés |
-| Configuration Logback | ✅ | `logback-spring.xml` | Profil dev (console, DEBUG) + prod (console + fichier rotatif 10MB/30j) |
-
-### Testabilité
-
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| Tests unitaires AuthService | ✅ | `AuthServiceTest.java` | 5 tests : register OK/KO, login OK/KO email/KO password |
-| Tests intégration AuthController | ✅ | `AuthControllerTest.java` | 7 tests : 201, 200, 400 validation, 400 email existant, 400 login KO |
-| Tests TransactionRepository | ✅ | `TransactionRepositoryTest.java` | 3 tests : tri date desc, isolation userId, filtre date between |
-| Tests SubscriptionRepository | ✅ | `SubscriptionRepositoryTest.java` | 2 tests : tri nom, filtre actifs |
-| Tests DebtRepository | ✅ | `DebtRepositoryTest.java` | 2 tests : tri date desc, filtre non remboursés |
-| Base de test H2 | ✅ | `application-test.yaml` | H2 in-memory, profil test dédié |
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| JWT Configuration | Conforme | Token stateless, secret via env var, expiration configurée |
+| Routes protégées | Conforme | Toutes les routes sauf `/auth/**` et `/error` nécessitent JWT |
+| Filtrage par user | Conforme | Tous les services filtrent par `userId` |
+| Bean Validation | Conforme | `@Valid` sur tous les endpoints, contraintes sur les DTOs |
+| Password encoding | Conforme | BCrypt utilisé |
+| Secrets hardcodés | Conforme | Aucun secret hardcodé détecté (dev-secret est un fallback documenté) |
+| CSRF | Conforme | Désactivé pour API REST stateless (correct) |
 
 ### Architecture
 
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| Package structure conforme | ✅ | Arborescence | `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/` |
-| DTOs utilisés (Auth) | ✅ | `AuthController.java` | `LoginRequest`, `RegisterRequest`, `AuthResponse` |
-| Enums dans package dédié | ✅ | `enums/` | `TransactionType`, `Frequency`, `DebtType` |
-| Lombok activé | ✅ | `pom.xml:82-83`, entités | `@Builder`, `@Getter`, `@Setter`, `@RequiredArgsConstructor` |
-| Un seul module Maven | ✅ | `pom.xml` | Pas de multi-module |
-| Controller → Service → Repository | ✅ | `AuthController.java:21` → `AuthService.java:17-19` | Architecture en couches respectée |
-| @UpdateTimestamp sur entités | ✅ | `Transaction.java`, `Subscription.java`, `Debt.java` | Champ `updatedAt` avec `@UpdateTimestamp` pour traçabilité |
-| Validation RegisterRequest.name | ✅ | `RegisterRequest.java:10` | `@Size(max = 100)` — champ optionnel avec contrainte de longueur |
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| Séparation couches | Conforme | Controller → Service → Repository respecté |
+| DTOs | Conforme | Aucune entité JPA exposée dans les endpoints (uniquement DTOs) |
+| Package structure | Conforme | Package base `fr.kksdev.budget.api` bien organisé |
+| Enums | Conforme | Toutes les valeurs fixes sont dans `enums/` |
+| Lombok | Partiellement Conforme | Utilisé partout, mais @Getter/@Setter au lieu de @Data |
+| UUID | Conforme | Toutes les entités utilisent UUID |
+| Simplicité (YAGNI) | Conforme | Architecture simple, pas de sur-ingénierie |
+
+### Logging
+
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| SLF4J/Logback | Conforme | Utilisé partout, pas de System.out.println |
+| Logback config | Conforme | Profils dev/prod, rotation, niveaux corrects |
+| Niveaux | Conforme | INFO pour actions, WARN pour échecs, ERROR pour exceptions |
+| Context logging | Conforme | Logs incluent userId, transactionId, etc. |
 
 ### Database
 
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| Entités avec UUID | ✅ | `User.java:20-21`, autres entités | `@GeneratedValue(strategy = GenerationType.UUID)` |
-| DDL dev : create-drop | ✅ | `application-dev.yaml:12` | `ddl-auto: create-drop` |
-| DDL prod : validate | ✅ | `application-prod.yaml:12` | `ddl-auto: validate` |
-| Relations JPA correctes | ✅ | `Transaction.java`, `Subscription.java`, `Debt.java` | `@ManyToOne` avec `@JoinColumn(name = "user_id")` |
-| PostgreSQL seule dépendance | ✅ | `pom.xml:76-79` | Driver PostgreSQL en runtime |
-| Migrations Flyway | ✅ | `V1__init_schema.sql`, `V2__add_updated_at.sql` | Flyway configuré, 2 migrations, activé en prod |
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| JPA Config | Conforme | `open-in-view: false`, `format_sql: true` |
+| Migrations Flyway | Partiellement Conforme | Migrations présentes (V1, V2), mais désactivées en dev |
+| Schema | Conforme | Tables avec UUID, FK, index sur user_id |
+| Relations | Conforme | `@ManyToOne(fetch = LAZY)` bien utilisé |
+| DDL | Conforme | `create-drop` en dev, `validate` en prod |
 
-### Configuration
+### Tests
 
-| Critère | Statut | Fichier | Commentaire |
-|---------|--------|---------|-------------|
-| Profils Spring dev/prod | ✅ | `application.yaml:5`, fichiers séparés | `spring.profiles.active: dev` |
-| Isolation des configs | ✅ | `application-dev.yaml`, `application-prod.yaml` | Fichiers séparés |
-| `.env.example` documenté | ✅ | `.env.example` | Placeholders pour DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET |
-| `.env` dans `.gitignore` | ✅ | `.gitignore` | `.env` et `**/.env` exclus |
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| Présence | Conforme | Tests unitaires et d'intégration présents |
+| Nommage | Conforme | Pattern `should_[résultat]_when_[condition]` respecté |
+| Pattern AAA | Conforme | Arrange-Act-Assert bien structuré |
+| Coverage | Partiellement Conforme | Services et contrôleurs bien testés, config incomplète |
+| Frameworks | Conforme | JUnit 5, Mockito, MockMvc, AssertJ |
 
-### Dette technique
+### Code Quality
 
-| Critère | Statut | Commentaire |
-|---------|--------|-------------|
-| Pas de `System.out.println` | ✅ | Aucun trouvé dans le code |
-| Pas de TODO/FIXME | ✅ | Aucun trouvé dans le code |
-| Pas de code deprecated | ✅ | Aucun `@Deprecated` trouvé |
-
----
-
-## 📊 Tableau de bord
-
-| Principe | Score | Écarts critiques | Écarts majeurs | Écarts mineurs |
-|----------|-------|------------------|----------------|----------------|
-| I. API-First | 75% | 0 | 1 | 0 |
-| II. Sécurité par défaut | 100% | 0 | 0 | 0 |
-| III. Simplicité & YAGNI | 100% | 0 | 0 | 0 |
-| IV. Mobile-First UX | N/A | — | — | — |
-| V. Testabilité | 100% | 0 | 0 | 0 |
-| VI. Observabilité | 100% | 0 | 0 | 0 |
-| VII. Self-Hosted Ready | 100% | 0 | 0 | 0 |
-
-**Score global pondéré** : 96%
-- CRITIQUE (×3) : 0 écart → 0 points
-- MAJEUR (×2) : 1 écart → -2 points
-- MINEUR (×1) : 0 écart → 0 points
+| Aspect | Status | Détails |
+|--------|--------|---------|
+| Lombok | Conforme | Utilisé sur toutes les entités et configs |
+| Code mort | Conforme | Aucun code mort détecté |
+| Duplication | Conforme | Pattern bien factorisé (toResponse, findByIdAndUser) |
+| Imports | Conforme | Pas d'imports inutiles |
+| Records | Conforme | DTOs utilisent records Java |
 
 ---
 
-## 🎯 Actions immédiates (Sprint en cours)
+## Actions immédiates recommandées
 
-### ✅ Critiques résolus
+### Priorité 1 (Sprint en cours)
 
-1. ~~**OBS-001** : Ajouter logging SLF4J~~ → `@Slf4j` sur AuthService, AuthController, JwtFilter
-2. ~~**OBS-002** : Créer logback-spring.xml~~ → Profils dev (console) + prod (fichier rotatif)
-3. ~~**SEC-001** : Créer GlobalExceptionHandler~~ → `@RestControllerAdvice` avec 400/404/500
-4. ~~**DB-001** : Migrer vers Flyway~~ → `V1__init_schema.sql` + config dev/prod
+1. **Refactorer l'exposition de l'entité User dans les contrôleurs** (ARCH-001)
+   - Impact : Violation architecture API-First
+   - Effort : Moyen (modification de tous les contrôleurs et services)
+   - Risque : Faible (changement interne, API publique inchangée)
 
-### ✅ Majeurs résolus
+2. **Activer Flyway en profil dev** (DB-001)
+   - Impact : Divergence dev/prod
+   - Effort : Faible (1 ligne de config)
+   - Risque : Faible
 
-5. ~~**TEST-001** : Tests AuthController + AuthService~~ → 12 tests (5 unitaires + 7 intégration)
-6. ~~**TEST-002** : Tests repositories~~ → 7 tests @DataJpaTest avec H2
-7. ~~**CONF-001** : Secrets vers variables d'environnement~~ → `${VAR:default}` + `.env.example`
+### Priorité 2 (Sprint suivant)
 
-### ✅ Mineurs résolus
+3. **Ajouter tests manquants** (TEST-001)
+   - Cibles : JwtUtil, GlobalExceptionHandler
+   - Effort : Moyen
 
-8. ~~**ARCH-001** : @UpdateTimestamp sur entités~~ → `updatedAt` sur Transaction, Subscription, Debt + migration V2
-9. ~~**VAL-001** : Validation RegisterRequest.name~~ → `@Size(max = 100)` sur champ optionnel
+4. **Remplacer @Getter/@Setter par @Data** (LOMBOK-001)
+   - Impact : Cohérence code
+   - Effort : Faible (refactoring automatique)
 
-### Restant
+### Priorité 3 (Backlog)
 
-10. **API-001** : DTOs pour Transaction, Subscription, Debt
-    - Statut : DTOs prêts localement, à commiter avec les controllers
-    - Effort : inclus dans le développement des controllers
-
----
-
-## 📝 Notes d'implémentation
-
-### Conformité générale
-
-Le projet respecte bien les fondations :
-- Architecture en couches claire
-- Lombok utilisé efficacement
-- Sécurité JWT bien configurée
-- Profils Spring dev/prod séparés
-- Structure de packages conforme
-- Observabilité en place (SLF4J + Logback)
-- Exceptions gérées globalement
-- Migrations Flyway prêtes pour la prod (V1 + V2)
-- Suite de tests complète (19 tests)
-- Secrets externalisés en dev et prod
-- Traçabilité des modifications (@UpdateTimestamp)
-
-### Points positifs remarquables
-
-- Utilisation correcte de `@Valid` pour Bean Validation
-- Relations JPA bien mappées avec `@ManyToOne` et isolation par `user_id`
-- Context path `/api` respecté
-- Pas de dette technique (TODO/FIXME/System.out)
-- Enums bien placés dans package dédié
-- Messages d'erreur de login unifiés (pas d'énumération d'emails)
-- 19 tests couvrant controllers, services et repositories
-
-### Priorité d'actions
-
-**Phase 1 (avant production) : ✅ TERMINÉE**
-1. ~~Logging (OBS-001, OBS-002)~~
-2. ~~GlobalExceptionHandler (SEC-001)~~
-3. ~~Migrations Flyway (DB-001)~~
-
-**Phase 2 (amélioration) : ✅ TERMINÉE**
-4. ~~Tests (TEST-001, TEST-002)~~
-5. ~~Sécurité secrets (CONF-001)~~
-
-**Phase 3 (mineurs) : ✅ TERMINÉE**
-6. ~~UpdateTimestamp (ARCH-001)~~
-7. ~~Validation name (VAL-001)~~
-
-**Phase 4 (futur) :**
-8. DTOs pour nouvelles entités (API-001) — avec les controllers
+5. Ajouter validations @Size sur DTOs (VALID-001)
+6. Améliorer logging du JwtFilter (LOG-001)
+7. Logger le démarrage dans ApiApplication (LOG-002)
 
 ---
 
-*Rapport mis à jour manuellement — 2026-02-07*
+## Statistiques
+
+- **Lignes de code source** : ~1200 (estimation basée sur 34 fichiers)
+- **Lignes de tests** : ~800 (estimation basée sur 11 fichiers)
+- **Ratio test/source** : ~67% (bon)
+- **Couverture entités** : 4/4 (100%)
+- **Couverture services** : 4/4 (100%)
+- **Couverture contrôleurs** : 4/4 (100%)
+- **Migrations Flyway** : 2 (V1 init, V2 updated_at)
+
+---
+
+## Notes de conformité
+
+### Points forts du projet
+
+1. **Sécurité exemplaire** : JWT bien implémenté, filtrage user strict, validation complète
+2. **Architecture propre** : Séparation des couches respectée, DTOs partout, pas de sur-ingénierie
+3. **Logging professionnel** : SLF4J/Logback bien configuré, niveaux appropriés
+4. **Tests de qualité** : Nommage clair, pattern AAA, bonnes assertions
+5. **Simplicité** : Code lisible, pas de complexité inutile (respect YAGNI)
+6. **Conventions modernes** : Records Java, UUID, Lombok, Spring Boot 4
+
+### Axes d'amélioration
+
+1. Éviter l'exposition des entités JPA même en interne (services)
+2. Unifier l'utilisation de Lombok (@Data vs @Getter/@Setter)
+3. Activer Flyway en dev pour cohérence dev/prod
+4. Compléter la couverture de tests (config, utils)
+
+### Respect de la constitution (7 principes)
+
+| Principe | Conformité | Commentaire |
+|----------|------------|-------------|
+| 1. API-First | 90% | DTOs partout en API, mais entités passées en interne |
+| 2. Sécurité par défaut | 100% | JWT, filtrage user, Bean Validation |
+| 3. Simplicité & YAGNI | 100% | Architecture simple, pas de complexité inutile |
+| 4. Mobile-First UX | N/A | API backend uniquement |
+| 5. Testabilité | 85% | Tests présents et bien structurés, mais coverage incomplète |
+| 6. Observabilité | 95% | Logging excellent, manque logs démarrage |
+| 7. Self-Hosted Ready | 100% | PostgreSQL seule dépendance, tout configurable via env |
+
+**Score moyen constitution : 95%**
+
+---
+
+*Rapport généré automatiquement par conformity-audit*
