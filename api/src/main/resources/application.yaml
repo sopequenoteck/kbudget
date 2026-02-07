@@ -10,6 +10,10 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  jwt:
+    expiration: 86400000
+
 server:
   port: 8080
   servlet:
