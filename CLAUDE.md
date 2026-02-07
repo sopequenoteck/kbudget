@@ -75,7 +75,7 @@ Toutes les entités utilisent des UUID comme clés primaires.
 
 ### Profils Spring
 
-- **dev** : PostgreSQL local, DDL `create-drop`, SQL visible, JWT secret hardcodé.
+- **dev** : PostgreSQL local, DDL `validate`, Flyway activé, SQL visible, JWT secret via `${JWT_SECRET:...}` (valeur par défaut en fallback).
 - **prod** : tout via variables d'environnement (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`), DDL `validate`.
 
 ## Constitution du projet

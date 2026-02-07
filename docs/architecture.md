@@ -13,16 +13,17 @@
 
 ## Backend — Structure par couches
 
-Package de base : `fr.kksdev.budget`
+Package de base : `fr.kksdev.budget.api`
 
 ```
-src/main/java/fr/kksdev/budget/
-├── config/        # SecurityConfig, JwtFilter
+src/main/java/fr/kksdev/budget/api/
+├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
 ├── controller/    # AuthController, TransactionController, SubscriptionController, DebtController
 ├── service/       # Logique metier
 ├── repository/    # Acces donnees (Spring Data JPA)
 ├── model/         # Entites JPA
-└── dto/           # Objets de transfert
+├── dto/           # Objets de transfert (request/ + response/)
+└── enums/         # TransactionType, Frequency, DebtType
 ```
 
 ## Modele de donnees
@@ -31,43 +32,51 @@ src/main/java/fr/kksdev/budget/
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | Long | Identifiant |
-| username | String | Nom d'utilisateur |
-| password | String | Mot de passe (hashe) |
+| id | UUID | Identifiant |
+| email | String | Email (unique) |
+| password | String | Mot de passe (hashe, BCrypt) |
+| name | String | Nom de l'utilisateur |
+| createdAt | LocalDateTime | Date de creation |
 
 ### Transaction
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | Long | Identifiant |
+| id | UUID | Identifiant |
 | montant | BigDecimal | Montant |
 | libelle | String | Description courte |
 | type | Enum | DEPENSE / RECETTE |
 | date | LocalDate | Date de la transaction |
 | categorie | String | Categorie (nullable) |
 | note | String | Note libre (nullable) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
 
 ### Subscription
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | Long | Identifiant |
+| id | UUID | Identifiant |
 | nom | String | Nom de l'abonnement |
 | montant | BigDecimal | Montant |
 | frequence | Enum | MENSUEL / ANNUEL |
 | dateDebut | LocalDate | Date de debut |
 | actif | Boolean | Abonnement actif ou non |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
 
 ### Debt
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | Long | Identifiant |
+| id | UUID | Identifiant |
 | personne | String | Nom de la personne |
 | montant | BigDecimal | Montant |
 | sens | Enum | JE_DOIS / ON_ME_DOIT |
 | date | LocalDate | Date |
 | rembourse | Boolean | Rembourse ou non |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
 
 ## Frontend — Ecrans
 
@@ -98,6 +107,7 @@ src/main/java/fr/kksdev/budget/
 
 | Methode | Route | Description |
 |---------|-------|-------------|
+| POST | `/api/auth/register` | Inscription, retourne JWT |
 | POST | `/api/auth/login` | Connexion, retourne JWT |
 
 ### Transactions
