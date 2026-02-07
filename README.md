@@ -88,35 +88,6 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | POST | `/api/auth/register` | Inscription |
 | POST | `/api/auth/login` | Connexion |
 
-**Inscription** `POST /api/auth/register`
-
-```json
-{
-  "email": "user@example.com",
-  "password": "secret123",
-  "name": "Kelly"
-}
-```
-
-Reponse `200` :
-
-```json
-{
-  "token": "eyJhbGciOi...",
-  "email": "user@example.com",
-  "name": "Kelly"
-}
-```
-
-**Connexion** `POST /api/auth/login`
-
-```json
-{
-  "email": "user@example.com",
-  "password": "secret123"
-}
-```
-
 ### Transactions
 
 | Methode | Route | Description |
@@ -127,31 +98,6 @@ Reponse `200` :
 | PUT | `/api/transactions/{id}` | Modifier une transaction |
 | DELETE | `/api/transactions/{id}` | Supprimer une transaction |
 | GET | `/api/transactions/summary?month=X&year=Y` | Bilan mensuel |
-
-**Creer** `POST /api/transactions`
-
-```json
-{
-  "montant": 42.50,
-  "libelle": "Courses Carrefour",
-  "type": "DEPENSE",
-  "date": "2026-02-07",
-  "categorie": "Alimentation",
-  "note": null
-}
-```
-
-**Bilan mensuel** `GET /api/transactions/summary?month=2&year=2026`
-
-```json
-{
-  "month": 2,
-  "year": 2026,
-  "totalRecettes": 2500.00,
-  "totalDepenses": 1200.50,
-  "solde": 1299.50
-}
-```
 
 ### Abonnements
 
@@ -172,6 +118,8 @@ Reponse `200` :
 | GET | `/api/debts/{id}` | Detail |
 | PUT | `/api/debts/{id}` | Modifier |
 | DELETE | `/api/debts/{id}` | Supprimer |
+
+Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
 ## Architecture
 
@@ -220,5 +168,6 @@ cd api && mvn test
 - **Spec OpenAPI JSON** : [http://localhost:8080/api/v3/api-docs](http://localhost:8080/api/v3/api-docs)
 - [`docs/vision.md`](docs/vision.md) — Vision produit et modules fonctionnels
 - [`docs/architecture.md`](docs/architecture.md) — Decisions techniques, modele de donnees et ecrans frontend
+- [`docs/api-examples.md`](docs/api-examples.md) — Exemples de requetes et reponses pour chaque endpoint
 - [`docs/api-errors.md`](docs/api-errors.md) — Contrat d'erreurs HTTP et guide d'integration frontend
 - [`docs/deployment.md`](docs/deployment.md) — Guide de deploiement (Docker, bare-metal, reverse proxy, backup)
