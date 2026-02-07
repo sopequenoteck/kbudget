@@ -3,6 +3,8 @@ package fr.kksdev.budget.api.controller;
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.service.SubscriptionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,10 +18,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/subscriptions")
 @RequiredArgsConstructor
+@Tag(name = "Abonnements", description = "Gestion des abonnements recurrents")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
+    @Operation(summary = "Creer un abonnement")
     @PostMapping
     public ResponseEntity<SubscriptionResponse> create(
             @Valid @RequestBody SubscriptionRequest request,
@@ -29,6 +33,7 @@ public class SubscriptionController {
                 .body(subscriptionService.create(request, userId));
     }
 
+    @Operation(summary = "Lister les abonnements")
     @GetMapping
     public ResponseEntity<List<SubscriptionResponse>> getAll(
             @RequestParam(required = false) Boolean actif,
@@ -40,6 +45,7 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.getAllByUser(userId));
     }
 
+    @Operation(summary = "Consulter un abonnement par son ID")
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionResponse> getById(
             @PathVariable UUID id,
@@ -48,6 +54,7 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.getById(id, userId));
     }
 
+    @Operation(summary = "Modifier un abonnement")
     @PutMapping("/{id}")
     public ResponseEntity<SubscriptionResponse> update(
             @PathVariable UUID id,
@@ -57,6 +64,7 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.update(id, request, userId));
     }
 
+    @Operation(summary = "Supprimer un abonnement")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
