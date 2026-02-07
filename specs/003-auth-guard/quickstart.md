@@ -21,13 +21,18 @@ Le guard est une fonction exportée qui :
 1. Injecte `AuthService` et `Router` via `inject()`
 2. Vérifie `authService.isAuthenticated()`
 3. Si authentifié : retourne `true`
-4. Si non authentifié : redirige vers `/auth` avec `returnUrl` en query param et retourne `false`
+4. Si non authentifié :
+   - Valide que `state.url` est une route interne (commence par `/`, ne commence pas par `//`, `http:` ou `https:`)
+   - Si valide : redirige vers `/auth` avec `returnUrl=state.url` en query param
+   - Si invalide (URL externe) : redirige vers `/auth` SANS returnUrl (redirection par défaut vers `/dashboard` après login)
+   - Retourne un UrlTree de redirection
 
 ### Validation du returnUrl
 
 Le `returnUrl` passé en query parameter doit :
 - Commencer par `/` (route relative)
 - Ne pas être une URL absolue (`http://`, `https://`, `//`)
+- Si ces conditions ne sont pas respectées, le returnUrl est ignoré (non passé au query param)
 
 ## Application sur les routes
 
@@ -45,8 +50,8 @@ Routes publiques (sans guard) :
 
 1. Utilisateur authentifié → accès autorisé (retourne `true`)
 2. Utilisateur non authentifié → redirection vers `/auth`
-3. returnUrl correctement passé en query param
-4. URL externe dans returnUrl → ignorée / redirigée vers `/dashboard`
+3. returnUrl correctement passé en query param (route interne valide)
+4. URL externe dans returnUrl → ignorée (pas de query param returnUrl, redirection vers `/auth` uniquement)
 5. Token expiré → traité comme non authentifié (via AuthService)
 
 ## Commandes

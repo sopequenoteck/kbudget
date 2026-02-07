@@ -40,16 +40,20 @@
 - [ ] T002 [US1] Implémenter la fonction `authGuard` (CanActivateFn) dans `app/src/app/core/guards/auth.guard.ts` :
   - Injecter `AuthService` et `Router` via `inject()`
   - Si `authService.isAuthenticated()` est `true` → retourner `true` (couvre US2)
-  - Si `false` → créer un `UrlTree` vers `/auth` avec queryParam `returnUrl` = `state.url` (couvre US1, US5)
-  - Valider que `state.url` commence par `/` et ne commence pas par `//`, `http:` ou `https:` avant de l'utiliser comme returnUrl (FR-007, sécurité open redirect)
+  - Si `false` :
+    - Valider que `state.url` commence par `/` ET ne commence pas par `//`, `http:` ou `https:` (FR-007, sécurité open redirect)
+    - Si valide → créer un `UrlTree` vers `/auth` avec queryParam `returnUrl=state.url` (couvre US1, US5)
+    - Si invalide (URL externe) → créer un `UrlTree` vers `/auth` SANS queryParam returnUrl (redirection par défaut vers `/dashboard` après login)
 
 ### Tests
 
 - [ ] T003 [US1] Écrire les tests unitaires dans `app/src/app/core/guards/auth.guard.spec.ts` :
   - `should_allow_access_when_authenticated` : mock `isAuthenticated` = true → retourne `true`
   - `should_redirect_to_auth_when_not_authenticated` : mock `isAuthenticated` = false → retourne UrlTree `/auth`
-  - `should_include_returnUrl_when_redirecting` : vérifie que le queryParam `returnUrl` contient l'URL demandée
-  - `should_reject_external_returnUrl` : `state.url` = `https://evil.com` → returnUrl ignoré ou non inclus
+  - `should_include_returnUrl_when_redirecting` : vérifie que le queryParam `returnUrl` contient l'URL demandée (ex: `state.url = '/transactions'` → query param `returnUrl=/transactions`)
+  - `should_reject_external_returnUrl_http` : `state.url = 'http://evil.com'` → UrlTree vers `/auth` SANS queryParam returnUrl (FR-007)
+  - `should_reject_external_returnUrl_https` : `state.url = 'https://evil.com'` → UrlTree vers `/auth` SANS queryParam returnUrl (FR-007)
+  - `should_reject_external_returnUrl_protocol_relative` : `state.url = '//evil.com'` → UrlTree vers `/auth` SANS queryParam returnUrl (FR-007)
   - `should_redirect_when_token_expired` : AuthService avec token expiré (isAuthenticated = false) → redirection (couvre US5)
 
 **Checkpoint**: Le guard fonctionne en isolation. Les tests passent.

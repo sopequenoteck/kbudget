@@ -9,7 +9,7 @@
 
 ### User Story 1 - Accès refusé sans authentification (Priority: P1)
 
-Un utilisateur non authentifié tente d'accéder à une page protégée (dashboard, transactions, abonnements, dettes). Le système le redirige automatiquement vers la page de connexion en conservant l'URL demandée, afin qu'il puisse y être redirigé après connexion.
+Un utilisateur non authentifié tente d'accéder à une page protégée (dashboard, transactions, abonnements, dettes). Le système le redirige automatiquement (sans délai perceptible, < 50ms) vers la page de connexion en conservant l'URL demandée, afin qu'il puisse y être redirigé après connexion.
 
 **Why this priority**: Sans cette protection, n'importe qui pourrait accéder aux données financières de l'utilisateur. C'est le fondement de la sécurité côté frontend.
 
@@ -62,6 +62,8 @@ Après s'être connecté, l'utilisateur est redirigé vers la page qu'il tentait
 
 **Independent Test**: Tenter d'accéder à `/transactions` sans authentification, se connecter, puis vérifier la redirection vers `/transactions`.
 
+**Implementation Note**: Le guard (KKS-27) pose le `returnUrl` en query param. La lecture et l'utilisation de ce paramètre seront implémentées dans le composant login (KKS-28, hors scope de cette feature).
+
 **Acceptance Scenarios**:
 
 1. **Given** un utilisateur redirigé vers `/auth?returnUrl=/transactions`, **When** il se connecte avec succès, **Then** il est redirigé vers `/transactions`
@@ -85,8 +87,8 @@ Un utilisateur dont la session a expiré est redirigé vers la page de connexion
 
 ### Edge Cases
 
-- Que se passe-t-il si le `returnUrl` contient une route invalide ? Le système redirige vers `/dashboard` par défaut après login.
-- Que se passe-t-il si le `returnUrl` est une URL externe malveillante (ex: `https://evil.com`) ? Le système ignore les URLs externes et redirige vers `/dashboard`.
+- Que se passe-t-il si le `returnUrl` contient une route invalide (ex: `/zzzinvalid`) ? Le returnUrl est conservé tel quel — si la route n'existe pas, Angular affichera la page 404 après login.
+- Que se passe-t-il si le `returnUrl` est une URL externe malveillante (ex: `https://evil.com`) ? Le système rejette l'URL externe : le returnUrl n'est PAS passé au query param. L'utilisateur est redirigé vers `/auth` sans returnUrl, ce qui déclenchera une redirection par défaut vers `/dashboard` après login.
 - Que se passe-t-il si l'utilisateur accède à une route wildcard (`/**`) sans authentification ? Il est redirigé vers `/auth`.
 
 ## Requirements *(mandatory)*
