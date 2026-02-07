@@ -1,0 +1,13 @@
+# Remplacer budget.example.com par votre domaine
+# En mode Docker : remplacer localhost:8080 par api:8080
+
+budget.example.com {
+	reverse_proxy localhost:8080
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

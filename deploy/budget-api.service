@@ -1,0 +1,25 @@
+[Unit]
+Description=Budget API (Spring Boot)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=budget
+Group=budget
+WorkingDirectory=/opt/budget-api
+
+ExecStart=/usr/bin/java -jar /opt/budget-api/api.jar --spring.profiles.active=prod
+EnvironmentFile=/opt/budget-api/.env
+
+Restart=on-failure
+RestartSec=10
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/budget-api/logs
+
+[Install]
+WantedBy=multi-user.target

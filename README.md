@@ -219,4 +219,6 @@ cd api && mvn test
 - **Swagger UI** : [http://localhost:8080/api/swagger-ui.html](http://localhost:8080/api/swagger-ui.html) — Documentation interactive de l'API (disponible quand l'application tourne)
 - **Spec OpenAPI JSON** : [http://localhost:8080/api/v3/api-docs](http://localhost:8080/api/v3/api-docs)
 - [`docs/vision.md`](docs/vision.md) — Vision produit et modules fonctionnels
-- [`docs/architecture.md`](docs/architecture.md) — Architecture technique detaillee
+- [`docs/architecture.md`](docs/architecture.md) — Decisions techniques, modele de donnees et ecrans frontend
+- [`docs/api-errors.md`](docs/api-errors.md) — Contrat d'erreurs HTTP et guide d'integration frontend
+- [`docs/deployment.md`](docs/deployment.md) — Guide de deploiement (Docker, bare-metal, reverse proxy, backup)

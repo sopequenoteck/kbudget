@@ -1,0 +1,13 @@
+.git
+.idea
+.vscode
+.claude
+.specify
+docs/
+deploy/
+.env
+**/.env
+api/target/
+*.md
+.gitignore
+.dockerignore
