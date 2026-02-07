@@ -98,3 +98,10 @@ Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de référ
 - Chaque requête filtre par le user authentifié (isolation des données)
 - Les inputs sont validés via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
 - Branches feature : `feature/<nom>`
+
+## Active Technologies
+- Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1 (001-springdoc-openapi)
+- N/A (pas de nouvelles donnees) (001-springdoc-openapi)
+
+## Recent Changes
+- 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
