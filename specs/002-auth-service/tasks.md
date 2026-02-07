@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/002-auth-service/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/auth-api.md
 
-**Tests**: Phase 7 dédiée aux tests unitaires du AuthService (T012-T016), conformément au principe V de la constitution.
+**Tests**: Phase 7 dédiée aux tests unitaires du AuthService (T009-T013), conformément au principe V de la constitution.
 
 **Organization**: Tasks groupées par user story pour une implémentation et un test indépendants de chaque story.
 
@@ -19,7 +19,7 @@
 
 **Purpose**: Création de la structure de dossiers pour les nouveaux fichiers
 
-- [ ] T001 Créer le dossier models/ dans `app/src/app/core/models/`
+- [x] T001 Créer le dossier models/ dans `app/src/app/core/models/`
 
 ---
 
@@ -29,9 +29,9 @@
 
 **CRITICAL**: Aucune user story ne peut commencer avant la fin de cette phase
 
-- [ ] T002 [P] Créer les interfaces auth dans `app/src/app/core/models/auth.model.ts` — LoginRequest (`email: string`, `password: string`), RegisterRequest (`name?: string`, `email: string`, `password: string`), AuthResponse (`token: string`, `email: string`, `name: string`). Cf. data-model.md et contracts/auth-api.md pour les champs exacts.
-- [ ] T003 [P] Créer l'interface UserInfo dans `app/src/app/core/models/user.model.ts` — UserInfo (`name: string`, `email: string`). Représente l'utilisateur connecté côté frontend.
-- [ ] T004 Créer le squelette AuthService dans `app/src/app/core/services/auth.ts` — Service injectable (`providedIn: 'root'`), inject ApiService et Router. Déclarer : `currentUser = signal<UserInfo | null>(null)` (FR-010), `isAuthenticated = computed(() => this.currentUser() !== null)`. Constantes : `STORAGE_TOKEN_KEY = 'budget_token'`, `STORAGE_USER_KEY = 'budget_user'`. Méthodes privées : `decodeToken(token)` (base64url → JSON via atob, try/catch, cf. research.md R1), `isTokenExpired(token)` (compare exp avec Date.now()/1000) (FR-006), `saveAuth(response: AuthResponse)` (stocke token dans `'budget_token'` et user au format JSON dans `'budget_user'` en localStorage, met à jour signal), `clearAuth()` (supprime localStorage, reset signal à null). Constructeur : lire token + user depuis localStorage (clés `'budget_token'` et `'budget_user'`), vérifier expiration, restaurer le signal si valide ou nettoyer si expiré/corrompu (cf. research.md R5, R6). Si `JSON.parse(localStorage['budget_user'])` échoue (JSON corrompu), nettoyer les deux clés (`'budget_token'` et `'budget_user'`) et rester déconnecté — loguer `console.error('budget_user corrompu')`. Méthode publique `getToken(): string | null` (lit le token, vérifie expiration, retourne null si expiré). Entourer tous les accès localStorage (getItem/setItem/removeItem) d'un try/catch — cf. spec.md Edge Cases pour le comportement attendu (mode session volatile, `console.error` sur localStorage indisponible et token corrompu).
+- [x] T002 [P] Créer les interfaces auth dans `app/src/app/core/models/auth.model.ts` — LoginRequest (`email: string`, `password: string`), RegisterRequest (`name?: string`, `email: string`, `password: string`), AuthResponse (`token: string`, `email: string`, `name: string`). AuthResponse est utilisé par `saveAuth()` pour stocker `{name, email}` dans `budget_user` (FR-003). Cf. data-model.md et contracts/auth-api.md pour les champs exacts.
+- [x] T003 [P] Créer l'interface UserInfo dans `app/src/app/core/models/user.model.ts` — UserInfo (`name: string`, `email: string`). Représente l'utilisateur connecté côté frontend.
+- [x] T004 Créer le squelette AuthService dans `app/src/app/core/services/auth.ts` — Service injectable (`providedIn: 'root'`), inject ApiService et Router. Déclarer : `currentUser = signal<UserInfo | null>(null)` (FR-010), `isAuthenticated = computed(() => this.currentUser() !== null)`. Constantes : `STORAGE_TOKEN_KEY = 'budget_token'`, `STORAGE_USER_KEY = 'budget_user'`. Méthodes privées : `decodeToken(token)` (base64url → JSON via atob, try/catch, cf. research.md R1 — si décodage échoue, logger `console.error('Token corrompu')` et retourner null), `isTokenExpired(token)` (compare exp avec Date.now()/1000 — si `exp` absent du payload, considérer le token comme expiré) (FR-006), `saveAuth(response: AuthResponse)` (stocke token dans `'budget_token'` et user au format JSON dans `'budget_user'` en localStorage, met à jour signal), `clearAuth()` (supprime localStorage, reset signal à null), `mapAuthError(error): string` (HTTP 400 → `error.error.message`, status 0 → "Impossible de contacter le serveur", 500+ → "Une erreur est survenue" — factorise le mapping d'erreur partagé entre login/register). Constructeur : lire token + user depuis localStorage (clés `'budget_token'` et `'budget_user'`), vérifier expiration, restaurer le signal si valide ou nettoyer si expiré/corrompu (cf. research.md R5, R6). Si `JSON.parse(localStorage['budget_user'])` échoue (JSON corrompu), nettoyer les deux clés (`'budget_token'` et `'budget_user'`) et rester déconnecté — loguer `console.error('budget_user corrompu')`. Méthode publique `getToken(): string | null` (lit le token, vérifie expiration, retourne null si expiré). Entourer tous les accès localStorage (getItem/setItem/removeItem) d'un try/catch — si localStorage échoue (navigation privée ou QuotaExceededError), loguer `console.error('localStorage indisponible')` et continuer en mode session volatile (les signals sont mis à jour normalement mais sans persistance, session perdue au rechargement). Cf. spec.md Edge Cases.
 
 **Checkpoint**: Modèles et squelette AuthService prêts — les user stories peuvent commencer
 
@@ -45,7 +45,7 @@
 
 ### Implementation
 
-- [ ] T005 [US1] Implémenter la méthode `login(credentials: LoginRequest)` dans `app/src/app/core/services/auth.ts` — Appeler `this.apiService.post<AuthResponse>('/auth/login', credentials)`, sur succès appeler `saveAuth(response)`. Sur erreur : mapper HTTP 400 → extraire `error.error.message` (retourne "Email ou mot de passe incorrect" ou message Bean Validation concaténé "field: message; field: message"), erreur réseau (status 0) → "Impossible de contacter le serveur", HTTP 500+ → "Une erreur est survenue". Note : le GlobalExceptionHandler backend retourne toujours `{timestamp, status, message}` — le chemin d'accès est toujours `error.error.message`. Retourner un Observable qui émet l'AuthResponse ou propage l'erreur mappée via `catchError` + `throwError`. Cf. contracts/auth-api.md pour les réponses exactes et research.md R4 pour la stratégie d'erreur.
+- [x] T005 [US1] Implémenter la méthode `login(credentials: LoginRequest)` dans `app/src/app/core/services/auth.ts` — Appeler `this.apiService.post<AuthResponse>('/auth/login', credentials)`, sur succès appeler `saveAuth(response)`. Sur erreur : utiliser la méthode privée `mapAuthError(error)` pour mapper les erreurs (HTTP 400 → `error.error.message`, status 0 → "Impossible de contacter le serveur" + `console.error`, 500+ → "Une erreur est survenue"). Note : le GlobalExceptionHandler backend retourne toujours `{timestamp, status, message}` — le chemin d'accès est toujours `error.error.message`. Retourner un Observable qui émet l'AuthResponse ou propage l'erreur mappée via `catchError` + `throwError`. Cf. contracts/auth-api.md et FR-008 pour le mapping complet.
 
 **Checkpoint**: La connexion fonctionne de bout en bout. MVP livrable.
 
@@ -59,7 +59,7 @@
 
 ### Implementation
 
-- [ ] T006 [US2] Implémenter la méthode `register(data: RegisterRequest)` dans `app/src/app/core/services/auth.ts` — Appeler `this.apiService.post<AuthResponse>('/auth/register', data)`, sur succès appeler `saveAuth(response)`. Même stratégie de mapping d'erreur que T005 (HTTP 400 → `error.error.message`, réseau → "Impossible de contacter le serveur", 500+ → "Une erreur est survenue"). Messages spécifiques register : "Email déjà utilisé", Bean Validation concaténé "field: message; field: message". Même pattern Observable que login(). Cf. contracts/auth-api.md pour les formats de réponse 400.
+- [x] T006 [US2] Implémenter la méthode `register(data: RegisterRequest)` dans `app/src/app/core/services/auth.ts` — Appeler `this.apiService.post<AuthResponse>('/auth/register', data)`, sur succès appeler `saveAuth(response)`. Même stratégie de mapping via `mapAuthError(error)` (méthode privée partagée avec T005). Messages spécifiques register : "Email déjà utilisé", Bean Validation concaténé "field: message; field: message". Même pattern Observable que login(). Note : le backend retourne 201 Created (pas 200) — Angular HttpClient traite tous les 2xx comme succès, donc aucun traitement spécial nécessaire. Cf. contracts/auth-api.md pour les formats de réponse 400.
 
 **Checkpoint**: L'inscription fonctionne. L'utilisateur est auto-connecté après inscription.
 
@@ -73,7 +73,7 @@
 
 ### Implementation
 
-- [ ] T007 [US3] Implémenter la méthode `logout()` dans `app/src/app/core/services/auth.ts` — Appeler `clearAuth()` puis `this.router.navigate(['/auth'])`. Méthode synchrone, pas de retour Observable.
+- [x] T007 [US3] Implémenter la méthode `logout()` dans `app/src/app/core/services/auth.ts` — Appeler `clearAuth()` puis `this.router.navigate(['/auth'])`. Méthode synchrone, pas de retour Observable.
 
 **Checkpoint**: La déconnexion fonctionne avec nettoyage complet et redirection.
 
@@ -87,7 +87,7 @@
 
 ### Implementation
 
-- [ ] T008 [US4] Renforcer la détection d'expiration dans `getToken()` dans `app/src/app/core/services/auth.ts` — Si le token est expiré ou corrompu (décodeToken retourne null), appeler `clearAuth()` et retourner `null`. Ceci assure le nettoyage automatique lors de toute tentative d'utilisation du token par l'intercepteur (KKS-26) ou le guard (KKS-27). Le constructeur gère déjà le cas au démarrage (T004) ; cette tâche couvre le cas pendant l'utilisation active.
+- [x] T008 [US4] Renforcer la détection d'expiration dans `getToken()` dans `app/src/app/core/services/auth.ts` — Si le token est expiré ou corrompu (décodeToken retourne null), appeler `clearAuth()` et retourner `null`. Ceci assure le nettoyage automatique lors de toute tentative d'utilisation du token par l'intercepteur (KKS-26) ou le guard (KKS-27). Le constructeur gère déjà le cas au démarrage (T004) ; cette tâche couvre le cas pendant l'utilisation active.
 
 **Checkpoint**: Tout token expiré/corrompu est automatiquement détecté et nettoyé.
 
@@ -99,11 +99,11 @@
 
 **CRITICAL**: Les tests DOIVENT passer avant la phase Polish
 
-- [ ] T012 [P] Tester login() dans `app/src/app/core/services/auth.spec.ts` — cas nominal (token stocké dans `localStorage['budget_token']`, user stocké dans `localStorage['budget_user']` au format JSON `{name, email}`, signal `currentUser()` contient `{name, email}` corrects, signal `isAuthenticated` → true), erreur 400 (message "Email ou mot de passe incorrect" mappé), erreur réseau (status 0 → "Impossible de contacter le serveur"), erreur 500 (message "Une erreur est survenue" mappé — couvre SC-004). Pattern AAA, nommage `should_[résultat]_when_[condition]`.
-- [ ] T013 [P] Tester register() dans `app/src/app/core/services/auth.spec.ts` — cas nominal (auto-connexion, `localStorage['budget_token']` et `localStorage['budget_user']` stockés, `currentUser()` contient `{name, email}` corrects, `isAuthenticated` → true), email déjà pris (400 avec `error.error.message` → "Email déjà utilisé"), validation Bean (400 avec `error.error.message` → chaîne concaténée "field: message; field: message", ex: "password: size must be between 6 and 2147483647"), erreur réseau (status 0 → "Impossible de contacter le serveur"), erreur 500 (message "Une erreur est survenue" mappé — couverture symétrique FR-008 avec T012). Mock ApiService.
-- [ ] T014 [P] Tester logout() dans `app/src/app/core/services/auth.spec.ts` — token supprimé de localStorage, signal `currentUser` → null, `isAuthenticated` → false, navigation vers `/auth` appelée.
-- [ ] T015 [P] Tester getToken() dans `app/src/app/core/services/auth.spec.ts` — token valide retourné, token expiré → null + `clearAuth()` appelé, token corrompu (base64 invalide) → null.
-- [ ] T016 Tester constructeur AuthService dans `app/src/app/core/services/auth.spec.ts` — restauration session avec token valide en localStorage, nettoyage avec token expiré, localStorage indisponible (spy throwant une erreur) → mode volatile sans crash, `budget_user` corrompu (JSON invalide en localStorage) → nettoyage des deux clés et état déconnecté.
+- [x] T009 [P] Tester login() dans `app/src/app/core/services/auth.spec.ts` — cas nominal (token stocké dans `localStorage['budget_token']`, user stocké dans `localStorage['budget_user']` au format JSON `{name, email}`, signal `currentUser()` contient `{name, email}` corrects, signal `isAuthenticated` → true), erreur 400 (message "Email ou mot de passe incorrect" mappé), erreur réseau (status 0 → "Impossible de contacter le serveur"), erreur 500 (message "Une erreur est survenue" mappé — couvre SC-004). Pattern AAA, nommage `should_[résultat]_when_[condition]`.
+- [x] T010 [P] Tester register() dans `app/src/app/core/services/auth.spec.ts` — cas nominal (auto-connexion, `localStorage['budget_token']` et `localStorage['budget_user']` stockés, `currentUser()` contient `{name, email}` corrects, `isAuthenticated` → true), email déjà pris (400 avec `error.error.message` → "Email déjà utilisé"), validation Bean (400 avec `error.error.message` → chaîne concaténée "field: message; field: message", ex: "password: size must be between 6 and 2147483647"), erreur réseau (status 0 → "Impossible de contacter le serveur"), erreur 500 (message "Une erreur est survenue" mappé — couverture symétrique FR-008 avec T009). Mock ApiService.
+- [x] T011 [P] Tester logout() dans `app/src/app/core/services/auth.spec.ts` — token supprimé de localStorage, signal `currentUser` → null, `isAuthenticated` → false, navigation vers `/auth` appelée.
+- [x] T012 [P] Tester getToken() dans `app/src/app/core/services/auth.spec.ts` — token valide retourné, token expiré → null + `clearAuth()` appelé, token corrompu (base64 invalide) → null.
+- [x] T013 Tester constructeur AuthService dans `app/src/app/core/services/auth.spec.ts` — restauration session avec token valide en localStorage, nettoyage avec token expiré, localStorage indisponible (spy throwant une erreur) → mode volatile sans crash, `budget_user` corrompu (JSON invalide en localStorage) → nettoyage des deux clés et état déconnecté.
 
 **Checkpoint**: Tous les tests passent (`ng test`). AuthService conforme au principe V.
 
@@ -113,9 +113,9 @@
 
 **Purpose**: Validation finale et intégration
 
-- [ ] T017 Exporter les modèles et le service via des barrel files si le pattern existe dans `app/src/app/core/` — Vérifier si un `index.ts` existe déjà dans `core/services/` ou `core/models/`. Si oui, ajouter les exports. Si non, ne pas créer de barrel (YAGNI).
-- [ ] T018 Exécuter `ng lint` et `npm run format:check` dans `app/` pour valider le code
-- [ ] T019 Valider les scénarios du quickstart.md : démarrer le backend, lancer le frontend, vérifier login/logout/session restore dans la console navigateur
+- [x] T014 Exporter les modèles et le service via des barrel files si le pattern existe dans `app/src/app/core/` — Vérifier si un `index.ts` existe déjà dans `core/services/` ou `core/models/`. Si oui, ajouter les exports. Si non, ne pas créer de barrel (YAGNI).
+- [x] T015 Exécuter `ng lint` et `npm run format:check` dans `app/` pour valider le code
+- [x] T016 Valider les scénarios du quickstart.md : démarrer le backend, lancer le frontend, vérifier login/logout/session restore dans la console navigateur
 
 ---
 
@@ -129,7 +129,7 @@
 - **US2 Inscription (Phase 4)**: Dépend de Phase 2 — parallélisable avec US1
 - **US3 Déconnexion (Phase 5)**: Dépend de Phase 2 — parallélisable avec US1/US2
 - **US4 Expiration (Phase 6)**: Dépend de Phase 2 — parallélisable avec les autres
-- **Tests (Phase 7)**: Dépend de toutes les user stories (Phases 3-6) — T012-T015 parallélisables, T016 indépendant
+- **Tests (Phase 7)**: Dépend de toutes les user stories (Phases 3-6) — T009-T012 parallélisables, T013 indépendant
 - **Polish (Phase 8)**: Dépend de Phase 7 (les tests DOIVENT passer avant Polish)
 
 ### User Story Dependencies
@@ -196,5 +196,5 @@ T004: Créer AuthService skeleton (dépend de T002 + T003)
 - Pas de `subscribe()` manuel — les composants consommeront les signals directement
 - Le `saveAuth()` et `clearAuth()` privés factorisent la logique commune entre les stories
 - Commit recommandé après chaque phase complétée
-- Tests unitaires du AuthService couverts en Phase 7 (T012-T016). Fichier unique `auth.spec.ts` dans `core/services/`.
+- Tests unitaires du AuthService couverts en Phase 7 (T009-T013). Fichier unique `auth.spec.ts` dans `core/services/`.
 - Limitation connue : les appels login/register simultanés ne sont pas protégés (pas de mutex/debounce). Acceptable en contexte single-user — le dernier token reçu sera stocké sans corruption.
