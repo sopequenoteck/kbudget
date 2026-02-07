@@ -39,7 +39,7 @@ Le projet Angular est dans `app/`. Toutes les commandes Angular CLI doivent êtr
 ### Stack
 
 - **Backend** : Java 21, Spring Boot 4.0.2, Maven
-- **Frontend** : Angular 19, TypeScript, SCSS
+- **Frontend** : Angular 20, TypeScript, SCSS
 - **BDD** : PostgreSQL 15+, Spring Data JPA
 - **Auth** : Spring Security + JWT (jjwt 0.12.6)
 - **Infra** : Caddy (reverse proxy, auto-HTTPS)
@@ -129,7 +129,7 @@ Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de référ
 
 ## Active Technologies
 - Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
-- Frontend : Angular 19, TypeScript, SCSS
+- Frontend : Angular 20, TypeScript, SCSS
 
 ## Recent Changes
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1

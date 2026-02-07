@@ -35,7 +35,7 @@ Hebergee en self-hosted sur serveur personnel.
 | Couche | Choix |
 |--------|-------|
 | Backend | Spring Boot 4.0.2 (API REST, Java 21) |
-| Frontend | Angular 19 PWA (`budget-app`, dossier `app/`) |
+| Frontend | Angular 20 PWA (`budget-app`, dossier `app/`) |
 | Base de donnees | PostgreSQL 15+ |
 | Auth | Spring Security + JWT |
 | Reverse proxy | Caddy (auto-HTTPS) |
