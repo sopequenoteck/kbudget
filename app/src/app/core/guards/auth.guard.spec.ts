@@ -1,15 +1,15 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
 import { Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '../services/auth';
 import { authGuard } from './auth.guard';
 
 if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
 }
 
 describe('authGuard', () => {

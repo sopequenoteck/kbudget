@@ -1,8 +1,8 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
@@ -11,9 +11,8 @@ import { AuthService } from './auth';
 import { ApiService } from './api';
 import { AuthResponse } from '../models/auth.model';
 
-// Init test environment
 if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
 }
 
 function createJwt(payload: Record<string, unknown>): string {

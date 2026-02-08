@@ -30,7 +30,7 @@ Implémenter un intercepteur HTTP fonctionnel Angular (`HttpInterceptorFn`) qui 
 | III. Simplicité & YAGNI | PASS | Une seule fonction (`HttpInterceptorFn`), pas de classe, pas d'abstraction. Liste d'exclusion inline. |
 | IV. Mobile-First UX | PASS | Pas d'impact direct sur l'UX mobile. L'intercepteur est transparent. |
 | V. Testabilité | PASS | L'intercepteur fonctionnel est testable unitairement via injection de mocks (AuthService, Router). Pattern AAA. |
-| VI. Observabilité | N/A | Pas de backend impliqué. Côté frontend, les erreurs sont loguées via `console.error` dans AuthService. |
+| VI. Observabilité | PASS | Pas de backend impliqué. Côté frontend, la stratégie de logging repose sur `console.error` dans AuthService (erreurs localStorage, token corrompu). L'intercepteur délègue le logging à AuthService via `logout()` — pas de logging direct dans l'intercepteur (YAGNI). |
 | VII. Self-Hosted Ready | PASS | Pas de dépendance externe ajoutée. |
 
 **Gate Result**: PASS - Aucune violation.

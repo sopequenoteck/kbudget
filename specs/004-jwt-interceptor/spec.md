@@ -71,7 +71,7 @@ En tant qu'utilisateur dont la session a expiré côté serveur, lorsque le serv
 - **FR-002**: Le système NE DOIT PAS ajouter le header d'autorisation aux requêtes vers les endpoints publics d'authentification (connexion et inscription).
 - **FR-003**: Le système DOIT supprimer le token stocké et rediriger l'utilisateur vers la page de connexion lorsqu'une réponse 401 est reçue du serveur.
 - **FR-004**: Le système DOIT mettre à jour l'état d'authentification de l'application (marquer l'utilisateur comme déconnecté) lors d'une réponse 401.
-- **FR-005**: Le système NE DOIT PAS ajouter le header d'autorisation aux requêtes vers des URL externes (en dehors du domaine de l'API).
+- **FR-005**: Le système NE DOIT PAS ajouter le header d'autorisation aux requêtes vers des URL externes (en dehors du domaine de l'API). Heuristique : une URL relative (ex: `/api/transactions`) est considérée interne ; une URL absolue commençant par `http://` ou `https://` est considérée externe.
 - **FR-006**: Le système DOIT gérer gracieusement l'absence de token (pas d'erreur, requête envoyée sans header).
 - **FR-007**: Le système DOIT éviter les redirections multiples vers la page de connexion lorsque plusieurs réponses 401 arrivent simultanément.
 - **FR-008**: Le système DOIT être enregistré dans la configuration globale de l'application pour intercepter toutes les requêtes HTTP.

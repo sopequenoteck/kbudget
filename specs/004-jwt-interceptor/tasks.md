@@ -23,8 +23,8 @@
 
 **Purpose**: Création du répertoire et du squelette de l'intercepteur
 
-- [ ] T001 Créer le répertoire `app/src/app/core/interceptors/` et le fichier squelette `app/src/app/core/interceptors/auth.interceptor.ts` avec une `HttpInterceptorFn` qui passe la requête sans modification (pass-through)
-- [ ] T002 Enregistrer l'intercepteur dans `app/src/app/app.config.ts` : remplacer `provideHttpClient()` par `provideHttpClient(withInterceptors([authInterceptor]))` avec les imports nécessaires
+- [x] T001 Créer le répertoire `app/src/app/core/interceptors/` et le fichier squelette `app/src/app/core/interceptors/auth.interceptor.ts` avec une `HttpInterceptorFn` qui passe la requête sans modification (pass-through)
+- [x] T002 Enregistrer l'intercepteur dans `app/src/app/app.config.ts` : remplacer `provideHttpClient()` par `provideHttpClient(withInterceptors([authInterceptor]))` avec les imports nécessaires
 
 ---
 
@@ -34,7 +34,7 @@
 
 **CRITICAL**: Les tests servent de filet de sécurité pour toute l'implémentation qui suit
 
-- [ ] T003 Créer le fichier de test `app/src/app/core/interceptors/auth.interceptor.spec.ts` avec la configuration TestBed (init `getTestBed().initTestEnvironment()` dans le fichier), provision de `provideHttpClient(withInterceptors([authInterceptor]))`, `provideHttpClientTesting`, mock de `AuthService` (getToken, logout) et mock de `Router` (navigate). Vérifier qu'un test de base passe (requête pass-through)
+- [x] T003 Créer le fichier de test `app/src/app/core/interceptors/auth.interceptor.spec.ts` avec la configuration TestBed (init `getTestBed().initTestEnvironment()` dans le fichier), provision de `provideHttpClient(withInterceptors([authInterceptor]))`, `provideHttpClientTesting`, mock de `AuthService` (getToken, logout) et mock de `Router` (navigate). Vérifier qu'un test de base passe (requête pass-through)
 
 **Checkpoint**: La base de test est fonctionnelle — `cd app && npx vitest run` passe
 
@@ -48,12 +48,12 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [US1] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_add_auth_header_when_token_exists — mock getToken retourne un token, vérifier que la requête sortante a le header `Authorization: Bearer <token>` ; (2) should_send_request_without_header_when_no_token — mock getToken retourne null, vérifier absence du header ; (3) should_add_same_header_to_concurrent_requests — deux requêtes simultanées, vérifier que les deux ont le header
+- [x] T004 [US1] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_add_auth_header_when_token_exists — mock getToken retourne un token, vérifier que la requête sortante a le header `Authorization: Bearer <token>` ; (2) should_send_request_without_header_when_no_token — mock getToken retourne null, vérifier absence du header ; (3) should_add_same_header_to_concurrent_requests — deux requêtes simultanées, vérifier que les deux ont le header
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Implémenter l'injection du token dans `app/src/app/core/interceptors/auth.interceptor.ts` : utiliser `inject(AuthService)` pour récupérer le token via `getToken()`, cloner la requête avec `req.clone({ setHeaders: { Authorization: 'Bearer ' + token } })` si le token existe, sinon passer la requête sans modification
-- [ ] T006 [US1] Vérifier que les tests T004 passent — `cd app && npx vitest run`
+- [x] T005 [US1] Implémenter l'injection du token dans `app/src/app/core/interceptors/auth.interceptor.ts` : utiliser `inject(AuthService)` pour récupérer le token via `getToken()`, cloner la requête avec `req.clone({ setHeaders: { Authorization: 'Bearer ' + token } })` si le token existe, sinon passer la requête sans modification
+- [x] T006 [US1] Vérifier que les tests T004 passent — `cd app && npx vitest run`
 
 **Checkpoint**: L'injection automatique du token fonctionne. MVP fonctionnel.
 
@@ -67,12 +67,12 @@
 
 ### Tests for User Story 2
 
-- [ ] T007 [US2] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_not_add_header_when_url_is_login — requête vers `/api/auth/login`, token présent, vérifier absence du header ; (2) should_not_add_header_when_url_is_register — requête vers `/api/auth/register`, token présent, vérifier absence du header ; (3) should_add_header_when_url_is_other_api_route — requête vers `/api/transactions`, token présent, vérifier présence du header ; (4) should_not_add_header_when_url_is_absolute_external — requête vers `https://external.com/api`, token présent, vérifier absence du header
+- [x] T007 [US2] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_not_add_header_when_url_is_login — requête vers `/api/auth/login`, token présent, vérifier absence du header ; (2) should_not_add_header_when_url_is_register — requête vers `/api/auth/register`, token présent, vérifier absence du header ; (3) should_add_header_when_url_is_other_api_route — requête vers `/api/transactions`, token présent, vérifier présence du header ; (4) should_not_add_header_when_url_is_absolute_external — requête vers `https://external.com/api`, token présent, vérifier absence du header
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Ajouter la logique d'exclusion dans `app/src/app/core/interceptors/auth.interceptor.ts` : définir une liste de chemins publics (`/auth/login`, `/auth/register`), vérifier si l'URL contient un de ces chemins avant d'injecter le token. Ajouter la vérification que l'URL n'est pas absolue vers un domaine externe (commence par `http://` ou `https://`)
-- [ ] T009 [US2] Vérifier que les tests T007 passent — `cd app && npx vitest run`
+- [x] T008 [US2] Ajouter la logique d'exclusion dans `app/src/app/core/interceptors/auth.interceptor.ts` : définir une liste de chemins publics (`/auth/login`, `/auth/register`), vérifier si l'URL contient un de ces chemins avant d'injecter le token. Ajouter la vérification que l'URL n'est pas absolue vers un domaine externe (commence par `http://` ou `https://`)
+- [x] T009 [US2] Vérifier que les tests T007 passent — `cd app && npx vitest run`
 
 **Checkpoint**: L'exclusion des routes publiques et la protection contre les domaines tiers fonctionnent
 
@@ -86,13 +86,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T010 [US3] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_call_logout_when_401_received — simuler une réponse 401, vérifier que `AuthService.logout()` est appelé ; (2) should_not_call_logout_when_403_received — simuler une réponse 403, vérifier que `logout()` n'est PAS appelé et que l'erreur est propagée ; (3) should_call_logout_only_once_on_multiple_401 — simuler deux réponses 401 simultanées, vérifier que `logout()` n'est appelé qu'une seule fois ; (4) should_propagate_error_after_logout — simuler une 401, vérifier que l'erreur est toujours propagée au subscriber après le logout
+- [x] T010 [US3] Écrire les tests dans `app/src/app/core/interceptors/auth.interceptor.spec.ts` : (1) should_call_logout_when_401_received — simuler une réponse 401, vérifier que `AuthService.logout()` est appelé ; (2) should_not_call_logout_when_403_received — simuler une réponse 403, vérifier que `logout()` n'est PAS appelé et que l'erreur est propagée ; (3) should_call_logout_only_once_on_multiple_401 — simuler deux réponses 401 simultanées, vérifier que `logout()` n'est appelé qu'une seule fois ; (4) should_propagate_error_after_logout — simuler une 401, vérifier que l'erreur est toujours propagée au subscriber après le logout ; (5) should_still_call_logout_when_already_on_auth_page — mocker `router.url` retournant `/auth`, simuler une 401, vérifier que `logout()` est appelé sans boucle infinie (logout() navigue vers `/auth` mais le Router Angular ne re-navigue pas si déjà sur la même route)
 
 ### Implementation for User Story 3
 
-- [ ] T011 [US3] Ajouter la gestion des erreurs 401 dans `app/src/app/core/interceptors/auth.interceptor.ts` : utiliser `pipe(catchError(...))` sur le `next(req)`, vérifier si l'erreur est une `HttpErrorResponse` avec status 401, appeler `AuthService.logout()` via le flag anti-cascade, puis re-throw l'erreur
-- [ ] T012 [US3] Implémenter le flag anti-cascade dans `app/src/app/core/interceptors/auth.interceptor.ts` : variable booléen au niveau du module qui empêche les appels multiples à `logout()`, réinitialisé après un délai court (setTimeout)
-- [ ] T013 [US3] Vérifier que les tests T010 passent — `cd app && npx vitest run`
+- [x] T011 [US3] Ajouter la gestion des erreurs 401 dans `app/src/app/core/interceptors/auth.interceptor.ts` : utiliser `pipe(catchError(...))` sur le `next(req)`, vérifier si l'erreur est une `HttpErrorResponse` avec status 401, appeler `AuthService.logout()` via le flag anti-cascade, puis re-throw l'erreur. Note : `logout()` gère déjà la suppression du token, la mise à jour du state ET la redirection vers `/auth` — l'intercepteur NE DOIT PAS appeler `router.navigate` séparément
+- [x] T012 [US3] Implémenter le flag anti-cascade dans `app/src/app/core/interceptors/auth.interceptor.ts` : variable `let isLoggingOut = false` au niveau du module. Sur 401 : si `isLoggingOut` est true, skip le logout ; sinon, mettre `isLoggingOut = true`, appeler `logout()`, puis réinitialiser à false via `setTimeout(() => isLoggingOut = false, 1000)`. Le délai de 1s couvre le temps de redirection. En test, utiliser `vi.useFakeTimers()` et `vi.advanceTimersByTime(1000)` pour vérifier le reset du flag
+- [x] T013 [US3] Vérifier que les tests T010 passent — `cd app && npx vitest run`
 
 **Checkpoint**: La gestion des 401 est complète. Toutes les user stories sont implémentées.
 
@@ -102,9 +102,9 @@
 
 **Purpose**: Validation finale, lint, et vérification de non-régression
 
-- [ ] T014 Exécuter le lint complet — `cd app && npx ng lint` — corriger toute erreur
-- [ ] T015 Exécuter tous les tests du projet — `cd app && npx vitest run` — vérifier que les tests existants (auth.spec.ts, auth.guard.spec.ts) passent toujours
-- [ ] T016 Vérifier le build — `cd app && npx ng build` — aucune erreur de compilation
+- [x] T014 Exécuter le lint complet — `cd app && npx ng lint` — corriger toute erreur
+- [x] T015 Exécuter tous les tests du projet — `cd app && npx vitest run` — vérifier que les tests existants (auth.spec.ts, auth.guard.spec.ts) passent toujours
+- [x] T016 Vérifier le build — `cd app && npx ng build` — aucune erreur de compilation
 
 ---
 
