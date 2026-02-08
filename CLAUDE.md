@@ -171,6 +171,7 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - localStorage (clé `budget_token`) (002-auth-service)
 - TypeScript 5.8+ / Angular 21 + `@angular/router` (Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot), `AuthService` (existant) (003-auth-guard)
 - localStorage via AuthService (existant, pas de modification) (003-auth-guard)
+- TypeScript 5.8+ / Angular 21 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
 
 ## Recent Changes
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
