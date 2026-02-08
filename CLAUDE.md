@@ -9,6 +9,8 @@ Application personnelle de gestion de budget (transactions, abonnements, dettes)
 - `api/` — Backend Spring Boot (API REST)
 - `app/` — Frontend Angular PWA mobile-first (`budget-app`)
 
+**Gestion des issues** : toutes les issues et le suivi du projet sont sur **Linear** (identifiants `KKS-*`). Ne pas utiliser GitHub Issues.
+
 ## Commandes
 
 ### Backend (api/)
