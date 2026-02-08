@@ -1,0 +1,27 @@
+<header class="shell-header">
+  <h1 class="shell-logo">Budget</h1>
+  @if (userName()) {
+    <span class="shell-user">{{ userName()!.name }}</span>
+  }
+  <button class="shell-hamburger" (click)="toggleSidebar()" aria-label="Menu">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+</header>
+
+@if (sidebarOpen()) {
+  <div class="shell-backdrop" (click)="closeSidebar()" (keydown.escape)="closeSidebar()" role="presentation"></div>
+}
+
+<nav class="shell-sidebar" [class.open]="sidebarOpen()">
+  <a routerLink="/dashboard" routerLinkActive="active" (click)="onNavClick()">Accueil</a>
+  <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">Transactions</a>
+  <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">Abonnements</a>
+  <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">Dettes</a>
+  <a class="shell-logout" tabindex="0" role="button" (click)="onLogout()" (keydown.enter)="onLogout()">Déconnexion</a>
+</nav>
+
+<main class="shell-content">
+  <router-outlet />
+</main>

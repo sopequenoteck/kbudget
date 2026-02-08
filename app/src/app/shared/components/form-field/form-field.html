@@ -1,0 +1,7 @@
+<div class="form-field">
+  <label [for]="fieldId()">{{ label() }}</label>
+  <ng-content />
+  @if (showError()) {
+    <span class="form-error">{{ errorMessage() }}</span>
+  }
+</div>

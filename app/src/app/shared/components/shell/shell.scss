@@ -1,0 +1,130 @@
+$sidebar-width: 240px;
+$header-height: 56px;
+
+// -- Header --
+.shell-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: $header-height;
+  padding: 0 var(--space-4);
+  background-color: var(--surface-default);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.shell-logo {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.shell-user {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.shell-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: var(--space-2);
+}
+
+.hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 1px;
+}
+
+// -- Sidebar --
+.shell-sidebar {
+  position: fixed;
+  top: $header-height;
+  left: 0;
+  bottom: 0;
+  width: $sidebar-width;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  background-color: var(--surface-default);
+  border-right: 1px solid var(--border-default);
+  transform: translateX(-100%);
+  transition: transform var(--duration-fast) var(--easing-default);
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  a {
+    display: block;
+    padding: var(--space-3) var(--space-5);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: background-color var(--duration-fast) var(--easing-default),
+      color var(--duration-fast) var(--easing-default);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--hover-bg);
+    }
+
+    &.active {
+      color: var(--color-primary);
+      background-color: var(--color-primary-light);
+    }
+  }
+}
+
+.shell-logout {
+  margin-top: auto;
+  border-top: 1px solid var(--border-default);
+  padding-top: var(--space-3);
+}
+
+// -- Backdrop --
+.shell-backdrop {
+  position: fixed;
+  inset: $header-height 0 0 0;
+  z-index: calc(var(--z-overlay) - 1);
+  background-color: var(--surface-overlay);
+}
+
+// -- Content --
+.shell-content {
+  padding: var(--space-4);
+  min-height: calc(100dvh - #{$header-height});
+}
+
+// -- Desktop (>= 768px) --
+@media (min-width: 768px) {
+  .shell-hamburger {
+    display: none;
+  }
+
+  .shell-sidebar {
+    transform: translateX(0);
+  }
+
+  .shell-backdrop {
+    display: none;
+  }
+
+  .shell-content {
+    margin-left: $sidebar-width;
+  }
+}

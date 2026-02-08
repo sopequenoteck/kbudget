@@ -204,6 +204,7 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.8+ / Angular 21 + `@angular/router` (Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot), `AuthService` (existant) (003-auth-guard)
 - localStorage via AuthService (existant, pas de modification) (003-auth-guard)
 - TypeScript 5.8+ / Angular 21 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/router` (Router, RouterOutlet, RouterLink, RouterLinkActive), `AuthService` (existant), `ApiService` (existant) (005-login-screen)
 
 ## Recent Changes
 - 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities)
