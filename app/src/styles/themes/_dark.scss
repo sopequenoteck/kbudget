@@ -1,0 +1,53 @@
+// =============================================================================
+// Theme Dark — Tokens semantiques
+// =============================================================================
+
+.theme-dark {
+  // -- Backgrounds --
+  --bg-primary: var(--gray-900);
+  --bg-secondary: var(--gray-800);
+  --bg-tertiary: var(--gray-700);
+
+  // -- Text --
+  --text-primary: var(--gray-50);
+  --text-secondary: var(--gray-400);
+  --text-tertiary: var(--gray-500);
+  --text-inverse: var(--gray-900);
+
+  // -- Borders --
+  --border-default: var(--gray-700);
+  --border-strong: var(--gray-600);
+
+  // -- Primary (amber-400 for better contrast on dark) --
+  --color-primary: var(--amber-400);
+  --color-primary-hover: var(--amber-300);
+  --color-primary-light: var(--amber-900);
+  --color-primary-contrast: var(--gray-900);
+
+  // -- Surfaces --
+  --surface-default: var(--gray-800);
+  --surface-raised: var(--gray-700);
+  --surface-overlay: rgb(0 0 0 / 0.6);
+
+  // -- Feedback backgrounds --
+  --bg-success: rgb(34 197 94 / 0.15);
+  --bg-error: rgb(239 68 68 / 0.15);
+  --bg-warning: rgb(234 179 8 / 0.15);
+  --bg-info: rgb(59 130 246 / 0.15);
+
+  // -- Feedback text (400 variants for dark) --
+  --text-success: #4ade80;
+  --text-error: #f87171;
+  --text-warning: #facc15;
+  --text-info: #60a5fa;
+
+  // -- Interactive --
+  --hover-bg: var(--gray-700);
+  --focus-ring: rgb(var(--amber-400-rgb) / 0.5);
+
+  // -- Business tokens --
+  --color-income: #4ade80;
+  --color-expense: #f87171;
+  --color-debt-owe: #f87171;
+  --color-debt-owed: #4ade80;
+}

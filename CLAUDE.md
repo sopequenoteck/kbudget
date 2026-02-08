@@ -75,8 +75,38 @@ app/src/
 │   ├── shared/        # Composants/pipes/directives réutilisables
 │   └── features/      # Modules lazy-loaded par feature
 ├── environments/      # Config dev/prod (apiUrl)
-└── styles/            # SCSS globaux
+└── styles/            # Design system foundation (voir section dédiée)
 ```
+
+### Design System SCSS
+
+Architecture en couches — les composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct.
+
+```
+app/src/styles/
+├── _index.scss              # Orchestrateur @use (point d'entrée)
+├── _reset.scss              # Reset minimal mobile-first (box-sizing, 100dvh, scrollbar)
+├── _base.scss               # Body, typo, focus-visible, selection, headings
+├── _utilities.scss          # .sr-only, .amount-income, .amount-expense
+├── tokens/
+│   ├── _primitives.scss     # Couche 1 : variables SCSS brutes (palettes, spacing, typo)
+│   └── _tokens.scss         # Couche 2 : CSS custom properties sur :root
+└── themes/
+    ├── _light.scss          # Tokens sémantiques theme clair (:root, .theme-light)
+    └── _dark.scss           # Tokens sémantiques theme dark (.theme-dark)
+```
+
+**Couleur primaire** : Amber (#f59e0b). **Thèmes** : Light (défaut) + Dark. **Police** : Inter.
+
+**Tokens sémantiques clés** :
+- Layout : `--bg-primary/secondary/tertiary`, `--surface-default/raised/overlay`
+- Texte : `--text-primary/secondary/tertiary/inverse`
+- Bordures : `--border-default/strong`
+- Primary : `--color-primary/primary-hover/primary-light/primary-contrast`
+- Feedback : `--bg-success/error/warning/info`, `--text-success/error/warning/info`
+- Métier : `--color-income`, `--color-expense`, `--color-debt-owe`, `--color-debt-owed`
+
+**Basculement de thème** : changer la classe sur `<html>` (`theme-light` / `theme-dark`).
 
 ### Environnements
 
@@ -174,4 +204,5 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.8+ / Angular 21 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
 
 ## Recent Changes
+- 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities)
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1

@@ -1,0 +1,54 @@
+// =============================================================================
+// Theme Light — Tokens semantiques
+// =============================================================================
+
+:root,
+.theme-light {
+  // -- Backgrounds --
+  --bg-primary: var(--gray-50);
+  --bg-secondary: #fff;
+  --bg-tertiary: var(--gray-100);
+
+  // -- Text --
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-400);
+  --text-inverse: #fff;
+
+  // -- Borders --
+  --border-default: var(--gray-200);
+  --border-strong: var(--gray-300);
+
+  // -- Primary --
+  --color-primary: var(--amber-500);
+  --color-primary-hover: var(--amber-600);
+  --color-primary-light: var(--amber-100);
+  --color-primary-contrast: #fff;
+
+  // -- Surfaces --
+  --surface-default: #fff;
+  --surface-raised: #fff;
+  --surface-overlay: rgb(var(--gray-900-rgb) / 0.5);
+
+  // -- Feedback backgrounds --
+  --bg-success: #dcfce7;
+  --bg-error: #fee2e2;
+  --bg-warning: #fef9c3;
+  --bg-info: #dbeafe;
+
+  // -- Feedback text --
+  --text-success: #16a34a;
+  --text-error: #dc2626;
+  --text-warning: #ca8a04;
+  --text-info: #2563eb;
+
+  // -- Interactive --
+  --hover-bg: var(--gray-100);
+  --focus-ring: rgb(var(--amber-500-rgb) / 0.5);
+
+  // -- Business tokens --
+  --color-income: #16a34a;
+  --color-expense: #dc2626;
+  --color-debt-owe: #dc2626;
+  --color-debt-owed: #16a34a;
+}
