@@ -1,0 +1,35 @@
+@if (isOpen()) {
+  <div
+    class="modal-overlay"
+    (click)="onOverlayClick()"
+    (keydown)="onKeydown($event)"
+    role="presentation"
+  >
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'modal-title'"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
+      (click)="$event.stopPropagation()"
+      (keydown)="onKeydown($event)"
+    >
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">{{ title() }}</h2>
+        <button
+          #closeBtn
+          type="button"
+          class="modal-close"
+          aria-label="Fermer"
+          (click)="closed.emit()"
+        >
+          &times;
+        </button>
+      </div>
+      <div class="modal-body">
+        <ng-content />
+      </div>
+    </div>
+  </div>
+}

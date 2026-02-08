@@ -11,7 +11,12 @@
 </header>
 
 @if (sidebarOpen()) {
-  <div class="shell-backdrop" (click)="closeSidebar()" (keydown.escape)="closeSidebar()" role="presentation"></div>
+  <div
+    class="shell-backdrop"
+    (click)="closeSidebar()"
+    (keydown.escape)="closeSidebar()"
+    role="presentation"
+  ></div>
 }
 
 <nav class="shell-sidebar" [class.open]="sidebarOpen()">
@@ -19,9 +24,37 @@
   <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">Transactions</a>
   <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">Abonnements</a>
   <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">Dettes</a>
-  <a class="shell-logout" tabindex="0" role="button" (click)="onLogout()" (keydown.enter)="onLogout()">Déconnexion</a>
+  <a
+    class="shell-logout"
+    tabindex="0"
+    role="button"
+    (click)="onLogout()"
+    (keydown.enter)="onLogout()"
+    >Déconnexion</a
+  >
 </nav>
 
 <main class="shell-content">
   <router-outlet />
 </main>
+
+<app-fab
+  [isOpen]="speedDialOpen()"
+  [isHidden]="modalOpen()"
+  (toggled)="onFabToggle()"
+  (actionSelected)="onSpeedDialAction($event)"
+/>
+
+<app-modal [isOpen]="modalOpen()" [title]="modalTitle()" (closed)="onModalClose()">
+  @switch (activeModal()) {
+    @case ('transaction') {
+      <p>Formulaire de transaction — à venir</p>
+    }
+    @case ('subscription') {
+      <p>Formulaire d'abonnement — à venir</p>
+    }
+    @case ('debt') {
+      <p>Formulaire de dette — à venir</p>
+    }
+  }
+</app-modal>

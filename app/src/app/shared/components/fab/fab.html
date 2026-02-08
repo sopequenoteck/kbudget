@@ -1,0 +1,31 @@
+@if (!isHidden()) {
+  @if (isOpen()) {
+    <div class="speed-dial-overlay" (click)="onToggle()" role="none" tabindex="-1"></div>
+    <div class="speed-dial-menu" role="menu" tabindex="-1" (keydown)="onMenuKeydown($event)">
+      @for (item of actions; track item.type) {
+        <button
+          #menuItem
+          type="button"
+          class="speed-dial-item"
+          role="menuitem"
+          (click)="onAction(item.type)"
+        >
+          <span class="speed-dial-icon">{{ item.icon }}</span>
+          <span class="speed-dial-label">{{ item.label }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <button
+    #fabButton
+    type="button"
+    class="fab-button"
+    [class.open]="isOpen()"
+    [attr.aria-expanded]="isOpen()"
+    aria-label="Actions rapides"
+    (click)="onToggle()"
+  >
+    <span class="fab-icon">+</span>
+  </button>
+}
