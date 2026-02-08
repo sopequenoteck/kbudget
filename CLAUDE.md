@@ -89,6 +89,8 @@ app/src/styles/
 ├── _index.scss              # Orchestrateur @use (point d'entrée)
 ├── _reset.scss              # Reset minimal mobile-first (box-sizing, 100dvh, scrollbar)
 ├── _base.scss               # Body, typo, focus-visible, selection, headings
+├── _buttons.scss            # Styles globaux boutons (.btn-primary, .btn-outline)
+├── _forms.scss              # Styles globaux inputs, textarea, select
 ├── _utilities.scss          # .sr-only, .amount-income, .amount-expense
 ├── tokens/
 │   ├── _primitives.scss     # Couche 1 : variables SCSS brutes (palettes, spacing, typo)
@@ -102,6 +104,7 @@ app/src/styles/
 
 **Tokens sémantiques clés** :
 - Layout : `--bg-primary/secondary/tertiary`, `--surface-default/raised/overlay`
+- Layout (dimensions) : `--sidebar-width`, `--header-height`
 - Texte : `--text-primary/secondary/tertiary/inverse`
 - Bordures : `--border-default/strong`
 - Primary : `--color-primary/primary-hover/primary-light/primary-contrast`
@@ -183,7 +186,7 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 
 - Standalone obligatoire (défaut Angular 21)
 - `ChangeDetectionStrategy.OnPush` sur tous les composants
-- Pas de `subscribe()` manuel — utiliser `toSignal()` ou pipe `async`
+- Pas de `subscribe()` manuel — utiliser `toSignal()`, `firstValueFrom()` ou pipe `async`
 
 ### Reactive (RxJS)
 
@@ -198,14 +201,17 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 
 ## Active Technologies
 - Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
-- Frontend : Angular 21, TypeScript, SCSS
-- TypeScript 5.8+ (Angular 21) + Angular 21 (HttpClient, Router, Signals), RxJS (HTTP uniquement) (002-auth-service)
+- Frontend : Angular 21.1.0, TypeScript 5.9.2, SCSS
+- TypeScript 5.9.2 / Angular 21.1.0 + Angular 21 (HttpClient, Router, Signals), RxJS (HTTP uniquement) (002-auth-service)
 - localStorage (clé `budget_token`) (002-auth-service)
-- TypeScript 5.8+ / Angular 21 + `@angular/router` (Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot), `AuthService` (existant) (003-auth-guard)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/router` (Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot), `AuthService` (existant) (003-auth-guard)
 - localStorage via AuthService (existant, pas de modification) (003-auth-guard)
-- TypeScript 5.8+ / Angular 21 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/router` (Router, RouterOutlet, RouterLink, RouterLinkActive), `AuthService` (existant), `ApiService` (existant) (005-login-screen)
+- TypeScript 5.9.2 / Angular 21.1.0 + Composants shared : `FormField` (form-field wrapper), `Shell` (layout container) (KKS-28, KKS-29)
 
 ## Recent Changes
-- 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities)
+- Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
+- KKS-28, KKS-29: Écran de login et layout shell (FormField, Shell components)
+- 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities, buttons, forms)
 - 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1

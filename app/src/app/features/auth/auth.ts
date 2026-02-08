@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth';
 import { FormField } from '../../shared/components/form-field/form-field';
@@ -26,7 +27,7 @@ export class Auth {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -37,15 +38,13 @@ export class Auth {
 
     const { email, password } = this.loginForm.getRawValue();
 
-    this.authService.login({ email, password }).subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
-        this.router.navigateByUrl(returnUrl);
-      },
-      error: (message: string) => {
-        this.errorMessage.set(message);
-        this.loading.set(false);
-      },
-    });
+    try {
+      await firstValueFrom(this.authService.login({ email, password }));
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+      this.router.navigateByUrl(returnUrl);
+    } catch (message) {
+      this.errorMessage.set(message as string);
+      this.loading.set(false);
+    }
   }
 }

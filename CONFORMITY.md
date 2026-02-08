@@ -1,71 +1,58 @@
-# Conformité Budget API
+# Conformité Budget
 
-> Dernière analyse : 2026-02-07
-> Score : 100% | Sources : 34 fichiers | Tests : 84 (14 fichiers) | 0 écart ouvert
+> Dernière analyse : 2026-02-08
+> Score : 100% | Sources : 80 fichiers (35 Java, 21 TS, 10 SCSS, 14 tests) | 0 écart ouvert
+
+---
+
+## Écarts ouverts
+
+Aucun.
 
 ---
 
 ## Conforme
 
-### Sécurité
+### Backend (api/)
 
-| Aspect | Détails |
-|--------|---------|
-| JWT | Token stateless, secret via env var, expiration configurée |
-| Routes protégées | Toutes sauf `/auth/**` et `/error` nécessitent JWT |
-| Filtrage par user | Tous les services filtrent par `userId` (UUID) |
-| Bean Validation | `@Valid` sur tous les endpoints, `@Size` sur champs String |
-| Password encoding | BCrypt |
-| Secrets | Aucun secret hardcodé |
-| CSRF | Désactivé (API REST stateless) |
+| Aspect | Statut |
+|--------|--------|
+| Architecture Controller → Service → Repository | OK |
+| DTOs séparés (request/response), aucune entité exposée | OK |
+| JWT sur toutes les routes sauf `/auth/**` et `/error` | OK |
+| Filtrage par user authentifié (UUID) | OK |
+| Bean Validation (`@Valid`, `@NotNull`, `@Size`) | OK |
+| Lombok (`@Data`, `@Builder`, `@RequiredArgsConstructor`) | OK |
+| UUID comme clés primaires sur toutes les entités | OK |
+| Enums dans le package `enums/` | OK |
+| SLF4J/Logback, pas de `System.out.println` | OK |
+| Tests : nommage `should_[résultat]_when_[condition]`, pattern AAA | OK |
+| Flyway activé, DDL `validate` | OK |
+| Records Java pour les DTOs | OK |
+| Profil prod avec variables d'environnement obligatoires | OK |
 
-### Architecture
+### Frontend (app/)
 
-| Aspect | Détails |
-|--------|---------|
-| Couches | Controller → Service → Repository |
-| DTOs | Aucune entité JPA exposée, packages `dto/request/` et `dto/response/` |
-| Enums | Valeurs fixes dans `enums/` |
-| Lombok | `@Data`, `@Builder`, `@RequiredArgsConstructor` |
-| UUID | Toutes les entités |
-| YAGNI | Pas de sur-ingénierie |
+| Aspect | Statut |
+|--------|--------|
+| Signals-first (`signal()`, `computed()`, `input()`) | OK |
+| `inject()` uniquement (pas de constructor injection) | OK |
+| Standalone + `ChangeDetectionStrategy.OnPush` | OK |
+| Pas de `@Input()`, `@Output()`, `@ViewChild()` | OK |
+| Design System en couches (primitives → tokens → themes) | OK |
+| Tokens CSS `var(--token-name)` dans composants SCSS | OK |
+| Structure `core/` / `shared/` / `features/` | OK |
+| Pas de `console.log` | OK |
+| Thèmes Light + Dark avec tokens sémantiques | OK |
 
-### Logging
+### Général
 
-| Aspect | Détails |
-|--------|---------|
-| Framework | SLF4J/Logback, pas de System.out.println |
-| Config | Profils dev/prod, rotation, niveaux corrects |
-| Niveaux | INFO actions, DEBUG auth JWT, WARN échecs, ERROR exceptions |
-| Démarrage | `log.info("Budget API started")` |
-
-### Database
-
-| Aspect | Détails |
-|--------|---------|
-| JPA | `open-in-view: false`, `format_sql: true` |
-| Flyway | V1 init + V2 updated_at, activé en dev |
-| Relations | `@ManyToOne(fetch = LAZY)` |
-| DDL | `validate` en dev et prod |
-
-### Tests
-
-| Aspect | Détails |
-|--------|---------|
-| Coverage | Services (4/4), controllers (4/4), repositories (3/3), config (2/2) |
-| Nommage | `should_[résultat]_when_[condition]` |
-| Pattern | AAA (Arrange-Act-Assert) |
-| Frameworks | JUnit 5, Mockito, MockMvc, AssertJ |
-
-### Code Quality
-
-| Aspect | Détails |
-|--------|---------|
-| Records | DTOs en records Java |
-| Code mort | 0 |
-| Duplication | Patterns factorisés (`toResponse`, `findByIdAndUser`) |
+| Aspect | Statut |
+|--------|--------|
+| Code commenté (> 3 lignes) | 0 |
 | TODO/FIXME | 0 |
-| Code commenté | 0 |
+| Code mort | 0 |
+| Fichiers orphelins | 0 |
 
 ---
 
@@ -83,7 +70,7 @@
 
 ---
 
-## Corrections appliquées
+## Corrections appliquées (historique)
 
 | ID | Sévérité | Description |
 |----|----------|-------------|
@@ -96,6 +83,18 @@
 | LOG-002 | Mineur | Log de démarrage dans ApiApplication |
 | CONFIG-001 | Mineur | application-dev.yaml ignoré par `.gitignore` |
 | ARCH-002 | Mineur | DTOs séparés en `dto/request/` et `dto/response/` |
+| CRIT-001 | Critique | Faux positif — `application-dev.yaml` est dans `.gitignore`, fallback dev restauré |
+| MAJ-001 | Majeur | Ajout `@Slf4j` sur TransactionController, DebtController, SubscriptionController |
+| MAJ-002 | Majeur | Remplacement `.subscribe()` par `firstValueFrom()` dans composant Auth |
+| MAJ-003 | Majeur | `console.error` conditionnés à `isDevMode()` dans AuthService |
+| MIN-002 | Mineur | Variables SCSS `$sidebar-width`/`$header-height` migrées vers tokens CSS custom properties |
+
+---
+
+## Recommandations
+
+- Augmenter la couverture de tests frontend (3 fichiers .spec.ts pour 21 fichiers TS)
+- Documenter les tokens SCSS manquants (`$sidebar-width`, `$header-height`) dans le design system
 
 ---
 

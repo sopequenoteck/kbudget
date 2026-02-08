@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, tap, throwError } from 'rxjs';
@@ -36,7 +36,7 @@ export class AuthService {
       }
       return token;
     } catch {
-      console.error('localStorage indisponible');
+      if (isDevMode()) console.error('localStorage indisponible');
       return null;
     }
   }
@@ -82,11 +82,11 @@ export class AuthService {
         const user: UserInfo = JSON.parse(userJson);
         this.currentUser.set(user);
       } catch {
-        console.error('budget_user corrompu');
+        if (isDevMode()) console.error('budget_user corrompu');
         this.clearAuth();
       }
     } catch {
-      console.error('localStorage indisponible');
+      if (isDevMode()) console.error('localStorage indisponible');
     }
   }
 
@@ -98,7 +98,7 @@ export class AuthService {
         JSON.stringify({ name: response.name, email: response.email }),
       );
     } catch {
-      console.error('localStorage indisponible');
+      if (isDevMode()) console.error('localStorage indisponible');
     }
     this.currentUser.set({ name: response.name, email: response.email });
   }
@@ -108,7 +108,7 @@ export class AuthService {
       localStorage.removeItem(STORAGE_TOKEN_KEY);
       localStorage.removeItem(STORAGE_USER_KEY);
     } catch {
-      console.error('localStorage indisponible');
+      if (isDevMode()) console.error('localStorage indisponible');
     }
     this.currentUser.set(null);
   }
@@ -122,7 +122,7 @@ export class AuthService {
       const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(atob(payload));
     } catch {
-      console.error('Token corrompu');
+      if (isDevMode()) console.error('Token corrompu');
       return null;
     }
   }
@@ -140,7 +140,7 @@ export class AuthService {
       return error.error?.message ?? 'Une erreur est survenue';
     }
     if (error.status === 0) {
-      console.error('Erreur réseau', error);
+      if (isDevMode()) console.error('Erreur réseau', error);
       return 'Impossible de contacter le serveur';
     }
     return 'Une erreur est survenue';
