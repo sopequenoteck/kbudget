@@ -209,6 +209,10 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/router` (Router, RouterOutlet, RouterLink, RouterLinkActive), `AuthService` (existant), `ApiService` (existant) (005-login-screen)
 - TypeScript 5.9.2 / Angular 21.1.0 + Composants shared : `FormField` (form-field wrapper), `Shell` (layout container) (KKS-28, KKS-29)
+- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone components, OnPush), SCSS design tokens (006-fab-speed-dial)
+- N/A (feature purement UI, pas de persistance) (006-fab-speed-dial)
+- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone components, OnPush, Router), SCSS design tokens (006-fab-speed-dial)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/cdk` (overlay + a11y), `@angular/router` (NavigationEnd) (006-fab-speed-dial)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
