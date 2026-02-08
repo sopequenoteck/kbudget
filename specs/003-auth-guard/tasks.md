@@ -23,7 +23,7 @@
 
 **Purpose**: Création de la structure de fichiers pour le guard
 
-- [ ] T001 Créer le répertoire `app/src/app/core/guards/`
+- [x] T001 Créer le répertoire `app/src/app/core/guards/`
 
 ---
 
@@ -37,7 +37,7 @@
 
 ### Implementation
 
-- [ ] T002 [US1] Implémenter la fonction `authGuard` (CanActivateFn) dans `app/src/app/core/guards/auth.guard.ts` :
+- [x] T002 [US1] Implémenter la fonction `authGuard` (CanActivateFn) dans `app/src/app/core/guards/auth.guard.ts` :
   - Injecter `AuthService` et `Router` via `inject()`
   - Si `authService.isAuthenticated()` est `true` → retourner `true` (couvre US2)
   - Si `false` :
@@ -47,7 +47,7 @@
 
 ### Tests
 
-- [ ] T003 [US1] Écrire les tests unitaires dans `app/src/app/core/guards/auth.guard.spec.ts` :
+- [x] T003 [US1] Écrire les tests unitaires dans `app/src/app/core/guards/auth.guard.spec.ts` :
   - `should_allow_access_when_authenticated` : mock `isAuthenticated` = true → retourne `true`
   - `should_redirect_to_auth_when_not_authenticated` : mock `isAuthenticated` = false → retourne UrlTree `/auth`
   - `should_include_returnUrl_when_redirecting` : vérifie que le queryParam `returnUrl` contient l'URL demandée (ex: `state.url = '/transactions'` → query param `returnUrl=/transactions`)
@@ -68,7 +68,7 @@
 
 ### Implementation
 
-- [ ] T004 [US3] Modifier `app/src/app/app.routes.ts` :
+- [x] T004 [US3] Modifier `app/src/app/app.routes.ts` :
   - Importer `authGuard` depuis `./core/guards/auth.guard`
   - Ajouter `canActivate: [authGuard]` sur les routes : `dashboard`, `transactions`, `subscriptions`, `debts`
   - Ajouter `canActivate: [authGuard]` sur la route wildcard (`**`)
@@ -83,8 +83,8 @@
 
 **Purpose**: Vérification finale et validation croisée
 
-- [ ] T005 Exécuter les tests avec `cd app && npx vitest run` et vérifier que tous passent
-- [ ] T006 Vérifier que ESLint passe avec `cd app && npx ng lint`
+- [x] T005 Exécuter les tests avec `cd app && npx vitest run` et vérifier que tous passent
+- [x] T006 Vérifier que ESLint passe avec `cd app && npx ng lint`
 
 ---
 
