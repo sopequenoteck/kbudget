@@ -1,0 +1,17 @@
+<div class="list-item" role="button" tabindex="0" (click)="onPress()" (keydown)="onKeydown($event)">
+  <span class="list-item__icon">{{ icon() }}</span>
+
+  <div class="list-item__content">
+    <span class="list-item__title">{{ title() }}</span>
+    @if (subtitle()) {
+      <span class="list-item__subtitle">{{ subtitle() }}</span>
+    }
+  </div>
+
+  <div class="list-item__right">
+    <span class="list-item__value" [ngClass]="valueClass()">{{ value() }}</span>
+    @if (rightSubtitle()) {
+      <span class="list-item__right-subtitle">{{ rightSubtitle() }}</span>
+    }
+  </div>
+</div>
