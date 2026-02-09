@@ -1,3 +1,5 @@
+import { Category } from './category.model';
+
 export enum TransactionType {
   DEPENSE = 'DEPENSE',
   RECETTE = 'RECETTE',
@@ -9,7 +11,7 @@ export interface Transaction {
   libelle: string;
   type: TransactionType;
   date: string;
-  categorie: string | null;
+  category: Category | null;
   note: string | null;
 }
 
@@ -18,7 +20,7 @@ export interface TransactionRequest {
   libelle: string;
   type: TransactionType;
   date: string;
-  categorie?: string;
+  categoryId?: string;
   note?: string;
 }
 

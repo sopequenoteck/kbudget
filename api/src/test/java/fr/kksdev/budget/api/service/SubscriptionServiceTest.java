@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +36,9 @@ class SubscriptionServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private SubscriptionService subscriptionService;
 
@@ -53,6 +57,7 @@ class SubscriptionServiceTest {
                 .frequence(Frequency.MENSUEL)
                 .dateDebut(LocalDate.of(2026, 1, 1))
                 .actif(true)
+                .category(null)
                 .user(user)
                 .build();
     }
@@ -61,7 +66,7 @@ class SubscriptionServiceTest {
     void should_create_subscription_when_valid_request() {
         var user = buildUser();
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null);
         var saved = buildSubscription(user);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -72,6 +77,7 @@ class SubscriptionServiceTest {
         assertThat(response.id()).isEqualTo(subscriptionId);
         assertThat(response.nom()).isEqualTo("Netflix");
         assertThat(response.actif()).isTrue();
+        assertThat(response.category()).isNull();
         verify(subscriptionRepository).save(any(Subscription.class));
     }
 
@@ -134,7 +140,7 @@ class SubscriptionServiceTest {
         var user = buildUser();
         var existing = buildSubscription(user);
         var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false);
+                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null);
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(existing));
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(existing);

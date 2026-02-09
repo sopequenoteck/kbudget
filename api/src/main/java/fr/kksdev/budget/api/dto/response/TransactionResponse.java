@@ -12,6 +12,6 @@ public record TransactionResponse(
         String libelle,
         TransactionType type,
         LocalDate date,
-        String categorie,
+        CategoryResponse category,
         String note
 ) {}

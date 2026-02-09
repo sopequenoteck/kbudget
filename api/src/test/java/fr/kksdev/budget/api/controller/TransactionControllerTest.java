@@ -62,30 +62,29 @@ class TransactionControllerTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
-    private String transactionJson(String montant, String libelle, String type, String date, String categorie) {
+    private String transactionJson(String montant, String libelle, String type, String date) {
         return """
                 {
                     "montant": %s,
                     "libelle": "%s",
                     "type": "%s",
-                    "date": "%s",
-                    "categorie": "%s"
+                    "date": "%s"
                 }
-                """.formatted(montant, libelle, type, date, categorie);
+                """.formatted(montant, libelle, type, date);
     }
 
     @Test
     void should_return_201_when_create_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), "Alimentation", null);
+                LocalDate.of(2026, 2, 7), null, null);
 
         when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(post("/transactions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(transactionJson("50.00", "Courses", "DEPENSE", "2026-02-07", "Alimentation")))
+                        .content(transactionJson("50.00", "Courses", "DEPENSE", "2026-02-07")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(transactionId.toString()))
                 .andExpect(jsonPath("$.libelle").value("Courses"))
@@ -96,7 +95,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_all_transactions() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), "Alimentation", null);
+                LocalDate.of(2026, 2, 7), null, null);
 
         when(transactionService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -110,7 +109,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_transaction_by_id() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), "Alimentation", null);
+                LocalDate.of(2026, 2, 7), null, null);
 
         when(transactionService.getById(transactionId, userId)).thenReturn(response);
 
@@ -124,7 +123,7 @@ class TransactionControllerTest {
     void should_return_200_when_update_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("75.00"), "Courses modifiées", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 8), "Alimentation", null);
+                LocalDate.of(2026, 2, 8), null, null);
 
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -132,7 +131,7 @@ class TransactionControllerTest {
         mockMvc.perform(put("/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(transactionJson("75.00", "Courses modifiées", "DEPENSE", "2026-02-08", "Alimentation")))
+                        .content(transactionJson("75.00", "Courses modifiées", "DEPENSE", "2026-02-08")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.montant").value(75.00));
     }

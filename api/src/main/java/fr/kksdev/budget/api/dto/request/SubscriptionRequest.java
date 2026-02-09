@@ -8,11 +8,13 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record SubscriptionRequest(
         @NotBlank @Size(max = 255) String nom,
         @NotNull @Positive BigDecimal montant,
         @NotNull Frequency frequence,
         @NotNull LocalDate dateDebut,
-        Boolean actif
+        Boolean actif,
+        UUID categoryId
 ) {}

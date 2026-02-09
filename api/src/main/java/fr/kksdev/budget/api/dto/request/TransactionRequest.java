@@ -8,12 +8,13 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record TransactionRequest(
         @NotNull @Positive BigDecimal montant,
         @NotBlank @Size(max = 255) String libelle,
         @NotNull TransactionType type,
         @NotNull LocalDate date,
-        @Size(max = 255) String categorie,
+        UUID categoryId,
         @Size(max = 500) String note
 ) {}

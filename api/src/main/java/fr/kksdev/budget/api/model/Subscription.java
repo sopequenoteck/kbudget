@@ -38,6 +38,10 @@ public class Subscription {
     @Column(nullable = false)
     private Boolean actif = true;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

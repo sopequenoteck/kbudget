@@ -1,3 +1,5 @@
+import { Category } from './category.model';
+
 export enum DebtType {
   JE_DOIS = 'JE_DOIS',
   ON_ME_DOIT = 'ON_ME_DOIT',
@@ -10,6 +12,7 @@ export interface Debt {
   sens: DebtType;
   date: string;
   rembourse: boolean;
+  category: Category | null;
 }
 
 export interface DebtRequest {
@@ -18,4 +21,5 @@ export interface DebtRequest {
   sens: DebtType;
   date: string;
   rembourse?: boolean;
+  categoryId?: string;
 }

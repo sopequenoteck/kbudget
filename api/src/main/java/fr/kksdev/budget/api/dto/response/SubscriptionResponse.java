@@ -12,5 +12,6 @@ public record SubscriptionResponse(
         BigDecimal montant,
         Frequency frequence,
         LocalDate dateDebut,
-        Boolean actif
+        Boolean actif,
+        CategoryResponse category
 ) {}

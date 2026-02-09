@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +36,9 @@ class DebtServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private DebtService debtService;
 
@@ -53,6 +57,7 @@ class DebtServiceTest {
                 .sens(DebtType.JE_DOIS)
                 .date(LocalDate.of(2026, 2, 1))
                 .rembourse(false)
+                .category(null)
                 .user(user)
                 .build();
     }
@@ -61,7 +66,7 @@ class DebtServiceTest {
     void should_create_debt_when_valid_request() {
         var user = buildUser();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), null);
+                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), null, null);
         var saved = buildDebt(user);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -72,6 +77,7 @@ class DebtServiceTest {
         assertThat(response.id()).isEqualTo(debtId);
         assertThat(response.personne()).isEqualTo("Alice");
         assertThat(response.rembourse()).isFalse();
+        assertThat(response.category()).isNull();
         verify(debtRepository).save(any(Debt.class));
     }
 
@@ -132,7 +138,7 @@ class DebtServiceTest {
         var user = buildUser();
         var existing = buildDebt(user);
         var request = new DebtRequest("Bob", new BigDecimal("200.00"),
-                DebtType.ON_ME_DOIT, LocalDate.of(2026, 2, 5), true);
+                DebtType.ON_ME_DOIT, LocalDate.of(2026, 2, 5), true, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(existing));
         when(debtRepository.save(any(Debt.class))).thenReturn(existing);

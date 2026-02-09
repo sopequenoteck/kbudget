@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +37,9 @@ class TransactionServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private TransactionService transactionService;
 
@@ -53,7 +57,7 @@ class TransactionServiceTest {
                 .libelle("Courses")
                 .type(TransactionType.DEPENSE)
                 .date(LocalDate.of(2026, 2, 7))
-                .categorie("Alimentation")
+                .category(null)
                 .note("Supermarché")
                 .user(user)
                 .build();
@@ -64,7 +68,7 @@ class TransactionServiceTest {
         var user = buildUser();
         var request = new TransactionRequest(
                 new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), "Alimentation", "Supermarché");
+                LocalDate.of(2026, 2, 7), null, "Supermarché");
         var saved = buildTransaction(user);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -76,6 +80,7 @@ class TransactionServiceTest {
         assertThat(response.montant()).isEqualByComparingTo("50.00");
         assertThat(response.libelle()).isEqualTo("Courses");
         assertThat(response.type()).isEqualTo(TransactionType.DEPENSE);
+        assertThat(response.category()).isNull();
         verify(transactionRepository).save(any(Transaction.class));
     }
 
@@ -141,7 +146,7 @@ class TransactionServiceTest {
         var existing = buildTransaction(user);
         var request = new TransactionRequest(
                 new BigDecimal("75.00"), "Courses modifiées", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 8), "Alimentation", "Autre magasin");
+                LocalDate.of(2026, 2, 8), null, "Autre magasin");
 
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(existing);

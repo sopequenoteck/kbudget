@@ -12,5 +12,6 @@ public record DebtResponse(
         BigDecimal montant,
         DebtType sens,
         LocalDate date,
-        Boolean rembourse
+        Boolean rembourse,
+        CategoryResponse category
 ) {}

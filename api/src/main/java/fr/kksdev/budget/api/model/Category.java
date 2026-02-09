@@ -1,46 +1,32 @@
 package fr.kksdev.budget.api.model;
 
-import fr.kksdev.budget.api.enums.DebtType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "debts")
+@Table(name = "categories")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Debt {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
-    private String personne;
+    private String nom;
 
     @Column(nullable = false)
-    private BigDecimal montant;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DebtType sens;
+    private String icone;
 
     @Column(nullable = false)
-    private LocalDate date;
-
-    @Column(nullable = false)
-    private Boolean rembourse = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    private String couleur;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

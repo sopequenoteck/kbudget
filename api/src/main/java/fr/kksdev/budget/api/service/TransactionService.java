@@ -1,10 +1,13 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Transaction;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +28,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     public TransactionResponse create(TransactionRequest request, UUID userId) {
         Transaction transaction = Transaction.builder()
@@ -32,7 +36,7 @@ public class TransactionService {
                 .libelle(request.libelle())
                 .type(request.type())
                 .date(request.date())
-                .categorie(request.categorie())
+                .category(resolveCategory(request.categoryId(), userId))
                 .note(request.note())
                 .user(userRepository.getReferenceById(userId))
                 .build();
@@ -61,7 +65,7 @@ public class TransactionService {
         transaction.setLibelle(request.libelle());
         transaction.setType(request.type());
         transaction.setDate(request.date());
-        transaction.setCategorie(request.categorie());
+        transaction.setCategory(resolveCategory(request.categoryId(), userId));
         transaction.setNote(request.note());
 
         transaction = transactionRepository.save(transaction);
@@ -109,6 +113,30 @@ public class TransactionService {
                 });
     }
 
+    private Category resolveCategory(UUID categoryId, UUID userId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .filter(c -> c.getUser().getId().equals(userId))
+                .orElseThrow(() -> {
+                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    return new EntityNotFoundException("Catégorie non trouvée");
+                });
+    }
+
+    private CategoryResponse toCategoryResponse(Category category) {
+        if (category == null) {
+            return null;
+        }
+        return new CategoryResponse(
+                category.getId(),
+                category.getNom(),
+                category.getIcone(),
+                category.getCouleur()
+        );
+    }
+
     private TransactionResponse toResponse(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
@@ -116,7 +144,7 @@ public class TransactionService {
                 transaction.getLibelle(),
                 transaction.getType(),
                 transaction.getDate(),
-                transaction.getCategorie(),
+                toCategoryResponse(transaction.getCategory()),
                 transaction.getNote()
         );
     }

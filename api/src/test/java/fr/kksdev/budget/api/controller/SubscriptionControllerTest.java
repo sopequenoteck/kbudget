@@ -75,7 +75,7 @@ class SubscriptionControllerTest {
     void should_return_201_when_create_subscription() throws Exception {
         var response = new SubscriptionResponse(
                 subscriptionId, "Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true, null);
 
         when(subscriptionService.create(any(SubscriptionRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -92,7 +92,7 @@ class SubscriptionControllerTest {
     void should_return_200_when_get_all_subscriptions() throws Exception {
         var response = new SubscriptionResponse(
                 subscriptionId, "Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true, null);
 
         when(subscriptionService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -106,7 +106,7 @@ class SubscriptionControllerTest {
     void should_return_200_when_get_active_subscriptions() throws Exception {
         var response = new SubscriptionResponse(
                 subscriptionId, "Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true, null);
 
         when(subscriptionService.getActiveByUser(userId)).thenReturn(List.of(response));
 
@@ -121,7 +121,7 @@ class SubscriptionControllerTest {
     void should_return_200_when_get_subscription_by_id() throws Exception {
         var response = new SubscriptionResponse(
                 subscriptionId, "Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), true, null);
 
         when(subscriptionService.getById(subscriptionId, userId)).thenReturn(response);
 
@@ -135,7 +135,7 @@ class SubscriptionControllerTest {
     void should_return_200_when_update_subscription() throws Exception {
         var response = new SubscriptionResponse(
                 subscriptionId, "Spotify", new BigDecimal("9.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), true);
+                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), true, null);
 
         when(subscriptionService.update(eq(subscriptionId), any(SubscriptionRequest.class), eq(userId)))
                 .thenReturn(response);

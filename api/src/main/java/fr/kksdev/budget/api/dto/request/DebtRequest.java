@@ -8,11 +8,13 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record DebtRequest(
         @NotBlank @Size(max = 255) String personne,
         @NotNull @Positive BigDecimal montant,
         @NotNull DebtType sens,
         @NotNull LocalDate date,
-        Boolean rembourse
+        Boolean rembourse,
+        UUID categoryId
 ) {}

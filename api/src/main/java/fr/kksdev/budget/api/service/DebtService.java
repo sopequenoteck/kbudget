@@ -1,8 +1,11 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Debt;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +23,7 @@ public class DebtService {
 
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     public DebtResponse create(DebtRequest request, UUID userId) {
         Debt debt = Debt.builder()
@@ -28,6 +32,7 @@ public class DebtService {
                 .sens(request.sens())
                 .date(request.date())
                 .rembourse(request.rembourse() != null ? request.rembourse() : false)
+                .category(resolveCategory(request.categoryId(), userId))
                 .user(userRepository.getReferenceById(userId))
                 .build();
 
@@ -65,6 +70,7 @@ public class DebtService {
         if (request.rembourse() != null) {
             debt.setRembourse(request.rembourse());
         }
+        debt.setCategory(resolveCategory(request.categoryId(), userId));
 
         debt = debtRepository.save(debt);
         log.info("Dette mise à jour: {}", debt.getId());
@@ -86,6 +92,30 @@ public class DebtService {
                 });
     }
 
+    private Category resolveCategory(UUID categoryId, UUID userId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .filter(c -> c.getUser().getId().equals(userId))
+                .orElseThrow(() -> {
+                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    return new EntityNotFoundException("Catégorie non trouvée");
+                });
+    }
+
+    private CategoryResponse toCategoryResponse(Category category) {
+        if (category == null) {
+            return null;
+        }
+        return new CategoryResponse(
+                category.getId(),
+                category.getNom(),
+                category.getIcone(),
+                category.getCouleur()
+        );
+    }
+
     private DebtResponse toResponse(Debt debt) {
         return new DebtResponse(
                 debt.getId(),
@@ -93,7 +123,8 @@ public class DebtService {
                 debt.getMontant(),
                 debt.getSens(),
                 debt.getDate(),
-                debt.getRembourse()
+                debt.getRembourse(),
+                toCategoryResponse(debt.getCategory())
         );
     }
 }

@@ -1,8 +1,11 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +23,7 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
         Subscription subscription = Subscription.builder()
@@ -28,6 +32,7 @@ public class SubscriptionService {
                 .frequence(request.frequence())
                 .dateDebut(request.dateDebut())
                 .actif(request.actif() != null ? request.actif() : true)
+                .category(resolveCategory(request.categoryId(), userId))
                 .user(userRepository.getReferenceById(userId))
                 .build();
 
@@ -65,6 +70,7 @@ public class SubscriptionService {
         if (request.actif() != null) {
             subscription.setActif(request.actif());
         }
+        subscription.setCategory(resolveCategory(request.categoryId(), userId));
 
         subscription = subscriptionRepository.save(subscription);
         log.info("Abonnement mis à jour: {}", subscription.getId());
@@ -86,6 +92,30 @@ public class SubscriptionService {
                 });
     }
 
+    private Category resolveCategory(UUID categoryId, UUID userId) {
+        if (categoryId == null) {
+            return null;
+        }
+        return categoryRepository.findById(categoryId)
+                .filter(c -> c.getUser().getId().equals(userId))
+                .orElseThrow(() -> {
+                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    return new EntityNotFoundException("Catégorie non trouvée");
+                });
+    }
+
+    private CategoryResponse toCategoryResponse(Category category) {
+        if (category == null) {
+            return null;
+        }
+        return new CategoryResponse(
+                category.getId(),
+                category.getNom(),
+                category.getIcone(),
+                category.getCouleur()
+        );
+    }
+
     private SubscriptionResponse toResponse(Subscription subscription) {
         return new SubscriptionResponse(
                 subscription.getId(),
@@ -93,7 +123,8 @@ public class SubscriptionService {
                 subscription.getMontant(),
                 subscription.getFrequence(),
                 subscription.getDateDebut(),
-                subscription.getActif()
+                subscription.getActif(),
+                toCategoryResponse(subscription.getCategory())
         );
     }
 }
