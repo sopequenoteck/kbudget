@@ -213,6 +213,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - N/A (feature purement UI, pas de persistance) (006-fab-speed-dial)
 - TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone components, OnPush, Router), SCSS design tokens (006-fab-speed-dial)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/cdk` (overlay + a11y), `@angular/router` (NavigationEnd) (006-fab-speed-dial)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (Pipe, PipeTransform), `Intl.NumberFormat`, `Intl.DateTimeFormat` (007-format-pipes)
+- N/A (pipes purs sans état, sans persistance) (007-format-pipes)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS

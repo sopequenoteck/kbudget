@@ -17,10 +17,10 @@
         </root>
 
         <!-- App : tout en DEBUG -->
-        <logger name="fr.kksdev.budget.api" level="DEBUG"/>
+        <logger name="fr.kksdev.budget.api" level="INFO"/>
 
         <!-- SQL : requêtes exécutées -->
-        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.SQL" level="INFO"/>
 
         <!-- Startup : garder les infos utiles -->
         <logger name="org.springframework.boot.web" level="INFO"/>
