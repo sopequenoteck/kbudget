@@ -55,7 +55,11 @@
       />
     }
     @case ('subscription') {
-      <p>Formulaire d'abonnement — à venir</p>
+      <app-subscription-form
+        [subscription]="editingSubscription()"
+        (saved)="onSubscriptionSaved($event)"
+        (cancelled)="onModalClose()"
+      />
     }
     @case ('debt') {
       <p>Formulaire de dette — à venir</p>
