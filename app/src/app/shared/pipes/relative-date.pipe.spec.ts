@@ -11,7 +11,7 @@ describe('RelativeDatePipe', () => {
     return d.toISOString().split('T')[0];
   }
 
-  it("should_return_aujourdhui_when_today", () => {
+  it('should_return_aujourdhui_when_today', () => {
     expect(pipe.transform(daysAgo(0))).toBe("Aujourd'hui");
   });
 

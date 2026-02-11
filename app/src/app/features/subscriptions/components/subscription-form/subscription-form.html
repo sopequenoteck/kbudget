@@ -14,13 +14,7 @@
     [showError]="isInvalid('montant')"
     [errorMessage]="'Le montant doit etre superieur a 0'"
   >
-    <input
-      id="montant"
-      type="number"
-      formControlName="montant"
-      step="0.01"
-      min="0.01"
-    />
+    <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
   </app-form-field>
 
   <div class="type-toggle" role="group" aria-label="Frequence de l'abonnement">
@@ -66,9 +60,7 @@
   </label>
 
   <div class="form-actions">
-    <button type="button" class="btn-outline" (click)="onCancel()">
-      Annuler
-    </button>
+    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
     <button type="submit" class="btn-primary">
       {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>

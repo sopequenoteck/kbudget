@@ -25,20 +25,14 @@ export class CategoryService {
   }
 
   create(request: CategoryRequest): Observable<Category> {
-    return this.api
-      .post<Category>('/categories', request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.post<Category>('/categories', request).pipe(tap(() => this.refresh()));
   }
 
   update(id: string, request: CategoryRequest): Observable<Category> {
-    return this.api
-      .put<Category>(`/categories/${id}`, request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.put<Category>(`/categories/${id}`, request).pipe(tap(() => this.refresh()));
   }
 
   delete(id: string): Observable<void> {
-    return this.api
-      .delete<void>(`/categories/${id}`)
-      .pipe(tap(() => this.refresh()));
+    return this.api.delete<void>(`/categories/${id}`).pipe(tap(() => this.refresh()));
   }
 }

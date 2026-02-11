@@ -13,7 +13,9 @@
       <app-form-field
         label="Email"
         fieldId="email"
-        [errorMessage]="loginForm.controls.email.hasError('required') ? 'Email requis' : 'Email invalide'"
+        [errorMessage]="
+          loginForm.controls.email.hasError('required') ? 'Email requis' : 'Email invalide'
+        "
         [showError]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
       >
         <input
@@ -38,7 +40,9 @@
           formControlName="password"
           autocomplete="current-password"
           placeholder="Votre mot de passe"
-          [class.input-error]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
+          [class.input-error]="
+            loginForm.controls.password.touched && loginForm.controls.password.invalid
+          "
         />
       </app-form-field>
 

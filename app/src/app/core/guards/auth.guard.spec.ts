@@ -1,8 +1,5 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '../services/auth';
@@ -35,9 +32,7 @@ describe('authGuard', () => {
   });
 
   function runGuard(url: string): boolean | UrlTree {
-    return TestBed.runInInjectionContext(() =>
-      authGuard({} as never, { url } as never),
-    );
+    return TestBed.runInInjectionContext(() => authGuard({} as never, { url } as never));
   }
 
   it('should_allow_access_when_authenticated', () => {

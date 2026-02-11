@@ -17,10 +17,7 @@ export class DebtService {
   }
 
   getAll(rembourse?: boolean): Observable<Debt[]> {
-    const path =
-      rembourse !== undefined
-        ? `/debts?rembourse=${rembourse}`
-        : '/debts';
+    const path = rembourse !== undefined ? `/debts?rembourse=${rembourse}` : '/debts';
     return this.api.get<Debt[]>(path);
   }
 
@@ -29,20 +26,14 @@ export class DebtService {
   }
 
   create(request: DebtRequest): Observable<Debt> {
-    return this.api
-      .post<Debt>('/debts', request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.post<Debt>('/debts', request).pipe(tap(() => this.refresh()));
   }
 
   update(id: string, request: DebtRequest): Observable<Debt> {
-    return this.api
-      .put<Debt>(`/debts/${id}`, request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.put<Debt>(`/debts/${id}`, request).pipe(tap(() => this.refresh()));
   }
 
   delete(id: string): Observable<void> {
-    return this.api
-      .delete<void>(`/debts/${id}`)
-      .pipe(tap(() => this.refresh()));
+    return this.api.delete<void>(`/debts/${id}`).pipe(tap(() => this.refresh()));
   }
 }

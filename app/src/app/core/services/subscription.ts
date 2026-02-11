@@ -17,10 +17,7 @@ export class SubscriptionService {
   }
 
   getAll(actif?: boolean): Observable<Subscription[]> {
-    const path =
-      actif !== undefined
-        ? `/subscriptions?actif=${actif}`
-        : '/subscriptions';
+    const path = actif !== undefined ? `/subscriptions?actif=${actif}` : '/subscriptions';
     return this.api.get<Subscription[]>(path);
   }
 
@@ -29,9 +26,7 @@ export class SubscriptionService {
   }
 
   create(request: SubscriptionRequest): Observable<Subscription> {
-    return this.api
-      .post<Subscription>('/subscriptions', request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.post<Subscription>('/subscriptions', request).pipe(tap(() => this.refresh()));
   }
 
   update(id: string, request: SubscriptionRequest): Observable<Subscription> {
@@ -41,8 +36,6 @@ export class SubscriptionService {
   }
 
   delete(id: string): Observable<void> {
-    return this.api
-      .delete<void>(`/subscriptions/${id}`)
-      .pipe(tap(() => this.refresh()));
+    return this.api.delete<void>(`/subscriptions/${id}`).pipe(tap(() => this.refresh()));
   }
 }

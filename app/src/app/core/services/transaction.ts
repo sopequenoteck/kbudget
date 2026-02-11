@@ -2,11 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api';
-import {
-  Transaction,
-  TransactionRequest,
-  MonthlySummary,
-} from '../models/transaction.model';
+import { Transaction, TransactionRequest, MonthlySummary } from '../models/transaction.model';
 
 @Injectable({
   providedIn: 'root',
@@ -29,9 +25,7 @@ export class TransactionService {
   }
 
   create(request: TransactionRequest): Observable<Transaction> {
-    return this.api
-      .post<Transaction>('/transactions', request)
-      .pipe(tap(() => this.refresh()));
+    return this.api.post<Transaction>('/transactions', request).pipe(tap(() => this.refresh()));
   }
 
   update(id: string, request: TransactionRequest): Observable<Transaction> {
@@ -41,9 +35,7 @@ export class TransactionService {
   }
 
   delete(id: string): Observable<void> {
-    return this.api
-      .delete<void>(`/transactions/${id}`)
-      .pipe(tap(() => this.refresh()));
+    return this.api.delete<void>(`/transactions/${id}`).pipe(tap(() => this.refresh()));
   }
 
   getSummary(month?: number, year?: number): Observable<MonthlySummary> {
