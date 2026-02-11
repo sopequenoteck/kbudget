@@ -48,7 +48,11 @@
 <app-modal [isOpen]="modalOpen()" [title]="modalTitle()" (closed)="onModalClose()">
   @switch (activeModal()) {
     @case ('transaction') {
-      <p>Formulaire de transaction — à venir</p>
+      <app-transaction-form
+        [transaction]="editingTransaction()"
+        (saved)="onTransactionSaved($event)"
+        (cancelled)="onModalClose()"
+      />
     }
     @case ('subscription') {
       <p>Formulaire d'abonnement — à venir</p>

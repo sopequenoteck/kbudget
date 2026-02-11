@@ -8,9 +8,15 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
+import { TransactionService } from '../../../core/services/transaction';
+import {
+  type Transaction,
+  type TransactionRequest,
+} from '../../../core/models/transaction.model';
+import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { Fab, type ModalType } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -22,7 +28,7 @@ const MODAL_TITLES: Record<ModalType, string> = {
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Fab, Modal],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Fab, Modal, TransactionForm],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +36,7 @@ const MODAL_TITLES: Record<ModalType, string> = {
 export class Shell {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly transactionService = inject(TransactionService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
   );
@@ -38,10 +45,15 @@ export class Shell {
   readonly sidebarOpen = signal(false);
   readonly speedDialOpen = signal(false);
   readonly activeModal = signal<ModalType | null>(null);
+  readonly editingTransaction = signal<Transaction | null>(null);
   readonly modalOpen = computed(() => this.activeModal() !== null);
   readonly modalTitle = computed(() => {
     const type = this.activeModal();
-    return type ? MODAL_TITLES[type] : '';
+    if (!type) return '';
+    if (type === 'transaction' && this.editingTransaction()) {
+      return 'Modifier la transaction';
+    }
+    return MODAL_TITLES[type];
   });
 
   constructor() {
@@ -79,5 +91,17 @@ export class Shell {
 
   onModalClose(): void {
     this.activeModal.set(null);
+    this.editingTransaction.set(null);
+  }
+
+  async onTransactionSaved(request: TransactionRequest): Promise<void> {
+    const editing = this.editingTransaction();
+    if (editing) {
+      await firstValueFrom(this.transactionService.update(editing.id, request));
+    } else {
+      await firstValueFrom(this.transactionService.create(request));
+    }
+    this.activeModal.set(null);
+    this.editingTransaction.set(null);
   }
 }

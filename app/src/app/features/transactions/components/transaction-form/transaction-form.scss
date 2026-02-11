@@ -1,0 +1,51 @@
+.transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+// -- Toggle segmenté --
+.type-toggle {
+  display: flex;
+  gap: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+
+  button {
+    flex: 1;
+    padding: var(--space-2);
+    border: none;
+    background-color: var(--surface-raised);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--easing-default),
+      color var(--duration-fast) var(--easing-default);
+
+    &:not(:last-child) {
+      border-right: 1px solid var(--border-default);
+    }
+
+    &.active {
+      background-color: var(--color-primary);
+      color: var(--color-primary-contrast);
+    }
+  }
+}
+
+// -- Note textarea --
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+// -- Boutons d'action --
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
