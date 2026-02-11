@@ -217,6 +217,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - N/A (pipes purs sans état, sans persistance) (007-format-pipes)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (Component, ChangeDetectionStrategy, input, output) (008-list-item)
 - N/A (composant présentationnel sans état) (008-list-item)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/core` (signals, input, output, inject), composants existants (`FormField`, `Shell`, `Modal`) (009-transaction-form)
+- N/A (composant présentationnel — pas de persistance directe) (009-transaction-form)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
