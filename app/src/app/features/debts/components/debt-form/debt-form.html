@@ -1,0 +1,70 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="debt-form">
+  <app-form-field
+    label="Personne"
+    fieldId="personne"
+    [showError]="isInvalid('personne')"
+    [errorMessage]="
+      form.get('personne')?.hasError('required') ? 'Personne requise' : '255 caracteres maximum'
+    "
+  >
+    <input id="personne" type="text" formControlName="personne" />
+  </app-form-field>
+
+  <app-form-field
+    label="Montant"
+    fieldId="montant"
+    [showError]="isInvalid('montant')"
+    [errorMessage]="'Le montant doit etre superieur a 0'"
+  >
+    <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
+  </app-form-field>
+
+  <div class="type-toggle" role="group" aria-label="Sens de la dette">
+    <button
+      type="button"
+      [class.active]="form.get('sens')?.value === DebtType.JE_DOIS"
+      [attr.aria-pressed]="form.get('sens')?.value === DebtType.JE_DOIS"
+      (click)="form.get('sens')?.setValue(DebtType.JE_DOIS)"
+    >
+      Emprunt
+    </button>
+    <button
+      type="button"
+      [class.active]="form.get('sens')?.value === DebtType.ON_ME_DOIT"
+      [attr.aria-pressed]="form.get('sens')?.value === DebtType.ON_ME_DOIT"
+      (click)="form.get('sens')?.setValue(DebtType.ON_ME_DOIT)"
+    >
+      Pret
+    </button>
+  </div>
+
+  <app-form-field
+    label="Date"
+    fieldId="date"
+    [showError]="isInvalid('date')"
+    [errorMessage]="'Date requise'"
+  >
+    <input id="date" type="date" formControlName="date" />
+  </app-form-field>
+
+  <app-form-field label="Categorie" fieldId="categoryId">
+    <select id="categoryId" formControlName="categoryId">
+      <option value="">Aucune categorie</option>
+      @for (cat of categories(); track cat.id) {
+        <option [value]="cat.id">{{ cat.nom }}</option>
+      }
+    </select>
+  </app-form-field>
+
+  <label class="checkbox-field">
+    <input type="checkbox" formControlName="rembourse" />
+    Rembourse
+  </label>
+
+  <div class="form-actions">
+    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+    <button type="submit" class="btn-primary">
+      {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
+    </button>
+  </div>
+</form>

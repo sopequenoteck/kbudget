@@ -62,7 +62,11 @@
       />
     }
     @case ('debt') {
-      <p>Formulaire de dette — à venir</p>
+      <app-debt-form
+        [debt]="editingDebt()"
+        (saved)="onDebtSaved($event)"
+        (cancelled)="onModalClose()"
+      />
     }
   }
 </app-modal>

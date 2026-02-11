@@ -13,16 +13,16 @@ import { filter, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core/services/auth';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
-import {
-  type Transaction,
-  type TransactionRequest,
-} from '../../../core/models/transaction.model';
+import { DebtService } from '../../../core/services/debt';
+import { type Transaction, type TransactionRequest } from '../../../core/models/transaction.model';
 import {
   type Subscription,
   type SubscriptionRequest,
 } from '../../../core/models/subscription.model';
+import { type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
+import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
 import { Fab, type ModalType } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -34,7 +34,16 @@ const MODAL_TITLES: Record<ModalType, string> = {
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Fab, Modal, TransactionForm, SubscriptionForm],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    Fab,
+    Modal,
+    TransactionForm,
+    SubscriptionForm,
+    DebtForm,
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +53,7 @@ export class Shell {
   private readonly router = inject(Router);
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly debtService = inject(DebtService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
   );
@@ -54,6 +64,7 @@ export class Shell {
   readonly activeModal = signal<ModalType | null>(null);
   readonly editingTransaction = signal<Transaction | null>(null);
   readonly editingSubscription = signal<Subscription | null>(null);
+  readonly editingDebt = signal<Debt | null>(null);
   readonly modalOpen = computed(() => this.activeModal() !== null);
   readonly modalTitle = computed(() => {
     const type = this.activeModal();
@@ -63,6 +74,9 @@ export class Shell {
     }
     if (type === 'subscription' && this.editingSubscription()) {
       return "Modifier l'abonnement";
+    }
+    if (type === 'debt' && this.editingDebt()) {
+      return 'Modifier la dette';
     }
     return MODAL_TITLES[type];
   });
@@ -104,6 +118,7 @@ export class Shell {
     this.activeModal.set(null);
     this.editingTransaction.set(null);
     this.editingSubscription.set(null);
+    this.editingDebt.set(null);
   }
 
   async onTransactionSaved(request: TransactionRequest): Promise<void> {
@@ -126,5 +141,16 @@ export class Shell {
     }
     this.activeModal.set(null);
     this.editingSubscription.set(null);
+  }
+
+  async onDebtSaved(request: DebtRequest): Promise<void> {
+    const editing = this.editingDebt();
+    if (editing) {
+      await firstValueFrom(this.debtService.update(editing.id, request));
+    } else {
+      await firstValueFrom(this.debtService.create(request));
+    }
+    this.activeModal.set(null);
+    this.editingDebt.set(null);
   }
 }
