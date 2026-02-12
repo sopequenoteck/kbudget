@@ -234,6 +234,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - Java 21 (backend) / TypeScript 5.9.2 (frontend) + Spring Boot 4.0.2, Angular 21.1.0, @angular/cdk (overlay, a11y) (018-category-system)
 - PostgreSQL 15+ via Spring Data JPA (018-category-system)
 - PostgreSQL 15+ via Spring Data JPA, Flyway migrations (018-category-system)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/forms` (ReactiveFormsModule), `@angular/cdk` (a11y) (019-form-ux-refonte)
+- N/A (pas de changement de persistance) (019-form-ux-refonte)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
