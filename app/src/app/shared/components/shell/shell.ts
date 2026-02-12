@@ -114,6 +114,21 @@ export class Shell {
     this.activeModal.set(type);
   }
 
+  openEditTransaction(transaction: Transaction): void {
+    this.editingTransaction.set(transaction);
+    this.activeModal.set('transaction');
+  }
+
+  openEditSubscription(subscription: Subscription): void {
+    this.editingSubscription.set(subscription);
+    this.activeModal.set('subscription');
+  }
+
+  openEditDebt(debt: Debt): void {
+    this.editingDebt.set(debt);
+    this.activeModal.set('debt');
+  }
+
   onModalClose(): void {
     this.activeModal.set(null);
     this.editingTransaction.set(null);
