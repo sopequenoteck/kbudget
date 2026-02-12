@@ -100,6 +100,10 @@ export class Dashboard {
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
+  readonly miniCardsLoading = computed(
+    () => this.subscriptionsLoading() || this.debtsLoading(),
+  );
+
   private summarySub: RxSub | null = null;
   private transactionsSub: RxSub | null = null;
   private subscriptionsSub: RxSub | null = null;

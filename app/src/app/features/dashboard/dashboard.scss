@@ -5,7 +5,6 @@
   padding: var(--space-4);
 }
 
-// -- Selecteur de mois --
 .month-selector {
   display: flex;
   align-items: center;
@@ -47,11 +46,24 @@
   }
 }
 
-// -- Resume mensuel --
-.summary {
+.kpi-zone {
   display: flex;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-4);
 
+  &__row {
+    display: flex;
+    gap: var(--space-3);
+  }
+}
+
+.kpi-separator {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 0;
+}
+
+.summary {
   &__card {
     flex: 1;
     display: flex;
@@ -86,7 +98,78 @@
   }
 }
 
-// -- Sections dashboard --
+.mini-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-xl);
+  background-color: var(--surface-default);
+  box-shadow: var(--shadow-md);
+  border-top: 3px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-normal) var(--easing-default),
+    box-shadow var(--duration-normal) var(--easing-default);
+
+  &:hover {
+    background-color: var(--hover-bg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  &--subscription { border-top-color: var(--color-subscription); }
+  &--debt-owe { border-top-color: var(--color-debt-owe); }
+  &--debt-owed { border-top-color: var(--color-debt-owed); }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__value {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
+}
+
+@media (max-width: 375px) {
+  .mini-card {
+    padding: var(--space-2) var(--space-1);
+    gap: 2px;
+
+    &__label {
+      font-size: 0.625rem;
+      letter-spacing: 0.03em;
+    }
+
+    &__value {
+      font-size: var(--font-size-sm);
+    }
+  }
+
+  .kpi-zone__row {
+    gap: var(--space-2);
+  }
+}
+
+.state-loading--mini {
+  padding: var(--space-3);
+}
+
+.spinner--sm {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
 .dashboard-section {
   display: flex;
   flex-direction: column;
@@ -115,33 +198,8 @@
       text-decoration: underline;
     }
   }
-
-  &__subtitle {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-
-    &--debts {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-    }
-  }
 }
 
-.debt-summary {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-
-  &--owe {
-    color: var(--color-debt-owe);
-  }
-
-  &--owed {
-    color: var(--color-debt-owed);
-  }
-}
-
-// -- Liste dashboard (dans card blanche arrondie) --
 .dashboard-list {
   list-style: none;
   margin: 0;
@@ -158,7 +216,6 @@
   }
 }
 
-// -- Etats --
 .state-loading,
 .state-empty,
 .state-error {
