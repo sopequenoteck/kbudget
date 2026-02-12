@@ -229,6 +229,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - N/A (données via services REST existants) (015-dashboard)
 - TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), @angular/cdk (overlay, a11y), @angular/router (016-modal-service)
 - N/A (utilise les services REST existants — TransactionService, SubscriptionService, DebtService) (016-modal-service)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core/testing`, `@angular/platform-browser/testing`, Vitest 4.x, RxJS (017-phase4-unit-tests)
+- N/A (tests uniquement, pas de persistance) (017-phase4-unit-tests)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
