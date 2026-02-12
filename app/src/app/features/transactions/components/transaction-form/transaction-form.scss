@@ -1,7 +1,7 @@
 .transaction-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 // -- Lignes grille --
@@ -25,8 +25,8 @@ textarea {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-2);
-  padding-top: var(--space-2);
+  gap: var(--space-3);
+  padding-top: var(--space-3);
 
   .btn-danger {
     margin-right: auto;
