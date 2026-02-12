@@ -223,6 +223,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/common` (NgClass), RxJS (HTTP uniquement) (012-transaction-list)
 - N/A (composant présentationnel — données via TransactionService existant) (012-transaction-list)
 - N/A (données via SubscriptionService existant, API REST backend) (013-subscription-list)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/common` (NgClass), composants existants (`ListItem`, `AmountPipe`, `RelativeDatePipe`) (014-debt-list)
+- N/A (donnees via DebtService existant, API REST backend) (014-debt-list)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
