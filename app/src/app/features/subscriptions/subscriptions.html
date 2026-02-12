@@ -1,1 +1,63 @@
-<p>subscriptions works!</p>
+@if (hasActiveSubscriptions()) {
+  <section class="summary">
+    <div class="summary__card">
+      <span class="summary__label">Total mensuel</span>
+      <span class="summary__value">{{ monthlyTotal() | amount }}</span>
+    </div>
+  </section>
+}
+
+<section class="status-filter" role="group" aria-label="Filtrer par statut">
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'ALL'"
+    (click)="setStatusFilter('ALL')"
+  >
+    Tous
+  </button>
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'ACTIF'"
+    (click)="setStatusFilter('ACTIF')"
+  >
+    Actifs
+  </button>
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'INACTIF'"
+    (click)="setStatusFilter('INACTIF')"
+  >
+    Inactifs
+  </button>
+</section>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+  </div>
+} @else if (sortedSubscriptions().length === 0) {
+  <div class="state-empty">
+    <p>Aucun abonnement</p>
+  </div>
+} @else {
+  <ul class="subscription-list">
+    @for (subscription of sortedSubscriptions(); track subscription.id) {
+      <li class="subscription-item">
+        @if (!subscription.actif) {
+          <span class="badge-inactive">Inactif</span>
+        }
+        <app-list-item
+          icon="🔄"
+          [title]="subscription.nom"
+          [value]="formatAmount(subscription)"
+          [subtitle]="'Renouvellement: ' + getNextRenewalDate(subscription)"
+        />
+      </li>
+    }
+  </ul>
+}
