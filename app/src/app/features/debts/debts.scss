@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
   padding: var(--space-4);
 }
 
@@ -15,21 +15,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-3);
-    border-radius: var(--radius-md);
-    background-color: var(--surface-raised);
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    background-color: var(--surface-default);
+    box-shadow: var(--shadow-md);
   }
 
   &__label {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   &__value {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: var(--text-primary);
   }
 }
@@ -43,46 +46,49 @@
   color: var(--color-debt-owed);
 }
 
-// -- Toggle filtre statut --
+// -- Toggle filtres → segmented controls iOS --
 .status-filter,
 .sens-filter {
   display: flex;
-  gap: 0;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border-default);
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-tertiary);
 
   &__btn {
     flex: 1;
     padding: var(--space-2);
     border: none;
-    background-color: var(--surface-raised);
+    border-radius: var(--radius-md);
+    background-color: transparent;
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition:
-      background-color var(--duration-fast) var(--easing-default),
-      color var(--duration-fast) var(--easing-default);
-
-    &:not(:last-child) {
-      border-right: 1px solid var(--border-default);
-    }
+      background-color var(--duration-normal) var(--easing-default),
+      color var(--duration-normal) var(--easing-default),
+      box-shadow var(--duration-normal) var(--easing-default);
 
     &.active {
-      background-color: var(--color-primary);
-      color: var(--color-primary-contrast);
+      background-color: var(--surface-default);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
     }
   }
 }
 
-// -- Liste de dettes --
+// -- Liste de dettes (dans card blanche arrondie) --
 .debt-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 
   li:not(:last-child) {
     border-bottom: 1px solid var(--border-default);
@@ -91,7 +97,7 @@
 
 .debt-item {
   position: relative;
-  transition: background-color var(--duration-fast) var(--easing-default);
+  transition: background-color var(--duration-normal) var(--easing-default);
 
   &:hover {
     background-color: var(--surface-raised);
@@ -102,19 +108,19 @@
   }
 }
 
-// -- Badge remboursé --
+// -- Badge remboursé → pill --
 .badge-rembourse {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
   z-index: 1;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
-  color: var(--text-inverse);
+  color: var(--text-success);
   background-color: var(--bg-success);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-round);
 }
 
 // -- États --
