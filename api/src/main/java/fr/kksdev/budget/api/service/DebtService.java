@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,12 +20,15 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DebtService {
 
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
+    @Transactional
     public DebtResponse create(DebtRequest request, UUID userId) {
         Debt debt = Debt.builder()
                 .personne(request.personne())
@@ -60,6 +64,7 @@ public class DebtService {
         return toResponse(debt);
     }
 
+    @Transactional
     public DebtResponse update(UUID id, DebtRequest request, UUID userId) {
         Debt debt = findByIdAndUser(id, userId);
 
@@ -77,6 +82,7 @@ public class DebtService {
         return toResponse(debt);
     }
 
+    @Transactional
     public void delete(UUID id, UUID userId) {
         Debt debt = findByIdAndUser(id, userId);
         debtRepository.delete(debt);
@@ -94,7 +100,7 @@ public class DebtService {
 
     private Category resolveCategory(UUID categoryId, UUID userId) {
         if (categoryId == null) {
-            return null;
+            return categoryService.findSystemCategoryByNom("Dette", userId);
         }
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
@@ -112,7 +118,8 @@ public class DebtService {
                 category.getId(),
                 category.getNom(),
                 category.getIcone(),
-                category.getCouleur()
+                category.getCouleur(),
+                Boolean.TRUE.equals(category.getIsSystem())
         );
     }
 

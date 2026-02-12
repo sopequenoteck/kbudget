@@ -6,5 +6,6 @@ public record CategoryResponse(
         UUID id,
         String nom,
         String icone,
-        String couleur
+        String couleur,
+        boolean isSystem
 ) {}

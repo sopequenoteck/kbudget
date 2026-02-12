@@ -28,6 +28,10 @@ public class Category {
     @Column(nullable = false)
     private String couleur;
 
+    @Column(name = "is_system", nullable = false)
+    @Builder.Default
+    private Boolean isSystem = false;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

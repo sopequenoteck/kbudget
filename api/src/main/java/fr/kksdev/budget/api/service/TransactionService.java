@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,12 +25,14 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
         Transaction transaction = Transaction.builder()
                 .montant(request.montant())
@@ -58,6 +61,7 @@ public class TransactionService {
         return toResponse(transaction);
     }
 
+    @Transactional
     public TransactionResponse update(UUID id, TransactionRequest request, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
 
@@ -73,6 +77,7 @@ public class TransactionService {
         return toResponse(transaction);
     }
 
+    @Transactional
     public void delete(UUID id, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
         transactionRepository.delete(transaction);
@@ -133,7 +138,8 @@ public class TransactionService {
                 category.getId(),
                 category.getNom(),
                 category.getIcone(),
-                category.getCouleur()
+                category.getCouleur(),
+                Boolean.TRUE.equals(category.getIsSystem())
         );
     }
 

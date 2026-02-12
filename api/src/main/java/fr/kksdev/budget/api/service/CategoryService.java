@@ -3,12 +3,14 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.CategoryRequest;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.model.Category;
+import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,13 +18,15 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public CategoryResponse create(CategoryRequest request, UUID userId) {
-        if (categoryRepository.existsByNomAndUserId(request.nom(), userId)) {
+        if (categoryRepository.existsByNomIgnoreCaseAndUserId(request.nom(), userId)) {
             throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
         }
 
@@ -50,10 +54,16 @@ public class CategoryService {
         return toResponse(category);
     }
 
+    @Transactional
     public CategoryResponse update(UUID id, CategoryRequest request, UUID userId) {
         Category category = findByIdAndUser(id, userId);
 
-        if (categoryRepository.existsByNomAndUserIdAndIdNot(request.nom(), userId, id)) {
+        if (Boolean.TRUE.equals(category.getIsSystem())) {
+            log.warn("Tentative de modification d'une catégorie système: id={}, userId={}", id, userId);
+            throw new IllegalArgumentException("Les catégories système ne peuvent pas être modifiées");
+        }
+
+        if (categoryRepository.existsByNomIgnoreCaseAndUserIdAndIdNot(request.nom(), userId, id)) {
             throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
         }
 
@@ -66,10 +76,51 @@ public class CategoryService {
         return toResponse(category);
     }
 
+    @Transactional
     public void delete(UUID id, UUID userId) {
         Category category = findByIdAndUser(id, userId);
+
+        if (Boolean.TRUE.equals(category.getIsSystem())) {
+            log.warn("Tentative de suppression d'une catégorie système: id={}, userId={}", id, userId);
+            throw new IllegalArgumentException("Les catégories système ne peuvent pas être supprimées");
+        }
+
         categoryRepository.delete(category);
         log.info("Catégorie supprimée: {}", id);
+    }
+
+    @Transactional
+    public void seedSystemCategories(User user) {
+        try {
+            Category abonnement = Category.builder()
+                    .nom("Abonnement")
+                    .icone("\uD83D\uDD04")
+                    .couleur("#6366f1")
+                    .isSystem(true)
+                    .user(user)
+                    .build();
+            categoryRepository.save(abonnement);
+
+            Category dette = Category.builder()
+                    .nom("Dette")
+                    .icone("\uD83D\uDCB0")
+                    .couleur("#ef4444")
+                    .isSystem(true)
+                    .user(user)
+                    .build();
+            categoryRepository.save(dette);
+
+            log.info("Catégories système créées pour userId {}", user.getId());
+        } catch (Exception e) {
+            log.error("Échec du seeding des catégories système pour userId {}: {}", user.getId(), e.getMessage());
+            throw e;
+        }
+    }
+
+    public Category findSystemCategoryByNom(String nom, UUID userId) {
+        return categoryRepository.findByNomIgnoreCaseAndUserId(nom, userId)
+                .filter(c -> Boolean.TRUE.equals(c.getIsSystem()))
+                .orElse(null);
     }
 
     private Category findByIdAndUser(UUID id, UUID userId) {
@@ -86,7 +137,8 @@ public class CategoryService {
                 category.getId(),
                 category.getNom(),
                 category.getIcone(),
-                category.getCouleur()
+                category.getCouleur(),
+                Boolean.TRUE.equals(category.getIsSystem())
         );
     }
 }

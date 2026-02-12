@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,12 +20,15 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
+    @Transactional
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
         Subscription subscription = Subscription.builder()
                 .nom(request.nom())
@@ -60,6 +64,7 @@ public class SubscriptionService {
         return toResponse(subscription);
     }
 
+    @Transactional
     public SubscriptionResponse update(UUID id, SubscriptionRequest request, UUID userId) {
         Subscription subscription = findByIdAndUser(id, userId);
 
@@ -77,6 +82,7 @@ public class SubscriptionService {
         return toResponse(subscription);
     }
 
+    @Transactional
     public void delete(UUID id, UUID userId) {
         Subscription subscription = findByIdAndUser(id, userId);
         subscriptionRepository.delete(subscription);
@@ -94,7 +100,7 @@ public class SubscriptionService {
 
     private Category resolveCategory(UUID categoryId, UUID userId) {
         if (categoryId == null) {
-            return null;
+            return categoryService.findSystemCategoryByNom("Abonnement", userId);
         }
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
@@ -112,7 +118,8 @@ public class SubscriptionService {
                 category.getId(),
                 category.getNom(),
                 category.getIcone(),
-                category.getCouleur()
+                category.getCouleur(),
+                Boolean.TRUE.equals(category.getIsSystem())
         );
     }
 

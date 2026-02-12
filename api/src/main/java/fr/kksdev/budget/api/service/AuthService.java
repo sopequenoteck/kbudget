@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -19,7 +20,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final CategoryService categoryService;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             log.warn("Registration failed: email already exists: {}", request.email());
@@ -33,6 +36,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        categoryService.seedSystemCategories(user);
         log.info("User registered: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());
