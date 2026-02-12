@@ -6,7 +6,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,24 +29,20 @@ export class SubscriptionForm {
   private readonly fb = inject(FormBuilder);
 
   readonly subscription = input<Subscription | null>(null);
+  readonly frequence = input(Frequency.MENSUEL);
   readonly saved = output<SubscriptionRequest>();
   readonly cancelled = output<void>();
   readonly deleted = output<string>();
-
-  readonly showDeleteConfirm = signal(false);
 
   readonly isEditMode = computed(() => this.subscription() !== null);
 
   readonly form = this.fb.nonNullable.group({
     nom: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
-    frequence: [Frequency.MENSUEL, [Validators.required]],
     dateDebut: [new Date().toISOString().split('T')[0], [Validators.required]],
     actif: [true],
     categoryId: [''],
   });
-
-  readonly Frequency = Frequency;
 
   constructor() {
     effect(() => {
@@ -56,7 +51,6 @@ export class SubscriptionForm {
         this.form.patchValue({
           nom: sub.nom,
           montant: String(sub.montant),
-          frequence: sub.frequence,
           dateDebut: sub.dateDebut,
           actif: sub.actif,
           categoryId: sub.category?.id ?? '',
@@ -75,7 +69,7 @@ export class SubscriptionForm {
     const request: SubscriptionRequest = {
       nom: raw.nom,
       montant: Number(raw.montant),
-      frequence: raw.frequence,
+      frequence: this.frequence(),
       dateDebut: raw.dateDebut,
       actif: raw.actif,
       categoryId: raw.categoryId || undefined,
@@ -89,16 +83,7 @@ export class SubscriptionForm {
   }
 
   onDelete(): void {
-    this.showDeleteConfirm.set(true);
-  }
-
-  onConfirmDelete(): void {
     this.deleted.emit(this.subscription()!.id);
-    this.showDeleteConfirm.set(false);
-  }
-
-  onCancelDelete(): void {
-    this.showDeleteConfirm.set(false);
   }
 
   isInvalid(controlName: string): boolean {

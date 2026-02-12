@@ -21,10 +21,11 @@ import {
   TransactionType,
 } from '../../../core/models/transaction.model';
 import {
+  Frequency,
   type Subscription,
   type SubscriptionRequest,
 } from '../../../core/models/subscription.model';
-import { type Debt, type DebtRequest } from '../../../core/models/debt.model';
+import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
@@ -65,6 +66,10 @@ export class Shell {
   readonly speedDialOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
+  readonly subscriptionFrequency = signal(Frequency.MENSUEL);
+  readonly Frequency = Frequency;
+  readonly debtType = signal(DebtType.EMPRUNT);
+  readonly DebtType = DebtType;
 
   constructor() {
     effect(() => {
@@ -78,6 +83,22 @@ export class Shell {
       if (modal === 'transaction') {
         const entity = this.modalService.editingEntity() as Transaction | null;
         this.transactionType.set(entity?.type ?? TransactionType.DEPENSE);
+      }
+    });
+
+    effect(() => {
+      const modal = this.modalService.activeModal();
+      if (modal === 'subscription') {
+        const entity = this.modalService.editingEntity() as Subscription | null;
+        this.subscriptionFrequency.set(entity?.frequence ?? Frequency.MENSUEL);
+      }
+    });
+
+    effect(() => {
+      const modal = this.modalService.activeModal();
+      if (modal === 'debt') {
+        const entity = this.modalService.editingEntity() as Debt | null;
+        this.debtType.set(entity?.sens ?? DebtType.EMPRUNT);
       }
     });
   }
@@ -100,6 +121,14 @@ export class Shell {
 
   onTransactionTypeChange(type: TransactionType): void {
     this.transactionType.set(type);
+  }
+
+  onFrequencyChange(freq: Frequency): void {
+    this.subscriptionFrequency.set(freq);
+  }
+
+  onDebtTypeChange(type: DebtType): void {
+    this.debtType.set(type);
   }
 
   onFabToggle(): void {

@@ -1,55 +1,40 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="debt-form">
-  <app-form-field
-    label="Personne"
-    fieldId="personne"
-    [showError]="isInvalid('personne')"
-    [errorMessage]="
-      form.get('personne')?.hasError('required') ? 'Personne requise' : '255 caracteres maximum'
-    "
-  >
-    <input id="personne" type="text" formControlName="personne" />
-  </app-form-field>
-
-  <app-form-field
-    label="Montant"
-    fieldId="montant"
-    [showError]="isInvalid('montant')"
-    [errorMessage]="'Le montant doit etre superieur a 0'"
-  >
-    <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-  </app-form-field>
-
-  <div class="type-toggle" role="group" aria-label="Sens de la dette">
-    <button
-      type="button"
-      [class.active]="form.get('sens')?.value === DebtType.EMPRUNT"
-      [attr.aria-pressed]="form.get('sens')?.value === DebtType.EMPRUNT"
-      (click)="form.get('sens')?.setValue(DebtType.EMPRUNT)"
+  <div class="form-row form-row--person-amount">
+    <app-form-field
+      label="Personne"
+      fieldId="personne"
+      [showError]="isInvalid('personne')"
+      [errorMessage]="
+        form.get('personne')?.hasError('required') ? 'Personne requise' : '255 caracteres maximum'
+      "
     >
-      Emprunt
-    </button>
-    <button
-      type="button"
-      [class.active]="form.get('sens')?.value === DebtType.PRET"
-      [attr.aria-pressed]="form.get('sens')?.value === DebtType.PRET"
-      (click)="form.get('sens')?.setValue(DebtType.PRET)"
+      <input id="personne" type="text" formControlName="personne" />
+    </app-form-field>
+
+    <app-form-field
+      label="Montant"
+      fieldId="montant"
+      [showError]="isInvalid('montant')"
+      [errorMessage]="'Le montant doit etre superieur a 0'"
     >
-      Pret
-    </button>
+      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
+    </app-form-field>
   </div>
 
-  <app-form-field
-    label="Date"
-    fieldId="date"
-    [showError]="isInvalid('date')"
-    [errorMessage]="'Date requise'"
-  >
-    <input id="date" type="date" formControlName="date" />
-  </app-form-field>
+  <div class="form-row">
+    <app-form-field label="Categorie" fieldId="categoryId">
+      <app-category-picker formControlName="categoryId" />
+    </app-form-field>
 
-  <app-form-field label="Categorie" fieldId="categoryId">
-    <app-category-picker formControlName="categoryId" />
-  </app-form-field>
+    <app-form-field
+      label="Date"
+      fieldId="date"
+      [showError]="isInvalid('date')"
+      [errorMessage]="'Date requise'"
+    >
+      <input id="date" type="date" formControlName="date" />
+    </app-form-field>
+  </div>
 
   <label class="checkbox-field">
     <input type="checkbox" formControlName="rembourse" />
@@ -57,25 +42,12 @@
   </label>
 
   <div class="form-actions">
+    @if (isEditMode()) {
+      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+    }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
     <button type="submit" class="btn-primary">
       {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
-
-  @if (isEditMode()) {
-    <div class="delete-section">
-      @if (showDeleteConfirm()) {
-        <div class="delete-confirm">
-          <span class="delete-confirm__message">Supprimer cet element ?</span>
-          <div class="delete-confirm__actions">
-            <button type="button" class="btn-danger" (click)="onConfirmDelete()">Confirmer</button>
-            <button type="button" class="btn-outline" (click)="onCancelDelete()">Annuler</button>
-          </div>
-        </div>
-      } @else {
-        <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-      }
-    </div>
-  }
 </form>

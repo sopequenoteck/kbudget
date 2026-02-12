@@ -4,35 +4,14 @@
   gap: var(--space-3);
 }
 
-// -- Toggle segmente --
-.type-toggle {
-  display: flex;
-  gap: 0;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border-default);
+// -- Lignes grille --
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
 
-  button {
-    flex: 1;
-    padding: var(--space-2);
-    border: none;
-    background-color: var(--surface-raised);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition:
-      background-color var(--duration-fast) var(--easing-default),
-      color var(--duration-fast) var(--easing-default);
-
-    &:not(:last-child) {
-      border-right: 1px solid var(--border-default);
-    }
-
-    &.active {
-      background-color: var(--color-primary);
-      color: var(--color-primary-contrast);
-    }
+  &--person-amount {
+    grid-template-columns: 7fr 3fr;
   }
 }
 
@@ -59,27 +38,16 @@
   justify-content: flex-end;
   gap: var(--space-2);
   padding-top: var(--space-2);
-}
 
-// -- Section suppression --
-.delete-section {
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-default);
-}
-
-.delete-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-
-  &__message {
-    font-size: var(--font-size-sm);
-    color: var(--text-error);
-    font-weight: var(--font-weight-medium);
+  .btn-danger {
+    margin-right: auto;
   }
+}
 
-  &__actions {
-    display: flex;
-    gap: var(--space-2);
+// -- Responsive petit ecran --
+@media (max-width: 400px) {
+  .form-row,
+  .form-row--person-amount {
+    grid-template-columns: 1fr;
   }
 }

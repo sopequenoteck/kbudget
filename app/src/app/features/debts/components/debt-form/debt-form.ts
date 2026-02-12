@@ -6,7 +6,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,24 +25,20 @@ export class DebtForm {
   private readonly fb = inject(FormBuilder);
 
   readonly debt = input<Debt | null>(null);
+  readonly sens = input(DebtType.EMPRUNT);
   readonly saved = output<DebtRequest>();
   readonly cancelled = output<void>();
   readonly deleted = output<string>();
-
-  readonly showDeleteConfirm = signal(false);
 
   readonly isEditMode = computed(() => this.debt() !== null);
 
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
-    sens: [DebtType.EMPRUNT, [Validators.required]],
     date: [new Date().toISOString().split('T')[0], [Validators.required]],
     rembourse: [false],
     categoryId: [''],
   });
-
-  readonly DebtType = DebtType;
 
   constructor() {
     effect(() => {
@@ -52,7 +47,6 @@ export class DebtForm {
         this.form.patchValue({
           personne: d.personne,
           montant: String(d.montant),
-          sens: d.sens,
           date: d.date,
           rembourse: d.rembourse,
           categoryId: d.category?.id ?? '',
@@ -71,7 +65,7 @@ export class DebtForm {
     const request: DebtRequest = {
       personne: raw.personne,
       montant: Number(raw.montant),
-      sens: raw.sens,
+      sens: this.sens(),
       date: raw.date,
       rembourse: raw.rembourse,
       categoryId: raw.categoryId || undefined,
@@ -85,16 +79,7 @@ export class DebtForm {
   }
 
   onDelete(): void {
-    this.showDeleteConfirm.set(true);
-  }
-
-  onConfirmDelete(): void {
     this.deleted.emit(this.debt()!.id);
-    this.showDeleteConfirm.set(false);
-  }
-
-  onCancelDelete(): void {
-    this.showDeleteConfirm.set(false);
   }
 
   isInvalid(controlName: string): boolean {
