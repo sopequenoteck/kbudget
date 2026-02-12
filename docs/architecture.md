@@ -70,7 +70,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | id | UUID | Identifiant |
 | personne | String | Nom de la personne |
 | montant | BigDecimal | Montant |
-| sens | Enum | JE_DOIS / ON_ME_DOIT |
+| sens | Enum | EMPRUNT / PRET |
 | date | LocalDate | Date |
 | rembourse | Boolean | Rembourse ou non |
 | updatedAt | LocalDateTime | Date de mise a jour |

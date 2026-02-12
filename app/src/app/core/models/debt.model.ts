@@ -1,8 +1,8 @@
 import { Category } from './category.model';
 
 export enum DebtType {
-  JE_DOIS = 'JE_DOIS',
-  ON_ME_DOIT = 'ON_ME_DOIT',
+  EMPRUNT = 'EMPRUNT',
+  PRET = 'PRET',
 }
 
 export interface Debt {

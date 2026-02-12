@@ -125,7 +125,7 @@ app/src/styles/
 - **User** : email (unique), password (BCrypt), name. Clé : UUID.
 - **Transaction** : montant, libellé, type (DEPENSE/RECETTE), date, catégorie, note. FK → User.
 - **Subscription** : nom, montant, fréquence (MENSUEL/ANNUEL), dateDebut, actif. FK → User.
-- **Debt** : personne, montant, sens (JE_DOIS/ON_ME_DOIT), date, remboursé. FK → User.
+- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, remboursé. FK → User.
 
 Toutes les entités utilisent des UUID comme clés primaires.
 

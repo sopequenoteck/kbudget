@@ -22,15 +22,15 @@ describe('AmountPipe', () => {
     expect(result).toContain('€');
   });
 
-  it('should_format_with_plus_when_ON_ME_DOIT', () => {
-    const result = normalize(pipe.transform(500, 'ON_ME_DOIT'));
+  it('should_format_with_plus_when_PRET', () => {
+    const result = normalize(pipe.transform(500, 'PRET'));
     expect(result).toContain('+');
     expect(result).toContain('500,00');
     expect(result).toContain('€');
   });
 
-  it('should_format_with_minus_when_JE_DOIS', () => {
-    const result = normalize(pipe.transform(150, 'JE_DOIS'));
+  it('should_format_with_minus_when_EMPRUNT', () => {
+    const result = normalize(pipe.transform(150, 'EMPRUNT'));
     expect(result).toContain('-');
     expect(result).toContain('150,00');
     expect(result).toContain('€');

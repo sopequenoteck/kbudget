@@ -90,13 +90,13 @@ export class Dashboard {
 
   readonly totalJeDois = computed(() =>
     this.debts()
-      .filter((d) => d.sens === DebtType.JE_DOIS)
+      .filter((d) => d.sens === DebtType.EMPRUNT)
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
   readonly totalOnMeDoit = computed(() =>
     this.debts()
-      .filter((d) => d.sens === DebtType.ON_ME_DOIT)
+      .filter((d) => d.sens === DebtType.PRET)
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
@@ -238,11 +238,11 @@ export class Dashboard {
   }
 
   getDebtIcon(d: Debt): string {
-    return d.sens === DebtType.JE_DOIS ? '📤' : '📥';
+    return d.sens === DebtType.EMPRUNT ? '📤' : '📥';
   }
 
   getDebtValueClass(d: Debt): string {
-    return d.sens === DebtType.JE_DOIS ? 'amount-expense' : 'amount-income';
+    return d.sens === DebtType.EMPRUNT ? 'amount-expense' : 'amount-income';
   }
 
   onTransactionClick(t: Transaction): void {

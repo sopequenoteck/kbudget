@@ -17,7 +17,7 @@ const mockDebt: Debt = {
   id: 'uuid-1',
   personne: 'Alice',
   montant: 100,
-  sens: DebtType.JE_DOIS,
+  sens: DebtType.EMPRUNT,
   date: '2026-02-01',
   rembourse: false,
   category: null,
@@ -26,7 +26,7 @@ const mockDebt: Debt = {
 const mockRequest: DebtRequest = {
   personne: 'Alice',
   montant: 100,
-  sens: DebtType.JE_DOIS,
+  sens: DebtType.EMPRUNT,
   date: '2026-02-01',
 };
 

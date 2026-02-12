@@ -17,7 +17,7 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 
 type StatusFilter = 'ALL' | 'EN_COURS' | 'REMBOURSE';
-type SensFilter = 'ALL' | 'JE_DOIS' | 'ON_ME_DOIT';
+type SensFilter = 'ALL' | 'EMPRUNT' | 'PRET';
 
 @Component({
   selector: 'app-debts',
@@ -44,13 +44,13 @@ export class Debts {
 
   readonly totalJeDois = computed(() =>
     this.filteredDebts()
-      .filter((d) => d.sens === DebtType.JE_DOIS)
+      .filter((d) => d.sens === DebtType.EMPRUNT)
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
   readonly totalOnMeDoit = computed(() =>
     this.filteredDebts()
-      .filter((d) => d.sens === DebtType.ON_ME_DOIT)
+      .filter((d) => d.sens === DebtType.PRET)
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
@@ -95,11 +95,11 @@ export class Debts {
   }
 
   getIcon(debt: Debt): string {
-    return debt.sens === DebtType.JE_DOIS ? '\u{1F4B8}' : '\u{1F4B0}';
+    return debt.sens === DebtType.EMPRUNT ? '\u{1F4B8}' : '\u{1F4B0}';
   }
 
   getValueClass(debt: Debt): string {
-    return debt.sens === DebtType.JE_DOIS ? 'debt-owe' : 'debt-owed';
+    return debt.sens === DebtType.EMPRUNT ? 'debt-owe' : 'debt-owed';
   }
 
   onDebtPressed(debt: Debt): void {

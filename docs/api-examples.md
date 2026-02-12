@@ -183,7 +183,7 @@ Request :
 {
   "personne": "Thomas",
   "montant": 50.00,
-  "sens": "JE_DOIS",
+  "sens": "EMPRUNT",
   "date": "2026-02-01",
   "rembourse": false
 }
@@ -196,7 +196,7 @@ Response `200` :
   "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
   "personne": "Thomas",
   "montant": 50.00,
-  "sens": "JE_DOIS",
+  "sens": "EMPRUNT",
   "date": "2026-02-01",
   "rembourse": false
 }
@@ -210,7 +210,7 @@ Request :
 {
   "personne": "Thomas",
   "montant": 50.00,
-  "sens": "JE_DOIS",
+  "sens": "EMPRUNT",
   "date": "2026-02-01",
   "rembourse": true
 }
@@ -223,7 +223,7 @@ Response `200` :
   "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
   "personne": "Thomas",
   "montant": 50.00,
-  "sens": "JE_DOIS",
+  "sens": "EMPRUNT",
   "date": "2026-02-01",
   "rembourse": true
 }
@@ -239,7 +239,7 @@ Response `200` :
     "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
     "personne": "Thomas",
     "montant": 50.00,
-    "sens": "JE_DOIS",
+    "sens": "EMPRUNT",
     "date": "2026-02-01",
     "rembourse": false
   },
@@ -247,7 +247,7 @@ Response `200` :
     "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
     "personne": "Marie",
     "montant": 25.00,
-    "sens": "ON_ME_DOIT",
+    "sens": "PRET",
     "date": "2026-01-20",
     "rembourse": false
   }
@@ -260,7 +260,7 @@ Response `200` :
 |------|---------|
 | `TransactionType` | `DEPENSE`, `RECETTE` |
 | `Frequency` | `MENSUEL`, `ANNUEL` |
-| `DebtType` | `JE_DOIS`, `ON_ME_DOIT` |
+| `DebtType` | `EMPRUNT`, `PRET` |
 
 ## Voir aussi
 

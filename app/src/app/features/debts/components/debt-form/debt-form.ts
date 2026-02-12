@@ -42,7 +42,7 @@ export class DebtForm {
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
-    sens: [DebtType.JE_DOIS, [Validators.required]],
+    sens: [DebtType.EMPRUNT, [Validators.required]],
     date: [new Date().toISOString().split('T')[0], [Validators.required]],
     rembourse: [false],
     categoryId: [''],

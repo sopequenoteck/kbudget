@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-const POSITIVE_TYPES = ['RECETTE', 'ON_ME_DOIT'];
-const NEGATIVE_TYPES = ['DEPENSE', 'JE_DOIS'];
+const POSITIVE_TYPES = ['RECETTE', 'PRET'];
+const NEGATIVE_TYPES = ['DEPENSE', 'EMPRUNT'];
 
 const formatter = new Intl.NumberFormat('fr-FR', {
   style: 'currency',

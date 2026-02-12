@@ -22,17 +22,17 @@
   <div class="type-toggle" role="group" aria-label="Sens de la dette">
     <button
       type="button"
-      [class.active]="form.get('sens')?.value === DebtType.JE_DOIS"
-      [attr.aria-pressed]="form.get('sens')?.value === DebtType.JE_DOIS"
-      (click)="form.get('sens')?.setValue(DebtType.JE_DOIS)"
+      [class.active]="form.get('sens')?.value === DebtType.EMPRUNT"
+      [attr.aria-pressed]="form.get('sens')?.value === DebtType.EMPRUNT"
+      (click)="form.get('sens')?.setValue(DebtType.EMPRUNT)"
     >
       Emprunt
     </button>
     <button
       type="button"
-      [class.active]="form.get('sens')?.value === DebtType.ON_ME_DOIT"
-      [attr.aria-pressed]="form.get('sens')?.value === DebtType.ON_ME_DOIT"
-      (click)="form.get('sens')?.setValue(DebtType.ON_ME_DOIT)"
+      [class.active]="form.get('sens')?.value === DebtType.PRET"
+      [attr.aria-pressed]="form.get('sens')?.value === DebtType.PRET"
+      (click)="form.get('sens')?.setValue(DebtType.PRET)"
     >
       Pret
     </button>

@@ -144,7 +144,7 @@ Declenchee par le handler generique `Exception`. Le message est toujours le meme
 |-------|-------------|:-----------:|
 | `personne` | `@NotBlank`, `@Size(max=255)` | oui |
 | `montant` | `@NotNull`, `@Positive` | oui |
-| `sens` | `@NotNull`, enum `DebtType` (JE_DOIS, ON_ME_DOIT) | oui |
+| `sens` | `@NotNull`, enum `DebtType` (EMPRUNT, PRET) | oui |
 | `date` | `@NotNull`, `LocalDate` | oui |
 | `rembourse` | `Boolean` | non |
 

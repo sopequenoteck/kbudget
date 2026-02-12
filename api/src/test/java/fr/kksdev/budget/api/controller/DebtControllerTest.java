@@ -75,14 +75,14 @@ class DebtControllerTest {
     void should_return_201_when_create_debt() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
 
         when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
         mockMvc.perform(post("/debts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(debtJson("Alice", "100.00", "JE_DOIS", "2026-02-01")))
+                        .content(debtJson("Alice", "100.00", "EMPRUNT", "2026-02-01")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.personne").value("Alice"))
                 .andExpect(jsonPath("$.rembourse").value(false));
@@ -92,7 +92,7 @@ class DebtControllerTest {
     void should_return_200_when_get_all_debts() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
 
         when(debtService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -106,7 +106,7 @@ class DebtControllerTest {
     void should_return_200_when_get_unpaid_debts() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
 
         when(debtService.getUnpaidByUser(userId)).thenReturn(List.of(response));
 
@@ -121,7 +121,7 @@ class DebtControllerTest {
     void should_return_200_when_get_debt_by_id() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
 
         when(debtService.getById(debtId, userId)).thenReturn(response);
 
@@ -135,7 +135,7 @@ class DebtControllerTest {
     void should_return_200_when_update_debt() throws Exception {
         var response = new DebtResponse(
                 debtId, "Bob", new BigDecimal("200.00"),
-                DebtType.ON_ME_DOIT, LocalDate.of(2026, 2, 5), true, null);
+                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null);
 
         when(debtService.update(eq(debtId), any(DebtRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -143,7 +143,7 @@ class DebtControllerTest {
         mockMvc.perform(put("/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(debtJson("Bob", "200.00", "ON_ME_DOIT", "2026-02-05")))
+                        .content(debtJson("Bob", "200.00", "PRET", "2026-02-05")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personne").value("Bob"));
     }

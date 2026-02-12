@@ -54,7 +54,7 @@ class DebtServiceTest {
                 .id(debtId)
                 .personne("Alice")
                 .montant(new BigDecimal("100.00"))
-                .sens(DebtType.JE_DOIS)
+                .sens(DebtType.EMPRUNT)
                 .date(LocalDate.of(2026, 2, 1))
                 .rembourse(false)
                 .category(null)
@@ -66,7 +66,7 @@ class DebtServiceTest {
     void should_create_debt_when_valid_request() {
         var user = buildUser();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.JE_DOIS, LocalDate.of(2026, 2, 1), null, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null);
         var saved = buildDebt(user);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -138,7 +138,7 @@ class DebtServiceTest {
         var user = buildUser();
         var existing = buildDebt(user);
         var request = new DebtRequest("Bob", new BigDecimal("200.00"),
-                DebtType.ON_ME_DOIT, LocalDate.of(2026, 2, 5), true, null);
+                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(existing));
         when(debtRepository.save(any(Debt.class))).thenReturn(existing);
