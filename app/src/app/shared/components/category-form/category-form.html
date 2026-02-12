@@ -1,0 +1,52 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="category-form">
+  <div class="category-form__field">
+    <label for="categoryNom">Nom</label>
+    <input
+      id="categoryNom"
+      type="text"
+      formControlName="nom"
+      maxlength="30"
+      placeholder="Nom de la categorie"
+    />
+    @if (form.get('nom')?.touched && form.get('nom')?.invalid) {
+      <span class="category-form__error">
+        {{ form.get('nom')?.hasError('required') ? 'Nom requis' : '30 caracteres maximum' }}
+      </span>
+    }
+  </div>
+
+  <div class="category-form__field">
+    <span id="iconLabel" class="category-form__label">Icone</span>
+    @if (!selectedEmoji()) {
+      <span class="category-form__hint">Choisissez un emoji</span>
+    }
+    <app-emoji-grid [selected]="selectedEmoji()" (emojiSelected)="onEmojiSelected($event)" aria-labelledby="iconLabel" />
+  </div>
+
+  <div class="category-form__field">
+    <span id="colorLabel" class="category-form__label">Couleur</span>
+    <div class="category-form__colors" role="radiogroup" aria-labelledby="colorLabel">
+      @for (color of colors; track color) {
+        <button
+          type="button"
+          class="category-form__color-swatch"
+          [class.active]="selectedColor() === color"
+          [style.background-color]="color"
+          (click)="onColorSelected(color)"
+          [attr.aria-label]="'Couleur ' + color"
+        ></button>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="category-form__error-banner">{{ errorMessage() }}</div>
+  }
+
+  <div class="category-form__actions">
+    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+    <button type="submit" class="btn-primary" [disabled]="submitting() || !selectedEmoji()">
+      {{ isEditMode ? 'Modifier' : 'Creer' }}
+    </button>
+  </div>
+</form>

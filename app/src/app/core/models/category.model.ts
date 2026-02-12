@@ -3,6 +3,7 @@ export interface Category {
   nom: string;
   icone: string;
   couleur: string;
+  isSystem: boolean;
 }
 
 export interface CategoryRequest {
