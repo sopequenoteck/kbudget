@@ -40,32 +40,35 @@
 
 <app-fab
   [isOpen]="speedDialOpen()"
-  [isHidden]="modalOpen()"
+  [isHidden]="modalService.modalOpen()"
   (toggled)="onFabToggle()"
   (actionSelected)="onSpeedDialAction($event)"
 />
 
-<app-modal [isOpen]="modalOpen()" [title]="modalTitle()" (closed)="onModalClose()">
-  @switch (activeModal()) {
+<app-modal [isOpen]="modalService.modalOpen()" [title]="modalService.modalTitle()" (closed)="onModalClose()">
+  @switch (modalService.activeModal()) {
     @case ('transaction') {
       <app-transaction-form
-        [transaction]="editingTransaction()"
+        [transaction]="$any(modalService.editingEntity())"
         (saved)="onTransactionSaved($event)"
         (cancelled)="onModalClose()"
+        (deleted)="onTransactionDeleted($event)"
       />
     }
     @case ('subscription') {
       <app-subscription-form
-        [subscription]="editingSubscription()"
+        [subscription]="$any(modalService.editingEntity())"
         (saved)="onSubscriptionSaved($event)"
         (cancelled)="onModalClose()"
+        (deleted)="onSubscriptionDeleted($event)"
       />
     }
     @case ('debt') {
       <app-debt-form
-        [debt]="editingDebt()"
+        [debt]="$any(modalService.editingEntity())"
         (saved)="onDebtSaved($event)"
         (cancelled)="onModalClose()"
+        (deleted)="onDebtDeleted($event)"
       />
     }
   }

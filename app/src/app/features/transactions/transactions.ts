@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { forkJoin } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { TransactionService } from '../../core/services/transaction';
+import { ModalService } from '../../core/services/modal.service';
 import { Transaction, TransactionType, MonthlySummary } from '../../core/models/transaction.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -25,6 +26,7 @@ import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 })
 export class Transactions {
   private readonly transactionService = inject(TransactionService);
+  private readonly modalService = inject(ModalService);
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
   readonly selectedYear = signal(new Date().getFullYear());
@@ -117,5 +119,9 @@ export class Transactions {
 
   getValueClass(transaction: Transaction): string {
     return transaction.type === TransactionType.RECETTE ? 'amount-income' : 'amount-expense';
+  }
+
+  onTransactionPressed(transaction: Transaction): void {
+    this.modalService.openModal('transaction', transaction);
   }
 }

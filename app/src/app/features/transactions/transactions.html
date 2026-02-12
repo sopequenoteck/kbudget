@@ -71,6 +71,7 @@
           [value]="transaction.montant | amount: transaction.type"
           [rightSubtitle]="transaction.date | relativeDate"
           [valueClass]="getValueClass(transaction)"
+          (pressed)="onTransactionPressed(transaction)"
         />
       </li>
     }

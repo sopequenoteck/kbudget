@@ -91,6 +91,7 @@
           [value]="debt.montant | amount"
           [subtitle]="debt.date | relativeDate"
           [valueClass]="getValueClass(debt)"
+          (pressed)="onDebtPressed(debt)"
         />
       </li>
     }

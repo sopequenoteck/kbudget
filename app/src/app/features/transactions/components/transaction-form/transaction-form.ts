@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -32,6 +33,9 @@ export class TransactionForm {
   readonly transaction = input<Transaction | null>(null);
   readonly saved = output<TransactionRequest>();
   readonly cancelled = output<void>();
+  readonly deleted = output<string>();
+
+  readonly showDeleteConfirm = signal(false);
 
   readonly categories = toSignal(this.categoryService.getAll(), {
     initialValue: [],
@@ -87,6 +91,19 @@ export class TransactionForm {
 
   onCancel(): void {
     this.cancelled.emit();
+  }
+
+  onDelete(): void {
+    this.showDeleteConfirm.set(true);
+  }
+
+  onConfirmDelete(): void {
+    this.deleted.emit(this.transaction()!.id);
+    this.showDeleteConfirm.set(false);
+  }
+
+  onCancelDelete(): void {
+    this.showDeleteConfirm.set(false);
   }
 
   isInvalid(controlName: string): boolean {

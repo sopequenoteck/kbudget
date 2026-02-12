@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   effect,
   inject,
+  isDevMode,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { DebtService } from '../../../core/services/debt';
+import { ModalService, type ModalType } from '../../../core/services/modal.service';
 import { type Transaction, type TransactionRequest } from '../../../core/models/transaction.model';
 import {
   type Subscription,
@@ -23,14 +24,8 @@ import { type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
-import { Fab, type ModalType } from '../fab/fab';
+import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
-
-const MODAL_TITLES: Record<ModalType, string> = {
-  transaction: 'Nouvelle transaction',
-  subscription: 'Nouvel abonnement',
-  debt: 'Nouvelle dette',
-};
 
 @Component({
   selector: 'app-shell',
@@ -54,6 +49,7 @@ export class Shell {
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
+  readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
   );
@@ -61,31 +57,12 @@ export class Shell {
   readonly userName = this.authService.currentUser;
   readonly sidebarOpen = signal(false);
   readonly speedDialOpen = signal(false);
-  readonly activeModal = signal<ModalType | null>(null);
-  readonly editingTransaction = signal<Transaction | null>(null);
-  readonly editingSubscription = signal<Subscription | null>(null);
-  readonly editingDebt = signal<Debt | null>(null);
-  readonly modalOpen = computed(() => this.activeModal() !== null);
-  readonly modalTitle = computed(() => {
-    const type = this.activeModal();
-    if (!type) return '';
-    if (type === 'transaction' && this.editingTransaction()) {
-      return 'Modifier la transaction';
-    }
-    if (type === 'subscription' && this.editingSubscription()) {
-      return "Modifier l'abonnement";
-    }
-    if (type === 'debt' && this.editingDebt()) {
-      return 'Modifier la dette';
-    }
-    return MODAL_TITLES[type];
-  });
 
   constructor() {
     effect(() => {
       this.navigationEnd();
       this.speedDialOpen.set(false);
-      this.activeModal.set(null);
+      this.modalService.closeModal();
     });
   }
 
@@ -111,61 +88,67 @@ export class Shell {
 
   onSpeedDialAction(type: ModalType): void {
     this.speedDialOpen.set(false);
-    this.activeModal.set(type);
-  }
-
-  openEditTransaction(transaction: Transaction): void {
-    this.editingTransaction.set(transaction);
-    this.activeModal.set('transaction');
-  }
-
-  openEditSubscription(subscription: Subscription): void {
-    this.editingSubscription.set(subscription);
-    this.activeModal.set('subscription');
-  }
-
-  openEditDebt(debt: Debt): void {
-    this.editingDebt.set(debt);
-    this.activeModal.set('debt');
+    this.modalService.openModal(type);
   }
 
   onModalClose(): void {
-    this.activeModal.set(null);
-    this.editingTransaction.set(null);
-    this.editingSubscription.set(null);
-    this.editingDebt.set(null);
+    this.modalService.closeModal();
   }
 
   async onTransactionSaved(request: TransactionRequest): Promise<void> {
-    const editing = this.editingTransaction();
+    const editing = this.modalService.editingEntity() as Transaction | null;
     if (editing) {
       await firstValueFrom(this.transactionService.update(editing.id, request));
     } else {
       await firstValueFrom(this.transactionService.create(request));
     }
-    this.activeModal.set(null);
-    this.editingTransaction.set(null);
+    this.modalService.closeModal();
   }
 
   async onSubscriptionSaved(request: SubscriptionRequest): Promise<void> {
-    const editing = this.editingSubscription();
+    const editing = this.modalService.editingEntity() as Subscription | null;
     if (editing) {
       await firstValueFrom(this.subscriptionService.update(editing.id, request));
     } else {
       await firstValueFrom(this.subscriptionService.create(request));
     }
-    this.activeModal.set(null);
-    this.editingSubscription.set(null);
+    this.modalService.closeModal();
   }
 
   async onDebtSaved(request: DebtRequest): Promise<void> {
-    const editing = this.editingDebt();
+    const editing = this.modalService.editingEntity() as Debt | null;
     if (editing) {
       await firstValueFrom(this.debtService.update(editing.id, request));
     } else {
       await firstValueFrom(this.debtService.create(request));
     }
-    this.activeModal.set(null);
-    this.editingDebt.set(null);
+    this.modalService.closeModal();
+  }
+
+  async onTransactionDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.transactionService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete transaction:', error);
+    }
+  }
+
+  async onSubscriptionDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.subscriptionService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete subscription:', error);
+    }
+  }
+
+  async onDebtDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.debtService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete debt:', error);
+    }
   }
 }

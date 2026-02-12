@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SubscriptionService } from '../../core/services/subscription';
+import { ModalService } from '../../core/services/modal.service';
 import { Subscription, Frequency } from '../../core/models/subscription.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -24,6 +25,7 @@ type StatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 })
 export class Subscriptions {
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly modalService = inject(ModalService);
 
   readonly statusFilter = signal<StatusFilter>('ALL');
   readonly loading = signal(true);
@@ -104,5 +106,9 @@ export class Subscriptions {
     }).format(subscription.montant);
 
     return subscription.frequence === Frequency.MENSUEL ? `${formatted}/mois` : `${formatted}/an`;
+  }
+
+  onSubscriptionPressed(subscription: Subscription): void {
+    this.modalService.openModal('subscription', subscription);
   }
 }

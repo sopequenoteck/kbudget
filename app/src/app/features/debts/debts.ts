@@ -10,6 +10,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { DebtService } from '../../core/services/debt';
+import { ModalService } from '../../core/services/modal.service';
 import { Debt, DebtType } from '../../core/models/debt.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -27,6 +28,7 @@ type SensFilter = 'ALL' | 'JE_DOIS' | 'ON_ME_DOIT';
 })
 export class Debts {
   private readonly debtService = inject(DebtService);
+  private readonly modalService = inject(ModalService);
 
   readonly loading = signal(true);
   readonly error = signal(false);
@@ -98,5 +100,9 @@ export class Debts {
 
   getValueClass(debt: Debt): string {
     return debt.sens === DebtType.JE_DOIS ? 'debt-owe' : 'debt-owed';
+  }
+
+  onDebtPressed(debt: Debt): void {
+    this.modalService.openModal('debt', debt);
   }
 }

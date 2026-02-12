@@ -65,4 +65,20 @@
       {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
+
+  @if (isEditMode()) {
+    <div class="delete-section">
+      @if (showDeleteConfirm()) {
+        <div class="delete-confirm">
+          <span class="delete-confirm__message">Supprimer cet element ?</span>
+          <div class="delete-confirm__actions">
+            <button type="button" class="btn-danger" (click)="onConfirmDelete()">Confirmer</button>
+            <button type="button" class="btn-outline" (click)="onCancelDelete()">Annuler</button>
+          </div>
+        </div>
+      } @else {
+        <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+      }
+    </div>
+  }
 </form>

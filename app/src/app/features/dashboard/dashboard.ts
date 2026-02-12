@@ -21,7 +21,7 @@ import {
 } from '../../core/models/transaction.model';
 import { type Subscription, Frequency } from '../../core/models/subscription.model';
 import { type Debt, DebtType } from '../../core/models/debt.model';
-import { Shell } from '../../shared/components/shell/shell';
+import { ModalService } from '../../core/services/modal.service';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
@@ -37,7 +37,7 @@ export class Dashboard {
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
-  private readonly shell = inject(Shell);
+  private readonly modalService = inject(ModalService);
 
   // -- Bilan mensuel (US1) --
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -246,14 +246,14 @@ export class Dashboard {
   }
 
   onTransactionClick(t: Transaction): void {
-    this.shell.openEditTransaction(t);
+    this.modalService.openModal('transaction', t);
   }
 
   onSubscriptionClick(s: Subscription): void {
-    this.shell.openEditSubscription(s);
+    this.modalService.openModal('subscription', s);
   }
 
   onDebtClick(d: Debt): void {
-    this.shell.openEditDebt(d);
+    this.modalService.openModal('debt', d);
   }
 }

@@ -42,6 +42,15 @@ button {
   }
 }
 
+.btn-danger {
+  background-color: var(--text-error);
+  color: var(--text-inverse);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
 .btn-block {
   width: 100%;
 }
