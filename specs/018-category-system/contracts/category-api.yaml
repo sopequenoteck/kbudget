@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Budget API - Categories
+  version: 2.0.0
+  description: |
+    Endpoints pour la gestion des catégories (feature 018-category-system).
+    Modifications par rapport à l'API existante :
+    - CategoryResponse inclut désormais `isSystem` (boolean)
+    - PUT/DELETE interdits sur catégories système (is_system = true)
+    - POST /subscriptions et POST /debts attribuent une catégorie système par défaut si categoryId absent
+    - Nom max 30 caractères (était 255), unicité case-insensitive
+
+paths:
+  /api/categories:
+    get:
+      summary: Lister les catégories de l'utilisateur
+      description: |
+        Retourne toutes les catégories (système + personnalisées) de l'utilisateur authentifié, triées par nom.
+        Le filtrage se fait côté client (pas de paramètre search).
+      operationId: getAllCategories
+      tags: [Catégories]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des catégories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          description: Non authentifié
+
+    post:
+      summary: Créer une catégorie personnalisée
+      description: |
+        Crée une nouvelle catégorie pour l'utilisateur authentifié.
+        Le nom doit être unique par utilisateur (case-insensitive).
+        Ne peut pas créer de catégorie système via cet endpoint.
+      operationId: createCategory
+      tags: [Catégories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '201':
+          description: Catégorie créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '400':
+          description: Validation error ou nom en doublon (case-insensitive)
+        '401':
+          description: Non authentifié
+
+  /api/categories/{id}:
+    get:
+      summary: Consulter une catégorie
+      operationId: getCategoryById
+      tags: [Catégories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '200':
+          description: Détail catégorie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          description: Non authentifié
+        '404':
+          description: Catégorie non trouvée
+
+    put:
+      summary: Modifier une catégorie
+      description: |
+        Modifier le nom et/ou l'icône d'une catégorie personnalisée.
+        Interdit sur les catégories système (isSystem = true) → 400.
+      operationId: updateCategory
+      tags: [Catégories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        '200':
+          description: Catégorie modifiée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '400':
+          description: Catégorie système non modifiable, validation error, ou nom en doublon
+        '401':
+          description: Non authentifié
+        '404':
+          description: Catégorie non trouvée
+
+    delete:
+      summary: Supprimer une catégorie
+      description: |
+        Supprimer une catégorie personnalisée.
+        Interdit sur les catégories système (isSystem = true) → 400.
+        Les items liés (transactions, abonnements, dettes) perdent leur catégorie (ON DELETE SET NULL).
+      operationId: deleteCategory
+      tags: [Catégories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+      responses:
+        '204':
+          description: Catégorie supprimée
+        '400':
+          description: Catégorie système non supprimable
+        '401':
+          description: Non authentifié
+        '404':
+          description: Catégorie non trouvée
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CategoryId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CategoryRequest:
+      type: object
+      required: [nom, icone, couleur]
+      properties:
+        nom:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: Nom de la catégorie (unique par utilisateur, case-insensitive)
+          example: Courses
+        icone:
+          type: string
+          maxLength: 50
+          description: Emoji représentant la catégorie
+          example: "🛒"
+        couleur:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Couleur hex (choisie parmi la palette prédéfinie)
+          example: "#22c55e"
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+          example: Courses
+        icone:
+          type: string
+          example: "🛒"
+        couleur:
+          type: string
+          example: "#22c55e"
+        isSystem:
+          type: boolean
+          description: |
+            true si catégorie système (non supprimable, non modifiable).
+            Les catégories système sont : "Abonnement" (🔄) et "Dette" (💰).
