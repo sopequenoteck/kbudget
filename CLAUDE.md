@@ -220,6 +220,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/core` (signals, input, output, inject), composants existants (`FormField`, `Shell`, `Modal`) (009-transaction-form)
 - N/A (composant présentationnel — pas de persistance directe) (009-transaction-form)
 - N/A (composant presentationnel — pas de persistance directe) (010-subscription-form)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/common` (NgClass), RxJS (HTTP uniquement) (012-transaction-list)
+- N/A (composant présentationnel — données via TransactionService existant) (012-transaction-list)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS

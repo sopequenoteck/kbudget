@@ -1,1 +1,78 @@
-<p>transactions works!</p>
+<section class="month-selector">
+  <button class="month-selector__btn" (click)="prevMonth()" aria-label="Mois précédent">◀</button>
+  <span class="month-selector__label">{{ selectedMonthLabel() }}</span>
+  <button class="month-selector__btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
+</section>
+
+@if (summary(); as s) {
+  <section class="summary">
+    <div class="summary__card summary__card--income">
+      <span class="summary__label">Recettes</span>
+      <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' }}</span>
+    </div>
+    <div class="summary__card summary__card--expense">
+      <span class="summary__label">Dépenses</span>
+      <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' }}</span>
+    </div>
+    <div class="summary__card summary__card--balance">
+      <span class="summary__label">Solde</span>
+      <span class="summary__value" [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
+        {{ s.solde | amount }}
+      </span>
+    </div>
+  </section>
+}
+
+<section class="type-filter" role="group" aria-label="Filtrer par type">
+  <button
+    class="type-filter__btn"
+    [class.active]="typeFilter() === 'ALL'"
+    (click)="setTypeFilter('ALL')"
+  >
+    Tous
+  </button>
+  <button
+    class="type-filter__btn"
+    [class.active]="typeFilter() === 'DEPENSE'"
+    (click)="setTypeFilter('DEPENSE')"
+  >
+    Dépenses
+  </button>
+  <button
+    class="type-filter__btn"
+    [class.active]="typeFilter() === 'RECETTE'"
+    (click)="setTypeFilter('RECETTE')"
+  >
+    Recettes
+  </button>
+</section>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+  </div>
+} @else if (filteredTransactions().length === 0) {
+  <div class="state-empty">
+    <p>Aucune transaction</p>
+  </div>
+} @else {
+  <ul class="transaction-list">
+    @for (transaction of filteredTransactions(); track transaction.id) {
+      <li>
+        <app-list-item
+          [icon]="getIcon(transaction)"
+          [title]="transaction.libelle"
+          [subtitle]="transaction.category?.nom ?? ''"
+          [value]="transaction.montant | amount: transaction.type"
+          [rightSubtitle]="transaction.date | relativeDate"
+          [valueClass]="getValueClass(transaction)"
+        />
+      </li>
+    }
+  </ul>
+}
