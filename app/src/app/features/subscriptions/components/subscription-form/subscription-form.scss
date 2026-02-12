@@ -23,13 +23,6 @@
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   cursor: pointer;
-
-  input[type='checkbox'] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--color-primary);
-    cursor: pointer;
-  }
 }
 
 // -- Boutons d'action --

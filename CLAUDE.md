@@ -236,6 +236,7 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - PostgreSQL 15+ via Spring Data JPA, Flyway migrations (018-category-system)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/forms` (ReactiveFormsModule), `@angular/cdk` (a11y) (019-form-ux-refonte)
 - N/A (pas de changement de persistance) (019-form-ux-refonte)
+- TypeScript 5.9.2 / Angular 21.1.0, SCSS + `@angular/forms` (ReactiveFormsModule) (020-fix-checkbox-forms)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS

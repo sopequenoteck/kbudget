@@ -2,7 +2,7 @@
 // Forms — Styles globaux pour inputs, textarea, select
 // =============================================================================
 
-input,
+input:not([type='checkbox']):not([type='radio']),
 textarea,
 select {
   width: 100%;
@@ -46,4 +46,15 @@ select {
 textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+// =============================================================================
+// Checkboxes & Radios — styles globaux dédiés
+// =============================================================================
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+  accent-color: var(--color-primary);
+  cursor: pointer;
 }
