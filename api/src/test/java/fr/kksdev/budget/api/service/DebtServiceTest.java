@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import fr.kksdev.budget.api.dto.response.CategoryResponse;
+import fr.kksdev.budget.api.model.Category;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +41,9 @@ class DebtServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private CategoryService categoryService;
 
     @InjectMocks
     private DebtService debtService;
@@ -69,6 +75,7 @@ class DebtServiceTest {
                 DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null);
         var saved = buildDebt(user);
 
+        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
 
@@ -77,8 +84,42 @@ class DebtServiceTest {
         assertThat(response.id()).isEqualTo(debtId);
         assertThat(response.personne()).isEqualTo("Alice");
         assertThat(response.rembourse()).isFalse();
-        assertThat(response.category()).isNull();
         verify(debtRepository).save(any(Debt.class));
+    }
+
+    @Test
+    void should_assignSystemCategory_when_noCategoryProvided() {
+        var user = buildUser();
+        var systemCat = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Dette")
+                .icone("\uD83D\uDCB0")
+                .couleur("#ef4444")
+                .isSystem(true)
+                .user(user)
+                .build();
+        var saved = Debt.builder()
+                .id(debtId)
+                .personne("Alice")
+                .montant(new BigDecimal("100.00"))
+                .sens(DebtType.EMPRUNT)
+                .date(LocalDate.of(2026, 2, 1))
+                .rembourse(false)
+                .category(systemCat)
+                .user(user)
+                .build();
+        var request = new DebtRequest("Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null);
+
+        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(debtRepository.save(any(Debt.class))).thenReturn(saved);
+
+        DebtResponse response = debtService.create(request, userId);
+
+        assertThat(response.category()).isNotNull();
+        assertThat(response.category().nom()).isEqualTo("Dette");
+        assertThat(response.category().isSystem()).isTrue();
     }
 
     @Test

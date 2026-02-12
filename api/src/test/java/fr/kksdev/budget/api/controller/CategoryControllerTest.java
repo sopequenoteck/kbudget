@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -69,7 +70,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_201_when_create_category() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733");
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
 
         when(categoryService.create(any(CategoryRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -80,24 +81,26 @@ class CategoryControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(categoryId.toString()))
                 .andExpect(jsonPath("$.nom").value("Alimentation"))
-                .andExpect(jsonPath("$.couleur").value("#FF5733"));
+                .andExpect(jsonPath("$.couleur").value("#FF5733"))
+                .andExpect(jsonPath("$.isSystem").value(false));
     }
 
     @Test
     void should_return_200_when_get_all_categories() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733");
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
 
         when(categoryService.getAllByUser(userId)).thenReturn(List.of(response));
 
         mockMvc.perform(get("/categories")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nom").value("Alimentation"));
+                .andExpect(jsonPath("$[0].nom").value("Alimentation"))
+                .andExpect(jsonPath("$[0].isSystem").value(false));
     }
 
     @Test
     void should_return_200_when_get_category_by_id() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733");
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
 
         when(categoryService.getById(categoryId, userId)).thenReturn(response);
 
@@ -109,7 +112,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_200_when_update_category() throws Exception {
-        var response = new CategoryResponse(categoryId, "Transport", "\uD83D\uDE97", "#3498DB");
+        var response = new CategoryResponse(categoryId, "Transport", "\uD83D\uDE97", "#3498DB", false);
 
         when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -157,6 +160,40 @@ class CategoryControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Test", "\uD83C\uDF54", "invalid")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_create_with_duplicate_name() throws Exception {
+        when(categoryService.create(any(CategoryRequest.class), any(UUID.class)))
+                .thenThrow(new IllegalArgumentException("Une catégorie avec ce nom existe déjà"));
+
+        mockMvc.perform(post("/categories")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(categoryJson("Existing", "\uD83C\uDF54", "#FF5733")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_deleteSystemCategory() throws Exception {
+        doThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être supprimées"))
+                .when(categoryService).delete(categoryId, userId);
+
+        mockMvc.perform(delete("/categories/{id}", categoryId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_updateSystemCategory() throws Exception {
+        when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
+                .thenThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être modifiées"));
+
+        mockMvc.perform(put("/categories/{id}", categoryId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(categoryJson("Renamed", "\uD83D\uDD04", "#6366f1")))
                 .andExpect(status().isBadRequest());
     }
 

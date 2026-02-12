@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import fr.kksdev.budget.api.dto.response.CategoryResponse;
+import fr.kksdev.budget.api.model.Category;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +41,9 @@ class SubscriptionServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private CategoryService categoryService;
 
     @InjectMocks
     private SubscriptionService subscriptionService;
@@ -69,6 +75,7 @@ class SubscriptionServiceTest {
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null);
         var saved = buildSubscription(user);
 
+        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
@@ -77,8 +84,42 @@ class SubscriptionServiceTest {
         assertThat(response.id()).isEqualTo(subscriptionId);
         assertThat(response.nom()).isEqualTo("Netflix");
         assertThat(response.actif()).isTrue();
-        assertThat(response.category()).isNull();
         verify(subscriptionRepository).save(any(Subscription.class));
+    }
+
+    @Test
+    void should_assignSystemCategory_when_noCategoryProvided() {
+        var user = buildUser();
+        var systemCat = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Abonnement")
+                .icone("\uD83D\uDD04")
+                .couleur("#6366f1")
+                .isSystem(true)
+                .user(user)
+                .build();
+        var saved = Subscription.builder()
+                .id(subscriptionId)
+                .nom("Netflix")
+                .montant(new BigDecimal("13.99"))
+                .frequence(Frequency.MENSUEL)
+                .dateDebut(LocalDate.of(2026, 1, 1))
+                .actif(true)
+                .category(systemCat)
+                .user(user)
+                .build();
+        var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null);
+
+        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(systemCat);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
+
+        SubscriptionResponse response = subscriptionService.create(request, userId);
+
+        assertThat(response.category()).isNotNull();
+        assertThat(response.category().nom()).isEqualTo("Abonnement");
+        assertThat(response.category().isSystem()).isTrue();
     }
 
     @Test
