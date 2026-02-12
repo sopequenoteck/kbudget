@@ -1,1 +1,98 @@
-<p>debts works!</p>
+@if (hasDebts()) {
+  <section class="summary">
+    <div class="summary__card">
+      <span class="summary__label">Je dois</span>
+      <span class="summary__value debt-owe">{{ totalJeDois() | amount }}</span>
+    </div>
+    <div class="summary__card">
+      <span class="summary__label">On me doit</span>
+      <span class="summary__value debt-owed">{{ totalOnMeDoit() | amount }}</span>
+    </div>
+    <div class="summary__card">
+      <span class="summary__label">Solde net</span>
+      <span class="summary__value" [ngClass]="netBalance() >= 0 ? 'debt-owed' : 'debt-owe'">
+        {{ netBalance() | amount }}
+      </span>
+    </div>
+  </section>
+}
+
+<section class="status-filter" role="group" aria-label="Filtrer par statut">
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'ALL'"
+    (click)="setStatusFilter('ALL')"
+  >
+    Tous
+  </button>
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'EN_COURS'"
+    (click)="setStatusFilter('EN_COURS')"
+  >
+    En cours
+  </button>
+  <button
+    class="status-filter__btn"
+    [class.active]="statusFilter() === 'REMBOURSE'"
+    (click)="setStatusFilter('REMBOURSE')"
+  >
+    Remboursé
+  </button>
+</section>
+
+<section class="sens-filter" role="group" aria-label="Filtrer par sens">
+  <button
+    class="sens-filter__btn"
+    [class.active]="sensFilter() === 'ALL'"
+    (click)="setSensFilter('ALL')"
+  >
+    Tous
+  </button>
+  <button
+    class="sens-filter__btn"
+    [class.active]="sensFilter() === 'JE_DOIS'"
+    (click)="setSensFilter('JE_DOIS')"
+  >
+    Je dois
+  </button>
+  <button
+    class="sens-filter__btn"
+    [class.active]="sensFilter() === 'ON_ME_DOIT'"
+    (click)="setSensFilter('ON_ME_DOIT')"
+  >
+    On me doit
+  </button>
+</section>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+  </div>
+} @else if (filteredDebts().length === 0) {
+  <div class="state-empty">
+    <p>Aucune dette</p>
+  </div>
+} @else {
+  <ul class="debt-list">
+    @for (debt of filteredDebts(); track debt.id) {
+      <li class="debt-item">
+        @if (debt.rembourse) {
+          <span class="badge-rembourse">Remboursé</span>
+        }
+        <app-list-item
+          [icon]="getIcon(debt)"
+          [title]="debt.personne"
+          [value]="debt.montant | amount"
+          [subtitle]="debt.date | relativeDate"
+          [valueClass]="getValueClass(debt)"
+        />
+      </li>
+    }
+  </ul>
+}
