@@ -47,10 +47,31 @@
 />
 
 <app-modal [isOpen]="modalService.modalOpen()" [title]="modalService.modalTitle()" (closed)="onModalClose()">
+  @if (modalService.activeModal() === 'transaction') {
+    <div modal-header-actions class="type-toggle" role="group" aria-label="Type de transaction">
+      <button
+        type="button"
+        [class.active]="transactionType() === TransactionType.DEPENSE"
+        [attr.aria-pressed]="transactionType() === TransactionType.DEPENSE"
+        (click)="onTransactionTypeChange(TransactionType.DEPENSE)"
+      >
+        Depense
+      </button>
+      <button
+        type="button"
+        [class.active]="transactionType() === TransactionType.RECETTE"
+        [attr.aria-pressed]="transactionType() === TransactionType.RECETTE"
+        (click)="onTransactionTypeChange(TransactionType.RECETTE)"
+      >
+        Recette
+      </button>
+    </div>
+  }
   @switch (modalService.activeModal()) {
     @case ('transaction') {
       <app-transaction-form
         [transaction]="$any(modalService.editingEntity())"
+        [type]="transactionType()"
         (saved)="onTransactionSaved($event)"
         (cancelled)="onModalClose()"
         (deleted)="onTransactionDeleted($event)"

@@ -6,7 +6,6 @@ import {
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,24 +29,20 @@ export class TransactionForm {
   private readonly fb = inject(FormBuilder);
 
   readonly transaction = input<Transaction | null>(null);
+  readonly type = input(TransactionType.DEPENSE);
   readonly saved = output<TransactionRequest>();
   readonly cancelled = output<void>();
   readonly deleted = output<string>();
-
-  readonly showDeleteConfirm = signal(false);
 
   readonly isEditMode = computed(() => this.transaction() !== null);
 
   readonly form = this.fb.nonNullable.group({
     libelle: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
-    type: [TransactionType.DEPENSE, [Validators.required]],
     date: [new Date().toISOString().split('T')[0], [Validators.required]],
     categoryId: [''],
     note: ['', [Validators.maxLength(500)]],
   });
-
-  readonly TransactionType = TransactionType;
 
   constructor() {
     effect(() => {
@@ -56,7 +51,6 @@ export class TransactionForm {
         this.form.patchValue({
           libelle: tx.libelle,
           montant: String(tx.montant),
-          type: tx.type,
           date: tx.date,
           categoryId: tx.category?.id ?? '',
           note: tx.note ?? '',
@@ -75,7 +69,7 @@ export class TransactionForm {
     const request: TransactionRequest = {
       libelle: raw.libelle,
       montant: Number(raw.montant),
-      type: raw.type,
+      type: this.type(),
       date: raw.date,
       categoryId: raw.categoryId || undefined,
       note: raw.note || undefined,
@@ -89,16 +83,7 @@ export class TransactionForm {
   }
 
   onDelete(): void {
-    this.showDeleteConfirm.set(true);
-  }
-
-  onConfirmDelete(): void {
     this.deleted.emit(this.transaction()!.id);
-    this.showDeleteConfirm.set(false);
-  }
-
-  onCancelDelete(): void {
-    this.showDeleteConfirm.set(false);
   }
 
   isInvalid(controlName: string): boolean {

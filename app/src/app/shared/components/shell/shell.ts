@@ -15,7 +15,11 @@ import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { DebtService } from '../../../core/services/debt';
 import { ModalService, type ModalType } from '../../../core/services/modal.service';
-import { type Transaction, type TransactionRequest } from '../../../core/models/transaction.model';
+import {
+  type Transaction,
+  type TransactionRequest,
+  TransactionType,
+} from '../../../core/models/transaction.model';
 import {
   type Subscription,
   type SubscriptionRequest,
@@ -59,12 +63,22 @@ export class Shell {
   readonly userName = this.authService.currentUser;
   readonly sidebarOpen = signal(false);
   readonly speedDialOpen = signal(false);
+  readonly transactionType = signal(TransactionType.DEPENSE);
+  readonly TransactionType = TransactionType;
 
   constructor() {
     effect(() => {
       this.navigationEnd();
       this.speedDialOpen.set(false);
       this.modalService.closeModal();
+    });
+
+    effect(() => {
+      const modal = this.modalService.activeModal();
+      if (modal === 'transaction') {
+        const entity = this.modalService.editingEntity() as Transaction | null;
+        this.transactionType.set(entity?.type ?? TransactionType.DEPENSE);
+      }
     });
   }
 
@@ -82,6 +96,10 @@ export class Shell {
 
   onLogout(): void {
     this.authService.logout();
+  }
+
+  onTransactionTypeChange(type: TransactionType): void {
+    this.transactionType.set(type);
   }
 
   onFabToggle(): void {

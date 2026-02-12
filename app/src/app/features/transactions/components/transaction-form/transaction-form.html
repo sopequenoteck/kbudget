@@ -1,55 +1,40 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="transaction-form">
-  <app-form-field
-    label="Libelle"
-    fieldId="libelle"
-    [showError]="isInvalid('libelle')"
-    [errorMessage]="
-      form.get('libelle')?.hasError('required') ? 'Libelle requis' : '255 caracteres maximum'
-    "
-  >
-    <input id="libelle" type="text" formControlName="libelle" />
-  </app-form-field>
-
-  <app-form-field
-    label="Montant"
-    fieldId="montant"
-    [showError]="isInvalid('montant')"
-    [errorMessage]="'Le montant doit etre superieur a 0'"
-  >
-    <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-  </app-form-field>
-
-  <div class="type-toggle" role="group" aria-label="Type de transaction">
-    <button
-      type="button"
-      [class.active]="form.get('type')?.value === TransactionType.DEPENSE"
-      [attr.aria-pressed]="form.get('type')?.value === TransactionType.DEPENSE"
-      (click)="form.get('type')?.setValue(TransactionType.DEPENSE)"
+  <div class="form-row form-row--label-amount">
+    <app-form-field
+      label="Libelle"
+      fieldId="libelle"
+      [showError]="isInvalid('libelle')"
+      [errorMessage]="
+        form.get('libelle')?.hasError('required') ? 'Libelle requis' : '255 caracteres maximum'
+      "
     >
-      Depense
-    </button>
-    <button
-      type="button"
-      [class.active]="form.get('type')?.value === TransactionType.RECETTE"
-      [attr.aria-pressed]="form.get('type')?.value === TransactionType.RECETTE"
-      (click)="form.get('type')?.setValue(TransactionType.RECETTE)"
+      <input id="libelle" type="text" formControlName="libelle" />
+    </app-form-field>
+
+    <app-form-field
+      label="Montant"
+      fieldId="montant"
+      [showError]="isInvalid('montant')"
+      [errorMessage]="'Le montant doit etre superieur a 0'"
     >
-      Recette
-    </button>
+      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
+    </app-form-field>
   </div>
 
-  <app-form-field
-    label="Date"
-    fieldId="date"
-    [showError]="isInvalid('date')"
-    [errorMessage]="'Date requise'"
-  >
-    <input id="date" type="date" formControlName="date" />
-  </app-form-field>
+  <div class="form-row">
+    <app-form-field label="Categorie" fieldId="categoryId">
+      <app-category-picker formControlName="categoryId" />
+    </app-form-field>
 
-  <app-form-field label="Categorie" fieldId="categoryId">
-    <app-category-picker formControlName="categoryId" />
-  </app-form-field>
+    <app-form-field
+      label="Date"
+      fieldId="date"
+      [showError]="isInvalid('date')"
+      [errorMessage]="'Date requise'"
+    >
+      <input id="date" type="date" formControlName="date" />
+    </app-form-field>
+  </div>
 
   <app-form-field
     label="Note"
@@ -57,29 +42,16 @@
     [showError]="isInvalid('note')"
     [errorMessage]="'500 caracteres maximum'"
   >
-    <textarea id="note" formControlName="note" rows="3"></textarea>
+    <textarea id="note" formControlName="note" rows="2"></textarea>
   </app-form-field>
 
   <div class="form-actions">
+    @if (isEditMode()) {
+      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+    }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
     <button type="submit" class="btn-primary">
       {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
-
-  @if (isEditMode()) {
-    <div class="delete-section">
-      @if (showDeleteConfirm()) {
-        <div class="delete-confirm">
-          <span class="delete-confirm__message">Supprimer cet element ?</span>
-          <div class="delete-confirm__actions">
-            <button type="button" class="btn-danger" (click)="onConfirmDelete()">Confirmer</button>
-            <button type="button" class="btn-outline" (click)="onCancelDelete()">Annuler</button>
-          </div>
-        </div>
-      } @else {
-        <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-      }
-    </div>
-  }
 </form>
