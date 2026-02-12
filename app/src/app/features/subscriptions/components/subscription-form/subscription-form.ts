@@ -8,11 +8,11 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { CategoryService } from '../../../../core/services/category';
 import { FormField } from '../../../../shared/components/form-field/form-field';
+import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import {
   Frequency,
   Subscription,
@@ -21,14 +21,13 @@ import {
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, CategoryPicker],
   templateUrl: './subscription-form.html',
   styleUrl: './subscription-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubscriptionForm {
   private readonly fb = inject(FormBuilder);
-  private readonly categoryService = inject(CategoryService);
 
   readonly subscription = input<Subscription | null>(null);
   readonly saved = output<SubscriptionRequest>();
@@ -36,10 +35,6 @@ export class SubscriptionForm {
   readonly deleted = output<string>();
 
   readonly showDeleteConfirm = signal(false);
-
-  readonly categories = toSignal(this.categoryService.getAll(), {
-    initialValue: [],
-  });
 
   readonly isEditMode = computed(() => this.subscription() !== null);
 

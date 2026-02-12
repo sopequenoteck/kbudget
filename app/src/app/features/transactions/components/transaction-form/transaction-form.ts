@@ -8,11 +8,11 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { CategoryService } from '../../../../core/services/category';
 import { FormField } from '../../../../shared/components/form-field/form-field';
+import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import {
   Transaction,
   TransactionRequest,
@@ -21,14 +21,13 @@ import {
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, CategoryPicker],
   templateUrl: './transaction-form.html',
   styleUrl: './transaction-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionForm {
   private readonly fb = inject(FormBuilder);
-  private readonly categoryService = inject(CategoryService);
 
   readonly transaction = input<Transaction | null>(null);
   readonly saved = output<TransactionRequest>();
@@ -36,10 +35,6 @@ export class TransactionForm {
   readonly deleted = output<string>();
 
   readonly showDeleteConfirm = signal(false);
-
-  readonly categories = toSignal(this.categoryService.getAll(), {
-    initialValue: [],
-  });
 
   readonly isEditMode = computed(() => this.transaction() !== null);
 

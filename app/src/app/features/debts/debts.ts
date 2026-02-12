@@ -95,7 +95,7 @@ export class Debts {
   }
 
   getIcon(debt: Debt): string {
-    return debt.sens === DebtType.EMPRUNT ? '\u{1F4B8}' : '\u{1F4B0}';
+    return debt.category?.icone ?? (debt.sens === DebtType.EMPRUNT ? '\u{1F4B8}' : '\u{1F4B0}');
   }
 
   getValueClass(debt: Debt): string {

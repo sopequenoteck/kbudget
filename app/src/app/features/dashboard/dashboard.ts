@@ -238,7 +238,7 @@ export class Dashboard {
   }
 
   getDebtIcon(d: Debt): string {
-    return d.sens === DebtType.EMPRUNT ? '📤' : '📥';
+    return d.category?.icone ?? (d.sens === DebtType.EMPRUNT ? '📤' : '📥');
   }
 
   getDebtValueClass(d: Debt): string {

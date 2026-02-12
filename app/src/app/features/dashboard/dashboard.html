@@ -110,7 +110,7 @@
       @for (sub of activeSubscriptions(); track sub.id) {
         <li>
           <app-list-item
-            icon="🔄"
+            [icon]="sub.category?.icone ?? '🔄'"
             [title]="sub.nom"
             [value]="sub.montant | amount"
             [subtitle]="sub.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel'"

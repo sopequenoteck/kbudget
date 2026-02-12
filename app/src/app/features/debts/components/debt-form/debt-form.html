@@ -48,12 +48,7 @@
   </app-form-field>
 
   <app-form-field label="Categorie" fieldId="categoryId">
-    <select id="categoryId" formControlName="categoryId">
-      <option value="">Aucune categorie</option>
-      @for (cat of categories(); track cat.id) {
-        <option [value]="cat.id">{{ cat.nom }}</option>
-      }
-    </select>
+    <app-category-picker formControlName="categoryId" />
   </app-form-field>
 
   <label class="checkbox-field">

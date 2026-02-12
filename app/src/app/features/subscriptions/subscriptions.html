@@ -52,7 +52,7 @@
           <span class="badge-inactive">Inactif</span>
         }
         <app-list-item
-          icon="🔄"
+          [icon]="subscription.category?.icone ?? '🔄'"
           [title]="subscription.nom"
           [value]="formatAmount(subscription)"
           [subtitle]="'Renouvellement: ' + getNextRenewalDate(subscription)"

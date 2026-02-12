@@ -24,6 +24,7 @@
   <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">Transactions</a>
   <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">Abonnements</a>
   <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">Dettes</a>
+  <a routerLink="/settings" routerLinkActive="active" (click)="onNavClick()">Paramètres</a>
   <a
     class="shell-logout"
     tabindex="0"
@@ -69,6 +70,13 @@
         (saved)="onDebtSaved($event)"
         (cancelled)="onModalClose()"
         (deleted)="onDebtDeleted($event)"
+      />
+    }
+    @case ('category') {
+      <app-category-form
+        [category]="$any(modalService.editingEntity())"
+        (saved)="onModalClose()"
+        (cancelled)="onModalClose()"
       />
     }
   }

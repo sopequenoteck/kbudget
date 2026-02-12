@@ -24,6 +24,7 @@ import { type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
+import { CategoryForm } from '../category-form/category-form';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -38,6 +39,7 @@ import { Modal } from '../modal/modal';
     TransactionForm,
     SubscriptionForm,
     DebtForm,
+    CategoryForm,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
