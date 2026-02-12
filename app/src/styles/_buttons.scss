@@ -5,17 +5,18 @@
 button {
   padding: var(--space-3) var(--space-5);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-xl);
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-normal);
   cursor: pointer;
   transition:
-    background-color var(--duration-fast) var(--easing-default),
-    border-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default),
-    opacity var(--duration-fast) var(--easing-default);
+    background-color var(--duration-normal) var(--easing-default),
+    border-color var(--duration-normal) var(--easing-default),
+    color var(--duration-normal) var(--easing-default),
+    box-shadow var(--duration-normal) var(--easing-default),
+    opacity var(--duration-normal) var(--easing-default);
 
   &:disabled {
     opacity: 0.6;
@@ -29,6 +30,7 @@ button {
 
   &:hover:not(:disabled) {
     background-color: var(--color-primary-hover);
+    box-shadow: var(--shadow-sm);
   }
 }
 

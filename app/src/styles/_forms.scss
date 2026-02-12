@@ -6,17 +6,17 @@ input,
 textarea,
 select {
   width: 100%;
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-xl);
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   transition:
-    border-color var(--duration-fast) var(--easing-default),
-    box-shadow var(--duration-fast) var(--easing-default);
+    border-color var(--duration-normal) var(--easing-default),
+    box-shadow var(--duration-normal) var(--easing-default);
   appearance: none;
 
   &::placeholder {
@@ -26,7 +26,7 @@ select {
   &:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-light);
+    box-shadow: 0 0 0 4px var(--color-primary-light);
   }
 
   &:disabled {
@@ -39,7 +39,7 @@ select {
   }
 
   &.input-error:focus {
-    box-shadow: 0 0 0 3px var(--bg-error);
+    box-shadow: 0 0 0 4px var(--bg-error);
   }
 }
 
