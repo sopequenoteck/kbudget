@@ -7,9 +7,8 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-default);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--easing-default);
+  transition: background var(--duration-normal) var(--easing-default);
   user-select: none;
 
   &:hover {
@@ -26,10 +25,15 @@
   }
 
   &__icon {
-    font-size: var(--font-size-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    width: var(--space-8);
-    text-align: center;
+    width: var(--space-10);
+    height: var(--space-10);
+    font-size: var(--font-size-lg);
+    background-color: var(--color-primary-light);
+    border-radius: var(--radius-round);
     line-height: 1;
   }
 
