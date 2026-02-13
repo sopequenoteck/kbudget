@@ -1,11 +1,11 @@
 @if (hasDebts()) {
   <section class="summary">
     <div class="summary__card">
-      <span class="summary__label">Je dois</span>
+      <span class="summary__label">Emprunts</span>
       <span class="summary__value debt-owe">{{ totalJeDois() | amount }}</span>
     </div>
     <div class="summary__card">
-      <span class="summary__label">On me doit</span>
+      <span class="summary__label">Prêts</span>
       <span class="summary__value debt-owed">{{ totalOnMeDoit() | amount }}</span>
     </div>
     <div class="summary__card">
@@ -41,30 +41,6 @@
   </button>
 </section>
 
-<section class="sens-filter" role="group" aria-label="Filtrer par sens">
-  <button
-    class="sens-filter__btn"
-    [class.active]="sensFilter() === 'ALL'"
-    (click)="setSensFilter('ALL')"
-  >
-    Tous
-  </button>
-  <button
-    class="sens-filter__btn"
-    [class.active]="sensFilter() === 'EMPRUNT'"
-    (click)="setSensFilter('EMPRUNT')"
-  >
-    Je dois
-  </button>
-  <button
-    class="sens-filter__btn"
-    [class.active]="sensFilter() === 'PRET'"
-    (click)="setSensFilter('PRET')"
-  >
-    On me doit
-  </button>
-</section>
-
 @if (loading()) {
   <div class="state-loading">
     <div class="spinner"></div>
@@ -79,21 +55,51 @@
     <p>Aucune dette</p>
   </div>
 } @else {
-  <ul class="debt-list">
-    @for (debt of filteredDebts(); track debt.id) {
-      <li class="debt-item">
-        @if (debt.rembourse) {
-          <span class="badge-rembourse">Remboursé</span>
+  @if (debtsOnMeDoit().length > 0) {
+    <section class="debt-section debt-section--owed">
+      <div class="section-header">
+        <span class="section-header__title">Prêts</span>
+        <span class="section-header__total debt-owed">{{ sectionTotalOnMeDoit() | amount }}</span>
+      </div>
+      <ul class="debt-list">
+        @for (debt of debtsOnMeDoit(); track debt.id) {
+          <li class="debt-item" [class.debt-item--rembourse]="debt.rembourse">
+            <app-list-item
+              [icon]="getIcon(debt)"
+              [title]="debt.personne"
+              [subtitle]="getSubtitle(debt)"
+              [rightSubtitle]="debt.date | relativeDate"
+              [value]="debt.montant | amount"
+              [valueClass]="getValueClass(debt)"
+              (pressed)="onDebtPressed(debt)"
+            />
+          </li>
         }
-        <app-list-item
-          [icon]="getIcon(debt)"
-          [title]="debt.personne"
-          [value]="debt.montant | amount"
-          [subtitle]="debt.date | relativeDate"
-          [valueClass]="getValueClass(debt)"
-          (pressed)="onDebtPressed(debt)"
-        />
-      </li>
-    }
-  </ul>
+      </ul>
+    </section>
+  }
+
+  @if (debtsJeDois().length > 0) {
+    <section class="debt-section debt-section--owe">
+      <div class="section-header">
+        <span class="section-header__title">Emprunts</span>
+        <span class="section-header__total debt-owe">{{ sectionTotalJeDois() | amount }}</span>
+      </div>
+      <ul class="debt-list">
+        @for (debt of debtsJeDois(); track debt.id) {
+          <li class="debt-item" [class.debt-item--rembourse]="debt.rembourse">
+            <app-list-item
+              [icon]="getIcon(debt)"
+              [title]="debt.personne"
+              [subtitle]="getSubtitle(debt)"
+              [rightSubtitle]="debt.date | relativeDate"
+              [value]="debt.montant | amount"
+              [valueClass]="getValueClass(debt)"
+              (pressed)="onDebtPressed(debt)"
+            />
+          </li>
+        }
+      </ul>
+    </section>
+  }
 }

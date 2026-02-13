@@ -239,6 +239,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - TypeScript 5.9.2 / Angular 21.1.0, SCSS + `@angular/forms` (ReactiveFormsModule) (020-fix-checkbox-forms)
 - TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), SCSS design tokens, Router (021-dashboard-redesign)
 - N/A (données via services REST existants — TransactionService, SubscriptionService, DebtService) (021-dashboard-redesign)
+- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), SCSS design tokens, `ListItem`, `AmountPipe`, `RelativeDatePipe` (022-debt-page-redesign)
+- N/A (données via `DebtService` existant, API REST backend inchangée) (022-debt-page-redesign)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS

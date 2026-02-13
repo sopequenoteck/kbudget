@@ -46,9 +46,8 @@
   color: var(--color-debt-owed);
 }
 
-// -- Toggle filtres → segmented controls iOS --
-.status-filter,
-.sens-filter {
+// -- Toggle filtre statut → segmented control iOS --
+.status-filter {
   display: flex;
   gap: var(--space-1);
   padding: var(--space-1);
@@ -78,23 +77,59 @@
   }
 }
 
-// -- Liste de dettes (dans card blanche arrondie) --
+// -- Section groupée (On me doit / Je dois) --
+.debt-section {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-xl);
+  background-color: var(--surface-default);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border-left: 3px solid transparent;
+
+  &--owed {
+    border-left-color: var(--color-debt-owed);
+  }
+
+  &--owe {
+    border-left-color: var(--color-debt-owe);
+  }
+}
+
+// -- Header de section --
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+
+  &__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+
+  &__total {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+// -- Liste de dettes (dans section) --
 .debt-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
 
   li:not(:last-child) {
     border-bottom: 1px solid var(--border-default);
   }
 }
 
+// -- Item de dette --
 .debt-item {
   position: relative;
   transition: background-color var(--duration-normal) var(--easing-default);
@@ -106,21 +141,10 @@
   &:focus-within {
     background-color: var(--surface-raised);
   }
-}
 
-// -- Badge remboursé → pill --
-.badge-rembourse {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  z-index: 1;
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1;
-  color: var(--text-success);
-  background-color: var(--bg-success);
-  border-radius: var(--radius-round);
+  &--rembourse {
+    opacity: 0.5;
+  }
 }
 
 // -- États --

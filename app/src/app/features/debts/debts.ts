@@ -17,7 +17,6 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 
 type StatusFilter = 'ALL' | 'EN_COURS' | 'REMBOURSE';
-type SensFilter = 'ALL' | 'EMPRUNT' | 'PRET';
 
 @Component({
   selector: 'app-debts',
@@ -34,22 +33,24 @@ export class Debts {
   readonly error = signal(false);
   readonly debts = signal<Debt[]>([]);
   readonly statusFilter = signal<StatusFilter>('ALL');
-  readonly sensFilter = signal<SensFilter>('ALL');
+
+  readonly activeDebts = computed(() => this.debts().filter((d) => !d.rembourse));
 
   readonly filteredDebts = computed(() => {
-    const sens = this.sensFilter();
-    const filtered = sens === 'ALL' ? this.debts() : this.debts().filter((d) => d.sens === sens);
-    return [...filtered].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const status = this.statusFilter();
+    if (status === 'ALL') return this.debts();
+    if (status === 'EN_COURS') return this.debts().filter((d) => !d.rembourse);
+    return this.debts().filter((d) => d.rembourse);
   });
 
   readonly totalJeDois = computed(() =>
-    this.filteredDebts()
+    this.activeDebts()
       .filter((d) => d.sens === DebtType.EMPRUNT)
       .reduce((sum, d) => sum + d.montant, 0),
   );
 
   readonly totalOnMeDoit = computed(() =>
-    this.filteredDebts()
+    this.activeDebts()
       .filter((d) => d.sens === DebtType.PRET)
       .reduce((sum, d) => sum + d.montant, 0),
   );
@@ -58,10 +59,29 @@ export class Debts {
 
   readonly hasDebts = computed(() => this.debts().length > 0);
 
+  readonly debtsOnMeDoit = computed(() =>
+    this.filteredDebts()
+      .filter((d) => d.sens === DebtType.PRET)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+  );
+
+  readonly debtsJeDois = computed(() =>
+    this.filteredDebts()
+      .filter((d) => d.sens === DebtType.EMPRUNT)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+  );
+
+  readonly sectionTotalOnMeDoit = computed(() =>
+    this.debtsOnMeDoit().reduce((sum, d) => sum + d.montant, 0),
+  );
+
+  readonly sectionTotalJeDois = computed(() =>
+    this.debtsJeDois().reduce((sum, d) => sum + d.montant, 0),
+  );
+
   constructor() {
     effect(() => {
       this.debtService.refreshTrigger();
-      this.statusFilter();
       this.loadData();
     });
   }
@@ -70,11 +90,8 @@ export class Debts {
     this.loading.set(true);
     this.error.set(false);
 
-    const filter = this.statusFilter();
-    const rembourse = filter === 'ALL' ? undefined : filter === 'REMBOURSE';
-
     try {
-      const data = await firstValueFrom(this.debtService.getAll(rembourse));
+      const data = await firstValueFrom(this.debtService.getAll());
       this.debts.set(data);
       this.loading.set(false);
     } catch (err) {
@@ -90,12 +107,13 @@ export class Debts {
     this.statusFilter.set(filter);
   }
 
-  setSensFilter(filter: SensFilter): void {
-    this.sensFilter.set(filter);
-  }
-
   getIcon(debt: Debt): string {
     return debt.category?.icone ?? (debt.sens === DebtType.EMPRUNT ? '\u{1F4B8}' : '\u{1F4B0}');
+  }
+
+  getSubtitle(debt: Debt): string {
+    const base = debt.category?.nom ?? (debt.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt');
+    return debt.rembourse ? `${base} \u00B7 Rembours\u00E9` : base;
   }
 
   getValueClass(debt: Debt): string {
