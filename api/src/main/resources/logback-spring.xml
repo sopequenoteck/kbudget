@@ -36,9 +36,9 @@
         </appender>
 
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>logs/budget-api.log</file>
+            <file>logs/k-budget-api.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>logs/budget-api.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <fileNamePattern>logs/k-budget-api.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                 <maxFileSize>10MB</maxFileSize>
                 <maxHistory>30</maxHistory>
                 <totalSizeCap>500MB</totalSizeCap>

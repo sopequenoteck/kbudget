@@ -1,15 +1,14 @@
-# Budget — Caddy reverse proxy (VM separee)
-# Remplacer VM_DOCKER_IP par l'IP reelle de la VM Docker
+# K-Budget — Caddy reverse proxy (VM separee)
 
 budget.kksdev.fr {
 	# API Spring Boot
 	handle /api/* {
-		reverse_proxy VM_DOCKER_IP:3001
+		reverse_proxy 192.168.1.81:3001
 	}
 
 	# Frontend Angular (container Nginx)
 	handle {
-		reverse_proxy VM_DOCKER_IP:3000
+		reverse_proxy 192.168.1.81:3000
 	}
 
 	header {

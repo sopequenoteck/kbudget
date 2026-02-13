@@ -1,5 +1,5 @@
 [Unit]
-Description=Budget API (Spring Boot)
+Description=K-Budget API (Spring Boot)
 After=network.target postgresql.service
 Requires=postgresql.service
 
@@ -7,10 +7,10 @@ Requires=postgresql.service
 Type=simple
 User=budget
 Group=budget
-WorkingDirectory=/opt/budget-api
+WorkingDirectory=/opt/k-budget-api
 
-ExecStart=/usr/bin/java -jar /opt/budget-api/api.jar --spring.profiles.active=prod
-EnvironmentFile=/opt/budget-api/.env
+ExecStart=/usr/bin/java -jar /opt/k-budget-api/api.jar --spring.profiles.active=prod
+EnvironmentFile=/opt/k-budget-api/.env
 
 Restart=on-failure
 RestartSec=10
@@ -19,7 +19,7 @@ RestartSec=10
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/budget-api/logs
+ReadWritePaths=/opt/k-budget-api/logs
 
 [Install]
 WantedBy=multi-user.target

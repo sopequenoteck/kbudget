@@ -10,7 +10,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "budget-app": {
+    "k-budget-app": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -94,10 +94,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "budget-app:build:production"
+              "buildTarget": "k-budget-app:build:production"
             },
             "development": {
-              "buildTarget": "budget-app:build:development"
+              "buildTarget": "k-budget-app:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -18,6 +18,7 @@ Thumbs.db
 **/application-dev.yaml
 
 HELP.md
+**/logs/
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Application personnelle de gestion de budget (transactions, abonnements, dettes). Self-hosted, single-user. Monorepo avec deux modules :
 
 - `api/` — Backend Spring Boot (API REST)
-- `app/` — Frontend Angular PWA mobile-first (`budget-app`)
+- `app/` — Frontend Angular PWA mobile-first (`k-budget-app`)
 
 **Gestion des issues** : toutes les issues et le suivi du projet sont sur **Linear** (identifiants `KKS-*`). Ne pas utiliser GitHub Issues.
 
