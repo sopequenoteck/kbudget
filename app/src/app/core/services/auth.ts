@@ -1,13 +1,14 @@
 import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, tap, throwError } from 'rxjs';
+import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
 
 import { ApiService } from './api';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
 
 const STORAGE_TOKEN_KEY = 'budget_token';
+const STORAGE_REFRESH_TOKEN_KEY = 'budget_refresh_token';
 const STORAGE_USER_KEY = 'budget_user';
 
 @Injectable({
@@ -27,14 +28,19 @@ export class AuthService {
   getToken(): string | null {
     try {
       const token = localStorage.getItem(STORAGE_TOKEN_KEY);
-      if (!token) {
-        return null;
-      }
-      if (this.isTokenExpired(token)) {
-        this.clearAuth();
+      if (!token || this.isTokenExpired(token)) {
         return null;
       }
       return token;
+    } catch {
+      if (isDevMode()) console.error('localStorage indisponible');
+      return null;
+    }
+  }
+
+  getRefreshToken(): string | null {
+    try {
+      return localStorage.getItem(STORAGE_REFRESH_TOKEN_KEY);
     } catch {
       if (isDevMode()) console.error('localStorage indisponible');
       return null;
@@ -55,7 +61,23 @@ export class AuthService {
     );
   }
 
+  refreshAccessToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new HttpErrorResponse({ status: 401, statusText: 'No refresh token' }));
+    }
+    return this.apiService.post<AuthResponse>('/auth/refresh', { refreshToken }).pipe(
+      tap((response) => this.saveAuth(response)),
+    );
+  }
+
   logout(): void {
+    const refreshToken = this.getRefreshToken();
+    if (refreshToken) {
+      firstValueFrom(
+        this.apiService.post('/auth/logout', { refreshToken }).pipe(catchError(() => of(null))),
+      );
+    }
     this.clearAuth();
     this.router.navigate(['/auth']);
   }
@@ -63,26 +85,35 @@ export class AuthService {
   private restoreSession(): void {
     try {
       const token = localStorage.getItem(STORAGE_TOKEN_KEY);
-      if (!token) {
+
+      if (token && !this.isTokenExpired(token)) {
+        const userJson = localStorage.getItem(STORAGE_USER_KEY);
+        if (!userJson) {
+          this.clearAuth();
+          return;
+        }
+        try {
+          const user: UserInfo = JSON.parse(userJson);
+          this.currentUser.set(user);
+        } catch {
+          if (isDevMode()) console.error('budget_user corrompu');
+          this.clearAuth();
+        }
         return;
       }
 
-      if (this.isTokenExpired(token)) {
-        this.clearAuth();
+      const refreshToken = this.getRefreshToken();
+      if (refreshToken) {
+        if (isDevMode()) console.log('restoreSession: access token expiré, tentative de refresh');
+        this.refreshAccessToken().subscribe({
+          error: () => {
+            this.clearAuth();
+          },
+        });
         return;
       }
 
-      const userJson = localStorage.getItem(STORAGE_USER_KEY);
-      if (!userJson) {
-        this.clearAuth();
-        return;
-      }
-
-      try {
-        const user: UserInfo = JSON.parse(userJson);
-        this.currentUser.set(user);
-      } catch {
-        if (isDevMode()) console.error('budget_user corrompu');
+      if (token) {
         this.clearAuth();
       }
     } catch {
@@ -93,6 +124,7 @@ export class AuthService {
   private saveAuth(response: AuthResponse): void {
     try {
       localStorage.setItem(STORAGE_TOKEN_KEY, response.token);
+      localStorage.setItem(STORAGE_REFRESH_TOKEN_KEY, response.refreshToken);
       localStorage.setItem(
         STORAGE_USER_KEY,
         JSON.stringify({ name: response.name, email: response.email }),
@@ -106,6 +138,7 @@ export class AuthService {
   private clearAuth(): void {
     try {
       localStorage.removeItem(STORAGE_TOKEN_KEY);
+      localStorage.removeItem(STORAGE_REFRESH_TOKEN_KEY);
       localStorage.removeItem(STORAGE_USER_KEY);
     } catch {
       if (isDevMode()) console.error('localStorage indisponible');

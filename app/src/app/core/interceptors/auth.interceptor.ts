@@ -1,16 +1,24 @@
-import { inject } from '@angular/core';
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { catchError, throwError } from 'rxjs';
+import { inject, isDevMode } from '@angular/core';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandlerFn,
+  HttpInterceptorFn,
+  HttpRequest,
+} from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, filter, switchMap, take, throwError } from 'rxjs';
 
 import { AuthService } from '../services/auth';
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/register'];
+const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
 
-let isLoggingOut = false;
+let isRefreshing = false;
+let refreshSubject = new BehaviorSubject<boolean>(true);
 
 /** @internal Reset state between tests */
 export function _resetInterceptorState(): void {
-  isLoggingOut = false;
+  isRefreshing = false;
+  refreshSubject = new BehaviorSubject<boolean>(true);
 }
 
 function isPublicUrl(url: string): boolean {
@@ -34,12 +42,73 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(request).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isLoggingOut) {
-        isLoggingOut = true;
-        authService.logout();
-        setTimeout(() => (isLoggingOut = false), 1000);
+      if (
+        error.status === 401 &&
+        !isPublicUrl(req.url) &&
+        !isExternalUrl(req.url) &&
+        !req.headers.has('_retry')
+      ) {
+        return handle401(authService, req, next);
       }
       return throwError(() => error);
     }),
   );
 };
+
+function handle401(
+  authService: AuthService,
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+): Observable<HttpEvent<unknown>> {
+  if (!isRefreshing) {
+    isRefreshing = true;
+    refreshSubject.next(false);
+
+    if (isDevMode()) console.log('Refresh token: tentative de renouvellement');
+
+    return authService.refreshAccessToken().pipe(
+      switchMap((response) => {
+        isRefreshing = false;
+        refreshSubject.next(true);
+        if (isDevMode()) console.log('Refresh token: renouvellement réussi');
+
+        return next(
+          req.clone({
+            setHeaders: { Authorization: `Bearer ${response.token}`, _retry: 'true' },
+          }),
+        );
+      }),
+      catchError((err) => {
+        isRefreshing = false;
+        refreshSubject.next(true);
+
+        if (err instanceof HttpErrorResponse && err.status === 401) {
+          if (isDevMode()) console.error('Refresh token: échec (401) — déconnexion');
+          authService.logout();
+        } else if (isDevMode()) {
+          console.error('Refresh token: erreur réseau — pas de déconnexion');
+        }
+
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  return refreshSubject.pipe(
+    filter((ready) => ready),
+    take(1),
+    switchMap(() => {
+      const newToken = authService.getToken();
+      if (!newToken) {
+        return throwError(
+          () => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }),
+        );
+      }
+      return next(
+        req.clone({
+          setHeaders: { Authorization: `Bearer ${newToken}`, _retry: 'true' },
+        }),
+      );
+    }),
+  );
+}

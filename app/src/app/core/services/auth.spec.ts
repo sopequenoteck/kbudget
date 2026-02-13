@@ -31,6 +31,7 @@ function expiredToken(): string {
 
 const mockAuthResponse: AuthResponse = {
   token: validToken(),
+  refreshToken: 'mock-refresh-token',
   email: 'test@test.com',
   name: 'Test User',
 };
@@ -66,9 +67,8 @@ describe('AuthService', () => {
     localStorage.clear();
   });
 
-  // T009 — Tests login()
   describe('login()', () => {
-    it('should_store_token_and_update_signals_when_login_succeeds', () => {
+    it('should_store_token_and_refresh_token_when_login_succeeds', () => {
       // Arrange
       const response: AuthResponse = { ...mockAuthResponse, token: validToken() };
       apiService.post.mockReturnValue(of(response));
@@ -78,6 +78,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(localStorage.getItem('budget_token')).toBe(response.token);
+      expect(localStorage.getItem('budget_refresh_token')).toBe(response.refreshToken);
       expect(JSON.parse(localStorage.getItem('budget_user')!)).toEqual({
         name: 'Test User',
         email: 'test@test.com',
@@ -130,9 +131,8 @@ describe('AuthService', () => {
     });
   });
 
-  // T010 — Tests register()
   describe('register()', () => {
-    it('should_store_token_and_auto_connect_when_register_succeeds', () => {
+    it('should_store_token_and_refresh_token_when_register_succeeds', () => {
       // Arrange
       const response: AuthResponse = { ...mockAuthResponse, token: validToken() };
       apiService.post.mockReturnValue(of(response));
@@ -144,6 +144,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(localStorage.getItem('budget_token')).toBe(response.token);
+      expect(localStorage.getItem('budget_refresh_token')).toBe(response.refreshToken);
       expect(JSON.parse(localStorage.getItem('budget_user')!)).toEqual({
         name: 'Test User',
         email: 'test@test.com',
@@ -212,29 +213,68 @@ describe('AuthService', () => {
     });
   });
 
-  // T011 — Tests logout()
   describe('logout()', () => {
     it('should_clear_storage_and_signals_and_navigate_when_logout', () => {
       // Arrange — simulate logged in state
       localStorage.setItem('budget_token', validToken());
+      localStorage.setItem('budget_refresh_token', 'some-refresh-token');
       localStorage.setItem(
         'budget_user',
         JSON.stringify({ name: 'Test User', email: 'test@test.com' }),
       );
+      apiService.post.mockReturnValue(of(null));
 
       // Act
       service.logout();
 
       // Assert
       expect(localStorage.getItem('budget_token')).toBeNull();
+      expect(localStorage.getItem('budget_refresh_token')).toBeNull();
       expect(localStorage.getItem('budget_user')).toBeNull();
       expect(service.currentUser()).toBeNull();
       expect(service.isAuthenticated()).toBe(false);
       expect(router.navigate).toHaveBeenCalledWith(['/auth']);
     });
+
+    it('should_call_logout_api_with_refresh_token', () => {
+      // Arrange
+      localStorage.setItem('budget_refresh_token', 'revoke-me');
+      apiService.post.mockReturnValue(of(null));
+
+      // Act
+      service.logout();
+
+      // Assert
+      expect(apiService.post).toHaveBeenCalledWith('/auth/logout', {
+        refreshToken: 'revoke-me',
+      });
+    });
+
+    it('should_clear_local_even_when_api_fails', () => {
+      // Arrange
+      localStorage.setItem('budget_token', validToken());
+      localStorage.setItem('budget_refresh_token', 'token-to-revoke');
+      apiService.post.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+
+      // Act
+      service.logout();
+
+      // Assert — fire-and-forget: local cleanup happens regardless
+      expect(localStorage.getItem('budget_token')).toBeNull();
+      expect(localStorage.getItem('budget_refresh_token')).toBeNull();
+      expect(router.navigate).toHaveBeenCalledWith(['/auth']);
+    });
+
+    it('should_not_call_api_when_no_refresh_token', () => {
+      // Act
+      service.logout();
+
+      // Assert
+      expect(apiService.post).not.toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/auth']);
+    });
   });
 
-  // T012 — Tests getToken()
   describe('getToken()', () => {
     it('should_return_token_when_token_is_valid', () => {
       // Arrange
@@ -248,18 +288,18 @@ describe('AuthService', () => {
       expect(result).toBe(token);
     });
 
-    it('should_return_null_and_clear_when_token_is_expired', () => {
+    it('should_return_null_without_clearing_when_token_is_expired', () => {
       // Arrange
       localStorage.setItem('budget_token', expiredToken());
-      localStorage.setItem('budget_user', JSON.stringify({ name: 'Test', email: 'test@test.com' }));
+      localStorage.setItem('budget_refresh_token', 'refresh-token-still-valid');
 
       // Act
       const result = service.getToken();
 
       // Assert
       expect(result).toBeNull();
-      expect(localStorage.getItem('budget_token')).toBeNull();
-      expect(localStorage.getItem('budget_user')).toBeNull();
+      // getToken() ne doit PAS supprimer le refresh token (nécessaire pour le renouvellement)
+      expect(localStorage.getItem('budget_refresh_token')).toBe('refresh-token-still-valid');
     });
 
     it('should_return_null_when_token_is_corrupted', () => {
@@ -273,10 +313,88 @@ describe('AuthService', () => {
       // Assert
       expect(result).toBeNull();
     });
+
+    it('should_return_null_when_no_token', () => {
+      // Act
+      const result = service.getToken();
+
+      // Assert
+      expect(result).toBeNull();
+    });
   });
 
-  // T013 — Tests constructeur
-  describe('constructor', () => {
+  describe('getRefreshToken()', () => {
+    it('should_return_refresh_token_when_present', () => {
+      // Arrange
+      localStorage.setItem('budget_refresh_token', 'my-refresh-token');
+
+      // Act
+      const result = service.getRefreshToken();
+
+      // Assert
+      expect(result).toBe('my-refresh-token');
+    });
+
+    it('should_return_null_when_no_refresh_token', () => {
+      // Act
+      const result = service.getRefreshToken();
+
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('refreshAccessToken()', () => {
+    it('should_save_new_tokens_when_refresh_succeeds', () => {
+      // Arrange
+      localStorage.setItem('budget_refresh_token', 'old-refresh-token');
+      const newToken = validToken();
+      const response: AuthResponse = {
+        token: newToken,
+        refreshToken: 'new-refresh-token',
+        email: 'test@test.com',
+        name: 'Test User',
+      };
+      apiService.post.mockReturnValue(of(response));
+
+      // Act
+      service.refreshAccessToken().subscribe();
+
+      // Assert
+      expect(apiService.post).toHaveBeenCalledWith('/auth/refresh', {
+        refreshToken: 'old-refresh-token',
+      });
+      expect(localStorage.getItem('budget_token')).toBe(newToken);
+      expect(localStorage.getItem('budget_refresh_token')).toBe('new-refresh-token');
+      expect(service.currentUser()).toEqual({ name: 'Test User', email: 'test@test.com' });
+    });
+
+    it('should_throw_401_when_no_refresh_token', () => {
+      // Act & Assert
+      service.refreshAccessToken().subscribe({
+        error: (err: HttpErrorResponse) => {
+          expect(err.status).toBe(401);
+        },
+      });
+      expect(apiService.post).not.toHaveBeenCalled();
+    });
+
+    it('should_propagate_error_when_refresh_api_fails', () => {
+      // Arrange
+      localStorage.setItem('budget_refresh_token', 'expired-refresh-token');
+      const httpError = new HttpErrorResponse({ status: 401 });
+      apiService.post.mockReturnValue(throwError(() => httpError));
+
+      // Act & Assert
+      service.refreshAccessToken().subscribe({
+        error: (err: HttpErrorResponse) => {
+          expect(err.status).toBe(401);
+        },
+      });
+    });
+  });
+
+  describe('constructor / restoreSession', () => {
     it('should_restore_session_when_valid_token_in_localStorage', () => {
       // Arrange
       const token = validToken();
@@ -305,7 +423,7 @@ describe('AuthService', () => {
       expect(newService.isAuthenticated()).toBe(true);
     });
 
-    it('should_clear_session_when_expired_token_in_localStorage', () => {
+    it('should_clear_session_when_expired_token_and_no_refresh_token', () => {
       // Arrange
       localStorage.setItem('budget_token', expiredToken());
       localStorage.setItem('budget_user', JSON.stringify({ name: 'Old', email: 'old@test.com' }));
@@ -325,6 +443,95 @@ describe('AuthService', () => {
       expect(newService.currentUser()).toBeNull();
       expect(newService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('budget_token')).toBeNull();
+    });
+
+    it('should_auto_refresh_when_expired_token_with_valid_refresh_token', () => {
+      // Arrange
+      localStorage.setItem('budget_token', expiredToken());
+      localStorage.setItem('budget_refresh_token', 'valid-refresh');
+      const newToken = validToken();
+      const refreshResponse = {
+        token: newToken,
+        refreshToken: 'rotated-refresh',
+        email: 'restored@test.com',
+        name: 'Restored User',
+      };
+      apiService.post.mockReturnValue(of(refreshResponse));
+      vi.spyOn(console, 'log').mockReturnValue(undefined);
+
+      // Act
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      const newService = TestBed.inject(AuthService);
+
+      // Assert — session restored via refresh
+      expect(apiService.post).toHaveBeenCalledWith('/auth/refresh', {
+        refreshToken: 'valid-refresh',
+      });
+      expect(newService.currentUser()).toEqual({
+        name: 'Restored User',
+        email: 'restored@test.com',
+      });
+      expect(newService.isAuthenticated()).toBe(true);
+      expect(localStorage.getItem('budget_refresh_token')).toBe('rotated-refresh');
+    });
+
+    it('should_clear_auth_when_expired_token_and_refresh_fails', () => {
+      // Arrange
+      localStorage.setItem('budget_token', expiredToken());
+      localStorage.setItem('budget_refresh_token', 'expired-refresh');
+      apiService.post.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 401 })),
+      );
+      vi.spyOn(console, 'log').mockReturnValue(undefined);
+
+      // Act
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      const newService = TestBed.inject(AuthService);
+
+      // Assert — clearAuth called, no redirect (auth guard handles it)
+      expect(newService.currentUser()).toBeNull();
+      expect(newService.isAuthenticated()).toBe(false);
+      expect(localStorage.getItem('budget_token')).toBeNull();
+      expect(localStorage.getItem('budget_refresh_token')).toBeNull();
+    });
+
+    it('should_not_refresh_when_valid_token_exists', () => {
+      // Arrange
+      localStorage.setItem('budget_token', validToken());
+      localStorage.setItem('budget_refresh_token', 'some-refresh');
+      localStorage.setItem(
+        'budget_user',
+        JSON.stringify({ name: 'User', email: 'user@test.com' }),
+      );
+
+      // Act
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      const newService = TestBed.inject(AuthService);
+
+      // Assert — no refresh call, session restored from localStorage
+      expect(apiService.post).not.toHaveBeenCalled();
+      expect(newService.isAuthenticated()).toBe(true);
     });
 
     it('should_handle_localStorage_unavailable_without_crash', () => {
