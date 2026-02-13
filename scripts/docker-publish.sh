@@ -12,8 +12,8 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-API_IMAGE="sopequenotech/budget-api"
-APP_IMAGE="sopequenotech/budget-app"
+API_IMAGE="sopequenotech/k-budget-api"
+APP_IMAGE="sopequenotech/k-budget-app"
 
 echo "=== Build API image ==="
 docker build -t "${API_IMAGE}:${VERSION}" -f api/Dockerfile api/

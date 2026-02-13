@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --- Configuration ---
-BACKUP_DIR="${BACKUP_DIR:-/opt/budget-api/backups}"
+BACKUP_DIR="${BACKUP_DIR:-/opt/k-budget-api/backups}"
 BACKUP_RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
 DB_NAME="${DB_NAME:-budget_db}"
 DB_HOST="${DB_HOST:-localhost}"

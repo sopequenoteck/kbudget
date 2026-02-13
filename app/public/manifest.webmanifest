@@ -1,7 +1,7 @@
 {
-  "name": "Budget",
-  "short_name": "Budget",
-  "description": "Gestion de budget personnel",
+  "name": "K-Budget",
+  "short_name": "K-Budget",
+  "description": "K-Budget — Gestion de budget personnel",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "./",

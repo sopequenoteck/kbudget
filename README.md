@@ -1,4 +1,4 @@
-# Budget
+# K-Budget
 
 Application personnelle de gestion de budget : transactions (depenses/recettes), abonnements recurrents et suivi de dettes. Single-user, self-hosted.
 
@@ -145,7 +145,7 @@ Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](
 ```
 budget/
 ├── api/           # Backend Spring Boot
-├── app/           # Frontend Angular PWA (budget-app)
+├── app/           # Frontend Angular PWA (k-budget-app)
 ├── deploy/        # Caddyfile, systemd, scripts
 └── docs/          # Documentation
 ```

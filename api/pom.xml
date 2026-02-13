@@ -10,9 +10,9 @@
     </parent>
     <groupId>fr.kksdev.budget</groupId>
     <artifactId>api</artifactId>
-    <version>0.1.0</version>
-    <name>api</name>
-    <description>api</description>
+    <version>1.0.0</version>
+    <name>k-budget-api</name>
+    <description>K-Budget API — Gestion de budget personnel</description>
     <url/>
     <licenses>
         <license/>

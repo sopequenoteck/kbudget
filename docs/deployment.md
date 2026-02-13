@@ -1,4 +1,4 @@
-# Deploiement Budget
+# Deploiement K-Budget
 
 ## Prerequis
 
@@ -10,7 +10,7 @@
 
 ## Variables d'environnement
 
-Creer un fichier `.env` a la racine du projet (ou dans `/opt/budget-api/` pour bare-metal) :
+Creer un fichier `.env` a la racine du projet (ou dans `/opt/k-budget-api/` pour bare-metal) :
 
 ```bash
 cp .env.example .env
@@ -37,10 +37,10 @@ npm ci
 ng build --configuration production
 ```
 
-Le build genere les fichiers statiques dans `app/dist/budget-app/browser/`. Ces fichiers doivent etre copies sur le serveur dans `/opt/budget-app/dist/`.
+Le build genere les fichiers statiques dans `app/dist/k-budget-app/browser/`. Ces fichiers doivent etre copies sur le serveur dans `/opt/k-budget-app/dist/`.
 
 ```bash
-scp -r app/dist/budget-app/browser/* serveur:/opt/budget-app/dist/
+scp -r app/dist/k-budget-app/browser/* serveur:/opt/k-budget-app/dist/
 ```
 
 ## Option A : Docker Compose (recommande)
@@ -107,7 +107,7 @@ CREATE DATABASE budget_db OWNER budget_u;
 ### 3. Creer l'utilisateur systeme
 
 ```bash
-sudo useradd -r -m -d /opt/budget-api -s /usr/sbin/nologin budget
+sudo useradd -r -m -d /opt/k-budget-api -s /usr/sbin/nologin budget
 ```
 
 ### 4. Deployer le JAR
@@ -115,15 +115,15 @@ sudo useradd -r -m -d /opt/budget-api -s /usr/sbin/nologin budget
 ```bash
 # Build sur la machine de dev
 cd api && mvn clean package -DskipTests
-scp target/api-*.jar serveur:/opt/budget-api/api.jar
+scp target/api-*.jar serveur:/opt/k-budget-api/api.jar
 ```
 
 ### 5. Configurer l'environnement
 
 ```bash
-sudo cp .env /opt/budget-api/.env
-sudo chown budget:budget /opt/budget-api/.env
-sudo chmod 600 /opt/budget-api/.env
+sudo cp .env /opt/k-budget-api/.env
+sudo chown budget:budget /opt/k-budget-api/.env
+sudo chmod 600 /opt/k-budget-api/.env
 ```
 
 Le fichier `.env` doit contenir les 4 variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`).
@@ -131,16 +131,16 @@ Le fichier `.env` doit contenir les 4 variables (`DB_URL`, `DB_USERNAME`, `DB_PA
 ### 6. Installer le service systemd
 
 ```bash
-sudo cp deploy/budget-api.service /etc/systemd/system/
+sudo cp deploy/k-budget-api.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable budget-api
-sudo systemctl start budget-api
+sudo systemctl enable k-budget-api
+sudo systemctl start k-budget-api
 ```
 
 ### 7. Verifier
 
 ```bash
-sudo systemctl status budget-api
+sudo systemctl status k-budget-api
 curl http://localhost:8080/api/actuator/health
 ```
 
@@ -154,8 +154,8 @@ Caddy gere automatiquement les certificats Let's Encrypt. Il sert a la fois le f
 sudo apt install -y caddy
 
 # Copier les fichiers frontend
-sudo mkdir -p /opt/budget-app/dist
-sudo cp -r app/dist/budget-app/browser/* /opt/budget-app/dist/
+sudo mkdir -p /opt/k-budget-app/dist
+sudo cp -r app/dist/k-budget-app/browser/* /opt/k-budget-app/dist/
 
 # Installer le Caddyfile
 sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
@@ -170,8 +170,8 @@ Fichier de reference : [`deploy/Caddyfile`](../deploy/Caddyfile)
 
 ```bash
 sudo apt install -y nginx
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/budget-api
-sudo ln -s /etc/nginx/sites-available/budget-api /etc/nginx/sites-enabled/
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/k-budget-api
+sudo ln -s /etc/nginx/sites-available/k-budget-api /etc/nginx/sites-enabled/
 # Editer : remplacer budget.kksdev.fr par votre domaine
 sudo nginx -t && sudo systemctl reload nginx
 
@@ -192,7 +192,7 @@ Variables configurables :
 
 | Variable | Defaut | Description |
 |----------|--------|-------------|
-| `BACKUP_DIR` | `/opt/budget-api/backups` | Repertoire de stockage |
+| `BACKUP_DIR` | `/opt/k-budget-api/backups` | Repertoire de stockage |
 | `BACKUP_RETENTION_DAYS` | `7` | Jours de retention |
 | `DB_NAME` | `budget_db` | Nom de la base |
 | `DB_HOST` | `localhost` | Hote PostgreSQL |
@@ -213,13 +213,13 @@ chmod 600 ~/.pgpass
 ```bash
 crontab -e
 # Ajouter :
-0 3 * * * /opt/budget-api/deploy/backup-pg.sh >> /opt/budget-api/logs/backup.log 2>&1
+0 3 * * * /opt/k-budget-api/deploy/backup-pg.sh >> /opt/k-budget-api/logs/backup.log 2>&1
 ```
 
 ### Restauration
 
 ```bash
-gunzip -c /opt/budget-api/backups/budget_db_2026-02-07_030000.sql.gz | psql -h localhost -U budget_u budget_db
+gunzip -c /opt/k-budget-api/backups/budget_db_2026-02-07_030000.sql.gz | psql -h localhost -U budget_u budget_db
 ```
 
 ## Mise a jour
@@ -242,13 +242,13 @@ cd api && mvn clean package -DskipTests
 cd app && npm ci && ng build --configuration production
 
 # Transfert backend
-scp api/target/api-*.jar serveur:/opt/budget-api/api.jar
+scp api/target/api-*.jar serveur:/opt/k-budget-api/api.jar
 
 # Transfert frontend
-scp -r app/dist/budget-app/browser/* serveur:/opt/budget-app/dist/
+scp -r app/dist/k-budget-app/browser/* serveur:/opt/k-budget-app/dist/
 
 # Redemarrage
-ssh serveur "sudo systemctl restart budget-api"
+ssh serveur "sudo systemctl restart k-budget-api"
 ```
 
 ## Notes importantes

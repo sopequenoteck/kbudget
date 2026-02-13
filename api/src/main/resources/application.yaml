@@ -1,6 +1,6 @@
 spring:
   application:
-    name: budget-api
+    name: k-budget-api
   profiles:
     default: prod
 

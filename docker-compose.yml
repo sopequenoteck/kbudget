@@ -1,6 +1,6 @@
 services:
   api:
-    image: sopequenotech/budget-api:latest
+    image: sopequenotech/k-budget-api:latest
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: sopequenotech/budget-app:latest
+    image: sopequenotech/k-budget-app:latest
     ports:
       - "3000:80"
     restart: unless-stopped
