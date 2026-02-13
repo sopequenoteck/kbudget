@@ -243,6 +243,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - N/A (données via `DebtService` existant, API REST backend inchangée) (022-debt-page-redesign)
 - Java 21 + Spring Boot 4.0.2, Spring Security, Spring Data JPA, jjwt 0.12.6, Flyway (023-jwt-refresh-token)
 - PostgreSQL 15+ (nouvelle table `refresh_tokens`) (023-jwt-refresh-token)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn), `@angular/core` (signals, inject), RxJS (Observable, Subject, switchMap, catchError, shareReplay) (024-frontend-refresh-token)
+- localStorage (clés `budget_token`, `budget_refresh_token`, `budget_user`) (024-frontend-refresh-token)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
