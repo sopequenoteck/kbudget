@@ -25,7 +25,7 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @Operation(summary = "Creer un abonnement")
+    @Operation(summary = "Créer un abonnement")
     @PostMapping
     public ResponseEntity<SubscriptionResponse> create(
             @Valid @RequestBody SubscriptionRequest request,

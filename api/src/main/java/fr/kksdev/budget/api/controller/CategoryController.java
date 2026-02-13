@@ -25,7 +25,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @Operation(summary = "Creer une categorie")
+    @Operation(summary = "Créer une catégorie")
     @PostMapping
     public ResponseEntity<CategoryResponse> create(
             @Valid @RequestBody CategoryRequest request,
@@ -42,7 +42,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllByUser(userId));
     }
 
-    @Operation(summary = "Consulter une categorie par son ID")
+    @Operation(summary = "Consulter une catégorie par son ID")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getById(
             @PathVariable UUID id,
@@ -51,7 +51,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getById(id, userId));
     }
 
-    @Operation(summary = "Modifier une categorie")
+    @Operation(summary = "Modifier une catégorie")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> update(
             @PathVariable UUID id,
@@ -61,7 +61,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.update(id, request, userId));
     }
 
-    @Operation(summary = "Supprimer une categorie")
+    @Operation(summary = "Supprimer une catégorie")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,

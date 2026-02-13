@@ -20,12 +20,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/debts")
 @RequiredArgsConstructor
-@Tag(name = "Dettes", description = "Suivi des dettes et prets")
+@Tag(name = "Dettes", description = "Suivi des dettes et prêts")
 public class DebtController {
 
     private final DebtService debtService;
 
-    @Operation(summary = "Creer une dette")
+    @Operation(summary = "Créer une dette")
     @PostMapping
     public ResponseEntity<DebtResponse> create(
             @Valid @RequestBody DebtRequest request,

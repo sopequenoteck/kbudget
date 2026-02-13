@@ -22,12 +22,12 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
-@Tag(name = "Transactions", description = "Gestion des depenses et recettes")
+@Tag(name = "Transactions", description = "Gestion des dépenses et recettes")
 public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @Operation(summary = "Creer une transaction")
+    @Operation(summary = "Créer une transaction")
     @PostMapping
     public ResponseEntity<TransactionResponse> create(
             @Valid @RequestBody TransactionRequest request,
