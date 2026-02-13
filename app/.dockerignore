@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.angular/
+*.md
+.gitignore
+e2e/
+coverage/

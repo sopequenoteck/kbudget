@@ -17,11 +17,13 @@ Application personnelle de gestion de budget (transactions, abonnements, dettes)
 
 ```bash
 cd api && mvn clean compile       # Build
-cd api && mvn spring-boot:run     # Lancer (profil dev)
+cd api && mvn spring-boot:run -Dspring-boot.run.profiles=dev  # Lancer (profil dev)
 cd api && mvn test                # Tests
 cd api && mvn test -Dtest=NomDuTest  # Test unique
 cd api && mvn clean install       # Build complet avec tests
 ```
+
+> **Note** : Le profil `prod` est le défaut (`spring.profiles.default=prod`). En dev, le profil `dev` doit être activé explicitement.
 
 Le module Maven est dans `api/`. Toutes les commandes Maven doivent être exécutées depuis ce répertoire.
 
@@ -245,6 +247,8 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - PostgreSQL 15+ (nouvelle table `refresh_tokens`) (023-jwt-refresh-token)
 - TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn), `@angular/core` (signals, inject), RxJS (Observable, Subject, switchMap, catchError, shareReplay) (024-frontend-refresh-token)
 - localStorage (clés `budget_token`, `budget_refresh_token`, `budget_user`) (024-frontend-refresh-token)
+- Java 21 (API) + TypeScript 5.9.2 / Angular 21.1.0 (Frontend) + Spring Boot 4.0.2, Angular 21, Docker, Nginx alpine (025-docker-deploy)
+- PostgreSQL 15+ (VM séparée, externe au Docker Compose) (025-docker-deploy)
 
 ## Recent Changes
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS

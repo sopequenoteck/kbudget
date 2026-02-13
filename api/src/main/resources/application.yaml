@@ -2,7 +2,7 @@ spring:
   application:
     name: budget-api
   profiles:
-    active: dev
+    default: prod
 
   flyway:
     enabled: true
