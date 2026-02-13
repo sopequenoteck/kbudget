@@ -83,7 +83,7 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- Actuator (health endpoint pour monitoring/healthcheck) -->
+        <!-- Actuator (health endpoint pour monitoring/health check) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
