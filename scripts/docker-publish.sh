@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Build, tag et push les images Docker sur Docker Hub
 # Usage: ./scripts/docker-publish.sh v1.0.0
+# Build multi-platform (linux/amd64) pour serveur x86_64
 
 VERSION="${1:-}"
 
@@ -12,27 +13,26 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
+PLATFORM="linux/amd64"
 API_IMAGE="sopequenotech/k-budget-api"
 APP_IMAGE="sopequenotech/k-budget-app"
 
-echo "=== Build API image ==="
-docker build -t "${API_IMAGE}:${VERSION}" -f api/Dockerfile api/
+echo "=== Build & push API image (${PLATFORM}) ==="
+docker buildx build --platform "${PLATFORM}" \
+  -t "${API_IMAGE}:${VERSION}" \
+  -t "${API_IMAGE}:latest" \
+  -f api/Dockerfile api/ \
+  --push
 
-echo "=== Build Frontend image ==="
-docker build -t "${APP_IMAGE}:${VERSION}" -f app/Dockerfile app/
-
-echo "=== Tag latest ==="
-docker tag "${API_IMAGE}:${VERSION}" "${API_IMAGE}:latest"
-docker tag "${APP_IMAGE}:${VERSION}" "${APP_IMAGE}:latest"
-
-echo "=== Push to Docker Hub ==="
-docker push "${API_IMAGE}:${VERSION}"
-docker push "${API_IMAGE}:latest"
-docker push "${APP_IMAGE}:${VERSION}"
-docker push "${APP_IMAGE}:latest"
+echo "=== Build & push Frontend image (${PLATFORM}) ==="
+docker buildx build --platform "${PLATFORM}" \
+  -t "${APP_IMAGE}:${VERSION}" \
+  -t "${APP_IMAGE}:latest" \
+  -f app/Dockerfile app/ \
+  --push
 
 echo "=== Done ==="
-echo "Published:"
+echo "Published (${PLATFORM}):"
 echo "  ${API_IMAGE}:${VERSION}"
 echo "  ${API_IMAGE}:latest"
 echo "  ${APP_IMAGE}:${VERSION}"
