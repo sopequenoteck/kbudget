@@ -8,6 +8,7 @@ import fr.kksdev.budget.api.dto.request.RegisterRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.repository.UserRepository;
 import fr.kksdev.budget.api.service.AuthService;
+import fr.kksdev.budget.api.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -35,6 +36,9 @@ class AuthControllerTest {
     private AuthService authService;
 
     @MockitoBean
+    private RefreshTokenService refreshTokenService;
+
+    @MockitoBean
     private JwtUtil jwtUtil;
 
     @MockitoBean
@@ -43,7 +47,7 @@ class AuthControllerTest {
     @Test
     void should_return_201_when_register_success() throws Exception {
         var request = new RegisterRequest("test@mail.com", "password123", "Test User");
-        var response = new AuthResponse("jwt-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("jwt-token", "refresh-token", "test@mail.com", "Test User");
 
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
 
@@ -59,7 +63,7 @@ class AuthControllerTest {
     @Test
     void should_return_200_when_login_success() throws Exception {
         var request = new LoginRequest("test@mail.com", "password123");
-        var response = new AuthResponse("jwt-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("jwt-token", "refresh-token", "test@mail.com", "Test User");
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 

@@ -21,6 +21,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final CategoryService categoryService;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -40,7 +41,8 @@ public class AuthService {
         log.info("User registered: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getName());
+        String refreshToken = refreshTokenService.generateRefreshToken(user);
+        return new AuthResponse(token, refreshToken, user.getEmail(), user.getName());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -57,6 +59,7 @@ public class AuthService {
 
         log.info("User logged in: {}", user.getEmail());
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getName());
+        String refreshToken = refreshTokenService.generateRefreshToken(user);
+        return new AuthResponse(token, refreshToken, user.getEmail(), user.getName());
     }
 }

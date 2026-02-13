@@ -1,5 +1,10 @@
 package fr.kksdev.budget.api.config;
 
+import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.exception.TokenExpiredException;
+import fr.kksdev.budget.api.exception.TokenInvalidException;
+import fr.kksdev.budget.api.exception.TokenReusedException;
+import fr.kksdev.budget.api.exception.TokenRevokedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,6 +49,30 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 message
         ));
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTokenExpired(TokenExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("TOKEN_EXPIRED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TokenRevokedException.class)
+    public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("TOKEN_REVOKED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TokenReusedException.class)
+    public ResponseEntity<ErrorResponse> handleTokenReused(TokenReusedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("TOKEN_REUSE_DETECTED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TokenInvalidException.class)
+    public ResponseEntity<ErrorResponse> handleTokenInvalid(TokenInvalidException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("TOKEN_INVALID", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

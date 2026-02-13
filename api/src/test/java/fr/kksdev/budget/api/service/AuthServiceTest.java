@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.dto.request.RegisterRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,9 @@ class AuthServiceTest {
     @Mock
     private CategoryService categoryService;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -56,10 +60,12 @@ class AuthServiceTest {
         when(passwordEncoder.encode("password123")).thenReturn("encoded");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtUtil.generateToken("test@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
         AuthResponse response = authService.register(request);
 
         assertThat(response.token()).isEqualTo("jwt-token");
+        assertThat(response.refreshToken()).isEqualTo("refresh-token");
         assertThat(response.email()).isEqualTo("test@mail.com");
         assertThat(response.name()).isEqualTo("Test User");
         verify(userRepository).save(any(User.class));
@@ -91,10 +97,12 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encoded")).thenReturn(true);
         when(jwtUtil.generateToken("test@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
         AuthResponse response = authService.login(request);
 
         assertThat(response.token()).isEqualTo("jwt-token");
+        assertThat(response.refreshToken()).isEqualTo("refresh-token");
         assertThat(response.email()).isEqualTo("test@mail.com");
     }
 
