@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Frequency;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -20,9 +21,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import fr.kksdev.budget.api.dto.response.CategoryResponse;
-import fr.kksdev.budget.api.model.Category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

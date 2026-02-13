@@ -49,6 +49,7 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(response.getBody()).containsEntry("status", 400);
+        assert response.getBody() != null;
         String message = (String) response.getBody().get("message");
         assertThat(message).contains("montant").contains("libelle");
     }
