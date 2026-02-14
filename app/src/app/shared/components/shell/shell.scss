@@ -19,6 +19,13 @@
   margin: 0;
 }
 
+.shell-page-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
 .shell-user {
   margin-left: auto;
   font-size: var(--font-size-sm);
@@ -107,8 +114,8 @@
 
 // -- Content --
 .shell-content {
-  padding: var(--space-4);
   min-height: calc(100dvh - var(--header-height));
+  padding-bottom: calc(56px + var(--space-6) + var(--space-4));
 }
 
 // -- Toggle type transaction (header modal) → segmented control iOS --

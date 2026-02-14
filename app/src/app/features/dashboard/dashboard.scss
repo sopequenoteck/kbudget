@@ -66,11 +66,12 @@
 .summary {
   &__card {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-5);
+    padding: var(--space-4) var(--space-2);
     border-radius: var(--radius-xl);
     background-color: var(--surface-default);
     box-shadow: var(--shadow-md);
@@ -93,8 +94,9 @@
   }
 
   &__value {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
+    white-space: nowrap;
   }
 }
 

@@ -117,7 +117,7 @@ export class Debts {
   }
 
   getValueClass(debt: Debt): string {
-    return debt.sens === DebtType.EMPRUNT ? 'debt-owe' : 'debt-owed';
+    return debt.sens === DebtType.EMPRUNT ? 'amount-expense' : 'amount-income';
   }
 
   onDebtPressed(debt: Debt): void {

@@ -4,7 +4,11 @@
     <span class="hamburger-line"></span>
     <span class="hamburger-line"></span>
   </button>
-  <h1 class="shell-logo"><a  routerLink="/" >K-Budget</a></h1>
+  @if (isHome()) {
+    <h1 class="shell-logo">K-Budget</h1>
+  } @else {
+    <h1 class="shell-page-title">{{ pageTitle() }}</h1>
+  }
   @if (userName()) {
     <span class="shell-user">{{ userName()!.name }}</span>
   }

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   isDevMode,
@@ -63,6 +64,16 @@ export class Shell {
 
   readonly userName = this.authService.currentUser;
   readonly sidebarOpen = signal(false);
+  readonly pageTitle = computed(() => {
+    this.navigationEnd();
+    const url = this.router.url;
+    if (url.startsWith('/transactions')) return 'Transactions';
+    if (url.startsWith('/subscriptions')) return 'Abonnements';
+    if (url.startsWith('/debts')) return 'Dettes';
+    if (url.startsWith('/settings')) return 'Paramètres';
+    return '';
+  });
+  readonly isHome = computed(() => this.pageTitle() === '');
   readonly speedDialOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
