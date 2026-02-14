@@ -21,6 +21,7 @@ Response `200` :
 ```json
 {
   "token": "eyJhbGciOi...",
+  "refreshToken": "a1b2c3d4e5f6...",
   "email": "user@example.com",
   "name": "Kelly"
 }
@@ -42,10 +43,44 @@ Response `200` :
 ```json
 {
   "token": "eyJhbGciOi...",
+  "refreshToken": "a1b2c3d4e5f6...",
   "email": "user@example.com",
   "name": "Kelly"
 }
 ```
+
+### Renouvellement `POST /api/auth/refresh`
+
+Request :
+
+```json
+{
+  "refreshToken": "a1b2c3d4e5f6..."
+}
+```
+
+Response `200` :
+
+```json
+{
+  "token": "eyJhbGciOi...(nouveau)...",
+  "refreshToken": "f6e5d4c3b2a1...(nouveau)...",
+  "email": "user@example.com",
+  "name": "Kelly"
+}
+```
+
+### Deconnexion `POST /api/auth/logout`
+
+Request :
+
+```json
+{
+  "refreshToken": "a1b2c3d4e5f6..."
+}
+```
+
+Response `200` : (corps vide)
 
 ## Transactions
 
@@ -59,7 +94,7 @@ Request :
   "libelle": "Courses Carrefour",
   "type": "DEPENSE",
   "date": "2026-02-07",
-  "categorie": "Alimentation",
+  "categoryId": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
   "note": null
 }
 ```
@@ -73,7 +108,13 @@ Response `200` :
   "libelle": "Courses Carrefour",
   "type": "DEPENSE",
   "date": "2026-02-07",
-  "categorie": "Alimentation",
+  "category": {
+    "id": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
+    "nom": "Alimentation",
+    "icone": "🛒",
+    "couleur": "#4CAF50",
+    "isSystem": false
+  },
   "note": null
 }
 ```
@@ -254,6 +295,55 @@ Response `200` :
 ]
 ```
 
+## Categories
+
+### Creer `POST /api/categories`
+
+Request :
+
+```json
+{
+  "nom": "Alimentation",
+  "icone": "🛒",
+  "couleur": "#4CAF50"
+}
+```
+
+Response `200` :
+
+```json
+{
+  "id": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
+  "nom": "Alimentation",
+  "icone": "🛒",
+  "couleur": "#4CAF50",
+  "isSystem": false
+}
+```
+
+### Lister `GET /api/categories`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
+    "nom": "Alimentation",
+    "icone": "🛒",
+    "couleur": "#4CAF50",
+    "isSystem": false
+  },
+  {
+    "id": "d2e3f4a5-b6c7-8901-defa-234567890bcd",
+    "nom": "Transport",
+    "icone": "🚗",
+    "couleur": "#2196F3",
+    "isSystem": true
+  }
+]
+```
+
 ## Valeurs des enums
 
 | Enum | Valeurs |
@@ -261,6 +351,7 @@ Response `200` :
 | `TransactionType` | `DEPENSE`, `RECETTE` |
 | `Frequency` | `MENSUEL`, `ANNUEL` |
 | `DebtType` | `EMPRUNT`, `PRET` |
+| `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 
 ## Voir aussi
 

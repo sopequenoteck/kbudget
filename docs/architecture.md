@@ -45,7 +45,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | libelle | String | Description courte |
 | type | Enum | DEPENSE / RECETTE |
 | date | LocalDate | Date de la transaction |
-| categorie | String | Categorie (nullable) |
+| category | Category | FK → Category (nullable) |
 | note | String | Note libre (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
@@ -60,6 +60,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | frequence | Enum | MENSUEL / ANNUEL |
 | dateDebut | LocalDate | Date de debut |
 | actif | Boolean | Abonnement actif ou non |
+| category | Category | FK → Category (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -73,7 +74,31 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | sens | Enum | EMPRUNT / PRET |
 | date | LocalDate | Date |
 | rembourse | Boolean | Rembourse ou non |
+| category | Category | FK → Category (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
+### Category
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| nom | String | Nom de la categorie |
+| icone | String | Icone (emoji ou identifiant) |
+| couleur | String | Couleur hexadecimale (#RRGGBB) |
+| isSystem | Boolean | Categorie systeme (non modifiable) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
+### RefreshToken
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| token | String | Token opaque (unique, max 64 car.) |
+| status | Enum | ACTIVE / CONSUMED / REVOKED |
+| createdAt | LocalDateTime | Date de creation |
+| expiresAt | LocalDateTime | Date d'expiration |
 | user | User | FK → User |
 
 ## Architecture frontend
@@ -111,11 +136,12 @@ app/src/app/
 
 | Ecran | Route | Role |
 |-------|-------|------|
-| Login | `/login` | Authentification |
-| Dashboard | `/` | Solde du mois, resume abonnements, etat dettes |
+| Auth | `/auth` | Inscription et connexion (toggle login/register) |
+| Dashboard | `/dashboard` | Solde du mois, resume abonnements, etat dettes |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
 | Dettes/Prets | `/debts` | Suivi dans les deux sens |
+| Parametres | `/settings` | Parametres utilisateur |
 
 ### Bouton flottant (+)
 
@@ -125,9 +151,11 @@ app/src/app/
 
 ## Flux d'authentification
 
-- `POST /api/auth/login` retourne un JWT (valide 24h)
+- `POST /api/auth/login` retourne un access token JWT (valide 15min) et un refresh token (valide 30j)
 - Le filtre `JwtFilter` de Spring Security intercepte toutes les routes `/api/**`
-- Cote Angular : intercepteur HTTP ajoute le token, guard protege les routes, ecran login dedie
+- `POST /api/auth/refresh` renouvelle les tokens (rotation : l'ancien refresh token est consomme)
+- `POST /api/auth/logout` revoque le refresh token
+- Cote Angular : intercepteur HTTP ajoute le token et renouvelle automatiquement via refresh, guard protege les routes, ecran auth dedie (login/register)
 - Un seul utilisateur, credentials stockes en base (BCrypt)
 
 ## Schema de deploiement

@@ -3,6 +3,60 @@
 Basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [Unreleased]
+
+### Added
+- Formulaire d'inscription avec toggle login/register sur `/auth`
+- Icône SVG sans background
+
+### Fixed
+- Permission denied logs Docker — entrypoint chown avant runuser
+- Correctifs visuels post-déploiement V1
+
+## [1.0.0] - 2026-02-13
+
+### Added
+- **Frontend Angular 21 PWA** : initialisation projet monorepo `app/` (KKS-23)
+- Configuration proxy API, HttpClient et ApiService (KKS-24)
+- ESLint, Prettier et conventions signals-first (KKS-25)
+- AuthService : login, register, logout, détection d'expiration (KKS-25)
+- Guard d'authentification Angular (KKS-27)
+- Intercepteur HTTP JWT (KKS-26)
+- Design system SCSS : tokens, thèmes light/dark, reset, DESIGN.md
+- Écran de login et layout shell (KKS-28, KKS-29)
+- Bouton flottant FAB avec speed dial (KKS-30)
+- Interfaces TypeScript des entités métier (KKS-47)
+- Services CRUD frontend : transactions, subscriptions, debts (KKS-50)
+- AmountPipe et RelativeDatePipe (KKS-48)
+- Composant ListItem réutilisable (KKS-49)
+- Formulaires modaux : Transaction (KKS-51), Subscription (KKS-52), Debt (KKS-53)
+- Écrans listes : Transactions (KKS-54), Abonnements (KKS-55), Dettes (KKS-56)
+- Écran Dashboard avec KPI 6 indicateurs et mini-cards cliquables (KKS-57, KKS-70)
+- ModalService et câblage édition/suppression (KKS-58)
+- Entité Category avec CRUD complet et liaison FK aux 3 entités métier
+- Système catégories : isSystem, seeding, gardes, @Transactional (KKS-61, KKS-63)
+- CategoryPicker, EmojiGrid et CategoryForm (KKS-64, KKS-65, KKS-66)
+- Intégration catégories dans formulaires, listes, settings et navigation (KKS-67)
+- Tests unitaires services Phase 4 (KKS-59)
+- Tests unitaires système catégories : 114 backend, 130 frontend
+- JWT refresh token avec rotation et détection de réutilisation backend (KKS-73)
+- Refresh token frontend : renouvellement transparent, logout avec révocation (KKS-73)
+- PWA installable avec icônes custom et manifest personnalisé (KKS-75)
+- Dockerisation API + frontend avec Docker Compose et Caddy (KKS-76)
+- Redesign page Dettes : sections groupées, KPI en cours, filtre simplifié (KKS-71)
+
+### Changed
+- Refonte UX formulaires : toggle header, grille 2 colonnes, suppression directe (KKS-69)
+- Design polish en 6 phases : tokens, boutons, shell, modals, cards, settings
+- Renommage DebtType JE_DOIS/ON_ME_DOIT → EMPRUNT/PRET (KKS-60)
+- Renommage projet budget → k-budget v1.0.0
+
+### Fixed
+- Checkboxes non fonctionnelles dans les formulaires (KKS-68)
+- Accents dans les annotations Swagger des controllers
+- Fautes d'orthographe
+- Build Docker images pour linux/amd64 via buildx
+
 ## [0.1.0] - 2026-02-07
 
 ### Added
@@ -24,4 +78,6 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/sopequenoteck/budget/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/sopequenoteck/budget/releases/tag/v0.1.0

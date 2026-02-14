@@ -56,7 +56,7 @@ Variables requises :
 ### 3. Lancement
 
 ```bash
-# Profil dev (par defaut)
+# Lancement (profil prod par defaut, ajouter -Dspring-boot.run.profiles=dev pour le dev)
 cd api && mvn spring-boot:run
 
 # Ou avec variables d'environnement explicites
@@ -104,6 +104,8 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 |---------|-------|-------------|
 | POST | `/api/auth/register` | Inscription |
 | POST | `/api/auth/login` | Connexion |
+| POST | `/api/auth/refresh` | Renouvellement des tokens |
+| POST | `/api/auth/logout` | Deconnexion (revocation du refresh token) |
 
 ### Transactions
 
@@ -136,6 +138,16 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/debts/{id}` | Modifier |
 | DELETE | `/api/debts/{id}` | Supprimer |
 
+### Categories
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/categories` | Creer une categorie |
+| GET | `/api/categories` | Lister les categories |
+| GET | `/api/categories/{id}` | Detail |
+| PUT | `/api/categories/{id}` | Modifier |
+| DELETE | `/api/categories/{id}` | Supprimer |
+
 Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
 ## Architecture
@@ -155,14 +167,14 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus
 ```
 
 ### Frontend (app/)
@@ -181,8 +193,8 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 
 ## Securite
 
-- JWT stateless, token valide 24h
-- Toutes les routes protegees sauf `/api/auth/**`
+- JWT stateless, access token valide 15 minutes, refresh token valide 30 jours
+- Toutes les routes protegees sauf `/api/auth/**` et `/api/actuator/health`
 - Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
 - Mots de passe hashes en BCrypt
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)

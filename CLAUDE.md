@@ -58,14 +58,16 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`.
 
 ### Entites
 
-- **User** : email (unique), password (BCrypt), name. UUID.
-- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, categorie, note. FK → User.
-- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif. FK → User.
-- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse. FK → User.
+- **User** : email (unique), password (BCrypt), name, createdAt. UUID.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, updatedAt. FK → User.
+- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), updatedAt. FK → User.
+- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
+- **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
+- **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
 
 ### Environnements
 
@@ -76,8 +78,9 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 
 ### Securite
 
-- JWT stateless. Token dans header `Authorization: Bearer <token>`.
-- Routes publiques : `/auth/**`, `/error`. Tout le reste necessite un JWT valide.
+- JWT stateless. Access token (15min) dans header `Authorization: Bearer <token>`. Refresh token (30j) pour renouvellement.
+- Routes publiques : `/auth/**`, `/error`, `/actuator/health`. Tout le reste necessite un JWT valide.
+- Endpoints auth : `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`.
 - Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 
 ### Design System SCSS
