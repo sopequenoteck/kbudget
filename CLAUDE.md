@@ -249,8 +249,11 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 - localStorage (clés `budget_token`, `budget_refresh_token`, `budget_user`) (024-frontend-refresh-token)
 - Java 21 (API) + TypeScript 5.9.2 / Angular 21.1.0 (Frontend) + Spring Boot 4.0.2, Angular 21, Docker, Nginx alpine (025-docker-deploy)
 - PostgreSQL 15+ (VM séparée, externe au Docker Compose) (025-docker-deploy)
+- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/core` (signals, standalone, OnPush), composants existants (`FormField`), `AuthService.register()` (026-register-form)
+- N/A (pas de changement de persistance — utilise endpoint backend existant POST /auth/register) (026-register-form)
 
 ## Recent Changes
+- 026-register-form: Formulaire d'inscription frontend avec toggle login/register sur /auth, validation croisée mots de passe
 - Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
 - KKS-28, KKS-29: Écran de login et layout shell (FormField, Shell components)
 - 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities, buttons, forms)
