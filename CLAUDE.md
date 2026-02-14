@@ -40,16 +40,17 @@ Le projet Angular est dans `app/`. Toutes les commandes Angular CLI doivent êtr
 
 ## Architecture
 
+> Détails complets : [`README.md`](README.md) et [`docs/architecture.md`](docs/architecture.md).
+
 ### Stack
 
-- **Backend** : Java 21, Spring Boot 4.0.2, Maven
-- **Frontend** : Angular 21, TypeScript, SCSS
-- **BDD** : PostgreSQL 15+, Spring Data JPA
-- **Auth** : Spring Security + JWT (jjwt 0.12.6)
-- **Infra** : Caddy (reverse proxy, auto-HTTPS)
-- Lombok pour le boilerplate
+- **Backend** : Java 21, Spring Boot 4.0.2, Maven, Lombok
+- **Frontend** : Angular 21, TypeScript 5.9, SCSS
+- **BDD** : PostgreSQL 15+, Spring Data JPA, Flyway
+- **Auth** : Spring Security + JWT (jjwt 0.12.6) avec refresh tokens
+- **Infra** : Docker + Caddy (reverse proxy, auto-HTTPS)
 
-### Couches backend
+### Structure
 
 ```
 Controller (@RestController) → Service (@Service) → Repository (JpaRepository)
@@ -57,118 +58,58 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api`
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`.
 
-```
-fr.kksdev.budget.api/
-├── config/        # SecurityConfig, JwtFilter, JwtUtil
-├── controller/    # REST endpoints
-├── service/       # Logique métier
-├── repository/    # Spring Data JPA
-├── model/         # Entités JPA (User, Transaction, Subscription, Debt)
-├── dto/           # Request/Response DTOs
-└── enums/         # TransactionType, Frequency, DebtType
-```
+### Entites
 
-### Structure frontend
-
-```
-app/src/
-├── app/
-│   ├── core/          # Services singleton, guards, interceptors (auth)
-│   ├── shared/        # Composants/pipes/directives réutilisables
-│   └── features/      # Modules lazy-loaded par feature
-├── environments/      # Config dev/prod (apiUrl)
-└── styles/            # Design system foundation (voir section dédiée)
-```
-
-### Design System SCSS
-
-Architecture en couches — les composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct.
-
-```
-app/src/styles/
-├── _index.scss              # Orchestrateur @use (point d'entrée)
-├── _reset.scss              # Reset minimal mobile-first (box-sizing, 100dvh, scrollbar)
-├── _base.scss               # Body, typo, focus-visible, selection, headings
-├── _buttons.scss            # Styles globaux boutons (.btn-primary, .btn-outline)
-├── _forms.scss              # Styles globaux inputs, textarea, select
-├── _utilities.scss          # .sr-only, .amount-income, .amount-expense
-├── tokens/
-│   ├── _primitives.scss     # Couche 1 : variables SCSS brutes (palettes, spacing, typo)
-│   └── _tokens.scss         # Couche 2 : CSS custom properties sur :root
-└── themes/
-    ├── _light.scss          # Tokens sémantiques theme clair (:root, .theme-light)
-    └── _dark.scss           # Tokens sémantiques theme dark (.theme-dark)
-```
-
-**Couleur primaire** : Amber (#f59e0b). **Thèmes** : Light (défaut) + Dark. **Police** : Inter.
-
-**Tokens sémantiques clés** :
-- Layout : `--bg-primary/secondary/tertiary`, `--surface-default/raised/overlay`
-- Layout (dimensions) : `--sidebar-width`, `--header-height`
-- Texte : `--text-primary/secondary/tertiary/inverse`
-- Bordures : `--border-default/strong`
-- Primary : `--color-primary/primary-hover/primary-light/primary-contrast`
-- Feedback : `--bg-success/error/warning/info`, `--text-success/error/warning/info`
-- Métier : `--color-income`, `--color-expense`, `--color-debt-owe`, `--color-debt-owed`
-
-**Basculement de thème** : changer la classe sur `<html>` (`theme-light` / `theme-dark`).
+- **User** : email (unique), password (BCrypt), name. UUID.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, categorie, note. FK → User.
+- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif. FK → User.
+- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse. FK → User.
 
 ### Environnements
 
-| Environnement | Frontend | API | apiUrl |
-|---------------|----------|-----|--------|
-| dev | `http://localhost:4200` | `http://localhost:8080/api` | `/api` (proxy dev) |
-| prod | `https://budget.kksdev.fr` | `https://budget.kksdev.fr/api` | `/api` |
+| Env | Frontend | API | apiUrl |
+|-----|----------|-----|--------|
+| dev | `localhost:4200` | `localhost:8080/api` | `/api` (proxy dev) |
+| prod | `budget.kksdev.fr` | `budget.kksdev.fr/api` | `/api` |
 
-### Entités
+### Securite
 
-- **User** : email (unique), password (BCrypt), name. Clé : UUID.
-- **Transaction** : montant, libellé, type (DEPENSE/RECETTE), date, catégorie, note. FK → User.
-- **Subscription** : nom, montant, fréquence (MENSUEL/ANNUEL), dateDebut, actif. FK → User.
-- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, remboursé. FK → User.
+- JWT stateless. Token dans header `Authorization: Bearer <token>`.
+- Routes publiques : `/auth/**`, `/error`. Tout le reste necessite un JWT valide.
+- Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 
-Toutes les entités utilisent des UUID comme clés primaires.
+### Design System SCSS
 
-### Sécurité
-
-- JWT stateless (pas de sessions). Token dans header `Authorization: Bearer <token>`.
-- Routes publiques : `/auth/**`, `/error`. Tout le reste nécessite un JWT valide.
-- Context path : `/api` (tous les endpoints commencent par `/api/...`).
-- `JwtFilter` valide le token et charge le User avant chaque requête authentifiée.
-
-### Profils Spring
-
-- **dev** : PostgreSQL local, DDL `validate`, Flyway activé, SQL visible, JWT secret via `${JWT_SECRET:...}` (valeur par défaut en fallback).
-- **prod** : tout via variables d'environnement (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`), DDL `validate`.
+Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities). Couleur primaire : Amber (#f59e0b). Police : Inter.
 
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de référence. 7 principes :
+Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de reference. 7 principes :
 
-1. **API-First** : toute feature via REST avant frontend. DTOs obligatoires, jamais d'entité JPA exposée.
-2. **Sécurité par défaut** : JWT sur toutes les routes, filtrage par user authentifié, Bean Validation.
-3. **Simplicité & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing. Un seul module Maven.
-4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les écrans.
-5. **Testabilité** : tests d'intégration sur endpoints, tests unitaires sur services. Pattern AAA. Nommage : `should_[résultat]_when_[condition]`.
-6. **Observabilité** : SLF4J/Logback uniquement (pas de `System.out.println`). Logger les actions au niveau INFO, erreurs au niveau ERROR.
-7. **Self-Hosted Ready** : PostgreSQL seule dépendance infra. Pas de SaaS en v1.
+1. **API-First** : toute feature via REST avant frontend. DTOs obligatoires, jamais d'entite JPA exposee.
+2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
+3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
+4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans.
+5. **Testabilite** : tests d'integration sur endpoints, tests unitaires sur services. Nommage : `should_[resultat]_when_[condition]`.
+6. **Observabilite** : SLF4J/Logback uniquement. INFO pour actions, ERROR pour erreurs.
+7. **Self-Hosted Ready** : PostgreSQL seule dependance infra.
 
 ## Conventions
 
-- Les DTOs séparent TOUJOURS la couche API de la couche persistance
-- Les enums pour les valeurs fixes du domaine (dans le package `enums/`)
+- DTOs separent TOUJOURS la couche API de la couche persistance
+- Enums pour les valeurs fixes du domaine (package `enums/`)
 - Lombok obligatoire (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
-- Chaque requête filtre par le user authentifié (isolation des données)
-- Les inputs sont validés via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
+- Chaque requete filtre par le user authentifie (isolation des donnees)
+- Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
 - Branches feature : `feature/<nom>`
 
 ## Conventions Frontend (Angular)
 
 ### Signals-First
 
-Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
+Approche **signals-first** obligatoire :
 
 | Besoin | Utiliser | Ne PAS utiliser |
 |--------|----------|-----------------|
@@ -177,84 +118,25 @@ Approche **signals-first** obligatoire. Utiliser les API modernes Angular :
 | Side effects | `effect()` | `ngOnChanges` |
 | Inputs | `input()` / `input.required()` | `@Input()` |
 | Outputs | `output()` | `@Output()` + `EventEmitter` |
-| Queries | `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()` | `@ViewChild()`, `@ContentChild()` |
+| Queries | `viewChild()`, `contentChild()` | `@ViewChild()`, `@ContentChild()` |
 | Two-way binding | `model()` | `@Input()` + `@Output()` combo |
 
-### Injection
+### Regles
 
 - `inject()` uniquement (pas de constructor injection)
-
-### Composants
-
-- Standalone obligatoire (défaut Angular 21)
-- `ChangeDetectionStrategy.OnPush` sur tous les composants
+- Standalone obligatoire, `ChangeDetectionStrategy.OnPush` sur tous les composants
 - Pas de `subscribe()` manuel — utiliser `toSignal()`, `firstValueFrom()` ou pipe `async`
+- RxJS limite aux flux HTTP et operateurs complexes
+- ESLint + Prettier configures (`ng lint`, `npm run format`)
 
-### Reactive (RxJS)
+## Documentation
 
-- `toSignal()` pour convertir Observable → Signal
-- `toObservable()` si besoin inverse
-- RxJS limité aux flux HTTP et opérateurs complexes
-
-### Linting
-
-- ESLint + @angular-eslint configuré (`ng lint`)
-- Prettier configuré (`npm run format` / `npm run format:check`)
-
-## Active Technologies
-- Backend : Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
-- Frontend : Angular 21.1.0, TypeScript 5.9.2, SCSS
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular 21 (HttpClient, Router, Signals), RxJS (HTTP uniquement) (002-auth-service)
-- localStorage (clé `budget_token`) (002-auth-service)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/router` (Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot), `AuthService` (existant) (003-auth-guard)
-- localStorage via AuthService (existant, pas de modification) (003-auth-guard)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn, HttpHandlerFn, HttpRequest, HttpErrorResponse), `@angular/router` (Router), `AuthService` (existant) (004-jwt-interceptor)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/router` (Router, RouterOutlet, RouterLink, RouterLinkActive), `AuthService` (existant), `ApiService` (existant) (005-login-screen)
-- TypeScript 5.9.2 / Angular 21.1.0 + Composants shared : `FormField` (form-field wrapper), `Shell` (layout container) (KKS-28, KKS-29)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone components, OnPush), SCSS design tokens (006-fab-speed-dial)
-- N/A (feature purement UI, pas de persistance) (006-fab-speed-dial)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone components, OnPush, Router), SCSS design tokens (006-fab-speed-dial)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/cdk` (overlay + a11y), `@angular/router` (NavigationEnd) (006-fab-speed-dial)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (Pipe, PipeTransform), `Intl.NumberFormat`, `Intl.DateTimeFormat` (007-format-pipes)
-- N/A (pipes purs sans état, sans persistance) (007-format-pipes)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (Component, ChangeDetectionStrategy, input, output) (008-list-item)
-- N/A (composant présentationnel sans état) (008-list-item)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/core` (signals, input, output, inject), composants existants (`FormField`, `Shell`, `Modal`) (009-transaction-form)
-- N/A (composant présentationnel — pas de persistance directe) (009-transaction-form)
-- N/A (composant presentationnel — pas de persistance directe) (010-subscription-form)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/common` (NgClass), RxJS (HTTP uniquement) (012-transaction-list)
-- N/A (composant présentationnel — données via TransactionService existant) (012-transaction-list)
-- N/A (données via SubscriptionService existant, API REST backend) (013-subscription-list)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/common` (NgClass), composants existants (`ListItem`, `AmountPipe`, `RelativeDatePipe`) (014-debt-list)
-- N/A (donnees via DebtService existant, API REST backend) (014-debt-list)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), RxJS (HTTP uniquement), composants existants (ListItem, AmountPipe, RelativeDatePipe, Shell, Fab, Modal) (015-dashboard)
-- N/A (données via services REST existants) (015-dashboard)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), @angular/cdk (overlay, a11y), @angular/router (016-modal-service)
-- N/A (utilise les services REST existants — TransactionService, SubscriptionService, DebtService) (016-modal-service)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core/testing`, `@angular/platform-browser/testing`, Vitest 4.x, RxJS (017-phase4-unit-tests)
-- N/A (tests uniquement, pas de persistance) (017-phase4-unit-tests)
-- Java 21 (backend) / TypeScript 5.9.2 (frontend) + Spring Boot 4.0.2, Angular 21.1.0, @angular/cdk (overlay, a11y) (018-category-system)
-- PostgreSQL 15+ via Spring Data JPA (018-category-system)
-- PostgreSQL 15+ via Spring Data JPA, Flyway migrations (018-category-system)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/core` (signals, standalone, OnPush), `@angular/forms` (ReactiveFormsModule), `@angular/cdk` (a11y) (019-form-ux-refonte)
-- N/A (pas de changement de persistance) (019-form-ux-refonte)
-- TypeScript 5.9.2 / Angular 21.1.0, SCSS + `@angular/forms` (ReactiveFormsModule) (020-fix-checkbox-forms)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), SCSS design tokens, Router (021-dashboard-redesign)
-- N/A (données via services REST existants — TransactionService, SubscriptionService, DebtService) (021-dashboard-redesign)
-- TypeScript 5.9.2 / Angular 21.1.0 + Angular (Signals, standalone, OnPush), SCSS design tokens, `ListItem`, `AmountPipe`, `RelativeDatePipe` (022-debt-page-redesign)
-- N/A (données via `DebtService` existant, API REST backend inchangée) (022-debt-page-redesign)
-- Java 21 + Spring Boot 4.0.2, Spring Security, Spring Data JPA, jjwt 0.12.6, Flyway (023-jwt-refresh-token)
-- PostgreSQL 15+ (nouvelle table `refresh_tokens`) (023-jwt-refresh-token)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/common/http` (HttpInterceptorFn), `@angular/core` (signals, inject), RxJS (Observable, Subject, switchMap, catchError, shareReplay) (024-frontend-refresh-token)
-- localStorage (clés `budget_token`, `budget_refresh_token`, `budget_user`) (024-frontend-refresh-token)
-- Java 21 (API) + TypeScript 5.9.2 / Angular 21.1.0 (Frontend) + Spring Boot 4.0.2, Angular 21, Docker, Nginx alpine (025-docker-deploy)
-- PostgreSQL 15+ (VM séparée, externe au Docker Compose) (025-docker-deploy)
-- TypeScript 5.9.2 / Angular 21.1.0 + `@angular/forms` (ReactiveFormsModule), `@angular/core` (signals, standalone, OnPush), composants existants (`FormField`), `AuthService.register()` (026-register-form)
-- N/A (pas de changement de persistance — utilise endpoint backend existant POST /auth/register) (026-register-form)
-
-## Recent Changes
-- 026-register-form: Formulaire d'inscription frontend avec toggle login/register sur /auth, validation croisée mots de passe
-- Conformité: @Slf4j controllers, subscribe() → firstValueFrom(), console.error → isDevMode(), tokens layout CSS
-- KKS-28, KKS-29: Écran de login et layout shell (FormField, Shell components)
-- 005-ds-foundation: Design system SCSS foundation (tokens, themes light/dark, reset, base, utilities, buttons, forms)
-- 001-springdoc-openapi: Added Java 21 + Spring Boot 4.0.2, springdoc-openapi-starter-webmvc-ui 3.0.1
+| Document | Contenu |
+|----------|---------|
+| [`README.md`](README.md) | Installation, commandes, endpoints, architecture |
+| [`docs/vision.md`](docs/vision.md) | Vision produit et modules fonctionnels |
+| [`docs/architecture.md`](docs/architecture.md) | Decisions techniques, modele de donnees |
+| [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses |
+| [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
+| [`docs/deployment.md`](docs/deployment.md) | Guide deploiement Docker/bare-metal |
+| **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
