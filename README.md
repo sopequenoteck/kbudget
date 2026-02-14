@@ -12,7 +12,7 @@ Monorepo avec deux modules :
 | Couche | Technologie |
 |--------|-------------|
 | Backend | Java 21, Spring Boot 4.0.2, Maven |
-| Frontend | Angular 20, TypeScript, SCSS |
+| Frontend | Angular 21, TypeScript 5.9, SCSS |
 | Base de donnees | PostgreSQL 15+ |
 | Auth | Spring Security + JWT (jjwt 0.12.6) |
 | Migrations | Flyway |
