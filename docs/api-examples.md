@@ -95,7 +95,8 @@ Request :
   "type": "DEPENSE",
   "date": "2026-02-07",
   "categoryId": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
-  "note": null
+  "note": null,
+  "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -115,7 +116,14 @@ Response `200` :
     "couleur": "#4CAF50",
     "isSystem": false
   },
-  "note": null
+  "note": null,
+  "account": {
+    "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+    "nom": "Compte Principal",
+    "icone": "🏦",
+    "couleur": "#3b82f6"
+  },
+  "transferId": null
 }
 ```
 
@@ -145,7 +153,8 @@ Request :
   "montant": 13.49,
   "frequence": "MENSUEL",
   "dateDebut": "2026-01-15",
-  "actif": true
+  "actif": true,
+  "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -158,7 +167,14 @@ Response `200` :
   "montant": 13.49,
   "frequence": "MENSUEL",
   "dateDebut": "2026-01-15",
-  "actif": true
+  "actif": true,
+  "category": null,
+  "account": {
+    "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+    "nom": "Compte Principal",
+    "icone": "🏦",
+    "couleur": "#3b82f6"
+  }
 }
 ```
 
@@ -172,7 +188,8 @@ Request :
   "montant": 15.99,
   "frequence": "MENSUEL",
   "dateDebut": "2026-01-15",
-  "actif": true
+  "actif": true,
+  "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890"
 }
 ```
 
@@ -185,7 +202,14 @@ Response `200` :
   "montant": 15.99,
   "frequence": "MENSUEL",
   "dateDebut": "2026-01-15",
-  "actif": true
+  "actif": true,
+  "category": null,
+  "account": {
+    "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+    "nom": "Compte Principal",
+    "icone": "🏦",
+    "couleur": "#3b82f6"
+  }
 }
 ```
 
@@ -201,7 +225,14 @@ Response `200` :
     "montant": 15.99,
     "frequence": "MENSUEL",
     "dateDebut": "2026-01-15",
-    "actif": true
+    "actif": true,
+    "category": null,
+    "account": {
+      "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+      "nom": "Compte Principal",
+      "icone": "🏦",
+      "couleur": "#3b82f6"
+    }
   },
   {
     "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
@@ -209,7 +240,9 @@ Response `200` :
     "montant": 10.99,
     "frequence": "MENSUEL",
     "dateDebut": "2025-06-01",
-    "actif": true
+    "actif": true,
+    "category": null,
+    "account": null
   }
 ]
 ```
@@ -295,6 +328,127 @@ Response `200` :
 ]
 ```
 
+## Comptes
+
+### Creer `POST /api/accounts`
+
+Request :
+
+```json
+{
+  "nom": "Livret A",
+  "type": "EPARGNE",
+  "soldeInitial": 1500.00,
+  "icone": "🐷",
+  "couleur": "#22c55e",
+  "actif": true
+}
+```
+
+Response `201` :
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
+  "nom": "Livret A",
+  "type": "EPARGNE",
+  "soldeInitial": 1500.00,
+  "solde": 1500.00,
+  "icone": "🐷",
+  "couleur": "#22c55e",
+  "isDefault": false,
+  "actif": true
+}
+```
+
+### Lister `GET /api/accounts`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+    "nom": "Compte Principal",
+    "type": "COURANT",
+    "soldeInitial": 0.00,
+    "solde": 1299.50,
+    "icone": "🏦",
+    "couleur": "#3b82f6",
+    "isDefault": true,
+    "actif": true
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
+    "nom": "Livret A",
+    "type": "EPARGNE",
+    "soldeInitial": 1500.00,
+    "solde": 1500.00,
+    "icone": "🐷",
+    "couleur": "#22c55e",
+    "isDefault": false,
+    "actif": true
+  }
+]
+```
+
+### Virement `POST /api/accounts/transfer`
+
+Request :
+
+```json
+{
+  "fromAccountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+  "toAccountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
+  "montant": 200.00,
+  "note": "Epargne mensuelle"
+}
+```
+
+Response `201` :
+
+```json
+{
+  "transferId": "e5f6a7b8-c9d0-1234-efab-345678901234",
+  "debitTransaction": {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "montant": 200.00,
+    "libelle": "Virement vers Livret A",
+    "type": "DEPENSE",
+    "date": "2026-02-15",
+    "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+    "accountNom": "Compte Principal"
+  },
+  "creditTransaction": {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "montant": 200.00,
+    "libelle": "Virement depuis Compte Principal",
+    "type": "RECETTE",
+    "date": "2026-02-15",
+    "accountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
+    "accountNom": "Livret A"
+  }
+}
+```
+
+### Definir par defaut `PUT /api/accounts/{id}/default`
+
+Response `200` :
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
+  "nom": "Livret A",
+  "type": "EPARGNE",
+  "soldeInitial": 1500.00,
+  "solde": 1700.00,
+  "icone": "🐷",
+  "couleur": "#22c55e",
+  "isDefault": true,
+  "actif": true
+}
+```
+
 ## Categories
 
 ### Creer `POST /api/categories`
@@ -352,6 +506,7 @@ Response `200` :
 | `Frequency` | `MENSUEL`, `ANNUEL` |
 | `DebtType` | `EMPRUNT`, `PRET` |
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
+| `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
 
 ## Voir aussi
 

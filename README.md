@@ -138,6 +138,18 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/debts/{id}` | Modifier |
 | DELETE | `/api/debts/{id}` | Supprimer |
 
+### Comptes
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/accounts` | Creer un compte |
+| GET | `/api/accounts` | Lister les comptes (filtre `?includeInactive=true`) |
+| GET | `/api/accounts/{id}` | Detail |
+| PUT | `/api/accounts/{id}` | Modifier |
+| DELETE | `/api/accounts/{id}` | Supprimer |
+| POST | `/api/accounts/transfer` | Virement entre deux comptes |
+| PUT | `/api/accounts/{id}/default` | Definir comme compte par defaut |
+
 ### Categories
 
 | Methode | Route | Description |
@@ -167,14 +179,14 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType
 ```
 
 ### Frontend (app/)
@@ -213,7 +225,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 cd api && mvn test
 ```
 
-84 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
+166 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
 
 ## Documentation complementaire
 

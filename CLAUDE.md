@@ -58,13 +58,14 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`.
 
 ### Entites
 
 - **User** : email (unique), password (BCrypt), name, createdAt. UUID.
-- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, updatedAt. FK → User.
-- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), updatedAt. FK → User.
+- **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), updatedAt. FK → User.
+- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
 - **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
