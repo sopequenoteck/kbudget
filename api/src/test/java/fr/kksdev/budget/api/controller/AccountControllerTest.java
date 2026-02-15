@@ -197,7 +197,7 @@ class AccountControllerTest {
     @Test
     void should_return401_when_notAuthenticated() throws Exception {
         mockMvc.perform(get("/accounts"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     // --- Transfer tests (T030) ---

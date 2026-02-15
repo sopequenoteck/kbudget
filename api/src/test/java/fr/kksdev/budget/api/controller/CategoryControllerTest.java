@@ -198,8 +198,8 @@ class CategoryControllerTest {
     }
 
     @Test
-    void should_return_403_when_no_token() throws Exception {
+    void should_return_401_when_no_token() throws Exception {
         mockMvc.perform(get("/categories"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

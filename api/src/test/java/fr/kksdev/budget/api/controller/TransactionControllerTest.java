@@ -193,8 +193,8 @@ class TransactionControllerTest {
     }
 
     @Test
-    void should_return_403_when_no_token() throws Exception {
+    void should_return_401_when_no_token() throws Exception {
         mockMvc.perform(get("/transactions"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }
