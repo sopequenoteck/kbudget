@@ -143,3 +143,11 @@ Approche **signals-first** obligatoire :
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/deployment.md`](docs/deployment.md) | Guide deploiement Docker/bare-metal |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
+
+## Active Technologies
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (026-bank-accounts)
+- PostgreSQL 15+, Flyway migrations (V1-V6 existantes, V7 pour cette feature) (026-bank-accounts)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Flyway, jjwt 0.12.6, Lombok (026-bank-accounts)
+
+## Recent Changes
+- 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

@@ -1,0 +1,272 @@
+package fr.kksdev.budget.api.service;
+
+import fr.kksdev.budget.api.dto.request.AccountRequest;
+import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.AccountRepository;
+import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.TransactionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class AccountServiceTest {
+
+    @Mock
+    private AccountRepository accountRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private AccountService accountService;
+
+    private final UUID userId = UUID.randomUUID();
+    private final UUID accountId = UUID.randomUUID();
+
+    private User buildUser() {
+        return User.builder().id(userId).email("test@mail.com").build();
+    }
+
+    private Account buildAccount(User user) {
+        return Account.builder()
+                .id(accountId)
+                .nom("Compte Principal")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(true)
+                .actif(true)
+                .user(user)
+                .build();
+    }
+
+    @Test
+    void should_createAccount_when_validRequest() {
+        var user = buildUser();
+        var request = new AccountRequest("Livret A", AccountType.EPARGNE, new BigDecimal("5000.00"), null, null, null);
+        var saved = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Livret A")
+                .type(AccountType.EPARGNE)
+                .soldeInitial(new BigDecimal("5000.00"))
+                .icone("🐷")
+                .couleur("#22c55e")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Livret A", userId)).thenReturn(false);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.save(any(Account.class))).thenReturn(saved);
+        when(transactionRepository.calculateBalanceByAccountId(saved.getId())).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.createAccount(request, userId);
+
+        assertThat(response.nom()).isEqualTo("Livret A");
+        assertThat(response.type()).isEqualTo(AccountType.EPARGNE);
+        assertThat(response.soldeInitial()).isEqualByComparingTo("5000.00");
+        assertThat(response.solde()).isEqualByComparingTo("5000.00");
+        assertThat(response.icone()).isEqualTo("🐷");
+        assertThat(response.couleur()).isEqualTo("#22c55e");
+        verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void should_applyDefaultIconAndColor_when_notProvided() {
+        var user = buildUser();
+        var request = new AccountRequest("Espèces", AccountType.ESPECES, null, null, null, null);
+        var saved = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Espèces")
+                .type(AccountType.ESPECES)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💵")
+                .couleur("#f59e0b")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Espèces", userId)).thenReturn(false);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.save(any(Account.class))).thenReturn(saved);
+        when(transactionRepository.calculateBalanceByAccountId(saved.getId())).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.createAccount(request, userId);
+
+        assertThat(response.icone()).isEqualTo("💵");
+        assertThat(response.couleur()).isEqualTo("#f59e0b");
+    }
+
+    @Test
+    void should_setDefault_when_requested() {
+        var user = buildUser();
+        var currentDefault = buildAccount(user);
+        var newDefault = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Livret A")
+                .type(AccountType.EPARGNE)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🐷")
+                .couleur("#22c55e")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(newDefault.getId())).thenReturn(Optional.of(newDefault));
+        when(accountRepository.findByUserIdAndIsDefaultTrue(userId)).thenReturn(Optional.of(currentDefault));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(transactionRepository.calculateBalanceByAccountId(newDefault.getId())).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.setDefault(newDefault.getId(), userId);
+
+        assertThat(response.isDefault()).isTrue();
+        assertThat(currentDefault.getIsDefault()).isFalse();
+        verify(accountRepository, times(2)).save(any(Account.class));
+    }
+
+    @Test
+    void should_preventDelete_when_transactionsExist() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(accountId)
+                .nom("Test")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.existsByAccountId(accountId)).thenReturn(true);
+
+        assertThatThrownBy(() -> accountService.deleteAccount(accountId, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Impossible de supprimer un compte avec des transactions rattachées");
+    }
+
+    @Test
+    void should_preventDeactivation_when_isDefault() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, false);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Compte Principal", userId, accountId)).thenReturn(false);
+
+        assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Impossible de désactiver le compte par défaut");
+    }
+
+    @Test
+    void should_deletePhysically_when_noDataAttached() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(accountId)
+                .nom("Vide")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.existsByAccountId(accountId)).thenReturn(false);
+        when(subscriptionRepository.existsByAccountId(accountId)).thenReturn(false);
+
+        accountService.deleteAccount(accountId, userId);
+
+        verify(accountRepository).delete(account);
+    }
+
+    @Test
+    void should_createDefaultAccount_when_userRegisters() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.createDefaultAccount(user);
+
+        verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void should_calculateBalance_when_accountHasTransactions() {
+        var user = buildUser();
+        var account = buildAccount(user);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(new BigDecimal("150.00"));
+
+        AccountResponse response = accountService.getAccountById(accountId, userId);
+
+        assertThat(response.solde()).isEqualByComparingTo("150.00");
+    }
+
+    @Test
+    void should_throw_when_accountNotFound() {
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> accountService.getAccountById(accountId, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Compte non trouvé");
+    }
+
+    @Test
+    void should_throw_when_duplicateName() {
+        var request = new AccountRequest("Existant", AccountType.COURANT, null, null, null, null);
+
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Existant", userId)).thenReturn(true);
+
+        assertThatThrownBy(() -> accountService.createAccount(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Un compte avec ce nom existe déjà");
+    }
+
+    @Test
+    void should_returnActiveAccounts_when_includeInactiveFalse() {
+        var user = buildUser();
+        var account = buildAccount(user);
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+
+        List<AccountResponse> result = accountService.getAccounts(userId, false);
+
+        assertThat(result).hasSize(1);
+        verify(accountRepository).findByUserIdAndActifTrue(userId);
+    }
+}

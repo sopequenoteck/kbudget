@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -43,6 +44,9 @@ class SubscriptionServiceTest {
     @Mock
     private CategoryService categoryService;
 
+    @Mock
+    private AccountRepository accountRepository;
+
     @InjectMocks
     private SubscriptionService subscriptionService;
 
@@ -62,6 +66,7 @@ class SubscriptionServiceTest {
                 .dateDebut(LocalDate.of(2026, 1, 1))
                 .actif(true)
                 .category(null)
+                .account(null)
                 .user(user)
                 .build();
     }
@@ -70,7 +75,7 @@ class SubscriptionServiceTest {
     void should_create_subscription_when_valid_request() {
         var user = buildUser();
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null);
         var saved = buildSubscription(user);
 
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
@@ -82,6 +87,7 @@ class SubscriptionServiceTest {
         assertThat(response.id()).isEqualTo(subscriptionId);
         assertThat(response.nom()).isEqualTo("Netflix");
         assertThat(response.actif()).isTrue();
+        assertThat(response.account()).isNull();
         verify(subscriptionRepository).save(any(Subscription.class));
     }
 
@@ -104,10 +110,11 @@ class SubscriptionServiceTest {
                 .dateDebut(LocalDate.of(2026, 1, 1))
                 .actif(true)
                 .category(systemCat)
+                .account(null)
                 .user(user)
                 .build();
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null);
 
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -179,7 +186,7 @@ class SubscriptionServiceTest {
         var user = buildUser();
         var existing = buildSubscription(user);
         var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null, null);
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(existing));
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(existing);

@@ -1,10 +1,13 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -27,6 +30,7 @@ public class SubscriptionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryService categoryService;
+    private final AccountRepository accountRepository;
 
     @Transactional
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
@@ -37,6 +41,7 @@ public class SubscriptionService {
                 .dateDebut(request.dateDebut())
                 .actif(request.actif() != null ? request.actif() : true)
                 .category(resolveCategory(request.categoryId(), userId))
+                .account(resolveAccount(request.accountId(), userId))
                 .user(userRepository.getReferenceById(userId))
                 .build();
 
@@ -76,6 +81,7 @@ public class SubscriptionService {
             subscription.setActif(request.actif());
         }
         subscription.setCategory(resolveCategory(request.categoryId(), userId));
+        subscription.setAccount(resolveAccount(request.accountId(), userId));
 
         subscription = subscriptionRepository.save(subscription);
         log.info("Abonnement mis à jour: {}", subscription.getId());
@@ -87,6 +93,19 @@ public class SubscriptionService {
         Subscription subscription = findByIdAndUser(id, userId);
         subscriptionRepository.delete(subscription);
         log.info("Abonnement supprimé: {}", id);
+    }
+
+    private Account resolveAccount(UUID accountId, UUID userId) {
+        if (accountId == null) {
+            return null;
+        }
+        return accountRepository.findById(accountId)
+                .filter(a -> a.getUser().getId().equals(userId))
+                .filter(a -> Boolean.TRUE.equals(a.getActif()))
+                .orElseThrow(() -> {
+                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    return new EntityNotFoundException("Compte non trouvé ou inactif");
+                });
     }
 
     private Subscription findByIdAndUser(UUID id, UUID userId) {
@@ -123,6 +142,18 @@ public class SubscriptionService {
         );
     }
 
+    private AccountSummary toAccountSummary(Account account) {
+        if (account == null) {
+            return null;
+        }
+        return new AccountSummary(
+                account.getId(),
+                account.getNom(),
+                account.getIcone(),
+                account.getCouleur()
+        );
+    }
+
     private SubscriptionResponse toResponse(Subscription subscription) {
         return new SubscriptionResponse(
                 subscription.getId(),
@@ -131,7 +162,8 @@ public class SubscriptionService {
                 subscription.getFrequence(),
                 subscription.getDateDebut(),
                 subscription.getActif(),
-                toCategoryResponse(subscription.getCategory())
+                toCategoryResponse(subscription.getCategory()),
+                toAccountSummary(subscription.getAccount())
         );
     }
 }

@@ -42,6 +42,10 @@ public class Subscription {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

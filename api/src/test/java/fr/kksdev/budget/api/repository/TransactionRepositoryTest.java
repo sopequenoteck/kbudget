@@ -1,6 +1,8 @@
 package fr.kksdev.budget.api.repository;
 
+import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,9 @@ class TransactionRepositoryTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -46,11 +51,30 @@ class TransactionRepositoryTest {
                 .name("User 2")
                 .build());
 
+        Account account1 = accountRepository.save(Account.builder()
+                .nom("Compte Principal")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦").couleur("#3b82f6")
+                .isDefault(true).actif(true)
+                .user(user1)
+                .build());
+
+        Account account2 = accountRepository.save(Account.builder()
+                .nom("Compte Principal")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦").couleur("#3b82f6")
+                .isDefault(true).actif(true)
+                .user(user2)
+                .build());
+
         transactionRepository.save(Transaction.builder()
                 .montant(new BigDecimal("100.00"))
                 .libelle("Salaire")
                 .type(TransactionType.RECETTE)
                 .date(LocalDate.of(2026, 1, 1))
+                .account(account1)
                 .user(user1)
                 .build());
 
@@ -59,6 +83,7 @@ class TransactionRepositoryTest {
                 .libelle("Courses")
                 .type(TransactionType.DEPENSE)
                 .date(LocalDate.of(2026, 1, 15))
+                .account(account1)
                 .user(user1)
                 .build());
 
@@ -67,6 +92,7 @@ class TransactionRepositoryTest {
                 .libelle("Loyer")
                 .type(TransactionType.DEPENSE)
                 .date(LocalDate.of(2026, 1, 10))
+                .account(account2)
                 .user(user2)
                 .build());
 

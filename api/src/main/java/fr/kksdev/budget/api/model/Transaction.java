@@ -41,6 +41,13 @@ public class Transaction {
 
     private String note;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
+    @Column(name = "transfer_id")
+    private UUID transferId;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

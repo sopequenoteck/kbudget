@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.controller;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
@@ -52,6 +53,7 @@ class TransactionControllerTest {
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private final UUID transactionId = UUID.randomUUID();
+    private final UUID accountId = UUID.randomUUID();
     private User testUser;
 
     @BeforeEach
@@ -60,6 +62,10 @@ class TransactionControllerTest {
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+    }
+
+    private AccountSummary buildAccountSummary() {
+        return new AccountSummary(accountId, "Compte Principal", "🏦", "#3b82f6");
     }
 
     private String transactionJson(String montant, String libelle, String type, String date) {
@@ -77,7 +83,7 @@ class TransactionControllerTest {
     void should_return_201_when_create_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null);
 
         when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -88,28 +94,30 @@ class TransactionControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(transactionId.toString()))
                 .andExpect(jsonPath("$.libelle").value("Courses"))
-                .andExpect(jsonPath("$.montant").value(50.00));
+                .andExpect(jsonPath("$.montant").value(50.00))
+                .andExpect(jsonPath("$.account.nom").value("Compte Principal"));
     }
 
     @Test
     void should_return_200_when_get_all_transactions() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null);
 
         when(transactionService.getAllByUser(userId)).thenReturn(List.of(response));
 
         mockMvc.perform(get("/transactions")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].libelle").value("Courses"));
+                .andExpect(jsonPath("$[0].libelle").value("Courses"))
+                .andExpect(jsonPath("$[0].account.nom").value("Compte Principal"));
     }
 
     @Test
     void should_return_200_when_get_transaction_by_id() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null);
 
         when(transactionService.getById(transactionId, userId)).thenReturn(response);
 
@@ -123,7 +131,7 @@ class TransactionControllerTest {
     void should_return_200_when_update_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("75.00"), "Courses modifiées", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 8), null, null);
+                LocalDate.of(2026, 2, 8), null, null, buildAccountSummary(), null);
 
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenReturn(response);
