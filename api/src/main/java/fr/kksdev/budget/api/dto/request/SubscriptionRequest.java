@@ -16,5 +16,6 @@ public record SubscriptionRequest(
         @NotNull Frequency frequence,
         @NotNull LocalDate dateDebut,
         Boolean actif,
-        UUID categoryId
+        UUID categoryId,
+        UUID accountId
 ) {}

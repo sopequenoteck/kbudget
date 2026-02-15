@@ -21,6 +21,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final CategoryService categoryService;
+    private final AccountService accountService;
     private final RefreshTokenService refreshTokenService;
 
     @Transactional
@@ -38,6 +39,7 @@ public class AuthService {
 
         userRepository.save(user);
         categoryService.seedSystemCategories(user);
+        accountService.createDefaultAccount(user);
         log.info("User registered: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());

@@ -16,5 +16,6 @@ public record TransactionRequest(
         @NotNull TransactionType type,
         @NotNull LocalDate date,
         UUID categoryId,
-        @Size(max = 500) String note
+        @Size(max = 500) String note,
+        UUID accountId
 ) {}

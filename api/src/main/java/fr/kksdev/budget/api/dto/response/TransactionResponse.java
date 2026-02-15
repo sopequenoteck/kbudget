@@ -13,5 +13,7 @@ public record TransactionResponse(
         TransactionType type,
         LocalDate date,
         CategoryResponse category,
-        String note
+        String note,
+        AccountSummary account,
+        UUID transferId
 ) {}

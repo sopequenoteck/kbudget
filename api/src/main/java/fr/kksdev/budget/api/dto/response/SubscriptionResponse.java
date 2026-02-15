@@ -13,5 +13,6 @@ public record SubscriptionResponse(
         Frequency frequence,
         LocalDate dateDebut,
         Boolean actif,
-        CategoryResponse category
+        CategoryResponse category,
+        AccountSummary account
 ) {}

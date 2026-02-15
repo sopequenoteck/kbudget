@@ -110,6 +110,15 @@ public class CategoryService {
                     .build();
             categoryRepository.save(dette);
 
+            Category virement = Category.builder()
+                    .nom("Virement")
+                    .icone("\uD83D\uDD04")
+                    .couleur("#8b5cf6")
+                    .isSystem(true)
+                    .user(user)
+                    .build();
+            categoryRepository.save(virement);
+
             log.info("Catégories système créées pour userId {}", user.getId());
         } catch (Exception e) {
             log.error("Échec du seeding des catégories système pour userId {}: {}", user.getId(), e.getMessage());

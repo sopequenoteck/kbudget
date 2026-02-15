@@ -1,12 +1,15 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.TransactionRequest;
+import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Transaction;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -31,9 +34,12 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
+        Account account = resolveAccount(request.accountId(), userId);
+
         Transaction transaction = Transaction.builder()
                 .montant(request.montant())
                 .libelle(request.libelle())
@@ -41,6 +47,7 @@ public class TransactionService {
                 .date(request.date())
                 .category(resolveCategory(request.categoryId(), userId))
                 .note(request.note())
+                .account(account)
                 .user(userRepository.getReferenceById(userId))
                 .build();
 
@@ -65,6 +72,11 @@ public class TransactionService {
     public TransactionResponse update(UUID id, TransactionRequest request, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
 
+        // Propager le montant si c'est une transaction de virement
+        if (transaction.getTransferId() != null && request.montant().compareTo(transaction.getMontant()) != 0) {
+            propagateTransferAmount(transaction, request.montant());
+        }
+
         transaction.setMontant(request.montant());
         transaction.setLibelle(request.libelle());
         transaction.setType(request.type());
@@ -80,6 +92,18 @@ public class TransactionService {
     @Transactional
     public void delete(UUID id, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
+
+        // Cascade delete pour les virements
+        if (transaction.getTransferId() != null) {
+            List<Transaction> linked = transactionRepository.findByTransferId(transaction.getTransferId());
+            linked.stream()
+                    .filter(t -> !t.getId().equals(id))
+                    .forEach(t -> {
+                        transactionRepository.delete(t);
+                        log.info("Transaction liée supprimée (cascade virement): {}", t.getId());
+                    });
+        }
+
         transactionRepository.delete(transaction);
         log.info("Transaction supprimée: {}", id);
     }
@@ -107,6 +131,31 @@ public class TransactionService {
 
         return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
                 totalRecettes.subtract(totalDepenses));
+    }
+
+    private void propagateTransferAmount(Transaction transaction, BigDecimal newMontant) {
+        List<Transaction> linked = transactionRepository.findByTransferId(transaction.getTransferId());
+        linked.stream()
+                .filter(t -> !t.getId().equals(transaction.getId()))
+                .forEach(t -> {
+                    t.setMontant(newMontant);
+                    transactionRepository.save(t);
+                    log.info("Montant propagé à la transaction liée: {} -> {}", t.getId(), newMontant);
+                });
+    }
+
+    private Account resolveAccount(UUID accountId, UUID userId) {
+        if (accountId == null) {
+            return accountRepository.findByUserIdAndIsDefaultTrue(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Aucun compte par défaut trouvé"));
+        }
+        return accountRepository.findById(accountId)
+                .filter(a -> a.getUser().getId().equals(userId))
+                .filter(a -> Boolean.TRUE.equals(a.getActif()))
+                .orElseThrow(() -> {
+                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    return new EntityNotFoundException("Compte non trouvé ou inactif");
+                });
     }
 
     private Transaction findByIdAndUser(UUID id, UUID userId) {
@@ -143,6 +192,18 @@ public class TransactionService {
         );
     }
 
+    private AccountSummary toAccountSummary(Account account) {
+        if (account == null) {
+            return null;
+        }
+        return new AccountSummary(
+                account.getId(),
+                account.getNom(),
+                account.getIcone(),
+                account.getCouleur()
+        );
+    }
+
     private TransactionResponse toResponse(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
@@ -151,7 +212,9 @@ public class TransactionService {
                 transaction.getType(),
                 transaction.getDate(),
                 toCategoryResponse(transaction.getCategory()),
-                transaction.getNote()
+                transaction.getNote(),
+                toAccountSummary(transaction.getAccount()),
+                transaction.getTransferId()
         );
     }
 }

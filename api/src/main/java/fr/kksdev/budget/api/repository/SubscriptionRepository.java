@@ -11,4 +11,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     List<Subscription> findByUserIdOrderByNomAsc(UUID userId);
 
     List<Subscription> findByUserIdAndActifTrueOrderByNomAsc(UUID userId);
+
+    boolean existsByAccountId(UUID accountId);
 }

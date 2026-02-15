@@ -41,6 +41,9 @@ class AuthServiceTest {
     private CategoryService categoryService;
 
     @Mock
+    private AccountService accountService;
+
+    @Mock
     private RefreshTokenService refreshTokenService;
 
     @InjectMocks

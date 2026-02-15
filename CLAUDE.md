@@ -58,13 +58,14 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`.
 
 ### Entites
 
 - **User** : email (unique), password (BCrypt), name, createdAt. UUID.
-- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, updatedAt. FK → User.
-- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), updatedAt. FK → User.
+- **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), updatedAt. FK → User.
+- **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
 - **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
@@ -143,3 +144,11 @@ Approche **signals-first** obligatoire :
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/deployment.md`](docs/deployment.md) | Guide deploiement Docker/bare-metal |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
+
+## Active Technologies
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (026-bank-accounts)
+- PostgreSQL 15+, Flyway migrations (V1-V6 existantes, V7 pour cette feature) (026-bank-accounts)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Flyway, jjwt 0.12.6, Lombok (026-bank-accounts)
+
+## Recent Changes
+- 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

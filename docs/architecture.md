@@ -36,6 +36,21 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | name | String | Nom de l'utilisateur |
 | createdAt | LocalDateTime | Date de creation |
 
+### Account
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| nom | String | Nom du compte (max 50 car.) |
+| type | Enum | COURANT / EPARGNE / ESPECES |
+| soldeInitial | BigDecimal | Solde initial du compte |
+| icone | String | Icone (emoji) |
+| couleur | String | Couleur hexadecimale (#RRGGBB) |
+| isDefault | Boolean | Compte par defaut |
+| actif | Boolean | Compte actif ou non |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
 ### Transaction
 
 | Champ | Type | Description |
@@ -47,6 +62,8 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | date | LocalDate | Date de la transaction |
 | category | Category | FK → Category (nullable) |
 | note | String | Note libre (nullable) |
+| account | Account | FK → Account |
+| transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -61,6 +78,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | dateDebut | LocalDate | Date de debut |
 | actif | Boolean | Abonnement actif ou non |
 | category | Category | FK → Category (nullable) |
+| account | Account | FK → Account (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
