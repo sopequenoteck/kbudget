@@ -1,0 +1,18 @@
+#!/bin/bash
+# Pre-push hook: bloque les push directs sur main.
+# Les merges via GitHub PR restent autorisés.
+
+protected_branch="main"
+current_branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+while read local_ref local_sha remote_ref remote_sha; do
+  if echo "$remote_ref" | grep -q "refs/heads/${protected_branch}$"; then
+    echo ""
+    echo "  BLOQUE: push direct sur '${protected_branch}' interdit."
+    echo "  Utilise une Pull Request pour merger dans '${protected_branch}'."
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0
