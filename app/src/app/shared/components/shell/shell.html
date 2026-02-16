@@ -4,14 +4,34 @@
     <span class="hamburger-line"></span>
     <span class="hamburger-line"></span>
   </button>
-  @if (isHome()) {
-    <h1 class="shell-logo">K-Budget</h1>
-  } @else {
-    <h1 class="shell-page-title">{{ pageTitle() }}</h1>
-  }
-  @if (userName()) {
-    <span class="shell-user">{{ userName()!.name }}</span>
-  }
+  <a routerLink="/dashboard" class="shell-brand">
+    <img src="icons/budget-icon-no-background.svg" alt="" class="shell-brand-logo" />
+    <span class="shell-brand-name">K-Budget</span>
+  </a>
+  <div class="shell-user-menu">
+    <button
+      class="shell-user-trigger"
+      (click)="toggleDropdown()"
+      [attr.aria-expanded]="dropdownOpen()"
+      aria-haspopup="true"
+      aria-label="Menu utilisateur"
+    >
+      <span class="shell-user-avatar">{{ userInitials() }}</span>
+    </button>
+    @if (dropdownOpen()) {
+      <div class="shell-dropdown" role="menu">
+        @if (userName(); as user) {
+          <div class="shell-dropdown-name">{{ user.name }}</div>
+        }
+        <a class="shell-dropdown-item" routerLink="/settings" role="menuitem" (click)="closeDropdown()">
+          <span>&#9881;&#65039;</span> Paramètres
+        </a>
+        <button class="shell-dropdown-item shell-dropdown-logout" role="menuitem" (click)="onLogout()">
+          <span>&#128682;</span> Déconnexion
+        </button>
+      </div>
+    }
+  </div>
 </header>
 
 @if (sidebarOpen()) {
@@ -24,19 +44,10 @@
 }
 
 <nav class="shell-sidebar" [class.open]="sidebarOpen()">
-  <a routerLink="/dashboard" routerLinkActive="active" (click)="onNavClick()">Accueil</a>
-  <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">Transactions</a>
-  <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">Abonnements</a>
-  <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">Dettes</a>
-  <a routerLink="/settings" routerLinkActive="active" (click)="onNavClick()">Paramètres</a>
-  <a
-    class="shell-logout"
-    tabindex="0"
-    role="button"
-    (click)="onLogout()"
-    (keydown.enter)="onLogout()"
-    >Déconnexion</a
-  >
+  <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="onNavClick()">&#127968; Accueil</a>
+  <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">&#128176; Transactions</a>
+  <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">&#128260; Abonnements</a>
+  <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">&#129309; Dettes</a>
 </nav>
 
 <main class="shell-content">

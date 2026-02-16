@@ -3,6 +3,8 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
+  HostListener,
   inject,
   isDevMode,
   signal,
@@ -54,6 +56,7 @@ import { Modal } from '../modal/modal';
 export class Shell {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef);
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
@@ -64,16 +67,17 @@ export class Shell {
 
   readonly userName = this.authService.currentUser;
   readonly sidebarOpen = signal(false);
-  readonly pageTitle = computed(() => {
-    this.navigationEnd();
-    const url = this.router.url;
-    if (url.startsWith('/transactions')) return 'Transactions';
-    if (url.startsWith('/subscriptions')) return 'Abonnements';
-    if (url.startsWith('/debts')) return 'Dettes';
-    if (url.startsWith('/settings')) return 'Paramètres';
-    return '';
+  readonly dropdownOpen = signal(false);
+  readonly userInitials = computed(() => {
+    const user = this.userName();
+    if (!user?.name) return '?';
+    return user.name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   });
-  readonly isHome = computed(() => this.pageTitle() === '');
   readonly speedDialOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
@@ -86,6 +90,7 @@ export class Shell {
     effect(() => {
       this.navigationEnd();
       this.speedDialOpen.set(false);
+      this.dropdownOpen.set(false);
       this.modalService.closeModal();
     });
 
@@ -126,7 +131,29 @@ export class Shell {
     this.closeSidebar();
   }
 
+  toggleDropdown(): void {
+    this.dropdownOpen.update((open) => !open);
+  }
+
+  closeDropdown(): void {
+    this.dropdownOpen.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const menuEl = this.elementRef.nativeElement.querySelector('.shell-user-menu');
+    if (menuEl && !menuEl.contains(event.target as Node)) {
+      this.closeDropdown();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.closeDropdown();
+  }
+
   onLogout(): void {
+    this.closeDropdown();
     this.authService.logout();
   }
 
