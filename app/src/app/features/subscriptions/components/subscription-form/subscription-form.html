@@ -20,10 +20,6 @@
   </div>
 
   <div class="form-row">
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
-
     <app-form-field
       label="Date de debut"
       fieldId="dateDebut"
@@ -32,7 +28,21 @@
     >
       <input id="dateDebut" type="date" formControlName="dateDebut" />
     </app-form-field>
+
+    <app-form-field label="Categorie" fieldId="categoryId">
+      <app-category-picker formControlName="categoryId" />
+    </app-form-field>
   </div>
+
+  @if (activeAccounts().length > 0) {
+    <app-account-picker
+      [accounts]="activeAccounts()"
+      [selectedAccountId]="form.get('accountId')?.value ?? null"
+      [required]="false"
+      label="Compte (optionnel)"
+      (accountSelected)="onAccountSelected($event)"
+    />
+  }
 
   <label class="checkbox-field">
     <input type="checkbox" formControlName="actif" />

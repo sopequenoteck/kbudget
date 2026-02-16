@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { CategoryService } from '../../core/services/category';
@@ -16,6 +17,7 @@ import { Category } from '../../core/models/category.model';
 
 @Component({
   selector: 'app-settings',
+  imports: [RouterLink],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

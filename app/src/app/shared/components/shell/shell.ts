@@ -17,6 +17,7 @@ import { AuthService } from '../../../core/services/auth';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { DebtService } from '../../../core/services/debt';
+import { AccountService } from '../../../core/services/account';
 import { ModalService, type ModalType } from '../../../core/services/modal.service';
 import {
   type Transaction,
@@ -29,10 +30,13 @@ import {
   type SubscriptionRequest,
 } from '../../../core/models/subscription.model';
 import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
+import { type Account, type AccountRequest } from '../../../core/models/account.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
 import { CategoryForm } from '../category-form/category-form';
+import { AccountForm } from '../account-form/account-form';
+import { TransferForm } from '../transfer-form/transfer-form';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -48,6 +52,8 @@ import { Modal } from '../modal/modal';
     SubscriptionForm,
     DebtForm,
     CategoryForm,
+    AccountForm,
+    TransferForm,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -60,6 +66,7 @@ export class Shell {
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
+  private readonly accountService = inject(AccountService);
   readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
@@ -236,6 +243,30 @@ export class Shell {
       this.modalService.closeModal();
     } catch (error) {
       if (isDevMode()) console.error('Failed to delete debt:', error);
+    }
+  }
+
+  async onAccountSaved(request: AccountRequest): Promise<void> {
+    const editing = this.modalService.editingEntity() as Account | null;
+    if (editing) {
+      await firstValueFrom(this.accountService.update(editing.id, request));
+    } else {
+      await firstValueFrom(this.accountService.create(request));
+    }
+    this.modalService.closeModal();
+  }
+
+  onTransferSaved(): void {
+    this.transactionService.refreshTrigger.update((v) => v + 1);
+    this.modalService.closeModal();
+  }
+
+  async onAccountDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.accountService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete account:', error);
     }
   }
 }

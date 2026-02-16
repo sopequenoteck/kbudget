@@ -21,6 +21,7 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2024-01-15',
     actif: true,
     category: null,
+    account: null,
   },
   {
     id: '2',
@@ -30,6 +31,7 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2024-03-01',
     actif: true,
     category: null,
+    account: null,
   },
   {
     id: '3',
@@ -39,6 +41,7 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2023-06-10',
     actif: false,
     category: null,
+    account: null,
   },
 ];
 
@@ -95,6 +98,7 @@ describe('Subscriptions', () => {
           dateDebut: '2024-01-01',
           actif: true,
           category: null,
+          account: null,
         },
       ]);
       expect(component.monthlyTotal()).toBeCloseTo(10, 2);
@@ -120,6 +124,7 @@ describe('Subscriptions', () => {
         dateDebut: '2020-01-15',
         actif: true,
         category: null,
+        account: null,
       };
       const result = component.getNextRenewalDate(sub);
       // Should contain a day number and a month name in French
@@ -135,6 +140,7 @@ describe('Subscriptions', () => {
         dateDebut: '2020-06-01',
         actif: true,
         category: null,
+        account: null,
       };
       const result = component.getNextRenewalDate(sub);
       expect(result).toMatch(/\d+\s+\w+/);
@@ -151,6 +157,7 @@ describe('Subscriptions', () => {
         dateDebut: futureDate.toISOString().split('T')[0],
         actif: true,
         category: null,
+        account: null,
       };
       const result = component.getNextRenewalDate(sub);
       expect(result).toMatch(/\d+\s+\w+/);
@@ -165,6 +172,7 @@ describe('Subscriptions', () => {
         dateDebut: '2020-01-01',
         actif: false,
         category: null,
+        account: null,
       };
       expect(component.getNextRenewalDate(sub)).toBe('Inactif');
     });

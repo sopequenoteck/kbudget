@@ -1,0 +1,72 @@
+@if (!hasEnoughAccounts()) {
+  <div class="transfer-form__no-accounts">
+    <p>Vous devez avoir au moins 2 comptes actifs pour effectuer un virement.</p>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="transfer-form">
+    <app-form-field
+      label="Depuis"
+      fieldId="fromAccountId"
+      [showError]="isInvalid('fromAccountId')"
+      [errorMessage]="'Compte source requis'"
+    >
+      <select id="fromAccountId" formControlName="fromAccountId">
+        <option value="">Sélectionner un compte</option>
+        @for (account of activeAccounts(); track account.id) {
+          <option [value]="account.id">
+            {{ account.icone }} {{ account.nom }} ({{ account.solde | number: '1.2-2' }} €)
+          </option>
+        }
+      </select>
+    </app-form-field>
+
+    <app-form-field
+      label="Vers"
+      fieldId="toAccountId"
+      [showError]="isInvalid('toAccountId')"
+      [errorMessage]="'Compte destination requis'"
+    >
+      <select id="toAccountId" formControlName="toAccountId">
+        <option value="">Sélectionner un compte</option>
+        @for (account of activeAccounts(); track account.id) {
+          <option [value]="account.id">
+            {{ account.icone }} {{ account.nom }} ({{ account.solde | number: '1.2-2' }} €)
+          </option>
+        }
+      </select>
+    </app-form-field>
+
+    @if (form.hasError('sameAccount') && form.get('toAccountId')?.touched) {
+      <div class="form-error-banner">Les comptes source et destination doivent être différents</div>
+    }
+
+    <app-form-field
+      label="Montant"
+      fieldId="transferMontant"
+      [showError]="isInvalid('montant')"
+      [errorMessage]="'Le montant doit être supérieur à 0'"
+    >
+      <input id="transferMontant" type="number" formControlName="montant" step="0.01" min="0.01" />
+    </app-form-field>
+
+    <app-form-field
+      label="Note (optionnel)"
+      fieldId="transferNote"
+      [showError]="isInvalid('note')"
+      [errorMessage]="'500 caractères maximum'"
+    >
+      <textarea id="transferNote" formControlName="note" rows="2"></textarea>
+    </app-form-field>
+
+    @if (errorMessage()) {
+      <div class="form-error-banner">{{ errorMessage() }}</div>
+    }
+
+    <div class="form-actions">
+      <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Virement...' : 'Effectuer le virement' }}
+      </button>
+    </div>
+  </form>
+}

@@ -5,6 +5,102 @@
   padding: var(--space-4);
 }
 
+// -- Section Comptes --
+.accounts-zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  &__total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background-color: var(--surface-default);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+  }
+
+  &__total-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__total-value {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+  }
+
+  &__list {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+    padding-bottom: var(--space-1);
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: var(--radius-round);
+    }
+  }
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 110px;
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  background-color: var(--surface-default);
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid transparent;
+  flex-shrink: 0;
+
+  &__icon {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+  }
+
+  &__name {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+    text-align: center;
+  }
+
+  &__solde {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    white-space: nowrap;
+  }
+}
+
+.state-loading--accounts {
+  padding: var(--space-4);
+}
+
+.state-empty--accounts {
+  padding: var(--space-6) var(--space-4);
+
+  .btn-outline {
+    text-decoration: none;
+  }
+}
+
 .month-selector {
   display: flex;
   align-items: center;

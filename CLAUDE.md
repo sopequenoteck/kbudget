@@ -149,6 +149,8 @@ Approche **signals-first** obligatoire :
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (026-bank-accounts)
 - PostgreSQL 15+, Flyway migrations (V1-V6 existantes, V7 pour cette feature) (026-bank-accounts)
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Flyway, jjwt 0.12.6, Lombok (026-bank-accounts)
+- TypeScript 5.9, Angular 21 + Angular 21, RxJS, Angular Reactive Forms (027-bank-accounts-frontend)
+- N/A (frontend consomme l'API REST existante) (027-bank-accounts-frontend)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

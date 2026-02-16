@@ -1,73 +1,18 @@
-// -- Navigation link --
-.settings-nav-link {
+.accounts-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--easing-default),
-    box-shadow var(--duration-fast) var(--easing-default);
-
-  &:hover {
-    background-color: var(--hover-bg);
-    box-shadow: var(--shadow-md);
-  }
-
-  &__icon {
-    font-size: var(--font-size-lg);
-    line-height: 1;
-  }
-
-  &__text {
-    flex: 1;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-  }
-
-  &__arrow {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-  }
+  margin-bottom: var(--space-4);
 }
 
-.settings-title {
-  font-size: var(--font-size-xl);
+.accounts-title {
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
-  margin-bottom: var(--space-6);
+  margin: 0;
 }
 
-.settings-section {
-  &__title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-  }
-}
-
-.category-group {
-  margin-bottom: var(--space-6);
-
-  &__label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--space-2);
-    padding-left: var(--space-4);
-  }
-}
-
-// -- Liste catégories dans card blanche arrondie --
-.category-list {
+.account-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -87,6 +32,10 @@
     &:last-child {
       border-bottom: none;
     }
+
+    &.inactive {
+      opacity: 0.6;
+    }
   }
 
   &__icon {
@@ -99,28 +48,38 @@
     background-color: var(--color-primary-light);
     border-radius: var(--radius-round);
     line-height: 1;
-  }
-
-  &__name {
-    flex: 1;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-  }
-
-  &__color {
-    width: var(--space-4);
-    height: var(--space-4);
-    border-radius: 50%;
     flex-shrink: 0;
   }
 
-  &__badge {
-    font-size: var(--font-size-xs);
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-round);
-    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  &__type {
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
+  }
+
+  &__solde {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  &__badges {
+    display: flex;
+    gap: var(--space-1);
   }
 
   &__actions {
@@ -142,11 +101,38 @@
     }
   }
 
+  &__confirm-error {
+    font-weight: var(--font-weight-medium);
+  }
+
   &__confirm-actions {
     display: flex;
     gap: var(--space-2);
     justify-content: flex-end;
   }
+}
+
+.badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-round);
+  white-space: nowrap;
+
+  &--primary {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  &--muted {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+}
+
+.btn-primary--sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
 }
 
 .btn-icon {
@@ -195,4 +181,35 @@
 .btn-outline--sm {
   padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);
+}
+
+.state-loading,
+.state-empty,
+.state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  gap: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.state-empty__hint {
+  font-size: var(--font-size-sm);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -26,6 +26,8 @@ const mockTransaction: Transaction = {
   date: '2026-02-01',
   category: null,
   note: null,
+  account: null,
+  transferId: null,
 };
 
 const mockRequest: TransactionRequest = {

@@ -1,0 +1,55 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
+  <div class="form-row">
+    <app-form-field
+      label="Nom"
+      fieldId="accountNom"
+      [showError]="isInvalid('nom')"
+      [errorMessage]="form.get('nom')?.hasError('required') ? 'Nom requis' : '50 caractères maximum'"
+    >
+      <input id="accountNom" type="text" formControlName="nom" maxlength="50" />
+    </app-form-field>
+
+    <app-form-field label="Type" fieldId="accountType">
+      <select id="accountType" formControlName="type" (change)="onTypeChange()">
+        @for (t of accountTypes; track t) {
+          <option [value]="t">{{ typeLabels[t] }}</option>
+        }
+      </select>
+    </app-form-field>
+  </div>
+
+  @if (!isEditMode()) {
+    <app-form-field label="Solde initial" fieldId="soldeInitial">
+      <input id="soldeInitial" type="number" formControlName="soldeInitial" step="0.01" />
+    </app-form-field>
+  }
+
+  <div class="account-form__field">
+    <span class="account-form__label">Icône</span>
+    <app-emoji-grid [selected]="selectedEmoji()" (emojiSelected)="onEmojiSelected($event)" />
+  </div>
+
+  <app-form-field label="Couleur" fieldId="accountCouleur">
+    <input id="accountCouleur" type="color" formControlName="couleur" />
+  </app-form-field>
+
+  @if (isEditMode()) {
+    <label class="checkbox-field" [class.disabled]="!canDeactivate()">
+      <input type="checkbox" formControlName="actif" [attr.disabled]="canDeactivate() ? null : true" />
+      Compte actif
+      @if (!canDeactivate()) {
+        <span class="checkbox-field__hint">Définissez un autre compte par défaut avant de désactiver celui-ci</span>
+      }
+    </label>
+  }
+
+  <div class="form-actions">
+    @if (isEditMode()) {
+      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+    }
+    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+    <button type="submit" class="btn-primary">
+      {{ isEditMode() ? 'Modifier' : 'Créer' }}
+    </button>
+  </div>
+</form>

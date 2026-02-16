@@ -21,20 +21,30 @@
     </app-form-field>
   </div>
 
-  <div class="form-row">
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
+  <app-form-field
+    label="Date"
+    fieldId="date"
+    [showError]="isInvalid('date')"
+    [errorMessage]="'Date requise'"
+  >
+    <input id="date" type="date" formControlName="date" />
+  </app-form-field>
 
-    <app-form-field
-      label="Date"
-      fieldId="date"
-      [showError]="isInvalid('date')"
-      [errorMessage]="'Date requise'"
-    >
-      <input id="date" type="date" formControlName="date" />
-    </app-form-field>
-  </div>
+  @if (hasAccounts()) {
+    <app-account-picker
+      [accounts]="activeAccounts()"
+      [selectedAccountId]="form.get('accountId')?.value ?? null"
+      [required]="!isEditMode() || !!form.get('accountId')?.value"
+      label="Compte"
+      (accountSelected)="onAccountSelected($event)"
+    />
+  } @else if (!isEditMode()) {
+    <div class="form-info">Créez un compte dans les paramètres pour associer vos transactions</div>
+  }
+
+  <app-form-field label="Categorie" fieldId="categoryId">
+    <app-category-picker formControlName="categoryId" />
+  </app-form-field>
 
   <app-form-field
     label="Note"

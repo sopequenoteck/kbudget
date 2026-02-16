@@ -1,3 +1,46 @@
+<!-- Section Comptes -->
+<section class="accounts-zone">
+  @if (accountsLoading()) {
+    <div class="state-loading state-loading--accounts">
+      <div class="spinner"></div>
+    </div>
+  } @else if (accountsError()) {
+    <div class="state-error">
+      <p>Erreur de chargement des comptes</p>
+      <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
+    </div>
+  } @else if (accounts().length === 0) {
+    <div class="state-empty state-empty--accounts">
+      <p>Aucun compte</p>
+      <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
+    </div>
+  } @else {
+    <div class="accounts-zone__total">
+      <span class="accounts-zone__total-label">Solde total</span>
+      <span
+        class="accounts-zone__total-value"
+        [ngClass]="totalSolde() >= 0 ? 'amount-income' : 'amount-expense'"
+      >
+        {{ totalSolde() | amount }}
+      </span>
+    </div>
+    <div class="accounts-zone__list">
+      @for (account of accounts(); track account.id) {
+        <div class="account-card" [style.border-color]="account.couleur">
+          <span class="account-card__icon">{{ account.icone }}</span>
+          <span class="account-card__name">{{ account.nom }}</span>
+          <span
+            class="account-card__solde"
+            [ngClass]="account.solde >= 0 ? 'amount-income' : 'amount-expense'"
+          >
+            {{ account.solde | amount }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+</section>
+
 <!-- Zone KPI -->
 <section class="kpi-zone">
   <!-- Sélecteur de mois -->

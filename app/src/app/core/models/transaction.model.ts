@@ -1,4 +1,5 @@
 import { Category } from './category.model';
+import { AccountSummary } from './account.model';
 
 export enum TransactionType {
   DEPENSE = 'DEPENSE',
@@ -13,6 +14,8 @@ export interface Transaction {
   date: string;
   category: Category | null;
   note: string | null;
+  account: AccountSummary | null;
+  transferId: string | null;
 }
 
 export interface TransactionRequest {
@@ -22,6 +25,7 @@ export interface TransactionRequest {
   date: string;
   categoryId?: string;
   note?: string;
+  accountId?: string;
 }
 
 export interface MonthlySummary {

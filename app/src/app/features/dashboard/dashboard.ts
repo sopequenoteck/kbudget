@@ -14,6 +14,7 @@ import { Subscription as RxSub } from 'rxjs';
 import { TransactionService } from '../../core/services/transaction';
 import { SubscriptionService } from '../../core/services/subscription';
 import { DebtService } from '../../core/services/debt';
+import { AccountService } from '../../core/services/account';
 import {
   type Transaction,
   TransactionType,
@@ -21,6 +22,7 @@ import {
 } from '../../core/models/transaction.model';
 import { type Subscription, Frequency } from '../../core/models/subscription.model';
 import { type Debt, DebtType } from '../../core/models/debt.model';
+import { type Account } from '../../core/models/account.model';
 import { ModalService } from '../../core/services/modal.service';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -37,7 +39,21 @@ export class Dashboard {
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
+  private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
+
+  // -- Comptes bancaires --
+  readonly accountsLoading = signal(true);
+  readonly accountsError = signal(false);
+  readonly accounts = signal<Account[]>([]);
+
+  readonly totalSolde = computed(() =>
+    this.accounts()
+      .filter((a) => a.actif)
+      .reduce((sum, a) => sum + a.solde, 0),
+  );
+
+  private accountsSub: RxSub | null = null;
 
   // -- Bilan mensuel (US1) --
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -111,6 +127,12 @@ export class Dashboard {
 
   constructor() {
     effect(() => {
+      this.accountService.refreshTrigger();
+      this.transactionService.refreshTrigger();
+      this.loadAccounts();
+    });
+
+    effect(() => {
       this.transactionService.refreshTrigger();
       this.selectedMonth();
       this.selectedYear();
@@ -149,6 +171,26 @@ export class Dashboard {
     } else {
       this.selectedMonth.update((m) => m + 1);
     }
+  }
+
+  loadAccounts(): void {
+    this.accountsSub?.unsubscribe();
+    this.accountsLoading.set(true);
+    this.accountsError.set(false);
+
+    this.accountsSub = this.accountService.getAll().subscribe({
+      next: (data) => {
+        this.accounts.set(data);
+        this.accountsLoading.set(false);
+      },
+      error: (err) => {
+        if (isDevMode()) {
+          console.error('Failed to load accounts', err);
+        }
+        this.accountsError.set(true);
+        this.accountsLoading.set(false);
+      },
+    });
   }
 
   loadSummary(): void {
