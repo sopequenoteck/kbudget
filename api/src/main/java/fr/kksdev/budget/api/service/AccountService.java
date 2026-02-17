@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.request.TransferRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -62,13 +63,17 @@ public class AccountService {
         String couleur = request.couleur() != null ? request.couleur() : type.getDefaultCouleur();
         BigDecimal soldeInitial = request.soldeInitial() != null ? request.soldeInitial() : BigDecimal.ZERO;
 
+        User user = userRepository.getReferenceById(userId);
+        Currency currency = request.currency() != null ? request.currency() : user.getDefaultCurrency();
+
         Account account = Account.builder()
                 .nom(request.nom())
                 .type(type)
                 .soldeInitial(soldeInitial)
                 .icone(icone)
                 .couleur(couleur)
-                .user(userRepository.getReferenceById(userId))
+                .currency(currency)
+                .user(user)
                 .build();
 
         account = accountRepository.save(account);
@@ -82,6 +87,10 @@ public class AccountService {
 
         if (accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot(request.nom(), userId, id)) {
             throw new IllegalArgumentException("Un compte avec ce nom existe déjà");
+        }
+
+        if (request.currency() != null && request.currency() != account.getCurrency()) {
+            throw new IllegalArgumentException("La devise d'un compte ne peut pas être modifiée");
         }
 
         // Gérer actif si présent dans la requête
@@ -159,6 +168,10 @@ public class AccountService {
         }
         if (!Boolean.TRUE.equals(toAccount.getActif())) {
             throw new IllegalArgumentException("Le compte destination est inactif");
+        }
+
+        if (fromAccount.getCurrency() != toAccount.getCurrency()) {
+            throw new IllegalArgumentException("Le virement entre comptes de devises différentes n'est pas autorisé");
         }
 
         Category virementCategory = categoryService.findSystemCategoryByNom("Virement", userId);
@@ -249,7 +262,8 @@ public class AccountService {
                 account.getIcone(),
                 account.getCouleur(),
                 Boolean.TRUE.equals(account.getIsDefault()),
-                Boolean.TRUE.equals(account.getActif())
+                Boolean.TRUE.equals(account.getActif()),
+                account.getCurrency().name()
         );
     }
 }

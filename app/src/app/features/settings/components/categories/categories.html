@@ -1,0 +1,88 @@
+<a class="section-back" routerLink="/settings">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Paramètres</span>
+</a>
+
+<h2 class="categories-title">Catégories</h2>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="loadCategories()">Réessayer</button>
+  </div>
+} @else {
+  @if (systemCategories().length > 0) {
+    <div class="category-group">
+      <h4 class="category-group__label">Catégories système</h4>
+      <ul class="category-list">
+        @for (cat of systemCategories(); track cat.id) {
+          <li class="category-list__item">
+            <span class="category-list__icon">{{ cat.icone }}</span>
+            <span class="category-list__name">{{ cat.nom }}</span>
+            <span
+              class="category-list__color"
+              [style.background-color]="cat.couleur"
+            ></span>
+            <span class="category-list__badge">Système</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (userCategories().length > 0) {
+    <div class="category-group">
+      <h4 class="category-group__label">Mes catégories</h4>
+      <ul class="category-list">
+        @for (cat of userCategories(); track cat.id) {
+          <li class="category-list__item">
+            <span class="category-list__icon">{{ cat.icone }}</span>
+            <span class="category-list__name">{{ cat.nom }}</span>
+            <span
+              class="category-list__color"
+              [style.background-color]="cat.couleur"
+            ></span>
+            <div class="category-list__actions">
+              <button
+                type="button"
+                class="btn-icon"
+                (click)="editCategory(cat)"
+                aria-label="Modifier"
+              >
+                ✏️
+              </button>
+              <button
+                type="button"
+                class="btn-icon btn-icon--danger"
+                (click)="requestDelete(cat.id)"
+                aria-label="Supprimer"
+              >
+                🗑️
+              </button>
+            </div>
+
+            @if (confirmDeleteId() === cat.id) {
+              <div class="category-list__confirm">
+                <p>Cette catégorie sera dissociée de tous les items liés (transactions, abonnements, dettes).</p>
+                <div class="category-list__confirm-actions">
+                  <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
+                  <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
+                </div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (categories().length === 0) {
+    <div class="state-empty">
+      <p>Aucune catégorie</p>
+    </div>
+  }
+}

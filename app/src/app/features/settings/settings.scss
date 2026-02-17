@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  padding: var(--space-4);
+}
+
 .settings-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
@@ -5,156 +10,76 @@
   margin-bottom: var(--space-6);
 }
 
-.settings-section {
-  &__title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-4);
-  }
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.category-group {
-  margin-bottom: var(--space-6);
-
-  &__label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--space-2);
-    padding-left: var(--space-4);
-  }
-}
-
-// -- Liste catégories dans card blanche arrondie --
-.category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.settings-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background-color: var(--surface-default);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-default),
+    box-shadow var(--duration-fast) var(--easing-default);
 
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border-default);
-    flex-wrap: wrap;
-
-    &:last-child {
-      border-bottom: none;
-    }
+  &:hover {
+    background-color: var(--hover-bg);
+    box-shadow: var(--shadow-md);
   }
 
   &__icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--space-8);
-    height: var(--space-8);
+    width: var(--space-10);
+    height: var(--space-10);
     font-size: var(--font-size-lg);
     background-color: var(--color-primary-light);
     border-radius: var(--radius-round);
     line-height: 1;
-  }
-
-  &__name {
-    flex: 1;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-  }
-
-  &__color {
-    width: var(--space-4);
-    height: var(--space-4);
-    border-radius: 50%;
     flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0-5);
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  &__description {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
   }
 
   &__badge {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
-    padding: var(--space-1) var(--space-2);
+    padding: var(--space-0-5) var(--space-2);
     border-radius: var(--radius-round);
     background: var(--bg-tertiary);
     color: var(--text-secondary);
+    white-space: nowrap;
   }
 
-  &__actions {
-    display: flex;
-    gap: var(--space-1);
-  }
-
-  &__confirm {
-    width: 100%;
-    margin-top: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-lg);
-    background: var(--bg-error);
-    font-size: var(--font-size-sm);
-    color: var(--text-error);
-
-    p {
-      margin: 0 0 var(--space-2);
-    }
-  }
-
-  &__confirm-actions {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: flex-end;
-  }
-}
-
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-8);
-  height: var(--space-8);
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: background var(--duration-fast) var(--easing-default);
-
-  &:hover {
-    background: var(--bg-tertiary);
-  }
-
-  &--danger:hover {
-    background: var(--bg-error);
-  }
-}
-
-.btn-danger {
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  border-radius: var(--radius-xl);
-  background: var(--text-error);
-  color: var(--text-inverse);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &--sm {
-    padding: var(--space-1) var(--space-2);
+  &__arrow {
     font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    flex-shrink: 0;
   }
-}
-
-.btn-outline--sm {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
 }

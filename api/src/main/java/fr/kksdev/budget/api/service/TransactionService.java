@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -108,7 +108,7 @@ public class TransactionService {
         log.info("Transaction supprimée: {}", id);
     }
 
-    public MonthlySummaryResponse getMonthlySummary(int month, int year, UUID userId) {
+    public List<MonthlySummaryResponse> getMonthlySummary(int month, int year, UUID userId) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
@@ -116,21 +116,41 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository
                 .findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to);
 
-        BigDecimal totalRecettes = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.RECETTE)
-                .map(Transaction::getMontant)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Group transactions by account currency
+        Map<String, List<Transaction>> byCurrency = transactions.stream()
+                .collect(Collectors.groupingBy(t -> t.getAccount().getCurrency().name()));
 
-        BigDecimal totalDepenses = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.DEPENSE)
-                .map(Transaction::getMontant)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Determine user default currency for ordering
+        String defaultCurrency = userRepository.getReferenceById(userId).getDefaultCurrency().name();
 
-        log.info("Bilan mensuel {}/{} pour userId={}: recettes={}, dépenses={}",
-                month, year, userId, totalRecettes, totalDepenses);
+        List<MonthlySummaryResponse> summaries = byCurrency.entrySet().stream()
+                .map(entry -> {
+                    String currency = entry.getKey();
+                    List<Transaction> txns = entry.getValue();
 
-        return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
-                totalRecettes.subtract(totalDepenses));
+                    BigDecimal totalRecettes = txns.stream()
+                            .filter(t -> t.getType() == TransactionType.RECETTE)
+                            .map(Transaction::getMontant)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    BigDecimal totalDepenses = txns.stream()
+                            .filter(t -> t.getType() == TransactionType.DEPENSE)
+                            .map(Transaction::getMontant)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
+                            totalRecettes.subtract(totalDepenses), currency);
+                })
+                .sorted((a, b) -> {
+                    // Default currency first, then alphabetical
+                    if (a.currency().equals(defaultCurrency) && !b.currency().equals(defaultCurrency)) return -1;
+                    if (!a.currency().equals(defaultCurrency) && b.currency().equals(defaultCurrency)) return 1;
+                    return a.currency().compareTo(b.currency());
+                })
+                .toList();
+
+        log.info("Bilan mensuel {}/{} pour userId={}: {} devises", month, year, userId, summaries.size());
+        return summaries;
     }
 
     private void propagateTransferAmount(Transaction transaction, BigDecimal newMontant) {
@@ -200,7 +220,8 @@ public class TransactionService {
                 account.getId(),
                 account.getNom(),
                 account.getIcone(),
-                account.getCouleur()
+                account.getCouleur(),
+                account.getCurrency().name()
         );
     }
 

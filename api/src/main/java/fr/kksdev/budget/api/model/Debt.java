@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,11 @@ public class Debt {
 
     @Column(nullable = false)
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 3)
+    @Builder.Default
+    private Currency currency = Currency.EUR;
 
     @Column(nullable = false)
     private Boolean rembourse = false;

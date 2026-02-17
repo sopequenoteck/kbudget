@@ -25,6 +25,7 @@ const mockSubscription: Subscription = {
   dateDebut: '2026-01-01',
   actif: true,
   category: null,
+  account: null,
 };
 
 const mockRequest: SubscriptionRequest = {

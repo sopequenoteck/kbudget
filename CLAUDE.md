@@ -149,6 +149,14 @@ Approche **signals-first** obligatoire :
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (026-bank-accounts)
 - PostgreSQL 15+, Flyway migrations (V1-V6 existantes, V7 pour cette feature) (026-bank-accounts)
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Flyway, jjwt 0.12.6, Lombok (026-bank-accounts)
+- TypeScript 5.9, Angular 21 + Angular 21, RxJS, Angular Reactive Forms (027-bank-accounts-frontend)
+- N/A (frontend consomme l'API REST existante) (027-bank-accounts-frontend)
+- TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, SCSS design tokens (existants) (028-settings-redesign)
+- localStorage (thème), AuthService.currentUser() signal (profil) (028-settings-redesign)
+- TypeScript 5.9.2, Angular 21.1.0 + @angular/core, @angular/forms (ControlValueAccessor), @angular/cdk (CdkTrapFocus pour le bottom-sheet) (029-select-picker)
+- N/A (composant frontend pur, pas de persistance) (029-select-picker)
+- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Spring Security + JWT, Angular 21, Lombok (030-multi-currency)
+- PostgreSQL 15+, Flyway migrations (V1-V7 existantes, V8 pour cette feature) (030-multi-currency)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

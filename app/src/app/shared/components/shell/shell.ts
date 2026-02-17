@@ -3,6 +3,8 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
+  HostListener,
   inject,
   isDevMode,
   signal,
@@ -12,9 +14,11 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { filter, firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
+import { ThemeService } from '../../../core/services/theme';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { DebtService } from '../../../core/services/debt';
+import { AccountService } from '../../../core/services/account';
 import { ModalService, type ModalType } from '../../../core/services/modal.service';
 import {
   type Transaction,
@@ -27,10 +31,13 @@ import {
   type SubscriptionRequest,
 } from '../../../core/models/subscription.model';
 import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
+import { type Account, type AccountRequest } from '../../../core/models/account.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
 import { CategoryForm } from '../category-form/category-form';
+import { AccountForm } from '../account-form/account-form';
+import { TransferForm } from '../transfer-form/transfer-form';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -46,6 +53,8 @@ import { Modal } from '../modal/modal';
     SubscriptionForm,
     DebtForm,
     CategoryForm,
+    AccountForm,
+    TransferForm,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -53,10 +62,13 @@ import { Modal } from '../modal/modal';
 })
 export class Shell {
   private readonly authService = inject(AuthService);
+  private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef);
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
+  private readonly accountService = inject(AccountService);
   readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
@@ -64,16 +76,17 @@ export class Shell {
 
   readonly userName = this.authService.currentUser;
   readonly sidebarOpen = signal(false);
-  readonly pageTitle = computed(() => {
-    this.navigationEnd();
-    const url = this.router.url;
-    if (url.startsWith('/transactions')) return 'Transactions';
-    if (url.startsWith('/subscriptions')) return 'Abonnements';
-    if (url.startsWith('/debts')) return 'Dettes';
-    if (url.startsWith('/settings')) return 'Paramètres';
-    return '';
+  readonly dropdownOpen = signal(false);
+  readonly userInitials = computed(() => {
+    const user = this.userName();
+    if (!user?.name) return '?';
+    return user.name
+      .split(' ')
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   });
-  readonly isHome = computed(() => this.pageTitle() === '');
   readonly speedDialOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
@@ -86,6 +99,7 @@ export class Shell {
     effect(() => {
       this.navigationEnd();
       this.speedDialOpen.set(false);
+      this.dropdownOpen.set(false);
       this.modalService.closeModal();
     });
 
@@ -126,7 +140,29 @@ export class Shell {
     this.closeSidebar();
   }
 
+  toggleDropdown(): void {
+    this.dropdownOpen.update((open) => !open);
+  }
+
+  closeDropdown(): void {
+    this.dropdownOpen.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const menuEl = this.elementRef.nativeElement.querySelector('.shell-user-menu');
+    if (menuEl && !menuEl.contains(event.target as Node)) {
+      this.closeDropdown();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.closeDropdown();
+  }
+
   onLogout(): void {
+    this.closeDropdown();
     this.authService.logout();
   }
 
@@ -209,6 +245,30 @@ export class Shell {
       this.modalService.closeModal();
     } catch (error) {
       if (isDevMode()) console.error('Failed to delete debt:', error);
+    }
+  }
+
+  async onAccountSaved(request: AccountRequest): Promise<void> {
+    const editing = this.modalService.editingEntity() as Account | null;
+    if (editing) {
+      await firstValueFrom(this.accountService.update(editing.id, request));
+    } else {
+      await firstValueFrom(this.accountService.create(request));
+    }
+    this.modalService.closeModal();
+  }
+
+  onTransferSaved(): void {
+    this.transactionService.refreshTrigger.update((v) => v + 1);
+    this.modalService.closeModal();
+  }
+
+  async onAccountDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.accountService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete account:', error);
     }
   }
 }

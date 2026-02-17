@@ -38,11 +38,11 @@ export class TransactionService {
     return this.api.delete<void>(`/transactions/${id}`).pipe(tap(() => this.refresh()));
   }
 
-  getSummary(month?: number, year?: number): Observable<MonthlySummary> {
+  getSummary(month?: number, year?: number): Observable<MonthlySummary[]> {
     const params: string[] = [];
     if (month !== undefined) params.push(`month=${month}`);
     if (year !== undefined) params.push(`year=${year}`);
     const query = params.length > 0 ? `?${params.join('&')}` : '';
-    return this.api.get<MonthlySummary>(`/transactions/summary${query}`);
+    return this.api.get<MonthlySummary[]>(`/transactions/summary${query}`);
   }
 }

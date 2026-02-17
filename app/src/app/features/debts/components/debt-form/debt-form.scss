@@ -15,6 +15,27 @@
   }
 }
 
+// -- Montant avec suffixe devise --
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding-right: var(--space-12);
+  }
+
+  &__suffix {
+    position: absolute;
+    right: var(--space-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+}
+
 // -- Checkbox rembourse --
 .checkbox-field {
   display: flex;

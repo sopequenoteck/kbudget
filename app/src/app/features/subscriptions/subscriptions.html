@@ -1,9 +1,11 @@
 @if (hasActiveSubscriptions()) {
   <section class="summary">
-    <div class="summary__card">
-      <span class="summary__label">Total mensuel</span>
-      <span class="summary__value">{{ monthlyTotal() | amount }}</span>
-    </div>
+    @for (ct of monthlyTotalsByCurrency(); track ct.currency) {
+      <div class="summary__card">
+        <span class="summary__label">Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span>
+        <span class="summary__value">{{ ct.total | amount : null : ct.currency }}</span>
+      </div>
+    }
   </section>
 }
 
@@ -55,7 +57,7 @@
           [icon]="subscription.category?.icone ?? '🔄'"
           [title]="subscription.nom"
           [value]="formatAmount(subscription)"
-          [subtitle]="'Renouvellement: ' + getNextRenewalDate(subscription)"
+          [subtitle]="getNextRenewalDate(subscription)"
           (pressed)="onSubscriptionPressed(subscription)"
         />
       </li>

@@ -17,7 +17,6 @@ select {
   transition:
     border-color var(--duration-normal) var(--easing-default),
     box-shadow var(--duration-normal) var(--easing-default);
-  appearance: none;
 
   &::placeholder {
     color: var(--text-tertiary);
@@ -41,6 +40,37 @@ select {
   &.input-error:focus {
     box-shadow: 0 0 0 4px var(--bg-error);
   }
+}
+
+// appearance: none uniquement sur input et textarea (sauf color)
+input:not([type='checkbox']):not([type='radio']):not([type='color']),
+textarea {
+  appearance: none;
+}
+
+input[type='color'] {
+  height: 44px;
+  padding: var(--space-1);
+  cursor: pointer;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: none;
+    border-radius: var(--radius-lg);
+  }
+
+  &::-moz-color-swatch {
+    border: none;
+    border-radius: var(--radius-lg);
+  }
+}
+
+// select : garder l'apparence native pour le picker mobile
+select {
+  cursor: pointer;
 }
 
 textarea {

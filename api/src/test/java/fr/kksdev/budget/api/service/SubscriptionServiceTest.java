@@ -2,7 +2,9 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Frequency;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
@@ -75,7 +77,7 @@ class SubscriptionServiceTest {
     void should_create_subscription_when_valid_request() {
         var user = buildUser();
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
         var saved = buildSubscription(user);
 
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
@@ -114,7 +116,7 @@ class SubscriptionServiceTest {
                 .user(user)
                 .build();
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
 
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -186,9 +188,10 @@ class SubscriptionServiceTest {
         var user = buildUser();
         var existing = buildSubscription(user);
         var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
-                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null, null);
+                Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null, null, null);
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(existing));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(existing);
 
         SubscriptionResponse response = subscriptionService.update(subscriptionId, request, userId);
@@ -207,5 +210,91 @@ class SubscriptionServiceTest {
         subscriptionService.delete(subscriptionId, userId);
 
         verify(subscriptionRepository).delete(subscription);
+    }
+
+    // --- Currency tests (T014c) ---
+
+    @Test
+    void should_inheritAccountCurrency_when_accountProvided() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte XOF")
+                .currency(Currency.XOF)
+                .actif(true)
+                .user(user)
+                .build();
+        var saved = Subscription.builder()
+                .id(subscriptionId)
+                .nom("Netflix")
+                .montant(new BigDecimal("13.99"))
+                .frequence(Frequency.MENSUEL)
+                .dateDebut(LocalDate.of(2026, 1, 1))
+                .actif(true)
+                .account(account)
+                .currency(Currency.XOF)
+                .user(user)
+                .build();
+        var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, account.getId(), null);
+
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
+
+        SubscriptionResponse response = subscriptionService.create(request, userId);
+
+        assertThat(response.currency()).isEqualTo("XOF");
+    }
+
+    @Test
+    void should_useExplicitCurrency_when_noAccount() {
+        var user = buildUser();
+        var saved = Subscription.builder()
+                .id(subscriptionId)
+                .nom("Spotify")
+                .montant(new BigDecimal("9.99"))
+                .frequence(Frequency.MENSUEL)
+                .dateDebut(LocalDate.of(2026, 1, 1))
+                .actif(true)
+                .currency(Currency.XOF)
+                .user(user)
+                .build();
+        var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, Currency.XOF);
+
+        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
+
+        SubscriptionResponse response = subscriptionService.create(request, userId);
+
+        assertThat(response.currency()).isEqualTo("XOF");
+    }
+
+    @Test
+    void should_useUserDefaultCurrency_when_noAccountAndNoCurrency() {
+        var user = User.builder().id(userId).email("test@mail.com").defaultCurrency(Currency.XOF).build();
+        var saved = Subscription.builder()
+                .id(subscriptionId)
+                .nom("Disney+")
+                .montant(new BigDecimal("8.99"))
+                .frequence(Frequency.MENSUEL)
+                .dateDebut(LocalDate.of(2026, 1, 1))
+                .actif(true)
+                .currency(Currency.XOF)
+                .user(user)
+                .build();
+        var request = new SubscriptionRequest("Disney+", new BigDecimal("8.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
+
+        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
+
+        SubscriptionResponse response = subscriptionService.create(request, userId);
+
+        assertThat(response.currency()).isEqualTo("XOF");
     }
 }

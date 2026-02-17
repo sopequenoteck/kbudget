@@ -36,11 +36,17 @@ export class Subscriptions {
     [...this.subscriptions()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr-FR')),
   );
 
-  readonly monthlyTotal = computed(() =>
-    this.subscriptions()
-      .filter((s) => s.actif)
-      .reduce((sum, s) => sum + (s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant), 0),
-  );
+  readonly monthlyTotalsByCurrency = computed(() => {
+    const byCurrency = new Map<string, number>();
+    for (const s of this.subscriptions().filter((s) => s.actif)) {
+      const cur = s.currency || 'EUR';
+      const monthly = s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant;
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + monthly);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   readonly hasActiveSubscriptions = computed(() => this.subscriptions().some((s) => s.actif));
 
@@ -102,7 +108,7 @@ export class Subscriptions {
   formatAmount(subscription: Subscription): string {
     const formatted = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: subscription.currency || 'EUR',
     }).format(subscription.montant);
 
     return subscription.frequence === Frequency.MENSUEL ? `${formatted}/mois` : `${formatted}/an`;
