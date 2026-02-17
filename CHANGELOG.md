@@ -5,11 +5,31 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-17
+
 ### Added
+- Support multi-devises : enum Currency (EUR/USD/GBP/XOF), CurrencyController, migration Flyway V8, devise par défaut sur User (KKS-030)
+- Composant SelectPicker générique avec bottom-sheet et migration des formulaires (KKS-029)
+- Gestion des comptes bancaires côté frontend : AccountService, liste comptes, account-form avec preview live et color swatches (KKS-81)
+- Refonte page Settings en hub 8 sections avec navigation enfant : Profile, Appearance, Accounts, Categories, Placeholder (KKS-83)
+- ThemeService pour gestion centralisée du thème light/dark
+- CurrencyService et UserService frontend
+- EmojiInput natif en remplacement de EmojiGrid
+- Transfer-form : composant de virement entre comptes
+- UserController et endpoint PUT `/users/me` pour mise à jour profil et devise
 - Formulaire d'inscription avec toggle login/register sur `/auth`
 - Icône SVG sans background
 
+### Changed
+- Refonte identité visuelle du shell : header et sidebar redesign
+- Refonte formulaire account-form avec type cards, preview live et color swatches
+- Dashboard enrichi avec sélecteur de compte et affichage multi-devises
+- Formulaires debt-form, subscription-form et transaction-form : intégration SelectPicker et compte associé
+- AmountPipe mis à jour pour supporter les devises
+- CategoryPicker simplifié avec SelectPicker
+
 ### Fixed
+- Retourner 401 au lieu de 403 pour les requêtes non authentifiées
 - Permission denied logs Docker — entrypoint chown avant runuser
 - Correctifs visuels post-déploiement V1
 
@@ -78,6 +98,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/sopequenoteck/budget/compare/v1.2.0...v1.3.0
 [1.0.0]: https://github.com/sopequenoteck/budget/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/sopequenoteck/budget/releases/tag/v0.1.0

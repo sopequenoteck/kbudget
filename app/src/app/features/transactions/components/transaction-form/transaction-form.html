@@ -21,20 +21,31 @@
     </app-form-field>
   </div>
 
-  <div class="form-row">
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
+  <app-form-field
+    label="Date"
+    fieldId="date"
+    [showError]="isInvalid('date')"
+    [errorMessage]="'Date requise'"
+  >
+    <input id="date" type="date" formControlName="date" />
+  </app-form-field>
 
-    <app-form-field
-      label="Date"
-      fieldId="date"
-      [showError]="isInvalid('date')"
-      [errorMessage]="'Date requise'"
-    >
-      <input id="date" type="date" formControlName="date" />
+  @if (hasAccounts()) {
+    <app-form-field label="Compte" fieldId="accountId">
+      <app-select-picker
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Selectionner un compte"
+        [clearable]="!isEditMode() || !!form.get('accountId')?.value"
+      />
     </app-form-field>
-  </div>
+  } @else if (!isEditMode()) {
+    <div class="form-info">Créez un compte dans les paramètres pour associer vos transactions</div>
+  }
+
+  <app-form-field label="Categorie" fieldId="categoryId">
+    <app-category-picker formControlName="categoryId" />
+  </app-form-field>
 
   <app-form-field
     label="Note"

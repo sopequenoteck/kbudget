@@ -1,0 +1,33 @@
+<a class="section-back" routerLink="/settings">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Paramètres</span>
+</a>
+
+<h2 class="appearance-title">Apparence</h2>
+
+<div class="theme-section">
+  <h3 class="theme-section__label">Thème</h3>
+  <div class="segmented-control">
+    <button
+      class="segmented-control__option"
+      [class.segmented-control__option--active]="currentTheme() === 'light'"
+      (click)="setTheme('light')"
+    >
+      Clair
+    </button>
+    <button
+      class="segmented-control__option"
+      [class.segmented-control__option--active]="currentTheme() === 'dark'"
+      (click)="setTheme('dark')"
+    >
+      Sombre
+    </button>
+    <button
+      class="segmented-control__option"
+      [class.segmented-control__option--active]="currentTheme() === 'auto'"
+      (click)="setTheme('auto')"
+    >
+      Automatique
+    </button>
+  </div>
+</div>

@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
@@ -68,7 +69,7 @@ class AccountServiceTest {
     @Test
     void should_createAccount_when_validRequest() {
         var user = buildUser();
-        var request = new AccountRequest("Livret A", AccountType.EPARGNE, new BigDecimal("5000.00"), null, null, null);
+        var request = new AccountRequest("Livret A", AccountType.EPARGNE, new BigDecimal("5000.00"), null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Livret A")
@@ -100,7 +101,7 @@ class AccountServiceTest {
     @Test
     void should_applyDefaultIconAndColor_when_notProvided() {
         var user = buildUser();
-        var request = new AccountRequest("Espèces", AccountType.ESPECES, null, null, null, null);
+        var request = new AccountRequest("Espèces", AccountType.ESPECES, null, null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Espèces")
@@ -179,7 +180,7 @@ class AccountServiceTest {
     void should_preventDeactivation_when_isDefault() {
         var user = buildUser();
         var account = buildAccount(user);
-        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, false);
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, false, null);
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Compte Principal", userId, accountId)).thenReturn(false);
@@ -247,7 +248,7 @@ class AccountServiceTest {
 
     @Test
     void should_throw_when_duplicateName() {
-        var request = new AccountRequest("Existant", AccountType.COURANT, null, null, null, null);
+        var request = new AccountRequest("Existant", AccountType.COURANT, null, null, null, null, null);
 
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Existant", userId)).thenReturn(true);
 
@@ -268,5 +269,106 @@ class AccountServiceTest {
 
         assertThat(result).hasSize(1);
         verify(accountRepository).findByUserIdAndActifTrue(userId);
+    }
+
+    // --- Currency tests (T014b) ---
+
+    @Test
+    void should_useExplicitCurrency_when_providedInRequest() {
+        var user = buildUser();
+        var request = new AccountRequest("Compte XOF", AccountType.COURANT, null, null, null, null, Currency.XOF);
+        var saved = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte XOF")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .currency(Currency.XOF)
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Compte XOF", userId)).thenReturn(false);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.save(any(Account.class))).thenReturn(saved);
+        when(transactionRepository.calculateBalanceByAccountId(saved.getId())).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.createAccount(request, userId);
+
+        assertThat(response.currency()).isEqualTo("XOF");
+    }
+
+    @Test
+    void should_useUserDefaultCurrency_when_noCurrencyInRequest() {
+        var user = User.builder().id(userId).email("test@mail.com").defaultCurrency(Currency.XOF).build();
+        var request = new AccountRequest("Compte défaut", AccountType.COURANT, null, null, null, null, null);
+        var saved = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte défaut")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .currency(Currency.XOF)
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Compte défaut", userId)).thenReturn(false);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.save(any(Account.class))).thenReturn(saved);
+        when(transactionRepository.calculateBalanceByAccountId(saved.getId())).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.createAccount(request, userId);
+
+        assertThat(response.currency()).isEqualTo("XOF");
+    }
+
+    @Test
+    void should_rejectCurrencyChange_when_updatingAccount() {
+        var user = buildUser();
+        var account = buildAccount(user); // has EUR by default
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, null, Currency.XOF);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Compte Principal", userId, accountId)).thenReturn(false);
+
+        assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("La devise d'un compte ne peut pas être modifiée");
+    }
+
+    @Test
+    void should_rejectTransfer_when_differentCurrencies() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte EUR")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte XOF")
+                .type(AccountType.COURANT)
+                .currency(Currency.XOF)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+
+        assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Le virement entre comptes de devises différentes n'est pas autorisé");
     }
 }

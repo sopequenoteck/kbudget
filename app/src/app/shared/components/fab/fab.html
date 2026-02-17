@@ -2,7 +2,7 @@
   @if (isOpen()) {
     <div class="speed-dial-overlay" (click)="onToggle()" role="none" tabindex="-1"></div>
     <div class="speed-dial-menu" role="menu" tabindex="-1" (keydown)="onMenuKeydown($event)">
-      @for (item of actions; track item.type) {
+      @for (item of actions(); track item.type) {
         <button
           #menuItem
           type="button"

@@ -34,7 +34,7 @@ export class Transactions {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly transactions = signal<Transaction[]>([]);
-  readonly summary = signal<MonthlySummary | null>(null);
+  readonly summaries = signal<MonthlySummary[]>([]);
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
@@ -78,7 +78,7 @@ export class Transactions {
     }).subscribe({
       next: ({ transactions, summary }) => {
         this.transactions.set(transactions);
-        this.summary.set(summary);
+        this.summaries.set(summary);
         this.loading.set(false);
       },
       error: (err) => {

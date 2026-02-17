@@ -7,5 +7,6 @@ public record MonthlySummaryResponse(
         int year,
         BigDecimal totalRecettes,
         BigDecimal totalDepenses,
-        BigDecimal solde
+        BigDecimal solde,
+        String currency
 ) {}

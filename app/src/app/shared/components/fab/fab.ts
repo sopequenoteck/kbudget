@@ -1,15 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   effect,
+  inject,
   input,
   output,
   viewChild,
   viewChildren,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-export type ModalType = 'transaction' | 'subscription' | 'debt';
+import { type ModalType } from '../../../core/services/modal.service';
+import { AccountService } from '../../../core/services/account';
+import { Account } from '../../../core/models/account.model';
 
 export interface SpeedDialItem {
   readonly type: ModalType;
@@ -17,11 +22,13 @@ export interface SpeedDialItem {
   readonly icon: string;
 }
 
-export const SPEED_DIAL_ACTIONS: readonly SpeedDialItem[] = [
+const BASE_ACTIONS: readonly SpeedDialItem[] = [
   { type: 'transaction', label: 'Transaction', icon: '💰' },
   { type: 'subscription', label: 'Abonnement', icon: '🔄' },
   { type: 'debt', label: 'Dette', icon: '🤝' },
 ] as const;
+
+const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: '↔️' };
 
 @Component({
   selector: 'app-fab',
@@ -31,6 +38,8 @@ export const SPEED_DIAL_ACTIONS: readonly SpeedDialItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Fab {
+  private readonly accountService = inject(AccountService);
+
   readonly isOpen = input.required<boolean>();
   readonly isHidden = input<boolean>(false);
   readonly toggled = output<void>();
@@ -39,7 +48,19 @@ export class Fab {
   readonly fabButton = viewChild<ElementRef<HTMLButtonElement>>('fabButton');
   readonly menuItems = viewChildren<ElementRef<HTMLButtonElement>>('menuItem');
 
-  readonly actions = SPEED_DIAL_ACTIONS;
+  private readonly allAccounts = toSignal(this.accountService.getAll(), {
+    initialValue: [] as Account[],
+  });
+
+  readonly hasEnoughAccounts = computed(() => this.allAccounts().filter((a) => a.actif).length >= 2);
+
+  readonly actions = computed<SpeedDialItem[]>(() => {
+    const base = [...BASE_ACTIONS];
+    if (this.hasEnoughAccounts()) {
+      base.push(TRANSFER_ACTION);
+    }
+    return base;
+  });
   private animating = false;
 
   constructor() {

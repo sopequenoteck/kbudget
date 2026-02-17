@@ -16,11 +16,11 @@ import {
   CATEGORY_COLORS,
   randomColor,
 } from '../../../core/constants/category.constants';
-import { EmojiGrid } from '../emoji-grid/emoji-grid';
+import { EmojiInput } from '../emoji-input/emoji-input';
 
 @Component({
   selector: 'app-category-form',
-  imports: [ReactiveFormsModule, EmojiGrid],
+  imports: [ReactiveFormsModule, EmojiInput],
   templateUrl: './category-form.html',
   styleUrl: './category-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

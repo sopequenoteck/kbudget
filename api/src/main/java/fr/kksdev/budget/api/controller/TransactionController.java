@@ -44,9 +44,9 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getAllByUser(userId));
     }
 
-    @Operation(summary = "Obtenir le bilan mensuel des transactions")
+    @Operation(summary = "Obtenir le bilan mensuel des transactions groupé par devise")
     @GetMapping("/summary")
-    public ResponseEntity<MonthlySummaryResponse> getMonthlySummary(
+    public ResponseEntity<List<MonthlySummaryResponse>> getMonthlySummary(
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             Authentication authentication) {

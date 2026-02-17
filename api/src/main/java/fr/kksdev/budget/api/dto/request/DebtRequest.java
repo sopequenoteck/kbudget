@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.request;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,5 +17,6 @@ public record DebtRequest(
         @NotNull DebtType sens,
         @NotNull LocalDate date,
         Boolean rembourse,
-        UUID categoryId
+        UUID categoryId,
+        Currency currency
 ) {}

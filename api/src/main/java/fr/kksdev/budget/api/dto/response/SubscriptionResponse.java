@@ -14,5 +14,6 @@ public record SubscriptionResponse(
         LocalDate dateDebut,
         Boolean actif,
         CategoryResponse category,
-        AccountSummary account
+        AccountSummary account,
+        String currency
 ) {}

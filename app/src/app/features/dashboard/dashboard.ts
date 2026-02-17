@@ -14,6 +14,7 @@ import { Subscription as RxSub } from 'rxjs';
 import { TransactionService } from '../../core/services/transaction';
 import { SubscriptionService } from '../../core/services/subscription';
 import { DebtService } from '../../core/services/debt';
+import { AccountService } from '../../core/services/account';
 import {
   type Transaction,
   TransactionType,
@@ -21,6 +22,12 @@ import {
 } from '../../core/models/transaction.model';
 import { type Subscription, Frequency } from '../../core/models/subscription.model';
 import { type Debt, DebtType } from '../../core/models/debt.model';
+import { type Account } from '../../core/models/account.model';
+
+interface CurrencyTotal {
+  currency: string;
+  total: number;
+}
 import { ModalService } from '../../core/services/modal.service';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -37,14 +44,34 @@ export class Dashboard {
   private readonly transactionService = inject(TransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
+  private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
+
+  // -- Comptes bancaires --
+  readonly accountsLoading = signal(true);
+  readonly accountsError = signal(false);
+  readonly accounts = signal<Account[]>([]);
+
+  readonly accountTotalsByCurrency = computed<CurrencyTotal[]>(() => {
+    const active = this.accounts().filter((a) => a.actif);
+    const byCurrency = new Map<string, number>();
+    for (const a of active) {
+      const cur = a.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + a.solde);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
+
+  private accountsSub: RxSub | null = null;
 
   // -- Bilan mensuel (US1) --
   readonly selectedMonth = signal(new Date().getMonth() + 1);
   readonly selectedYear = signal(new Date().getFullYear());
   readonly summaryLoading = signal(true);
   readonly summaryError = signal(false);
-  readonly summary = signal<MonthlySummary | null>(null);
+  readonly summaries = signal<MonthlySummary[]>([]);
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
@@ -71,11 +98,17 @@ export class Dashboard {
     [...this.subscriptions()].sort((a, b) => a.nom.localeCompare(b.nom)).slice(0, 3),
   );
 
-  readonly monthlySubTotal = computed(() =>
-    this.subscriptions().reduce((sum, s) => {
-      return sum + (s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant);
-    }, 0),
-  );
+  readonly monthlySubTotalsByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const s of this.subscriptions()) {
+      const cur = s.currency || 'EUR';
+      const monthly = s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant;
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + monthly);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   // -- Dettes en cours (US4) --
   readonly debtsLoading = signal(true);
@@ -88,17 +121,27 @@ export class Dashboard {
       .slice(0, 3),
   );
 
-  readonly totalJeDois = computed(() =>
-    this.debts()
-      .filter((d) => d.sens === DebtType.EMPRUNT)
-      .reduce((sum, d) => sum + d.montant, 0),
-  );
+  readonly totalJeDoisByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const d of this.debts().filter((d) => d.sens === DebtType.EMPRUNT)) {
+      const cur = d.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
-  readonly totalOnMeDoit = computed(() =>
-    this.debts()
-      .filter((d) => d.sens === DebtType.PRET)
-      .reduce((sum, d) => sum + d.montant, 0),
-  );
+  readonly totalOnMeDoitByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const d of this.debts().filter((d) => d.sens === DebtType.PRET)) {
+      const cur = d.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   readonly miniCardsLoading = computed(
     () => this.subscriptionsLoading() || this.debtsLoading(),
@@ -110,6 +153,12 @@ export class Dashboard {
   private debtsSub: RxSub | null = null;
 
   constructor() {
+    effect(() => {
+      this.accountService.refreshTrigger();
+      this.transactionService.refreshTrigger();
+      this.loadAccounts();
+    });
+
     effect(() => {
       this.transactionService.refreshTrigger();
       this.selectedMonth();
@@ -151,6 +200,26 @@ export class Dashboard {
     }
   }
 
+  loadAccounts(): void {
+    this.accountsSub?.unsubscribe();
+    this.accountsLoading.set(true);
+    this.accountsError.set(false);
+
+    this.accountsSub = this.accountService.getAll().subscribe({
+      next: (data) => {
+        this.accounts.set(data);
+        this.accountsLoading.set(false);
+      },
+      error: (err) => {
+        if (isDevMode()) {
+          console.error('Failed to load accounts', err);
+        }
+        this.accountsError.set(true);
+        this.accountsLoading.set(false);
+      },
+    });
+  }
+
   loadSummary(): void {
     this.summarySub?.unsubscribe();
     this.summaryLoading.set(true);
@@ -160,7 +229,7 @@ export class Dashboard {
       .getSummary(this.selectedMonth(), this.selectedYear())
       .subscribe({
         next: (data) => {
-          this.summary.set(data);
+          this.summaries.set(data);
           this.summaryLoading.set(false);
         },
         error: (err) => {

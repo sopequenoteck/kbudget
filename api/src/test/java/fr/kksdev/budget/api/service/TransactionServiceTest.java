@@ -225,7 +225,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void should_return_monthly_summary_with_correct_totals() {
+    void should_return_monthly_summary_grouped_by_currency() {
         var user = buildUser();
         var account = buildDefaultAccount(user);
         var depense = Transaction.builder()
@@ -240,27 +240,31 @@ class TransactionServiceTest {
         when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
                 .thenReturn(List.of(depense, recette));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
 
-        MonthlySummaryResponse summary = transactionService.getMonthlySummary(2, 2026, userId);
+        List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(2, 2026, userId);
 
+        assertThat(summaries).hasSize(1);
+        var summary = summaries.getFirst();
         assertThat(summary.month()).isEqualTo(2);
         assertThat(summary.year()).isEqualTo(2026);
         assertThat(summary.totalRecettes()).isEqualByComparingTo("2000.00");
         assertThat(summary.totalDepenses()).isEqualByComparingTo("50.00");
         assertThat(summary.solde()).isEqualByComparingTo("1950.00");
+        assertThat(summary.currency()).isEqualTo("EUR");
     }
 
     @Test
-    void should_return_zero_summary_when_no_transactions() {
+    void should_return_empty_list_when_no_transactions() {
+        var user = buildUser();
         when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)))
                 .thenReturn(List.of());
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
 
-        MonthlySummaryResponse summary = transactionService.getMonthlySummary(3, 2026, userId);
+        List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(3, 2026, userId);
 
-        assertThat(summary.totalRecettes()).isEqualByComparingTo("0");
-        assertThat(summary.totalDepenses()).isEqualByComparingTo("0");
-        assertThat(summary.solde()).isEqualByComparingTo("0");
+        assertThat(summaries).isEmpty();
     }
 
     @Test

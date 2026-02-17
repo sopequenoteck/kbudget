@@ -14,5 +14,6 @@ public record AccountResponse(
         String icone,
         String couleur,
         boolean isDefault,
-        boolean actif
+        boolean actif,
+        String currency
 ) {}

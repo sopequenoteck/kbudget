@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.dto.request;
 
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -14,5 +15,6 @@ public record AccountRequest(
         BigDecimal soldeInitial,
         String icone,
         @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Couleur invalide (format hex attendu)") String couleur,
-        Boolean actif
+        Boolean actif,
+        Currency currency
 ) {}

@@ -17,10 +17,7 @@
 
   <div class="category-form__field">
     <span id="iconLabel" class="category-form__label">Icone</span>
-    @if (!selectedEmoji()) {
-      <span class="category-form__hint">Choisissez un emoji</span>
-    }
-    <app-emoji-grid [selected]="selectedEmoji()" (emojiSelected)="onEmojiSelected($event)" aria-labelledby="iconLabel" />
+    <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
   </div>
 
   <div class="category-form__field">

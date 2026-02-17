@@ -1,0 +1,72 @@
+:host {
+  display: block;
+  padding: var(--space-4);
+}
+
+.section-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-6);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &__arrow {
+    font-size: var(--font-size-xs);
+  }
+}
+
+.appearance-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-6);
+}
+
+.theme-section {
+  &__label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-3);
+  }
+}
+
+.segmented-control {
+  display: flex;
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-1);
+  gap: var(--space-1);
+
+  &__option {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--easing-default),
+      color var(--duration-fast) var(--easing-default);
+
+    &:hover:not(&--active) {
+      background-color: var(--hover-bg);
+    }
+
+    &--active {
+      background-color: var(--color-primary);
+      color: var(--text-inverse);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}

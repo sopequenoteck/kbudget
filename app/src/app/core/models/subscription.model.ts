@@ -1,4 +1,5 @@
 import { Category } from './category.model';
+import { AccountSummary } from './account.model';
 
 export enum Frequency {
   MENSUEL = 'MENSUEL',
@@ -13,6 +14,8 @@ export interface Subscription {
   dateDebut: string;
   actif: boolean;
   category: Category | null;
+  account: AccountSummary | null;
+  currency: string;
 }
 
 export interface SubscriptionRequest {
@@ -22,4 +25,6 @@ export interface SubscriptionRequest {
   dateDebut: string;
   actif?: boolean;
   categoryId?: string;
+  accountId?: string;
+  currency?: string;
 }

@@ -4,9 +4,11 @@ import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
 import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
@@ -34,6 +36,10 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
+        Account account = resolveAccount(request.accountId(), userId);
+        User user = userRepository.getReferenceById(userId);
+        Currency currency = resolveCurrency(request.currency(), account, user);
+
         Subscription subscription = Subscription.builder()
                 .nom(request.nom())
                 .montant(request.montant())
@@ -41,8 +47,9 @@ public class SubscriptionService {
                 .dateDebut(request.dateDebut())
                 .actif(request.actif() != null ? request.actif() : true)
                 .category(resolveCategory(request.categoryId(), userId))
-                .account(resolveAccount(request.accountId(), userId))
-                .user(userRepository.getReferenceById(userId))
+                .account(account)
+                .currency(currency)
+                .user(user)
                 .build();
 
         subscription = subscriptionRepository.save(subscription);
@@ -72,6 +79,9 @@ public class SubscriptionService {
     @Transactional
     public SubscriptionResponse update(UUID id, SubscriptionRequest request, UUID userId) {
         Subscription subscription = findByIdAndUser(id, userId);
+        Account account = resolveAccount(request.accountId(), userId);
+        User user = userRepository.getReferenceById(userId);
+        Currency currency = resolveCurrency(request.currency(), account, user);
 
         subscription.setNom(request.nom());
         subscription.setMontant(request.montant());
@@ -81,7 +91,8 @@ public class SubscriptionService {
             subscription.setActif(request.actif());
         }
         subscription.setCategory(resolveCategory(request.categoryId(), userId));
-        subscription.setAccount(resolveAccount(request.accountId(), userId));
+        subscription.setAccount(account);
+        subscription.setCurrency(currency);
 
         subscription = subscriptionRepository.save(subscription);
         log.info("Abonnement mis à jour: {}", subscription.getId());
@@ -93,6 +104,16 @@ public class SubscriptionService {
         Subscription subscription = findByIdAndUser(id, userId);
         subscriptionRepository.delete(subscription);
         log.info("Abonnement supprimé: {}", id);
+    }
+
+    private Currency resolveCurrency(Currency requestCurrency, Account account, User user) {
+        if (account != null) {
+            return account.getCurrency();
+        }
+        if (requestCurrency != null) {
+            return requestCurrency;
+        }
+        return user.getDefaultCurrency();
     }
 
     private Account resolveAccount(UUID accountId, UUID userId) {
@@ -150,7 +171,8 @@ public class SubscriptionService {
                 account.getId(),
                 account.getNom(),
                 account.getIcone(),
-                account.getCouleur()
+                account.getCouleur(),
+                account.getCurrency().name()
         );
     }
 
@@ -163,7 +185,8 @@ public class SubscriptionService {
                 subscription.getDateDebut(),
                 subscription.getActif(),
                 toCategoryResponse(subscription.getCategory()),
-                toAccountSummary(subscription.getAccount())
+                toAccountSummary(subscription.getAccount()),
+                subscription.getCurrency().name()
         );
     }
 }

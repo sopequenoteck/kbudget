@@ -21,6 +21,8 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2024-01-15',
     actif: true,
     category: null,
+    account: null,
+    currency: 'EUR',
   },
   {
     id: '2',
@@ -30,6 +32,8 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2024-03-01',
     actif: true,
     category: null,
+    account: null,
+    currency: 'EUR',
   },
   {
     id: '3',
@@ -39,6 +43,8 @@ const mockSubscriptions: Subscription[] = [
     dateDebut: '2023-06-10',
     actif: false,
     category: null,
+    account: null,
+    currency: 'EUR',
   },
 ];
 
@@ -73,16 +79,18 @@ describe('Subscriptions', () => {
 
   // -- T010: Computed signals --
 
-  describe('monthlyTotal', () => {
+  describe('monthlyTotalsByCurrency', () => {
     it('should_compute_monthly_total_with_mixed_frequencies', () => {
       // Netflix 15.99 (mensuel) + Adobe 287.88/12 = 23.99 = 39.98
-      const total = component.monthlyTotal();
-      expect(total).toBeCloseTo(15.99 + 287.88 / 12, 2);
+      const totals = component.monthlyTotalsByCurrency();
+      expect(totals).toHaveLength(1);
+      expect(totals[0].currency).toBe('EUR');
+      expect(totals[0].total).toBeCloseTo(15.99 + 287.88 / 12, 2);
     });
 
-    it('should_return_zero_when_no_active_subscriptions', () => {
+    it('should_return_empty_when_no_active_subscriptions', () => {
       component.subscriptions.set([{ ...mockSubscriptions[2], actif: false }]);
-      expect(component.monthlyTotal()).toBe(0);
+      expect(component.monthlyTotalsByCurrency()).toHaveLength(0);
     });
 
     it('should_divide_annual_by_12', () => {
@@ -95,9 +103,13 @@ describe('Subscriptions', () => {
           dateDebut: '2024-01-01',
           actif: true,
           category: null,
+          account: null,
+          currency: 'EUR',
         },
       ]);
-      expect(component.monthlyTotal()).toBeCloseTo(10, 2);
+      const totals = component.monthlyTotalsByCurrency();
+      expect(totals).toHaveLength(1);
+      expect(totals[0].total).toBeCloseTo(10, 2);
     });
   });
 
@@ -120,6 +132,8 @@ describe('Subscriptions', () => {
         dateDebut: '2020-01-15',
         actif: true,
         category: null,
+        account: null,
+        currency: 'EUR',
       };
       const result = component.getNextRenewalDate(sub);
       // Should contain a day number and a month name in French
@@ -135,6 +149,8 @@ describe('Subscriptions', () => {
         dateDebut: '2020-06-01',
         actif: true,
         category: null,
+        account: null,
+        currency: 'EUR',
       };
       const result = component.getNextRenewalDate(sub);
       expect(result).toMatch(/\d+\s+\w+/);
@@ -151,6 +167,8 @@ describe('Subscriptions', () => {
         dateDebut: futureDate.toISOString().split('T')[0],
         actif: true,
         category: null,
+        account: null,
+        currency: 'EUR',
       };
       const result = component.getNextRenewalDate(sub);
       expect(result).toMatch(/\d+\s+\w+/);
@@ -165,6 +183,8 @@ describe('Subscriptions', () => {
         dateDebut: '2020-01-01',
         actif: false,
         category: null,
+        account: null,
+        currency: 'EUR',
       };
       expect(component.getNextRenewalDate(sub)).toBe('Inactif');
     });

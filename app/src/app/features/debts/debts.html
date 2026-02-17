@@ -2,17 +2,32 @@
   <section class="summary">
     <div class="summary__card">
       <span class="summary__label">Emprunts</span>
-      <span class="summary__value debt-owe">{{ totalJeDois() | amount }}</span>
+      @for (ct of totalJeDoisByCurrency(); track ct.currency) {
+        <span class="summary__value debt-owe">{{ ct.total | amount : null : ct.currency }}</span>
+      }
+      @if (totalJeDoisByCurrency().length === 0) {
+        <span class="summary__value debt-owe">{{ 0 | amount }}</span>
+      }
     </div>
     <div class="summary__card">
       <span class="summary__label">Prêts</span>
-      <span class="summary__value debt-owed">{{ totalOnMeDoit() | amount }}</span>
+      @for (ct of totalOnMeDoitByCurrency(); track ct.currency) {
+        <span class="summary__value debt-owed">{{ ct.total | amount : null : ct.currency }}</span>
+      }
+      @if (totalOnMeDoitByCurrency().length === 0) {
+        <span class="summary__value debt-owed">{{ 0 | amount }}</span>
+      }
     </div>
     <div class="summary__card">
       <span class="summary__label">Solde net</span>
-      <span class="summary__value" [ngClass]="netBalance() >= 0 ? 'debt-owed' : 'debt-owe'">
-        {{ netBalance() | amount }}
-      </span>
+      @for (ct of netBalanceByCurrency(); track ct.currency) {
+        <span class="summary__value" [ngClass]="ct.total >= 0 ? 'debt-owed' : 'debt-owe'">
+          {{ ct.total | amount : null : ct.currency }}
+        </span>
+      }
+      @if (netBalanceByCurrency().length === 0) {
+        <span class="summary__value debt-owed">{{ 0 | amount }}</span>
+      }
     </div>
   </section>
 }
@@ -59,7 +74,9 @@
     <section class="debt-section debt-section--owed">
       <div class="section-header">
         <span class="section-header__title">Prêts</span>
-        <span class="section-header__total debt-owed">{{ sectionTotalOnMeDoit() | amount }}</span>
+        @for (ct of sectionTotalOnMeDoitByCurrency(); track ct.currency) {
+          <span class="section-header__total debt-owed">{{ ct.total | amount : null : ct.currency }}</span>
+        }
       </div>
       <ul class="debt-list">
         @for (debt of debtsOnMeDoit(); track debt.id) {
@@ -69,7 +86,7 @@
               [title]="debt.personne"
               [subtitle]="getSubtitle(debt)"
               [rightSubtitle]="debt.date | relativeDate"
-              [value]="debt.montant | amount"
+              [value]="debt.montant | amount : null : debt.currency"
               [valueClass]="getValueClass(debt)"
               (pressed)="onDebtPressed(debt)"
             />
@@ -83,7 +100,9 @@
     <section class="debt-section debt-section--owe">
       <div class="section-header">
         <span class="section-header__title">Emprunts</span>
-        <span class="section-header__total debt-owe">{{ sectionTotalJeDois() | amount }}</span>
+        @for (ct of sectionTotalJeDoisByCurrency(); track ct.currency) {
+          <span class="section-header__total debt-owe">{{ ct.total | amount : null : ct.currency }}</span>
+        }
       </div>
       <ul class="debt-list">
         @for (debt of debtsJeDois(); track debt.id) {
@@ -93,7 +112,7 @@
               [title]="debt.personne"
               [subtitle]="getSubtitle(debt)"
               [rightSubtitle]="debt.date | relativeDate"
-              [value]="debt.montant | amount"
+              [value]="debt.montant | amount : null : debt.currency"
               [valueClass]="getValueClass(debt)"
               (pressed)="onDebtPressed(debt)"
             />

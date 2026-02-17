@@ -17,11 +17,22 @@
       [showError]="isInvalid('montant')"
       [errorMessage]="'Le montant doit etre superieur a 0'"
     >
-      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
+      <div class="amount-input-wrapper">
+        <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
+        <span class="amount-input-wrapper__suffix">{{ selectedCurrency() }}</span>
+      </div>
     </app-form-field>
   </div>
 
   <div class="form-row">
+    <app-form-field label="Devise" fieldId="currency">
+      <app-select-picker
+        formControlName="currency"
+        [items]="currencyItems()"
+        placeholder="Devise par defaut"
+      />
+    </app-form-field>
+
     <app-form-field label="Categorie" fieldId="categoryId">
       <app-category-picker formControlName="categoryId" />
     </app-form-field>

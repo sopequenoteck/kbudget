@@ -1,3 +1,53 @@
+<!-- Section Comptes -->
+<section class="accounts-zone">
+  @if (accountsLoading()) {
+    <div class="state-loading state-loading--accounts">
+      <div class="spinner"></div>
+    </div>
+  } @else if (accountsError()) {
+    <div class="state-error">
+      <p>Erreur de chargement des comptes</p>
+      <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
+    </div>
+  } @else if (accounts().length === 0) {
+    <div class="state-empty state-empty--accounts">
+      <p>Aucun compte</p>
+      <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
+    </div>
+  } @else {
+    <div class="accounts-zone__totals">
+      @for (ct of accountTotalsByCurrency(); track ct.currency) {
+        <div class="accounts-zone__total">
+          @if (accountTotalsByCurrency().length > 1) {
+            <span class="accounts-zone__total-currency">{{ ct.currency }}</span>
+          }
+          <span class="accounts-zone__total-label">Solde total</span>
+          <span
+            class="accounts-zone__total-value"
+            [ngClass]="ct.total >= 0 ? 'amount-income' : 'amount-expense'"
+          >
+            {{ ct.total | amount : null : ct.currency }}
+          </span>
+        </div>
+      }
+    </div>
+    <div class="accounts-zone__list">
+      @for (account of accounts(); track account.id) {
+        <div class="account-card" [style.border-color]="account.couleur">
+          <span class="account-card__icon">{{ account.icone }}</span>
+          <span class="account-card__name">{{ account.nom }}</span>
+          <span
+            class="account-card__solde"
+            [ngClass]="account.solde >= 0 ? 'amount-income' : 'amount-expense'"
+          >
+            {{ account.solde | amount : null : account.currency }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+</section>
+
 <!-- Zone KPI -->
 <section class="kpi-zone">
   <!-- Sélecteur de mois -->
@@ -22,25 +72,46 @@
       <button class="btn-outline" (click)="loadSummary()">Réessayer</button>
     </div>
   } @else {
-    <div class="kpi-zone__row">
-      <div class="summary__card summary__card--income">
-        <span class="summary__label">Recettes</span>
-        <span class="summary__value">{{ summary()?.totalRecettes | amount: 'RECETTE' }}</span>
+    @for (s of summaries(); track s.currency) {
+      @if (summaries().length > 1) {
+        <span class="kpi-zone__currency-label">{{ s.currency }}</span>
+      }
+      <div class="kpi-zone__row">
+        <div class="summary__card summary__card--income">
+          <span class="summary__label">Recettes</span>
+          <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
+        </div>
+        <div class="summary__card summary__card--expense">
+          <span class="summary__label">Dépenses</span>
+          <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
+        </div>
+        <div class="summary__card summary__card--balance">
+          <span class="summary__label">Solde</span>
+          <span
+            class="summary__value"
+            [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'"
+          >
+            {{ s.solde | amount : null : s.currency }}
+          </span>
+        </div>
       </div>
-      <div class="summary__card summary__card--expense">
-        <span class="summary__label">Dépenses</span>
-        <span class="summary__value">{{ summary()?.totalDepenses | amount: 'DEPENSE' }}</span>
+    }
+    @if (summaries().length === 0) {
+      <div class="kpi-zone__row">
+        <div class="summary__card summary__card--income">
+          <span class="summary__label">Recettes</span>
+          <span class="summary__value">{{ 0 | amount: 'RECETTE' }}</span>
+        </div>
+        <div class="summary__card summary__card--expense">
+          <span class="summary__label">Dépenses</span>
+          <span class="summary__value">{{ 0 | amount: 'DEPENSE' }}</span>
+        </div>
+        <div class="summary__card summary__card--balance">
+          <span class="summary__label">Solde</span>
+          <span class="summary__value amount-income">{{ 0 | amount }}</span>
+        </div>
       </div>
-      <div class="summary__card summary__card--balance">
-        <span class="summary__label">Solde</span>
-        <span
-          class="summary__value"
-          [ngClass]="(summary()?.solde ?? 0) >= 0 ? 'amount-income' : 'amount-expense'"
-        >
-          {{ summary()?.solde | amount }}
-        </span>
-      </div>
-    </div>
+    }
   }
 
   <!-- Rang 2 : Abos / Je dois / On me doit -->
@@ -52,15 +123,30 @@
     <div class="kpi-zone__row">
       <a class="mini-card mini-card--subscription" routerLink="/subscriptions">
         <span class="mini-card__label">Abos</span>
-        <span class="mini-card__value">{{ monthlySubTotal() | amount }}</span>
+        @for (ct of monthlySubTotalsByCurrency(); track ct.currency) {
+          <span class="mini-card__value">{{ ct.total | amount : null : ct.currency }}</span>
+        }
+        @if (monthlySubTotalsByCurrency().length === 0) {
+          <span class="mini-card__value">{{ 0 | amount }}</span>
+        }
       </a>
       <a class="mini-card mini-card--debt-owe" routerLink="/debts">
         <span class="mini-card__label">Je dois</span>
-        <span class="mini-card__value">{{ totalJeDois() | amount }}</span>
+        @for (ct of totalJeDoisByCurrency(); track ct.currency) {
+          <span class="mini-card__value">{{ ct.total | amount : null : ct.currency }}</span>
+        }
+        @if (totalJeDoisByCurrency().length === 0) {
+          <span class="mini-card__value">{{ 0 | amount }}</span>
+        }
       </a>
       <a class="mini-card mini-card--debt-owed" routerLink="/debts">
         <span class="mini-card__label">On me doit</span>
-        <span class="mini-card__value">{{ totalOnMeDoit() | amount }}</span>
+        @for (ct of totalOnMeDoitByCurrency(); track ct.currency) {
+          <span class="mini-card__value">{{ ct.total | amount : null : ct.currency }}</span>
+        }
+        @if (totalOnMeDoitByCurrency().length === 0) {
+          <span class="mini-card__value">{{ 0 | amount }}</span>
+        }
       </a>
     </div>
   }
@@ -96,7 +182,7 @@
             [icon]="getTransactionIcon(transaction)"
             [title]="transaction.libelle"
             [subtitle]="transaction.category?.nom ?? ''"
-            [value]="transaction.montant | amount: transaction.type"
+            [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
             [rightSubtitle]="transaction.date | relativeDate"
             [valueClass]="getTransactionValueClass(transaction)"
             (pressed)="onTransactionClick(transaction)"
@@ -134,7 +220,7 @@
           <app-list-item
             [icon]="sub.category?.icone ?? '🔄'"
             [title]="sub.nom"
-            [value]="sub.montant | amount"
+            [value]="sub.montant | amount : null : sub.currency"
             [subtitle]="sub.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel'"
             (pressed)="onSubscriptionClick(sub)"
           />
@@ -171,7 +257,7 @@
           <app-list-item
             [icon]="getDebtIcon(debt)"
             [title]="debt.personne"
-            [value]="debt.montant | amount"
+            [value]="debt.montant | amount : null : debt.currency"
             [subtitle]="debt.sens === 'EMPRUNT' ? 'Emprunt' : 'Prêt'"
             [rightSubtitle]="debt.date | relativeDate"
             [valueClass]="getDebtValueClass(debt)"

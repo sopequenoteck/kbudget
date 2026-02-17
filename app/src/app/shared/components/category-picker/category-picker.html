@@ -1,58 +1,24 @@
 <div class="category-picker" [class.disabled]="disabled()">
-  @if (selectedCategory() && !isOpen()) {
-    <div class="category-picker__selected" (click)="onFocus()" role="button" tabindex="0" (keydown.enter)="onFocus()">
-      <span class="category-picker__emoji">{{ selectedCategory()!.icone }}</span>
-      <span class="category-picker__name">{{ selectedCategory()!.nom }}</span>
-      <button
-        type="button"
-        class="category-picker__clear"
-        (click)="clearSelection(); $event.stopPropagation()"
-        aria-label="Retirer la categorie"
-      >
-        &times;
-      </button>
-    </div>
-  } @else {
-    <input
-      #searchInput
-      type="text"
-      class="category-picker__input"
-      [value]="searchTerm()"
-      (input)="onInput($event)"
-      (focus)="onFocus()"
-      (keydown)="onKeydown($event)"
-      placeholder="Rechercher une categorie..."
-      [disabled]="disabled()"
-      autocomplete="off"
-    />
-  }
+  <app-select-picker
+    [items]="categoryItems()"
+    [searchable]="true"
+    [clearable]="true"
+    searchPlaceholder="Rechercher une categorie..."
+    emptyMessage="Aucune categorie"
+    placeholder="Selectionner"
+    [ngModel]="selectedCategoryId()"
+    (ngModelChange)="onPickerChange($event)"
+    (searchTermChange)="onSearchTermChange($event)"
+  />
 
-  @if (isOpen()) {
-    <div class="category-picker__dropdown" role="listbox">
-      @for (cat of filteredCategories(); track cat.id; let i = $index) {
-        <div
-          class="category-picker__option"
-          [class.highlighted]="highlightedIndex() === i"
-          role="option"
-          tabindex="0"
-          [attr.aria-selected]="selectedCategoryId() === cat.id"
-          (click)="selectCategory(cat)"
-          (keydown.enter)="selectCategory(cat)"
-          (mouseenter)="highlightedIndex.set(i)"
-        >
-          <span class="category-picker__option-emoji">{{ cat.icone }}</span>
-          <span class="category-picker__option-name">{{ cat.nom }}</span>
-        </div>
-      } @empty {
-        <div class="category-picker__empty">Aucune categorie</div>
-      }
-
-      @if (!hasExactMatch() && searchTerm()) {
-        <div class="category-picker__create" role="button" tabindex="0" (click)="openCreateModal()" (keydown.enter)="openCreateModal()">
-          + Creer "{{ searchTerm() }}"
-        </div>
-      }
-    </div>
+  @if (!hasExactMatch() && searchTerm()) {
+    <button
+      type="button"
+      class="category-picker__create"
+      (click)="openCreateModal()"
+    >
+      + Créer "{{ searchTerm() }}"
+    </button>
   }
 </div>
 

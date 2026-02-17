@@ -20,10 +20,6 @@
   </div>
 
   <div class="form-row">
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
-
     <app-form-field
       label="Date de debut"
       fieldId="dateDebut"
@@ -32,7 +28,33 @@
     >
       <input id="dateDebut" type="date" formControlName="dateDebut" />
     </app-form-field>
+
+    <app-form-field label="Categorie" fieldId="categoryId">
+      <app-category-picker formControlName="categoryId" />
+    </app-form-field>
   </div>
+
+  @if (activeAccounts().length > 0) {
+    <app-form-field label="Compte (optionnel)" fieldId="accountId">
+      <app-select-picker
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Aucun compte"
+        [clearable]="true"
+      />
+    </app-form-field>
+  }
+
+  @if (showCurrencyPicker()) {
+    <app-form-field label="Devise (optionnel)" fieldId="currency">
+      <app-select-picker
+        formControlName="currency"
+        [items]="currencyItems()"
+        placeholder="Devise par défaut"
+        [clearable]="true"
+      />
+    </app-form-field>
+  }
 
   <label class="checkbox-field">
     <input type="checkbox" formControlName="actif" />

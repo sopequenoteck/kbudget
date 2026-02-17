@@ -1,0 +1,154 @@
+<div class="select-picker" [class.disabled]="disabled()" [class.open]="isOpen()">
+  <div
+    #trigger
+    class="select-picker__trigger"
+    role="combobox"
+    tabindex="0"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox"
+    [attr.aria-controls]="isOpen() ? 'select-picker-listbox' : null"
+    [attr.aria-activedescendant]="highlightedIndex() >= 0 ? 'select-picker-option-' + filteredItems()[highlightedIndex()]?.id : null"
+    (click)="toggle()"
+    (keydown)="onKeydown($event)"
+  >
+    @if (selectedItem()) {
+      <span class="select-picker__selected">
+        @if (selectedItem()!.color) {
+          <span class="select-picker__color" [style.background-color]="selectedItem()!.color"></span>
+        }
+        @if (selectedItem()!.icon) {
+          <span class="select-picker__icon">{{ selectedItem()!.icon }}</span>
+        }
+        <span class="select-picker__label">{{ selectedItem()!.label }}</span>
+        @if (selectedItem()!.secondaryText) {
+          <span class="select-picker__secondary">{{ selectedItem()!.secondaryText }}</span>
+        }
+      </span>
+      @if (clearable()) {
+        <button
+          type="button"
+          class="select-picker__clear"
+          (click)="clearSelection($event)"
+          aria-label="Effacer la selection"
+        >
+          &times;
+        </button>
+      }
+    } @else {
+      <span class="select-picker__placeholder">{{ placeholder() }}</span>
+    }
+    <span class="select-picker__chevron">&#9662;</span>
+  </div>
+
+  @if (isOpen()) {
+    <!-- Desktop dropdown -->
+    <div class="select-picker__dropdown" [class.select-picker__dropdown--above]="dropAbove()">
+      @if (showSearch()) {
+        <div class="select-picker__search">
+          <input
+            #searchInput
+            type="text"
+            class="select-picker__search-input"
+            [placeholder]="searchPlaceholder()"
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            (keydown)="onKeydown($event)"
+            autocomplete="off"
+            aria-label="Rechercher"
+          />
+        </div>
+      }
+      <div class="select-picker__list" role="listbox" id="select-picker-listbox">
+        @for (item of filteredItems(); track item.id; let i = $index) {
+          <div
+            class="select-picker__item"
+            [class.highlighted]="highlightedIndex() === i"
+            [class.selected]="selectedId() === item.id"
+            role="option"
+            tabindex="-1"
+            [attr.aria-selected]="selectedId() === item.id"
+            [id]="'select-picker-option-' + item.id"
+            (click)="selectItem(item)"
+            (keydown.enter)="selectItem(item)"
+            (mouseenter)="highlightedIndex.set(i)"
+          >
+            @if (item.color) {
+              <span class="select-picker__item-color" [style.background-color]="item.color"></span>
+            }
+            @if (item.icon) {
+              <span class="select-picker__item-icon">{{ item.icon }}</span>
+            }
+            <span class="select-picker__item-label">{{ item.label }}</span>
+            @if (item.secondaryText) {
+              <span class="select-picker__item-secondary">{{ item.secondaryText }}</span>
+            }
+          </div>
+        } @empty {
+          <div class="select-picker__empty">{{ emptyMessage() }}</div>
+        }
+      </div>
+      <div class="sr-only" aria-live="polite">{{ filteredItems().length }} resultats</div>
+    </div>
+
+    <!-- Mobile bottom-sheet -->
+    <div
+      class="select-picker__overlay"
+      role="dialog"
+      tabindex="-1"
+      (click)="close()"
+      (keydown.escape)="close()"
+    >
+      <div class="select-picker__sheet" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" role="document" (click)="$event.stopPropagation()" (keydown.escape)="close()">
+        <div class="select-picker__sheet-header">
+          <span class="select-picker__sheet-title">{{ placeholder() }}</span>
+          <button type="button" class="select-picker__sheet-close" (click)="close()" aria-label="Fermer">
+            &times;
+          </button>
+        </div>
+        @if (showSearch()) {
+          <div class="select-picker__search">
+            <input
+              type="text"
+              class="select-picker__search-input"
+              [placeholder]="searchPlaceholder()"
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
+              (keydown)="onKeydown($event)"
+              autocomplete="off"
+              aria-label="Rechercher"
+            />
+          </div>
+        }
+        <div class="select-picker__list" role="listbox">
+          @for (item of filteredItems(); track item.id; let i = $index) {
+            <div
+              class="select-picker__item"
+              [class.highlighted]="highlightedIndex() === i"
+              [class.selected]="selectedId() === item.id"
+              role="option"
+              tabindex="-1"
+              [attr.aria-selected]="selectedId() === item.id"
+              [id]="'select-picker-sheet-option-' + item.id"
+              (click)="selectItem(item)"
+              (keydown.enter)="selectItem(item)"
+              (mouseenter)="highlightedIndex.set(i)"
+            >
+              @if (item.color) {
+                <span class="select-picker__item-color" [style.background-color]="item.color"></span>
+              }
+              @if (item.icon) {
+                <span class="select-picker__item-icon">{{ item.icon }}</span>
+              }
+              <span class="select-picker__item-label">{{ item.label }}</span>
+              @if (item.secondaryText) {
+                <span class="select-picker__item-secondary">{{ item.secondaryText }}</span>
+              }
+            </div>
+          } @empty {
+            <div class="select-picker__empty">{{ emptyMessage() }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

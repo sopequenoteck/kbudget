@@ -131,10 +131,11 @@ app/src/app/
 ├── shared/            # Composants, pipes, directives reutilisables
 └── features/          # Modules lazy-loaded
     ├── auth/          # Login
-    ├── dashboard/     # Tableau de bord
+    ├── dashboard/     # Tableau de bord (soldes comptes + KPI mensuels)
     ├── transactions/  # CRUD transactions
     ├── subscriptions/ # CRUD abonnements
-    └── debts/         # CRUD dettes
+    ├── debts/         # CRUD dettes
+    └── settings/      # Parametres (categories, comptes bancaires)
 ```
 
 ### Principes
@@ -155,16 +156,17 @@ app/src/app/
 | Ecran | Route | Role |
 |-------|-------|------|
 | Auth | `/auth` | Inscription et connexion (toggle login/register) |
-| Dashboard | `/dashboard` | Solde du mois, resume abonnements, etat dettes |
+| Dashboard | `/dashboard` | Soldes par compte, solde total, KPI mensuels, resume abonnements, etat dettes |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
 | Dettes/Prets | `/debts` | Suivi dans les deux sens |
 | Parametres | `/settings` | Parametres utilisateur |
 
-### Bouton flottant (+)
+### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Ouvre un formulaire minimal : montant + libelle + type
+- Speed-dial avec 5 actions : Transaction, Abonnement, Dette, Categorie, Virement
+- L'action Virement n'apparait que si au moins 2 comptes actifs existent
 - Saisie en 2-3 taps
 
 ## Flux d'authentification
