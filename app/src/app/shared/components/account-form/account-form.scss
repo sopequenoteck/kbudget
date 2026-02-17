@@ -1,19 +1,118 @@
 .account-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
-.form-row {
-  display: grid;
+// Section 1 : Preview card
+.account-form__preview {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-default);
+  border-radius: var(--radius-xl);
+  border-left: 3px solid;
+  box-shadow: var(--shadow-sm);
+}
 
-  &--icon-name {
-    grid-template-columns: auto 1fr;
-    align-items: end;
+.account-form__preview-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.account-form__preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.account-form__preview-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+
+  &.placeholder {
+    color: var(--text-tertiary);
   }
 }
 
+.account-form__preview-type {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Sections (fieldsets)
+.account-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.account-form__section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Section 2 : Type cards
+.type-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-default);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--easing-default),
+    background-color var(--duration-fast) var(--easing-default),
+    box-shadow var(--duration-fast) var(--easing-default);
+
+  &:hover:not(:disabled) {
+    border-color: var(--border-strong);
+  }
+
+  &.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &__emoji {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+  }
+}
+
+// Section 3 : Personnalisation
 .account-form__field {
   display: flex;
   flex-direction: column;
@@ -26,19 +125,51 @@
   color: var(--text-primary);
 }
 
-.form-row--icon-name input[type='color'] {
-  width: var(--space-12);
-  height: var(--space-12);
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
+.color-swatch {
+  width: var(--space-7);
+  height: var(--space-7);
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--easing-default),
+    transform var(--duration-fast) var(--easing-default);
 
-  .btn-danger {
-    margin-right: auto;
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.active {
+    border-color: var(--text-primary);
+    transform: scale(1.15);
+  }
+}
+
+// Section 4 : Détails
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding-right: var(--space-12);
+  }
+
+  &__suffix {
+    position: absolute;
+    right: var(--space-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    pointer-events: none;
   }
 }
 
@@ -63,38 +194,14 @@
   }
 }
 
-.type-segmented {
+// Section 5 : Actions
+.form-actions {
   display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border-radius: var(--radius-xl);
-  background-color: var(--bg-tertiary);
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
 
-  &__option {
-    flex: 1;
-    padding: var(--space-2) var(--space-3);
-    border: none;
-    border-radius: var(--radius-lg);
-    background-color: transparent;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition:
-      background-color var(--duration-fast) var(--easing-default),
-      color var(--duration-fast) var(--easing-default),
-      box-shadow var(--duration-fast) var(--easing-default);
-
-    &.active {
-      background-color: var(--surface-default);
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  .btn-danger {
+    margin-right: auto;
   }
 }
-

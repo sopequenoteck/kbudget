@@ -1,61 +1,95 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
-  <div class="form-row form-row--icon-name">
+  <!-- Section 1 : Preview card live -->
+  <div class="account-form__preview" [style.border-left-color]="selectedColor()">
+    <span class="account-form__preview-emoji">{{ selectedEmoji() }}</span>
+    <div class="account-form__preview-info">
+      <span class="account-form__preview-name" [class.placeholder]="!form.get('nom')?.value">
+        {{ form.get('nom')?.value || 'Nom du compte' }}
+      </span>
+      <span class="account-form__preview-type">{{ typeLabels[selectedType()] }}</span>
+    </div>
+  </div>
+
+  <!-- Section 2 : Type de compte -->
+  <fieldset class="account-form__section">
+    <legend class="account-form__section-title">Type de compte</legend>
+    <div class="type-cards" role="radiogroup" aria-label="Type de compte">
+      @for (t of accountTypes; track t) {
+        <button
+          type="button"
+          class="type-card"
+          [class.active]="selectedType() === t"
+          [attr.aria-pressed]="selectedType() === t"
+          [disabled]="isEditMode()"
+          (click)="selectType(t)"
+        >
+          <span class="type-card__emoji">{{ defaultIcons[t] }}</span>
+          <span class="type-card__label">{{ typeLabels[t] }}</span>
+        </button>
+      }
+    </div>
+  </fieldset>
+
+  <!-- Section 3 : Personnalisation -->
+  <fieldset class="account-form__section">
+    <legend class="account-form__section-title">Personnalisation</legend>
+
     <div class="account-form__field">
       <span class="account-form__label">Icône</span>
       <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
     </div>
 
+    <div class="account-form__field">
+      <span id="accountColorLabel" class="account-form__label">Couleur</span>
+      <div class="color-swatches" role="radiogroup" aria-labelledby="accountColorLabel">
+        @for (color of accountColors; track color) {
+          <button
+            type="button"
+            class="color-swatch"
+            [class.active]="selectedColor() === color"
+            [style.background-color]="color"
+            (click)="selectColor(color)"
+            [attr.aria-label]="'Couleur ' + color"
+          ></button>
+        }
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- Section 4 : Détails -->
+  <fieldset class="account-form__section">
+    <legend class="account-form__section-title">Détails</legend>
+
     <app-form-field
-      label="Nom"
+      label="Nom du compte"
       fieldId="accountNom"
       [showError]="isInvalid('nom')"
       [errorMessage]="form.get('nom')?.hasError('required') ? 'Nom requis' : '50 caractères maximum'"
     >
-      <input id="accountNom" type="text" formControlName="nom" maxlength="50" />
+      <input id="accountNom" type="text" formControlName="nom" maxlength="50" placeholder="Ex: Compte courant" />
     </app-form-field>
-  </div>
 
-  <div class="form-row form-row--icon-name">
-    <div class="account-form__field">
-      <span class="account-form__label">Couleur</span>
-      <input type="color" formControlName="couleur" />
-    </div>
+    @if (!isEditMode()) {
+      <app-form-field label="Solde initial" fieldId="soldeInitial">
+        <div class="amount-input-wrapper">
+          <input id="soldeInitial" type="text" inputmode="decimal" formControlName="soldeInitial" placeholder="0" />
+          <span class="amount-input-wrapper__suffix">EUR</span>
+        </div>
+      </app-form-field>
+    }
 
-    <div class="account-form__field">
-      <span class="account-form__label">Type</span>
-      <div class="type-segmented" role="radiogroup" aria-label="Type de compte">
-        @for (t of accountTypes; track t) {
-          <button
-            type="button"
-            class="type-segmented__option"
-            [class.active]="selectedType() === t"
-            [attr.aria-pressed]="selectedType() === t"
-            [disabled]="isEditMode()"
-            (click)="selectType(t)"
-          >
-            {{ typeLabels[t] }}
-          </button>
+    @if (isEditMode()) {
+      <label class="checkbox-field" [class.disabled]="!canDeactivate()">
+        <input type="checkbox" formControlName="actif" [attr.disabled]="canDeactivate() ? null : true" />
+        Compte actif
+        @if (!canDeactivate()) {
+          <span class="checkbox-field__hint">Définissez un autre compte par défaut avant de désactiver celui-ci</span>
         }
-      </div>
-    </div>
-  </div>
+      </label>
+    }
+  </fieldset>
 
-  @if (!isEditMode()) {
-    <app-form-field label="Solde initial" fieldId="soldeInitial">
-      <input id="soldeInitial" type="number" formControlName="soldeInitial" step="0.01" />
-    </app-form-field>
-  }
-
-  @if (isEditMode()) {
-    <label class="checkbox-field" [class.disabled]="!canDeactivate()">
-      <input type="checkbox" formControlName="actif" [attr.disabled]="canDeactivate() ? null : true" />
-      Compte actif
-      @if (!canDeactivate()) {
-        <span class="checkbox-field__hint">Définissez un autre compte par défaut avant de désactiver celui-ci</span>
-      }
-    </label>
-  }
-
+  <!-- Section 5 : Actions -->
   <div class="form-actions">
     @if (isEditMode()) {
       <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>

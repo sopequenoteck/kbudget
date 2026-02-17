@@ -32,6 +32,13 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
   [AccountType.ESPECES]: '#f59e0b',
 };
 
+const ACCOUNT_COLORS: string[] = [
+  '#3b82f6', '#10b981', '#f59e0b',
+  '#ef4444', '#f97316', '#84cc16',
+  '#22c55e', '#06b6d4', '#6366f1',
+  '#8b5cf6', '#ec4899', '#78716c',
+];
+
 @Component({
   selector: 'app-account-form',
   imports: [ReactiveFormsModule, FormField, EmojiInput],
@@ -49,16 +56,19 @@ export class AccountForm {
 
   readonly isEditMode = computed(() => this.account() !== null);
   readonly selectedEmoji = signal('🏦');
+  readonly selectedColor = signal('#3b82f6');
   readonly accountTypes = Object.values(AccountType);
   readonly AccountType = AccountType;
   readonly typeLabels = ACCOUNT_TYPE_LABELS;
+  readonly defaultIcons = DEFAULT_ICONS;
+  readonly accountColors = ACCOUNT_COLORS;
 
   readonly canDeactivate = computed(() => {
     const acc = this.account();
     return acc ? !acc.isDefault : true;
   });
 
-  readonly selectedType = computed(() => this.form.getRawValue().type);
+  readonly selectedType = signal<AccountType>(AccountType.COURANT);
 
   readonly form = this.fb.nonNullable.group({
     nom: ['', [Validators.required, Validators.maxLength(50)]],
@@ -79,7 +89,9 @@ export class AccountForm {
           couleur: acc.couleur,
           actif: acc.actif,
         });
+        this.selectedType.set(acc.type);
         this.selectedEmoji.set(acc.icone);
+        this.selectedColor.set(acc.couleur);
         this.form.get('type')!.disable();
       } else {
         this.form.get('type')!.enable();
@@ -94,7 +106,14 @@ export class AccountForm {
   selectType(type: AccountType): void {
     if (this.isEditMode()) return;
     this.form.patchValue({ type, couleur: DEFAULT_COLORS[type] });
+    this.selectedType.set(type);
     this.selectedEmoji.set(DEFAULT_ICONS[type]);
+    this.selectedColor.set(DEFAULT_COLORS[type]);
+  }
+
+  selectColor(color: string): void {
+    this.form.patchValue({ couleur: color });
+    this.selectedColor.set(color);
   }
 
   onSubmit(): void {
