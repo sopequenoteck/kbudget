@@ -13,7 +13,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
-import { AccountPicker } from '../../../../shared/components/account-picker/account-picker';
+import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
+import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
 import { Account } from '../../../../core/models/account.model';
 import {
@@ -24,7 +25,7 @@ import {
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, FormField, CategoryPicker, AccountPicker],
+  imports: [ReactiveFormsModule, FormField, CategoryPicker, SelectPicker],
   templateUrl: './transaction-form.html',
   styleUrl: './transaction-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +49,16 @@ export class TransactionForm {
   readonly activeAccounts = computed(() => this.allAccounts().filter((a) => a.actif));
   readonly hasAccounts = computed(() => this.activeAccounts().length > 0);
   readonly defaultAccount = computed(() => this.activeAccounts().find((a) => a.isDefault) ?? null);
+
+  readonly accountItems = computed<SelectPickerItem[]>(() =>
+    this.activeAccounts().map((a) => ({
+      id: a.id,
+      label: a.nom,
+      icon: a.icone,
+      secondaryText: `${a.solde.toFixed(2)} \u20AC`,
+      color: a.couleur,
+    })),
+  );
 
   readonly form = this.fb.nonNullable.group({
     libelle: ['', [Validators.required, Validators.maxLength(255)]],
@@ -77,10 +88,6 @@ export class TransactionForm {
         }
       }
     });
-  }
-
-  onAccountSelected(accountId: string | null): void {
-    this.form.patchValue({ accountId: accountId ?? '' });
   }
 
   onSubmit(): void {

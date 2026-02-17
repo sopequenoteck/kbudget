@@ -10,14 +10,12 @@
       [showError]="isInvalid('fromAccountId')"
       [errorMessage]="'Compte source requis'"
     >
-      <select id="fromAccountId" formControlName="fromAccountId">
-        <option value="">Sélectionner un compte</option>
-        @for (account of activeAccounts(); track account.id) {
-          <option [value]="account.id">
-            {{ account.icone }} {{ account.nom }} ({{ account.solde | number: '1.2-2' }} €)
-          </option>
-        }
-      </select>
+      <app-select-picker
+        formControlName="fromAccountId"
+        [items]="accountItems()"
+        placeholder="Compte source"
+        [clearable]="false"
+      />
     </app-form-field>
 
     <app-form-field
@@ -26,14 +24,12 @@
       [showError]="isInvalid('toAccountId')"
       [errorMessage]="'Compte destination requis'"
     >
-      <select id="toAccountId" formControlName="toAccountId">
-        <option value="">Sélectionner un compte</option>
-        @for (account of activeAccounts(); track account.id) {
-          <option [value]="account.id">
-            {{ account.icone }} {{ account.nom }} ({{ account.solde | number: '1.2-2' }} €)
-          </option>
-        }
-      </select>
+      <app-select-picker
+        formControlName="toAccountId"
+        [items]="accountItems()"
+        placeholder="Compte destination"
+        [clearable]="false"
+      />
     </app-form-field>
 
     @if (form.hasError('sameAccount') && form.get('toAccountId')?.touched) {

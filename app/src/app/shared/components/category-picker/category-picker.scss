@@ -6,125 +6,16 @@
     pointer-events: none;
   }
 
-  &__input {
-    width: 100%;
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl);
-    background: var(--surface-default);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-
-    &:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px var(--color-primary-light);
-    }
-
-    &::placeholder {
-      color: var(--text-tertiary);
-    }
-  }
-
-  &__selected {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl);
-    background: var(--surface-default);
-    cursor: pointer;
-    transition: border-color var(--duration-normal) var(--easing-default);
-
-    &:hover {
-      border-color: var(--color-primary);
-    }
-  }
-
-  &__emoji {
-    font-size: var(--font-size-lg);
-    line-height: 1;
-  }
-
-  &__name {
-    flex: 1;
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-  }
-
-  &__clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--space-5);
-    height: var(--space-5);
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    line-height: 1;
-    transition: background var(--duration-fast) var(--easing-default);
-
-    &:hover {
-      background: var(--border-strong);
-    }
-  }
-
-  &__dropdown {
-    position: absolute;
-    top: calc(100% + var(--space-1));
-    left: 0;
-    right: 0;
-    max-height: 12rem;
-    overflow-y: auto;
-    border-radius: var(--radius-xl);
-    background: var(--surface-raised);
-    box-shadow: var(--shadow-lg);
-    z-index: var(--z-dropdown);
-  }
-
-  &__option {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    cursor: pointer;
-    transition: background-color var(--duration-fast) var(--easing-default);
-
-    &:hover,
-    &.highlighted {
-      background: var(--bg-tertiary);
-    }
-
-    &-emoji {
-      font-size: var(--font-size-base);
-      line-height: 1;
-    }
-
-    &-name {
-      color: var(--text-primary);
-      font-size: var(--font-size-sm);
-    }
-  }
-
-  &__empty {
-    padding: var(--space-3);
-    text-align: center;
-    color: var(--text-tertiary);
-    font-size: var(--font-size-sm);
-  }
-
   &__create {
     padding: var(--space-2) var(--space-3);
     color: var(--color-primary);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    border-top: 1px solid var(--border-default);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
     transition: background var(--duration-fast) var(--easing-default);
 
     &:hover {

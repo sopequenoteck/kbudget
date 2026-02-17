@@ -51,19 +51,22 @@ describe('CategoryPicker', () => {
     expect(categoryServiceMock.getAll).toHaveBeenCalled();
   });
 
-  it('should filter categories by search term', () => {
+  it('should transform categories to SelectPickerItems', () => {
     const fixture = TestBed.createComponent(CategoryPicker);
     fixture.detectChanges();
 
-    const component = fixture.componentInstance;
-    component.searchTerm.set('ali');
-
-    const filtered = component.filteredCategories();
-    expect(filtered).toHaveLength(1);
-    expect(filtered[0].nom).toBe('Alimentation');
+    const items = fixture.componentInstance.categoryItems();
+    expect(items).toHaveLength(3);
+    expect(items[0]).toEqual({
+      id: 'cat-1',
+      label: 'Alimentation',
+      icon: '🍔',
+      secondaryText: null,
+      color: null,
+    });
   });
 
-  it('should emit categoryId on selection', () => {
+  it('should emit categoryId via CVA on picker change', () => {
     const fixture = TestBed.createComponent(CategoryPicker);
     fixture.detectChanges();
 
@@ -73,9 +76,10 @@ describe('CategoryPicker', () => {
       emittedValue = value;
     });
 
-    component.selectCategory(mockCategories[0]);
+    component.onPickerChange('cat-1');
 
     expect(emittedValue).toBe('cat-1');
+    expect(component.selectedCategoryId()).toBe('cat-1');
   });
 
   it('should show create button when no exact match', () => {
@@ -98,41 +102,49 @@ describe('CategoryPicker', () => {
     expect(component.hasExactMatch()).toBe(true);
   });
 
-  it('should show empty state when no categories match', () => {
+  it('should open create modal', () => {
     const fixture = TestBed.createComponent(CategoryPicker);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    component.searchTerm.set('zzzzz');
+    component.openCreateModal();
 
-    expect(component.filteredCategories()).toHaveLength(0);
+    expect(component.showCreateModal()).toBe(true);
   });
 
-  it('should close dropdown on escape key', () => {
+  it('should handle category saved', () => {
     const fixture = TestBed.createComponent(CategoryPicker);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    component.isOpen.set(true);
-    component.onKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
-
-    expect(component.isOpen()).toBe(false);
-  });
-
-  it('should clear selection', () => {
-    const fixture = TestBed.createComponent(CategoryPicker);
-    fixture.detectChanges();
-
-    const component = fixture.componentInstance;
-    let emittedValue: string | undefined;
+    let emittedValue = '';
     component.registerOnChange((value: string) => {
       emittedValue = value;
     });
 
-    component.selectCategory(mockCategories[0]);
-    component.clearSelection();
+    const newCategory: Category = {
+      id: 'cat-new',
+      nom: 'Nouveau',
+      icone: '✨',
+      couleur: '#000',
+      isSystem: false,
+    };
 
-    expect(emittedValue).toBe('');
-    expect(component.selectedCategoryId()).toBe('');
+    component.openCreateModal();
+    component.onCategorySaved(newCategory);
+
+    expect(component.showCreateModal()).toBe(false);
+    expect(emittedValue).toBe('cat-new');
+    expect(component.categories()).toHaveLength(4);
+  });
+
+  it('should track search term changes', () => {
+    const fixture = TestBed.createComponent(CategoryPicker);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.onSearchTermChange('test');
+
+    expect(component.searchTerm()).toBe('test');
   });
 });

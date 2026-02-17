@@ -35,13 +35,14 @@
   </div>
 
   @if (activeAccounts().length > 0) {
-    <app-account-picker
-      [accounts]="activeAccounts()"
-      [selectedAccountId]="form.get('accountId')?.value ?? null"
-      [required]="false"
-      label="Compte (optionnel)"
-      (accountSelected)="onAccountSelected($event)"
-    />
+    <app-form-field label="Compte (optionnel)" fieldId="accountId">
+      <app-select-picker
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Aucun compte"
+        [clearable]="true"
+      />
+    </app-form-field>
   }
 
   <label class="checkbox-field">

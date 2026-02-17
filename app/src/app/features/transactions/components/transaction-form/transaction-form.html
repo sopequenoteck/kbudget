@@ -31,13 +31,14 @@
   </app-form-field>
 
   @if (hasAccounts()) {
-    <app-account-picker
-      [accounts]="activeAccounts()"
-      [selectedAccountId]="form.get('accountId')?.value ?? null"
-      [required]="!isEditMode() || !!form.get('accountId')?.value"
-      label="Compte"
-      (accountSelected)="onAccountSelected($event)"
-    />
+    <app-form-field label="Compte" fieldId="accountId">
+      <app-select-picker
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Selectionner un compte"
+        [clearable]="!isEditMode() || !!form.get('accountId')?.value"
+      />
+    </app-form-field>
   } @else if (!isEditMode()) {
     <div class="form-info">Créez un compte dans les paramètres pour associer vos transactions</div>
   }

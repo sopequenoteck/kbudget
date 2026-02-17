@@ -16,15 +16,16 @@ import {
   Validators,
 } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { DecimalPipe } from '@angular/common';
 
 import { FormField } from '../form-field/form-field';
+import { SelectPicker } from '../select-picker/select-picker';
+import { SelectPickerItem } from '../select-picker/select-picker.model';
 import { AccountService } from '../../../core/services/account';
 import { Account, TransferRequest, TransferResponse } from '../../../core/models/account.model';
 
 @Component({
   selector: 'app-transfer-form',
-  imports: [ReactiveFormsModule, FormField, DecimalPipe],
+  imports: [ReactiveFormsModule, FormField, SelectPicker],
   templateUrl: './transfer-form.html',
   styleUrl: './transfer-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,16 @@ export class TransferForm {
 
   readonly activeAccounts = computed(() => this.allAccounts().filter((a) => a.actif));
   readonly hasEnoughAccounts = computed(() => this.activeAccounts().length >= 2);
+
+  readonly accountItems = computed<SelectPickerItem[]>(() =>
+    this.activeAccounts().map((a) => ({
+      id: a.id,
+      label: a.nom,
+      icon: a.icone,
+      secondaryText: `${a.solde.toFixed(2)} \u20AC`,
+      color: a.couleur,
+    })),
+  );
 
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
@@ -63,18 +74,6 @@ export class TransferForm {
       return { sameAccount: true };
     }
     return null;
-  }
-
-  getAccountName(id: string): string {
-    return this.activeAccounts().find((a) => a.id === id)?.nom ?? '';
-  }
-
-  getAccountIcon(id: string): string {
-    return this.activeAccounts().find((a) => a.id === id)?.icone ?? '';
-  }
-
-  getAccountSolde(id: string): number {
-    return this.activeAccounts().find((a) => a.id === id)?.solde ?? 0;
   }
 
   async onSubmit(): Promise<void> {
