@@ -1,95 +1,17 @@
 <h2 class="settings-title">Paramètres</h2>
 
-<section class="settings-section">
-  <a class="settings-nav-link" routerLink="accounts">
-    <span class="settings-nav-link__icon">🏦</span>
-    <span class="settings-nav-link__text">Gérer mes comptes</span>
-    <span class="settings-nav-link__arrow">&#9654;</span>
-  </a>
-</section>
-
-<section class="settings-section">
-  <h3 class="settings-section__title">Catégories</h3>
-
-  @if (loading()) {
-    <div class="state-loading">
-      <div class="spinner"></div>
-    </div>
-  } @else if (error()) {
-    <div class="state-error">
-      <p>Erreur de chargement</p>
-      <button class="btn-outline" (click)="loadCategories()">Réessayer</button>
-    </div>
-  } @else {
-    @if (systemCategories().length > 0) {
-      <div class="category-group">
-        <h4 class="category-group__label">Catégories système</h4>
-        <ul class="category-list">
-          @for (cat of systemCategories(); track cat.id) {
-            <li class="category-list__item">
-              <span class="category-list__icon">{{ cat.icone }}</span>
-              <span class="category-list__name">{{ cat.nom }}</span>
-              <span
-                class="category-list__color"
-                [style.background-color]="cat.couleur"
-              ></span>
-              <span class="category-list__badge">Système</span>
-            </li>
-          }
-        </ul>
+<nav class="settings-grid">
+  @for (section of sections; track section.id) {
+    <a class="settings-card" [routerLink]="section.route">
+      <span class="settings-card__icon">{{ section.icon }}</span>
+      <div class="settings-card__content">
+        <span class="settings-card__title">{{ section.title }}</span>
+        <span class="settings-card__description">{{ section.description }}</span>
       </div>
-    }
-
-    @if (userCategories().length > 0) {
-      <div class="category-group">
-        <h4 class="category-group__label">Mes catégories</h4>
-        <ul class="category-list">
-          @for (cat of userCategories(); track cat.id) {
-            <li class="category-list__item">
-              <span class="category-list__icon">{{ cat.icone }}</span>
-              <span class="category-list__name">{{ cat.nom }}</span>
-              <span
-                class="category-list__color"
-                [style.background-color]="cat.couleur"
-              ></span>
-              <div class="category-list__actions">
-                <button
-                  type="button"
-                  class="btn-icon"
-                  (click)="editCategory(cat)"
-                  aria-label="Modifier"
-                >
-                  ✏️
-                </button>
-                <button
-                  type="button"
-                  class="btn-icon btn-icon--danger"
-                  (click)="requestDelete(cat.id)"
-                  aria-label="Supprimer"
-                >
-                  🗑️
-                </button>
-              </div>
-
-              @if (confirmDeleteId() === cat.id) {
-                <div class="category-list__confirm">
-                  <p>Cette catégorie sera dissociée de tous les items liés (transactions, abonnements, dettes).</p>
-                  <div class="category-list__confirm-actions">
-                    <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
-                    <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
-                  </div>
-                </div>
-              }
-            </li>
-          }
-        </ul>
-      </div>
-    }
-
-    @if (categories().length === 0) {
-      <div class="state-empty">
-        <p>Aucune catégorie</p>
-      </div>
-    }
+      @if (section.status === 'placeholder') {
+        <span class="settings-card__badge">À venir</span>
+      }
+      <span class="settings-card__arrow">&#9654;</span>
+    </a>
   }
-</section>
+</nav>

@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { RouterLink } from '@angular/router';
 import { AccountService } from '../../../../core/services/account';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
@@ -15,7 +16,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe],
+  imports: [AmountPipe, RouterLink],
   templateUrl: './accounts.html',
   styleUrl: './accounts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

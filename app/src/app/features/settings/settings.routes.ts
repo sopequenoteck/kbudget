@@ -8,4 +8,42 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/accounts/accounts').then((m) => m.Accounts),
   },
+  {
+    path: 'categories',
+    loadComponent: () =>
+      import('./components/categories/categories').then((m) => m.Categories),
+  },
+  {
+    path: 'appearance',
+    loadComponent: () =>
+      import('./components/appearance/appearance').then((m) => m.Appearance),
+  },
+  {
+    path: 'profile',
+    loadComponent: () =>
+      import('./components/profile/profile').then((m) => m.Profile),
+  },
+  {
+    path: 'about',
+    loadComponent: () =>
+      import('./components/about/about').then((m) => m.About),
+  },
+  {
+    path: 'budget',
+    loadComponent: () =>
+      import('./components/placeholder/placeholder').then((m) => m.Placeholder),
+    data: { title: 'Budget', icon: '📊' },
+  },
+  {
+    path: 'notifications',
+    loadComponent: () =>
+      import('./components/placeholder/placeholder').then((m) => m.Placeholder),
+    data: { title: 'Notifications', icon: '🔔' },
+  },
+  {
+    path: 'data',
+    loadComponent: () =>
+      import('./components/placeholder/placeholder').then((m) => m.Placeholder),
+    data: { title: 'Données', icon: '💾' },
+  },
 ];
