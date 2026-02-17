@@ -5,6 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-02-17
+
+### Added
+- Documentation d'installation PWA pour Android et iOS (`docs/pwa-install.md`)
+
 ## [1.3.0] - 2026-02-17
 
 ### Added
@@ -98,7 +103,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/sopequenoteck/budget/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/sopequenoteck/budget/compare/v1.2.0...v1.3.0
 [1.0.0]: https://github.com/sopequenoteck/budget/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/sopequenoteck/budget/releases/tag/v0.1.0
