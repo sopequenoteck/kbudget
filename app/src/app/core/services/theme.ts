@@ -30,6 +30,7 @@ export class ThemeService {
       const effective = this.effectiveTheme();
       document.documentElement.classList.remove('theme-light', 'theme-dark');
       document.documentElement.classList.add(`theme-${effective}`);
+      document.documentElement.style.colorScheme = effective;
     });
   }
 

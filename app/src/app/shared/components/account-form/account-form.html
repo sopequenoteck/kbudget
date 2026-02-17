@@ -1,5 +1,10 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
-  <div class="form-row">
+  <div class="form-row form-row--icon-name">
+    <div class="account-form__field">
+      <span class="account-form__label">Icône</span>
+      <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
+    </div>
+
     <app-form-field
       label="Nom"
       fieldId="accountNom"
@@ -8,14 +13,31 @@
     >
       <input id="accountNom" type="text" formControlName="nom" maxlength="50" />
     </app-form-field>
+  </div>
 
-    <app-form-field label="Type" fieldId="accountType">
-      <select id="accountType" formControlName="type" (change)="onTypeChange()">
+  <div class="form-row form-row--icon-name">
+    <div class="account-form__field">
+      <span class="account-form__label">Couleur</span>
+      <input type="color" formControlName="couleur" />
+    </div>
+
+    <div class="account-form__field">
+      <span class="account-form__label">Type</span>
+      <div class="type-segmented" role="radiogroup" aria-label="Type de compte">
         @for (t of accountTypes; track t) {
-          <option [value]="t">{{ typeLabels[t] }}</option>
+          <button
+            type="button"
+            class="type-segmented__option"
+            [class.active]="selectedType() === t"
+            [attr.aria-pressed]="selectedType() === t"
+            [disabled]="isEditMode()"
+            (click)="selectType(t)"
+          >
+            {{ typeLabels[t] }}
+          </button>
         }
-      </select>
-    </app-form-field>
+      </div>
+    </div>
   </div>
 
   @if (!isEditMode()) {
@@ -23,15 +45,6 @@
       <input id="soldeInitial" type="number" formControlName="soldeInitial" step="0.01" />
     </app-form-field>
   }
-
-  <div class="account-form__field">
-    <span class="account-form__label">Icône</span>
-    <app-emoji-grid [selected]="selectedEmoji()" (emojiSelected)="onEmojiSelected($event)" />
-  </div>
-
-  <app-form-field label="Couleur" fieldId="accountCouleur">
-    <input id="accountCouleur" type="color" formControlName="couleur" />
-  </app-form-field>
 
   @if (isEditMode()) {
     <label class="checkbox-field" [class.disabled]="!canDeactivate()">

@@ -1,0 +1,27 @@
+.emoji-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  input {
+    width: var(--space-12);
+    height: var(--space-12);
+    font-size: 2rem;
+    text-align: center;
+    padding: 0;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl);
+    background-color: var(--surface-default);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--easing-default),
+      box-shadow var(--duration-fast) var(--easing-default);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px var(--color-primary-light);
+    }
+  }
+
+}

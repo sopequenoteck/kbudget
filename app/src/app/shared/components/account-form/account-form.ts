@@ -11,7 +11,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { FormField } from '../form-field/form-field';
-import { EmojiGrid } from '../emoji-grid/emoji-grid';
+import { EmojiInput } from '../emoji-input/emoji-input';
 import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
 
 const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
@@ -34,7 +34,7 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
 
 @Component({
   selector: 'app-account-form',
-  imports: [ReactiveFormsModule, FormField, EmojiGrid],
+  imports: [ReactiveFormsModule, FormField, EmojiInput],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,6 +57,8 @@ export class AccountForm {
     const acc = this.account();
     return acc ? !acc.isDefault : true;
   });
+
+  readonly selectedType = computed(() => this.form.getRawValue().type);
 
   readonly form = this.fb.nonNullable.group({
     nom: ['', [Validators.required, Validators.maxLength(50)]],
@@ -89,12 +91,10 @@ export class AccountForm {
     this.selectedEmoji.set(emoji);
   }
 
-  onTypeChange(): void {
-    const type = this.form.getRawValue().type;
-    if (!this.isEditMode()) {
-      this.selectedEmoji.set(DEFAULT_ICONS[type]);
-      this.form.patchValue({ couleur: DEFAULT_COLORS[type] });
-    }
+  selectType(type: AccountType): void {
+    if (this.isEditMode()) return;
+    this.form.patchValue({ type, couleur: DEFAULT_COLORS[type] });
+    this.selectedEmoji.set(DEFAULT_ICONS[type]);
   }
 
   onSubmit(): void {

@@ -7,12 +7,3 @@ export const CATEGORY_COLORS: string[] = [
 export function randomColor(): string {
   return CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)];
 }
-
-export const BUDGET_EMOJIS: string[] = [
-  '🛒', '🍽️', '🏠', '🚗', '🚌', '⛽',
-  '🏥', '💊', '🎬', '🎮', '📚', '🎓',
-  '👕', '👟', '💻', '📱', '✈️', '🏖️',
-  '🎵', '🏋️', '💇', '🐾', '👶', '🎁',
-  '💼', '📦', '🔧', '🏦', '💰', '🔄',
-  '⚡', '💧', '📡', '🛡️', '❓',
-];
