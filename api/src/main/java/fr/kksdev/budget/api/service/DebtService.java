@@ -3,8 +3,10 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.DebtRequest;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Debt;
+import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -30,6 +32,9 @@ public class DebtService {
 
     @Transactional
     public DebtResponse create(DebtRequest request, UUID userId) {
+        User user = userRepository.getReferenceById(userId);
+        Currency currency = request.currency() != null ? request.currency() : user.getDefaultCurrency();
+
         Debt debt = Debt.builder()
                 .personne(request.personne())
                 .montant(request.montant())
@@ -37,7 +42,8 @@ public class DebtService {
                 .date(request.date())
                 .rembourse(request.rembourse() != null ? request.rembourse() : false)
                 .category(resolveCategory(request.categoryId(), userId))
-                .user(userRepository.getReferenceById(userId))
+                .currency(currency)
+                .user(user)
                 .build();
 
         debt = debtRepository.save(debt);
@@ -76,6 +82,9 @@ public class DebtService {
             debt.setRembourse(request.rembourse());
         }
         debt.setCategory(resolveCategory(request.categoryId(), userId));
+        if (request.currency() != null) {
+            debt.setCurrency(request.currency());
+        }
 
         debt = debtRepository.save(debt);
         log.info("Dette mise à jour: {}", debt.getId());
@@ -131,7 +140,8 @@ public class DebtService {
                 debt.getSens(),
                 debt.getDate(),
                 debt.getRembourse(),
-                toCategoryResponse(debt.getCategory())
+                toCategoryResponse(debt.getCategory()),
+                debt.getCurrency().name()
         );
     }
 }

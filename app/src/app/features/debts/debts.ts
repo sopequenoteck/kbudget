@@ -43,19 +43,28 @@ export class Debts {
     return this.debts().filter((d) => d.rembourse);
   });
 
-  readonly totalJeDois = computed(() =>
-    this.activeDebts()
-      .filter((d) => d.sens === DebtType.EMPRUNT)
-      .reduce((sum, d) => sum + d.montant, 0),
+  readonly totalJeDoisByCurrency = computed(() =>
+    this.groupByCurrency(this.activeDebts().filter((d) => d.sens === DebtType.EMPRUNT)),
   );
 
-  readonly totalOnMeDoit = computed(() =>
-    this.activeDebts()
-      .filter((d) => d.sens === DebtType.PRET)
-      .reduce((sum, d) => sum + d.montant, 0),
+  readonly totalOnMeDoitByCurrency = computed(() =>
+    this.groupByCurrency(this.activeDebts().filter((d) => d.sens === DebtType.PRET)),
   );
 
-  readonly netBalance = computed(() => this.totalOnMeDoit() - this.totalJeDois());
+  readonly netBalanceByCurrency = computed(() => {
+    const currencies = new Set([
+      ...this.totalJeDoisByCurrency().map((c) => c.currency),
+      ...this.totalOnMeDoitByCurrency().map((c) => c.currency),
+    ]);
+    return Array.from(currencies)
+      .map((currency) => ({
+        currency,
+        total:
+          (this.totalOnMeDoitByCurrency().find((c) => c.currency === currency)?.total ?? 0) -
+          (this.totalJeDoisByCurrency().find((c) => c.currency === currency)?.total ?? 0),
+      }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   readonly hasDebts = computed(() => this.debts().length > 0);
 
@@ -71,13 +80,24 @@ export class Debts {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   );
 
-  readonly sectionTotalOnMeDoit = computed(() =>
-    this.debtsOnMeDoit().reduce((sum, d) => sum + d.montant, 0),
+  readonly sectionTotalOnMeDoitByCurrency = computed(() =>
+    this.groupByCurrency(this.debtsOnMeDoit()),
   );
 
-  readonly sectionTotalJeDois = computed(() =>
-    this.debtsJeDois().reduce((sum, d) => sum + d.montant, 0),
+  readonly sectionTotalJeDoisByCurrency = computed(() =>
+    this.groupByCurrency(this.debtsJeDois()),
   );
+
+  private groupByCurrency(debts: Debt[]): { currency: string; total: number }[] {
+    const byCurrency = new Map<string, number>();
+    for (const d of debts) {
+      const cur = d.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  }
 
   constructor() {
     effect(() => {

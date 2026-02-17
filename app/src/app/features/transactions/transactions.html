@@ -4,20 +4,23 @@
   <button class="month-selector__btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
 </section>
 
-@if (summary(); as s) {
+@for (s of summaries(); track s.currency) {
   <section class="summary">
+    @if (summaries().length > 1) {
+      <span class="summary__currency-label">{{ s.currency }}</span>
+    }
     <div class="summary__card summary__card--income">
       <span class="summary__label">Recettes</span>
-      <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' }}</span>
+      <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
     </div>
     <div class="summary__card summary__card--expense">
       <span class="summary__label">Dépenses</span>
-      <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' }}</span>
+      <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
     </div>
     <div class="summary__card summary__card--balance">
       <span class="summary__label">Solde</span>
       <span class="summary__value" [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
-        {{ s.solde | amount }}
+        {{ s.solde | amount : null : s.currency }}
       </span>
     </div>
   </section>
@@ -68,7 +71,7 @@
           [icon]="getIcon(transaction)"
           [title]="transaction.libelle"
           [subtitle]="transaction.category?.nom ?? ''"
-          [value]="transaction.montant | amount: transaction.type"
+          [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
           [rightSubtitle]="transaction.date | relativeDate"
           [valueClass]="getValueClass(transaction)"
           (pressed)="onTransactionPressed(transaction)"

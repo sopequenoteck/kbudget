@@ -23,6 +23,11 @@ import {
 import { type Subscription, Frequency } from '../../core/models/subscription.model';
 import { type Debt, DebtType } from '../../core/models/debt.model';
 import { type Account } from '../../core/models/account.model';
+
+interface CurrencyTotal {
+  currency: string;
+  total: number;
+}
 import { ModalService } from '../../core/services/modal.service';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -47,11 +52,17 @@ export class Dashboard {
   readonly accountsError = signal(false);
   readonly accounts = signal<Account[]>([]);
 
-  readonly totalSolde = computed(() =>
-    this.accounts()
-      .filter((a) => a.actif)
-      .reduce((sum, a) => sum + a.solde, 0),
-  );
+  readonly accountTotalsByCurrency = computed<CurrencyTotal[]>(() => {
+    const active = this.accounts().filter((a) => a.actif);
+    const byCurrency = new Map<string, number>();
+    for (const a of active) {
+      const cur = a.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + a.solde);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   private accountsSub: RxSub | null = null;
 
@@ -60,7 +71,7 @@ export class Dashboard {
   readonly selectedYear = signal(new Date().getFullYear());
   readonly summaryLoading = signal(true);
   readonly summaryError = signal(false);
-  readonly summary = signal<MonthlySummary | null>(null);
+  readonly summaries = signal<MonthlySummary[]>([]);
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
@@ -87,11 +98,17 @@ export class Dashboard {
     [...this.subscriptions()].sort((a, b) => a.nom.localeCompare(b.nom)).slice(0, 3),
   );
 
-  readonly monthlySubTotal = computed(() =>
-    this.subscriptions().reduce((sum, s) => {
-      return sum + (s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant);
-    }, 0),
-  );
+  readonly monthlySubTotalsByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const s of this.subscriptions()) {
+      const cur = s.currency || 'EUR';
+      const monthly = s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant;
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + monthly);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   // -- Dettes en cours (US4) --
   readonly debtsLoading = signal(true);
@@ -104,17 +121,27 @@ export class Dashboard {
       .slice(0, 3),
   );
 
-  readonly totalJeDois = computed(() =>
-    this.debts()
-      .filter((d) => d.sens === DebtType.EMPRUNT)
-      .reduce((sum, d) => sum + d.montant, 0),
-  );
+  readonly totalJeDoisByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const d of this.debts().filter((d) => d.sens === DebtType.EMPRUNT)) {
+      const cur = d.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
-  readonly totalOnMeDoit = computed(() =>
-    this.debts()
-      .filter((d) => d.sens === DebtType.PRET)
-      .reduce((sum, d) => sum + d.montant, 0),
-  );
+  readonly totalOnMeDoitByCurrency = computed<CurrencyTotal[]>(() => {
+    const byCurrency = new Map<string, number>();
+    for (const d of this.debts().filter((d) => d.sens === DebtType.PRET)) {
+      const cur = d.currency || 'EUR';
+      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
+    }
+    return Array.from(byCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  });
 
   readonly miniCardsLoading = computed(
     () => this.subscriptionsLoading() || this.debtsLoading(),
@@ -202,7 +229,7 @@ export class Dashboard {
       .getSummary(this.selectedMonth(), this.selectedYear())
       .subscribe({
         next: (data) => {
-          this.summary.set(data);
+          this.summaries.set(data);
           this.summaryLoading.set(false);
         },
         error: (err) => {

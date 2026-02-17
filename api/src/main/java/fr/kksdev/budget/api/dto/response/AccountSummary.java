@@ -6,5 +6,6 @@ public record AccountSummary(
         UUID id,
         String nom,
         String icone,
-        String couleur
+        String couleur,
+        String currency
 ) {}

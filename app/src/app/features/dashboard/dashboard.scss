@@ -11,7 +11,13 @@
   flex-direction: column;
   gap: var(--space-3);
 
+  &__totals {
+    display: flex;
+    gap: var(--space-3);
+  }
+
   &__total {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -20,6 +26,14 @@
     background-color: var(--surface-default);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
+  }
+
+  &__total-currency {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   &__total-label {
@@ -150,6 +164,14 @@
   &__row {
     display: flex;
     gap: var(--space-3);
+  }
+
+  &__currency-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 }
 

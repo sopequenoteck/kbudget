@@ -15,6 +15,7 @@ export interface Subscription {
   actif: boolean;
   category: Category | null;
   account: AccountSummary | null;
+  currency: string;
 }
 
 export interface SubscriptionRequest {
@@ -25,4 +26,5 @@ export interface SubscriptionRequest {
   actif?: boolean;
   categoryId?: string;
   accountId?: string;
+  currency?: string;
 }

@@ -70,10 +70,19 @@
     </app-form-field>
 
     @if (!isEditMode()) {
+      <app-form-field label="Devise" fieldId="currency">
+        <app-select-picker
+          formControlName="currency"
+          [items]="currencyItems()"
+          placeholder="Devise par défaut"
+          [clearable]="true"
+        />
+      </app-form-field>
+
       <app-form-field label="Solde initial" fieldId="soldeInitial">
         <div class="amount-input-wrapper">
           <input id="soldeInitial" type="text" inputmode="decimal" formControlName="soldeInitial" placeholder="0" />
-          <span class="amount-input-wrapper__suffix">EUR</span>
+          <span class="amount-input-wrapper__suffix">{{ selectedCurrency() }}</span>
         </div>
       </app-form-field>
     }

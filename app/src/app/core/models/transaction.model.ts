@@ -34,4 +34,5 @@ export interface MonthlySummary {
   totalRecettes: number;
   totalDepenses: number;
   solde: number;
+  currency: string;
 }

@@ -16,6 +16,7 @@ export interface Account {
   couleur: string;
   isDefault: boolean;
   actif: boolean;
+  currency: string;
 }
 
 export interface AccountSummary {
@@ -23,6 +24,7 @@ export interface AccountSummary {
   nom: string;
   icone: string;
   couleur: string;
+  currency: string;
 }
 
 export interface AccountRequest {
@@ -32,6 +34,7 @@ export interface AccountRequest {
   icone?: string;
   couleur?: string;
   actif?: boolean;
+  currency?: string;
 }
 
 export interface TransferRequest {

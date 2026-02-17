@@ -75,7 +75,7 @@ class DebtControllerTest {
     void should_return_201_when_create_debt() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null, "EUR");
 
         when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -92,7 +92,7 @@ class DebtControllerTest {
     void should_return_200_when_get_all_debts() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null, "EUR");
 
         when(debtService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -106,7 +106,7 @@ class DebtControllerTest {
     void should_return_200_when_get_unpaid_debts() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null, "EUR");
 
         when(debtService.getUnpaidByUser(userId)).thenReturn(List.of(response));
 
@@ -121,7 +121,7 @@ class DebtControllerTest {
     void should_return_200_when_get_debt_by_id() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), false, null, "EUR");
 
         when(debtService.getById(debtId, userId)).thenReturn(response);
 
@@ -135,7 +135,7 @@ class DebtControllerTest {
     void should_return_200_when_update_debt() throws Exception {
         var response = new DebtResponse(
                 debtId, "Bob", new BigDecimal("200.00"),
-                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null);
+                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null, "EUR");
 
         when(debtService.update(eq(debtId), any(DebtRequest.class), eq(userId)))
                 .thenReturn(response);

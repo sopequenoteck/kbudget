@@ -12,17 +12,20 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
+import { CurrencyService } from '../../../../core/services/currency';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, FormField, CategoryPicker],
+  imports: [ReactiveFormsModule, FormField, CategoryPicker, SelectPicker],
   templateUrl: './debt-form.html',
   styleUrl: './debt-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DebtForm {
   private readonly fb = inject(FormBuilder);
+  private readonly currencyService = inject(CurrencyService);
 
   readonly debt = input<Debt | null>(null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -32,15 +35,22 @@ export class DebtForm {
 
   readonly isEditMode = computed(() => this.debt() !== null);
 
+  readonly currencyItems = this.currencyService.currencyItems;
+
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
     date: [new Date().toISOString().split('T')[0], [Validators.required]],
     rembourse: [false],
     categoryId: [''],
+    currency: [''],
   });
 
+  readonly selectedCurrency = computed(() => this.form.get('currency')?.value || 'EUR');
+
   constructor() {
+    this.currencyService.loadIfEmpty();
+
     effect(() => {
       const d = this.debt();
       if (d) {
@@ -50,6 +60,7 @@ export class DebtForm {
           date: d.date,
           rembourse: d.rembourse,
           categoryId: d.category?.id ?? '',
+          currency: d.currency || '',
         });
       }
     });
@@ -69,6 +80,7 @@ export class DebtForm {
       date: raw.date,
       rembourse: raw.rembourse,
       categoryId: raw.categoryId || undefined,
+      currency: raw.currency || undefined,
     };
 
     this.saved.emit(request);

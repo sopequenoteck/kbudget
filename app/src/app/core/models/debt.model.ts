@@ -13,6 +13,7 @@ export interface Debt {
   date: string;
   rembourse: boolean;
   category: Category | null;
+  currency: string;
 }
 
 export interface DebtRequest {
@@ -22,4 +23,5 @@ export interface DebtRequest {
   date: string;
   rembourse?: boolean;
   categoryId?: string;
+  currency?: string;
 }

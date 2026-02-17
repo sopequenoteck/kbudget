@@ -32,7 +32,7 @@
           <span class="account-list__type">{{ account.type }}</span>
         </div>
         <span class="account-list__solde" [class.amount-expense]="account.solde < 0">
-          {{ account.solde | amount }}
+          {{ account.solde | amount: null : account.currency }}
         </span>
         <div class="account-list__badges">
           @if (account.isDefault) {

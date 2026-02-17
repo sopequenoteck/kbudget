@@ -13,5 +13,6 @@ public record DebtResponse(
         DebtType sens,
         LocalDate date,
         Boolean rembourse,
-        CategoryResponse category
+        CategoryResponse category,
+        String currency
 ) {}

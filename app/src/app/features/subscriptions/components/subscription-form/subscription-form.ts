@@ -16,6 +16,7 @@ import { CategoryPicker } from '../../../../shared/components/category-picker/ca
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
+import { CurrencyService } from '../../../../core/services/currency';
 import { Account } from '../../../../core/models/account.model';
 import {
   Frequency,
@@ -33,6 +34,7 @@ import {
 export class SubscriptionForm {
   private readonly fb = inject(FormBuilder);
   private readonly accountService = inject(AccountService);
+  private readonly currencyService = inject(CurrencyService);
 
   readonly subscription = input<Subscription | null>(null);
   readonly frequence = input(Frequency.MENSUEL);
@@ -49,12 +51,14 @@ export class SubscriptionForm {
   readonly activeAccounts = computed(() => this.allAccounts().filter((a) => a.actif));
   readonly defaultAccount = computed(() => this.activeAccounts().find((a) => a.isDefault) ?? null);
 
+  readonly currencyItems = this.currencyService.currencyItems;
+
   readonly accountItems = computed<SelectPickerItem[]>(() =>
     this.activeAccounts().map((a) => ({
       id: a.id,
       label: a.nom,
       icon: a.icone,
-      secondaryText: `${a.solde.toFixed(2)} \u20AC`,
+      secondaryText: `${a.solde.toFixed(2)} ${a.currency}`,
       color: a.couleur,
     })),
   );
@@ -66,9 +70,14 @@ export class SubscriptionForm {
     actif: [true],
     categoryId: [''],
     accountId: [''],
+    currency: [''],
   });
 
+  readonly showCurrencyPicker = computed(() => !this.form.get('accountId')?.value);
+
   constructor() {
+    this.currencyService.loadIfEmpty();
+
     effect(() => {
       const sub = this.subscription();
       if (sub) {
@@ -104,6 +113,7 @@ export class SubscriptionForm {
       actif: raw.actif,
       categoryId: raw.categoryId || undefined,
       accountId: raw.accountId || undefined,
+      currency: raw.accountId ? undefined : (raw.currency || undefined),
     };
 
     this.saved.emit(request);

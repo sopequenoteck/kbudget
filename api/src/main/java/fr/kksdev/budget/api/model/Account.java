@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.model;
 
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -40,6 +41,11 @@ public class Account {
     @Column(name = "is_default", nullable = false)
     @Builder.Default
     private Boolean isDefault = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 3)
+    @Builder.Default
+    private Currency currency = Currency.EUR;
 
     @Column(nullable = false)
     @Builder.Default

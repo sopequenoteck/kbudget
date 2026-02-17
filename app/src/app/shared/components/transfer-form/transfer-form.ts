@@ -49,7 +49,7 @@ export class TransferForm {
       id: a.id,
       label: a.nom,
       icon: a.icone,
-      secondaryText: `${a.solde.toFixed(2)} \u20AC`,
+      secondaryText: `${a.solde.toFixed(2)} ${a.currency}`,
       color: a.couleur,
     })),
   );

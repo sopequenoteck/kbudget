@@ -43,6 +43,7 @@ const mockSummary: MonthlySummary = {
   totalRecettes: 3000,
   totalDepenses: 1500,
   solde: 1500,
+  currency: 'EUR',
 };
 
 describe('TransactionService', () => {

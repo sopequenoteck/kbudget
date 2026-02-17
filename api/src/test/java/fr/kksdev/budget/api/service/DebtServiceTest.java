@@ -70,7 +70,7 @@ class DebtServiceTest {
     void should_create_debt_when_valid_request() {
         var user = buildUser();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null);
         var saved = buildDebt(user);
 
         when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
@@ -107,7 +107,7 @@ class DebtServiceTest {
                 .user(user)
                 .build();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null);
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null);
 
         when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -177,7 +177,7 @@ class DebtServiceTest {
         var user = buildUser();
         var existing = buildDebt(user);
         var request = new DebtRequest("Bob", new BigDecimal("200.00"),
-                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null);
+                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(existing));
         when(debtRepository.save(any(Debt.class))).thenReturn(existing);

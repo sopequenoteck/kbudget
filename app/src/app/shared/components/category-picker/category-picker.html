@@ -5,7 +5,7 @@
     [clearable]="true"
     searchPlaceholder="Rechercher une categorie..."
     emptyMessage="Aucune categorie"
-    placeholder="Selectionner une categorie"
+    placeholder="Selectionner"
     [ngModel]="selectedCategoryId()"
     (ngModelChange)="onPickerChange($event)"
     (searchTermChange)="onSearchTermChange($event)"
@@ -17,7 +17,7 @@
       class="category-picker__create"
       (click)="openCreateModal()"
     >
-      + Creer "{{ searchTerm() }}"
+      + Créer "{{ searchTerm() }}"
     </button>
   }
 </div>

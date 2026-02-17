@@ -45,6 +45,17 @@
     </app-form-field>
   }
 
+  @if (showCurrencyPicker()) {
+    <app-form-field label="Devise (optionnel)" fieldId="currency">
+      <app-select-picker
+        formControlName="currency"
+        [items]="currencyItems()"
+        placeholder="Devise par défaut"
+        [clearable]="true"
+      />
+    </app-form-field>
+  }
+
   <label class="checkbox-field">
     <input type="checkbox" formControlName="actif" />
     Abonnement actif

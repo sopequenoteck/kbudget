@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.request;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Frequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,5 +18,6 @@ public record SubscriptionRequest(
         @NotNull LocalDate dateDebut,
         Boolean actif,
         UUID categoryId,
-        UUID accountId
+        UUID accountId,
+        Currency currency
 ) {}

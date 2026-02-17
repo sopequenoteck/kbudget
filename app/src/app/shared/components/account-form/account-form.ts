@@ -12,7 +12,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
+import { SelectPicker } from '../select-picker/select-picker';
 import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
+import { CurrencyService } from '../../../core/services/currency';
 
 const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   [AccountType.COURANT]: 'Courant',
@@ -41,13 +43,14 @@ const ACCOUNT_COLORS: string[] = [
 
 @Component({
   selector: 'app-account-form',
-  imports: [ReactiveFormsModule, FormField, EmojiInput],
+  imports: [ReactiveFormsModule, FormField, EmojiInput, SelectPicker],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccountForm {
   private readonly fb = inject(FormBuilder);
+  private readonly currencyService = inject(CurrencyService);
 
   readonly account = input<Account | null>(null);
   readonly saved = output<AccountRequest>();
@@ -62,6 +65,7 @@ export class AccountForm {
   readonly typeLabels = ACCOUNT_TYPE_LABELS;
   readonly defaultIcons = DEFAULT_ICONS;
   readonly accountColors = ACCOUNT_COLORS;
+  readonly currencyItems = this.currencyService.currencyItems;
 
   readonly canDeactivate = computed(() => {
     const acc = this.account();
@@ -76,9 +80,17 @@ export class AccountForm {
     soldeInitial: ['0'],
     couleur: ['#3b82f6'],
     actif: [true],
+    currency: [''],
+  });
+
+  readonly selectedCurrency = computed(() => {
+    const acc = this.account();
+    return acc ? acc.currency : (this.form.get('currency')?.value || 'EUR');
   });
 
   constructor() {
+    this.currencyService.loadIfEmpty();
+
     effect(() => {
       const acc = this.account();
       if (acc) {
@@ -133,6 +145,9 @@ export class AccountForm {
 
     if (!this.isEditMode()) {
       request.soldeInitial = Number(raw.soldeInitial) || 0;
+      if (raw.currency) {
+        request.currency = raw.currency;
+      }
     }
 
     this.saved.emit(request);
