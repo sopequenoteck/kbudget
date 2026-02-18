@@ -1,0 +1,162 @@
+import 'package:flutter/material.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
+import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/theme/app_theme_extension.dart';
+
+class AppTheme {
+  AppTheme._();
+
+  static ThemeData get light => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        fontFamily: AppTypography.fontFamily,
+        colorScheme: const ColorScheme.light(
+          primary: AppColors.amber500,
+          onPrimary: Colors.white,
+          primaryContainer: AppColors.amber100,
+          onPrimaryContainer: AppColors.amber900,
+          secondary: AppColors.gray600,
+          onSecondary: Colors.white,
+          surface: Colors.white,
+          onSurface: AppColors.gray900,
+          error: AppColors.error,
+          onError: Colors.white,
+          outline: AppColors.gray300,
+          outlineVariant: AppColors.gray200,
+          surfaceContainerHighest: AppColors.gray100,
+        ),
+        scaffoldBackgroundColor: AppColors.gray50,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.gray900,
+          elevation: 0,
+          scrolledUnderElevation: 1,
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.gray200),
+          ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: AppColors.amber600,
+          unselectedItemColor: AppColors.gray400,
+          type: BottomNavigationBarType.fixed,
+          elevation: 8,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.amber500,
+          foregroundColor: Colors.white,
+          elevation: 4,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.gray300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.gray300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.amber500, width: 2),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.amber500,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        extensions: const <ThemeExtension<dynamic>>[
+          AppThemeExtension.light,
+        ],
+      );
+
+  static ThemeData get dark => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        fontFamily: AppTypography.fontFamily,
+        colorScheme: const ColorScheme.dark(
+          primary: AppColors.amber400,
+          onPrimary: AppColors.gray900,
+          primaryContainer: AppColors.amber800,
+          onPrimaryContainer: AppColors.amber100,
+          secondary: AppColors.gray400,
+          onSecondary: AppColors.gray900,
+          surface: AppColors.gray800,
+          onSurface: AppColors.gray50,
+          error: AppColors.error,
+          onError: Colors.white,
+          outline: AppColors.gray600,
+          outlineVariant: AppColors.gray700,
+          surfaceContainerHighest: AppColors.gray700,
+        ),
+        scaffoldBackgroundColor: AppColors.gray900,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.gray900,
+          foregroundColor: AppColors.gray50,
+          elevation: 0,
+          scrolledUnderElevation: 1,
+        ),
+        cardTheme: CardThemeData(
+          color: AppColors.gray800,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: AppColors.gray700),
+          ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: AppColors.gray800,
+          selectedItemColor: AppColors.amber400,
+          unselectedItemColor: AppColors.gray500,
+          type: BottomNavigationBarType.fixed,
+          elevation: 8,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.amber400,
+          foregroundColor: AppColors.gray900,
+          elevation: 4,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.gray600),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.gray600),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.amber400, width: 2),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.amber400,
+            foregroundColor: AppColors.gray900,
+            minimumSize: const Size(double.infinity, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        extensions: const <ThemeExtension<dynamic>>[
+          AppThemeExtension.dark,
+        ],
+      );
+}

@@ -1,0 +1,68 @@
+import 'package:k_budget/src/data/remote/data_sources/subscription_remote_data_source.dart';
+import 'package:k_budget/src/data/remote/dtos/subscription_dtos.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/subscription.dart';
+import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
+
+class SubscriptionRepositoryRemote implements SubscriptionRepository {
+  final SubscriptionRemoteDataSource _dataSource;
+
+  SubscriptionRepositoryRemote(this._dataSource);
+
+  @override
+  Future<List<Subscription>> getAll() async {
+    final responses = await _dataSource.getAll();
+    return responses.map(_toDomain).toList();
+  }
+
+  @override
+  Stream<List<Subscription>> watchAll() async* {
+    yield await getAll();
+  }
+
+  @override
+  Future<Subscription> getById(String id) async {
+    final response = await _dataSource.getById(id);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<Subscription> create(Subscription subscription) async {
+    final request = _toRequest(subscription);
+    final response = await _dataSource.create(request);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<Subscription> update(Subscription subscription) async {
+    final request = _toRequest(subscription);
+    final response = await _dataSource.update(subscription.id, request);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<void> delete(String id) => _dataSource.delete(id);
+
+  Subscription _toDomain(SubscriptionResponse r) => Subscription(
+        id: r.id,
+        nom: r.nom,
+        montant: r.montant,
+        frequence: Frequency.values.byName(r.frequence.toLowerCase()),
+        dateDebut: DateTime.parse(r.dateDebut),
+        currency: Currency.values.byName(r.currency.toLowerCase()),
+        actif: r.actif,
+        categoryId: r.categoryId,
+        accountId: r.accountId,
+        updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
+      );
+
+  SubscriptionRequest _toRequest(Subscription s) => SubscriptionRequest(
+        nom: s.nom,
+        montant: s.montant,
+        frequence: s.frequence.name.toUpperCase(),
+        dateDebut: s.dateDebut.toIso8601String(),
+        actif: s.actif,
+        categoryId: s.categoryId,
+        accountId: s.accountId,
+      );
+}
