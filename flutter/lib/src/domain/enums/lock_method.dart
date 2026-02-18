@@ -1,0 +1,1 @@
+enum LockMethod { biometric, pin }

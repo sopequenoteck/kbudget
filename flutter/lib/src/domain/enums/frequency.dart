@@ -1,0 +1,1 @@
+enum Frequency { mensuel, annuel }
