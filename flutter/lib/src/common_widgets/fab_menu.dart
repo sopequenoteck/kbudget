@@ -14,22 +14,22 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
 
   static const _items = [
     _SpeedDialItem(
-      icon: '💰',
+      icon: Icons.receipt_long,
       label: 'Transaction',
       action: 'transaction',
     ),
     _SpeedDialItem(
-      icon: '📅',
+      icon: Icons.autorenew,
       label: 'Abonnement',
       action: 'subscription',
     ),
     _SpeedDialItem(
-      icon: '🤝',
+      icon: Icons.handshake,
       label: 'Dette',
       action: 'debt',
     ),
     _SpeedDialItem(
-      icon: '➡️',
+      icon: Icons.swap_horiz,
       label: 'Virement',
       action: 'transfer',
     ),
@@ -140,9 +140,10 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
               width: 130,
               child: Row(
               children: [
-                Text(
+                Icon(
                   item.icon,
-                  style: const TextStyle(fontSize: 16),
+                  size: 18,
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -162,7 +163,7 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
 }
 
 class _SpeedDialItem {
-  final String icon;
+  final IconData icon;
   final String label;
   final String action;
 
