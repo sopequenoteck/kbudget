@@ -1,0 +1,136 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for French (`fr`).
+class AppLocalizationsFr extends AppLocalizations {
+  AppLocalizationsFr([String locale = 'fr']) : super(locale);
+
+  @override
+  String get appTitle => 'K-Budget';
+
+  @override
+  String get navDashboard => 'Accueil';
+
+  @override
+  String get navTransactions => 'Transactions';
+
+  @override
+  String get navSubscriptions => 'Abonnements';
+
+  @override
+  String get navDebts => 'Dettes';
+
+  @override
+  String get settings => 'Paramètres';
+
+  @override
+  String get themeLight => 'Thème clair';
+
+  @override
+  String get themeDark => 'Thème sombre';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get confirm => 'Confirmer';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
+  String get loading => 'Chargement...';
+
+  @override
+  String get errorGeneric => 'Une erreur est survenue';
+
+  @override
+  String get errorNetwork => 'Erreur de connexion réseau';
+
+  @override
+  String get errorServer => 'Erreur serveur';
+
+  @override
+  String get onboardingTitle => 'Bienvenue sur K-Budget';
+
+  @override
+  String get onboardingLocalTitle => 'Mode local';
+
+  @override
+  String get onboardingLocalDesc => 'Vos données restent sur cet appareil';
+
+  @override
+  String get onboardingServerTitle => 'Mode serveur';
+
+  @override
+  String get onboardingServerDesc => 'Synchronisez avec votre serveur K-Budget';
+
+  @override
+  String get onboardingChooseMode => 'Choisissez votre mode de données';
+
+  @override
+  String get serverUrlLabel => 'URL du serveur';
+
+  @override
+  String get serverUrlHint => 'https://budget.example.com/api';
+
+  @override
+  String get serverCheckConnection => 'Vérifier la connexion';
+
+  @override
+  String get serverConnecting => 'Connexion en cours...';
+
+  @override
+  String get serverConnected => 'Connexion réussie';
+
+  @override
+  String get serverUnreachable => 'Serveur injoignable';
+
+  @override
+  String get loginTitle => 'Connexion';
+
+  @override
+  String get loginEmail => 'Email';
+
+  @override
+  String get loginPassword => 'Mot de passe';
+
+  @override
+  String get loginButton => 'Se connecter';
+
+  @override
+  String get loginInvalidCredentials => 'Email ou mot de passe incorrect';
+
+  @override
+  String get logoutButton => 'Se déconnecter';
+
+  @override
+  String get lockTitle => 'Déverrouillage';
+
+  @override
+  String get lockBiometric => 'Déverrouiller avec la biométrie';
+
+  @override
+  String get lockPin => 'Saisir le code PIN';
+
+  @override
+  String get fabNewTransaction => 'Nouvelle transaction';
+
+  @override
+  String get fabNewSubscription => 'Nouvel abonnement';
+
+  @override
+  String get fabNewDebt => 'Nouvelle dette';
+}

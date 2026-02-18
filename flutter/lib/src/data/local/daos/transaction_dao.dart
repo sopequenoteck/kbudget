@@ -1,0 +1,36 @@
+import 'package:drift/drift.dart';
+import 'package:k_budget/src/data/local/database.dart';
+
+part 'transaction_dao.g.dart';
+
+@DriftAccessor(tables: [Transactions])
+class TransactionDao extends DatabaseAccessor<AppDatabase>
+    with _$TransactionDaoMixin {
+  TransactionDao(super.db);
+
+  Future<List<Transaction>> getAllTransactions() =>
+      (select(transactions)
+            ..orderBy([
+              (t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)
+            ]))
+          .get();
+
+  Stream<List<Transaction>> watchAllTransactions() =>
+      (select(transactions)
+            ..orderBy([
+              (t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)
+            ]))
+          .watch();
+
+  Future<Transaction> getTransactionById(String id) =>
+      (select(transactions)..where((t) => t.id.equals(id))).getSingle();
+
+  Future<int> insertTransaction(TransactionsCompanion transaction) =>
+      into(transactions).insert(transaction);
+
+  Future<bool> updateTransaction(TransactionsCompanion transaction) =>
+      update(transactions).replace(transaction);
+
+  Future<int> deleteTransaction(String id) =>
+      (delete(transactions)..where((t) => t.id.equals(id))).go();
+}
