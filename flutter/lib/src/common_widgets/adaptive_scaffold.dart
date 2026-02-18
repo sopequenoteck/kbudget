@@ -59,18 +59,13 @@ class AdaptiveScaffold extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      floatingActionButton: floatingActionButton,
       body: Row(
         children: [
           NavigationRail(
             selectedIndex: currentIndex,
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
-            leading: floatingActionButton != null
-                ? Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: floatingActionButton,
-                  )
-                : null,
             backgroundColor: theme.colorScheme.surface,
             destinations: _destinations
                 .map(

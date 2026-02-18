@@ -1,86 +1,174 @@
 import 'package:flutter/material.dart';
-import 'package:k_budget/src/constants/app_spacing.dart';
 
-class FabMenu extends StatelessWidget {
+class FabMenu extends StatefulWidget {
   const FabMenu({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () => _showMenu(context),
-      child: const Icon(Icons.add),
+  State<FabMenu> createState() => _FabMenuState();
+}
+
+class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _expandAnimation;
+  bool _isOpen = false;
+
+  static const _items = [
+    _SpeedDialItem(
+      icon: '💰',
+      label: 'Transaction',
+      action: 'transaction',
+    ),
+    _SpeedDialItem(
+      icon: '📅',
+      label: 'Abonnement',
+      action: 'subscription',
+    ),
+    _SpeedDialItem(
+      icon: '🤝',
+      label: 'Dette',
+      action: 'debt',
+    ),
+    _SpeedDialItem(
+      icon: '➡️',
+      label: 'Virement',
+      action: 'transfer',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
     );
   }
 
-  void _showMenu(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() {
+      _isOpen = !_isOpen;
+      if (_isOpen) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  void _onItemTap(String action) {
+    _toggle();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$action (à venir)')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      height: _isOpen ? 300 : 56,
+      width: 160,
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        clipBehavior: Clip.none,
+        children: [
+          // Speed dial items
+          Positioned(
+            bottom: 64,
+            right: 0,
+            child: SizeTransition(
+              sizeFactor: _expandAnimation,
+              axisAlignment: 1,
+              child: FadeTransition(
+                opacity: _expandAnimation,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: _items
+                      .map((item) => _buildSpeedDialItem(item, theme))
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+          // Main FAB
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: FloatingActionButton(
+              onPressed: _toggle,
+              child: AnimatedRotation(
+                turns: _isOpen ? 0.125 : 0,
+                duration: const Duration(milliseconds: 250),
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpeedDialItem(_SpeedDialItem item, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Material(
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHigh
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(24),
+        elevation: 3,
+        child: InkWell(
+          onTap: () => _onItemTap(item.action),
+          borderRadius: BorderRadius.circular(24),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.space4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: SizedBox(
+              width: 130,
+              child: Row(
               children: [
-                _MenuItem(
-                  icon: Icons.receipt_long,
-                  label: 'Nouvelle transaction',
-                  onTap: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Nouvelle transaction (à venir)')),
-                    );
-                  },
+                Text(
+                  item.icon,
+                  style: const TextStyle(fontSize: 16),
                 ),
-                _MenuItem(
-                  icon: Icons.autorenew,
-                  label: 'Nouvel abonnement',
-                  onTap: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Nouvel abonnement (à venir)')),
-                    );
-                  },
-                ),
-                _MenuItem(
-                  icon: Icons.handshake,
-                  label: 'Nouvelle dette',
-                  onTap: () {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Nouvelle dette (à venir)')),
-                    );
-                  },
+                const SizedBox(width: 8),
+                Text(
+                  item.label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-class _MenuItem extends StatelessWidget {
-  final IconData icon;
+class _SpeedDialItem {
+  final String icon;
   final String label;
-  final VoidCallback onTap;
+  final String action;
 
-  const _MenuItem({
+  const _SpeedDialItem({
     required this.icon,
     required this.label,
-    required this.onTap,
+    required this.action,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: onTap,
-    );
-  }
 }
