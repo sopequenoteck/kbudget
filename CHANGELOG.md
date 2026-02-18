@@ -5,6 +5,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-02-18
+
+### Added
+- Projet Flutter (iOS, Android, Web) avec architecture feature-first
+- State management Riverpod, navigation GoRouter avec auth guards
+- Base de données locale Drift (SQLite) avec DAOs pour toutes les entités
+- Client HTTP Dio avec intercepteur JWT pour le mode serveur
+- Flow onboarding avec choix mode local/serveur
+- Design system : thèmes light/dark portés depuis les tokens SCSS (Amber primary, Inter font)
+- Navigation bottom bar (4 onglets) + NavigationRail adaptatif wide screen
+- FAB speed dial (Transaction, Abonnement, Dette, Virement)
+- Écrans auth : login, register, lock (biométrie/PIN)
+- Data sources et repositories distants pour le mode serveur
+- Localisation française (l10n)
+- 65 tests unitaires/widget, tests d'intégration
+
 ## [1.4.0] - 2026-02-17
 
 ### Added
