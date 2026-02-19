@@ -15,28 +15,8 @@
     <button class="btn-outline" (click)="loadCategories()">Réessayer</button>
   </div>
 } @else {
-  @if (systemCategories().length > 0) {
-    <div class="category-group">
-      <h4 class="category-group__label">Catégories système</h4>
-      <ul class="category-list">
-        @for (cat of systemCategories(); track cat.id) {
-          <li class="category-list__item">
-            <span class="category-list__icon">{{ cat.icone }}</span>
-            <span class="category-list__name">{{ cat.nom }}</span>
-            <span
-              class="category-list__color"
-              [style.background-color]="cat.couleur"
-            ></span>
-            <span class="category-list__badge">Système</span>
-          </li>
-        }
-      </ul>
-    </div>
-  }
-
   @if (userCategories().length > 0) {
     <div class="category-group">
-      <h4 class="category-group__label">Mes catégories</h4>
       <ul class="category-list">
         @for (cat of userCategories(); track cat.id) {
           <li class="category-list__item">
@@ -80,7 +60,7 @@
     </div>
   }
 
-  @if (categories().length === 0) {
+  @if (userCategories().length === 0) {
     <div class="state-empty">
       <p>Aucune catégorie</p>
     </div>

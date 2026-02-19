@@ -5,7 +5,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
-## [2.1.0] - 2026-02-19
+## [2.1.1] - 2026-02-20
 
 ### Added
 - Ajustement de solde de compte via endpoint `POST /accounts/{id}/adjust-balance`

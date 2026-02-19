@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import packageJson from '../../../../../../package.json';
 
 @Component({
   selector: 'app-about',
@@ -10,6 +11,6 @@ import { RouterLink } from '@angular/router';
 })
 export class About {
   readonly appName = 'K-Budget';
-  readonly version = '1.2.0';
+  readonly version = packageJson.version;
   readonly author = 'Kelly SOSSOE - KKSDEV';
 }
