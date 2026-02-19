@@ -161,6 +161,7 @@
       <app-account-form
         [account]="$any(modalService.editingEntity())"
         (saved)="onAccountSaved($event)"
+        (balanceAdjusted)="onBalanceAdjusted($event)"
         (cancelled)="onModalClose()"
         (deleted)="onAccountDeleted($event)"
       />

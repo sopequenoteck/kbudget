@@ -4,6 +4,7 @@ import { AccountSummary } from './account.model';
 export enum TransactionType {
   DEPENSE = 'DEPENSE',
   RECETTE = 'RECETTE',
+  AJUSTEMENT = 'AJUSTEMENT',
 }
 
 export interface Transaction {

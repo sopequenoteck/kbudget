@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.AccountRequest;
+import fr.kksdev.budget.api.dto.request.AdjustBalanceRequest;
 import fr.kksdev.budget.api.dto.request.TransferRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
@@ -81,6 +82,16 @@ public class AccountController {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(accountService.transfer(request, userId));
+    }
+
+    @Operation(summary = "Ajuster le solde d'un compte")
+    @PostMapping("/{id}/adjust-balance")
+    public ResponseEntity<AccountResponse> adjustBalance(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdjustBalanceRequest request,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(accountService.adjustBalance(id, request.newBalance(), userId));
     }
 
     @Operation(summary = "Désigner un compte comme compte par défaut")

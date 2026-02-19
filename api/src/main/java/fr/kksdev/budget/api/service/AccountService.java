@@ -222,6 +222,40 @@ public class AccountService {
     }
 
     @Transactional
+    public AccountResponse adjustBalance(UUID accountId, BigDecimal newBalance, UUID userId) {
+        Account account = findByIdAndUser(accountId, userId);
+
+        if (!Boolean.TRUE.equals(account.getActif())) {
+            throw new IllegalArgumentException("Impossible d'ajuster le solde d'un compte inactif");
+        }
+
+        BigDecimal balance = transactionRepository.calculateBalanceByAccountId(accountId);
+        BigDecimal currentBalance = account.getSoldeInitial().add(balance);
+        BigDecimal diff = newBalance.subtract(currentBalance);
+
+        if (diff.compareTo(BigDecimal.ZERO) == 0) {
+            log.info("Ajustement ignoré (solde identique): accountId={}, userId={}", accountId, userId);
+            return toResponse(account);
+        }
+
+        Category adjustmentCategory = categoryService.findOrCreateAdjustmentCategory(userId);
+
+        Transaction adjustment = Transaction.builder()
+                .montant(diff)
+                .libelle("Ajustement de solde")
+                .type(TransactionType.AJUSTEMENT)
+                .date(LocalDate.now())
+                .category(adjustmentCategory)
+                .account(account)
+                .user(userRepository.getReferenceById(userId))
+                .build();
+
+        transactionRepository.save(adjustment);
+        log.info("Solde ajusté: accountId={}, diff={}, userId={}", accountId, diff, userId);
+        return toResponse(account);
+    }
+
+    @Transactional
     public void createDefaultAccount(User user) {
         try {
             Account defaultAccount = Account.builder()

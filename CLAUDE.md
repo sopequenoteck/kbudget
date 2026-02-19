@@ -159,6 +159,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+, Flyway migrations (V1-V7 existantes, V8 pour cette feature) (030-multi-currency)
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter_riverpod, go_router, drift, dio, flutter_secure_storage, local_auth, firebase_crashlytics, freezed, json_serializable (031-flutter-setup)
 - Drift (SQLite local, multi-plateforme), flutter_secure_storage (tokens/PIN), API REST existante (mode serveur) (031-flutter-setup)
+- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Angular 21 (032-balance-adjustment)
+- PostgreSQL 15+ (aucune migration Flyway requise — VARCHAR(50) pour type, NUMERIC(19,2) pour montant) (032-balance-adjustment)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

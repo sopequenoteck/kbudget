@@ -276,4 +276,116 @@ class AccountControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Le compte source est inactif"));
     }
+
+    // --- Adjust Balance tests (T032) ---
+
+    @Test
+    void should_adjustBalance_when_newBalanceHigher() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte Principal", AccountType.COURANT,
+                BigDecimal.ZERO, new BigDecimal("750.00"),
+                "🏦", "#3b82f6", true, true, "EUR");
+
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 750.00 }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.solde").value(750.00));
+    }
+
+    @Test
+    void should_adjustBalance_when_newBalanceLower() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte Principal", AccountType.COURANT,
+                new BigDecimal("500.00"), new BigDecimal("300.00"),
+                "🏦", "#3b82f6", true, true, "EUR");
+
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 300.00 }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.solde").value(300.00));
+    }
+
+    @Test
+    void should_notCreateTransaction_when_sameBalance() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte Principal", AccountType.COURANT,
+                new BigDecimal("500.00"), new BigDecimal("500.00"),
+                "🏦", "#3b82f6", true, true, "EUR");
+
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 500.00 }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.solde").value(500.00));
+    }
+
+    @Test
+    void should_rejectAdjustment_when_accountInactive() throws Exception {
+        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
+                .thenThrow(new IllegalArgumentException("Impossible d'ajuster le solde d'un compte inactif"));
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 750.00 }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Impossible d'ajuster le solde d'un compte inactif"));
+    }
+
+    @Test
+    void should_rejectAdjustment_when_accountNotFound() throws Exception {
+        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
+                .thenThrow(new EntityNotFoundException("Compte non trouvé"));
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 750.00 }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Compte non trouvé"));
+    }
+
+    @Test
+    void should_acceptNegativeBalance() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte Principal", AccountType.COURANT,
+                BigDecimal.ZERO, new BigDecimal("-100.00"),
+                "🏦", "#3b82f6", true, true, "EUR");
+
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": -100.00 }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.solde").value(-100.00));
+    }
 }

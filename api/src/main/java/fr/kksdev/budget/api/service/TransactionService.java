@@ -16,6 +16,7 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,10 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
+        if (request.type() == TransactionType.AJUSTEMENT) {
+            throw new IllegalArgumentException("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance");
+        }
+
         Account account = resolveAccount(request.accountId(), userId);
 
         Transaction transaction = Transaction.builder()
@@ -72,6 +77,11 @@ public class TransactionService {
     public TransactionResponse update(UUID id, TransactionRequest request, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
 
+        if (transaction.getType() == TransactionType.AJUSTEMENT) {
+            log.warn("Tentative de modification d'une transaction d'ajustement: id={}, userId={}", id, userId);
+            throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées");
+        }
+
         // Propager le montant si c'est une transaction de virement
         if (transaction.getTransferId() != null && request.montant().compareTo(transaction.getMontant()) != 0) {
             propagateTransferAmount(transaction, request.montant());
@@ -92,6 +102,11 @@ public class TransactionService {
     @Transactional
     public void delete(UUID id, UUID userId) {
         Transaction transaction = findByIdAndUser(id, userId);
+
+        if (transaction.getType() == TransactionType.AJUSTEMENT) {
+            log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
+            throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées");
+        }
 
         // Cascade delete pour les virements
         if (transaction.getTransferId() != null) {
@@ -138,8 +153,13 @@ public class TransactionService {
                             .map(Transaction::getMontant)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                    BigDecimal totalAjustements = txns.stream()
+                            .filter(t -> t.getType() == TransactionType.AJUSTEMENT)
+                            .map(Transaction::getMontant)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
                     return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
-                            totalRecettes.subtract(totalDepenses), currency);
+                            totalRecettes.subtract(totalDepenses).add(totalAjustements), currency);
                 })
                 .sorted((a, b) -> {
                     // Default currency first, then alphabetical
