@@ -56,4 +56,13 @@
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
   }
+
+  &__link {
+    text-decoration: none;
+    color: var(--text-primary);
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
 }
