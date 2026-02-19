@@ -1,13 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  throw UnimplementedError('Must be overridden with a configured Dio');
+  final dio = ref.watch(authenticatedDioProvider);
+  return AuthRemoteDataSource(dio);
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

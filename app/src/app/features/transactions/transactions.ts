@@ -118,10 +118,12 @@ export class Transactions {
   }
 
   getValueClass(transaction: Transaction): string {
+    if (transaction.type === TransactionType.AJUSTEMENT) return 'amount-adjustment';
     return transaction.type === TransactionType.RECETTE ? 'amount-income' : 'amount-expense';
   }
 
   onTransactionPressed(transaction: Transaction): void {
+    if (transaction.type === TransactionType.AJUSTEMENT) return;
     this.modalService.openModal('transaction', transaction);
   }
 }

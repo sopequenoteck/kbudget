@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
@@ -92,6 +94,32 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> hasValidToken() async {
     final token = await getAccessToken();
-    return token != null && token.isNotEmpty;
+    if (token == null || token.isEmpty) return false;
+    return !_isTokenExpired(token);
+  }
+
+  /// Décode le payload JWT (base64) et vérifie le claim `exp`.
+  /// Retourne `true` si le token est expiré ou malformé.
+  /// Marge de sécurité de 30 secondes pour éviter les race conditions.
+  bool _isTokenExpired(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+
+      // Le payload JWT est en base64url — normaliser le padding
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final map = jsonDecode(decoded) as Map<String, dynamic>;
+
+      final exp = map['exp'] as int?;
+      if (exp == null) return true;
+
+      // exp est en secondes Unix, on ajoute 30s de marge
+      final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      return DateTime.now().isAfter(expiry.subtract(const Duration(seconds: 30)));
+    } on Exception {
+      return true;
+    }
   }
 }

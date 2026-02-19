@@ -18,6 +18,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -197,5 +199,44 @@ class TransactionControllerTest {
     void should_return_401_when_no_token() throws Exception {
         mockMvc.perform(get("/transactions"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    // --- Immutability & creation guard tests (T032) ---
+
+    @Test
+    void should_return403_when_updatingAdjustmentTransaction() throws Exception {
+        when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
+                .thenThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées"));
+
+        mockMvc.perform(put("/transactions/{id}", transactionId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transactionJson("100.00", "Test", "DEPENSE", "2026-02-19")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent pas être modifiées"));
+    }
+
+    @Test
+    void should_return403_when_deletingAdjustmentTransaction() throws Exception {
+        doThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées"))
+                .when(transactionService).delete(transactionId, userId);
+
+        mockMvc.perform(delete("/transactions/{id}", transactionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent pas être supprimées"));
+    }
+
+    @Test
+    void should_return400_when_creatingAdjustmentDirectly() throws Exception {
+        when(transactionService.create(any(TransactionRequest.class), eq(userId)))
+                .thenThrow(new IllegalArgumentException("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
+
+        mockMvc.perform(post("/transactions")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transactionJson("250.00", "Ajustement", "AJUSTEMENT", "2026-02-19")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
     }
 }

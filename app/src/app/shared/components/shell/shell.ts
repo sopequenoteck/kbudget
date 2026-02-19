@@ -258,6 +258,13 @@ export class Shell {
     this.modalService.closeModal();
   }
 
+  async onBalanceAdjusted(newBalance: number): Promise<void> {
+    const editing = this.modalService.editingEntity() as Account | null;
+    if (editing) {
+      await firstValueFrom(this.accountService.adjustBalance(editing.id, newBalance));
+    }
+  }
+
   onTransferSaved(): void {
     this.transactionService.refreshTrigger.update((v) => v + 1);
     this.modalService.closeModal();

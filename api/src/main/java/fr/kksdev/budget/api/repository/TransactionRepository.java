@@ -16,7 +16,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByUserIdAndDateBetweenOrderByDateDesc(UUID userId, LocalDate from, LocalDate to);
 
-    @Query(value = "SELECT COALESCE(SUM(CASE WHEN t.type = 'RECETTE' THEN t.montant ELSE -t.montant END), 0) " +
+    @Query(value = "SELECT COALESCE(SUM(CASE WHEN t.type = 'RECETTE' THEN t.montant " +
+            "WHEN t.type = 'AJUSTEMENT' THEN t.montant ELSE -t.montant END), 0) " +
             "FROM transactions t WHERE t.account_id = :accountId", nativeQuery = true)
     BigDecimal calculateBalanceByAccountId(@Param("accountId") UUID accountId);
 

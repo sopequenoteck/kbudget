@@ -88,6 +88,18 @@
     }
 
     @if (isEditMode()) {
+      <div class="account-form__balance-info">
+        <span class="account-form__label">Solde actuel</span>
+        <span class="account-form__balance-value">{{ account()?.solde }} {{ account()?.currency }}</span>
+      </div>
+
+      <app-form-field label="Nouveau solde" fieldId="newBalance">
+        <div class="amount-input-wrapper">
+          <input id="newBalance" type="text" inputmode="decimal" formControlName="newBalance" placeholder="Nouveau solde" />
+          <span class="amount-input-wrapper__suffix">{{ account()?.currency }}</span>
+        </div>
+      </app-form-field>
+
       <label class="checkbox-field" [class.disabled]="!canDeactivate()">
         <input type="checkbox" formControlName="actif" [attr.disabled]="canDeactivate() ? null : true" />
         Compte actif

@@ -126,6 +126,25 @@ public class CategoryService {
         }
     }
 
+    @Transactional
+    public Category findOrCreateAdjustmentCategory(UUID userId) {
+        Category existing = findSystemCategoryByNom("Ajustement", userId);
+        if (existing != null) {
+            return existing;
+        }
+
+        Category ajustement = Category.builder()
+                .nom("Ajustement")
+                .icone("⚖️")
+                .couleur("#6b7280")
+                .isSystem(true)
+                .user(userRepository.getReferenceById(userId))
+                .build();
+        ajustement = categoryRepository.save(ajustement);
+        log.info("Catégorie système 'Ajustement' créée pour userId {}", userId);
+        return ajustement;
+    }
+
     public Category findSystemCategoryByNom(String nom, UUID userId) {
         return categoryRepository.findByNomIgnoreCaseAndUserId(nom, userId)
                 .filter(c -> Boolean.TRUE.equals(c.getIsSystem()))

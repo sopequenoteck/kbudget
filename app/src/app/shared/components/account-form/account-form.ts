@@ -54,6 +54,7 @@ export class AccountForm {
 
   readonly account = input<Account | null>(null);
   readonly saved = output<AccountRequest>();
+  readonly balanceAdjusted = output<number>();
   readonly cancelled = output<void>();
   readonly deleted = output<string>();
 
@@ -81,6 +82,7 @@ export class AccountForm {
     couleur: ['#3b82f6'],
     actif: [true],
     currency: [''],
+    newBalance: [''],
   });
 
   readonly selectedCurrency = computed(() => {
@@ -104,6 +106,7 @@ export class AccountForm {
         this.selectedType.set(acc.type);
         this.selectedEmoji.set(acc.icone);
         this.selectedColor.set(acc.couleur);
+        this.form.patchValue({ newBalance: String(acc.solde) });
         this.form.get('type')!.disable();
       } else {
         this.form.get('type')!.enable();
@@ -151,6 +154,14 @@ export class AccountForm {
     }
 
     this.saved.emit(request);
+
+    const acc = this.account();
+    if (acc) {
+      const newBalance = Number(raw.newBalance);
+      if (!isNaN(newBalance) && newBalance !== acc.solde) {
+        this.balanceAdjusted.emit(newBalance);
+      }
+    }
   }
 
   onCancel(): void {

@@ -3,6 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/utils/env_config.dart';
 
+/// Dio brut sans intercepteurs d'auth.
+/// Utilisé pour les appels publics (health check, etc.).
+/// Pour les appels authentifiés, utiliser [authenticatedDioProvider]
+/// dans data_mode_provider.dart.
 final apiClientProvider = Provider<Dio>((ref) {
   return Dio(BaseOptions(
     baseUrl: EnvConfig.apiBaseUrl,

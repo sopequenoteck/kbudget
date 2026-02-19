@@ -194,6 +194,22 @@
   }
 }
 
+// Balance adjustment
+.account-form__balance-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.account-form__balance-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
 // Section 5 : Actions
 .form-actions {
   display: flex;

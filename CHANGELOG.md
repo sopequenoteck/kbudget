@@ -5,6 +5,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-02-19
+
+### Added
+- Ajustement de solde de compte via endpoint `POST /accounts/{id}/adjust-balance`
+- Nouveau type de transaction `AJUSTEMENT` (immuable, non modifiable/supprimable)
+- Catégorie système "Ajustement" auto-créée
+- Handler `AccessDeniedException` (403) dans le GlobalExceptionHandler
+- Champ "nouveau solde" dans le formulaire d'édition de compte (frontend)
+- Style dédié pour les transactions d'ajustement dans la liste
+
 ## [2.0.0] - 2026-02-18
 
 ### Added

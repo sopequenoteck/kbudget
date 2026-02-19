@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
@@ -11,6 +13,15 @@ import 'package:mockito/mockito.dart';
   MockSpec<FlutterSecureStorage>(),
 ])
 import 'auth_repository_impl_test.mocks.dart';
+
+/// Génère un JWT factice avec le claim `exp` donné.
+/// Ne signe pas le token (pas nécessaire pour le décodage côté client).
+String _buildFakeJwt({required int exp}) {
+  final header = base64Url.encode(utf8.encode('{"alg":"HS256","typ":"JWT"}'));
+  final payload = base64Url.encode(utf8.encode('{"sub":"test@test.fr","exp":$exp}'));
+  const signature = 'fake-signature';
+  return '$header.$payload.$signature';
+}
 
 void main() {
   late MockAuthRemoteDataSource mockDataSource;
@@ -122,23 +133,49 @@ void main() {
       verify(mockStorage.delete(key: 'access_token')).called(1);
       verify(mockStorage.delete(key: 'refresh_token')).called(1);
     });
+  });
 
-    test('should_returnTrue_when_tokenExists', () async {
-      when(mockStorage.read(key: 'access_token'))
-          .thenAnswer((_) async => 'some-token');
+  group('hasValidToken', () {
+    test('should_returnFalse_when_noTokenStored', () async {
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => null);
 
-      final result = await repository.hasValidToken();
-
-      expect(result, true);
+      expect(await repository.hasValidToken(), isFalse);
     });
 
-    test('should_returnFalse_when_noToken', () async {
-      when(mockStorage.read(key: 'access_token'))
-          .thenAnswer((_) async => null);
+    test('should_returnFalse_when_tokenIsEmpty', () async {
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => '');
 
-      final result = await repository.hasValidToken();
+      expect(await repository.hasValidToken(), isFalse);
+    });
 
-      expect(result, false);
+    test('should_returnFalse_when_tokenIsExpired', () async {
+      final expiredExp = DateTime.now().subtract(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+      final token = _buildFakeJwt(exp: expiredExp);
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => token);
+
+      expect(await repository.hasValidToken(), isFalse);
+    });
+
+    test('should_returnFalse_when_tokenExpiresWithin30Seconds', () async {
+      final soonExp = DateTime.now().add(const Duration(seconds: 15)).millisecondsSinceEpoch ~/ 1000;
+      final token = _buildFakeJwt(exp: soonExp);
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => token);
+
+      expect(await repository.hasValidToken(), isFalse);
+    });
+
+    test('should_returnTrue_when_tokenIsValid', () async {
+      final validExp = DateTime.now().add(const Duration(minutes: 10)).millisecondsSinceEpoch ~/ 1000;
+      final token = _buildFakeJwt(exp: validExp);
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => token);
+
+      expect(await repository.hasValidToken(), isTrue);
+    });
+
+    test('should_returnFalse_when_tokenIsMalformed', () async {
+      when(mockStorage.read(key: 'access_token')).thenAnswer((_) async => 'not-a-jwt');
+
+      expect(await repository.hasValidToken(), isFalse);
     });
   });
 }

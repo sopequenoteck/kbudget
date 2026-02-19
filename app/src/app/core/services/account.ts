@@ -46,4 +46,10 @@ export class AccountService {
       .post<TransferResponse>('/accounts/transfer', request)
       .pipe(tap(() => this.refresh()));
   }
+
+  adjustBalance(id: string, newBalance: number): Observable<Account> {
+    return this.api
+      .post<Account>(`/accounts/${id}/adjust-balance`, { newBalance })
+      .pipe(tap(() => this.refresh()));
+  }
 }
