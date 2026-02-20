@@ -39,6 +39,9 @@ dependencies:
   # Crypto
   crypto: ^3.0.6
 
+  # SVG
+  flutter_svg: ^2.0.17
+
   # Utils
   uuid: ^4.5.1
   freezed_annotation: ^2.4.4
@@ -68,6 +71,7 @@ flutter:
 
   assets:
     - assets/fonts/Inter/
+    - assets/budget-icon-no-background.svg
 
   fonts:
     - family: Inter
