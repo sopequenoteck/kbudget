@@ -163,6 +163,7 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (aucune migration Flyway requise — VARCHAR(50) pour type, NUMERIC(19,2) pour montant) (032-balance-adjustment)
 - Dart >= 3.11 / Flutter >= 3.27 (stable) + flutter (SDK), shimmer ^3.0.0 (pour skeleton P3) (033-flutter-listitem-widget)
 - N/A (widget UI pur, pas de persistance) (033-flutter-listitem-widget)
+- Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK) (035-flutter-formfield-widget)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
