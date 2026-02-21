@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
-import 'package:k_budget/src/constants/app_radius.dart';
-import 'package:k_budget/src/constants/app_spacing.dart';
-import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 
 Future<void> pumpSelectPicker(
