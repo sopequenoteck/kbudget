@@ -255,8 +255,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.light,
-            home: Scaffold(
-              body: const Column(
+            home: const Scaffold(
+              body: Column(
                 children: [
                   AppFormField(
                     label: 'Montant',
