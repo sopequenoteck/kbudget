@@ -166,6 +166,8 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter_riverpod, go_router, flutter_secure_storage, dio, freezed (034-flutter-settings-hub)
 - FlutterSecureStorage (AppConfig : dataMode, serverUrl), Drift (SQLite local) (034-flutter-settings-hub)
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK) (035-flutter-formfield-widget)
+- Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter_riverpod ^2.6.1, go_router ^14.8.1, freezed_annotation ^2.4.4 (036-flutter-modal-system)
+- N/A (composant UI pur, pas de persistance) (036-flutter-modal-system)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

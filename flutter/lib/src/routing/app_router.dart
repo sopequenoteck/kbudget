@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
+import 'package:k_budget/src/common_widgets/app_modal.dart';
+import 'package:k_budget/src/common_widgets/app_toggle.dart';
 import 'package:k_budget/src/common_widgets/fab_menu.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/modal/application/modal_state.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
@@ -191,11 +195,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class _ShellScaffold extends StatelessWidget {
+class _ShellScaffold extends ConsumerStatefulWidget {
   final Widget child;
 
   const _ShellScaffold({required this.child});
 
+  @override
+  ConsumerState<_ShellScaffold> createState() => _ShellScaffoldState();
+}
+
+class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
   static const _paths = [
     RouteNames.dashboard,
     RouteNames.transactions,
@@ -203,10 +212,18 @@ class _ShellScaffold extends StatelessWidget {
     RouteNames.debts,
   ];
 
+  bool _isModalShowing = false;
+
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = _paths.indexOf(location).clamp(0, _paths.length - 1);
+
+    ref.listen<ModalState>(modalNotifierProvider, (previous, next) {
+      if (next is ModalOpen && !_isModalShowing) {
+        _showModal(context, next);
+      }
+    });
 
     return AdaptiveScaffold(
       currentIndex: currentIndex,
@@ -214,7 +231,65 @@ class _ShellScaffold extends StatelessWidget {
         context.go(_paths[index]);
       },
       floatingActionButton: const FabMenu(),
-      body: child,
+      body: widget.child,
+    );
+  }
+
+  void _showModal(BuildContext context, ModalOpen state) {
+    _isModalShowing = true;
+    final notifier = ref.read(modalNotifierProvider.notifier);
+
+    Widget? headerActions;
+    if (state.type.hasToggle) {
+      final values = state.type.toggleValues!;
+      final selectedIndex = values.indexOf(state.subType);
+
+      headerActions = _ModalToggle(
+        type: state.type,
+        initialIndex: selectedIndex.clamp(0, 1),
+      );
+    }
+
+    AppModal.show(
+      context,
+      title: state.type.title(state.mode),
+      headerActions: headerActions,
+      onClose: () {
+        _isModalShowing = false;
+        notifier.close();
+      },
+      child: const SizedBox.shrink(),
+    ).then((_) {
+      // Modal dismissed via swipe/overlay tap
+      if (_isModalShowing) {
+        _isModalShowing = false;
+        notifier.close();
+      }
+    });
+  }
+}
+
+class _ModalToggle extends ConsumerWidget {
+  final ModalType type;
+  final int initialIndex;
+
+  const _ModalToggle({required this.type, required this.initialIndex});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    final labels = type.toggleLabels!;
+    final values = type.toggleValues!;
+    final selectedIndex = values.indexOf(modalState.subType).clamp(0, 1);
+
+    return AppToggle(
+      labels: labels,
+      selectedIndex: selectedIndex,
+      onChanged: (index) {
+        ref.read(modalNotifierProvider.notifier).setSubType(values[index]);
+      },
     );
   }
 }

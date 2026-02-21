@@ -91,7 +91,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
           TextField(
             controller: _urlController,
             decoration: InputDecoration(
-              hintText: 'https://budget.example.com/api',
+              hintText: 'https://budget.kksdev.fr/api',
               prefixIcon: const Icon(Icons.link),
               errorText: state.error,
               border: const OutlineInputBorder(),

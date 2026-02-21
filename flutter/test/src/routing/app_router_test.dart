@@ -134,7 +134,8 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationRail), findsOneWidget);
+      // Wide layout uses a custom sidebar with VerticalDivider, not NavigationRail
+      expect(find.byType(VerticalDivider), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsNothing);
     });
   });

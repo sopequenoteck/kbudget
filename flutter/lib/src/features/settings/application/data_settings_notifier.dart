@@ -77,7 +77,9 @@ class DataSettingsNotifier extends Notifier<DataSettingsState> {
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ));
-      final response = await dio.head(url);
+      final healthUrl =
+          url.endsWith('/') ? '${url}actuator/health' : '$url/actuator/health';
+      final response = await dio.get(healthUrl);
       final isReachable =
           response.statusCode != null && response.statusCode! < 500;
       state = state.copyWith(
@@ -86,10 +88,24 @@ class DataSettingsNotifier extends Notifier<DataSettingsState> {
         clearError: isReachable,
       );
       return isReachable;
-    } on DioException {
+    } on DioException catch (e) {
+      final String errorMsg;
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMsg = 'Délai de connexion dépassé';
+      } else if (e.response?.statusCode == 401 ||
+          e.response?.statusCode == 403) {
+        errorMsg = 'Accès refusé par le serveur';
+      } else if (e.response?.statusCode == 404) {
+        errorMsg = 'Endpoint introuvable — vérifiez l\'URL';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMsg = 'Impossible de joindre le serveur';
+      } else {
+        errorMsg = 'Serveur injoignable';
+      }
       state = state.copyWith(
         isLoading: false,
-        error: 'Serveur injoignable',
+        error: errorMsg,
       );
       return false;
     }
