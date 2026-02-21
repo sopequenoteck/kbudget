@@ -170,6 +170,7 @@ Approche **signals-first** obligatoire :
 - N/A (composant UI pur, pas de persistance) (036-flutter-modal-system)
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK), intl (déjà présent via flutter_localizations) (037-flutter-monthselector-widget)
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK), AppModal (feature 036), design tokens existants (039-flutter-selectpicker-widget)
+- Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK), SelectPicker (feature 039), AppModal (feature 036) (040-flutter-categorypicker-widget)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
