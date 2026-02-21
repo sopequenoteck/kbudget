@@ -14,7 +14,9 @@ import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
-import 'package:k_budget/src/features/settings/presentation/settings_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
 import 'package:k_budget/src/routing/route_names.dart';
@@ -147,7 +149,43 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.settings,
         name: RouteNames.settingsName,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
+        builder: (context, state) => const SettingsHubScreen(),
+        routes: [
+          GoRoute(
+            path: RouteNames.settingsProfile,
+            name: RouteNames.settingsProfileName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const StubSettingsScreen(title: 'Profil'),
+          ),
+          GoRoute(
+            path: RouteNames.settingsAppearance,
+            name: RouteNames.settingsAppearanceName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const StubSettingsScreen(title: 'Apparence'),
+          ),
+          GoRoute(
+            path: RouteNames.settingsAccounts,
+            name: RouteNames.settingsAccountsName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const StubSettingsScreen(title: 'Comptes'),
+          ),
+          GoRoute(
+            path: RouteNames.settingsCategories,
+            name: RouteNames.settingsCategoriesName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const StubSettingsScreen(title: 'Catégories'),
+          ),
+          GoRoute(
+            path: RouteNames.settingsData,
+            name: RouteNames.settingsDataName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const DataSettingsScreen(),
+          ),
+        ],
       ),
     ],
   );
