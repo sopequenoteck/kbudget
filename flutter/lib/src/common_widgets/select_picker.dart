@@ -32,6 +32,7 @@ class SelectPicker extends FormField<String?> {
   final int searchThreshold;
   final String emptyMessage;
   final ValueChanged<String>? onSearchChanged;
+  final Widget Function(String searchTerm)? emptyActionBuilder;
 
   SelectPicker({
     super.key,
@@ -45,6 +46,7 @@ class SelectPicker extends FormField<String?> {
     this.searchThreshold = 5,
     this.emptyMessage = 'Aucun résultat',
     this.onSearchChanged,
+    this.emptyActionBuilder,
     super.validator,
     super.onSaved,
     super.autovalidateMode,
@@ -82,8 +84,12 @@ class _SelectPickerState extends FormFieldState<String?> {
 
     // Auto-reset if selected item no longer exists (FR-011)
     if (value != null && !widget.items.any((item) => item.id == value)) {
-      didChange(null);
-      widget.onChanged?.call(null);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          didChange(null);
+          widget.onChanged?.call(null);
+        }
+      });
     }
   }
 
@@ -170,6 +176,9 @@ class _SelectPickerState extends FormFieldState<String?> {
             .toList();
 
     if (filteredItems.isEmpty) {
+      if (widget.emptyActionBuilder != null) {
+        return widget.emptyActionBuilder!(searchQuery);
+      }
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.space6),

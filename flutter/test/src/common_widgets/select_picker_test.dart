@@ -797,6 +797,93 @@ void main() {
     );
   });
 
+  // --- emptyActionBuilder (T002) ---
+  group('emptyActionBuilder', () {
+    final manyItems = List.generate(
+      10,
+      (i) => SelectPickerItem(id: '$i', label: 'Item $i'),
+    );
+
+    testWidgets(
+      'should_renderBuilder_when_emptyActionBuilderProvidedAndListEmpty',
+      (tester) async {
+        await pumpSelectPicker(
+          tester,
+          SelectPicker(
+            label: 'Test',
+            items: manyItems,
+            onChanged: (_) {},
+            emptyActionBuilder: (searchTerm) => Text('Créer « $searchTerm »'),
+          ),
+        );
+
+        // Open modal
+        await tester.tap(find.text('Sélectionner...'));
+        await tester.pumpAndSettle();
+
+        // Type a search term that yields no results
+        await tester.enterText(find.byType(TextField), 'zzzzz');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Créer « zzzzz »'), findsOneWidget);
+        expect(find.text('Aucun résultat'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should_showEmptyMessage_when_noEmptyActionBuilderAndListEmpty',
+      (tester) async {
+        await pumpSelectPicker(
+          tester,
+          SelectPicker(
+            label: 'Test',
+            items: manyItems,
+            emptyMessage: 'Rien trouvé',
+            onChanged: (_) {},
+          ),
+        );
+
+        // Open modal
+        await tester.tap(find.text('Sélectionner...'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'zzzzz');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Rien trouvé'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_passSearchTerm_when_emptyActionBuilderCalled',
+      (tester) async {
+        String? receivedTerm;
+
+        await pumpSelectPicker(
+          tester,
+          SelectPicker(
+            label: 'Test',
+            items: manyItems,
+            onChanged: (_) {},
+            emptyActionBuilder: (searchTerm) {
+              receivedTerm = searchTerm;
+              return Text('Action: $searchTerm');
+            },
+          ),
+        );
+
+        await tester.tap(find.text('Sélectionner...'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'Voyages');
+        await tester.pumpAndSettle();
+
+        expect(receivedTerm, 'Voyages');
+        expect(find.text('Action: Voyages'), findsOneWidget);
+      },
+    );
+  });
+
   // --- Edge Cases & Polish (T018) ---
   group('Edge Cases & Polish', () {
     testWidgets(
