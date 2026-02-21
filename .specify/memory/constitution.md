@@ -90,9 +90,9 @@ spéculatives.
 
 ### IV. Mobile-First UX
 
-Le frontend DOIT être une PWA Angular optimisée pour un
-usage mobile quotidien. L'expérience de saisie rapide est
-la priorité absolue.
+Les frontends (PWA Angular et app Flutter) DOIVENT être
+optimisés pour un usage mobile quotidien. L'expérience de
+saisie rapide est la priorité absolue.
 
 - Saisie d'une dépense en 2-3 interactions maximum
 - Le bouton flottant (+) DOIT être accessible sur tous les
@@ -102,7 +102,7 @@ la priorité absolue.
 - Le design DOIT être responsive mais optimisé mobile
   en priorité
 - Les interactions DOIVENT fonctionner offline quand possible
-  (PWA service worker)
+  (PWA service worker côté Angular, SQLite local côté Flutter)
 
 ### V. Testabilité
 
