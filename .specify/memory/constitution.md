@@ -1,24 +1,24 @@
 <!--
   Sync Impact Report
   ==================================================
-  Version change: 1.0.0 → 2.0.0 (MAJOR — redéfinition complète)
-  Bump rationale: Redéfinition totale des principes (5 → 7),
-    ajout de 2 nouveaux principes (Testabilité, Observabilité),
-    réorganisation des sections. Constitue un changement
-    incompatible avec la v1.
+  Version change: 2.0.0 → 2.1.0 (MINOR — ajout stack Flutter)
+  Bump rationale: Expansion matérielle de la section Contraintes
+    techniques et Workflow de développement pour inclure le module
+    Flutter (Dart, Riverpod, Drift, Freezed, go_router). Aucun
+    principe modifié ou supprimé.
 
-  Modified principles:
-    - I. API-First (conservé, affiné)
-    - II. Sécurité par défaut (conservé, affiné)
-    - III. Simplicité & YAGNI (conservé, affiné)
-    - IV. Mobile-First UX (conservé, affiné)
-    - VII. Self-Hosted Ready (conservé, déplacé en VII)
+  Modified principles: aucun (les 7 principes restent identiques)
 
-  Added principles:
-    - V. Testabilité (NOUVEAU)
-    - VI. Observabilité (NOUVEAU)
+  Modified sections:
+    - Contraintes techniques: scindée en 3 sous-sections
+      (Backend, Frontend PWA, Mobile natif)
+    - Workflow de développement: inchangé (déjà générique)
 
-  Added sections: aucune (sections existantes conservées)
+  Added sections:
+    - Contraintes techniques > Frontend PWA (app/) — extrait
+      de l'ancien bloc monolithique
+    - Contraintes techniques > Mobile natif (flutter/) — NOUVEAU
+
   Removed sections: aucune
 
   Templates requiring updates:
@@ -27,7 +27,6 @@
     - .specify/templates/spec-template.md ✅ compatible
     - .specify/templates/tasks-template.md ✅ compatible
     - .specify/templates/checklist-template.md ✅ compatible
-    - .specify/templates/agent-file-template.md ✅ compatible
 
   Follow-up TODOs: none
   ==================================================
@@ -155,19 +154,50 @@ sans dépendance à des services cloud externes.
 
 ## Contraintes techniques
 
+### Backend (api/)
+
 - **Langage** : Java 21
 - **Framework** : Spring Boot 4.x
 - **Build** : Maven
 - **Base de données** : PostgreSQL 15+
 - **ORM** : Spring Data JPA (Hibernate)
 - **Auth** : Spring Security + JWT (jjwt)
-- **Frontend** : Angular PWA
 - **Tests** : JUnit 5 + Spring Boot Test + Mockito
 - **Logging** : SLF4J / Logback
 - **Package base** : `fr.kksdev.budget.api`
 - **Structure** : `config/`, `controller/`, `service/`,
   `repository/`, `model/`, `dto/`, `enums/`
 - **DDL dev** : `create-drop` — **DDL prod** : `validate`
+
+### Frontend PWA (app/)
+
+- **Framework** : Angular 21+
+- **Langage** : TypeScript 5.9
+- **Styles** : SCSS avec design tokens (`var(--token)`)
+- **State** : Signals-first (`signal()`, `computed()`,
+  `effect()`)
+- **Composants** : Standalone, `ChangeDetectionStrategy.OnPush`
+- **DI** : `inject()` uniquement (pas de constructor injection)
+- **RxJS** : Limité aux flux HTTP et opérateurs complexes
+- **Linting** : ESLint + Prettier
+
+### Mobile natif (flutter/)
+
+- **Langage** : Dart >= 3.6
+- **Framework** : Flutter >= 3.27 (stable)
+- **State management** : flutter_riverpod
+- **Routing** : go_router
+- **Base de données locale** : Drift (SQLite)
+- **HTTP** : Dio
+- **Secure storage** : flutter_secure_storage
+- **Models** : Freezed + json_serializable
+- **Tests** : flutter_test + Mockito
+- **Code generation** : build_runner (Drift, Freezed, JSON)
+- **Structure** : `common_widgets/`, `constants/`, `data/`,
+  `domain/`, `features/`, `localization/`, `routing/`,
+  `theme/`, `utils/`
+- **Data mode** : local-first (Drift/SQLite) avec sync
+  optionnelle vers l'API REST via Dio
 
 ## Workflow de développement
 
@@ -204,4 +234,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 2.0.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-02-07
+**Version**: 2.1.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-02-22
