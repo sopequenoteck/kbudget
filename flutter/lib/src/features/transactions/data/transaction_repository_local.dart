@@ -56,7 +56,7 @@ class TransactionRepositoryLocal implements TransactionRepository {
       final total = row['total'] as double;
       if (type == 'recette') {
         totalRecettes = total;
-      } else {
+      } else if (type == 'depense') {
         totalDepenses = total;
       }
     }

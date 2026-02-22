@@ -3,16 +3,7 @@ import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
-
-Color? _parseHexColor(String hex) {
-  if (hex.isEmpty) return null;
-  var cleaned = hex.replaceFirst('#', '');
-  if (cleaned.length == 6) {
-    cleaned = 'FF$cleaned';
-  }
-  final value = int.tryParse(cleaned, radix: 16);
-  return value != null ? Color(value) : null;
-}
+import 'package:k_budget/src/utils/color_utils.dart';
 
 class CategoryPicker extends StatelessWidget {
   final List<Category> categories;
@@ -51,7 +42,7 @@ class CategoryPicker extends StatelessWidget {
             id: c.id,
             label: c.nom,
             icon: c.icone,
-            color: _parseHexColor(c.couleur),
+            color: parseHexColor(c.couleur),
           ))
       .toList();
 

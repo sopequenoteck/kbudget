@@ -20,7 +20,9 @@ class MonthlySummarySection extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final colors = theme.extension<AppThemeExtension>()!;
 
-    if (state.isLoading) return const _SummarySkeleton();
+    if (state.isLoading || state.isSummaryLoading) {
+      return const _SummarySkeleton();
+    }
 
     // Prendre le premier summary (devise par defaut)
     final summary = state.monthlySummaries.isNotEmpty

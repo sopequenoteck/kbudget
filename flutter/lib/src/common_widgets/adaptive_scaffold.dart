@@ -10,7 +10,7 @@ class AdaptiveScaffold extends StatefulWidget {
 
   static const double _breakpoint = 768;
 
-  static const List<_Destination> destinations = [
+  static const List<_Destination> _destinations = [
     _Destination(
       icon: Icons.home_outlined,
       selectedIcon: Icons.home,
@@ -103,7 +103,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: widget.currentIndex,
         onTap: widget.onDestinationSelected,
-        items: AdaptiveScaffold.destinations
+        items: AdaptiveScaffold._destinations
             .map(
               (d) => BottomNavigationBarItem(
                 icon: Icon(d.icon),
@@ -165,7 +165,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 children: [
                   const SizedBox(height: 8),
                   // Navigation items
-                  ...AdaptiveScaffold.destinations.asMap().entries.map(
+                  ...AdaptiveScaffold._destinations.asMap().entries.map(
                         (entry) => _buildSidebarItem(
                           theme,
                           entry.value,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
@@ -14,6 +16,11 @@ import '../../helpers/mocks.mocks.dart';
 void main() {
   late MockAppConfigRepository mockRepo;
   late MockAuthRepository mockAuthRepo;
+  late MockAccountRepository mockAccountRepo;
+  late MockTransactionRepository mockTransactionRepo;
+  late MockSubscriptionRepository mockSubscriptionRepo;
+  late MockDebtRepository mockDebtRepo;
+  late MockCategoryRepository mockCategoryRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -23,6 +30,19 @@ void main() {
   setUp(() {
     mockRepo = MockAppConfigRepository();
     mockAuthRepo = MockAuthRepository();
+    mockAccountRepo = MockAccountRepository();
+    mockTransactionRepo = MockTransactionRepository();
+    mockSubscriptionRepo = MockSubscriptionRepository();
+    mockDebtRepo = MockDebtRepository();
+    mockCategoryRepo = MockCategoryRepository();
+
+    when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
+    when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
+    when(mockTransactionRepo.getMonthlySummary(any, any))
+        .thenAnswer((_) async => []);
+    when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
+    when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
+    when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
@@ -30,6 +50,12 @@ void main() {
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
         authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        accountRepositoryProvider.overrideWithValue(mockAccountRepo),
+        transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
+        subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
+        debtRepositoryProvider.overrideWithValue(mockDebtRepo),
+        categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+        currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],
       child: Consumer(

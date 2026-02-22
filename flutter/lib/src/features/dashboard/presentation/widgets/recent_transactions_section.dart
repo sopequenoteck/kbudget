@@ -9,6 +9,7 @@ import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.d
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecentTransactionsSection extends ConsumerWidget {
@@ -68,7 +69,7 @@ class RecentTransactionsSection extends ConsumerWidget {
 
             return ListItem(
               icon: category?.icone ?? '💰',
-              iconBackgroundColor: _parseHexColor(category?.couleur),
+              iconBackgroundColor: parseHexColor(category?.couleur),
               title: transaction.libelle,
               value: AmountFormatter.format(
                 transaction.montant,
@@ -82,14 +83,6 @@ class RecentTransactionsSection extends ConsumerWidget {
           }),
       ],
     );
-  }
-
-  static Color? _parseHexColor(String? hex) {
-    if (hex == null || hex.isEmpty) return null;
-    var cleaned = hex.replaceFirst('#', '');
-    if (cleaned.length == 6) cleaned = 'FF$cleaned';
-    final value = int.tryParse(cleaned, radix: 16);
-    return value != null ? Color(value) : null;
   }
 
   Widget _buildSkeleton() {

@@ -6,8 +6,8 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
-import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HeroAccountSection extends ConsumerWidget {
@@ -43,7 +43,7 @@ class HeroAccountSection extends ConsumerWidget {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => context.go(RouteNames.settings),
+              onPressed: () => context.push('/settings/accounts'),
               child: const Text('Voir tout'),
             ),
           ),
@@ -65,60 +65,56 @@ class _HeroCard extends StatelessWidget {
 
     final solde = account.solde;
 
-    return GestureDetector(
-      onTap: () => context.go(RouteNames.transactions),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.space5),
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: AppSpacing.space12,
-                  height: AppSpacing.space12,
-                  decoration: BoxDecoration(
-                    color: Color(
-                        int.parse('0xFF${account.couleur.replaceAll('#', '')}')),
-                    borderRadius: BorderRadius.circular(AppRadius.round),
-                  ),
-                  child: Center(
-                    child: Text(
-                      account.icone,
-                      style:
-                          const TextStyle(fontSize: AppTypography.sizeXl),
-                    ),
-                  ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.space5),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: AppSpacing.space12,
+                height: AppSpacing.space12,
+                decoration: BoxDecoration(
+                  color: parseHexColor(account.couleur) ?? colorScheme.primary,
+                  borderRadius: BorderRadius.circular(AppRadius.round),
                 ),
-                const SizedBox(width: AppSpacing.space3),
-                Expanded(
+                child: Center(
                   child: Text(
-                    account.nom,
-                    style: TextStyle(
-                      fontSize: AppTypography.sizeLg,
-                      fontWeight: AppTypography.semiBold,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
+                    account.icone,
+                    style:
+                        const TextStyle(fontSize: AppTypography.sizeXl),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.space3),
-            Text(
-              AmountFormatter.format(solde, currency: account.currency),
-              style: TextStyle(
-                fontSize: AppTypography.size3xl,
-                fontWeight: AppTypography.bold,
-                color: colorScheme.onPrimaryContainer,
               ),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Text(
+                  account.nom,
+                  style: TextStyle(
+                    fontSize: AppTypography.sizeLg,
+                    fontWeight: AppTypography.semiBold,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.space3),
+          Text(
+            AmountFormatter.format(solde, currency: account.currency),
+            style: TextStyle(
+              fontSize: AppTypography.size3xl,
+              fontWeight: AppTypography.bold,
+              color: colorScheme.onPrimaryContainer,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -134,55 +130,50 @@ class _AccountRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return InkWell(
-      onTap: () => context.go(RouteNames.transactions),
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.space2,
-          horizontal: AppSpacing.space1,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: AppSpacing.space9,
-              height: AppSpacing.space9,
-              decoration: BoxDecoration(
-                color: Color(
-                    int.parse('0xFF${account.couleur.replaceAll('#', '')}')),
-                borderRadius: BorderRadius.circular(AppRadius.round),
-              ),
-              child: Center(
-                child: Text(
-                  account.icone,
-                  style: const TextStyle(fontSize: AppTypography.sizeMd),
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.space2,
+        horizontal: AppSpacing.space1,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: AppSpacing.space9,
+            height: AppSpacing.space9,
+            decoration: BoxDecoration(
+              color: parseHexColor(account.couleur) ?? colorScheme.primary,
+              borderRadius: BorderRadius.circular(AppRadius.round),
             ),
-            const SizedBox(width: AppSpacing.space3),
-            Expanded(
+            child: Center(
               child: Text(
-                account.nom,
-                style: TextStyle(
-                  fontSize: AppTypography.sizeMd,
-                  fontWeight: AppTypography.medium,
-                  color: colorScheme.onSurface,
-                ),
+                account.icone,
+                style: const TextStyle(fontSize: AppTypography.sizeMd),
               ),
             ),
-            Text(
-              AmountFormatter.format(
-                account.solde,
-                currency: account.currency,
-              ),
+          ),
+          const SizedBox(width: AppSpacing.space3),
+          Expanded(
+            child: Text(
+              account.nom,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
-                fontWeight: AppTypography.semiBold,
+                fontWeight: AppTypography.medium,
                 color: colorScheme.onSurface,
               ),
             ),
-          ],
-        ),
+          ),
+          Text(
+            AmountFormatter.format(
+              account.solde,
+              currency: account.currency,
+            ),
+            style: TextStyle(
+              fontSize: AppTypography.sizeMd,
+              fontWeight: AppTypography.semiBold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ],
       ),
     );
   }

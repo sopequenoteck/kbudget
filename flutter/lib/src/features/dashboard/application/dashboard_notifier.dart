@@ -136,13 +136,6 @@ class DashboardNotifier extends Notifier<DashboardState> {
     ref.invalidate(categoryNotifierProvider);
     ref.invalidate(currentUserNameProvider);
 
-    // Attendre que les notifiers rechargent
-    await ref.read(accountNotifierProvider.notifier).loadItems();
-    await ref.read(transactionNotifierProvider.notifier).loadItems();
-    await ref.read(subscriptionNotifierProvider.notifier).loadItems();
-    await ref.read(debtNotifierProvider.notifier).loadItems();
-    await ref.read(categoryNotifierProvider.notifier).loadItems();
-
     await loadDashboard();
   }
 
@@ -150,16 +143,21 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = state.copyWith(
       selectedMonth: month,
       selectedYear: year,
+      isSummaryLoading: true,
     );
 
     try {
       final summaries = await ref.read(
         monthlySummaryProvider((month: month, year: year)).future,
       );
-      state = state.copyWith(monthlySummaries: summaries);
+      state = state.copyWith(
+        monthlySummaries: summaries,
+        isSummaryLoading: false,
+      );
     } on Exception catch (e) {
       state = state.copyWith(
         monthlySummaries: [],
+        isSummaryLoading: false,
         error: 'Erreur chargement resume: $e',
       );
     }

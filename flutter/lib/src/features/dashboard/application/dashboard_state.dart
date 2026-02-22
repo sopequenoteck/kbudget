@@ -31,6 +31,7 @@ class DashboardState with _$DashboardState {
 
     // Loading / Error
     @Default(true) bool isLoading,
+    @Default(false) bool isSummaryLoading,
     String? error,
   }) = _DashboardState;
 }
