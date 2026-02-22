@@ -173,6 +173,8 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter (SDK), SelectPicker (feature 039), AppModal (feature 036) (040-flutter-categorypicker-widget)
 - Dart >= 3.11 / Flutter >= 3.27 (stable) + flutter_riverpod ^2.6.1, freezed_annotation ^2.4.4, drift ^2.23.1, dio ^5.8.0+1, mockito ^5.4.5 (041-flutter-riverpod-notifiers)
 - Drift (SQLite local) + API REST (remote via Dio) — via repositories abstraits existants (041-flutter-riverpod-notifiers)
+- Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter_riverpod ^2.6.1, go_router ^14.8.1, dio ^5.8.0+1, shimmer ^3.0.0, freezed_annotation ^2.4.4, intl (042-flutter-dashboard)
+- Drift (SQLite local) + API REST (remote via Dio) — via data mode provider (042-flutter-dashboard)
 
 ## Recent Changes
 - 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6

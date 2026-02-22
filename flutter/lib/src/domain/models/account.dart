@@ -16,6 +16,7 @@ class Account with _$Account {
     @Default(false) bool isDefault,
     @Default(Currency.eur) Currency currency,
     @Default(true) bool actif,
+    @Default(0) double solde,
     DateTime? updatedAt,
   }) = _Account;
 

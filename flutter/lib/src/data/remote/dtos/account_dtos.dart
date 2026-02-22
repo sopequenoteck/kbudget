@@ -32,6 +32,7 @@ class AccountResponse with _$AccountResponse {
     required bool isDefault,
     required String currency,
     required bool actif,
+    @Default(0) double solde,
     String? updatedAt,
   }) = _AccountResponse;
 

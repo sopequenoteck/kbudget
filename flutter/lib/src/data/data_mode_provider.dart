@@ -20,6 +20,7 @@ import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/category_repository.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
+import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_local.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_remote.dart';
@@ -85,6 +86,14 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
       return TransactionRepositoryLocal(TransactionDao(db));
     },
   );
+});
+
+// Monthly summary provider — uses transaction repository to get aggregated data
+final monthlySummaryProvider =
+    FutureProvider.family<List<MonthlySummary>, ({int month, int year})>(
+        (ref, params) {
+  final repo = ref.watch(transactionRepositoryProvider);
+  return repo.getMonthlySummary(params.month, params.year);
 });
 
 final subscriptionRepositoryProvider = Provider<SubscriptionRepository>((ref) {

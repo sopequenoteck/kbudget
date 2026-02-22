@@ -1,6 +1,7 @@
 import 'package:k_budget/src/data/remote/data_sources/transaction_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/transaction_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 
@@ -42,6 +43,21 @@ class TransactionRepositoryRemote implements TransactionRepository {
 
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
+
+  @override
+  Future<List<MonthlySummary>> getMonthlySummary(int month, int year) async {
+    final responses = await _dataSource.getMonthlySummary(month, year);
+    return responses.map(_summaryToDomain).toList();
+  }
+
+  MonthlySummary _summaryToDomain(MonthlySummaryResponse r) => MonthlySummary(
+        month: r.month,
+        year: r.year,
+        totalRecettes: r.totalRecettes,
+        totalDepenses: r.totalDepenses,
+        solde: r.solde,
+        currency: Currency.values.byName(r.currency.toLowerCase()),
+      );
 
   Transaction _toDomain(TransactionResponse r) => Transaction(
         id: r.id,

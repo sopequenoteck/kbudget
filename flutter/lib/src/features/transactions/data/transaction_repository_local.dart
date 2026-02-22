@@ -1,5 +1,7 @@
 import 'package:k_budget/src/data/local/daos/transaction_dao.dart';
 import 'package:k_budget/src/data/local/mappers.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 
@@ -42,5 +44,32 @@ class TransactionRepositoryLocal implements TransactionRepository {
   @override
   Future<void> delete(String id) async {
     await _dao.deleteTransaction(id);
+  }
+
+  @override
+  Future<List<MonthlySummary>> getMonthlySummary(int month, int year) async {
+    final rows = await _dao.getMonthlySummary(month, year);
+    double totalRecettes = 0;
+    double totalDepenses = 0;
+    for (final row in rows) {
+      final type = row['type'] as String;
+      final total = row['total'] as double;
+      if (type == 'recette') {
+        totalRecettes = total;
+      } else {
+        totalDepenses = total;
+      }
+    }
+    final solde = totalRecettes - totalDepenses;
+    return [
+      MonthlySummary(
+        month: month,
+        year: year,
+        totalRecettes: totalRecettes,
+        totalDepenses: totalDepenses,
+        solde: solde,
+        currency: Currency.eur,
+      ),
+    ];
   }
 }

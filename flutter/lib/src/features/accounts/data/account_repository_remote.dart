@@ -59,6 +59,7 @@ class AccountRepositoryRemote implements AccountRepository {
         isDefault: r.isDefault,
         currency: Currency.values.byName(r.currency.toLowerCase()),
         actif: r.actif,
+        solde: r.solde,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
       );
 
