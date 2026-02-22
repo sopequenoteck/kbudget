@@ -3,6 +3,7 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 
 abstract class TransactionRepository {
   Future<List<Transaction>> getAll();
+  Future<List<Transaction>> getByMonth(int month, int year);
   Stream<List<Transaction>> watchAll();
   Future<Transaction> getById(String id);
   Future<Transaction> create(Transaction transaction);

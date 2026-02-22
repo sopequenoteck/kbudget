@@ -31,7 +31,7 @@ class MonthlySummarySection extends ConsumerWidget {
 
     final totalRecettes = summary?.totalRecettes ?? 0;
     final totalDepenses = summary?.totalDepenses ?? 0;
-    final solde = summary?.solde ?? 0;
+    final solde = summary?.bilan ?? 0;
     final currency = summary?.currency;
 
     // Barres proportionnelles

@@ -55,7 +55,7 @@ class MonthlySummaryResponse with _$MonthlySummaryResponse {
     required int year,
     required double totalRecettes,
     required double totalDepenses,
-    required double solde,
+    @JsonKey(name: 'solde') required double bilan,
     required String currency,
   }) = _MonthlySummaryResponse;
 

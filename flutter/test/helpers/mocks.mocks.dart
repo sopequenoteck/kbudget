@@ -340,6 +340,19 @@ class MockTransactionRepository extends _i1.Mock
           as _i10.Future<List<_i4.Transaction>>);
 
   @override
+  _i10.Future<List<_i4.Transaction>> getByMonth(int? month, int? year) =>
+      (super.noSuchMethod(
+            Invocation.method(#getByMonth, [month, year]),
+            returnValue: _i10.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+            returnValueForMissingStub: _i10.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+          )
+          as _i10.Future<List<_i4.Transaction>>);
+
+  @override
   _i10.Stream<List<_i4.Transaction>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),

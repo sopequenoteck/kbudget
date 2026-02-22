@@ -11,6 +11,12 @@ class TransactionRepositoryRemote implements TransactionRepository {
   TransactionRepositoryRemote(this._dataSource);
 
   @override
+  Future<List<Transaction>> getByMonth(int month, int year) async {
+    final responses = await _dataSource.getByMonth(month, year);
+    return responses.map(_toDomain).toList();
+  }
+
+  @override
   Future<List<Transaction>> getAll() async {
     final responses = await _dataSource.getAll();
     return responses.map(_toDomain).toList();
@@ -55,7 +61,7 @@ class TransactionRepositoryRemote implements TransactionRepository {
         year: r.year,
         totalRecettes: r.totalRecettes,
         totalDepenses: r.totalDepenses,
-        solde: r.solde,
+        bilan: r.bilan,
         currency: Currency.values.byName(r.currency.toLowerCase()),
       );
 

@@ -11,6 +11,12 @@ class TransactionRepositoryLocal implements TransactionRepository {
   TransactionRepositoryLocal(this._dao);
 
   @override
+  Future<List<Transaction>> getByMonth(int month, int year) async {
+    final rows = await _dao.getTransactionsByMonth(month, year);
+    return rows.map(transactionFromDb).toList();
+  }
+
+  @override
   Future<List<Transaction>> getAll() async {
     final rows = await _dao.getAllTransactions();
     return rows.map(transactionFromDb).toList();
@@ -60,14 +66,14 @@ class TransactionRepositoryLocal implements TransactionRepository {
         totalDepenses = total;
       }
     }
-    final solde = totalRecettes - totalDepenses;
+    final bilan = totalRecettes - totalDepenses;
     return [
       MonthlySummary(
         month: month,
         year: year,
         totalRecettes: totalRecettes,
         totalDepenses: totalDepenses,
-        solde: solde,
+        bilan: bilan,
         currency: Currency.eur,
       ),
     ];

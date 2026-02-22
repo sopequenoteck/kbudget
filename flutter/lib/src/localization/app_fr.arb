@@ -41,5 +41,16 @@
   "lockPin": "Saisir le code PIN",
   "fabNewTransaction": "Nouvelle transaction",
   "fabNewSubscription": "Nouvel abonnement",
-  "fabNewDebt": "Nouvelle dette"
+  "fabNewDebt": "Nouvelle dette",
+  "transactionsEmptyMonth": "Aucune transaction ce mois-ci",
+  "transactionsEmptyDepenses": "Aucune dépense ce mois-ci",
+  "transactionsEmptyRecettes": "Aucune recette ce mois-ci",
+  "transactionsSummaryRecettes": "Recettes",
+  "transactionsSummaryDepenses": "Dépenses",
+  "transactionsSummaryBilan": "Bilan",
+  "transactionsFilterAll": "Tous",
+  "transactionsFilterDepenses": "Dépenses",
+  "transactionsFilterRecettes": "Recettes",
+  "transactionsRetry": "Réessayer",
+  "transactionsNoCategory": "Sans catégorie"
 }

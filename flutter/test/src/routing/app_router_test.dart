@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
@@ -14,6 +15,10 @@ import 'package:mockito/mockito.dart';
 import '../../helpers/mocks.mocks.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('fr_FR');
+  });
+
   late MockAppConfigRepository mockRepo;
   late MockAuthRepository mockAuthRepo;
   late MockAccountRepository mockAccountRepo;
@@ -38,6 +43,8 @@ void main() {
 
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
+    when(mockTransactionRepo.getByMonth(any, any))
+        .thenAnswer((_) async => []);
     when(mockTransactionRepo.getMonthlySummary(any, any))
         .thenAnswer((_) async => []);
     when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
@@ -129,7 +136,7 @@ void main() {
       await tester.tap(find.text('Transactions').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction'), findsOneWidget);
+      expect(find.text('Aucune transaction ce mois-ci'), findsOneWidget);
     });
 
     testWidgets('should_show_fab_when_onboarding_done',

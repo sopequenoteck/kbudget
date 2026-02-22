@@ -345,6 +345,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouvelle dette'**
   String get fabNewDebt;
+
+  /// No description provided for @transactionsEmptyMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune transaction ce mois-ci'**
+  String get transactionsEmptyMonth;
+
+  /// No description provided for @transactionsEmptyDepenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dépense ce mois-ci'**
+  String get transactionsEmptyDepenses;
+
+  /// No description provided for @transactionsEmptyRecettes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune recette ce mois-ci'**
+  String get transactionsEmptyRecettes;
+
+  /// No description provided for @transactionsSummaryRecettes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recettes'**
+  String get transactionsSummaryRecettes;
+
+  /// No description provided for @transactionsSummaryDepenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get transactionsSummaryDepenses;
+
+  /// No description provided for @transactionsSummaryBilan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan'**
+  String get transactionsSummaryBilan;
+
+  /// No description provided for @transactionsFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get transactionsFilterAll;
+
+  /// No description provided for @transactionsFilterDepenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get transactionsFilterDepenses;
+
+  /// No description provided for @transactionsFilterRecettes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recettes'**
+  String get transactionsFilterRecettes;
+
+  /// No description provided for @transactionsRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get transactionsRetry;
+
+  /// No description provided for @transactionsNoCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans catégorie'**
+  String get transactionsNoCategory;
 }
 
 class _AppLocalizationsDelegate

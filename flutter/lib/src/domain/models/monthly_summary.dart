@@ -11,7 +11,7 @@ class MonthlySummary with _$MonthlySummary {
     required int year,
     required double totalRecettes,
     required double totalDepenses,
-    required double solde,
+    required double bilan,
     required Currency currency,
   }) = _MonthlySummary;
 

@@ -133,4 +133,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fabNewDebt => 'Nouvelle dette';
+
+  @override
+  String get transactionsEmptyMonth => 'Aucune transaction ce mois-ci';
+
+  @override
+  String get transactionsEmptyDepenses => 'Aucune dépense ce mois-ci';
+
+  @override
+  String get transactionsEmptyRecettes => 'Aucune recette ce mois-ci';
+
+  @override
+  String get transactionsSummaryRecettes => 'Recettes';
+
+  @override
+  String get transactionsSummaryDepenses => 'Dépenses';
+
+  @override
+  String get transactionsSummaryBilan => 'Bilan';
+
+  @override
+  String get transactionsFilterAll => 'Tous';
+
+  @override
+  String get transactionsFilterDepenses => 'Dépenses';
+
+  @override
+  String get transactionsFilterRecettes => 'Recettes';
+
+  @override
+  String get transactionsRetry => 'Réessayer';
+
+  @override
+  String get transactionsNoCategory => 'Sans catégorie';
 }
