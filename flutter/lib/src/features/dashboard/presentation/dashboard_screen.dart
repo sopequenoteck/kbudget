@@ -105,7 +105,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Commencez par creer un compte\npour suivre vos finances.',
+              'Commencez par créer un compte\npour suivre vos finances.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,

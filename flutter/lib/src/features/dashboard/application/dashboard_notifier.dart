@@ -158,7 +158,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
       state = state.copyWith(
         monthlySummaries: [],
         isSummaryLoading: false,
-        error: 'Erreur chargement resume: $e',
+        error: 'Erreur chargement résumé: $e',
       );
     }
   }

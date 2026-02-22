@@ -33,7 +33,7 @@ class RecentTransactionsSection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Dernieres operations',
+              'Dernières opérations',
               style: TextStyle(
                 fontSize: AppTypography.sizeLg,
                 fontWeight: AppTypography.semiBold,
@@ -52,7 +52,7 @@ class RecentTransactionsSection extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.space4),
             child: Center(
               child: Text(
-                'Aucune operation recente',
+                'Aucune opération récente',
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurface.withValues(alpha: 0.5),

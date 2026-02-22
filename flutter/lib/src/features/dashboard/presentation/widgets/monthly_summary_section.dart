@@ -55,7 +55,7 @@ class MonthlySummarySection extends ConsumerWidget {
       children: [
         // Header
         Text(
-          'Resume du mois',
+          'Résumé du mois',
           style: TextStyle(
             fontSize: AppTypography.sizeLg,
             fontWeight: AppTypography.semiBold,
@@ -182,7 +182,7 @@ class _SummaryBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.sm),
           child: LinearProgressIndicator(
             value: ratio,
-            minHeight: 8,
+            minHeight: AppSpacing.space2,
             backgroundColor: colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
@@ -233,7 +233,7 @@ class _SummarySkeleton extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: AppSpacing.space2),
               child: Container(
                 width: double.infinity,
-                height: 32,
+                height: AppSpacing.space8,
                 decoration: BoxDecoration(
                   color: baseColor,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
