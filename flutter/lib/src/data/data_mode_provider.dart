@@ -199,3 +199,10 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
     },
   );
 });
+
+// AccountRemoteDataSource provider (server-only, used for transfer)
+final accountRemoteDataSourceProvider =
+    FutureProvider<AccountRemoteDataSource>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return AccountRemoteDataSource(dio);
+});

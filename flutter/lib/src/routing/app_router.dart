@@ -28,6 +28,7 @@ import 'package:k_budget/src/features/subscriptions/presentation/subscription_li
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_form.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
@@ -36,6 +37,8 @@ import 'package:k_budget/src/features/transactions/application/transaction_list_
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
+import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -270,6 +273,12 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
           Navigator.of(context).pop();
         },
       );
+    } else if (state.type == ModalType.transfer) {
+      return _TransferFormConsumer(
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
     return const SizedBox.shrink();
   }
@@ -423,6 +432,33 @@ class _DebtFormConsumer extends ConsumerWidget {
               onDone();
             }
           : null,
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _TransferFormConsumer extends ConsumerWidget {
+  final VoidCallback onDone;
+
+  const _TransferFormConsumer({required this.onDone});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountState = ref.watch(accountNotifierProvider);
+    final activeAccounts = accountState.items.where((a) => a.actif).toList();
+
+    return TransferForm(
+      accounts: activeAccounts,
+      onSaved: (request) async {
+        final dataSource =
+            await ref.read(accountRemoteDataSourceProvider.future);
+        await dataSource.transfer(request);
+        if (!context.mounted) return;
+        unawaited(
+            ref.read(transactionListNotifierProvider.notifier).refresh());
+        unawaited(ref.read(accountNotifierProvider.notifier).refresh());
+        onDone();
+      },
       onCancelled: onDone,
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/enums/modal_type.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 
 class FabMenu extends ConsumerStatefulWidget {
@@ -16,7 +17,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
   late final Animation<double> _expandAnimation;
   bool _isOpen = false;
 
-  static const _items = [
+  static const _allItems = [
     _SpeedDialItem(
       icon: Icons.receipt_long,
       label: 'Transaction',
@@ -77,6 +78,14 @@ class _FabMenuState extends ConsumerState<FabMenu>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accountState = ref.watch(accountNotifierProvider);
+    final activeAccountCount =
+        accountState.items.where((a) => a.actif).length;
+
+    final items = _allItems
+        .where((item) =>
+            item.modalType != ModalType.transfer || activeAccountCount >= 2)
+        .toList();
 
     return SizedBox(
       height: _isOpen ? 300 : 56,
@@ -97,7 +106,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children: _items
+                  children: items
                       .map((item) => _buildSpeedDialItem(item, theme))
                       .toList(),
                 ),

@@ -127,6 +127,13 @@
   "debtsSectionEmprunts": "Emprunts",
   "debtBadgeRembourse": "Remboursé",
 
+  "transferFormSourcePicker": "Compte source",
+  "transferFormDestinationPicker": "Compte destination",
+  "transferFormAmountField": "Montant",
+  "transferFormNoteField": "Note",
+  "transferFormSaveButton": "Valider",
+  "validationSameAccount": "Les comptes source et destination doivent être différents",
+
   "validationRequired": "Champ requis",
   "validationAmountPositive": "Le montant doit être positif",
   "validationMaxLength": "Maximum {max} caractères",

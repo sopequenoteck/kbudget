@@ -360,6 +360,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtBadgeRembourse => 'Remboursé';
 
   @override
+  String get transferFormSourcePicker => 'Compte source';
+
+  @override
+  String get transferFormDestinationPicker => 'Compte destination';
+
+  @override
+  String get transferFormAmountField => 'Montant';
+
+  @override
+  String get transferFormNoteField => 'Note';
+
+  @override
+  String get transferFormSaveButton => 'Valider';
+
+  @override
+  String get validationSameAccount =>
+      'Les comptes source et destination doivent être différents';
+
+  @override
   String get validationRequired => 'Champ requis';
 
   @override

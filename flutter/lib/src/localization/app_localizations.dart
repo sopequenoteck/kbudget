@@ -784,6 +784,42 @@ abstract class AppLocalizations {
   /// **'Remboursé'**
   String get debtBadgeRembourse;
 
+  /// No description provided for @transferFormSourcePicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte source'**
+  String get transferFormSourcePicker;
+
+  /// No description provided for @transferFormDestinationPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte destination'**
+  String get transferFormDestinationPicker;
+
+  /// No description provided for @transferFormAmountField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get transferFormAmountField;
+
+  /// No description provided for @transferFormNoteField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get transferFormNoteField;
+
+  /// No description provided for @transferFormSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get transferFormSaveButton;
+
+  /// No description provided for @validationSameAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les comptes source et destination doivent être différents'**
+  String get validationSameAccount;
+
   /// No description provided for @validationRequired.
   ///
   /// In fr, this message translates to:
