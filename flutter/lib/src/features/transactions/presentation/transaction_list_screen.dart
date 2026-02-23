@@ -7,7 +7,10 @@ import 'package:k_budget/src/common_widgets/segmented_filter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_day_group.dart';
@@ -39,6 +42,12 @@ class _TransactionListScreenState
       final catState = ref.read(categoryNotifierProvider);
       if (catState.items.isEmpty && !catState.isLoading) {
         ref.read(categoryNotifierProvider.notifier).loadItems();
+      }
+
+      // Charger les comptes si pas encore chargés (pour le formulaire)
+      final accState = ref.read(accountNotifierProvider);
+      if (accState.items.isEmpty && !accState.isLoading) {
+        ref.read(accountNotifierProvider.notifier).loadItems();
       }
     });
   }
@@ -245,6 +254,13 @@ class _TransactionListScreenState
             date: day,
             transactions: dayTxs,
             categories: categoryMap,
+            onTransactionTap: (tx) {
+              if (tx.type == TransactionType.ajustement) return;
+              ref.read(modalNotifierProvider.notifier).open(
+                    ModalType.transaction,
+                    entity: tx,
+                  );
+            },
           );
         },
       ),

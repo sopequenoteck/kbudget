@@ -411,6 +411,102 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Sans catégorie'**
   String get transactionsNoCategory;
+
+  /// No description provided for @transactionFormLabelField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get transactionFormLabelField;
+
+  /// No description provided for @transactionFormAmountField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get transactionFormAmountField;
+
+  /// No description provided for @transactionFormDateField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get transactionFormDateField;
+
+  /// No description provided for @transactionFormNoteField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note'**
+  String get transactionFormNoteField;
+
+  /// No description provided for @transactionFormAccountPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get transactionFormAccountPicker;
+
+  /// No description provided for @transactionFormCategoryPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get transactionFormCategoryPicker;
+
+  /// No description provided for @transactionFormSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get transactionFormSaveButton;
+
+  /// No description provided for @transactionFormUpdateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get transactionFormUpdateButton;
+
+  /// No description provided for @transactionFormDeleteButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get transactionFormDeleteButton;
+
+  /// No description provided for @transactionFormDeleteConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la transaction'**
+  String get transactionFormDeleteConfirmTitle;
+
+  /// No description provided for @transactionFormDeleteConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.'**
+  String get transactionFormDeleteConfirmMessage;
+
+  /// No description provided for @transactionFormNoAccounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez un compte dans les paramètres'**
+  String get transactionFormNoAccounts;
+
+  /// No description provided for @transactionFormNoCategories.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez une catégorie d\'abord'**
+  String get transactionFormNoCategories;
+
+  /// No description provided for @validationRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ requis'**
+  String get validationRequired;
+
+  /// No description provided for @validationAmountPositive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant doit être positif'**
+  String get validationAmountPositive;
+
+  /// No description provided for @validationMaxLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum {max} caractères'**
+  String validationMaxLength(int max);
 }
 
 class _AppLocalizationsDelegate

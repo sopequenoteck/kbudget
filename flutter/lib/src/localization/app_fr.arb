@@ -52,5 +52,29 @@
   "transactionsFilterDepenses": "Dépenses",
   "transactionsFilterRecettes": "Recettes",
   "transactionsRetry": "Réessayer",
-  "transactionsNoCategory": "Sans catégorie"
+  "transactionsNoCategory": "Sans catégorie",
+
+  "transactionFormLabelField": "Libellé",
+  "transactionFormAmountField": "Montant",
+  "transactionFormDateField": "Date",
+  "transactionFormNoteField": "Note",
+  "transactionFormAccountPicker": "Compte",
+  "transactionFormCategoryPicker": "Catégorie",
+  "transactionFormSaveButton": "Enregistrer",
+  "transactionFormUpdateButton": "Modifier",
+  "transactionFormDeleteButton": "Supprimer",
+  "transactionFormDeleteConfirmTitle": "Supprimer la transaction",
+  "transactionFormDeleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.",
+  "transactionFormNoAccounts": "Créez un compte dans les paramètres",
+  "transactionFormNoCategories": "Créez une catégorie d'abord",
+  "validationRequired": "Champ requis",
+  "validationAmountPositive": "Le montant doit être positif",
+  "validationMaxLength": "Maximum {max} caractères",
+  "@validationMaxLength": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  }
 }

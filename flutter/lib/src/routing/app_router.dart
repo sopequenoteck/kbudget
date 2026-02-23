@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +24,11 @@ import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
+import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
+import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -235,6 +241,18 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     );
   }
 
+  Widget _buildModalChild(ModalOpen state) {
+    if (state.type == ModalType.transaction) {
+      return _TransactionFormConsumer(
+        transaction: state.entity as Transaction?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
   void _showModal(BuildContext context, ModalOpen state) {
     _isModalShowing = true;
     final notifier = ref.read(modalNotifierProvider.notifier);
@@ -250,15 +268,18 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       );
     }
 
+    final child = _buildModalChild(state);
+
     AppModal.show(
       context,
       title: state.type.title(state.mode),
       headerActions: headerActions,
+      inlineHeaderActions: state.type.hasToggle,
       onClose: () {
         _isModalShowing = false;
         notifier.close();
       },
-      child: const SizedBox.shrink(),
+      child: child,
     ).then((_) {
       // Modal dismissed via swipe/overlay tap
       if (_isModalShowing) {
@@ -266,6 +287,47 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
         notifier.close();
       }
     });
+  }
+}
+
+class _TransactionFormConsumer extends ConsumerWidget {
+  final Transaction? transaction;
+  final VoidCallback onDone;
+
+  const _TransactionFormConsumer({
+    this.transaction,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    final type = (modalState.subType as TransactionType?) ??
+        TransactionType.depense;
+
+    return TransactionForm(
+      transaction: transaction,
+      type: type,
+      onSaved: (tx) async {
+        if (transaction == null) {
+          await ref.read(transactionNotifierProvider.notifier).create(tx);
+        } else {
+          await ref.read(transactionNotifierProvider.notifier).update(tx);
+        }
+        unawaited(ref.read(transactionListNotifierProvider.notifier).refresh());
+        onDone();
+      },
+      onDeleted: transaction != null
+          ? (id) async {
+              await ref.read(transactionNotifierProvider.notifier).delete(id);
+              unawaited(ref.read(transactionListNotifierProvider.notifier).refresh());
+              onDone();
+            }
+          : null,
+      onCancelled: onDone,
+    );
   }
 }
 

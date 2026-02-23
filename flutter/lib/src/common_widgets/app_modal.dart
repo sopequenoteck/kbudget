@@ -9,11 +9,15 @@ class AppModal {
   static const double _dialogMaxWidth = 480;
 
   /// Affiche une modale : bottom sheet sur mobile, dialog sur tablette.
+  ///
+  /// [inlineHeaderActions] : si `true`, les [headerActions] sont placées
+  /// sur la même ligne que le titre (ex. toggle dépense/recette).
   static Future<void> show(
     BuildContext context, {
     required Widget child,
     required String title,
     Widget? headerActions,
+    bool inlineHeaderActions = false,
     required VoidCallback onClose,
   }) {
     final width = MediaQuery.sizeOf(context).width;
@@ -24,6 +28,7 @@ class AppModal {
         child: child,
         title: title,
         headerActions: headerActions,
+        inlineHeaderActions: inlineHeaderActions,
         onClose: onClose,
       );
     } else {
@@ -32,6 +37,7 @@ class AppModal {
         child: child,
         title: title,
         headerActions: headerActions,
+        inlineHeaderActions: inlineHeaderActions,
         onClose: onClose,
       );
     }
@@ -42,6 +48,7 @@ class AppModal {
     required Widget child,
     required String title,
     Widget? headerActions,
+    bool inlineHeaderActions = false,
     required VoidCallback onClose,
   }) {
     return showModalBottomSheet<void>(
@@ -57,6 +64,7 @@ class AppModal {
         return _ModalContent(
           title: title,
           headerActions: headerActions,
+          inlineHeaderActions: inlineHeaderActions,
           onClose: onClose,
           child: child,
         );
@@ -69,6 +77,7 @@ class AppModal {
     required Widget child,
     required String title,
     Widget? headerActions,
+    bool inlineHeaderActions = false,
     required VoidCallback onClose,
   }) {
     return showDialog<void>(
@@ -83,6 +92,7 @@ class AppModal {
               child: _ModalContent(
                 title: title,
                 headerActions: headerActions,
+                inlineHeaderActions: inlineHeaderActions,
                 onClose: onClose,
                 child: child,
               ),
@@ -97,12 +107,14 @@ class AppModal {
 class _ModalContent extends StatelessWidget {
   final String title;
   final Widget? headerActions;
+  final bool inlineHeaderActions;
   final VoidCallback onClose;
   final Widget child;
 
   const _ModalContent({
     required this.title,
     this.headerActions,
+    this.inlineHeaderActions = false,
     required this.onClose,
     required this.child,
   });
@@ -154,9 +166,15 @@ class _ModalContent extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: theme.textTheme.titleLarge,
+                            style: inlineHeaderActions
+                                ? theme.textTheme.titleMedium
+                                : theme.textTheme.titleLarge,
                           ),
                         ),
+                        if (inlineHeaderActions && headerActions != null) ...[
+                          const SizedBox(width: AppSpacing.space2),
+                          headerActions!,
+                        ],
                         Semantics(
                           button: true,
                           label: 'Fermer',
@@ -170,7 +188,7 @@ class _ModalContent extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (headerActions != null) ...[
+                    if (!inlineHeaderActions && headerActions != null) ...[
                       const SizedBox(height: AppSpacing.space2),
                       headerActions!,
                     ],

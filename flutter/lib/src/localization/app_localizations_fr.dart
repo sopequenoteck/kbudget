@@ -166,4 +166,55 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transactionsNoCategory => 'Sans catégorie';
+
+  @override
+  String get transactionFormLabelField => 'Libellé';
+
+  @override
+  String get transactionFormAmountField => 'Montant';
+
+  @override
+  String get transactionFormDateField => 'Date';
+
+  @override
+  String get transactionFormNoteField => 'Note';
+
+  @override
+  String get transactionFormAccountPicker => 'Compte';
+
+  @override
+  String get transactionFormCategoryPicker => 'Catégorie';
+
+  @override
+  String get transactionFormSaveButton => 'Enregistrer';
+
+  @override
+  String get transactionFormUpdateButton => 'Modifier';
+
+  @override
+  String get transactionFormDeleteButton => 'Supprimer';
+
+  @override
+  String get transactionFormDeleteConfirmTitle => 'Supprimer la transaction';
+
+  @override
+  String get transactionFormDeleteConfirmMessage =>
+      'Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.';
+
+  @override
+  String get transactionFormNoAccounts => 'Créez un compte dans les paramètres';
+
+  @override
+  String get transactionFormNoCategories => 'Créez une catégorie d\'abord';
+
+  @override
+  String get validationRequired => 'Champ requis';
+
+  @override
+  String get validationAmountPositive => 'Le montant doit être positif';
+
+  @override
+  String validationMaxLength(int max) {
+    return 'Maximum $max caractères';
+  }
 }
