@@ -76,6 +76,18 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
   }
 
   @override
+  Future<void> setTextScale(TextScale textScale) async {
+    final config = await getConfig();
+    await saveConfig(config.copyWith(textScale: textScale));
+  }
+
+  @override
+  Future<TextScale> getTextScale() async {
+    final config = await getConfig();
+    return config.textScale;
+  }
+
+  @override
   Future<void> setLockEnabled(bool enabled) async {
     final config = await getConfig();
     await saveConfig(config.copyWith(lockEnabled: enabled));

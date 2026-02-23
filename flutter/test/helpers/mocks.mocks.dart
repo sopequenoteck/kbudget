@@ -180,6 +180,28 @@ class MockAppConfigRepository extends _i1.Mock
           as _i10.Future<_i11.AppTheme>);
 
   @override
+  _i10.Future<void> setTextScale(_i11.TextScale? textScale) =>
+      (super.noSuchMethod(
+            Invocation.method(#setTextScale, [textScale]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
+
+  @override
+  _i10.Future<_i11.TextScale> getTextScale() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTextScale, []),
+            returnValue: _i10.Future<_i11.TextScale>.value(
+              _i11.TextScale.small,
+            ),
+            returnValueForMissingStub: _i10.Future<_i11.TextScale>.value(
+              _i11.TextScale.small,
+            ),
+          )
+          as _i10.Future<_i11.TextScale>);
+
+  @override
   _i10.Future<void> setLockEnabled(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#setLockEnabled, [enabled]),

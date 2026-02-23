@@ -12,6 +12,8 @@ abstract class AppConfigRepository {
   Future<String?> getServerUrl();
   Future<void> setTheme(AppTheme theme);
   Future<AppTheme> getTheme();
+  Future<void> setTextScale(TextScale textScale);
+  Future<TextScale> getTextScale();
   Future<void> setLockEnabled(bool enabled);
   Future<void> setLockMethod(LockMethod? method);
   Future<void> setHashedPin(String? pin);

@@ -227,6 +227,8 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, json_serializable, go_router, dio, shimmer (049-flutter-settings-profile)
 - Serveur uniquement (pas de Drift/SQLite pour le profil — données toujours fraîches depuis l'API) (049-flutter-settings-profile)
 - Serveur uniquement (opération atomique, pas de stockage local) (050-flutter-transfer-form)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, build_runner (051-flutter-settings-appearance)
+- FlutterSecureStorage (AppConfig JSON sérialisé) (051-flutter-settings-appearance)
 
 ### Backend (api/)
 

@@ -22,6 +22,7 @@ import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
@@ -183,7 +184,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.settingsAppearanceName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) =>
-                const StubSettingsScreen(title: 'Apparence'),
+                const AppearanceSettingsScreen(),
           ),
           GoRoute(
             path: RouteNames.settingsAccounts,

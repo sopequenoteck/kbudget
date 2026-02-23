@@ -8,4 +8,5 @@ export 'frequency.dart';
 export 'lock_method.dart';
 export 'modal_type.dart';
 export 'subscription_status_filter.dart';
+export 'text_scale.dart';
 export 'transaction_type.dart';
