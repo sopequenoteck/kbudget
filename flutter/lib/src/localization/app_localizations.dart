@@ -580,6 +580,66 @@ abstract class AppLocalizations {
   /// **'Réessayer'**
   String get subscriptionsRetry;
 
+  /// No description provided for @subscriptionsFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get subscriptionsFilterAll;
+
+  /// No description provided for @subscriptionsFilterActifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actifs'**
+  String get subscriptionsFilterActifs;
+
+  /// No description provided for @subscriptionsFilterInactifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inactifs'**
+  String get subscriptionsFilterInactifs;
+
+  /// No description provided for @subscriptionsTotalMensuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total mensuel'**
+  String get subscriptionsTotalMensuel;
+
+  /// No description provided for @subscriptionsEmptyActifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun abonnement actif'**
+  String get subscriptionsEmptyActifs;
+
+  /// No description provided for @subscriptionsEmptyInactifs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun abonnement inactif'**
+  String get subscriptionsEmptyInactifs;
+
+  /// No description provided for @subscriptionFrequencyMensuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/mois'**
+  String get subscriptionFrequencyMensuel;
+
+  /// No description provided for @subscriptionFrequencyAnnuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/an'**
+  String get subscriptionFrequencyAnnuel;
+
+  /// No description provided for @subscriptionNextRenewal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain : {date}'**
+  String subscriptionNextRenewal(String date);
+
+  /// No description provided for @subscriptionBadgeInactif.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inactif'**
+  String get subscriptionBadgeInactif;
+
   /// No description provided for @validationRequired.
   ///
   /// In fr, this message translates to:

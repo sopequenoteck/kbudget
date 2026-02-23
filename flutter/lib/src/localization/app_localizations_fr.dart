@@ -255,6 +255,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsRetry => 'Réessayer';
 
   @override
+  String get subscriptionsFilterAll => 'Tous';
+
+  @override
+  String get subscriptionsFilterActifs => 'Actifs';
+
+  @override
+  String get subscriptionsFilterInactifs => 'Inactifs';
+
+  @override
+  String get subscriptionsTotalMensuel => 'Total mensuel';
+
+  @override
+  String get subscriptionsEmptyActifs => 'Aucun abonnement actif';
+
+  @override
+  String get subscriptionsEmptyInactifs => 'Aucun abonnement inactif';
+
+  @override
+  String get subscriptionFrequencyMensuel => '/mois';
+
+  @override
+  String get subscriptionFrequencyAnnuel => '/an';
+
+  @override
+  String subscriptionNextRenewal(String date) {
+    return 'Prochain : $date';
+  }
+
+  @override
+  String get subscriptionBadgeInactif => 'Inactif';
+
+  @override
   String get validationRequired => 'Champ requis';
 
   @override

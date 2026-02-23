@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
+import 'package:k_budget/src/common_widgets/segmented_filter.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
-import 'package:k_budget/src/domain/models/list_state.dart';
-import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/next_renewal_date.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SubscriptionListScreen extends ConsumerStatefulWidget {
   const SubscriptionListScreen({super.key});
@@ -79,7 +83,7 @@ class _SubscriptionListScreenState
   }
 
   List<Widget> _buildContent(
-    ListState<Subscription> state,
+    SubscriptionListState state,
     Map<String, Category> categoryMap,
     ColorScheme colorScheme,
     AppLocalizations l10n,
@@ -87,6 +91,12 @@ class _SubscriptionListScreenState
     // Loading
     if (state.isLoading) {
       return [
+        SliverToBoxAdapter(
+          child: _SubscriptionSummaryCard(
+            monthlyTotals: state.monthlyTotals,
+            isLoading: true,
+          ),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(top: AppSpacing.space4),
@@ -141,7 +151,46 @@ class _SubscriptionListScreenState
 
     // Empty
     if (state.items.isEmpty) {
+      final emptyMessage = switch (state.activeFilter) {
+        SubscriptionStatusFilter.all => l10n.subscriptionsEmpty,
+        SubscriptionStatusFilter.actif => l10n.subscriptionsEmptyActifs,
+        SubscriptionStatusFilter.inactif => l10n.subscriptionsEmptyInactifs,
+      };
+
       return [
+        SliverToBoxAdapter(
+          child: _SubscriptionSummaryCard(
+            monthlyTotals: state.monthlyTotals,
+            isLoading: false,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.space4,
+              vertical: AppSpacing.space2,
+            ),
+            child: SegmentedFilter<SubscriptionStatusFilter>(
+              items: [
+                SegmentedFilterItem(
+                  value: SubscriptionStatusFilter.all,
+                  label: l10n.subscriptionsFilterAll,
+                ),
+                SegmentedFilterItem(
+                  value: SubscriptionStatusFilter.actif,
+                  label: l10n.subscriptionsFilterActifs,
+                ),
+                SegmentedFilterItem(
+                  value: SubscriptionStatusFilter.inactif,
+                  label: l10n.subscriptionsFilterInactifs,
+                ),
+              ],
+              selectedValue: state.activeFilter,
+              onChanged: (f) =>
+                  ref.read(subscriptionNotifierProvider.notifier).setFilter(f),
+            ),
+          ),
+        ),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Center(
@@ -157,7 +206,7 @@ class _SubscriptionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.subscriptionsEmpty,
+                    emptyMessage,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -172,9 +221,44 @@ class _SubscriptionListScreenState
     }
 
     // Data
+    final dateFormat = DateFormat('d MMMM', 'fr_FR');
+
     return [
+      SliverToBoxAdapter(
+        child: _SubscriptionSummaryCard(
+          monthlyTotals: state.monthlyTotals,
+          isLoading: false,
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.space4,
+            vertical: AppSpacing.space2,
+          ),
+          child: SegmentedFilter<SubscriptionStatusFilter>(
+            items: [
+              SegmentedFilterItem(
+                value: SubscriptionStatusFilter.all,
+                label: l10n.subscriptionsFilterAll,
+              ),
+              SegmentedFilterItem(
+                value: SubscriptionStatusFilter.actif,
+                label: l10n.subscriptionsFilterActifs,
+              ),
+              SegmentedFilterItem(
+                value: SubscriptionStatusFilter.inactif,
+                label: l10n.subscriptionsFilterInactifs,
+              ),
+            ],
+            selectedValue: state.activeFilter,
+            onChanged: (f) =>
+                ref.read(subscriptionNotifierProvider.notifier).setFilter(f),
+          ),
+        ),
+      ),
       SliverPadding(
-        padding: const EdgeInsets.only(top: AppSpacing.space4),
+        padding: const EdgeInsets.only(top: AppSpacing.space2),
         sliver: SliverList.builder(
           itemCount: state.items.length,
           itemBuilder: (context, index) {
@@ -183,20 +267,29 @@ class _SubscriptionListScreenState
                 ? categoryMap[sub.categoryId]
                 : null;
 
-            final frequencyLabel =
-                sub.frequence == Frequency.mensuel ? 'Mensuel' : 'Annuel';
+            final frequencySuffix = sub.frequence == Frequency.mensuel
+                ? l10n.subscriptionFrequencyMensuel
+                : l10n.subscriptionFrequencyAnnuel;
+
+            final formattedAmount = AmountFormatter.format(
+              sub.montant,
+              currency: sub.currency,
+            );
+
+            final renewal = nextRenewalDate(sub.dateDebut, sub.frequence);
+            final renewalLabel =
+                l10n.subscriptionNextRenewal(dateFormat.format(renewal));
 
             return ListItem(
               icon: cat?.icone ?? '📅',
-              iconBackgroundColor:
-                  cat != null ? parseHexColor(cat.couleur) : null,
+              iconBackgroundColor: cat != null
+                  ? parseHexColor(cat.couleur)
+                  : colorScheme.surfaceContainerHighest,
               title: sub.nom,
-              subtitle: frequencyLabel,
-              value: AmountFormatter.format(
-                sub.montant,
-                currency: sub.currency,
-              ),
-              rightSubtitle: sub.actif ? null : 'Inactif',
+              subtitle: renewalLabel,
+              value: '$formattedAmount$frequencySuffix',
+              rightSubtitle:
+                  sub.actif ? null : l10n.subscriptionBadgeInactif,
               onPressed: () {
                 ref.read(modalNotifierProvider.notifier).open(
                       ModalType.subscription,
@@ -212,5 +305,98 @@ class _SubscriptionListScreenState
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
     ];
+  }
+}
+
+class _SubscriptionSummaryCard extends StatelessWidget {
+  const _SubscriptionSummaryCard({
+    required this.monthlyTotals,
+    required this.isLoading,
+  });
+
+  final Map<Currency, double> monthlyTotals;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) return const _SummaryCardSkeleton();
+    if (monthlyTotals.isEmpty) return const SizedBox.shrink();
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    final entries = monthlyTotals.entries.toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space2,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space3,
+        ),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.subscriptionsTotalMensuel,
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space1),
+            ...entries.map(
+              (e) => Text(
+                AmountFormatter.format(e.value, currency: e.key),
+                style: TextStyle(
+                  fontSize: AppTypography.sizeLg,
+                  fontWeight: AppTypography.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryCardSkeleton extends StatelessWidget {
+  const _SummaryCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = colorScheme.surface;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space2,
+        ),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+          ),
+        ),
+      ),
+    );
   }
 }

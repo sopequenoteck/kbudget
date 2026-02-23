@@ -1,20 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
-import 'package:k_budget/src/domain/models/list_state.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
+import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 
 final subscriptionNotifierProvider =
-    NotifierProvider<SubscriptionNotifier, ListState<Subscription>>(
+    NotifierProvider<SubscriptionNotifier, SubscriptionListState>(
   SubscriptionNotifier.new,
 );
 
-class SubscriptionNotifier extends Notifier<ListState<Subscription>> {
+class SubscriptionNotifier extends Notifier<SubscriptionListState> {
   static const _pageSize = 20;
   List<Subscription> _allItems = [];
 
   @override
-  ListState<Subscription> build() => const ListState<Subscription>();
+  SubscriptionListState build() => const SubscriptionListState();
 
   SubscriptionRepository get _repo =>
       ref.read(subscriptionRepositoryProvider);
@@ -35,15 +36,21 @@ class SubscriptionNotifier extends Notifier<ListState<Subscription>> {
 
   Future<void> refresh() async => loadItems();
 
+  void setFilter(SubscriptionStatusFilter filter) {
+    state = state.copyWith(activeFilter: filter);
+    _refreshPage(resetPage: true);
+  }
+
   void loadMore() {
     if (!state.hasMore || state.isLoading) return;
+    final filtered = _applyFilter(_allItems, state.activeFilter);
     final nextPage = state.currentPage + 1;
     final end = (nextPage + 1) * _pageSize;
-    final page = _allItems.take(end).toList();
+    final page = filtered.take(end).toList();
     state = state.copyWith(
       items: page,
       currentPage: nextPage,
-      hasMore: end < _allItems.length,
+      hasMore: end < filtered.length,
     );
   }
 
@@ -115,15 +122,42 @@ class SubscriptionNotifier extends Notifier<ListState<Subscription>> {
     await update(item.copyWith(actif: !item.actif));
   }
 
+  List<Subscription> _applyFilter(
+    List<Subscription> items,
+    SubscriptionStatusFilter filter,
+  ) {
+    return switch (filter) {
+      SubscriptionStatusFilter.all => items,
+      SubscriptionStatusFilter.actif =>
+        items.where((s) => s.actif).toList(),
+      SubscriptionStatusFilter.inactif =>
+        items.where((s) => !s.actif).toList(),
+    };
+  }
+
+  Map<Currency, double> _computeMonthlyTotals(List<Subscription> allItems) {
+    final totals = <Currency, double>{};
+    for (final sub in allItems.where((s) => s.actif)) {
+      final monthly = switch (sub.frequence) {
+        Frequency.mensuel => sub.montant,
+        Frequency.annuel => sub.montant / 12,
+      };
+      totals[sub.currency] = (totals[sub.currency] ?? 0) + monthly;
+    }
+    return totals;
+  }
+
   void _refreshPage({bool resetPage = false}) {
+    final filtered = _applyFilter(_allItems, state.activeFilter);
     final page = resetPage ? 0 : state.currentPage;
     final end = (page + 1) * _pageSize;
-    final items = _allItems.take(end).toList();
+    final items = filtered.take(end).toList();
     state = state.copyWith(
       items: items,
       isLoading: false,
       currentPage: page,
-      hasMore: end < _allItems.length,
+      hasMore: end < filtered.length,
+      monthlyTotals: _computeMonthlyTotals(_allItems),
     );
   }
 }

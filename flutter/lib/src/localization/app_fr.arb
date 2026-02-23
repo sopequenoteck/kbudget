@@ -83,6 +83,23 @@
   "subscriptionFormNoCategories": "Créez une catégorie d'abord",
   "subscriptionsEmpty": "Aucun abonnement",
   "subscriptionsRetry": "Réessayer",
+  "subscriptionsFilterAll": "Tous",
+  "subscriptionsFilterActifs": "Actifs",
+  "subscriptionsFilterInactifs": "Inactifs",
+  "subscriptionsTotalMensuel": "Total mensuel",
+  "subscriptionsEmptyActifs": "Aucun abonnement actif",
+  "subscriptionsEmptyInactifs": "Aucun abonnement inactif",
+  "subscriptionFrequencyMensuel": "/mois",
+  "subscriptionFrequencyAnnuel": "/an",
+  "subscriptionNextRenewal": "Prochain : {date}",
+  "@subscriptionNextRenewal": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionBadgeInactif": "Inactif",
 
   "validationRequired": "Champ requis",
   "validationAmountPositive": "Le montant doit être positif",
