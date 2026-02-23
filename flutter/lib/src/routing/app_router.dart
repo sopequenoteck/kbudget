@@ -24,7 +24,10 @@ import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_form.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
@@ -249,6 +252,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
           Navigator.of(context).pop();
         },
       );
+    } else if (state.type == ModalType.subscription) {
+      return _SubscriptionFormConsumer(
+        subscription: state.entity as Subscription?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
     return const SizedBox.shrink();
   }
@@ -323,6 +333,44 @@ class _TransactionFormConsumer extends ConsumerWidget {
           ? (id) async {
               await ref.read(transactionNotifierProvider.notifier).delete(id);
               unawaited(ref.read(transactionListNotifierProvider.notifier).refresh());
+              onDone();
+            }
+          : null,
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _SubscriptionFormConsumer extends ConsumerWidget {
+  final Subscription? subscription;
+  final VoidCallback onDone;
+
+  const _SubscriptionFormConsumer({
+    this.subscription,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    final frequence = (modalState.subType as Frequency?) ?? Frequency.mensuel;
+
+    return SubscriptionForm(
+      subscription: subscription,
+      frequence: frequence,
+      onSaved: (sub) async {
+        if (subscription == null) {
+          await ref.read(subscriptionNotifierProvider.notifier).create(sub);
+        } else {
+          await ref.read(subscriptionNotifierProvider.notifier).update(sub);
+        }
+        onDone();
+      },
+      onDeleted: subscription != null
+          ? (id) async {
+              await ref.read(subscriptionNotifierProvider.notifier).delete(id);
               onDone();
             }
           : null,

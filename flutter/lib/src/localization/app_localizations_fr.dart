@@ -208,6 +208,53 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionFormNoCategories => 'Créez une catégorie d\'abord';
 
   @override
+  String get subscriptionFormNameField => 'Nom';
+
+  @override
+  String get subscriptionFormAmountField => 'Montant';
+
+  @override
+  String get subscriptionFormDateField => 'Date de début';
+
+  @override
+  String get subscriptionFormAccountPicker => 'Compte';
+
+  @override
+  String get subscriptionFormCategoryPicker => 'Catégorie';
+
+  @override
+  String get subscriptionFormActiveSwitch => 'Actif';
+
+  @override
+  String get subscriptionFormSaveButton => 'Enregistrer';
+
+  @override
+  String get subscriptionFormUpdateButton => 'Modifier';
+
+  @override
+  String get subscriptionFormDeleteButton => 'Supprimer';
+
+  @override
+  String get subscriptionFormDeleteConfirmTitle => 'Supprimer l\'abonnement';
+
+  @override
+  String get subscriptionFormDeleteConfirmMessage =>
+      'Êtes-vous sûr de vouloir supprimer cet abonnement ? Cette action est irréversible.';
+
+  @override
+  String get subscriptionFormNoAccounts =>
+      'Créez un compte dans les paramètres';
+
+  @override
+  String get subscriptionFormNoCategories => 'Créez une catégorie d\'abord';
+
+  @override
+  String get subscriptionsEmpty => 'Aucun abonnement';
+
+  @override
+  String get subscriptionsRetry => 'Réessayer';
+
+  @override
   String get validationRequired => 'Champ requis';
 
   @override

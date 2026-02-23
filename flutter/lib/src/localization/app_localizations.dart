@@ -490,6 +490,96 @@ abstract class AppLocalizations {
   /// **'Créez une catégorie d\'abord'**
   String get transactionFormNoCategories;
 
+  /// No description provided for @subscriptionFormNameField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get subscriptionFormNameField;
+
+  /// No description provided for @subscriptionFormAmountField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get subscriptionFormAmountField;
+
+  /// No description provided for @subscriptionFormDateField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de début'**
+  String get subscriptionFormDateField;
+
+  /// No description provided for @subscriptionFormAccountPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get subscriptionFormAccountPicker;
+
+  /// No description provided for @subscriptionFormCategoryPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get subscriptionFormCategoryPicker;
+
+  /// No description provided for @subscriptionFormActiveSwitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get subscriptionFormActiveSwitch;
+
+  /// No description provided for @subscriptionFormSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get subscriptionFormSaveButton;
+
+  /// No description provided for @subscriptionFormUpdateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get subscriptionFormUpdateButton;
+
+  /// No description provided for @subscriptionFormDeleteButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get subscriptionFormDeleteButton;
+
+  /// No description provided for @subscriptionFormDeleteConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l\'abonnement'**
+  String get subscriptionFormDeleteConfirmTitle;
+
+  /// No description provided for @subscriptionFormDeleteConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer cet abonnement ? Cette action est irréversible.'**
+  String get subscriptionFormDeleteConfirmMessage;
+
+  /// No description provided for @subscriptionFormNoAccounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez un compte dans les paramètres'**
+  String get subscriptionFormNoAccounts;
+
+  /// No description provided for @subscriptionFormNoCategories.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez une catégorie d\'abord'**
+  String get subscriptionFormNoCategories;
+
+  /// No description provided for @subscriptionsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun abonnement'**
+  String get subscriptionsEmpty;
+
+  /// No description provided for @subscriptionsRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get subscriptionsRetry;
+
   /// No description provided for @validationRequired.
   ///
   /// In fr, this message translates to:
