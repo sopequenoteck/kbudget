@@ -39,8 +39,14 @@ public class TransactionController {
 
     @Operation(summary = "Lister toutes les transactions")
     @GetMapping
-    public ResponseEntity<List<TransactionResponse>> getAll(Authentication authentication) {
+    public ResponseEntity<List<TransactionResponse>> getAll(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
+        if (month != null && year != null) {
+            return ResponseEntity.ok(transactionService.getByMonth(month, year, userId));
+        }
         return ResponseEntity.ok(transactionService.getAllByUser(userId));
     }
 

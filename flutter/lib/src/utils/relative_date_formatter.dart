@@ -6,7 +6,7 @@ class RelativeDateFormatter {
   static DateFormat? _longDateFormatter;
 
   static DateFormat get _formatter =>
-      _longDateFormatter ??= DateFormat.yMMMMd('fr_FR');
+      _longDateFormatter ??= DateFormat.yMMMMd('fr');
 
   /// Formate une date en texte relatif francais.
   ///
@@ -15,10 +15,10 @@ class RelativeDateFormatter {
   /// - il y a X jours (2-7j)
   /// - il y a X semaine(s) (8-30j)
   /// - Format long (ex: "15 janvier 2026") au-dela
-  static String format(DateTime? value) {
+  static String format(DateTime? value, {DateTime? now}) {
     if (value == null) return '';
 
-    final today = DateTime.now();
+    final today = now ?? DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final targetDate = DateTime(value.year, value.month, value.day);
 

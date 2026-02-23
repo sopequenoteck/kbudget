@@ -28,10 +28,13 @@ class _TransactionListScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final now = DateTime.now();
-      ref
-          .read(transactionListNotifierProvider.notifier)
-          .loadMonth(now.month, now.year);
+      // Charger les transactions si pas encore chargées
+      final txState = ref.read(transactionListNotifierProvider);
+      if (txState.allMonthTransactions.isEmpty && !txState.isLoading) {
+        ref.read(transactionListNotifierProvider.notifier)
+            .loadMonth(txState.selectedMonth, txState.selectedYear);
+      }
+
       // Charger les catégories si pas encore chargées
       final catState = ref.read(categoryNotifierProvider);
       if (catState.items.isEmpty && !catState.isLoading) {
@@ -43,7 +46,6 @@ class _TransactionListScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(transactionListNotifierProvider);
-    final notifier = ref.read(transactionListNotifierProvider.notifier);
     final catState = ref.watch(categoryNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -57,7 +59,7 @@ class _TransactionListScreenState
     return RefreshIndicator(
       onRefresh: () async {
         try {
-          await notifier.refresh();
+          await ref.read(transactionListNotifierProvider.notifier).refresh();
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +81,7 @@ class _TransactionListScreenState
                 child: MonthSelector(
                   initialMonth: state.selectedMonth,
                   initialYear: state.selectedYear,
-                  onChanged: notifier.changeMonth,
+                  onChanged: (m, y) => ref.read(transactionListNotifierProvider.notifier).changeMonth(m, y),
                 ),
               ),
             ),
@@ -119,13 +121,13 @@ class _TransactionListScreenState
                   ),
                 ],
                 selectedValue: state.activeFilter,
-                onChanged: notifier.setFilter,
+                onChanged: (f) => ref.read(transactionListNotifierProvider.notifier).setFilter(f),
               ),
             ),
           ),
 
           // Contenu principal
-          ..._buildContent(state, notifier, categoryMap, colorScheme, l10n),
+          ..._buildContent(state, categoryMap, colorScheme, l10n),
         ],
       ),
     );
@@ -133,7 +135,6 @@ class _TransactionListScreenState
 
   List<Widget> _buildContent(
     TransactionListState state,
-    TransactionListNotifier notifier,
     Map<String, Category> categoryMap,
     ColorScheme colorScheme,
     AppLocalizations l10n,
@@ -176,7 +177,7 @@ class _TransactionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   FilledButton.icon(
-                    onPressed: () => notifier.refresh(),
+                    onPressed: () => ref.read(transactionListNotifierProvider.notifier).refresh(),
                     icon: const Icon(Icons.refresh),
                     label: Text(l10n.transactionsRetry),
                   ),
@@ -244,7 +245,6 @@ class _TransactionListScreenState
             date: day,
             transactions: dayTxs,
             categories: categoryMap,
-            onTransactionTap: (tx) => _onTransactionTap(tx.id),
           );
         },
       ),
@@ -253,10 +253,5 @@ class _TransactionListScreenState
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
     ];
-  }
-
-  void _onTransactionTap(String id) {
-    // Navigation préparée — no-op tant que le formulaire d'édition n'existe pas.
-    // Sera activé quand la route /transactions/:id sera ajoutée au router.
   }
 }

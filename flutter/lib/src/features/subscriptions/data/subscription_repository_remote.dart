@@ -1,6 +1,7 @@
 import 'package:k_budget/src/data/remote/data_sources/subscription_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/subscription_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 
@@ -47,9 +48,9 @@ class SubscriptionRepositoryRemote implements SubscriptionRepository {
         id: r.id,
         nom: r.nom,
         montant: r.montant,
-        frequence: Frequency.values.byName(r.frequence.toLowerCase()),
+        frequence: Frequency.values.byNameOrDefault(r.frequence.toLowerCase(), Frequency.mensuel),
         dateDebut: DateTime.parse(r.dateDebut),
-        currency: Currency.values.byName(r.currency.toLowerCase()),
+        currency: Currency.values.byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
         actif: r.actif,
         categoryId: r.categoryId,
         accountId: r.accountId,

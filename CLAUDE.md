@@ -217,6 +217,9 @@ Approche **signals-first** obligatoire :
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
 
 ## Active Technologies
+- Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
+- Drift (SQLite local) / Dio (API REST) via strategy pattern `dataModeProvider` (043-flutter-transactions-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
 
 ### Backend (api/)
 
@@ -236,3 +239,6 @@ Approche **signals-first** obligatoire :
 - flutter_riverpod, go_router, drift, dio, flutter_secure_storage
 - freezed, json_serializable, shimmer, intl
 - flutter_test, mockito, build_runner
+
+## Recent Changes
+- 043-flutter-transactions-list: Added Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl

@@ -8,6 +8,7 @@ import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
@@ -71,6 +72,8 @@ void main() {
           return MaterialApp.router(
             routerConfig: router,
             theme: app_theme.AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
           );
         },
       ),

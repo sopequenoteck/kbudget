@@ -5,11 +5,11 @@ class DayHeaderFormatter {
 
   static DateFormat? _fullFormatCache;
   static DateFormat get _fullFormat =>
-      _fullFormatCache ??= DateFormat('EEEE d MMMM', 'fr_FR');
+      _fullFormatCache ??= DateFormat('EEEE d MMMM', 'fr');
 
-  static String format(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+  static String format(DateTime date, {DateTime? now}) {
+    final ref = now ?? DateTime.now();
+    final today = DateTime(ref.year, ref.month, ref.day);
     final target = DateTime(date.year, date.month, date.day);
 
     final diff = today.difference(target).inDays;

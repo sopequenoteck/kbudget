@@ -1,6 +1,7 @@
 import 'package:k_budget/src/data/remote/data_sources/transaction_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/transaction_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
@@ -62,14 +63,14 @@ class TransactionRepositoryRemote implements TransactionRepository {
         totalRecettes: r.totalRecettes,
         totalDepenses: r.totalDepenses,
         bilan: r.bilan,
-        currency: Currency.values.byName(r.currency.toLowerCase()),
+        currency: Currency.values.byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
       );
 
   Transaction _toDomain(TransactionResponse r) => Transaction(
         id: r.id,
         montant: r.montant,
         libelle: r.libelle,
-        type: TransactionType.values.byName(r.type.toLowerCase()),
+        type: TransactionType.values.byNameOrDefault(r.type.toLowerCase(), TransactionType.depense),
         date: DateTime.parse(r.date),
         note: r.note,
         transferId: r.transferId,

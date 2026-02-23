@@ -37,7 +37,6 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dataSettingsNotifierProvider);
-    final notifier = ref.read(dataSettingsNotifierProvider.notifier);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -73,7 +72,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
               onSelectionChanged: (selection) {
                 final newMode = selection.first;
                 if (newMode == state.dataMode) return;
-                _onModeChanged(newMode, notifier, state);
+                _onModeChanged(newMode, state);
               },
             ),
           ),
@@ -98,7 +97,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             ),
             keyboardType: TextInputType.url,
             onChanged: (_) {
-              if (state.error != null) notifier.clearError();
+              if (state.error != null) ref.read(dataSettingsNotifierProvider.notifier).clearError();
             },
           ),
           const SizedBox(height: AppSpacing.space3),
@@ -138,12 +137,12 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
 
   Future<void> _onModeChanged(
     DataMode newMode,
-    DataSettingsNotifier notifier,
     DataSettingsState state,
   ) async {
     // Validate URL if switching to server
     if (newMode == DataMode.server) {
       final url = _urlController.text.trim();
+      final notifier = ref.read(dataSettingsNotifierProvider.notifier);
       final validationError = notifier.validateUrl(url);
       if (validationError != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -181,12 +180,13 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     // If switching to server, check connectivity
     if (newMode == DataMode.server) {
       final url = _urlController.text.trim();
-      await notifier.saveServerUrl(url);
-      final isReachable = await notifier.checkConnectivity(url);
+      final n = ref.read(dataSettingsNotifierProvider.notifier);
+      await n.saveServerUrl(url);
+      final isReachable = await n.checkConnectivity(url);
       if (!isReachable || !mounted) return;
     }
 
-    await notifier.switchDataMode(newMode);
+    await ref.read(dataSettingsNotifierProvider.notifier).switchDataMode(newMode);
     if (mounted) {
       RestartWidget.restartApp(context);
     }

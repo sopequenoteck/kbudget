@@ -15,7 +15,7 @@ class TransactionListState with _$TransactionListState {
     required int selectedMonth,
     required int selectedYear,
     MonthlySummary? summary,
-    @Default(true) bool isLoading,
+    @Default(false) bool isLoading,
     String? error,
   }) = _TransactionListState;
 }
