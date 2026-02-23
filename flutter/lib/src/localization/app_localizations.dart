@@ -706,6 +706,84 @@ abstract class AppLocalizations {
   /// **'Créez une catégorie d\'abord'**
   String get debtFormNoCategories;
 
+  /// No description provided for @debtsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dettes'**
+  String get debtsTitle;
+
+  /// No description provided for @debtsSummaryEmprunts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Emprunts'**
+  String get debtsSummaryEmprunts;
+
+  /// No description provided for @debtsSummaryPrets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêts'**
+  String get debtsSummaryPrets;
+
+  /// No description provided for @debtsSummaryNet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde net'**
+  String get debtsSummaryNet;
+
+  /// No description provided for @debtsFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get debtsFilterAll;
+
+  /// No description provided for @debtsFilterEnCours.
+  ///
+  /// In fr, this message translates to:
+  /// **'En cours'**
+  String get debtsFilterEnCours;
+
+  /// No description provided for @debtsFilterRembourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé'**
+  String get debtsFilterRembourse;
+
+  /// No description provided for @debtsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dette'**
+  String get debtsEmpty;
+
+  /// No description provided for @debtsEmptyEnCours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dette en cours'**
+  String get debtsEmptyEnCours;
+
+  /// No description provided for @debtsEmptyRembourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dette remboursée'**
+  String get debtsEmptyRembourse;
+
+  /// No description provided for @debtsSectionPrets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêts'**
+  String get debtsSectionPrets;
+
+  /// No description provided for @debtsSectionEmprunts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Emprunts'**
+  String get debtsSectionEmprunts;
+
+  /// No description provided for @debtBadgeRembourse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé'**
+  String get debtBadgeRembourse;
+
   /// No description provided for @validationRequired.
   ///
   /// In fr, this message translates to:

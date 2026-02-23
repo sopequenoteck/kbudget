@@ -321,6 +321,45 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtFormNoCategories => 'Créez une catégorie d\'abord';
 
   @override
+  String get debtsTitle => 'Dettes';
+
+  @override
+  String get debtsSummaryEmprunts => 'Emprunts';
+
+  @override
+  String get debtsSummaryPrets => 'Prêts';
+
+  @override
+  String get debtsSummaryNet => 'Solde net';
+
+  @override
+  String get debtsFilterAll => 'Tous';
+
+  @override
+  String get debtsFilterEnCours => 'En cours';
+
+  @override
+  String get debtsFilterRembourse => 'Remboursé';
+
+  @override
+  String get debtsEmpty => 'Aucune dette';
+
+  @override
+  String get debtsEmptyEnCours => 'Aucune dette en cours';
+
+  @override
+  String get debtsEmptyRembourse => 'Aucune dette remboursée';
+
+  @override
+  String get debtsSectionPrets => 'Prêts';
+
+  @override
+  String get debtsSectionEmprunts => 'Emprunts';
+
+  @override
+  String get debtBadgeRembourse => 'Remboursé';
+
+  @override
   String get validationRequired => 'Champ requis';
 
   @override

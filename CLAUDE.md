@@ -223,6 +223,7 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl (044-flutter-transaction-form)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, intl (045-flutter-subscription-form)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl, shimmer (046-flutter-subscriptions-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, shimmer, intl (048-flutter-debts-list)
 
 ### Backend (api/)
 

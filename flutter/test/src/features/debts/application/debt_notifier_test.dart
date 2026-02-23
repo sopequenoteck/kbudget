@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
-import 'package:k_budget/src/domain/models/list_state.dart';
+import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,6 +27,22 @@ void main() {
     sens: DebtType.pret,
     date: DateTime(2026, 2, 20),
   );
+  final debtRepaid = Debt(
+    id: '3',
+    personne: 'Charlie',
+    montant: 30.0,
+    sens: DebtType.emprunt,
+    date: DateTime(2026, 1, 5),
+    rembourse: true,
+  );
+  final debtUsd = Debt(
+    id: '4',
+    personne: 'Diana',
+    montant: 200.0,
+    sens: DebtType.pret,
+    date: DateTime(2026, 2, 15),
+    currency: Currency.usd,
+  );
 
   setUp(() {
     mockRepo = MockDebtRepository();
@@ -44,7 +60,7 @@ void main() {
   DebtNotifier notifier() =>
       container.read(debtNotifierProvider.notifier);
 
-  ListState<Debt> state() => container.read(debtNotifierProvider);
+  DebtListState state() => container.read(debtNotifierProvider);
 
   group('DebtNotifier', () {
     test('should_haveEmptyState_when_created', () {
@@ -120,28 +136,6 @@ void main() {
       expect(state().error, contains('Erreur lors de la suppression'));
     });
 
-    test('should_markAsRepaid_when_markAsRepaidCalled', () async {
-      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
-      await notifier().loadItems();
-
-      final repaid = debt1.copyWith(rembourse: true);
-      when(mockRepo.update(any)).thenAnswer((_) async => repaid);
-      await notifier().markAsRepaid('1');
-
-      expect(state().items.first.rembourse, true);
-    });
-
-    test('should_showError_when_markAsRepaidFails', () async {
-      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
-      await notifier().loadItems();
-
-      when(mockRepo.update(any)).thenThrow(Exception('Server error'));
-      await notifier().markAsRepaid('1');
-
-      expect(state().error, contains('Erreur lors de la modification'));
-      expect(state().items.first.rembourse, false);
-    });
-
     test('should_loadNextPage_when_loadMoreCalled', () async {
       final items = List.generate(
         25,
@@ -176,6 +170,112 @@ void main() {
 
       await future;
       expect(state().mutatingIds, isEmpty);
+    });
+  });
+
+  group('DebtNotifier — filter', () {
+    test('should_excludeRepaid_when_filterSetToEnCours', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      notifier().setFilter(DebtStatusFilter.enCours);
+
+      expect(state().items, hasLength(2));
+      expect(state().items.every((d) => !d.rembourse), true);
+      expect(state().activeFilter, DebtStatusFilter.enCours);
+    });
+
+    test('should_showOnlyRepaid_when_filterSetToRembourse', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      notifier().setFilter(DebtStatusFilter.rembourse);
+
+      expect(state().items, hasLength(1));
+      expect(state().items.first.personne, 'Charlie');
+      expect(state().activeFilter, DebtStatusFilter.rembourse);
+    });
+
+    test('should_showAll_when_filterSetToAll', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      notifier().setFilter(DebtStatusFilter.enCours);
+      notifier().setFilter(DebtStatusFilter.all);
+
+      expect(state().items, hasLength(3));
+      expect(state().activeFilter, DebtStatusFilter.all);
+    });
+
+    test('should_preserveFilter_when_refreshCalled', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      notifier().setFilter(DebtStatusFilter.enCours);
+      expect(state().items, hasLength(2));
+
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().refresh();
+
+      expect(state().activeFilter, DebtStatusFilter.enCours);
+      expect(state().items, hasLength(2));
+    });
+  });
+
+  group('DebtNotifier — summary', () {
+    test('should_computeSummary_when_debtsExist', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1, debt2]);
+      await notifier().loadItems();
+
+      // debt1: emprunt 50 EUR, debt2: pret 100 EUR
+      expect(state().summary[Currency.eur]?.totalEmprunts, 50.0);
+      expect(state().summary[Currency.eur]?.totalPrets, 100.0);
+    });
+
+    test('should_excludeRepaid_when_computingSummary', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      // debtRepaid (emprunt 30 EUR) should be excluded
+      expect(state().summary[Currency.eur]?.totalEmprunts, 50.0);
+      expect(state().summary[Currency.eur]?.totalPrets, 100.0);
+    });
+
+    test('should_groupByCurrency_when_multiCurrency', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtUsd]);
+      await notifier().loadItems();
+
+      expect(state().summary[Currency.eur]?.totalEmprunts, 50.0);
+      expect(state().summary[Currency.eur]?.totalPrets, 100.0);
+      expect(state().summary[Currency.usd]?.totalPrets, 200.0);
+      expect(state().summary[Currency.usd]?.totalEmprunts, 0.0);
+    });
+
+    test('should_returnEmptySummary_when_allRepaid', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debtRepaid]);
+      await notifier().loadItems();
+
+      expect(state().summary, isEmpty);
+    });
+
+    test('should_notChangeSummary_when_filterChanges', () async {
+      when(mockRepo.getAll())
+          .thenAnswer((_) async => [debt1, debt2, debtRepaid]);
+      await notifier().loadItems();
+
+      final summaryBefore =
+          Map<Currency, DebtCurrencySummary>.from(state().summary);
+
+      notifier().setFilter(DebtStatusFilter.rembourse);
+
+      expect(state().summary, summaryBefore);
     });
   });
 }

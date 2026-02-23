@@ -1,20 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
-import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
+import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 
 final debtNotifierProvider =
-    NotifierProvider<DebtNotifier, ListState<Debt>>(
+    NotifierProvider<DebtNotifier, DebtListState>(
   DebtNotifier.new,
 );
 
-class DebtNotifier extends Notifier<ListState<Debt>> {
+class DebtNotifier extends Notifier<DebtListState> {
   static const _pageSize = 20;
   List<Debt> _allItems = [];
 
   @override
-  ListState<Debt> build() => const ListState<Debt>();
+  DebtListState build() => const DebtListState();
 
   DebtRepository get _repo => ref.read(debtRepositoryProvider);
 
@@ -34,15 +35,21 @@ class DebtNotifier extends Notifier<ListState<Debt>> {
 
   Future<void> refresh() async => loadItems();
 
+  void setFilter(DebtStatusFilter filter) {
+    state = state.copyWith(activeFilter: filter);
+    _refreshPage(resetPage: true);
+  }
+
   void loadMore() {
     if (!state.hasMore || state.isLoading) return;
+    final filtered = _applyFilter(_allItems, state.activeFilter);
     final nextPage = state.currentPage + 1;
     final end = (nextPage + 1) * _pageSize;
-    final page = _allItems.take(end).toList();
+    final page = filtered.take(end).toList();
     state = state.copyWith(
       items: page,
       currentPage: nextPage,
-      hasMore: end < _allItems.length,
+      hasMore: end < filtered.length,
     );
   }
 
@@ -108,21 +115,45 @@ class DebtNotifier extends Notifier<ListState<Debt>> {
     }
   }
 
-  Future<void> markAsRepaid(String id) async {
-    final item = _allItems.where((e) => e.id == id).firstOrNull;
-    if (item == null) return;
-    await update(item.copyWith(rembourse: true));
+  List<Debt> _applyFilter(List<Debt> items, DebtStatusFilter filter) {
+    return switch (filter) {
+      DebtStatusFilter.all => items,
+      DebtStatusFilter.enCours => items.where((d) => !d.rembourse).toList(),
+      DebtStatusFilter.rembourse => items.where((d) => d.rembourse).toList(),
+    };
+  }
+
+  Map<Currency, DebtCurrencySummary> _computeSummary(List<Debt> allItems) {
+    final result = <Currency, ({double totalEmprunts, double totalPrets})>{};
+    for (final debt in allItems.where((d) => !d.rembourse)) {
+      final prev = result[debt.currency] ??
+          (totalEmprunts: 0.0, totalPrets: 0.0);
+      if (debt.sens == DebtType.emprunt) {
+        result[debt.currency] = (
+          totalEmprunts: prev.totalEmprunts + debt.montant,
+          totalPrets: prev.totalPrets,
+        );
+      } else {
+        result[debt.currency] = (
+          totalEmprunts: prev.totalEmprunts,
+          totalPrets: prev.totalPrets + debt.montant,
+        );
+      }
+    }
+    return result;
   }
 
   void _refreshPage({bool resetPage = false}) {
+    final filtered = _applyFilter(_allItems, state.activeFilter);
     final page = resetPage ? 0 : state.currentPage;
     final end = (page + 1) * _pageSize;
-    final items = _allItems.take(end).toList();
+    final items = filtered.take(end).toList();
     state = state.copyWith(
       items: items,
       isLoading: false,
       currentPage: page,
-      hasMore: end < _allItems.length,
+      hasMore: end < filtered.length,
+      summary: _computeSummary(_allItems),
     );
   }
 }
