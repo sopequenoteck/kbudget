@@ -287,6 +287,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionBadgeInactif => 'Inactif';
 
   @override
+  String get debtFormPersonField => 'Personne';
+
+  @override
+  String get debtFormAmountField => 'Montant';
+
+  @override
+  String get debtFormDateField => 'Date';
+
+  @override
+  String get debtFormCategoryPicker => 'Catégorie';
+
+  @override
+  String get debtFormRepaidSwitch => 'Remboursé';
+
+  @override
+  String get debtFormSaveButton => 'Enregistrer';
+
+  @override
+  String get debtFormUpdateButton => 'Modifier';
+
+  @override
+  String get debtFormDeleteButton => 'Supprimer';
+
+  @override
+  String get debtFormDeleteConfirmTitle => 'Supprimer la dette';
+
+  @override
+  String get debtFormDeleteConfirmMessage =>
+      'Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.';
+
+  @override
+  String get debtFormNoCategories => 'Créez une catégorie d\'abord';
+
+  @override
   String get validationRequired => 'Champ requis';
 
   @override

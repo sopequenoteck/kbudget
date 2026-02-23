@@ -24,8 +24,11 @@ import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/debts/presentation/widgets/debt_form.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_form.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
@@ -259,6 +262,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
           Navigator.of(context).pop();
         },
       );
+    } else if (state.type == ModalType.debt) {
+      return _DebtFormConsumer(
+        debt: state.entity as Debt?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
     return const SizedBox.shrink();
   }
@@ -371,6 +381,44 @@ class _SubscriptionFormConsumer extends ConsumerWidget {
       onDeleted: subscription != null
           ? (id) async {
               await ref.read(subscriptionNotifierProvider.notifier).delete(id);
+              onDone();
+            }
+          : null,
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _DebtFormConsumer extends ConsumerWidget {
+  final Debt? debt;
+  final VoidCallback onDone;
+
+  const _DebtFormConsumer({
+    this.debt,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    final debtType = (modalState.subType as DebtType?) ?? DebtType.emprunt;
+
+    return DebtForm(
+      debt: debt,
+      debtType: debtType,
+      onSaved: (d) async {
+        if (debt == null) {
+          await ref.read(debtNotifierProvider.notifier).create(d);
+        } else {
+          await ref.read(debtNotifierProvider.notifier).update(d);
+        }
+        onDone();
+      },
+      onDeleted: debt != null
+          ? (id) async {
+              await ref.read(debtNotifierProvider.notifier).delete(id);
               onDone();
             }
           : null,

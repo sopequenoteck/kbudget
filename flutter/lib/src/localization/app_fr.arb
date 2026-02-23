@@ -101,6 +101,18 @@
   },
   "subscriptionBadgeInactif": "Inactif",
 
+  "debtFormPersonField": "Personne",
+  "debtFormAmountField": "Montant",
+  "debtFormDateField": "Date",
+  "debtFormCategoryPicker": "Catégorie",
+  "debtFormRepaidSwitch": "Remboursé",
+  "debtFormSaveButton": "Enregistrer",
+  "debtFormUpdateButton": "Modifier",
+  "debtFormDeleteButton": "Supprimer",
+  "debtFormDeleteConfirmTitle": "Supprimer la dette",
+  "debtFormDeleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.",
+  "debtFormNoCategories": "Créez une catégorie d'abord",
+
   "validationRequired": "Champ requis",
   "validationAmountPositive": "Le montant doit être positif",
   "validationMaxLength": "Maximum {max} caractères",

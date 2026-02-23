@@ -640,6 +640,72 @@ abstract class AppLocalizations {
   /// **'Inactif'**
   String get subscriptionBadgeInactif;
 
+  /// No description provided for @debtFormPersonField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne'**
+  String get debtFormPersonField;
+
+  /// No description provided for @debtFormAmountField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get debtFormAmountField;
+
+  /// No description provided for @debtFormDateField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get debtFormDateField;
+
+  /// No description provided for @debtFormCategoryPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get debtFormCategoryPicker;
+
+  /// No description provided for @debtFormRepaidSwitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé'**
+  String get debtFormRepaidSwitch;
+
+  /// No description provided for @debtFormSaveButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get debtFormSaveButton;
+
+  /// No description provided for @debtFormUpdateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get debtFormUpdateButton;
+
+  /// No description provided for @debtFormDeleteButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get debtFormDeleteButton;
+
+  /// No description provided for @debtFormDeleteConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la dette'**
+  String get debtFormDeleteConfirmTitle;
+
+  /// No description provided for @debtFormDeleteConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.'**
+  String get debtFormDeleteConfirmMessage;
+
+  /// No description provided for @debtFormNoCategories.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez une catégorie d\'abord'**
+  String get debtFormNoCategories;
+
   /// No description provided for @validationRequired.
   ///
   /// In fr, this message translates to:
