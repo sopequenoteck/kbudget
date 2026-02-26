@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
 
@@ -8,19 +9,21 @@ void main() {
       required Size size,
       int currentIndex = 0,
     }) {
-      return MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(size: size),
-          child: SizedBox(
-            width: size.width,
-            height: size.height,
-            child: AdaptiveScaffold(
-              currentIndex: currentIndex,
-              onDestinationSelected: (_) {},
-              body: const Text('Body'),
-              floatingActionButton: const FloatingActionButton(
-                onPressed: null,
-                child: Icon(Icons.add),
+      return ProviderScope(
+        child: MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: size),
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: AdaptiveScaffold(
+                currentIndex: currentIndex,
+                onDestinationSelected: (_) {},
+                body: const Text('Body'),
+                floatingActionButton: const FloatingActionButton(
+                  onPressed: null,
+                  child: Icon(Icons.add),
+                ),
               ),
             ),
           ),
@@ -38,10 +41,9 @@ void main() {
       await tester.pump();
 
       expect(find.byType(BottomNavigationBar), findsOneWidget);
-      expect(find.byType(NavigationRail), findsNothing);
     });
 
-    testWidgets('should_show_navigation_rail_when_wide',
+    testWidgets('should_show_sidebar_when_wide',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1024, 768);
       tester.view.devicePixelRatio = 1.0;
@@ -50,7 +52,8 @@ void main() {
       await tester.pumpWidget(buildScaffold(size: const Size(1024, 768)));
       await tester.pump();
 
-      expect(find.byType(NavigationRail), findsOneWidget);
+      // Wide layout uses a custom sidebar with VerticalDivider, not NavigationRail
+      expect(find.byType(VerticalDivider), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsNothing);
     });
 

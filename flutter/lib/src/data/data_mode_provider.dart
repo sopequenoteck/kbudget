@@ -20,6 +20,7 @@ import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/category_repository.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
+import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_local.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_remote.dart';
@@ -47,8 +48,8 @@ final dataModeProvider = FutureProvider<DataMode>((ref) async {
 });
 
 // Configured Dio with JWT and connectivity interceptors (server mode)
-final authenticatedDioProvider = Provider<Dio>((ref) {
-  final dio = ref.watch(apiClientProvider);
+final authenticatedDioProvider = FutureProvider<Dio>((ref) async {
+  final dio = await ref.watch(apiClientProvider.future);
   const secureStorage = FlutterSecureStorage();
 
   dio.interceptors.addAll([
@@ -66,8 +67,12 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   return modeAsync.when(
     data: (mode) {
       if (mode == DataMode.server) {
-        final dio = ref.watch(authenticatedDioProvider);
-        return TransactionRepositoryRemote(TransactionRemoteDataSource(dio));
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => TransactionRepositoryRemote(TransactionRemoteDataSource(dio)),
+          loading: () => TransactionRepositoryLocal(TransactionDao(ref.watch(databaseProvider))),
+          error: (_, _) => TransactionRepositoryLocal(TransactionDao(ref.watch(databaseProvider))),
+        );
       }
       final db = ref.watch(databaseProvider);
       return TransactionRepositoryLocal(TransactionDao(db));
@@ -83,14 +88,25 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   );
 });
 
+// Monthly summary provider — uses transaction repository to get aggregated data
+final monthlySummaryProvider =
+    FutureProvider.family<List<MonthlySummary>, ({int month, int year})>(
+        (ref, params) {
+  final repo = ref.watch(transactionRepositoryProvider);
+  return repo.getMonthlySummary(params.month, params.year);
+});
+
 final subscriptionRepositoryProvider = Provider<SubscriptionRepository>((ref) {
   final modeAsync = ref.watch(dataModeProvider);
   return modeAsync.when(
     data: (mode) {
       if (mode == DataMode.server) {
-        final dio = ref.watch(authenticatedDioProvider);
-        return SubscriptionRepositoryRemote(
-            SubscriptionRemoteDataSource(dio));
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => SubscriptionRepositoryRemote(SubscriptionRemoteDataSource(dio)),
+          loading: () => SubscriptionRepositoryLocal(SubscriptionDao(ref.watch(databaseProvider))),
+          error: (_, _) => SubscriptionRepositoryLocal(SubscriptionDao(ref.watch(databaseProvider))),
+        );
       }
       final db = ref.watch(databaseProvider);
       return SubscriptionRepositoryLocal(SubscriptionDao(db));
@@ -111,8 +127,12 @@ final debtRepositoryProvider = Provider<DebtRepository>((ref) {
   return modeAsync.when(
     data: (mode) {
       if (mode == DataMode.server) {
-        final dio = ref.watch(authenticatedDioProvider);
-        return DebtRepositoryRemote(DebtRemoteDataSource(dio));
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => DebtRepositoryRemote(DebtRemoteDataSource(dio)),
+          loading: () => DebtRepositoryLocal(DebtDao(ref.watch(databaseProvider))),
+          error: (_, _) => DebtRepositoryLocal(DebtDao(ref.watch(databaseProvider))),
+        );
       }
       final db = ref.watch(databaseProvider);
       return DebtRepositoryLocal(DebtDao(db));
@@ -133,8 +153,12 @@ final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
   return modeAsync.when(
     data: (mode) {
       if (mode == DataMode.server) {
-        final dio = ref.watch(authenticatedDioProvider);
-        return CategoryRepositoryRemote(CategoryRemoteDataSource(dio));
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => CategoryRepositoryRemote(CategoryRemoteDataSource(dio)),
+          loading: () => CategoryRepositoryLocal(CategoryDao(ref.watch(databaseProvider))),
+          error: (_, _) => CategoryRepositoryLocal(CategoryDao(ref.watch(databaseProvider))),
+        );
       }
       final db = ref.watch(databaseProvider);
       return CategoryRepositoryLocal(CategoryDao(db));
@@ -155,8 +179,12 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return modeAsync.when(
     data: (mode) {
       if (mode == DataMode.server) {
-        final dio = ref.watch(authenticatedDioProvider);
-        return AccountRepositoryRemote(AccountRemoteDataSource(dio));
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => AccountRepositoryRemote(AccountRemoteDataSource(dio)),
+          loading: () => AccountRepositoryLocal(AccountDao(ref.watch(databaseProvider))),
+          error: (_, _) => AccountRepositoryLocal(AccountDao(ref.watch(databaseProvider))),
+        );
       }
       final db = ref.watch(databaseProvider);
       return AccountRepositoryLocal(AccountDao(db));
@@ -170,4 +198,11 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
       return AccountRepositoryLocal(AccountDao(db));
     },
   );
+});
+
+// AccountRemoteDataSource provider (server-only, used for transfer)
+final accountRemoteDataSourceProvider =
+    FutureProvider<AccountRemoteDataSource>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return AccountRemoteDataSource(dio);
 });

@@ -36,6 +36,7 @@ Hebergee en self-hosted sur serveur personnel.
 |--------|-------|
 | Backend | Spring Boot 4.0.2 (API REST, Java 21) |
 | Frontend | Angular 21 PWA (`k-budget-app`, dossier `app/`) |
+| Mobile | Flutter >= 3.27 / Dart >= 3.6 (`k_budget`, dossier `flutter/`) |
 | Base de donnees | PostgreSQL 15+ |
 | Auth | Spring Security + JWT |
 | Reverse proxy | Caddy (auto-HTTPS) |

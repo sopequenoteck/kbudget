@@ -68,15 +68,17 @@ class _FakeMacOsOptions_6 extends _i1.SmartFake implements _i3.MacOsOptions {
 /// See the documentation for Mockito's code generation for more information.
 class MockAuthRemoteDataSource extends _i1.Mock
     implements _i4.AuthRemoteDataSource {
-  MockAuthRemoteDataSource() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i5.Future<_i2.AuthResponse> login(String? email, String? password) =>
       (super.noSuchMethod(
             Invocation.method(#login, [email, password]),
             returnValue: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(#login, [email, password]),
+              ),
+            ),
+            returnValueForMissingStub: _i5.Future<_i2.AuthResponse>.value(
               _FakeAuthResponse_0(
                 this,
                 Invocation.method(#login, [email, password]),
@@ -108,6 +110,16 @@ class MockAuthRemoteDataSource extends _i1.Mock
                 ),
               ),
             ),
+            returnValueForMissingStub: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(
+                  #register,
+                  [email, password, name],
+                  {#invitationToken: invitationToken},
+                ),
+              ),
+            ),
           )
           as _i5.Future<_i2.AuthResponse>);
 
@@ -116,6 +128,12 @@ class MockAuthRemoteDataSource extends _i1.Mock
       (super.noSuchMethod(
             Invocation.method(#refresh, [refreshToken]),
             returnValue: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(#refresh, [refreshToken]),
+              ),
+            ),
+            returnValueForMissingStub: _i5.Future<_i2.AuthResponse>.value(
               _FakeAuthResponse_0(
                 this,
                 Invocation.method(#refresh, [refreshToken]),
@@ -139,15 +157,15 @@ class MockAuthRemoteDataSource extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockFlutterSecureStorage extends _i1.Mock
     implements _i3.FlutterSecureStorage {
-  MockFlutterSecureStorage() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i3.IOSOptions get iOptions =>
       (super.noSuchMethod(
             Invocation.getter(#iOptions),
             returnValue: _FakeIOSOptions_1(this, Invocation.getter(#iOptions)),
+            returnValueForMissingStub: _FakeIOSOptions_1(
+              this,
+              Invocation.getter(#iOptions),
+            ),
           )
           as _i3.IOSOptions);
 
@@ -156,6 +174,10 @@ class MockFlutterSecureStorage extends _i1.Mock
       (super.noSuchMethod(
             Invocation.getter(#aOptions),
             returnValue: _FakeAndroidOptions_2(
+              this,
+              Invocation.getter(#aOptions),
+            ),
+            returnValueForMissingStub: _FakeAndroidOptions_2(
               this,
               Invocation.getter(#aOptions),
             ),
@@ -170,6 +192,10 @@ class MockFlutterSecureStorage extends _i1.Mock
               this,
               Invocation.getter(#lOptions),
             ),
+            returnValueForMissingStub: _FakeLinuxOptions_3(
+              this,
+              Invocation.getter(#lOptions),
+            ),
           )
           as _i3.LinuxOptions);
 
@@ -178,6 +204,10 @@ class MockFlutterSecureStorage extends _i1.Mock
       (super.noSuchMethod(
             Invocation.getter(#wOptions),
             returnValue: _FakeWindowsOptions_4(
+              this,
+              Invocation.getter(#wOptions),
+            ),
+            returnValueForMissingStub: _FakeWindowsOptions_4(
               this,
               Invocation.getter(#wOptions),
             ),
@@ -192,6 +222,10 @@ class MockFlutterSecureStorage extends _i1.Mock
               this,
               Invocation.getter(#webOptions),
             ),
+            returnValueForMissingStub: _FakeWebOptions_5(
+              this,
+              Invocation.getter(#webOptions),
+            ),
           )
           as _i3.WebOptions);
 
@@ -200,6 +234,10 @@ class MockFlutterSecureStorage extends _i1.Mock
       (super.noSuchMethod(
             Invocation.getter(#mOptions),
             returnValue: _FakeMacOsOptions_6(
+              this,
+              Invocation.getter(#mOptions),
+            ),
+            returnValueForMissingStub: _FakeMacOsOptions_6(
               this,
               Invocation.getter(#mOptions),
             ),
@@ -288,6 +326,7 @@ class MockFlutterSecureStorage extends _i1.Mock
               #wOptions: wOptions,
             }),
             returnValue: _i5.Future<String?>.value(),
+            returnValueForMissingStub: _i5.Future<String?>.value(),
           )
           as _i5.Future<String?>);
 
@@ -312,6 +351,7 @@ class MockFlutterSecureStorage extends _i1.Mock
               #wOptions: wOptions,
             }),
             returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
           as _i5.Future<bool>);
 
@@ -361,6 +401,9 @@ class MockFlutterSecureStorage extends _i1.Mock
             returnValue: _i5.Future<Map<String, String>>.value(
               <String, String>{},
             ),
+            returnValueForMissingStub: _i5.Future<Map<String, String>>.value(
+              <String, String>{},
+            ),
           )
           as _i5.Future<Map<String, String>>);
 
@@ -392,6 +435,7 @@ class MockFlutterSecureStorage extends _i1.Mock
       (super.noSuchMethod(
             Invocation.method(#isCupertinoProtectedDataAvailable, []),
             returnValue: _i5.Future<bool?>.value(),
+            returnValueForMissingStub: _i5.Future<bool?>.value(),
           )
           as _i5.Future<bool?>);
 }

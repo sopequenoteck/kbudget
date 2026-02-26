@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-Application personnelle de gestion de budget (transactions, abonnements, dettes). Self-hosted, single-user. Monorepo avec deux modules :
+Application personnelle de gestion de budget (transactions, abonnements, dettes). Self-hosted, single-user. Monorepo avec trois modules :
 
 - `api/` — Backend Spring Boot (API REST)
 - `app/` — Frontend Angular PWA mobile-first (`k-budget-app`)
+- `flutter/` — App mobile native Flutter (`k_budget`)
 
 **Gestion des issues** : toutes les issues et le suivi du projet sont sur **Linear** (identifiants `KKS-*`). Ne pas utiliser GitHub Issues.
 
@@ -38,6 +39,18 @@ cd app && ng build --configuration production  # Build prod
 
 Le projet Angular est dans `app/`. Toutes les commandes Angular CLI doivent être exécutées depuis ce répertoire.
 
+### Flutter (flutter/)
+
+```bash
+cd flutter && flutter test             # Tests unitaires + widget
+cd flutter && flutter test test/src/features/  # Tests par feature
+cd flutter && dart run build_runner build --delete-conflicting-outputs  # Code generation (Drift, Freezed, JSON)
+cd flutter && flutter run              # Lancer sur device/simulateur
+cd flutter && flutter analyze          # Analyse statique
+```
+
+Le projet Flutter est dans `flutter/`. Toutes les commandes Flutter/Dart doivent être exécutées depuis ce répertoire.
+
 ## Architecture
 
 > Détails complets : [`README.md`](README.md) et [`docs/architecture.md`](docs/architecture.md).
@@ -46,7 +59,8 @@ Le projet Angular est dans `app/`. Toutes les commandes Angular CLI doivent êtr
 
 - **Backend** : Java 21, Spring Boot 4.0.2, Maven, Lombok
 - **Frontend** : Angular 21, TypeScript 5.9, SCSS
-- **BDD** : PostgreSQL 15+, Spring Data JPA, Flyway
+- **Mobile** : Flutter >= 3.27, Dart >= 3.6, Riverpod, Drift, Dio
+- **BDD** : PostgreSQL 15+ (backend), SQLite/Drift (Flutter local)
 - **Auth** : Spring Security + JWT (jjwt 0.12.6) avec refresh tokens
 - **Infra** : Docker + Caddy (reverse proxy, auto-HTTPS)
 
@@ -84,13 +98,39 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - Endpoints auth : `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`.
 - Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 
-### Design System SCSS
+### Design System SCSS (Angular)
 
 Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities). Couleur primaire : Amber (#f59e0b). Police : Inter.
 
+### Architecture Flutter (flutter/)
+
+```
+flutter/lib/src/
+├── common_widgets/    # Widgets partagés (AdaptiveScaffold, AppModal, SelectPicker, EmojiInput, ColorPalettePicker, AppFormField...)
+├── constants/         # Design tokens (AppSpacing, AppColors, AppTypography, AppRadius...)
+├── data/
+│   ├── local/         # Drift database, DAOs, mappers
+│   └── remote/        # Dio client, interceptors, remote data sources
+├── domain/
+│   ├── enums/         # TransactionType, Frequency, DebtType, Currency...
+│   ├── models/        # Freezed models (Account, Transaction...) + ListState<T>
+│   └── repositories/  # Interfaces abstraites (contrats)
+├── features/          # Modules par feature
+│   └── [feature]/
+│       ├── application/   # Riverpod notifiers + state (Freezed)
+│       ├── data/          # Implémentations repositories (local + remote)
+│       └── presentation/  # Screens + widgets
+├── localization/      # i18n
+├── routing/           # Go Router (routes, redirects, shell)
+├── theme/             # AppTheme (light/dark) + AppThemeExtension
+└── utils/             # Helpers (amount_formatter, color_utils...)
+```
+
+**Data mode** : Strategy pattern via `dataModeProvider` — bascule transparente entre `TransactionRepositoryLocal` (Drift) et `TransactionRepositoryRemote` (Dio) selon la config utilisateur.
+
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v2.0.0) est le document de reference. 7 principes :
+Le fichier `.specify/memory/constitution.md` (v2.1.0) est le document de reference. 7 principes :
 
 1. **API-First** : toute feature via REST avant frontend. DTOs obligatoires, jamais d'entite JPA exposee.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
@@ -133,6 +173,37 @@ Approche **signals-first** obligatoire :
 - RxJS limite aux flux HTTP et operateurs complexes
 - ESLint + Prettier configures (`ng lint`, `npm run format`)
 
+## Conventions Frontend (Flutter)
+
+### Riverpod-First
+
+| Besoin | Utiliser | Ne PAS utiliser |
+|--------|----------|-----------------|
+| State management | `Notifier` + `NotifierProvider` | `ChangeNotifier`, `setState` |
+| Async data | `FutureProvider` / `StreamProvider` | `FutureBuilder`, `StreamBuilder` |
+| State immutable | `Freezed` (`@freezed`) | Classes mutables |
+| DI | `ref.watch()` / `ref.read()` | `Provider.of()`, `GetIt` |
+| Parameterized | `FutureProvider.family` | Provider avec constructeur |
+
+### Patterns obligatoires
+
+- **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`
+- **ListState\<T\>** : Freezed model generique (`items`, `isLoading`, `error`, `currentPage`, `hasMore`, `mutatingIds`)
+- **Repository abstrait** : Interface dans `domain/repositories/`, implementations dans `features/[feature]/data/` (local + remote)
+- **Data mode provider** : Strategy pattern — `dataModeProvider` bascule entre `RepositoryLocal` (Drift) et `RepositoryRemote` (Dio)
+- **Widgets** : `ConsumerWidget` (lecture state), `ConsumerStatefulWidget` (stateful + Riverpod), `StatelessWidget` (UI pure)
+- **Design tokens** : Utiliser `AppSpacing`, `AppColors`, `AppRadius` etc. — jamais de valeurs hardcodées
+- **Navigation** : `context.push()` / `context.go()` via go_router
+- **Skeleton loading** : Package `shimmer` avec widgets `_XxxSkeleton` privés
+- **Code generation** : `build_runner` pour Drift, Freezed, json_serializable — fichiers `.g.dart` et `.freezed.dart` commits
+
+### Tests Flutter
+
+- Nommage : `should_[résultat]_when_[condition]`
+- Structure : `ProviderContainer` avec `overrides` pour mocker les repositories
+- Pattern : `notifier()` / `state()` helpers dans chaque fichier test
+- Widget tests : `ProviderScope` + `MaterialApp.router` + `AppTheme.light`
+
 ## Documentation
 
 | Document | Contenu |
@@ -146,21 +217,43 @@ Approche **signals-first** obligatoire :
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
 
 ## Active Technologies
-- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (026-bank-accounts)
-- PostgreSQL 15+, Flyway migrations (V1-V6 existantes, V7 pour cette feature) (026-bank-accounts)
-- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Flyway, jjwt 0.12.6, Lombok (026-bank-accounts)
-- TypeScript 5.9, Angular 21 + Angular 21, RxJS, Angular Reactive Forms (027-bank-accounts-frontend)
-- N/A (frontend consomme l'API REST existante) (027-bank-accounts-frontend)
-- TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, SCSS design tokens (existants) (028-settings-redesign)
-- localStorage (thème), AuthService.currentUser() signal (profil) (028-settings-redesign)
-- TypeScript 5.9.2, Angular 21.1.0 + @angular/core, @angular/forms (ControlValueAccessor), @angular/cdk (CdkTrapFocus pour le bottom-sheet) (029-select-picker)
-- N/A (composant frontend pur, pas de persistance) (029-select-picker)
-- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Spring Security + JWT, Angular 21, Lombok (030-multi-currency)
-- PostgreSQL 15+, Flyway migrations (V1-V7 existantes, V8 pour cette feature) (030-multi-currency)
-- Dart >= 3.6 / Flutter >= 3.27 (stable) + flutter_riverpod, go_router, drift, dio, flutter_secure_storage, local_auth, firebase_crashlytics, freezed, json_serializable (031-flutter-setup)
-- Drift (SQLite local, multi-plateforme), flutter_secure_storage (tokens/PIN), API REST existante (mode serveur) (031-flutter-setup)
-- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Angular 21 (032-balance-adjustment)
-- PostgreSQL 15+ (aucune migration Flyway requise — VARCHAR(50) pour type, NUMERIC(19,2) pour montant) (032-balance-adjustment)
+- Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
+- Drift (SQLite local) / Dio (API REST) via strategy pattern `dataModeProvider` (043-flutter-transactions-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl (044-flutter-transaction-form)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, intl (045-flutter-subscription-form)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl, shimmer (046-flutter-subscriptions-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, shimmer, intl (048-flutter-debts-list)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, json_serializable, go_router, dio, shimmer (049-flutter-settings-profile)
+- Serveur uniquement (pas de Drift/SQLite pour le profil — données toujours fraîches depuis l'API) (049-flutter-settings-profile)
+- Serveur uniquement (opération atomique, pas de stockage local) (050-flutter-transfer-form)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, build_runner (051-flutter-settings-appearance)
+- FlutterSecureStorage (AppConfig JSON sérialisé) (051-flutter-settings-appearance)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + `emoji_picker_flutter: ^4.4.0` (déjà ajouté au pubspec.yaml) (052-flutter-emoji-input)
+- N/A (widget UI pur, pas de persistance) (052-flutter-emoji-input)
+- Dart >= 3.6 + Flutter >= 3.27, flutter_riverpod, go_router, freezed, dio, emoji_picker_flutter, shimmer, intl (053-flutter-settings-accounts)
+- API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, emoji_picker_flutter, shimmer, intl (054-flutter-settings-categories)
+- API REST uniquement (pas de Drift pour cette feature — données toujours fraîches depuis l'API) (054-flutter-settings-categories)
+
+### Backend (api/)
+
+- Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
+- PostgreSQL 15+, Flyway migrations V1-V8
+- JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
+
+### Frontend PWA (app/)
+
+- TypeScript 5.9, Angular 21, RxJS, Angular Reactive Forms
+- Angular Signals, Angular Router (lazy-loaded), Angular CDK
+- SCSS design tokens, Vitest
+
+### Mobile natif (flutter/)
+
+- Dart >= 3.6, Flutter >= 3.27
+- flutter_riverpod, go_router, drift, dio, flutter_secure_storage
+- freezed, json_serializable, shimmer, intl
+- flutter_test, mockito, build_runner
 
 ## Recent Changes
-- 026-bank-accounts: Added Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
+- 043-flutter-transactions-list: Added Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl

@@ -123,6 +123,16 @@ public class TransactionService {
         log.info("Transaction supprimée: {}", id);
     }
 
+    public List<TransactionResponse> getByMonth(int month, int year, UUID userId) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate from = yearMonth.atDay(1);
+        LocalDate to = yearMonth.atEndOfMonth();
+        return transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public List<MonthlySummaryResponse> getMonthlySummary(int month, int year, UUID userId) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate from = yearMonth.atDay(1);

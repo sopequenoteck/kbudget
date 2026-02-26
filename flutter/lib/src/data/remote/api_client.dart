@@ -1,15 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/utils/env_config.dart';
 
 /// Dio brut sans intercepteurs d'auth.
 /// Utilisé pour les appels publics (health check, etc.).
 /// Pour les appels authentifiés, utiliser [authenticatedDioProvider]
 /// dans data_mode_provider.dart.
-final apiClientProvider = Provider<Dio>((ref) {
+final apiClientProvider = FutureProvider<Dio>((ref) async {
+  final configRepo = ref.watch(appConfigRepositoryProvider);
+  final serverUrl = await configRepo.getServerUrl();
+  final baseUrl = serverUrl ?? EnvConfig.apiBaseUrl;
+
   return Dio(BaseOptions(
-    baseUrl: EnvConfig.apiBaseUrl,
+    baseUrl: baseUrl,
     contentType: 'application/json',
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 30),

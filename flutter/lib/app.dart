@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/text_scale_notifier.dart';
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
@@ -12,6 +13,7 @@ class KBudgetApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeNotifierProvider);
+    final textScale = ref.watch(textScaleNotifierProvider);
 
     return MaterialApp.router(
       title: 'K-Budget',
@@ -23,6 +25,14 @@ class KBudgetApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('fr'),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale.scaleFactor),
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }

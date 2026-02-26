@@ -1,37 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/domain/enums/modal_type.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 
-class FabMenu extends StatefulWidget {
+class FabMenu extends ConsumerStatefulWidget {
   const FabMenu({super.key});
 
   @override
-  State<FabMenu> createState() => _FabMenuState();
+  ConsumerState<FabMenu> createState() => _FabMenuState();
 }
 
-class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
+class _FabMenuState extends ConsumerState<FabMenu>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
   bool _isOpen = false;
 
-  static const _items = [
+  static const _allItems = [
     _SpeedDialItem(
       icon: Icons.receipt_long,
       label: 'Transaction',
-      action: 'transaction',
+      modalType: ModalType.transaction,
     ),
     _SpeedDialItem(
       icon: Icons.autorenew,
       label: 'Abonnement',
-      action: 'subscription',
+      modalType: ModalType.subscription,
     ),
     _SpeedDialItem(
       icon: Icons.handshake,
       label: 'Dette',
-      action: 'debt',
+      modalType: ModalType.debt,
     ),
     _SpeedDialItem(
       icon: Icons.swap_horiz,
       label: 'Virement',
-      action: 'transfer',
+      modalType: ModalType.transfer,
     ),
   ];
 
@@ -65,16 +70,22 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
     });
   }
 
-  void _onItemTap(String action) {
+  void _onItemTap(ModalType type) {
     _toggle();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$action (à venir)')),
-    );
+    ref.read(modalNotifierProvider.notifier).open(type);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accountState = ref.watch(accountNotifierProvider);
+    final activeAccountCount =
+        accountState.items.where((a) => a.actif).length;
+
+    final items = _allItems
+        .where((item) =>
+            item.modalType != ModalType.transfer || activeAccountCount >= 2)
+        .toList();
 
     return SizedBox(
       height: _isOpen ? 300 : 56,
@@ -95,7 +106,7 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children: _items
+                  children: items
                       .map((item) => _buildSpeedDialItem(item, theme))
                       .toList(),
                 ),
@@ -132,28 +143,28 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
         borderRadius: BorderRadius.circular(24),
         elevation: 3,
         child: InkWell(
-          onTap: () => _onItemTap(item.action),
+          onTap: () => _onItemTap(item.modalType),
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: SizedBox(
               width: 130,
               child: Row(
-              children: [
-                Icon(
-                  item.icon,
-                  size: 18,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  item.label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                children: [
+                  Icon(
+                    item.icon,
+                    size: 18,
+                    color: theme.colorScheme.primary,
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  Text(
+                    item.label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -165,11 +176,11 @@ class _FabMenuState extends State<FabMenu> with SingleTickerProviderStateMixin {
 class _SpeedDialItem {
   final IconData icon;
   final String label;
-  final String action;
+  final ModalType modalType;
 
   const _SpeedDialItem({
     required this.icon,
     required this.label,
-    required this.action,
+    required this.modalType,
   });
 }

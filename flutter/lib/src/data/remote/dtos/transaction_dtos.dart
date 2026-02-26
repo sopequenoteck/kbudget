@@ -29,11 +29,36 @@ class TransactionResponse with _$TransactionResponse {
     required String date,
     String? note,
     String? transferId,
+    @JsonKey(name: 'category', fromJson: _extractNestedId)
     String? categoryId,
+    @JsonKey(name: 'account', fromJson: _extractNestedId)
     String? accountId,
     String? updatedAt,
   }) = _TransactionResponse;
 
   factory TransactionResponse.fromJson(Map<String, dynamic> json) =>
       _$TransactionResponseFromJson(json);
+}
+
+/// Extrait l'ID d'un objet imbrique (ex: {"id": "uuid", "nom": "..."})
+/// ou retourne la valeur directement si c'est deja une string.
+String? _extractNestedId(dynamic json) {
+  if (json is Map<String, dynamic>) return json['id']?.toString();
+  if (json is String) return json;
+  return null;
+}
+
+@freezed
+class MonthlySummaryResponse with _$MonthlySummaryResponse {
+  const factory MonthlySummaryResponse({
+    required int month,
+    required int year,
+    required double totalRecettes,
+    required double totalDepenses,
+    @JsonKey(name: 'solde') required double bilan,
+    required String currency,
+  }) = _MonthlySummaryResponse;
+
+  factory MonthlySummaryResponse.fromJson(Map<String, dynamic> json) =>
+      _$MonthlySummaryResponseFromJson(json);
 }

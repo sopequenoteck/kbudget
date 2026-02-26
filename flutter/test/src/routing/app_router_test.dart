@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
@@ -12,8 +16,17 @@ import 'package:mockito/mockito.dart';
 import '../../helpers/mocks.mocks.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('fr_FR');
+  });
+
   late MockAppConfigRepository mockRepo;
   late MockAuthRepository mockAuthRepo;
+  late MockAccountRepository mockAccountRepo;
+  late MockTransactionRepository mockTransactionRepo;
+  late MockSubscriptionRepository mockSubscriptionRepo;
+  late MockDebtRepository mockDebtRepo;
+  late MockCategoryRepository mockCategoryRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -23,6 +36,21 @@ void main() {
   setUp(() {
     mockRepo = MockAppConfigRepository();
     mockAuthRepo = MockAuthRepository();
+    mockAccountRepo = MockAccountRepository();
+    mockTransactionRepo = MockTransactionRepository();
+    mockSubscriptionRepo = MockSubscriptionRepository();
+    mockDebtRepo = MockDebtRepository();
+    mockCategoryRepo = MockCategoryRepository();
+
+    when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
+    when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
+    when(mockTransactionRepo.getByMonth(any, any))
+        .thenAnswer((_) async => []);
+    when(mockTransactionRepo.getMonthlySummary(any, any))
+        .thenAnswer((_) async => []);
+    when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
+    when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
+    when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
@@ -30,6 +58,12 @@ void main() {
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
         authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        accountRepositoryProvider.overrideWithValue(mockAccountRepo),
+        transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
+        subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
+        debtRepositoryProvider.overrideWithValue(mockDebtRepo),
+        categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+        currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],
       child: Consumer(
@@ -38,6 +72,8 @@ void main() {
           return MaterialApp.router(
             routerConfig: router,
             theme: app_theme.AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
           );
         },
       ),
@@ -103,7 +139,7 @@ void main() {
       await tester.tap(find.text('Transactions').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction'), findsOneWidget);
+      expect(find.text('Aucune transaction ce mois-ci'), findsOneWidget);
     });
 
     testWidgets('should_show_fab_when_onboarding_done',
@@ -134,7 +170,8 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationRail), findsOneWidget);
+      // Wide layout uses a custom sidebar with VerticalDivider, not NavigationRail
+      expect(find.byType(VerticalDivider), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsNothing);
     });
   });

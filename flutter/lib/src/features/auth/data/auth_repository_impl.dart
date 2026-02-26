@@ -10,6 +10,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
+  static const _userNameKey = 'user_name';
 
   AuthRepositoryImpl(this._dataSource, {FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage();
@@ -24,6 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: response.name,
     );
     await saveTokens(result.accessToken, result.refreshToken);
+    await _saveUserName(result.name);
     return result;
   }
 
@@ -38,6 +40,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: response.name,
     );
     await saveTokens(result.accessToken, result.refreshToken);
+    await _saveUserName(result.name);
     return result;
   }
 
@@ -55,6 +58,9 @@ class AuthRepositoryImpl implements AuthRepository {
       name: response.name,
     );
     await saveTokens(result.accessToken, result.refreshToken);
+    if (result.name != null) {
+      await _saveUserName(result.name);
+    }
     return result;
   }
 
@@ -89,6 +95,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> clearTokens() async {
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
+    await _storage.delete(key: _userNameKey);
+  }
+
+  Future<String?> getUserName() => _storage.read(key: _userNameKey);
+
+  Future<void> _saveUserName(String? name) async {
+    if (name != null) {
+      await _storage.write(key: _userNameKey, value: name);
+    }
   }
 
   @override

@@ -8,4 +8,5 @@ abstract class AccountRepository {
   Future<Account> update(Account account);
   Future<void> delete(String id);
   Future<Account> setDefault(String id);
+  Future<Account> adjustBalance(String id, double newBalance);
 }

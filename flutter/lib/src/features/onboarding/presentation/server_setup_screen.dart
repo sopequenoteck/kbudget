@@ -23,7 +23,6 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingNotifierProvider);
-    final notifier = ref.read(onboardingNotifierProvider.notifier);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -111,7 +110,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
               OutlinedButton.icon(
                 onPressed: state.isCheckingServer
                     ? null
-                    : () => _checkConnection(notifier),
+                    : () => _checkConnection(),
                 icon: state.isCheckingServer
                     ? const SizedBox(
                         height: 16,
@@ -140,9 +139,10 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
     );
   }
 
-  Future<void> _checkConnection(OnboardingNotifier notifier) async {
+  Future<void> _checkConnection() async {
     if (!_formKey.currentState!.validate()) return;
     final url = _urlController.text.trim();
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
     notifier.setServerUrl(url);
     await notifier.checkServerConnectivity(url);
   }

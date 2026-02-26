@@ -8,8 +8,12 @@ import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  final dio = ref.watch(authenticatedDioProvider);
-  return AuthRemoteDataSource(dio);
+  final dioAsync = ref.watch(authenticatedDioProvider);
+  return dioAsync.when(
+    data: (dio) => AuthRemoteDataSource(dio),
+    loading: () => AuthRemoteDataSource(Dio()),
+    error: (_, _) => AuthRemoteDataSource(Dio()),
+  );
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

@@ -10,18 +10,19 @@ import 'package:k_budget/src/domain/models/account.dart' as _i8;
 import 'package:k_budget/src/domain/models/app_config.dart' as _i2;
 import 'package:k_budget/src/domain/models/category.dart' as _i7;
 import 'package:k_budget/src/domain/models/debt.dart' as _i6;
+import 'package:k_budget/src/domain/models/monthly_summary.dart' as _i13;
 import 'package:k_budget/src/domain/models/subscription.dart' as _i5;
 import 'package:k_budget/src/domain/models/transaction.dart' as _i4;
 import 'package:k_budget/src/domain/repositories/account_repository.dart'
-    as _i16;
+    as _i17;
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart'
     as _i9;
 import 'package:k_budget/src/domain/repositories/auth_repository.dart' as _i3;
 import 'package:k_budget/src/domain/repositories/category_repository.dart'
-    as _i15;
-import 'package:k_budget/src/domain/repositories/debt_repository.dart' as _i14;
+    as _i16;
+import 'package:k_budget/src/domain/repositories/debt_repository.dart' as _i15;
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart'
-    as _i13;
+    as _i14;
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart'
     as _i12;
 import 'package:mockito/mockito.dart' as _i1;
@@ -177,6 +178,28 @@ class MockAppConfigRepository extends _i1.Mock
             ),
           )
           as _i10.Future<_i11.AppTheme>);
+
+  @override
+  _i10.Future<void> setTextScale(_i11.TextScale? textScale) =>
+      (super.noSuchMethod(
+            Invocation.method(#setTextScale, [textScale]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
+
+  @override
+  _i10.Future<_i11.TextScale> getTextScale() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTextScale, []),
+            returnValue: _i10.Future<_i11.TextScale>.value(
+              _i11.TextScale.small,
+            ),
+            returnValueForMissingStub: _i10.Future<_i11.TextScale>.value(
+              _i11.TextScale.small,
+            ),
+          )
+          as _i10.Future<_i11.TextScale>);
 
   @override
   _i10.Future<void> setLockEnabled(bool? enabled) =>
@@ -339,6 +362,19 @@ class MockTransactionRepository extends _i1.Mock
           as _i10.Future<List<_i4.Transaction>>);
 
   @override
+  _i10.Future<List<_i4.Transaction>> getByMonth(int? month, int? year) =>
+      (super.noSuchMethod(
+            Invocation.method(#getByMonth, [month, year]),
+            returnValue: _i10.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+            returnValueForMissingStub: _i10.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+          )
+          as _i10.Future<List<_i4.Transaction>>);
+
+  @override
   _i10.Stream<List<_i4.Transaction>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
@@ -407,13 +443,30 @@ class MockTransactionRepository extends _i1.Mock
             returnValueForMissingStub: _i10.Future<void>.value(),
           )
           as _i10.Future<void>);
+
+  @override
+  _i10.Future<List<_i13.MonthlySummary>> getMonthlySummary(
+    int? month,
+    int? year,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getMonthlySummary, [month, year]),
+            returnValue: _i10.Future<List<_i13.MonthlySummary>>.value(
+              <_i13.MonthlySummary>[],
+            ),
+            returnValueForMissingStub:
+                _i10.Future<List<_i13.MonthlySummary>>.value(
+                  <_i13.MonthlySummary>[],
+                ),
+          )
+          as _i10.Future<List<_i13.MonthlySummary>>);
 }
 
 /// A class which mocks [SubscriptionRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionRepository extends _i1.Mock
-    implements _i13.SubscriptionRepository {
+    implements _i14.SubscriptionRepository {
   @override
   _i10.Future<List<_i5.Subscription>> getAll() =>
       (super.noSuchMethod(
@@ -500,7 +553,7 @@ class MockSubscriptionRepository extends _i1.Mock
 /// A class which mocks [DebtRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDebtRepository extends _i1.Mock implements _i14.DebtRepository {
+class MockDebtRepository extends _i1.Mock implements _i15.DebtRepository {
   @override
   _i10.Future<List<_i6.Debt>> getAll() =>
       (super.noSuchMethod(
@@ -574,7 +627,7 @@ class MockDebtRepository extends _i1.Mock implements _i14.DebtRepository {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCategoryRepository extends _i1.Mock
-    implements _i15.CategoryRepository {
+    implements _i16.CategoryRepository {
   @override
   _i10.Future<List<_i7.Category>> getAll() =>
       (super.noSuchMethod(
@@ -649,7 +702,7 @@ class MockCategoryRepository extends _i1.Mock
 /// A class which mocks [AccountRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAccountRepository extends _i1.Mock implements _i16.AccountRepository {
+class MockAccountRepository extends _i1.Mock implements _i17.AccountRepository {
   @override
   _i10.Future<List<_i8.Account>> getAll() =>
       (super.noSuchMethod(
@@ -727,6 +780,25 @@ class MockAccountRepository extends _i1.Mock implements _i16.AccountRepository {
             ),
             returnValueForMissingStub: _i10.Future<_i8.Account>.value(
               _FakeAccount_6(this, Invocation.method(#setDefault, [id])),
+            ),
+          )
+          as _i10.Future<_i8.Account>);
+
+  @override
+  _i10.Future<_i8.Account> adjustBalance(String? id, double? newBalance) =>
+      (super.noSuchMethod(
+            Invocation.method(#adjustBalance, [id, newBalance]),
+            returnValue: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(
+                this,
+                Invocation.method(#adjustBalance, [id, newBalance]),
+              ),
+            ),
+            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(
+                this,
+                Invocation.method(#adjustBalance, [id, newBalance]),
+              ),
             ),
           )
           as _i10.Future<_i8.Account>);

@@ -1,6 +1,8 @@
 import 'package:k_budget/src/data/remote/data_sources/account_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/account_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/adjust_balance_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/repositories/account_repository.dart';
 
@@ -49,16 +51,24 @@ class AccountRepositoryRemote implements AccountRepository {
     return _toDomain(response);
   }
 
+  @override
+  Future<Account> adjustBalance(String id, double newBalance) async {
+    final request = AdjustBalanceRequest(newBalance: newBalance);
+    final response = await _dataSource.adjustBalance(id, request);
+    return _toDomain(response);
+  }
+
   Account _toDomain(AccountResponse r) => Account(
         id: r.id,
         nom: r.nom,
-        type: AccountType.values.byName(r.type.toLowerCase()),
+        type: AccountType.values.byNameOrDefault(r.type.toLowerCase(), AccountType.courant),
         soldeInitial: r.soldeInitial,
         icone: r.icone,
         couleur: r.couleur,
         isDefault: r.isDefault,
-        currency: Currency.values.byName(r.currency.toLowerCase()),
+        currency: Currency.values.byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
         actif: r.actif,
+        solde: r.solde,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
       );
 

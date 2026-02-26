@@ -13,7 +13,6 @@ class OnboardingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(onboardingNotifierProvider);
-    final notifier = ref.read(onboardingNotifierProvider.notifier);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -51,7 +50,7 @@ class OnboardingScreen extends ConsumerWidget {
                 title: 'Mode local',
                 description: 'Vos données restent sur cet appareil',
                 isSelected: state.selectedMode == DataMode.local,
-                onTap: () => notifier.selectMode(DataMode.local),
+                onTap: () => ref.read(onboardingNotifierProvider.notifier).selectMode(DataMode.local),
               ),
               const SizedBox(height: AppSpacing.space4),
               _ModeCard(
@@ -59,7 +58,7 @@ class OnboardingScreen extends ConsumerWidget {
                 title: 'Mode serveur',
                 description: 'Synchronisez avec votre serveur K-Budget',
                 isSelected: state.selectedMode == DataMode.server,
-                onTap: () => notifier.selectMode(DataMode.server),
+                onTap: () => ref.read(onboardingNotifierProvider.notifier).selectMode(DataMode.server),
               ),
               const Spacer(),
               if (state.error != null)

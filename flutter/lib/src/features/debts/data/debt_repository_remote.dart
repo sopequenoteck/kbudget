@@ -1,6 +1,7 @@
 import 'package:k_budget/src/data/remote/data_sources/debt_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/debt_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 
@@ -47,9 +48,9 @@ class DebtRepositoryRemote implements DebtRepository {
         id: r.id,
         personne: r.personne,
         montant: r.montant,
-        sens: DebtType.values.byName(r.sens.toLowerCase()),
+        sens: DebtType.values.byNameOrDefault(r.sens.toLowerCase(), DebtType.emprunt),
         date: DateTime.parse(r.date),
-        currency: Currency.values.byName(r.currency.toLowerCase()),
+        currency: Currency.values.byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
         rembourse: r.rembourse,
         categoryId: r.categoryId,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,

@@ -39,10 +39,20 @@ dependencies:
   # Crypto
   crypto: ^3.0.6
 
+  # SVG
+  flutter_svg: ^2.0.17
+
+  # Shimmer (skeleton loading)
+  shimmer: ^3.0.0
+
+  # Emoji picker
+  emoji_picker_flutter: ^4.4.0
+
   # Utils
   uuid: ^4.5.1
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
+  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +78,7 @@ flutter:
 
   assets:
     - assets/fonts/Inter/
+    - assets/budget-icon-no-background.svg
 
   fonts:
     - family: Inter

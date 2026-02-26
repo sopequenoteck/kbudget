@@ -1,1 +1,1 @@
-enum TransactionType { depense, recette }
+enum TransactionType { depense, recette, ajustement }

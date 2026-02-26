@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:k_budget/src/data/local/database.dart' as db;
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/account.dart' as domain;
 import 'package:k_budget/src/domain/models/category.dart' as domain;
 import 'package:k_budget/src/domain/models/debt.dart' as domain;
@@ -13,7 +14,7 @@ domain.Transaction transactionFromDb(db.Transaction row) => domain.Transaction(
       id: row.id,
       montant: row.montant,
       libelle: row.libelle,
-      type: TransactionType.values.byName(row.type),
+      type: TransactionType.values.byNameOrDefault(row.type, TransactionType.depense),
       date: row.date,
       note: row.note,
       transferId: row.transferId,
@@ -62,12 +63,12 @@ db.CategoriesCompanion categoryToDb(domain.Category c) =>
 domain.Account accountFromDb(db.Account row) => domain.Account(
       id: row.id,
       nom: row.nom,
-      type: AccountType.values.byName(row.type),
+      type: AccountType.values.byNameOrDefault(row.type, AccountType.courant),
       soldeInitial: row.soldeInitial,
       icone: row.icone,
       couleur: row.couleur,
       isDefault: row.isDefault,
-      currency: Currency.values.byName(row.currency),
+      currency: Currency.values.byNameOrDefault(row.currency, Currency.eur),
       actif: row.actif,
       updatedAt: row.updatedAt,
     );
@@ -92,9 +93,9 @@ domain.Subscription subscriptionFromDb(db.Subscription row) =>
       id: row.id,
       nom: row.nom,
       montant: row.montant,
-      frequence: Frequency.values.byName(row.frequence),
+      frequence: Frequency.values.byNameOrDefault(row.frequence, Frequency.mensuel),
       dateDebut: row.dateDebut,
-      currency: Currency.values.byName(row.currency),
+      currency: Currency.values.byNameOrDefault(row.currency, Currency.eur),
       actif: row.actif,
       categoryId: row.categoryId,
       accountId: row.accountId,
@@ -121,9 +122,9 @@ domain.Debt debtFromDb(db.Debt row) => domain.Debt(
       id: row.id,
       personne: row.personne,
       montant: row.montant,
-      sens: DebtType.values.byName(row.sens),
+      sens: DebtType.values.byNameOrDefault(row.sens, DebtType.emprunt),
       date: row.date,
-      currency: Currency.values.byName(row.currency),
+      currency: Currency.values.byNameOrDefault(row.currency, Currency.eur),
       rembourse: row.rembourse,
       categoryId: row.categoryId,
       updatedAt: row.updatedAt,

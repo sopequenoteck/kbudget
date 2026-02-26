@@ -39,4 +39,26 @@ class TransactionRemoteDataSource {
   Future<void> delete(String id) async {
     await _dio.delete<void>('/transactions/$id');
   }
+
+  Future<List<TransactionResponse>> getByMonth(int month, int year) async {
+    final response = await _dio.get<List<dynamic>>(
+      '/transactions',
+      queryParameters: {'month': month, 'year': year},
+    );
+    return response.data!
+        .map((e) => TransactionResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<MonthlySummaryResponse>> getMonthlySummary(
+      int month, int year) async {
+    final response = await _dio.get<List<dynamic>>(
+      '/transactions/summary',
+      queryParameters: {'month': month, 'year': year},
+    );
+    return response.data!
+        .map((e) =>
+            MonthlySummaryResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }

@@ -10,6 +10,7 @@ class AppConfig with _$AppConfig {
     required DataMode dataMode,
     String? serverUrl,
     @Default(AppTheme.light) AppTheme theme,
+    @Default(TextScale.medium) TextScale textScale,
     @Default(false) bool lockEnabled,
     LockMethod? lockMethod,
     String? hashedPin,
