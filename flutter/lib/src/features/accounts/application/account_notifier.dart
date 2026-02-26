@@ -134,6 +134,27 @@ class AccountNotifier extends Notifier<ListState<Account>> {
     }
   }
 
+  Future<void> adjustBalance(String id, double newBalance) async {
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, id},
+      error: null,
+    );
+    try {
+      final updated = await _repo.adjustBalance(id, newBalance);
+      final index = _allItems.indexWhere((e) => e.id == id);
+      if (index != -1) _allItems[index] = updated;
+      _refreshPage();
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+      );
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+        error: 'Erreur lors de l\'ajustement du solde: $e',
+      );
+    }
+  }
+
   void _refreshPage({bool resetPage = false}) {
     final page = resetPage ? 0 : state.currentPage;
     final end = (page + 1) * _pageSize;

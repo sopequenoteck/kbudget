@@ -207,5 +207,47 @@ void main() {
       await future;
       expect(state().mutatingIds, isEmpty);
     });
+
+    test('should_updateBalance_when_adjustBalanceCalled', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+
+      final adjusted = acc1.copyWith(solde: 2000.0);
+      when(mockRepo.adjustBalance('1', 2000.0))
+          .thenAnswer((_) async => adjusted);
+      await notifier().adjustBalance('1', 2000.0);
+
+      expect(state().items.first.solde, 2000.0);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_setError_when_adjustBalanceFails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+
+      when(mockRepo.adjustBalance('1', 2000.0))
+          .thenThrow(Exception('Server error'));
+      await notifier().adjustBalance('1', 2000.0);
+
+      expect(state().error, contains('ajustement du solde'));
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_trackMutatingId_when_adjustBalanceInProgress', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+
+      final adjusted = acc1.copyWith(solde: 2000.0);
+      when(mockRepo.adjustBalance('1', 2000.0)).thenAnswer(
+        (_) =>
+            Future.delayed(const Duration(milliseconds: 100), () => adjusted),
+      );
+
+      final future = notifier().adjustBalance('1', 2000.0);
+      expect(state().mutatingIds, contains('1'));
+
+      await future;
+      expect(state().mutatingIds, isEmpty);
+    });
   });
 }

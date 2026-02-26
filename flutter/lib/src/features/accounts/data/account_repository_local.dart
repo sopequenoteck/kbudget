@@ -49,4 +49,9 @@ class AccountRepositoryLocal implements AccountRepository {
     await _dao.setDefault(id);
     return getById(id);
   }
+
+  @override
+  Future<Account> adjustBalance(String id, double newBalance) async {
+    throw UnimplementedError('adjustBalance is not supported in local mode');
+  }
 }

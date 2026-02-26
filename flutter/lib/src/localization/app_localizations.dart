@@ -837,6 +837,186 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Maximum {max} caractères'**
   String validationMaxLength(int max);
+
+  /// No description provided for @accountsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes'**
+  String get accountsTitle;
+
+  /// No description provided for @accountsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte'**
+  String get accountsEmpty;
+
+  /// No description provided for @accountsRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get accountsRetry;
+
+  /// No description provided for @accountsNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau compte'**
+  String get accountsNewTitle;
+
+  /// No description provided for @accountsEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le compte'**
+  String get accountsEditTitle;
+
+  /// No description provided for @accountTypeCourant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courant'**
+  String get accountTypeCourant;
+
+  /// No description provided for @accountTypeEpargne.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épargne'**
+  String get accountTypeEpargne;
+
+  /// No description provided for @accountTypeEspeces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Espèces'**
+  String get accountTypeEspeces;
+
+  /// No description provided for @accountFormNameField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du compte'**
+  String get accountFormNameField;
+
+  /// No description provided for @accountFormInitialBalanceField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde initial'**
+  String get accountFormInitialBalanceField;
+
+  /// No description provided for @accountFormCurrencyPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get accountFormCurrencyPicker;
+
+  /// No description provided for @accountFormIconField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get accountFormIconField;
+
+  /// No description provided for @accountFormColorField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get accountFormColorField;
+
+  /// No description provided for @accountFormActiveSwitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get accountFormActiveSwitch;
+
+  /// No description provided for @accountFormActiveDefaultHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le compte par défaut ne peut pas être désactivé'**
+  String get accountFormActiveDefaultHint;
+
+  /// No description provided for @accountFormCurrentBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde actuel'**
+  String get accountFormCurrentBalance;
+
+  /// No description provided for @accountFormNewBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau solde'**
+  String get accountFormNewBalance;
+
+  /// No description provided for @accountFormPreviewPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu du compte'**
+  String get accountFormPreviewPlaceholder;
+
+  /// No description provided for @accountBadgeDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défaut'**
+  String get accountBadgeDefault;
+
+  /// No description provided for @accountBadgeInactive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inactif'**
+  String get accountBadgeInactive;
+
+  /// No description provided for @accountActionSetDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Définir par défaut'**
+  String get accountActionSetDefault;
+
+  /// No description provided for @accountActionDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get accountActionDelete;
+
+  /// No description provided for @accountDeleteConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte'**
+  String get accountDeleteConfirmTitle;
+
+  /// No description provided for @accountDeleteConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.'**
+  String get accountDeleteConfirmMessage;
+
+  /// No description provided for @accountErrorLoad.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les comptes'**
+  String get accountErrorLoad;
+
+  /// No description provided for @accountErrorCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la création du compte'**
+  String get accountErrorCreate;
+
+  /// No description provided for @accountErrorUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la modification du compte'**
+  String get accountErrorUpdate;
+
+  /// No description provided for @accountErrorDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression du compte'**
+  String get accountErrorDelete;
+
+  /// No description provided for @accountErrorSetDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du changement de compte par défaut'**
+  String get accountErrorSetDefault;
+
+  /// No description provided for @accountErrorAdjustBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de l\'ajustement du solde'**
+  String get accountErrorAdjustBalance;
 }
 
 class _AppLocalizationsDelegate

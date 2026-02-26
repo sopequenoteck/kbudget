@@ -388,4 +388,98 @@ class AppLocalizationsFr extends AppLocalizations {
   String validationMaxLength(int max) {
     return 'Maximum $max caractères';
   }
+
+  @override
+  String get accountsTitle => 'Comptes';
+
+  @override
+  String get accountsEmpty => 'Aucun compte';
+
+  @override
+  String get accountsRetry => 'Réessayer';
+
+  @override
+  String get accountsNewTitle => 'Nouveau compte';
+
+  @override
+  String get accountsEditTitle => 'Modifier le compte';
+
+  @override
+  String get accountTypeCourant => 'Courant';
+
+  @override
+  String get accountTypeEpargne => 'Épargne';
+
+  @override
+  String get accountTypeEspeces => 'Espèces';
+
+  @override
+  String get accountFormNameField => 'Nom du compte';
+
+  @override
+  String get accountFormInitialBalanceField => 'Solde initial';
+
+  @override
+  String get accountFormCurrencyPicker => 'Devise';
+
+  @override
+  String get accountFormIconField => 'Icône';
+
+  @override
+  String get accountFormColorField => 'Couleur';
+
+  @override
+  String get accountFormActiveSwitch => 'Actif';
+
+  @override
+  String get accountFormActiveDefaultHint =>
+      'Le compte par défaut ne peut pas être désactivé';
+
+  @override
+  String get accountFormCurrentBalance => 'Solde actuel';
+
+  @override
+  String get accountFormNewBalance => 'Nouveau solde';
+
+  @override
+  String get accountFormPreviewPlaceholder => 'Aperçu du compte';
+
+  @override
+  String get accountBadgeDefault => 'Défaut';
+
+  @override
+  String get accountBadgeInactive => 'Inactif';
+
+  @override
+  String get accountActionSetDefault => 'Définir par défaut';
+
+  @override
+  String get accountActionDelete => 'Supprimer';
+
+  @override
+  String get accountDeleteConfirmTitle => 'Supprimer le compte';
+
+  @override
+  String get accountDeleteConfirmMessage =>
+      'Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.';
+
+  @override
+  String get accountErrorLoad => 'Impossible de charger les comptes';
+
+  @override
+  String get accountErrorCreate => 'Erreur lors de la création du compte';
+
+  @override
+  String get accountErrorUpdate => 'Erreur lors de la modification du compte';
+
+  @override
+  String get accountErrorDelete => 'Erreur lors de la suppression du compte';
+
+  @override
+  String get accountErrorSetDefault =>
+      'Erreur lors du changement de compte par défaut';
+
+  @override
+  String get accountErrorAdjustBalance =>
+      'Erreur lors de l\'ajustement du solde';
 }

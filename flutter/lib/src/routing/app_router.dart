@@ -23,9 +23,12 @@ import 'package:k_budget/src/features/onboarding/presentation/server_setup_scree
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
+import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
+import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
@@ -190,8 +193,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.settingsAccounts,
             name: RouteNames.settingsAccountsName,
             parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) =>
-                const StubSettingsScreen(title: 'Comptes'),
+            builder: (context, state) => const AccountListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.settingsAccountsNew,
+                name: RouteNames.settingsAccountsNewName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => const AccountFormScreen(),
+              ),
+              GoRoute(
+                path: RouteNames.settingsAccountsEdit,
+                name: RouteNames.settingsAccountsEditName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final account = state.extra as Account?;
+                  return AccountFormScreen(account: account);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.settingsCategories,

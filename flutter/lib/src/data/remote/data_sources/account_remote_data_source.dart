@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:k_budget/src/data/remote/dtos/account_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/adjust_balance_request.dart';
 import 'package:k_budget/src/data/remote/dtos/transfer_dtos.dart';
 
 class AccountRemoteDataSource {
@@ -44,6 +45,15 @@ class AccountRemoteDataSource {
   Future<AccountResponse> setDefault(String id) async {
     final response = await _dio.patch<Map<String, dynamic>>(
       '/accounts/$id/default',
+    );
+    return AccountResponse.fromJson(response.data!);
+  }
+
+  Future<AccountResponse> adjustBalance(
+      String id, AdjustBalanceRequest request) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/accounts/$id/adjust-balance',
+      data: request.toJson(),
     );
     return AccountResponse.fromJson(response.data!);
   }

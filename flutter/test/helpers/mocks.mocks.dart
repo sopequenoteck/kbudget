@@ -783,4 +783,23 @@ class MockAccountRepository extends _i1.Mock implements _i17.AccountRepository {
             ),
           )
           as _i10.Future<_i8.Account>);
+
+  @override
+  _i10.Future<_i8.Account> adjustBalance(String? id, double? newBalance) =>
+      (super.noSuchMethod(
+            Invocation.method(#adjustBalance, [id, newBalance]),
+            returnValue: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(
+                this,
+                Invocation.method(#adjustBalance, [id, newBalance]),
+              ),
+            ),
+            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(
+                this,
+                Invocation.method(#adjustBalance, [id, newBalance]),
+              ),
+            ),
+          )
+          as _i10.Future<_i8.Account>);
 }

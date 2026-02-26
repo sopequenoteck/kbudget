@@ -231,6 +231,8 @@ Approche **signals-first** obligatoire :
 - FlutterSecureStorage (AppConfig JSON sérialisé) (051-flutter-settings-appearance)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + `emoji_picker_flutter: ^4.4.0` (déjà ajouté au pubspec.yaml) (052-flutter-emoji-input)
 - N/A (widget UI pur, pas de persistance) (052-flutter-emoji-input)
+- Dart >= 3.6 + Flutter >= 3.27, flutter_riverpod, go_router, freezed, dio, emoji_picker_flutter, shimmer, intl (053-flutter-settings-accounts)
+- API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
 
 ### Backend (api/)
 

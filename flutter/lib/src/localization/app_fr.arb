@@ -143,5 +143,36 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "accountsTitle": "Comptes",
+  "accountsEmpty": "Aucun compte",
+  "accountsRetry": "Réessayer",
+  "accountsNewTitle": "Nouveau compte",
+  "accountsEditTitle": "Modifier le compte",
+  "accountTypeCourant": "Courant",
+  "accountTypeEpargne": "Épargne",
+  "accountTypeEspeces": "Espèces",
+  "accountFormNameField": "Nom du compte",
+  "accountFormInitialBalanceField": "Solde initial",
+  "accountFormCurrencyPicker": "Devise",
+  "accountFormIconField": "Icône",
+  "accountFormColorField": "Couleur",
+  "accountFormActiveSwitch": "Actif",
+  "accountFormActiveDefaultHint": "Le compte par défaut ne peut pas être désactivé",
+  "accountFormCurrentBalance": "Solde actuel",
+  "accountFormNewBalance": "Nouveau solde",
+  "accountFormPreviewPlaceholder": "Aperçu du compte",
+  "accountBadgeDefault": "Défaut",
+  "accountBadgeInactive": "Inactif",
+  "accountActionSetDefault": "Définir par défaut",
+  "accountActionDelete": "Supprimer",
+  "accountDeleteConfirmTitle": "Supprimer le compte",
+  "accountDeleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.",
+  "accountErrorLoad": "Impossible de charger les comptes",
+  "accountErrorCreate": "Erreur lors de la création du compte",
+  "accountErrorUpdate": "Erreur lors de la modification du compte",
+  "accountErrorDelete": "Erreur lors de la suppression du compte",
+  "accountErrorSetDefault": "Erreur lors du changement de compte par défaut",
+  "accountErrorAdjustBalance": "Erreur lors de l'ajustement du solde"
 }

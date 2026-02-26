@@ -1,5 +1,6 @@
 import 'package:k_budget/src/data/remote/data_sources/account_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/account_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/adjust_balance_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -47,6 +48,13 @@ class AccountRepositoryRemote implements AccountRepository {
   @override
   Future<Account> setDefault(String id) async {
     final response = await _dataSource.setDefault(id);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<Account> adjustBalance(String id, double newBalance) async {
+    final request = AdjustBalanceRequest(newBalance: newBalance);
+    final response = await _dataSource.adjustBalance(id, request);
     return _toDomain(response);
   }
 
