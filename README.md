@@ -2,10 +2,11 @@
 
 Application personnelle de gestion de budget : transactions (depenses/recettes), abonnements recurrents et suivi de dettes. Single-user, self-hosted.
 
-Monorepo avec deux modules :
+Monorepo avec trois modules :
 
 - `api/` — Backend Spring Boot (API REST)
 - `app/` — Frontend Angular PWA (mobile-first)
+- `flutter/` — App mobile native Flutter (`k_budget`)
 
 ## Stack technique
 
@@ -22,6 +23,7 @@ Monorepo avec deux modules :
 
 - Java 21+, Maven 3.9+, PostgreSQL 15+
 - Node.js 20+, npm 10+
+- Flutter >= 3.27, Dart >= 3.6
 
 ## Installation
 
@@ -170,6 +172,7 @@ Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](
 budget/
 ├── api/           # Backend Spring Boot
 ├── app/           # Frontend Angular PWA (k-budget-app)
+├── flutter/       # App mobile native Flutter (k_budget)
 ├── deploy/        # Caddyfile, systemd, scripts
 └── docs/          # Documentation
 ```
