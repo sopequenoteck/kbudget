@@ -42,4 +42,12 @@ class RouteNames {
   // Settings sub-paths (relative, accounts)
   static const String settingsAccountsNew = 'new';
   static const String settingsAccountsEdit = ':id';
+
+  // Settings sub-paths (relative, categories)
+  static const String settingsCategoriesNew = 'new';
+  static const String settingsCategoriesEdit = ':id';
+
+  // Names (categories)
+  static const String settingsCategoriesNewName = 'settings-categories-new';
+  static const String settingsCategoriesEditName = 'settings-categories-edit';
 }

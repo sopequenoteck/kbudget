@@ -106,7 +106,7 @@ Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct
 
 ```
 flutter/lib/src/
-├── common_widgets/    # Widgets partagés (AdaptiveScaffold, AppModal, SelectPicker...)
+├── common_widgets/    # Widgets partagés (AdaptiveScaffold, AppModal, SelectPicker, EmojiInput, ColorPalettePicker, AppFormField...)
 ├── constants/         # Design tokens (AppSpacing, AppColors, AppTypography, AppRadius...)
 ├── data/
 │   ├── local/         # Drift database, DAOs, mappers
@@ -233,6 +233,8 @@ Approche **signals-first** obligatoire :
 - N/A (widget UI pur, pas de persistance) (052-flutter-emoji-input)
 - Dart >= 3.6 + Flutter >= 3.27, flutter_riverpod, go_router, freezed, dio, emoji_picker_flutter, shimmer, intl (053-flutter-settings-accounts)
 - API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, emoji_picker_flutter, shimmer, intl (054-flutter-settings-categories)
+- API REST uniquement (pas de Drift pour cette feature — données toujours fraîches depuis l'API) (054-flutter-settings-categories)
 
 ### Backend (api/)
 

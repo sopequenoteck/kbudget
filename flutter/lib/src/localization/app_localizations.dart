@@ -1017,6 +1017,120 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de l\'ajustement du solde'**
   String get accountErrorAdjustBalance;
+
+  /// No description provided for @categoriesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégories'**
+  String get categoriesTitle;
+
+  /// No description provided for @categoriesEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune catégorie'**
+  String get categoriesEmpty;
+
+  /// No description provided for @categoriesRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get categoriesRetry;
+
+  /// No description provided for @categoryFormTitleCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle catégorie'**
+  String get categoryFormTitleCreate;
+
+  /// No description provided for @categoryFormTitleEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la catégorie'**
+  String get categoryFormTitleEdit;
+
+  /// No description provided for @categoryFormNameField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de la catégorie'**
+  String get categoryFormNameField;
+
+  /// No description provided for @categoryFormIconField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get categoryFormIconField;
+
+  /// No description provided for @categoryFormColorField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur'**
+  String get categoryFormColorField;
+
+  /// No description provided for @categoryFormPreviewPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu de la catégorie'**
+  String get categoryFormPreviewPlaceholder;
+
+  /// No description provided for @categoryNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom est requis'**
+  String get categoryNameRequired;
+
+  /// No description provided for @categoryNameMaxLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum 30 caractères'**
+  String get categoryNameMaxLength;
+
+  /// No description provided for @categoryNameDuplicate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce nom de catégorie existe déjà'**
+  String get categoryNameDuplicate;
+
+  /// No description provided for @categoryEmojiRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'icône est requise'**
+  String get categoryEmojiRequired;
+
+  /// No description provided for @categoryDeleteConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer la catégorie'**
+  String get categoryDeleteConfirmTitle;
+
+  /// No description provided for @categoryDeleteConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer cette catégorie ? Les éléments liés seront dissociés.'**
+  String get categoryDeleteConfirmMessage;
+
+  /// No description provided for @categoryErrorLoad.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les catégories'**
+  String get categoryErrorLoad;
+
+  /// No description provided for @categoryErrorCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la création de la catégorie'**
+  String get categoryErrorCreate;
+
+  /// No description provided for @categoryErrorUpdate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la modification de la catégorie'**
+  String get categoryErrorUpdate;
+
+  /// No description provided for @categoryErrorDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression de la catégorie'**
+  String get categoryErrorDelete;
 }
 
 class _AppLocalizationsDelegate

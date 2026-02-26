@@ -482,4 +482,65 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountErrorAdjustBalance =>
       'Erreur lors de l\'ajustement du solde';
+
+  @override
+  String get categoriesTitle => 'Catégories';
+
+  @override
+  String get categoriesEmpty => 'Aucune catégorie';
+
+  @override
+  String get categoriesRetry => 'Réessayer';
+
+  @override
+  String get categoryFormTitleCreate => 'Nouvelle catégorie';
+
+  @override
+  String get categoryFormTitleEdit => 'Modifier la catégorie';
+
+  @override
+  String get categoryFormNameField => 'Nom de la catégorie';
+
+  @override
+  String get categoryFormIconField => 'Icône';
+
+  @override
+  String get categoryFormColorField => 'Couleur';
+
+  @override
+  String get categoryFormPreviewPlaceholder => 'Aperçu de la catégorie';
+
+  @override
+  String get categoryNameRequired => 'Le nom est requis';
+
+  @override
+  String get categoryNameMaxLength => 'Maximum 30 caractères';
+
+  @override
+  String get categoryNameDuplicate => 'Ce nom de catégorie existe déjà';
+
+  @override
+  String get categoryEmojiRequired => 'L\'icône est requise';
+
+  @override
+  String get categoryDeleteConfirmTitle => 'Supprimer la catégorie';
+
+  @override
+  String get categoryDeleteConfirmMessage =>
+      'Êtes-vous sûr de vouloir supprimer cette catégorie ? Les éléments liés seront dissociés.';
+
+  @override
+  String get categoryErrorLoad => 'Impossible de charger les catégories';
+
+  @override
+  String get categoryErrorCreate =>
+      'Erreur lors de la création de la catégorie';
+
+  @override
+  String get categoryErrorUpdate =>
+      'Erreur lors de la modification de la catégorie';
+
+  @override
+  String get categoryErrorDelete =>
+      'Erreur lors de la suppression de la catégorie';
 }

@@ -12,7 +12,7 @@ import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_preview_card.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_type_selector.dart';
-import 'package:k_budget/src/features/accounts/presentation/widgets/color_palette_picker.dart';
+import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 

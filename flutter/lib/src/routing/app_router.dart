@@ -25,10 +25,12 @@ import 'package:k_budget/src/features/settings/presentation/data_settings_screen
 import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
-import 'package:k_budget/src/features/settings/presentation/stub_settings_screen.dart';
+import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
+import 'package:k_budget/src/features/categories/presentation/screens/category_form_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
@@ -216,8 +218,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.settingsCategories,
             name: RouteNames.settingsCategoriesName,
             parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) =>
-                const StubSettingsScreen(title: 'Catégories'),
+            builder: (context, state) => const CategoryListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.settingsCategoriesNew,
+                name: RouteNames.settingsCategoriesNewName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => const CategoryFormScreen(),
+              ),
+              GoRoute(
+                path: RouteNames.settingsCategoriesEdit,
+                name: RouteNames.settingsCategoriesEditName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final category = state.extra as Category?;
+                  return CategoryFormScreen(category: category);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.settingsData,

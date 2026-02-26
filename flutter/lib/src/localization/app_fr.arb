@@ -174,5 +174,25 @@
   "accountErrorUpdate": "Erreur lors de la modification du compte",
   "accountErrorDelete": "Erreur lors de la suppression du compte",
   "accountErrorSetDefault": "Erreur lors du changement de compte par défaut",
-  "accountErrorAdjustBalance": "Erreur lors de l'ajustement du solde"
+  "accountErrorAdjustBalance": "Erreur lors de l'ajustement du solde",
+
+  "categoriesTitle": "Catégories",
+  "categoriesEmpty": "Aucune catégorie",
+  "categoriesRetry": "Réessayer",
+  "categoryFormTitleCreate": "Nouvelle catégorie",
+  "categoryFormTitleEdit": "Modifier la catégorie",
+  "categoryFormNameField": "Nom de la catégorie",
+  "categoryFormIconField": "Icône",
+  "categoryFormColorField": "Couleur",
+  "categoryFormPreviewPlaceholder": "Aperçu de la catégorie",
+  "categoryNameRequired": "Le nom est requis",
+  "categoryNameMaxLength": "Maximum 30 caractères",
+  "categoryNameDuplicate": "Ce nom de catégorie existe déjà",
+  "categoryEmojiRequired": "L'icône est requise",
+  "categoryDeleteConfirmTitle": "Supprimer la catégorie",
+  "categoryDeleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette catégorie ? Les éléments liés seront dissociés.",
+  "categoryErrorLoad": "Impossible de charger les catégories",
+  "categoryErrorCreate": "Erreur lors de la création de la catégorie",
+  "categoryErrorUpdate": "Erreur lors de la modification de la catégorie",
+  "categoryErrorDelete": "Erreur lors de la suppression de la catégorie"
 }
