@@ -16,6 +16,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
   bool _isOpen = false;
+  OverlayEntry? _overlayEntry;
 
   static const _allItems = [
     _SpeedDialItem(
@@ -55,23 +56,42 @@ class _FabMenuState extends ConsumerState<FabMenu>
 
   @override
   void dispose() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
     _controller.dispose();
     super.dispose();
   }
 
+  void _close() {
+    if (!_isOpen) return;
+    setState(() => _isOpen = false);
+    _controller.reverse();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
   void _toggle() {
-    setState(() {
-      _isOpen = !_isOpen;
-      if (_isOpen) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    });
+    if (_isOpen) {
+      _close();
+    } else {
+      setState(() => _isOpen = true);
+      _controller.forward();
+      _overlayEntry = OverlayEntry(
+        builder: (_) => GestureDetector(
+          onTap: _close,
+          behavior: HitTestBehavior.opaque,
+          child: const ColoredBox(
+            color: Color(0x33000000),
+            child: SizedBox.expand(),
+          ),
+        ),
+      );
+      Overlay.of(context).insert(_overlayEntry!);
+    }
   }
 
   void _onItemTap(ModalType type) {
-    _toggle();
+    _close();
     ref.read(modalNotifierProvider.notifier).open(type);
   }
 
