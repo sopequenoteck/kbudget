@@ -20,7 +20,7 @@ void main() {
     return ProviderScope(
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockConfigRepo),
-        authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
       ],
       child: MaterialApp(
         home: RegisterScreen(invitationToken: invitationToken),

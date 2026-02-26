@@ -57,7 +57,7 @@ void main() {
     return ProviderScope(
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
-        authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),

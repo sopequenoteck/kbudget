@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/domain/enums/modal_type.dart';
+import 'package:k_budget/src/domain/enums/transaction_type.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
+import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -79,6 +82,12 @@ class RecentTransactionsSection extends ConsumerWidget {
               rightSubtitle: RelativeDateFormatter.format(transaction.date),
               valueColor:
                   AmountFormatter.amountColor(transaction.type.name, colors),
+              onPressed: transaction.type == TransactionType.ajustement
+                  ? null
+                  : () => ref.read(modalNotifierProvider.notifier).open(
+                        ModalType.transaction,
+                        entity: transaction,
+                      ),
             );
           }),
       ],

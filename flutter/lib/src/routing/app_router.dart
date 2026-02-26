@@ -84,7 +84,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         // Server mode: check authentication
         if (config.dataMode == DataMode.server) {
           final authState = ref.read(authNotifierProvider);
-          final isAuthenticated = authState is AuthAuthenticated;
+
+          // Premier lancement : valider les tokens stockés
+          if (authState is AuthInitial) {
+            await ref.read(authNotifierProvider.notifier).checkAuth();
+          }
+
+          final currentAuthState = ref.read(authNotifierProvider);
+          final isAuthenticated = currentAuthState is AuthAuthenticated;
 
           if (!isAuthenticated && !isAuthRoute && !isInviteRoute) {
             return RouteNames.login;

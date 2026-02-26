@@ -24,6 +24,7 @@ import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_local.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_remote.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_local.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_remote.dart';
 import 'package:k_budget/src/features/debts/data/debt_repository_local.dart';
@@ -54,7 +55,13 @@ final authenticatedDioProvider = FutureProvider<Dio>((ref) async {
 
   dio.interceptors.addAll([
     ConnectivityInterceptor(),
-    JwtInterceptor(dio: dio, secureStorage: secureStorage),
+    JwtInterceptor(
+      dio: dio,
+      secureStorage: secureStorage,
+      onAuthFailure: () {
+        ref.read(authNotifierProvider.notifier).forceUnauthenticated();
+      },
+    ),
   ]);
 
   return dio;

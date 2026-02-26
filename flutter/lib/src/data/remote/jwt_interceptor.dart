@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 
@@ -7,20 +10,22 @@ import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 /// - Adds `Authorization: Bearer <accessToken>` header on every request.
 /// - On 401 response, attempts a token refresh via `/auth/refresh`.
 /// - Replays the original request with the new access token.
-/// - If the refresh fails, throws the error (logout is handled at notifier level).
+/// - If the refresh fails, calls [onAuthFailure] and forwards the error.
 class JwtInterceptor extends Interceptor {
   JwtInterceptor({
     required this.dio,
     required this.secureStorage,
+    this.onAuthFailure,
   });
 
   final Dio dio;
   final FlutterSecureStorage secureStorage;
+  final VoidCallback? onAuthFailure;
 
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
 
-  bool _isRefreshing = false;
+  Completer<String?>? _refreshCompleter;
 
   @override
   void onRequest(
@@ -36,16 +41,39 @@ class JwtInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode != 401 || _isRefreshing) {
+    if (err.response?.statusCode != 401) {
       return handler.next(err);
     }
 
-    _isRefreshing = true;
+    // Si un refresh est déjà en cours, attendre son résultat
+    if (_refreshCompleter != null) {
+      final newToken = await _refreshCompleter!.future;
+      if (newToken != null) {
+        err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+        final refreshDio = Dio(BaseOptions(
+          baseUrl: dio.options.baseUrl,
+          contentType: 'application/json',
+          connectTimeout: dio.options.connectTimeout,
+          receiveTimeout: dio.options.receiveTimeout,
+        ));
+        try {
+          final retryResponse = await refreshDio.fetch(err.requestOptions);
+          return handler.resolve(retryResponse);
+        } on DioException {
+          return handler.next(err);
+        }
+      }
+      return handler.next(err);
+    }
+
+    _refreshCompleter = Completer<String?>();
 
     try {
       final refreshToken = await secureStorage.read(key: _refreshTokenKey);
       if (refreshToken == null) {
-        _isRefreshing = false;
+        _refreshCompleter!.complete(null);
+        _refreshCompleter = null;
+        onAuthFailure?.call();
         return handler.next(err);
       }
 
@@ -77,7 +105,8 @@ class JwtInterceptor extends Interceptor {
         value: authResponse.refreshToken,
       );
 
-      _isRefreshing = false;
+      _refreshCompleter!.complete(authResponse.accessToken);
+      _refreshCompleter = null;
 
       // Replay original request with new token
       final originalRequest = err.requestOptions;
@@ -87,10 +116,14 @@ class JwtInterceptor extends Interceptor {
       final retryResponse = await refreshDio.fetch(originalRequest);
       return handler.resolve(retryResponse);
     } on DioException {
-      _isRefreshing = false;
+      _refreshCompleter!.complete(null);
+      _refreshCompleter = null;
+      onAuthFailure?.call();
       return handler.next(err);
     } catch (_) {
-      _isRefreshing = false;
+      _refreshCompleter!.complete(null);
+      _refreshCompleter = null;
+      onAuthFailure?.call();
       return handler.next(err);
     }
   }
