@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/accounts/presentation/widgets/account_type
 import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? account;
@@ -149,40 +150,28 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     }
   }
 
-  void _onDelete() {
+  Future<void> _onDelete() async {
     final l10n = AppLocalizations.of(context)!;
 
-    showDialog<bool>(
+    final confirmed = await showDeleteConfirmDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.accountDeleteConfirmTitle),
-        content: Text(l10n.accountDeleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    ).then((confirmed) async {
-      if (confirmed != true || !mounted) return;
-      try {
-        await ref
-            .read(accountNotifierProvider.notifier)
-            .delete(widget.account!.id);
-        if (mounted) context.pop();
-      } on Exception {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.accountErrorDelete)),
-          );
-        }
+      title: l10n.accountDeleteConfirmTitle,
+      message: l10n.accountDeleteConfirmMessage,
+    );
+
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(accountNotifierProvider.notifier)
+          .delete(widget.account!.id);
+      if (mounted) context.pop();
+    } on Exception {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.accountErrorDelete)),
+        );
       }
-    });
+    }
   }
 
   void _onTypeChanged(AccountType type) {

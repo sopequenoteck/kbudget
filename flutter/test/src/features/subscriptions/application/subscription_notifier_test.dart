@@ -58,12 +58,12 @@ void main() {
       container.read(subscriptionNotifierProvider);
 
   group('SubscriptionNotifier', () {
-    test('should_haveEmptyState_when_created', () {
+    test('should_have_empty_state_when_created', () {
       expect(state().items, isEmpty);
       expect(state().isLoading, false);
     });
 
-    test('should_showItems_when_loadSucceeds', () async {
+    test('should_show_items_when_load_succeeds', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1, sub2]);
 
       await notifier().loadItems();
@@ -73,7 +73,7 @@ void main() {
       expect(state().items[1].nom, 'Spotify');
     });
 
-    test('should_showError_when_loadFails', () async {
+    test('should_show_error_when_load_fails', () async {
       when(mockRepo.getAll()).thenThrow(Exception('Network error'));
 
       await notifier().loadItems();
@@ -81,7 +81,7 @@ void main() {
       expect(state().error, contains('Impossible de charger'));
     });
 
-    test('should_addItem_when_createSucceeds', () async {
+    test('should_add_item_when_create_succeeds', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
 
@@ -91,7 +91,7 @@ void main() {
       expect(state().items, hasLength(2));
     });
 
-    test('should_updateItem_when_updateSucceeds', () async {
+    test('should_update_item_when_update_succeeds', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
 
@@ -103,7 +103,7 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
-    test('should_removeItem_when_deleteSucceeds', () async {
+    test('should_remove_item_when_delete_succeeds', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1, sub2]);
       await notifier().loadItems();
 
@@ -113,7 +113,7 @@ void main() {
       expect(state().items, hasLength(1));
     });
 
-    test('should_rollbackItem_when_deleteFails', () async {
+    test('should_rollback_item_when_delete_fails', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
 
@@ -124,7 +124,7 @@ void main() {
       expect(state().error, contains('Erreur lors de la suppression'));
     });
 
-    test('should_toggleActif_when_toggleActifCalled', () async {
+    test('should_toggle_actif_when_toggleActif_called', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
 
@@ -135,7 +135,7 @@ void main() {
       expect(state().items.first.actif, false);
     });
 
-    test('should_deactivate_when_activeSubscriptionToggled', () async {
+    test('should_deactivate_when_active_subscription_toggled', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
       await notifier().loadItems();
       expect(state().items.first.actif, true);
@@ -156,7 +156,7 @@ void main() {
       expect(state().items.first.actif, true);
     });
 
-    test('should_loadNextPage_when_loadMoreCalled', () async {
+    test('should_load_next_page_when_loadMore_called', () async {
       final items = List.generate(
         25,
         (i) => Subscription(

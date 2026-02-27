@@ -228,7 +228,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 cd api && mvn test
 ```
 
-166 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
+189 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
 
 ## Documentation complementaire
 

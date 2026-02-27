@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/utils/env_config.dart';
@@ -33,8 +32,7 @@ Future<bool> checkApiHealth(Dio dio) async {
     );
     final status = response.data?['status'] as String?;
     return status == 'UP';
-  } on DioException catch (e) {
-    debugPrint('API health check failed: ${e.message}');
+  } on DioException {
     return false;
   }
 }

@@ -165,7 +165,7 @@ app/src/app/
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec 5 actions : Transaction, Abonnement, Dette, Categorie, Virement
+- Speed-dial avec 4 actions : Transaction, Abonnement, Dette, Virement
 - L'action Virement n'apparait que si au moins 2 comptes actifs existent
 - Saisie en 2-3 taps
 
