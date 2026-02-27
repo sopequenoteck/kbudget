@@ -498,6 +498,56 @@ Response `200` :
 ]
 ```
 
+## Preferences utilisateur
+
+### Consulter `GET /api/users/me/preferences`
+
+Response `200` (valeurs par defaut) :
+
+```json
+{
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
+  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"]
+}
+```
+
+### Mettre a jour `PUT /api/users/me/preferences`
+
+Request (desactiver les dettes, navOrder auto-gere) :
+
+```json
+{
+  "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"]
+}
+```
+
+Response `200` :
+
+```json
+{
+  "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"],
+  "navOrder": ["SUBSCRIPTIONS", "SHOP"]
+}
+```
+
+Request (reordonner avec navOrder explicite) :
+
+```json
+{
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+}
+```
+
+Response `200` :
+
+```json
+{
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+}
+```
+
 ## Valeurs des enums
 
 | Enum | Valeurs |
@@ -507,6 +557,8 @@ Response `200` :
 | `DebtType` | `EMPRUNT`, `PRET` |
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 | `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
+| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP` |
+| `Currency` | `EUR`, `USD`, `GBP`, `XOF` |
 
 ## Voir aussi
 

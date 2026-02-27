@@ -119,6 +119,18 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | expiresAt | LocalDateTime | Date d'expiration |
 | user | User | FK → User |
 
+### UserPreference
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| enabledFeatures | List\<Feature\> | Features optionnelles activees (stocke en VARCHAR via converter) |
+| navOrder | List\<Feature\> | Ordre des onglets de navigation (stocke en VARCHAR via converter) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | @OneToOne → User (unique, non-null) |
+
+Enum `Feature` : `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. Converter JPA `FeatureListConverter` pour la serialisation CSV en base.
+
 ## Architecture frontend
 
 ### Projet Angular : `budget-app` (dossier `app/`)

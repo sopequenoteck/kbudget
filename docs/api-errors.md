@@ -148,6 +148,17 @@ Declenchee par le handler generique `Exception`. Le message est toujours le meme
 | `date` | `@NotNull`, `LocalDate` | oui |
 | `rembourse` | `Boolean` | non |
 
+### PUT /api/users/me/preferences — `UserPreferenceRequest`
+
+| Champ | Contraintes | Obligatoire |
+|-------|-------------|:-----------:|
+| `enabledFeatures` | `@NotNull`, `List<Feature>` (SUBSCRIPTIONS, DEBTS, SHOP) | oui |
+| `navOrder` | `List<Feature>` — si fourni : doit contenir exactement les features activees, sans doublons | non |
+
+Messages d'erreur metier (IllegalArgumentException → 400) :
+- `"L'ordre de navigation ne doit pas contenir de doublons"`
+- `"L'ordre de navigation doit contenir exactement les fonctionnalites activees"`
+
 ## Guide d'integration frontend
 
 ### Intercepteur HTTP Angular

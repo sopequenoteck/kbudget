@@ -162,6 +162,13 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/categories/{id}` | Modifier |
 | DELETE | `/api/categories/{id}` | Supprimer |
 
+### Preferences utilisateur
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/users/me/preferences` | Consulter les preferences (features activees + ordre nav) |
+| PUT | `/api/users/me/preferences` | Mettre a jour les preferences |
+
 Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
 ## Architecture
@@ -182,14 +189,14 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Preference)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, UserPreference)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency
 ```
 
 ### Frontend (app/)
@@ -228,7 +235,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 cd api && mvn test
 ```
 
-189 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
+211 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
 
 ## Documentation complementaire
 
