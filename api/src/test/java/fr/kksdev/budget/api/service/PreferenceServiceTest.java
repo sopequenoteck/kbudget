@@ -1,0 +1,234 @@
+package fr.kksdev.budget.api.service;
+
+import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
+import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
+import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.model.UserPreference;
+import fr.kksdev.budget.api.repository.UserPreferenceRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class PreferenceServiceTest {
+
+    @Mock
+    private UserPreferenceRepository userPreferenceRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private PreferenceService preferenceService;
+
+    private final UUID userId = UUID.randomUUID();
+
+    private UserPreference buildPreference(List<Feature> enabled, List<Feature> navOrder) {
+        return UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(User.builder().id(userId).build())
+                .enabledFeatures(new ArrayList<>(enabled))
+                .navOrder(new ArrayList<>(navOrder))
+                .build();
+    }
+
+    // === US1: getPreferences ===
+
+    @Test
+    void should_returnDefaultPreferences_when_noPreferenceExists() {
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.getReferenceById(userId)).thenReturn(User.builder().id(userId).build());
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        UserPreferenceResponse response = preferenceService.getPreferences(userId);
+
+        assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
+        assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
+        verify(userPreferenceRepository).save(any(UserPreference.class));
+    }
+
+    @Test
+    void should_returnExistingPreferences_when_preferenceExists() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
+                List.of(Feature.SHOP, Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserPreferenceResponse response = preferenceService.getPreferences(userId);
+
+        assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.SHOP);
+        assertThat(response.navOrder()).containsExactly(Feature.SHOP, Feature.SUBSCRIPTIONS);
+    }
+
+    // === US2: updatePreferences — auto-management navOrder ===
+
+    @Test
+    void should_removeDisabledFeatureFromNavOrder_when_navOrderNotProvided() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.SHOP), null);
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.SHOP);
+        assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.SHOP);
+    }
+
+    @Test
+    void should_appendReactivatedFeatureAtEnd_when_navOrderNotProvided() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null);
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS);
+    }
+
+    @Test
+    void should_acceptEmptyEnabledFeatures_when_allFeaturesDisabled() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(), null);
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.enabledFeatures()).isEmpty();
+        assertThat(response.navOrder()).isEmpty();
+    }
+
+    @Test
+    void should_preserveRemainingOrder_when_featureRemovedFromMiddle() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SHOP, Feature.SUBSCRIPTIONS), null);
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.navOrder()).containsExactly(Feature.SHOP, Feature.SUBSCRIPTIONS);
+    }
+
+    // === US3: updatePreferences — explicit navOrder validation ===
+
+    @Test
+    void should_acceptValidNavOrder_when_matchesEnabledFeatures() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS)
+        );
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.navOrder()).containsExactly(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS);
+    }
+
+    @Test
+    void should_throw_when_navOrderContainsDuplicates() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        var request = new UserPreferenceRequest(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.SUBSCRIPTIONS)
+        );
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("L'ordre de navigation ne doit pas contenir de doublons");
+    }
+
+    @Test
+    void should_throw_when_navOrderMissingEnabledFeature() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        var request = new UserPreferenceRequest(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("L'ordre de navigation doit contenir exactement les fonctionnalités activées");
+    }
+
+    @Test
+    void should_throw_when_navOrderContainsDisabledFeature() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        var request = new UserPreferenceRequest(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS)
+        );
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("L'ordre de navigation doit contenir exactement les fonctionnalités activées");
+    }
+
+    @Test
+    void should_preserveExplicitNavOrderOrder() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                List.of(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS)
+        );
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.navOrder()).containsExactly(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS);
+    }
+}

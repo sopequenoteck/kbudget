@@ -235,6 +235,8 @@ Approche **signals-first** obligatoire :
 - API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, emoji_picker_flutter, shimmer, intl (054-flutter-settings-categories)
 - API REST uniquement (pas de Drift pour cette feature — données toujours fraîches depuis l'API) (054-flutter-settings-categories)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.6 (055-backend-feature-toggles)
+- PostgreSQL 15+ (nouvelle table `user_preferences`) (055-backend-feature-toggles)
 
 ### Backend (api/)
 
