@@ -78,13 +78,13 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 
 - **User** : email (unique), password (BCrypt), name, createdAt. UUID.
 - **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
-- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), updatedAt. FK → User.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), productId (UUID, nullable, FK → Product), updatedAt. FK → User.
 - **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
 - **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
 - **Product** : nom, description (nullable), icone (nullable), imageUrl (nullable), prixAchat, prixVente, stock, totalVendu, actif, createdAt, updatedAt. FK → User.
-- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), updatedAt. @OneToOne → User.
+- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), updatedAt. @OneToOne → User.
 
 ### Environnements
 
@@ -246,7 +246,7 @@ Approche **signals-first** obligatoire :
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V10
+- PostgreSQL 15+, Flyway migrations V1-V11
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
