@@ -498,6 +498,87 @@ Response `200` :
 ]
 ```
 
+## Produits
+
+### Creer `POST /api/products`
+
+Request :
+
+```json
+{
+  "nom": "T-shirt personnalise",
+  "description": "T-shirt 100% coton, impression personnalisee",
+  "icone": "👕",
+  "imageUrl": "https://example.com/tshirt.jpg",
+  "prixAchat": 8.50,
+  "prixVente": 15.00,
+  "stock": 25
+}
+```
+
+Response `201` :
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "nom": "T-shirt personnalise",
+  "description": "T-shirt 100% coton, impression personnalisee",
+  "icone": "👕",
+  "imageUrl": "https://example.com/tshirt.jpg",
+  "prixAchat": 8.50,
+  "prixVente": 15.00,
+  "stock": 25,
+  "totalVendu": 0,
+  "actif": true,
+  "createdAt": "2026-02-28T10:30:00",
+  "updatedAt": "2026-02-28T10:30:00"
+}
+```
+
+### Lister `GET /api/products`
+
+Response `200` (produits actifs uniquement, tries par date de creation decroissante) :
+
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "nom": "T-shirt personnalise",
+    "description": "T-shirt 100% coton",
+    "icone": "👕",
+    "imageUrl": null,
+    "prixAchat": 8.50,
+    "prixVente": 15.00,
+    "stock": 25,
+    "totalVendu": 3,
+    "actif": true,
+    "createdAt": "2026-02-28T10:30:00",
+    "updatedAt": "2026-02-28T12:00:00"
+  }
+]
+```
+
+### Modifier `PUT /api/products/{id}`
+
+Request (remplacement complet, champ `actif` obligatoire) :
+
+```json
+{
+  "nom": "T-shirt personnalise v2",
+  "description": "T-shirt bio",
+  "icone": "👕",
+  "imageUrl": "https://example.com/tshirt-v2.jpg",
+  "prixAchat": 9.00,
+  "prixVente": 18.00,
+  "stock": 50,
+  "actif": true
+}
+```
+
+### Supprimer `DELETE /api/products/{id}`
+
+Response `204` (corps vide, suppression physique).
+
 ## Preferences utilisateur
 
 ### Consulter `GET /api/users/me/preferences`

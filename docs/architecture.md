@@ -108,6 +108,24 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
+### Product
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| nom | String | Nom du produit (max 100) |
+| description | String | Description (nullable, max 500) |
+| icone | String | Emoji (nullable) |
+| imageUrl | String | URL image (nullable, max 500) |
+| prixAchat | BigDecimal | Prix d'achat |
+| prixVente | BigDecimal | Prix de vente |
+| stock | Integer | Stock disponible (>= 0) |
+| totalVendu | Integer | Total vendu (auto, default 0) |
+| actif | Boolean | Toggle de visibilite (default true) |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
 ### RefreshToken
 
 | Champ | Type | Description |

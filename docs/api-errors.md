@@ -59,13 +59,18 @@ Declenchee explicitement dans les services. Messages connus :
 
 ### 403 Forbidden
 
-Declenchee par **Spring Security** (pas par le `GlobalExceptionHandler`) quand :
+Declenchee par **Spring Security** quand :
 
 - Le header `Authorization` est absent
 - Le token JWT est invalide ou expire
 - La route n'est pas dans la liste des routes publiques
 
-**Le corps de la reponse ne suit PAS le format standard.** Spring Security retourne son propre format ou un corps vide. Le frontend doit detecter le code HTTP 403, pas parser le body.
+Spring Security retourne son propre format ou un corps vide dans ces cas.
+
+Declenchee par le `GlobalExceptionHandler` via `FeatureDisabledException` quand :
+
+- Une feature optionnelle est desactivee dans les preferences utilisateur (ex: SHOP)
+- Le corps suit le format standard (`timestamp`, `status: 403`, `message`)
 
 Routes publiques (pas de JWT requis) :
 

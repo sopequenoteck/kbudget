@@ -162,6 +162,16 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/categories/{id}` | Modifier |
 | DELETE | `/api/categories/{id}` | Supprimer |
 
+### Produits
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/products` | Creer un produit |
+| GET | `/api/products` | Lister les produits actifs |
+| GET | `/api/products/{id}` | Detail d'un produit |
+| PUT | `/api/products/{id}` | Modifier un produit |
+| DELETE | `/api/products/{id}` | Supprimer un produit |
+
 ### Preferences utilisateur
 
 | Methode | Route | Description |
