@@ -15,6 +15,7 @@ class AppConfig with _$AppConfig {
     LockMethod? lockMethod,
     String? hashedPin,
     @Default(false) bool onboardingCompleted,
+    @Default([Feature.subscriptions, Feature.debts]) List<Feature> enabledFeatures,
   }) = _AppConfig;
 
   factory AppConfig.fromJson(Map<String, dynamic> json) =>

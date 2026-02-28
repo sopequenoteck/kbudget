@@ -51,6 +51,8 @@ void main() {
     when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
     when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
     when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
+    when(mockRepo.getEnabledFeatures()).thenAnswer(
+        (_) async => [Feature.subscriptions, Feature.debts]);
   });
 
   Widget buildApp({List<Override> overrides = const []}) {

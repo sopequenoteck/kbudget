@@ -28,6 +28,8 @@ import 'package:k_budget/src/features/accounts/presentation/screens/account_form
 import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_form_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
+import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -176,6 +178,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.debtsName,
             builder: (context, state) => const DebtListScreen(),
           ),
+          GoRoute(
+            path: RouteNames.shop,
+            name: RouteNames.shopName,
+            builder: (context, state) => const Scaffold(
+              body: Center(child: Text('Boutique — À venir')),
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -197,6 +206,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) =>
                 const AppearanceSettingsScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.settingsFeatures,
+            name: RouteNames.settingsFeaturesName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const FeatureSettingsScreen(),
           ),
           GoRoute(
             path: RouteNames.settingsAccounts,
@@ -266,19 +282,66 @@ class _ShellScaffold extends ConsumerStatefulWidget {
 }
 
 class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
-  static const _paths = [
-    RouteNames.dashboard,
-    RouteNames.transactions,
-    RouteNames.subscriptions,
-    RouteNames.debts,
-  ];
-
   bool _isModalShowing = false;
 
   @override
   Widget build(BuildContext context) {
+    final featureState = ref.watch(featureConfigNotifierProvider);
+    final enabledFeatures = featureState.enabledFeatures;
+
+    // Build dynamic paths and destinations
+    final paths = <String>[
+      RouteNames.dashboard,
+      RouteNames.transactions,
+    ];
+    final destinations = <NavDestination>[
+      const NavDestination(
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+        label: 'Accueil',
+      ),
+      const NavDestination(
+        icon: Icons.receipt_long_outlined,
+        selectedIcon: Icons.receipt_long,
+        label: 'Transactions',
+      ),
+    ];
+
+    if (enabledFeatures.contains(Feature.subscriptions)) {
+      paths.add(RouteNames.subscriptions);
+      destinations.add(const NavDestination(
+        icon: Icons.autorenew_outlined,
+        selectedIcon: Icons.autorenew,
+        label: 'Abonnements',
+      ));
+    }
+    if (enabledFeatures.contains(Feature.debts)) {
+      paths.add(RouteNames.debts);
+      destinations.add(const NavDestination(
+        icon: Icons.handshake_outlined,
+        selectedIcon: Icons.handshake,
+        label: 'Dettes',
+      ));
+    }
+    if (enabledFeatures.contains(Feature.shop)) {
+      paths.add(RouteNames.shop);
+      destinations.add(const NavDestination(
+        icon: Icons.storefront_outlined,
+        selectedIcon: Icons.storefront,
+        label: 'Boutique',
+      ));
+    }
+
     final location = GoRouterState.of(context).matchedLocation;
-    final currentIndex = _paths.indexOf(location).clamp(0, _paths.length - 1);
+    var currentIndex = paths.indexOf(location).clamp(0, paths.length - 1);
+
+    // If current route is no longer in paths, redirect to dashboard
+    if (!paths.contains(location)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go(RouteNames.dashboard);
+      });
+      currentIndex = 0;
+    }
 
     ref.listen<ModalState>(modalNotifierProvider, (previous, next) {
       if (next is ModalOpen && !_isModalShowing) {
@@ -288,8 +351,9 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
 
     return AdaptiveScaffold(
       currentIndex: currentIndex,
+      destinations: destinations,
       onDestinationSelected: (index) {
-        context.go(_paths[index]);
+        context.go(paths[index]);
       },
       floatingActionButton: const FabMenu(),
       body: widget.child,

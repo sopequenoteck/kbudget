@@ -9,6 +9,7 @@ class RouteNames {
   static const String subscriptions = '/subscriptions';
   static const String debts = '/debts';
   static const String settings = '/settings';
+  static const String shop = '/shop';
   static const String login = '/login';
   static const String register = '/register';
   static const String lock = '/lock';
@@ -16,6 +17,7 @@ class RouteNames {
   // Settings sub-paths (relative)
   static const String settingsProfile = 'profile';
   static const String settingsAppearance = 'appearance';
+  static const String settingsFeatures = 'features';
   static const String settingsAccounts = 'accounts';
   static const String settingsCategories = 'categories';
   static const String settingsData = 'data';
@@ -33,9 +35,11 @@ class RouteNames {
   static const String lockName = 'lock';
   static const String settingsProfileName = 'settings-profile';
   static const String settingsAppearanceName = 'settings-appearance';
+  static const String settingsFeaturesName = 'settings-features';
   static const String settingsAccountsName = 'settings-accounts';
   static const String settingsCategoriesName = 'settings-categories';
   static const String settingsDataName = 'settings-data';
+  static const String shopName = 'shop';
   static const String settingsAccountsNewName = 'settings-accounts-new';
   static const String settingsAccountsEditName = 'settings-accounts-edit';
 

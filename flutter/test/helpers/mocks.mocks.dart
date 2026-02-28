@@ -227,6 +227,28 @@ class MockAppConfigRepository extends _i1.Mock
             returnValueForMissingStub: _i10.Future<void>.value(),
           )
           as _i10.Future<void>);
+
+  @override
+  _i10.Future<List<_i11.Feature>> getEnabledFeatures() =>
+      (super.noSuchMethod(
+            Invocation.method(#getEnabledFeatures, []),
+            returnValue: _i10.Future<List<_i11.Feature>>.value(
+              <_i11.Feature>[],
+            ),
+            returnValueForMissingStub: _i10.Future<List<_i11.Feature>>.value(
+              <_i11.Feature>[],
+            ),
+          )
+          as _i10.Future<List<_i11.Feature>>);
+
+  @override
+  _i10.Future<void> setEnabledFeatures(List<_i11.Feature>? features) =>
+      (super.noSuchMethod(
+            Invocation.method(#setEnabledFeatures, [features]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [AuthRepository].
@@ -629,19 +651,6 @@ class MockDebtRepository extends _i1.Mock implements _i15.DebtRepository {
 class MockCategoryRepository extends _i1.Mock
     implements _i16.CategoryRepository {
   @override
-  _i10.Future<List<_i7.Category>> getAll() =>
-      (super.noSuchMethod(
-            Invocation.method(#getAll, []),
-            returnValue: _i10.Future<List<_i7.Category>>.value(
-              <_i7.Category>[],
-            ),
-            returnValueForMissingStub: _i10.Future<List<_i7.Category>>.value(
-              <_i7.Category>[],
-            ),
-          )
-          as _i10.Future<List<_i7.Category>>);
-
-  @override
   _i10.Stream<List<_i7.Category>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
@@ -664,27 +673,40 @@ class MockCategoryRepository extends _i1.Mock
           as _i10.Future<_i7.Category>);
 
   @override
-  _i10.Future<_i7.Category> create(_i7.Category? category) =>
+  _i10.Future<List<_i7.Category>> getAll() =>
       (super.noSuchMethod(
-            Invocation.method(#create, [category]),
+            Invocation.method(#getAll, []),
+            returnValue: _i10.Future<List<_i7.Category>>.value(
+              <_i7.Category>[],
+            ),
+            returnValueForMissingStub: _i10.Future<List<_i7.Category>>.value(
+              <_i7.Category>[],
+            ),
+          )
+          as _i10.Future<List<_i7.Category>>);
+
+  @override
+  _i10.Future<_i7.Category> create(_i7.Category? item) =>
+      (super.noSuchMethod(
+            Invocation.method(#create, [item]),
             returnValue: _i10.Future<_i7.Category>.value(
-              _FakeCategory_5(this, Invocation.method(#create, [category])),
+              _FakeCategory_5(this, Invocation.method(#create, [item])),
             ),
             returnValueForMissingStub: _i10.Future<_i7.Category>.value(
-              _FakeCategory_5(this, Invocation.method(#create, [category])),
+              _FakeCategory_5(this, Invocation.method(#create, [item])),
             ),
           )
           as _i10.Future<_i7.Category>);
 
   @override
-  _i10.Future<_i7.Category> update(_i7.Category? category) =>
+  _i10.Future<_i7.Category> update(_i7.Category? item) =>
       (super.noSuchMethod(
-            Invocation.method(#update, [category]),
+            Invocation.method(#update, [item]),
             returnValue: _i10.Future<_i7.Category>.value(
-              _FakeCategory_5(this, Invocation.method(#update, [category])),
+              _FakeCategory_5(this, Invocation.method(#update, [item])),
             ),
             returnValueForMissingStub: _i10.Future<_i7.Category>.value(
-              _FakeCategory_5(this, Invocation.method(#update, [category])),
+              _FakeCategory_5(this, Invocation.method(#update, [item])),
             ),
           )
           as _i10.Future<_i7.Category>);
@@ -703,17 +725,6 @@ class MockCategoryRepository extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAccountRepository extends _i1.Mock implements _i17.AccountRepository {
-  @override
-  _i10.Future<List<_i8.Account>> getAll() =>
-      (super.noSuchMethod(
-            Invocation.method(#getAll, []),
-            returnValue: _i10.Future<List<_i8.Account>>.value(<_i8.Account>[]),
-            returnValueForMissingStub: _i10.Future<List<_i8.Account>>.value(
-              <_i8.Account>[],
-            ),
-          )
-          as _i10.Future<List<_i8.Account>>);
-
   @override
   _i10.Stream<List<_i8.Account>> watchAll() =>
       (super.noSuchMethod(
@@ -735,41 +746,6 @@ class MockAccountRepository extends _i1.Mock implements _i17.AccountRepository {
             ),
           )
           as _i10.Future<_i8.Account>);
-
-  @override
-  _i10.Future<_i8.Account> create(_i8.Account? account) =>
-      (super.noSuchMethod(
-            Invocation.method(#create, [account]),
-            returnValue: _i10.Future<_i8.Account>.value(
-              _FakeAccount_6(this, Invocation.method(#create, [account])),
-            ),
-            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
-              _FakeAccount_6(this, Invocation.method(#create, [account])),
-            ),
-          )
-          as _i10.Future<_i8.Account>);
-
-  @override
-  _i10.Future<_i8.Account> update(_i8.Account? account) =>
-      (super.noSuchMethod(
-            Invocation.method(#update, [account]),
-            returnValue: _i10.Future<_i8.Account>.value(
-              _FakeAccount_6(this, Invocation.method(#update, [account])),
-            ),
-            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
-              _FakeAccount_6(this, Invocation.method(#update, [account])),
-            ),
-          )
-          as _i10.Future<_i8.Account>);
-
-  @override
-  _i10.Future<void> delete(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#delete, [id]),
-            returnValue: _i10.Future<void>.value(),
-            returnValueForMissingStub: _i10.Future<void>.value(),
-          )
-          as _i10.Future<void>);
 
   @override
   _i10.Future<_i8.Account> setDefault(String? id) =>
@@ -802,4 +778,50 @@ class MockAccountRepository extends _i1.Mock implements _i17.AccountRepository {
             ),
           )
           as _i10.Future<_i8.Account>);
+
+  @override
+  _i10.Future<List<_i8.Account>> getAll() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAll, []),
+            returnValue: _i10.Future<List<_i8.Account>>.value(<_i8.Account>[]),
+            returnValueForMissingStub: _i10.Future<List<_i8.Account>>.value(
+              <_i8.Account>[],
+            ),
+          )
+          as _i10.Future<List<_i8.Account>>);
+
+  @override
+  _i10.Future<_i8.Account> create(_i8.Account? item) =>
+      (super.noSuchMethod(
+            Invocation.method(#create, [item]),
+            returnValue: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(this, Invocation.method(#create, [item])),
+            ),
+            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(this, Invocation.method(#create, [item])),
+            ),
+          )
+          as _i10.Future<_i8.Account>);
+
+  @override
+  _i10.Future<_i8.Account> update(_i8.Account? item) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [item]),
+            returnValue: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(this, Invocation.method(#update, [item])),
+            ),
+            returnValueForMissingStub: _i10.Future<_i8.Account>.value(
+              _FakeAccount_6(this, Invocation.method(#update, [item])),
+            ),
+          )
+          as _i10.Future<_i8.Account>);
+
+  @override
+  _i10.Future<void> delete(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [id]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
 }

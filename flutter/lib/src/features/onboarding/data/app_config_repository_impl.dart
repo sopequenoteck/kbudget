@@ -104,4 +104,16 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
     final config = await getConfig();
     await saveConfig(config.copyWith(hashedPin: pin));
   }
+
+  @override
+  Future<List<Feature>> getEnabledFeatures() async {
+    final config = await getConfig();
+    return config.enabledFeatures;
+  }
+
+  @override
+  Future<void> setEnabledFeatures(List<Feature> features) async {
+    final config = await getConfig();
+    await saveConfig(config.copyWith(enabledFeatures: features));
+  }
 }

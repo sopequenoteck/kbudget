@@ -40,6 +40,14 @@ const settingsSections = <SettingsSection>[
     route: '/settings/profile',
   ),
   SettingsSection(
+    icon: Icons.toggle_on,
+    iconColor: Colors.green,
+    title: 'Fonctionnalités',
+    description: 'Activer/désactiver les modules',
+    group: SettingsGroup.general,
+    route: '/settings/features',
+  ),
+  SettingsSection(
     icon: Icons.palette,
     iconColor: Colors.purple,
     title: 'Apparence',

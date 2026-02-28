@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/domain/enums/modal_type.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
 class FabMenu extends ConsumerStatefulWidget {
   const FabMenu({super.key});
@@ -102,9 +103,26 @@ class _FabMenuState extends ConsumerState<FabMenu>
     final activeAccountCount =
         accountState.items.where((a) => a.actif).length;
 
+    final featureState = ref.watch(featureConfigNotifierProvider);
+    final enabledFeatures = featureState.enabledFeatures;
+
     final items = _allItems
-        .where((item) =>
-            item.modalType != ModalType.transfer || activeAccountCount >= 2)
+        .where((item) {
+          // Keep transfer only if 2+ active accounts
+          if (item.modalType == ModalType.transfer) {
+            return activeAccountCount >= 2;
+          }
+          // Hide subscription if feature off
+          if (item.modalType == ModalType.subscription) {
+            return enabledFeatures.contains(Feature.subscriptions);
+          }
+          // Hide debt if feature off
+          if (item.modalType == ModalType.debt) {
+            return enabledFeatures.contains(Feature.debts);
+          }
+          // Transaction always visible
+          return true;
+        })
         .toList();
 
     return SizedBox(

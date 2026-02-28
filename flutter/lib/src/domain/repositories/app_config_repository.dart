@@ -17,4 +17,6 @@ abstract class AppConfigRepository {
   Future<void> setLockEnabled(bool enabled);
   Future<void> setLockMethod(LockMethod? method);
   Future<void> setHashedPin(String? pin);
+  Future<List<Feature>> getEnabledFeatures();
+  Future<void> setEnabledFeatures(List<Feature> features);
 }
