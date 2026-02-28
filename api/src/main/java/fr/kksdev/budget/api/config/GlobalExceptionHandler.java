@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
 import fr.kksdev.budget.api.exception.TokenInvalidException;
@@ -46,6 +47,15 @@ public class GlobalExceptionHandler {
         log.warn("Feature disabled: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
                 HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+        log.warn("Conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(
+                HttpStatus.CONFLICT.value(),
                 ex.getMessage()
         ));
     }

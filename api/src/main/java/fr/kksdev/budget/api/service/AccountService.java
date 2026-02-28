@@ -37,6 +37,7 @@ public class AccountService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final CategoryService categoryService;
+    private final PreferenceService preferenceService;
 
     public List<AccountResponse> getAccounts(UUID userId, boolean includeInactive) {
         List<Account> accounts = includeInactive
@@ -285,6 +286,7 @@ public class AccountService {
     }
 
     private AccountResponse toResponse(Account account) {
+        UUID shopAccountId = preferenceService.getOrCreatePreference(account.getUser().getId()).getShopAccountId();
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(account.getId());
         BigDecimal solde = account.getSoldeInitial().add(balance);
         return new AccountResponse(
@@ -297,7 +299,8 @@ public class AccountService {
                 account.getCouleur(),
                 Boolean.TRUE.equals(account.getIsDefault()),
                 Boolean.TRUE.equals(account.getActif()),
-                account.getCurrency().name()
+                account.getCurrency().name(),
+                account.getId().equals(shopAccountId)
         );
     }
 }

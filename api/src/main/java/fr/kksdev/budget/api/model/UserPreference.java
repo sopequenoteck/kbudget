@@ -39,6 +39,13 @@ public class UserPreference {
     @Builder.Default
     private List<Feature> navOrder = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
 
+    @Column(name = "shop_account_id")
+    private UUID shopAccountId;
+
+    @Column(name = "include_shop_in_balance", nullable = false)
+    @Builder.Default
+    private Boolean includeShopInBalance = false;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

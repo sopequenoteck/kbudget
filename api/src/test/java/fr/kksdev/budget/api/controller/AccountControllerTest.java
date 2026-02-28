@@ -68,7 +68,7 @@ class AccountControllerTest {
         return new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
     }
 
     @Test
@@ -87,7 +87,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Livret A", AccountType.EPARGNE,
                 new BigDecimal("5000.00"), new BigDecimal("5000.00"),
-                "🐷", "#22c55e", false, true, "EUR");
+                "🐷", "#22c55e", false, true, "EUR", false);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
@@ -130,7 +130,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Nouveau Nom", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
 
         when(accountService.updateAccount(eq(accountId), any(AccountRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -173,7 +173,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Livret A", AccountType.EPARGNE,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🐷", "#22c55e", true, true, "EUR");
+                "🐷", "#22c55e", true, true, "EUR", false);
 
         when(accountService.setDefault(accountId, userId)).thenReturn(response);
 
@@ -284,7 +284,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("750.00"),
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
                 .thenReturn(response);
@@ -304,7 +304,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("300.00"),
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
                 .thenReturn(response);
@@ -324,7 +324,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("500.00"),
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
                 .thenReturn(response);
@@ -374,7 +374,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("-100.00"),
-                "🏦", "#3b82f6", true, true, "EUR");
+                "🏦", "#3b82f6", true, true, "EUR", false);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
                 .thenReturn(response);

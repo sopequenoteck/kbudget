@@ -59,7 +59,8 @@ class PreferenceControllerTest {
     void should_return200WithDefaultPreferences_when_noCustomPreferences() throws Exception {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP)
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
+                null, false
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -78,7 +79,8 @@ class PreferenceControllerTest {
     void should_return200WithCustomPreferences_when_preferencesExist() throws Exception {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                List.of(Feature.SHOP, Feature.SUBSCRIPTIONS)
+                List.of(Feature.SHOP, Feature.SUBSCRIPTIONS),
+                null, false
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -104,7 +106,8 @@ class PreferenceControllerTest {
     void should_return200_when_toggleFeaturesWithoutNavOrder() throws Exception {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP)
+                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
+                null, false
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -122,7 +125,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return200_when_disableAllFeatures() throws Exception {
-        var response = new UserPreferenceResponse(List.of(), List.of());
+        var response = new UserPreferenceResponse(List.of(), List.of(), null, false);
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
@@ -164,7 +167,8 @@ class PreferenceControllerTest {
     void should_return200_when_validNavOrderProvided() throws Exception {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS)
+                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
+                null, false
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);

@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ class PreferenceServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AccountRepository accountRepository;
 
     @InjectMocks
     private PreferenceService preferenceService;
@@ -87,7 +91,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.SHOP), null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.SHOP), null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.SHOP);
@@ -103,7 +107,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS);
@@ -118,7 +122,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(), null);
+        var request = new UserPreferenceRequest(List.of(), null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).isEmpty();
@@ -134,7 +138,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SHOP, Feature.SUBSCRIPTIONS), null);
+        var request = new UserPreferenceRequest(List.of(Feature.SHOP, Feature.SUBSCRIPTIONS), null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.SHOP, Feature.SUBSCRIPTIONS);
@@ -153,7 +157,8 @@ class PreferenceServiceTest {
 
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS)
+                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
+                null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
@@ -170,7 +175,8 @@ class PreferenceServiceTest {
 
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
-                List.of(Feature.SUBSCRIPTIONS, Feature.SUBSCRIPTIONS)
+                List.of(Feature.SUBSCRIPTIONS, Feature.SUBSCRIPTIONS),
+                null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -188,7 +194,8 @@ class PreferenceServiceTest {
 
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
-                List.of(Feature.SUBSCRIPTIONS)
+                List.of(Feature.SUBSCRIPTIONS),
+                null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -206,7 +213,8 @@ class PreferenceServiceTest {
 
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS),
-                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS)
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -225,7 +233,8 @@ class PreferenceServiceTest {
 
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS)
+                List.of(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS),
+                null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 

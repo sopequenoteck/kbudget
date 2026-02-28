@@ -240,6 +240,8 @@ Approche **signals-first** obligatoire :
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.6 (055-backend-feature-toggles)
 - PostgreSQL 15+ (nouvelle table `user_preferences`) (055-backend-feature-toggles)
 - PostgreSQL 15+ (Flyway V10) (056-backend-product-crud)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (057-backend-product-sales)
+- PostgreSQL 15+ (Flyway V11) (057-backend-product-sales)
 
 ### Backend (api/)
 

@@ -234,7 +234,7 @@ class CategoryServiceTest {
 
         categoryService.seedSystemCategories(user);
 
-        verify(categoryRepository, org.mockito.Mockito.times(3)).save(any(Category.class));
+        verify(categoryRepository, org.mockito.Mockito.times(4)).save(any(Category.class));
     }
 
     @Test

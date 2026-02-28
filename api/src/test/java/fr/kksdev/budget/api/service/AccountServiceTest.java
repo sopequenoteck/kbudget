@@ -10,7 +10,9 @@ import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.model.UserPreference;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,11 +44,26 @@ class AccountServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CategoryService categoryService;
+
+    @Mock
+    private PreferenceService preferenceService;
+
     @InjectMocks
     private AccountService accountService;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID accountId = UUID.randomUUID();
+
+    @BeforeEach
+    void setUp() {
+        var prefs = UserPreference.builder()
+                .shopAccountId(null)
+                .includeShopInBalance(false)
+                .build();
+        lenient().when(preferenceService.getOrCreatePreference(any(UUID.class))).thenReturn(prefs);
+    }
 
     private User buildUser() {
         return User.builder().id(userId).email("test@mail.com").build();

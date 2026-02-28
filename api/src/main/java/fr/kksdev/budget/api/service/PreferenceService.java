@@ -4,8 +4,10 @@ import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.model.UserPreference;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class PreferenceService {
 
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
 
     public UserPreferenceResponse getPreferences(UUID userId) {
         UserPreference preference = getOrCreate(userId);
@@ -46,6 +49,15 @@ public class PreferenceService {
 
         preference.setEnabledFeatures(enabledFeatures);
         preference.setNavOrder(navOrder);
+        if (request.shopAccountId() != null) {
+            accountRepository.findById(request.shopAccountId())
+                    .filter(a -> a.getUser().getId().equals(userId))
+                    .orElseThrow(() -> new EntityNotFoundException("Compte non trouvé"));
+            preference.setShopAccountId(request.shopAccountId());
+        }
+        if (request.includeShopInBalance() != null) {
+            preference.setIncludeShopInBalance(request.includeShopInBalance());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -66,6 +78,7 @@ public class PreferenceService {
                             .user(userRepository.getReferenceById(userId))
                             .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
                             .navOrder(new ArrayList<>(DEFAULT_FEATURES))
+                            .includeShopInBalance(false)
                             .build();
                     return userPreferenceRepository.save(newPreference);
                 });
@@ -103,7 +116,17 @@ public class PreferenceService {
         return newNavOrder;
     }
 
+    @Transactional
+    public UserPreference getOrCreatePreference(UUID userId) {
+        return getOrCreate(userId);
+    }
+
     private UserPreferenceResponse toResponse(UserPreference preference) {
-        return new UserPreferenceResponse(preference.getEnabledFeatures(), preference.getNavOrder());
+        return new UserPreferenceResponse(
+                preference.getEnabledFeatures(),
+                preference.getNavOrder(),
+                preference.getShopAccountId(),
+                preference.getIncludeShopInBalance()
+        );
     }
 }
