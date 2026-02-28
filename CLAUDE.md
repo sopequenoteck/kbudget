@@ -114,7 +114,7 @@ flutter/lib/src/
 │   ├── local/         # Drift database, DAOs, mappers
 │   └── remote/        # Dio client, interceptors, remote data sources
 ├── domain/
-│   ├── enums/         # TransactionType, Frequency, DebtType, Currency...
+│   ├── enums/         # TransactionType, Frequency, DebtType, Currency, Feature...
 │   ├── models/        # Freezed models (Account, Transaction...) + ListState<T>
 │   └── repositories/  # Interfaces abstraites (contrats)
 ├── features/          # Modules par feature
@@ -242,6 +242,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V10) (056-backend-product-crud)
 - Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (057-backend-product-sales)
 - PostgreSQL 15+ (Flyway V11) (057-backend-product-sales)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage (058-flutter-settings-features)
+- FlutterSecureStorage (AppConfig JSON) + API REST (mode serveur) (058-flutter-settings-features)
 
 ### Backend (api/)
 
@@ -263,4 +265,4 @@ Approche **signals-first** obligatoire :
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
-- 043-flutter-transactions-list: Added Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl
+- 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
