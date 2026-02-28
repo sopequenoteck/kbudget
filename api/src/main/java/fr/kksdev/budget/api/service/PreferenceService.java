@@ -52,6 +52,11 @@ public class PreferenceService {
         return toResponse(preference);
     }
 
+    public boolean isFeatureEnabled(UUID userId, Feature feature) {
+        UserPreference preference = getOrCreate(userId);
+        return preference.getEnabledFeatures().contains(feature);
+    }
+
     @Transactional
     private UserPreference getOrCreate(UUID userId) {
         return userPreferenceRepository.findByUserId(userId)

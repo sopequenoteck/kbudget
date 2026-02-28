@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
 import fr.kksdev.budget.api.exception.TokenInvalidException;
 import fr.kksdev.budget.api.exception.TokenReusedException;
@@ -34,6 +35,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(FeatureDisabledException.class)
+    public ResponseEntity<Map<String, Object>> handleFeatureDisabled(FeatureDisabledException ex) {
+        log.warn("Feature disabled: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
                 HttpStatus.FORBIDDEN.value(),
                 ex.getMessage()
