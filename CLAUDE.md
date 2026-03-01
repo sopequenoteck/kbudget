@@ -244,6 +244,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V11) (057-backend-product-sales)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage (058-flutter-settings-features)
 - FlutterSecureStorage (AppConfig JSON) + API REST (mode serveur) (058-flutter-settings-features)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, flutter_secure_storage (059-flutter-settings-bottom-nav)
+- FlutterSecureStorage (AppConfig JSON sérialisé) + API REST (mode serveur) (059-flutter-settings-bottom-nav)
 
 ### Backend (api/)
 
@@ -266,3 +268,4 @@ Approche **signals-first** obligatoire :
 
 ## Recent Changes
 - 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
+- 059-flutter-settings-bottom-nav: Feature.outlinedIcon added; AppConfig extended with navOrder; AppConfigRepository/Impl extended with getNavOrder/setNavOrder; FeatureConfigNotifier extended with navOrder state + reorderNavigation(); FeatureSettingsScreen renamed to "Fonctionnalités & Navigation" + section Navigation (drag & drop ReorderableListView + _BottomNavPreview); _ShellScaffold uses navOrder for ordered bottom nav
