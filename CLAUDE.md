@@ -261,6 +261,8 @@ Approche **signals-first** obligatoire :
 - Server-only (API REST `GET/PUT /users/me/preferences`) — pas de stockage local (064-angular-feature-toggles)
 - TypeScript 5.9, Angular 21 + Angular HttpClient, Angular Router, Angular Signals (065-angular-data-settings)
 - N/A (pas de persistance locale, lecture seule depuis le serveur) (065-angular-data-settings)
+- TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals (066-angular-transfer-form)
+- N/A (server-only, pas de stockage local) (066-angular-transfer-form)
 
 ### Backend (api/)
 
