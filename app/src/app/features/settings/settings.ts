@@ -16,6 +16,7 @@ const SECTIONS: SettingsSection[] = [
   { id: 'budget', title: 'Budget', description: 'Définir mes budgets', icon: '📊', route: 'budget', status: 'placeholder' },
   { id: 'notifications', title: 'Notifications', description: 'Configurer les alertes', icon: '🔔', route: 'notifications', status: 'placeholder' },
   { id: 'profile', title: 'Profil', description: 'Mes informations', icon: '👤', route: 'profile', status: 'active' },
+  { id: 'features', title: 'Fonctionnalités', description: 'Activer/désactiver les modules', icon: '⚡', route: 'features', status: 'active' },
   { id: 'appearance', title: 'Apparence', description: 'Thème et affichage', icon: '🎨', route: 'appearance', status: 'active' },
   { id: 'data', title: 'Données', description: 'Export et gestion', icon: '💾', route: 'data', status: 'placeholder' },
   { id: 'about', title: 'À propos', description: "Informations sur l'app", icon: 'ℹ️', route: 'about', status: 'active' },

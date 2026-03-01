@@ -14,6 +14,8 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { filter, firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
+import { PreferenceService } from '../../../core/services/preference';
+import { FEATURES, type Feature } from '../../../core/models/preference.model';
 import { ThemeService } from '../../../core/services/theme';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
@@ -62,6 +64,7 @@ import { Modal } from '../modal/modal';
 })
 export class Shell {
   private readonly authService = inject(AuthService);
+  readonly preferenceService = inject(PreferenceService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
@@ -94,6 +97,21 @@ export class Shell {
   readonly Frequency = Frequency;
   readonly debtType = signal(DebtType.EMPRUNT);
   readonly DebtType = DebtType;
+  readonly navItems = computed(() => {
+    const fixed = [
+      { label: 'Accueil', route: '/dashboard', icon: '🏠' },
+      { label: 'Transactions', route: '/transactions', icon: '💰' },
+    ];
+    const navOrder = this.preferenceService.navOrder();
+    const enabled = this.preferenceService.enabledFeatures();
+    const optional = navOrder
+      .filter((f: Feature) => enabled.includes(f))
+      .map((f: Feature) => {
+        const meta = FEATURES.find((m) => m.value === f)!;
+        return { label: meta.label, route: meta.route, icon: meta.icon };
+      });
+    return [...fixed, ...optional];
+  });
 
   constructor() {
     effect(() => {
@@ -124,6 +142,29 @@ export class Shell {
       if (modal === 'debt') {
         const entity = this.modalService.editingEntity() as Debt | null;
         this.debtType.set(entity?.sens ?? DebtType.EMPRUNT);
+      }
+    });
+
+    // Load user preferences after authentication
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        this.preferenceService.loadPreferences();
+      }
+    });
+
+    // Redirect if current route is a disabled feature
+    effect(() => {
+      const items = this.navItems();
+      const nav = this.navigationEnd();
+      if (nav instanceof NavigationEnd) {
+        const url = nav.urlAfterRedirects;
+        const validRoutes = items.map((i) => i.route);
+        const isSettings = url.startsWith('/settings');
+        const isDashboard = url === '/dashboard' || url === '/';
+        const isKnownRoute = validRoutes.some((r) => url.startsWith(r));
+        if (!isSettings && !isDashboard && !isKnownRoute && this.preferenceService.isLoaded()) {
+          this.router.navigate(['/dashboard']);
+        }
       }
     });
   }

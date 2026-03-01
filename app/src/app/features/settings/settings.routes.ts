@@ -14,6 +14,11 @@ export const SETTINGS_ROUTES: Routes = [
       import('./components/categories/categories').then((m) => m.Categories),
   },
   {
+    path: 'features',
+    loadComponent: () =>
+      import('./components/features/features').then((m) => m.Features),
+  },
+  {
     path: 'appearance',
     loadComponent: () =>
       import('./components/appearance/appearance').then((m) => m.Appearance),

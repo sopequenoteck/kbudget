@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { featureGuard } from './core/guards/feature.guard';
 import { Shell } from './shared/components/shell/shell';
 
 export const routes: Routes = [
@@ -30,6 +31,8 @@ export const routes: Routes = [
       },
       {
         path: 'subscriptions',
+        canActivate: [featureGuard],
+        data: { feature: 'SUBSCRIPTIONS' },
         loadChildren: () =>
           import('./features/subscriptions/subscriptions.routes').then(
             (m) => m.SUBSCRIPTIONS_ROUTES,
@@ -37,7 +40,16 @@ export const routes: Routes = [
       },
       {
         path: 'debts',
+        canActivate: [featureGuard],
+        data: { feature: 'DEBTS' },
         loadChildren: () => import('./features/debts/debts.routes').then((m) => m.DEBTS_ROUTES),
+      },
+      {
+        path: 'shop',
+        canActivate: [featureGuard],
+        data: { feature: 'SHOP' },
+        loadComponent: () =>
+          import('./features/shop/shop-placeholder').then((m) => m.ShopPlaceholder),
       },
       {
         path: 'settings',

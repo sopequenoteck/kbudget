@@ -44,10 +44,14 @@
 }
 
 <nav class="shell-sidebar" [class.open]="sidebarOpen()">
-  <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="onNavClick()">&#127968; Accueil</a>
-  <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">&#128176; Transactions</a>
-  <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">&#128260; Abonnements</a>
-  <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">&#129309; Dettes</a>
+  @for (item of navItems(); track item.route) {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="item.route === '/dashboard' ? {exact: true} : {exact: false}"
+      (click)="onNavClick()"
+    >{{ item.icon }} {{ item.label }}</a>
+  }
 </nav>
 
 <main class="shell-content">

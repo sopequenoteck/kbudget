@@ -1,0 +1,70 @@
+<a class="section-back" routerLink="/settings">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Paramètres</span>
+</a>
+
+<h2 class="features-title">Fonctionnalités</h2>
+
+@if (preferenceService.error(); as error) {
+  <div class="features-error">{{ error }}</div>
+}
+
+<section class="features-section">
+  <h3 class="features-section__title">Modules</h3>
+  <div class="features-list">
+    @for (feature of features; track feature.value) {
+      <div class="feature-item">
+        <span class="feature-item__icon">{{ feature.icon }}</span>
+        <div class="feature-item__text">
+          <span class="feature-item__label">{{ feature.label }}</span>
+          <span class="feature-item__description">{{ feature.description }}</span>
+        </div>
+        <label class="feature-toggle">
+          <input
+            type="checkbox"
+            [checked]="preferenceService.isEnabled(feature.value)"
+            (change)="toggleFeature(feature.value)"
+          />
+          <span class="feature-toggle__slider"></span>
+        </label>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="features-section">
+  <h3 class="features-section__title">Navigation</h3>
+  <div class="features-list">
+    <div class="nav-item nav-item--locked">
+      <span class="nav-item__icon">🏠</span>
+      <span class="nav-item__label">Accueil</span>
+      <span class="nav-item__lock">🔒</span>
+    </div>
+    <div class="nav-item nav-item--locked">
+      <span class="nav-item__icon">💰</span>
+      <span class="nav-item__label">Transactions</span>
+      <span class="nav-item__lock">🔒</span>
+    </div>
+    <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="nav-drop-list">
+      @for (item of enabledNavItems(); track item.value) {
+        <div cdkDrag class="nav-item nav-item--draggable">
+          <span cdkDragHandle class="nav-item__handle">⠿</span>
+          <span class="nav-item__icon">{{ item.icon }}</span>
+          <span class="nav-item__label">{{ item.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+@if (confirmDisableFeature(); as feature) {
+  <div class="confirm-banner">
+    <p class="confirm-banner__message">
+      Vos données seront masquées mais pas supprimées.
+    </p>
+    <div class="confirm-banner__actions">
+      <button class="confirm-banner__cancel" (click)="cancelDisable()">Annuler</button>
+      <button class="confirm-banner__confirm" (click)="confirmDisable()">Désactiver</button>
+    </div>
+  </div>
+}

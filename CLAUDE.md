@@ -257,6 +257,8 @@ Approche **signals-first** obligatoire :
 - API REST uniquement (pas de Drift/SQLite — remote only). Images stockees en fichier local (app documents directory). (061-flutter-product-form)
 - TypeScript 5.9 (Angular SCSS), Dart >= 3.6 (Flutter) + Angular 21 (SCSS tokens), Flutter >= 3.27 (Dart constants + ThemeData) (063-shared-design-tokens)
 - N/A (fichiers statiques de configuration) (063-shared-design-tokens)
+- TypeScript 5.9, Angular 21 + Angular CDK (`@angular/cdk/drag-drop` pour le DnD), Angular Signals, Angular Router (064-angular-feature-toggles)
+- Server-only (API REST `GET/PUT /users/me/preferences`) — pas de stockage local (064-angular-feature-toggles)
 
 ### Backend (api/)
 
