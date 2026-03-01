@@ -25,6 +25,12 @@
   --color-primary-light: var(--amber-100);
   --color-primary-contrast: #fff;
 
+  // -- Secondary --
+  --color-secondary: var(--indigo-600);
+  --color-secondary-hover: var(--indigo-700);
+  --color-secondary-light: var(--indigo-100);
+  --color-secondary-contrast: #fff;
+
   // -- Surfaces --
   --surface-default: #fff;
   --surface-raised: #fff;
@@ -51,5 +57,5 @@
   --color-expense: #dc2626;
   --color-debt-owe: #dc2626;
   --color-debt-owed: #16a34a;
-  --color-subscription: #2563eb;
+  --color-subscription: #8b5cf6;
 }

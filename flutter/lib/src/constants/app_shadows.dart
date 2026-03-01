@@ -15,7 +15,8 @@ class AppShadows {
     BoxShadow(
       color: Color(0x1A000000),
       blurRadius: 6,
-      offset: Offset(0, 2),
+      spreadRadius: -1,
+      offset: Offset(0, 4),
     ),
   ];
 
@@ -23,15 +24,19 @@ class AppShadows {
     BoxShadow(
       color: Color(0x1A000000),
       blurRadius: 15,
-      offset: Offset(0, 4),
+      spreadRadius: -3,
+      offset: Offset(0, 10),
     ),
   ];
 
-  static List<BoxShadow> colored(Color color) => [
+  /// Colored shadow with theme-aware alpha.
+  /// [alpha] should be 102 for light theme, 89 for dark theme.
+  static List<BoxShadow> colored(Color color, {int alpha = 102}) => [
     BoxShadow(
-      color: color.withValues(alpha: 0.3),
-      blurRadius: 8,
-      offset: const Offset(0, 2),
+      color: color.withAlpha(alpha),
+      blurRadius: 24,
+      spreadRadius: -4,
+      offset: const Offset(0, 8),
     ),
   ];
 }

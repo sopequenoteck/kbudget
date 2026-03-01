@@ -260,3 +260,4 @@ cd api && mvn test
 - [`docs/api-examples.md`](docs/api-examples.md) — Exemples de requetes et reponses pour chaque endpoint
 - [`docs/api-errors.md`](docs/api-errors.md) — Contrat d'erreurs HTTP et guide d'integration frontend
 - [`docs/deployment.md`](docs/deployment.md) — Guide de deploiement (Docker, bare-metal, reverse proxy, backup)
+- [`docs/design-tokens.md`](docs/design-tokens.md) — Reference unique des design tokens partages (couleurs, typographie, spacing, radius, ombres, animations)

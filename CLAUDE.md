@@ -100,9 +100,13 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - Endpoints auth : `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`.
 - Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 
-### Design System SCSS (Angular)
+### Design System
 
-Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities). Couleur primaire : Amber (#f59e0b). Police : Inter.
+Document de reference unique : [`docs/design-tokens.md`](docs/design-tokens.md). Couleur primaire : Amber (#f59e0b). Couleur secondaire : Indigo (#4f46e5). Police : Inter. 7 categories de tokens : couleurs, typographie, spacing, radius, ombres, animations, platform-specific.
+
+**Angular** : Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities).
+
+**Flutter** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations). Theme dans `flutter/lib/src/theme/` (AppTheme, AppThemeExtension).
 
 ### Architecture Flutter (flutter/)
 
@@ -216,6 +220,7 @@ Approche **signals-first** obligatoire :
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/deployment.md`](docs/deployment.md) | Guide deploiement Docker/bare-metal |
+| [`docs/design-tokens.md`](docs/design-tokens.md) | Reference unique design tokens partages (couleurs, typo, spacing, radius, ombres, animations) |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
 
 ## Active Technologies
@@ -250,6 +255,8 @@ Approche **signals-first** obligatoire :
 - API REST uniquement (pas de Drift/SQLite pour cette feature) (060-flutter-shop-products)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, image_picker, path_provider (061-flutter-product-form)
 - API REST uniquement (pas de Drift/SQLite — remote only). Images stockees en fichier local (app documents directory). (061-flutter-product-form)
+- TypeScript 5.9 (Angular SCSS), Dart >= 3.6 (Flutter) + Angular 21 (SCSS tokens), Flutter >= 3.27 (Dart constants + ThemeData) (063-shared-design-tokens)
+- N/A (fichiers statiques de configuration) (063-shared-design-tokens)
 
 ### Backend (api/)
 

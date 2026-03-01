@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
+import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 
@@ -15,8 +17,9 @@ class AppTheme {
           onPrimary: Colors.white,
           primaryContainer: AppColors.amber100,
           onPrimaryContainer: AppColors.amber900,
-          secondary: AppColors.gray600,
+          secondary: AppColors.indigo600,
           onSecondary: Colors.white,
+          secondaryContainer: AppColors.indigo100,
           surface: Colors.white,
           onSurface: AppColors.gray900,
           error: AppColors.error,
@@ -36,7 +39,7 @@ class AppTheme {
           color: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             side: const BorderSide(color: AppColors.gray200),
           ),
         ),
@@ -54,19 +57,21 @@ class AppTheme {
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.gray300),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.gray300),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.amber500, width: 2),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.space4,
+            vertical: AppSpacing.space3,
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -74,7 +79,7 @@ class AppTheme {
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ),
         ),
@@ -92,11 +97,12 @@ class AppTheme {
           onPrimary: AppColors.gray900,
           primaryContainer: AppColors.amber800,
           onPrimaryContainer: AppColors.amber100,
-          secondary: AppColors.gray400,
+          secondary: AppColors.indigo400,
           onSecondary: AppColors.gray900,
+          secondaryContainer: AppColors.indigo800,
           surface: AppColors.gray800,
           onSurface: AppColors.gray50,
-          error: AppColors.error,
+          error: Color(0xFFF87171),
           onError: Colors.white,
           outline: AppColors.gray600,
           outlineVariant: AppColors.gray700,
@@ -113,7 +119,7 @@ class AppTheme {
           color: AppColors.gray800,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             side: const BorderSide(color: AppColors.gray700),
           ),
         ),
@@ -131,19 +137,21 @@ class AppTheme {
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.gray600),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.gray600),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: const BorderSide(color: AppColors.amber400, width: 2),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.space4,
+            vertical: AppSpacing.space3,
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -151,7 +159,7 @@ class AppTheme {
             foregroundColor: AppColors.gray900,
             minimumSize: const Size(double.infinity, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ),
         ),
