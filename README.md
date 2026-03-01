@@ -190,6 +190,7 @@ budget/
 ├── api/           # Backend Spring Boot
 ├── app/           # Frontend Angular PWA (k-budget-app)
 ├── flutter/       # App mobile native Flutter (k_budget)
+├── scripts/       # Scripts utilitaires (Python, maintenance)
 ├── deploy/        # Caddyfile, systemd, scripts
 └── docs/          # Documentation
 ```
@@ -199,10 +200,10 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Preference)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, Preference)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, UserPreference)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, UserPreference)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
