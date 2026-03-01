@@ -21,6 +21,12 @@ enum Feature {
     Feature.shop => Icons.storefront,
   };
 
+  IconData get outlinedIcon => switch (this) {
+    Feature.subscriptions => Icons.autorenew_outlined,
+    Feature.debts => Icons.handshake_outlined,
+    Feature.shop => Icons.storefront_outlined,
+  };
+
   String get description => switch (this) {
     Feature.subscriptions => 'Gérer vos abonnements récurrents',
     Feature.debts => 'Suivre vos prêts et emprunts',

@@ -72,7 +72,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Profil'), findsOneWidget);
-      expect(find.text('Fonctionnalités'), findsOneWidget);
+      expect(find.text('Fonctionnalités & Navigation'), findsOneWidget);
       expect(find.text('Apparence'), findsOneWidget);
       expect(find.text('Comptes'), findsOneWidget);
       expect(find.text('Catégories'), findsOneWidget);

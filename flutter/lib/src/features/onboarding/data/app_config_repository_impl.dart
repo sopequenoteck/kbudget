@@ -116,4 +116,16 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
     final config = await getConfig();
     await saveConfig(config.copyWith(enabledFeatures: features));
   }
+
+  @override
+  Future<List<Feature>> getNavOrder() async {
+    final config = await getConfig();
+    return config.navOrder;
+  }
+
+  @override
+  Future<void> setNavOrder(List<Feature> order) async {
+    final config = await getConfig();
+    await saveConfig(config.copyWith(navOrder: order));
+  }
 }

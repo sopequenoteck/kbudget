@@ -249,6 +249,28 @@ class MockAppConfigRepository extends _i1.Mock
             returnValueForMissingStub: _i10.Future<void>.value(),
           )
           as _i10.Future<void>);
+
+  @override
+  _i10.Future<List<_i11.Feature>> getNavOrder() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNavOrder, []),
+            returnValue: _i10.Future<List<_i11.Feature>>.value(
+              <_i11.Feature>[],
+            ),
+            returnValueForMissingStub: _i10.Future<List<_i11.Feature>>.value(
+              <_i11.Feature>[],
+            ),
+          )
+          as _i10.Future<List<_i11.Feature>>);
+
+  @override
+  _i10.Future<void> setNavOrder(List<_i11.Feature>? order) =>
+      (super.noSuchMethod(
+            Invocation.method(#setNavOrder, [order]),
+            returnValue: _i10.Future<void>.value(),
+            returnValueForMissingStub: _i10.Future<void>.value(),
+          )
+          as _i10.Future<void>);
 }
 
 /// A class which mocks [AuthRepository].

@@ -288,6 +288,7 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
   Widget build(BuildContext context) {
     final featureState = ref.watch(featureConfigNotifierProvider);
     final enabledFeatures = featureState.enabledFeatures;
+    final navOrder = featureState.navOrder;
 
     // Build dynamic paths and destinations
     final paths = <String>[
@@ -307,29 +308,37 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       ),
     ];
 
-    if (enabledFeatures.contains(Feature.subscriptions)) {
-      paths.add(RouteNames.subscriptions);
-      destinations.add(const NavDestination(
-        icon: Icons.autorenew_outlined,
-        selectedIcon: Icons.autorenew,
-        label: 'Abonnements',
-      ));
-    }
-    if (enabledFeatures.contains(Feature.debts)) {
-      paths.add(RouteNames.debts);
-      destinations.add(const NavDestination(
-        icon: Icons.handshake_outlined,
-        selectedIcon: Icons.handshake,
-        label: 'Dettes',
-      ));
-    }
-    if (enabledFeatures.contains(Feature.shop)) {
-      paths.add(RouteNames.shop);
-      destinations.add(const NavDestination(
-        icon: Icons.storefront_outlined,
-        selectedIcon: Icons.storefront,
-        label: 'Boutique',
-      ));
+    // Add enabled features in navOrder order
+    final orderedEnabled = navOrder.where(enabledFeatures.contains);
+    for (final feature in orderedEnabled) {
+      final (path, destination) = switch (feature) {
+        Feature.subscriptions => (
+          RouteNames.subscriptions,
+          const NavDestination(
+            icon: Icons.autorenew_outlined,
+            selectedIcon: Icons.autorenew,
+            label: 'Abonnements',
+          ),
+        ),
+        Feature.debts => (
+          RouteNames.debts,
+          const NavDestination(
+            icon: Icons.handshake_outlined,
+            selectedIcon: Icons.handshake,
+            label: 'Dettes',
+          ),
+        ),
+        Feature.shop => (
+          RouteNames.shop,
+          const NavDestination(
+            icon: Icons.storefront_outlined,
+            selectedIcon: Icons.storefront,
+            label: 'Boutique',
+          ),
+        ),
+      };
+      paths.add(path);
+      destinations.add(destination);
     }
 
     final location = GoRouterState.of(context).matchedLocation;

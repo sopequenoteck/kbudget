@@ -14,6 +14,7 @@ part 'feature_config_notifier.freezed.dart';
 class FeatureConfigState with _$FeatureConfigState {
   const factory FeatureConfigState({
     @Default([Feature.subscriptions, Feature.debts]) List<Feature> enabledFeatures,
+    @Default(Feature.values) List<Feature> navOrder,
     @Default(false) bool isLoading,
     String? error,
   }) = _FeatureConfigState;
@@ -34,7 +35,8 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   Future<void> _loadFeatures() async {
     final repo = ref.read(appConfigRepositoryProvider);
     final features = await repo.getEnabledFeatures();
-    state = state.copyWith(enabledFeatures: features);
+    final navOrder = await repo.getNavOrder();
+    state = state.copyWith(enabledFeatures: features, navOrder: navOrder);
 
     // In server mode, load from API and overwrite local
     final modeAsync = ref.read(dataModeProvider);
@@ -52,12 +54,14 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
       final prefs = await dataSource.getPreferences();
       state = state.copyWith(
         enabledFeatures: prefs.enabledFeatures,
+        navOrder: prefs.navOrder,
         isLoading: false,
         error: null,
       );
       // Sync local config
       final repo = ref.read(appConfigRepositoryProvider);
       await repo.setEnabledFeatures(prefs.enabledFeatures);
+      await repo.setNavOrder(prefs.navOrder);
     } on Exception catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -87,16 +91,37 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final modeAsync = ref.read(dataModeProvider);
     final mode = modeAsync.valueOrNull;
     if (mode == DataMode.server) {
-      unawaited(_syncToServer(current));
+      unawaited(_syncToServer(current, navOrder: state.navOrder));
     }
   }
 
-  Future<void> _syncToServer(List<Feature> features) async {
+  Future<void> reorderNavigation(List<Feature> newOrder) async {
+    state = state.copyWith(navOrder: newOrder, error: null);
+
+    // Persist locally
+    final repo = ref.read(appConfigRepositoryProvider);
+    await repo.setNavOrder(newOrder);
+
+    // If server mode, sync in background
+    final modeAsync = ref.read(dataModeProvider);
+    final mode = modeAsync.valueOrNull;
+    if (mode == DataMode.server) {
+      unawaited(_syncToServer(state.enabledFeatures, navOrder: newOrder));
+    }
+  }
+
+  Future<void> _syncToServer(
+    List<Feature> features, {
+    List<Feature>? navOrder,
+  }) async {
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
       await dataSource.updatePreferences(
-        UserPreferenceRequest(enabledFeatures: features),
+        UserPreferenceRequest(
+          enabledFeatures: features,
+          navOrder: navOrder,
+        ),
       );
     } on Exception catch (e) {
       state = state.copyWith(error: 'Synchronisation échouée: $e');

@@ -42,8 +42,8 @@ const settingsSections = <SettingsSection>[
   SettingsSection(
     icon: Icons.toggle_on,
     iconColor: Colors.green,
-    title: 'Fonctionnalités',
-    description: 'Activer/désactiver les modules',
+    title: 'Fonctionnalités & Navigation',
+    description: 'Modules et ordre de navigation',
     group: SettingsGroup.general,
     route: '/settings/features',
   ),
