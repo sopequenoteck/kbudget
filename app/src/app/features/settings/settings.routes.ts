@@ -48,7 +48,6 @@ export const SETTINGS_ROUTES: Routes = [
   {
     path: 'data',
     loadComponent: () =>
-      import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Données', icon: '💾' },
+      import('./components/data-settings/data-settings').then((m) => m.DataSettings),
   },
 ];

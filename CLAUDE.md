@@ -259,6 +259,8 @@ Approche **signals-first** obligatoire :
 - N/A (fichiers statiques de configuration) (063-shared-design-tokens)
 - TypeScript 5.9, Angular 21 + Angular CDK (`@angular/cdk/drag-drop` pour le DnD), Angular Signals, Angular Router (064-angular-feature-toggles)
 - Server-only (API REST `GET/PUT /users/me/preferences`) — pas de stockage local (064-angular-feature-toggles)
+- TypeScript 5.9, Angular 21 + Angular HttpClient, Angular Router, Angular Signals (065-angular-data-settings)
+- N/A (pas de persistance locale, lecture seule depuis le serveur) (065-angular-data-settings)
 
 ### Backend (api/)
 
