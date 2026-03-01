@@ -44,6 +44,10 @@ dependencies:
   # Emoji picker
   emoji_picker_flutter: ^4.4.0
 
+  # Image picker & file storage
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+
   # Utils
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0

@@ -32,6 +32,9 @@ import 'package:k_budget/src/features/settings/application/feature_config_notifi
 import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
 import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/product.dart';
+import 'package:k_budget/src/features/shop/application/product_notifier.dart';
+import 'package:k_budget/src/features/shop/presentation/widgets/product_form.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
@@ -396,6 +399,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
           Navigator.of(context).pop();
         },
       );
+    } else if (state.type == ModalType.product) {
+      return _ProductFormConsumer(
+        product: state.entity as Product?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
     }
     return const SizedBox.shrink();
   }
@@ -574,6 +584,35 @@ class _TransferFormConsumer extends ConsumerWidget {
         unawaited(
             ref.read(transactionListNotifierProvider.notifier).refresh());
         unawaited(ref.read(accountNotifierProvider.notifier).refresh());
+        onDone();
+      },
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _ProductFormConsumer extends ConsumerWidget {
+  final Product? product;
+  final VoidCallback onDone;
+
+  const _ProductFormConsumer({
+    this.product,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    return ProductForm(
+      product: product,
+      onSaved: (p) async {
+        if (product == null) {
+          await ref.read(productNotifierProvider.notifier).create(p);
+        } else {
+          await ref.read(productNotifierProvider.notifier).update(p);
+        }
         onDone();
       },
       onCancelled: onDone,

@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/features/shop/application/product_list_state.dart';
 import 'package:k_budget/src/features/shop/application/product_notifier.dart';
+import 'package:k_budget/src/domain/enums/modal_type.dart';
+import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
@@ -136,7 +142,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   const SizedBox(height: AppSpacing.space4),
                   FilledButton.icon(
                     onPressed: () {
-                      // No-op — formulaire non implémenté
+                      ref.read(modalNotifierProvider.notifier).open(ModalType.product);
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Créer un produit'),
@@ -158,17 +164,106 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           itemBuilder: (context, index) {
             final product = state.items[index];
 
-            final listItem = ListItem(
-              icon: product.icone ?? '📦',
-              title: product.nom,
-              value: AmountFormatter.format(product.prixVente),
-              subtitle: 'Stock: ${product.stock}',
-              rightSubtitle: product.stock == 0
-                  ? 'Rupture'
-                  : '${product.totalVendu} ventes',
-              onPressed: () {
-                // No-op — navigation vers détail (KKS-125)
+            final hasImage = product.imageUrl != null &&
+                File(product.imageUrl!).existsSync();
+
+            final leading = hasImage
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    child: Image.file(
+                      File(product.imageUrl!),
+                      width: AppSpacing.space10,
+                      height: AppSpacing.space10,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(
+                    width: AppSpacing.space10,
+                    height: AppSpacing.space10,
+                    decoration: BoxDecoration(
+                      color: AppColors.amber100,
+                      borderRadius: BorderRadius.circular(AppRadius.round),
+                    ),
+                    child: Center(
+                      child: Text(
+                        product.icone ?? '📦',
+                        style: const TextStyle(fontSize: AppTypography.sizeLg),
+                      ),
+                    ),
+                  );
+
+            final listItem = InkWell(
+              onTap: () {
+                ref.read(modalNotifierProvider.notifier).open(
+                      ModalType.product,
+                      entity: product,
+                    );
               },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.space3,
+                  horizontal: AppSpacing.space4,
+                ),
+                child: Row(
+                  spacing: AppSpacing.space3,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    leading,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: AppSpacing.space1,
+                        children: [
+                          Text(
+                            product.nom,
+                            style: TextStyle(
+                              fontSize: AppTypography.sizeMd,
+                              fontWeight: AppTypography.medium,
+                              color: colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Stock: ${product.stock}',
+                            style: TextStyle(
+                              fontSize: AppTypography.sizeSm,
+                              fontWeight: AppTypography.regular,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: AppSpacing.space1,
+                      children: [
+                        Text(
+                          AmountFormatter.format(product.prixVente),
+                          style: TextStyle(
+                            fontSize: AppTypography.sizeMd,
+                            fontWeight: AppTypography.semiBold,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          product.stock == 0
+                              ? 'Rupture'
+                              : '${product.totalVendu} ventes',
+                          style: TextStyle(
+                            fontSize: AppTypography.sizeSm,
+                            fontWeight: AppTypography.regular,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             );
 
             if (product.stock == 0) {
