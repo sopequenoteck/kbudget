@@ -248,6 +248,8 @@ Approche **signals-first** obligatoire :
 - FlutterSecureStorage (AppConfig JSON sérialisé) + API REST (mode serveur) (059-flutter-settings-bottom-nav)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl (060-flutter-shop-products)
 - API REST uniquement (pas de Drift/SQLite pour cette feature) (060-flutter-shop-products)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, image_picker, path_provider (061-flutter-product-form)
+- API REST uniquement (pas de Drift/SQLite — remote only). Images stockees en fichier local (app documents directory). (061-flutter-product-form)
 
 ### Backend (api/)
 
@@ -264,11 +266,12 @@ Approche **signals-first** obligatoire :
 ### Mobile natif (flutter/)
 
 - Dart >= 3.6, Flutter >= 3.27
-- flutter_riverpod, go_router, drift, dio, flutter_secure_storage
+- flutter_riverpod, go_router, drift, dio, flutter_secure_storage, image_picker, path_provider
 - freezed, json_serializable, shimmer, intl
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
 - 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
 - 059-flutter-settings-bottom-nav: Feature.outlinedIcon added; AppConfig extended with navOrder; AppConfigRepository/Impl extended with getNavOrder/setNavOrder; FeatureConfigNotifier extended with navOrder state + reorderNavigation(); FeatureSettingsScreen renamed to "Fonctionnalités & Navigation" + section Navigation (drag & drop ReorderableListView + _BottomNavPreview); _ShellScaffold uses navOrder for ordered bottom nav
-- 060-flutter-shop-products (en cours): ProductListScreen + ProductListNotifier (CrudNotifier pattern) + ProductRepository (remote only); fix FAB speed dial — RenderBox.localToGlobal() remplace CompositedTransformFollower/LayerLink
+- 060-flutter-shop-products: ProductListScreen + ProductListNotifier (CrudNotifier pattern) + ProductRepository (remote only); fix FAB speed dial — RenderBox.localToGlobal() remplace CompositedTransformFollower/LayerLink
+- 061-flutter-product-form: ProductForm (ConsumerStatefulWidget) + DecimalTextInputFormatter; image_picker + path_provider ajoutés; ModalType.product ajouté; ProductListScreen câblé (create/edit via ModalNotifier)
