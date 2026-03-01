@@ -77,14 +77,67 @@ class _FabMenuState extends ConsumerState<FabMenu>
     } else {
       setState(() => _isOpen = true);
       _controller.forward();
+
+      // Snapshot des données nécessaires via ref.read (pas de watch dans l'overlay)
+      final accountState = ref.read(accountNotifierProvider);
+      final activeAccountCount =
+          accountState.items.where((a) => a.actif).length;
+      final featureState = ref.read(featureConfigNotifierProvider);
+      final enabledFeatures = featureState.enabledFeatures;
+      final theme = Theme.of(context);
+
+      final items = _allItems
+          .where((item) {
+            if (item.modalType == ModalType.transfer) {
+              return activeAccountCount >= 2;
+            }
+            if (item.modalType == ModalType.subscription) {
+              return enabledFeatures.contains(Feature.subscriptions);
+            }
+            if (item.modalType == ModalType.debt) {
+              return enabledFeatures.contains(Feature.debts);
+            }
+            return true;
+          })
+          .toList();
+
+      final renderBox = context.findRenderObject() as RenderBox;
+      final fabPos = renderBox.localToGlobal(Offset.zero);
+      final fabSize = renderBox.size;
+      final screenSize = MediaQuery.of(context).size;
+
       _overlayEntry = OverlayEntry(
-        builder: (_) => GestureDetector(
-          onTap: _close,
-          behavior: HitTestBehavior.opaque,
-          child: const ColoredBox(
-            color: Color(0x33000000),
-            child: SizedBox.expand(),
-          ),
+        builder: (_) => Stack(
+          children: [
+            // Backdrop : absorbe tous les taps en dehors des items
+            GestureDetector(
+              onTap: _close,
+              behavior: HitTestBehavior.opaque,
+              child: const ColoredBox(
+                color: Color(0x33000000),
+                child: SizedBox.expand(),
+              ),
+            ),
+            // Speed dial items : positionnés au-dessus du FAB, alignés à droite
+            Positioned(
+              right: screenSize.width - fabPos.dx - fabSize.width,
+              bottom: screenSize.height - fabPos.dy + 8,
+              child: SizeTransition(
+                sizeFactor: _expandAnimation,
+                axisAlignment: 1,
+                child: FadeTransition(
+                  opacity: _expandAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: items
+                        .map((item) => _buildSpeedDialItem(item, theme))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
       Overlay.of(context).insert(_overlayEntry!);
@@ -98,73 +151,12 @@ class _FabMenuState extends ConsumerState<FabMenu>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final accountState = ref.watch(accountNotifierProvider);
-    final activeAccountCount =
-        accountState.items.where((a) => a.actif).length;
-
-    final featureState = ref.watch(featureConfigNotifierProvider);
-    final enabledFeatures = featureState.enabledFeatures;
-
-    final items = _allItems
-        .where((item) {
-          // Keep transfer only if 2+ active accounts
-          if (item.modalType == ModalType.transfer) {
-            return activeAccountCount >= 2;
-          }
-          // Hide subscription if feature off
-          if (item.modalType == ModalType.subscription) {
-            return enabledFeatures.contains(Feature.subscriptions);
-          }
-          // Hide debt if feature off
-          if (item.modalType == ModalType.debt) {
-            return enabledFeatures.contains(Feature.debts);
-          }
-          // Transaction always visible
-          return true;
-        })
-        .toList();
-
-    return SizedBox(
-      height: _isOpen ? 300 : 56,
-      width: 160,
-      child: Stack(
-        alignment: Alignment.bottomRight,
-        clipBehavior: Clip.none,
-        children: [
-          // Speed dial items
-          Positioned(
-            bottom: 64,
-            right: 0,
-            child: SizeTransition(
-              sizeFactor: _expandAnimation,
-              axisAlignment: 1,
-              child: FadeTransition(
-                opacity: _expandAnimation,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: items
-                      .map((item) => _buildSpeedDialItem(item, theme))
-                      .toList(),
-                ),
-              ),
-            ),
-          ),
-          // Main FAB
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: FloatingActionButton(
-              onPressed: _toggle,
-              child: AnimatedRotation(
-                turns: _isOpen ? 0.125 : 0,
-                duration: const Duration(milliseconds: 250),
-                child: const Icon(Icons.add),
-              ),
-            ),
-          ),
-        ],
+    return FloatingActionButton(
+      onPressed: _toggle,
+      child: AnimatedRotation(
+        turns: _isOpen ? 0.125 : 0,
+        duration: const Duration(milliseconds: 250),
+        child: const Icon(Icons.add),
       ),
     );
   }
