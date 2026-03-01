@@ -6,6 +6,7 @@ import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/domain/repositories/category_repository.dart';
 import 'package:k_budget/src/domain/repositories/account_repository.dart';
+import 'package:k_budget/src/domain/repositories/product_repository.dart';
 
 @GenerateNiceMocks([
   MockSpec<AppConfigRepository>(),
@@ -15,5 +16,6 @@ import 'package:k_budget/src/domain/repositories/account_repository.dart';
   MockSpec<DebtRepository>(),
   MockSpec<CategoryRepository>(),
   MockSpec<AccountRepository>(),
+  MockSpec<ProductRepository>(),
 ])
 void main() {}

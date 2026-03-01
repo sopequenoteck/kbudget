@@ -30,6 +30,7 @@ import 'package:k_budget/src/features/categories/presentation/screens/category_f
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
+import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -181,9 +182,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RouteNames.shop,
             name: RouteNames.shopName,
-            builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Boutique — À venir')),
-            ),
+            builder: (context, state) => const ProductListScreen(),
           ),
         ],
       ),
