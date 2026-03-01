@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
@@ -194,10 +195,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
 
             final listItem = InkWell(
               onTap: () {
-                ref.read(modalNotifierProvider.notifier).open(
-                      ModalType.product,
-                      entity: product,
-                    );
+                context.push('/shop/${product.id}', extra: product);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(

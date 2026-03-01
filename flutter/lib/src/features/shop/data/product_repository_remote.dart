@@ -1,7 +1,11 @@
 import 'package:k_budget/src/data/remote/data_sources/product_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/product_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/transaction_dtos.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/product.dart';
+import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/product_repository.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 
 class ProductRepositoryRemote implements ProductRepository {
   final ProductRemoteDataSource _dataSource;
@@ -37,6 +41,25 @@ class ProductRepositoryRemote implements ProductRepository {
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
 
+  @override
+  Future<Product> sell(String id) async {
+    final response = await _dataSource.sell(id);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<Product> restock(String id, int quantity) async {
+    final request = RestockRequest(quantity: quantity);
+    final response = await _dataSource.restock(id, request);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<List<Transaction>> getSales(String id) async {
+    final responses = await _dataSource.getSales(id);
+    return responses.map(_transactionToDomain).toList();
+  }
+
   Product _toDomain(ProductResponse r) => Product(
         id: r.id,
         nom: r.nom,
@@ -60,6 +83,19 @@ class ProductRepositoryRemote implements ProductRepository {
         prixAchat: p.prixAchat,
         prixVente: p.prixVente,
         stock: p.stock,
+      );
+
+  Transaction _transactionToDomain(TransactionResponse r) => Transaction(
+        id: r.id,
+        montant: r.montant,
+        libelle: r.libelle,
+        type: TransactionType.values.byNameOrDefault(r.type.toLowerCase(), TransactionType.depense),
+        date: DateTime.parse(r.date),
+        note: r.note,
+        transferId: r.transferId,
+        categoryId: r.categoryId,
+        accountId: r.accountId,
+        updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
       );
 
   ProductUpdateRequest _toUpdateRequest(Product p) => ProductUpdateRequest(

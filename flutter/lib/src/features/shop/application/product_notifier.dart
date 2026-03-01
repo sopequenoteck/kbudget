@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/product.dart';
+import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/product_repository.dart';
 import 'package:k_budget/src/features/shop/application/product_list_state.dart';
 
@@ -109,6 +110,54 @@ class ProductNotifier extends Notifier<ProductListState> {
     }
   }
 
+  Future<void> sellProduct(String id) async {
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, id},
+      error: null,
+    );
+    try {
+      final updated = await _repo.sell(id);
+      final index = _allItems.indexWhere((e) => e.id == id);
+      if (index != -1) _allItems[index] = updated;
+      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
+      _refreshPage();
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+      );
+      ref.invalidate(productSalesProvider(id));
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+        error: 'Erreur lors de la vente: $e',
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> restockProduct(String id, int quantity) async {
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, id},
+      error: null,
+    );
+    try {
+      final updated = await _repo.restock(id, quantity);
+      final index = _allItems.indexWhere((e) => e.id == id);
+      if (index != -1) _allItems[index] = updated;
+      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
+      _refreshPage();
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+      );
+      ref.invalidate(productSalesProvider(id));
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+        error: 'Erreur lors du réapprovisionnement: $e',
+      );
+      rethrow;
+    }
+  }
+
   void _refreshPage({bool resetPage = false}) {
     final page = resetPage ? 0 : state.currentPage;
     final end = (page + 1) * _pageSize;
@@ -121,3 +170,9 @@ class ProductNotifier extends Notifier<ProductListState> {
     );
   }
 }
+
+final productSalesProvider =
+    FutureProvider.family<List<Transaction>, String>((ref, productId) async {
+  final repo = ref.read(productRepositoryProvider);
+  return repo.getSales(productId);
+});

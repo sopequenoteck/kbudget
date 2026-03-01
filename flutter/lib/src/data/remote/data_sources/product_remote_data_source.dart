@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:k_budget/src/data/remote/dtos/product_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/transaction_dtos.dart';
 
 class ProductRemoteDataSource {
   final Dio _dio;
@@ -38,5 +39,25 @@ class ProductRemoteDataSource {
 
   Future<void> delete(String id) async {
     await _dio.delete<void>('/products/$id');
+  }
+
+  Future<ProductResponse> sell(String id) async {
+    final response = await _dio.post<Map<String, dynamic>>('/products/$id/sell');
+    return ProductResponse.fromJson(response.data!);
+  }
+
+  Future<ProductResponse> restock(String id, RestockRequest request) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/products/$id/restock',
+      data: request.toJson(),
+    );
+    return ProductResponse.fromJson(response.data!);
+  }
+
+  Future<List<TransactionResponse>> getSales(String id) async {
+    final response = await _dio.get<List<dynamic>>('/products/$id/sales');
+    return response.data!
+        .map((e) => TransactionResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

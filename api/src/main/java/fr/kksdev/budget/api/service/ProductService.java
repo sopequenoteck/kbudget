@@ -182,7 +182,6 @@ public class ProductService {
 
         return transactionRepository.findByProductIdAndUserIdOrderByDateDesc(productId, userId)
                 .stream()
-                .filter(t -> t.getType() == TransactionType.RECETTE)
                 .map(this::toTransactionResponse)
                 .toList();
     }

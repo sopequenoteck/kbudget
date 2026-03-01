@@ -918,4 +918,43 @@ class MockProductRepository extends _i1.Mock implements _i19.ProductRepository {
             returnValueForMissingStub: _i11.Future<void>.value(),
           )
           as _i11.Future<void>);
+
+  @override
+  _i11.Future<_i9.Product> sell(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#sell, [id]),
+            returnValue: _i11.Future<_i9.Product>.value(
+              _FakeProduct_7(this, Invocation.method(#sell, [id])),
+            ),
+            returnValueForMissingStub: _i11.Future<_i9.Product>.value(
+              _FakeProduct_7(this, Invocation.method(#sell, [id])),
+            ),
+          )
+          as _i11.Future<_i9.Product>);
+
+  @override
+  _i11.Future<_i9.Product> restock(String? id, int? quantity) =>
+      (super.noSuchMethod(
+            Invocation.method(#restock, [id, quantity]),
+            returnValue: _i11.Future<_i9.Product>.value(
+              _FakeProduct_7(this, Invocation.method(#restock, [id, quantity])),
+            ),
+            returnValueForMissingStub: _i11.Future<_i9.Product>.value(
+              _FakeProduct_7(this, Invocation.method(#restock, [id, quantity])),
+            ),
+          )
+          as _i11.Future<_i9.Product>);
+
+  @override
+  _i11.Future<List<_i4.Transaction>> getSales(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSales, [id]),
+            returnValue: _i11.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+            returnValueForMissingStub: _i11.Future<List<_i4.Transaction>>.value(
+              <_i4.Transaction>[],
+            ),
+          )
+          as _i11.Future<List<_i4.Transaction>>);
 }

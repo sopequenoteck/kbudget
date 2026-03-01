@@ -31,6 +31,7 @@ import 'package:k_budget/src/features/user_profile/presentation/screens/profile_
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
 import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
+import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/domain/models/product.dart';
 import 'package:k_budget/src/features/shop/application/product_notifier.dart';
@@ -186,6 +187,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.shop,
             name: RouteNames.shopName,
             builder: (context, state) => const ProductListScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final product = state.extra as Product?;
+                  return ProductDetailScreen(
+                    productId: state.pathParameters['id']!,
+                    initialProduct: product,
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

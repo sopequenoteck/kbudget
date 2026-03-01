@@ -4,6 +4,16 @@ part 'product_dtos.freezed.dart';
 part 'product_dtos.g.dart';
 
 @freezed
+class RestockRequest with _$RestockRequest {
+  const factory RestockRequest({
+    required int quantity,
+  }) = _RestockRequest;
+
+  factory RestockRequest.fromJson(Map<String, dynamic> json) =>
+      _$RestockRequestFromJson(json);
+}
+
+@freezed
 class ProductRequest with _$ProductRequest {
   const factory ProductRequest({
     required String nom,
