@@ -45,11 +45,7 @@
     <p class="checked-at">Dernier test : {{ formatTime(healthResult().checkedAt) }}</p>
   }
 
-  <button
-    class="test-button"
-    [disabled]="isTestRunning()"
-    (click)="testConnection()"
-  >
+  <button class="test-button" [disabled]="isTestRunning()" (click)="testConnection()">
     @if (isTestRunning()) {
       <span class="test-button__spinner"></span>
     }
@@ -59,15 +55,17 @@
 
 <div class="info-section">
   <h3 class="info-section__title">Maintenance</h3>
-  <p class="maintenance-description">Forcer un rechargement complet des données depuis le serveur.</p>
+  <p class="maintenance-description">
+    Forcer un rechargement complet des données depuis le serveur.
+  </p>
   @if (!confirmReload()) {
-    <button class="reload-button" (click)="reloadData()">
-      Recharger les données
-    </button>
+    <button class="reload-button" (click)="reloadData()">Recharger les données</button>
   }
   @if (confirmReload()) {
     <div class="confirm-banner">
-      <p class="confirm-banner__message">Recharger toutes les données ? L'application va redémarrer.</p>
+      <p class="confirm-banner__message">
+        Recharger toutes les données ? L'application va redémarrer.
+      </p>
       <div class="confirm-banner__actions">
         <button class="confirm-banner__cancel" (click)="cancelReload()">Annuler</button>
         <button class="confirm-banner__confirm" (click)="confirmReloadData()">Recharger</button>

@@ -143,9 +143,7 @@ export class Dashboard {
       .sort((a, b) => a.currency.localeCompare(b.currency));
   });
 
-  readonly miniCardsLoading = computed(
-    () => this.subscriptionsLoading() || this.debtsLoading(),
-  );
+  readonly miniCardsLoading = computed(() => this.subscriptionsLoading() || this.debtsLoading());
 
   private summarySub: RxSub | null = null;
   private transactionsSub: RxSub | null = null;

@@ -54,7 +54,9 @@ export class Fab {
     initialValue: [] as Account[],
   });
 
-  readonly hasEnoughAccounts = computed(() => this.allAccounts().filter((a) => a.actif).length >= 2);
+  readonly hasEnoughAccounts = computed(
+    () => this.allAccounts().filter((a) => a.actif).length >= 2,
+  );
 
   readonly actions = computed<SpeedDialItem[]>(() => {
     const base = BASE_ACTIONS.filter((action) => {

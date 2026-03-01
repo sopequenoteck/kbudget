@@ -6,7 +6,13 @@ import { type Debt } from '../models/debt.model';
 import { type Category } from '../models/category.model';
 import { type Account } from '../models/account.model';
 
-export type ModalType = 'transaction' | 'subscription' | 'debt' | 'category' | 'account' | 'transfer';
+export type ModalType =
+  | 'transaction'
+  | 'subscription'
+  | 'debt'
+  | 'category'
+  | 'account'
+  | 'transfer';
 
 type EditableEntity = Transaction | Subscription | Debt | Category | Account;
 

@@ -59,9 +59,7 @@
 
 @if (confirmDisableFeature(); as feature) {
   <div class="confirm-banner">
-    <p class="confirm-banner__message">
-      Vos données seront masquées mais pas supprimées.
-    </p>
+    <p class="confirm-banner__message">Vos données seront masquées mais pas supprimées.</p>
     <div class="confirm-banner__actions">
       <button class="confirm-banner__cancel" (click)="cancelDisable()">Annuler</button>
       <button class="confirm-banner__confirm" (click)="confirmDisable()">Désactiver</button>

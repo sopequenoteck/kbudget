@@ -2,7 +2,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api';
-import { Account, AccountRequest, TransferRequest, TransferResponse } from '../models/account.model';
+import {
+  Account,
+  AccountRequest,
+  TransferRequest,
+  TransferResponse,
+} from '../models/account.model';
 
 @Injectable({
   providedIn: 'root',

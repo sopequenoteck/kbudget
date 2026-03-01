@@ -4,7 +4,9 @@
       label="Nom"
       fieldId="nom"
       [showError]="isInvalid('nom')"
-      [errorMessage]="form.get('nom')?.hasError('required') ? 'Nom requis' : '255 caracteres maximum'"
+      [errorMessage]="
+        form.get('nom')?.hasError('required') ? 'Nom requis' : '255 caracteres maximum'
+      "
     >
       <input id="nom" type="text" formControlName="nom" />
     </app-form-field>

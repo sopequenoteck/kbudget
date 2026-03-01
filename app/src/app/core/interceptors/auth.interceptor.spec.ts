@@ -231,9 +231,7 @@ describe('authInterceptor', () => {
     httpClient.get('/api/subscriptions').subscribe((r) => (result2 = r));
 
     // Both get 401
-    const reqs = httpTesting.match(
-      (r) => r.url.startsWith('/api/') && !r.headers.has('_retry'),
-    );
+    const reqs = httpTesting.match((r) => r.url.startsWith('/api/') && !r.headers.has('_retry'));
     expect(reqs).toHaveLength(2);
     reqs[0].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
     reqs[1].flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
@@ -285,9 +283,7 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient
-      .post('/api/auth/login', {})
-      .subscribe({ error: (err) => (caughtError = err) });
+    httpClient.post('/api/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
     const req = httpTesting.expectOne('/api/auth/login');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
@@ -328,9 +324,7 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient
-      .post('/api/auth/login', {})
-      .subscribe({ error: (err) => (caughtError = err) });
+    httpClient.post('/api/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
     const req = httpTesting.expectOne('/api/auth/login');
     req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
 

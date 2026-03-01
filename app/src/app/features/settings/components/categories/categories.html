@@ -22,10 +22,7 @@
           <li class="category-list__item">
             <span class="category-list__icon">{{ cat.icone }}</span>
             <span class="category-list__name">{{ cat.nom }}</span>
-            <span
-              class="category-list__color"
-              [style.background-color]="cat.couleur"
-            ></span>
+            <span class="category-list__color" [style.background-color]="cat.couleur"></span>
             <div class="category-list__actions">
               <button
                 type="button"
@@ -47,10 +44,17 @@
 
             @if (confirmDeleteId() === cat.id) {
               <div class="category-list__confirm">
-                <p>Cette catégorie sera dissociée de tous les items liés (transactions, abonnements, dettes).</p>
+                <p>
+                  Cette catégorie sera dissociée de tous les items liés (transactions, abonnements,
+                  dettes).
+                </p>
                 <div class="category-list__confirm-actions">
-                  <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
-                  <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
+                  <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">
+                    Annuler
+                  </button>
+                  <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">
+                    Supprimer
+                  </button>
                 </div>
               </div>
             }

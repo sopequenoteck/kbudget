@@ -241,9 +241,15 @@
     box-shadow: var(--shadow-lg);
   }
 
-  &--subscription { border-top-color: var(--color-subscription); }
-  &--debt-owe { border-top-color: var(--color-debt-owe); }
-  &--debt-owed { border-top-color: var(--color-debt-owed); }
+  &--subscription {
+    border-top-color: var(--color-subscription);
+  }
+  &--debt-owe {
+    border-top-color: var(--color-debt-owe);
+  }
+  &--debt-owed {
+    border-top-color: var(--color-debt-owed);
+  }
 
   &__label {
     font-size: var(--font-size-xs);

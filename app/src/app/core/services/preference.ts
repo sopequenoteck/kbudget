@@ -2,7 +2,11 @@ import { Injectable, inject, isDevMode, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
-import { type Feature, type UserPreference, type UserPreferenceRequest } from '../models/preference.model';
+import {
+  type Feature,
+  type UserPreference,
+  type UserPreferenceRequest,
+} from '../models/preference.model';
 
 @Injectable({
   providedIn: 'root',
@@ -31,9 +35,7 @@ export class PreferenceService {
   toggleFeature(feature: Feature): void {
     const current = this.enabledFeatures();
     const enabled = current.includes(feature);
-    const updated = enabled
-      ? current.filter((f) => f !== feature)
-      : [...current, feature];
+    const updated = enabled ? current.filter((f) => f !== feature) : [...current, feature];
 
     // Optimistic update
     this.enabledFeatures.set(updated);
@@ -75,7 +77,7 @@ export class PreferenceService {
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', request)).catch(
       (e) => {
         if (isDevMode()) console.error('Failed to reorder navigation:', e);
-        this.error.set('Impossible de sauvegarder l\'ordre de navigation');
+        this.error.set("Impossible de sauvegarder l'ordre de navigation");
       },
     );
   }

@@ -9,9 +9,27 @@ export interface FeatureMetadata {
 }
 
 export const FEATURES: readonly FeatureMetadata[] = [
-  { value: 'SUBSCRIPTIONS', label: 'Abonnements', icon: '🔄', description: 'Gérer vos abonnements récurrents', route: '/subscriptions' },
-  { value: 'DEBTS', label: 'Dettes', icon: '🤝', description: 'Suivre vos prêts et emprunts', route: '/debts' },
-  { value: 'SHOP', label: 'Boutique', icon: '🏪', description: 'Gérer vos ventes de produits', route: '/shop' },
+  {
+    value: 'SUBSCRIPTIONS',
+    label: 'Abonnements',
+    icon: '🔄',
+    description: 'Gérer vos abonnements récurrents',
+    route: '/subscriptions',
+  },
+  {
+    value: 'DEBTS',
+    label: 'Dettes',
+    icon: '🤝',
+    description: 'Suivre vos prêts et emprunts',
+    route: '/debts',
+  },
+  {
+    value: 'SHOP',
+    label: 'Boutique',
+    icon: '🏪',
+    description: 'Gérer vos ventes de produits',
+    route: '/shop',
+  },
 ] as const;
 
 export interface UserPreference {

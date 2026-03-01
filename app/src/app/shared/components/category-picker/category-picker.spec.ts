@@ -1,8 +1,5 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { of } from 'rxjs';
 
 import { CategoryPicker } from './category-picker';
@@ -33,9 +30,7 @@ describe('CategoryPicker', () => {
 
     TestBed.configureTestingModule({
       imports: [CategoryPicker],
-      providers: [
-        { provide: CategoryService, useValue: categoryServiceMock },
-      ],
+      providers: [{ provide: CategoryService, useValue: categoryServiceMock }],
     });
   });
 

@@ -20,7 +20,11 @@ function getFormatter(currency: string): Intl.NumberFormat {
 
 @Pipe({ name: 'amount', pure: true })
 export class AmountPipe implements PipeTransform {
-  transform(value: number | null | undefined, type?: string | null, currency?: string | null): string {
+  transform(
+    value: number | null | undefined,
+    type?: string | null,
+    currency?: string | null,
+  ): string {
     if (value == null) {
       return '';
     }

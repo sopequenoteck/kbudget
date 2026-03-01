@@ -1,17 +1,10 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { of } from 'rxjs';
 
 import { SubscriptionService } from './subscription';
 import { ApiService } from './api';
-import {
-  Subscription,
-  SubscriptionRequest,
-  Frequency,
-} from '../models/subscription.model';
+import { Subscription, SubscriptionRequest, Frequency } from '../models/subscription.model';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());

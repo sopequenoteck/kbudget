@@ -30,9 +30,7 @@ export class Categories {
   readonly error = signal(false);
   readonly confirmDeleteId = signal<string | null>(null);
 
-  readonly userCategories = computed(() =>
-    this.categories().filter((c) => !c.isSystem),
-  );
+  readonly userCategories = computed(() => this.categories().filter((c) => !c.isSystem));
 
   constructor() {
     effect(() => {

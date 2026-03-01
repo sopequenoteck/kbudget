@@ -20,7 +20,7 @@
     <div class="summary__card summary__card--balance">
       <span class="summary__label">Solde</span>
       <span class="summary__value" [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
-        {{ s.solde | amount : null : s.currency }}
+        {{ s.solde | amount: null : s.currency }}
       </span>
     </div>
   </section>

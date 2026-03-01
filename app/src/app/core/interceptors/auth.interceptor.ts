@@ -100,9 +100,7 @@ function handle401(
     switchMap(() => {
       const newToken = authService.getToken();
       if (!newToken) {
-        return throwError(
-          () => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }),
-        );
+        return throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }));
       }
       return next(
         req.clone({

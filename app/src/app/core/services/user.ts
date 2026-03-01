@@ -13,14 +13,12 @@ export class UserService {
   readonly profile = this._profile.asReadonly();
 
   getProfile(): Observable<UserInfo> {
-    return this.api.get<UserInfo>('/users/me').pipe(
-      tap((profile) => this._profile.set(profile)),
-    );
+    return this.api.get<UserInfo>('/users/me').pipe(tap((profile) => this._profile.set(profile)));
   }
 
   updateDefaultCurrency(currency: string): Observable<UserInfo> {
-    return this.api.put<UserInfo>('/users/me', { defaultCurrency: currency }).pipe(
-      tap((profile) => this._profile.set(profile)),
-    );
+    return this.api
+      .put<UserInfo>('/users/me', { defaultCurrency: currency })
+      .pipe(tap((profile) => this._profile.set(profile)));
   }
 }
