@@ -165,7 +165,8 @@ app/src/app/
     ├── transactions/  # CRUD transactions
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
-    └── settings/      # Parametres (categories, comptes bancaires)
+    ├── settings/      # Parametres (categories, comptes, fonctionnalites)
+    └── shop/          # Module Boutique (placeholder)
 ```
 
 ### Principes
@@ -195,8 +196,7 @@ app/src/app/
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec 4 actions : Transaction, Abonnement, Dette, Virement
-- L'action Virement n'apparait que si au moins 2 comptes actifs existent
+- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs)
 - Saisie en 2-3 taps
 
 ## Flux d'authentification
