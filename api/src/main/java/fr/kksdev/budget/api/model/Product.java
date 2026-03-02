@@ -30,7 +30,7 @@ public class Product {
     @Column(length = 10)
     private String icone;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "prix_achat", nullable = false, precision = 12, scale = 2)

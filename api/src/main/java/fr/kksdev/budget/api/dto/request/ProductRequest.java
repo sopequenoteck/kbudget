@@ -8,7 +8,7 @@ public record ProductRequest(
         @NotBlank @Size(max = 100) String nom,
         @Size(max = 500) String description,
         String icone,
-        @Size(max = 500) String imageUrl,
+        String imageUrl,
         @NotNull @Positive @Digits(integer = 10, fraction = 2) BigDecimal prixAchat,
         @NotNull @Positive @Digits(integer = 10, fraction = 2) BigDecimal prixVente,
         @NotNull @Min(0) Integer stock
