@@ -300,6 +300,7 @@ Reference values (CSS format). Flutter utilise une approximation single-shadow.
 | z-toast | Angular | 500 | |
 | sidebar-width | Angular | 240px | Layout specifique PWA |
 | header-height | Angular | 56px | Layout specifique PWA |
+| bottom-nav-height | Angular | 64px | Hauteur barre navigation mobile |
 
 ---
 
