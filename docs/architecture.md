@@ -108,6 +108,24 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
+### Product
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| nom | String | Nom du produit (max 100) |
+| description | String | Description (nullable, max 500) |
+| icone | String | Emoji (nullable) |
+| imageUrl | String | URL image (nullable, max 500) |
+| prixAchat | BigDecimal | Prix d'achat |
+| prixVente | BigDecimal | Prix de vente |
+| stock | Integer | Stock disponible (>= 0) |
+| totalVendu | Integer | Total vendu (auto, default 0) |
+| actif | Boolean | Toggle de visibilite (default true) |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
 ### RefreshToken
 
 | Champ | Type | Description |
@@ -118,6 +136,18 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | createdAt | LocalDateTime | Date de creation |
 | expiresAt | LocalDateTime | Date d'expiration |
 | user | User | FK → User |
+
+### UserPreference
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| enabledFeatures | List\<Feature\> | Features optionnelles activees (stocke en VARCHAR via converter) |
+| navOrder | List\<Feature\> | Ordre des onglets de navigation (stocke en VARCHAR via converter) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | @OneToOne → User (unique, non-null) |
+
+Enum `Feature` : `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. Converter JPA `FeatureListConverter` pour la serialisation CSV en base.
 
 ## Architecture frontend
 
@@ -135,7 +165,8 @@ app/src/app/
     ├── transactions/  # CRUD transactions
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
-    └── settings/      # Parametres (categories, comptes bancaires)
+    ├── settings/      # Parametres (categories, comptes, fonctionnalites)
+    └── shop/          # Module Boutique (placeholder)
 ```
 
 ### Principes
@@ -165,8 +196,7 @@ app/src/app/
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec 5 actions : Transaction, Abonnement, Dette, Categorie, Virement
-- L'action Virement n'apparait que si au moins 2 comptes actifs existent
+- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs)
 - Saisie en 2-3 taps
 
 ## Flux d'authentification

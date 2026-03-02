@@ -3,5 +3,6 @@ export 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 export 'package:k_budget/src/domain/repositories/auth_repository.dart';
 export 'package:k_budget/src/domain/repositories/category_repository.dart';
 export 'package:k_budget/src/domain/repositories/debt_repository.dart';
+export 'package:k_budget/src/domain/repositories/product_repository.dart';
 export 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 export 'package:k_budget/src/domain/repositories/transaction_repository.dart';

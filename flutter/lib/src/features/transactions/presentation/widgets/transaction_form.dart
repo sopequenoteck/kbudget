@@ -13,6 +13,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 
 class TransactionForm extends ConsumerStatefulWidget {
   const TransactionForm({
@@ -169,25 +170,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   Future<void> _onDelete() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showDeleteConfirmDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.transactionFormDeleteConfirmTitle),
-        content: Text(l10n.transactionFormDeleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+      title: l10n.transactionFormDeleteConfirmTitle,
+      message: l10n.transactionFormDeleteConfirmMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {

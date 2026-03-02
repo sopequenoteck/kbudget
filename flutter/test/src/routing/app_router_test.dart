@@ -51,13 +51,17 @@ void main() {
     when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
     when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
     when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
+    when(mockRepo.getEnabledFeatures()).thenAnswer(
+        (_) async => [Feature.subscriptions, Feature.debts]);
+    when(mockRepo.getNavOrder())
+        .thenAnswer((_) async => Feature.values.toList());
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
     return ProviderScope(
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
-        authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),

@@ -1,8 +1,5 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { of, throwError } from 'rxjs';
 
 import { CategoryForm } from './category-form';
@@ -35,9 +32,7 @@ describe('CategoryForm', () => {
 
     TestBed.configureTestingModule({
       imports: [CategoryForm],
-      providers: [
-        { provide: CategoryService, useValue: categoryServiceMock },
-      ],
+      providers: [{ provide: CategoryService, useValue: categoryServiceMock }],
     });
   });
 

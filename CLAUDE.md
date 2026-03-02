@@ -72,17 +72,19 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`, `Feature`, `Currency`.
 
 ### Entites
 
 - **User** : email (unique), password (BCrypt), name, createdAt. UUID.
 - **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
-- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), updatedAt. FK → User.
+- **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), productId (UUID, nullable, FK → Product), updatedAt. FK → User.
 - **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
 - **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
+- **Product** : nom, description (nullable), icone (nullable), imageUrl (nullable), prixAchat, prixVente, stock, totalVendu, actif, createdAt, updatedAt. FK → User.
+- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), updatedAt. @OneToOne → User.
 
 ### Environnements
 
@@ -98,9 +100,13 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - Endpoints auth : `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`.
 - Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 
-### Design System SCSS (Angular)
+### Design System
 
-Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities). Couleur primaire : Amber (#f59e0b). Police : Inter.
+Document de reference unique : [`docs/design-tokens.md`](docs/design-tokens.md). Couleur primaire : Amber (#f59e0b). Couleur secondaire : Indigo (#4f46e5). Police : Inter. 7 categories de tokens : couleurs, typographie, spacing, radius, ombres, animations, platform-specific.
+
+**Angular** : Composants utilisent UNIQUEMENT `var(--token-name)`, jamais d'import SCSS direct. Structure dans `app/src/styles/` (tokens, themes light/dark, reset, base, utilities).
+
+**Flutter** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations). Theme dans `flutter/lib/src/theme/` (AppTheme, AppThemeExtension).
 
 ### Architecture Flutter (flutter/)
 
@@ -112,7 +118,7 @@ flutter/lib/src/
 │   ├── local/         # Drift database, DAOs, mappers
 │   └── remote/        # Dio client, interceptors, remote data sources
 ├── domain/
-│   ├── enums/         # TransactionType, Frequency, DebtType, Currency...
+│   ├── enums/         # TransactionType, Frequency, DebtType, Currency, Feature...
 │   ├── models/        # Freezed models (Account, Transaction...) + ListState<T>
 │   └── repositories/  # Interfaces abstraites (contrats)
 ├── features/          # Modules par feature
@@ -214,6 +220,7 @@ Approche **signals-first** obligatoire :
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/deployment.md`](docs/deployment.md) | Guide deploiement Docker/bare-metal |
+| [`docs/design-tokens.md`](docs/design-tokens.md) | Reference unique design tokens partages (couleurs, typo, spacing, radius, ombres, animations) |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
 
 ## Active Technologies
@@ -235,11 +242,36 @@ Approche **signals-first** obligatoire :
 - API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, emoji_picker_flutter, shimmer, intl (054-flutter-settings-categories)
 - API REST uniquement (pas de Drift pour cette feature — données toujours fraîches depuis l'API) (054-flutter-settings-categories)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.6 (055-backend-feature-toggles)
+- PostgreSQL 15+ (nouvelle table `user_preferences`) (055-backend-feature-toggles)
+- PostgreSQL 15+ (Flyway V10) (056-backend-product-crud)
+- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (057-backend-product-sales)
+- PostgreSQL 15+ (Flyway V11) (057-backend-product-sales)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage (058-flutter-settings-features)
+- FlutterSecureStorage (AppConfig JSON) + API REST (mode serveur) (058-flutter-settings-features)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, flutter_secure_storage (059-flutter-settings-bottom-nav)
+- FlutterSecureStorage (AppConfig JSON sérialisé) + API REST (mode serveur) (059-flutter-settings-bottom-nav)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl (060-flutter-shop-products)
+- API REST uniquement (pas de Drift/SQLite pour cette feature) (060-flutter-shop-products)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, image_picker, path_provider (061-flutter-product-form)
+- API REST uniquement (pas de Drift/SQLite — remote only). Images stockees en fichier local (app documents directory). (061-flutter-product-form)
+- TypeScript 5.9 (Angular SCSS), Dart >= 3.6 (Flutter) + Angular 21 (SCSS tokens), Flutter >= 3.27 (Dart constants + ThemeData) (063-shared-design-tokens)
+- N/A (fichiers statiques de configuration) (063-shared-design-tokens)
+- TypeScript 5.9, Angular 21 + Angular CDK (`@angular/cdk/drag-drop` pour le DnD), Angular Signals, Angular Router (064-angular-feature-toggles)
+- Server-only (API REST `GET/PUT /users/me/preferences`) — pas de stockage local (064-angular-feature-toggles)
+- TypeScript 5.9, Angular 21 + Angular HttpClient, Angular Router, Angular Signals (065-angular-data-settings)
+- N/A (pas de persistance locale, lecture seule depuis le serveur) (065-angular-data-settings)
+- TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals (066-angular-transfer-form)
+- N/A (server-only, pas de stockage local) (066-angular-transfer-form)
+- TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, Angular CDK (deja present) (067-angular-responsive-nav)
+- N/A (pas de persistance, reutilise PreferenceService existant) (067-angular-responsive-nav)
+- TypeScript 5.9 (Angular), Java 21 (backend modification mineure) + Angular 21, Angular Reactive Forms, Angular Router, Angular Signals (068-angular-shop-module)
+- Server-only (API REST, pas de stockage local) (068-angular-shop-module)
 
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V8
+- PostgreSQL 15+, Flyway migrations V1-V11
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -251,9 +283,19 @@ Approche **signals-first** obligatoire :
 ### Mobile natif (flutter/)
 
 - Dart >= 3.6, Flutter >= 3.27
-- flutter_riverpod, go_router, drift, dio, flutter_secure_storage
+- flutter_riverpod, go_router, drift, dio, flutter_secure_storage, image_picker, path_provider
 - freezed, json_serializable, shimmer, intl
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
-- 043-flutter-transactions-list: Added Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl
+- 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
+- 059-flutter-settings-bottom-nav: Feature.outlinedIcon added; AppConfig extended with navOrder; AppConfigRepository/Impl extended with getNavOrder/setNavOrder; FeatureConfigNotifier extended with navOrder state + reorderNavigation(); FeatureSettingsScreen renamed to "Fonctionnalités & Navigation" + section Navigation (drag & drop ReorderableListView + _BottomNavPreview); _ShellScaffold uses navOrder for ordered bottom nav
+- 060-flutter-shop-products: ProductListScreen + ProductListNotifier (CrudNotifier pattern) + ProductRepository (remote only); fix FAB speed dial — RenderBox.localToGlobal() remplace CompositedTransformFollower/LayerLink
+- 061-flutter-product-form: ProductForm (ConsumerStatefulWidget) + DecimalTextInputFormatter; image_picker + path_provider ajoutés; ModalType.product ajouté; ProductListScreen câblé (create/edit via ModalNotifier)
+- 062-flutter-product-detail: ProductDetailScreen (ConsumerWidget) + RestockDialog; sell/restock/getSales ajoutés au data layer (DTO, data source, repository, notifier + productSalesProvider); route /shop/:id; ProductListScreen tap → navigation détail; fix ProductService.getSalesHistory() → RECETTE + DEPENSE
+- 063-shared-design-tokens: docs/design-tokens.md créé (source de vérité unique, 7 catégories). Angular: +palette Indigo, +secondary tokens (light/dark), subscription blue→violet, +space-9/11, +radius-xxl. Flutter: +Indigo palette, feedback/business colors harmonisés (green/red), +lineHeights, +fontMono, shadows harmonisées, +easeDefault+resolve() reduced-motion, +secondaryColor; AppTheme remplace valeurs hardcodées par AppRadius/AppSpacing
+- 064-angular-feature-toggles: PreferenceService (signal-based, GET/PUT /users/me/preferences) + featureGuard (CanActivateFn paramétré); Settings > Fonctionnalités (toggle, DnD navOrder, confirmation dialog); sidebar dynamique via computed() + @for; FAB filtré par features; ShopPlaceholder /shop; 11 tests unitaires
+- 065-angular-data-settings: HealthService (signal-based, GET /actuator/health); DataSettings component (statut serveur, reload avec confirmation); route /settings/data; fix tokens CSS dark mode (--bg-warning, --text-warning)
+- 066-angular-transfer-form: TransferForm (standalone, OnPush, Reactive Forms) + differentAccountsValidator (cross-field); AccountService.transfer() POST /accounts/transfer; FAB TRANSFER_ACTION conditionnel (≥ 2 comptes actifs); Shell @case('transfer') + onTransferSaved(); 7 tests unitaires
+- 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Material standard)
+- 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop

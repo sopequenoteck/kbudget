@@ -28,7 +28,14 @@ import 'package:k_budget/src/features/accounts/presentation/screens/account_form
 import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_form_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
+import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
+import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
+import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/domain/models/product.dart';
+import 'package:k_budget/src/features/shop/application/product_notifier.dart';
+import 'package:k_budget/src/features/shop/presentation/widgets/product_form.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
@@ -84,7 +91,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         // Server mode: check authentication
         if (config.dataMode == DataMode.server) {
           final authState = ref.read(authNotifierProvider);
-          final isAuthenticated = authState is AuthAuthenticated;
+
+          // Premier lancement : valider les tokens stockés
+          if (authState is AuthInitial) {
+            await ref.read(authNotifierProvider.notifier).checkAuth();
+          }
+
+          final currentAuthState = ref.read(authNotifierProvider);
+          final isAuthenticated = currentAuthState is AuthAuthenticated;
 
           if (!isAuthenticated && !isAuthRoute && !isInviteRoute) {
             return RouteNames.login;
@@ -169,6 +183,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.debtsName,
             builder: (context, state) => const DebtListScreen(),
           ),
+          GoRoute(
+            path: RouteNames.shop,
+            name: RouteNames.shopName,
+            builder: (context, state) => const ProductListScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final product = state.extra as Product?;
+                  return ProductDetailScreen(
+                    productId: state.pathParameters['id']!,
+                    initialProduct: product,
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -190,6 +222,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) =>
                 const AppearanceSettingsScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.settingsFeatures,
+            name: RouteNames.settingsFeaturesName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) =>
+                const FeatureSettingsScreen(),
           ),
           GoRoute(
             path: RouteNames.settingsAccounts,
@@ -259,19 +298,75 @@ class _ShellScaffold extends ConsumerStatefulWidget {
 }
 
 class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
-  static const _paths = [
-    RouteNames.dashboard,
-    RouteNames.transactions,
-    RouteNames.subscriptions,
-    RouteNames.debts,
-  ];
-
   bool _isModalShowing = false;
 
   @override
   Widget build(BuildContext context) {
+    final featureState = ref.watch(featureConfigNotifierProvider);
+    final enabledFeatures = featureState.enabledFeatures;
+    final navOrder = featureState.navOrder;
+
+    // Build dynamic paths and destinations
+    final paths = <String>[
+      RouteNames.dashboard,
+      RouteNames.transactions,
+    ];
+    final destinations = <NavDestination>[
+      const NavDestination(
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+        label: 'Accueil',
+      ),
+      const NavDestination(
+        icon: Icons.receipt_long_outlined,
+        selectedIcon: Icons.receipt_long,
+        label: 'Transactions',
+      ),
+    ];
+
+    // Add enabled features in navOrder order
+    final orderedEnabled = navOrder.where(enabledFeatures.contains);
+    for (final feature in orderedEnabled) {
+      final (path, destination) = switch (feature) {
+        Feature.subscriptions => (
+          RouteNames.subscriptions,
+          const NavDestination(
+            icon: Icons.autorenew_outlined,
+            selectedIcon: Icons.autorenew,
+            label: 'Abonnements',
+          ),
+        ),
+        Feature.debts => (
+          RouteNames.debts,
+          const NavDestination(
+            icon: Icons.handshake_outlined,
+            selectedIcon: Icons.handshake,
+            label: 'Dettes',
+          ),
+        ),
+        Feature.shop => (
+          RouteNames.shop,
+          const NavDestination(
+            icon: Icons.storefront_outlined,
+            selectedIcon: Icons.storefront,
+            label: 'Boutique',
+          ),
+        ),
+      };
+      paths.add(path);
+      destinations.add(destination);
+    }
+
     final location = GoRouterState.of(context).matchedLocation;
-    final currentIndex = _paths.indexOf(location).clamp(0, _paths.length - 1);
+    var currentIndex = paths.indexOf(location).clamp(0, paths.length - 1);
+
+    // If current route is no longer in paths, redirect to dashboard
+    if (!paths.contains(location)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.go(RouteNames.dashboard);
+      });
+      currentIndex = 0;
+    }
 
     ref.listen<ModalState>(modalNotifierProvider, (previous, next) {
       if (next is ModalOpen && !_isModalShowing) {
@@ -281,8 +376,9 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
 
     return AdaptiveScaffold(
       currentIndex: currentIndex,
+      destinations: destinations,
       onDestinationSelected: (index) {
-        context.go(_paths[index]);
+        context.go(paths[index]);
       },
       floatingActionButton: const FabMenu(),
       body: widget.child,
@@ -313,6 +409,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       );
     } else if (state.type == ModalType.transfer) {
       return _TransferFormConsumer(
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } else if (state.type == ModalType.product) {
+      return _ProductFormConsumer(
+        product: state.entity as Product?,
         onDone: () {
           Navigator.of(context).pop();
         },
@@ -495,6 +598,35 @@ class _TransferFormConsumer extends ConsumerWidget {
         unawaited(
             ref.read(transactionListNotifierProvider.notifier).refresh());
         unawaited(ref.read(accountNotifierProvider.notifier).refresh());
+        onDone();
+      },
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _ProductFormConsumer extends ConsumerWidget {
+  final Product? product;
+  final VoidCallback onDone;
+
+  const _ProductFormConsumer({
+    this.product,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    return ProductForm(
+      product: product,
+      onSaved: (p) async {
+        if (product == null) {
+          await ref.read(productNotifierProvider.notifier).create(p);
+        } else {
+          await ref.read(productNotifierProvider.notifier).update(p);
+        }
         onDone();
       },
       onCancelled: onDone,

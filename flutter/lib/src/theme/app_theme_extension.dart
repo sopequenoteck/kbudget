@@ -8,6 +8,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     required this.debtOweColor,
     required this.debtOwedColor,
     required this.subscriptionColor,
+    required this.secondaryColor,
   });
 
   final Color incomeColor;
@@ -15,6 +16,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
   final Color debtOweColor;
   final Color debtOwedColor;
   final Color subscriptionColor;
+  final Color secondaryColor;
 
   static const light = AppThemeExtension(
     incomeColor: AppColors.incomeLight,
@@ -22,6 +24,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     debtOweColor: AppColors.debtOweLight,
     debtOwedColor: AppColors.debtOwedLight,
     subscriptionColor: AppColors.subscriptionLight,
+    secondaryColor: AppColors.indigo600,
   );
 
   static const dark = AppThemeExtension(
@@ -30,6 +33,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     debtOweColor: AppColors.debtOweDark,
     debtOwedColor: AppColors.debtOwedDark,
     subscriptionColor: AppColors.subscriptionDark,
+    secondaryColor: AppColors.indigo400,
   );
 
   @override
@@ -39,6 +43,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     Color? debtOweColor,
     Color? debtOwedColor,
     Color? subscriptionColor,
+    Color? secondaryColor,
   }) {
     return AppThemeExtension(
       incomeColor: incomeColor ?? this.incomeColor,
@@ -46,6 +51,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       debtOweColor: debtOweColor ?? this.debtOweColor,
       debtOwedColor: debtOwedColor ?? this.debtOwedColor,
       subscriptionColor: subscriptionColor ?? this.subscriptionColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
     );
   }
 
@@ -59,6 +65,7 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       debtOwedColor: Color.lerp(debtOwedColor, other.debtOwedColor, t)!,
       subscriptionColor:
           Color.lerp(subscriptionColor, other.subscriptionColor, t)!,
+      secondaryColor: Color.lerp(secondaryColor, other.secondaryColor, t)!,
     );
   }
 }

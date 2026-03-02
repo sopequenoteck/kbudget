@@ -1,8 +1,5 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { of } from 'rxjs';
 
 import { AccountService } from './account';
@@ -58,7 +55,13 @@ const mockTransactionRef: TransactionRef = {
 const mockTransferResponse: TransferResponse = {
   transferId: 'transfer-1',
   debitTransaction: mockTransactionRef,
-  creditTransaction: { ...mockTransactionRef, id: 'tx-2', type: TransactionType.RECETTE, accountId: 'acc-2', accountNom: 'Épargne' },
+  creditTransaction: {
+    ...mockTransactionRef,
+    id: 'tx-2',
+    type: TransactionType.RECETTE,
+    accountId: 'acc-2',
+    accountNom: 'Épargne',
+  },
 };
 
 describe('AccountService', () => {

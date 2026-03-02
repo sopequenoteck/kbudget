@@ -1,5 +1,9 @@
 <div class="list-item" role="button" tabindex="0" (click)="onPress()" (keydown)="onKeydown($event)">
-  <span class="list-item__icon">{{ icon() }}</span>
+  @if (webImageUrl()) {
+    <img class="list-item__image" [src]="webImageUrl()" [alt]="title()" />
+  } @else {
+    <span class="list-item__icon">{{ icon() }}</span>
+  }
 
   <div class="list-item__content">
     <span class="list-item__title">{{ title() }}</span>

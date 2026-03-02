@@ -20,6 +20,7 @@ Thumbs.db
 HELP.md
 **/logs/
 target/
+*.class
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

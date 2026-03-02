@@ -9,8 +9,10 @@ import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Transaction;
+import fr.kksdev.budget.api.model.Product;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
+import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +38,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
+    private final ProductRepository productRepository;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -106,6 +109,21 @@ public class TransactionService {
         if (transaction.getType() == TransactionType.AJUSTEMENT) {
             log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
             throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées");
+        }
+
+        // Rollback stock produit si transaction liée à un produit
+        if (transaction.getProduct() != null) {
+            Product product = transaction.getProduct();
+            if (transaction.getType() == TransactionType.RECETTE) {
+                product.setStock(product.getStock() + 1);
+                product.setTotalVendu(product.getTotalVendu() - 1);
+                log.info("Rollback vente: productId={}, stock={}, totalVendu={}", product.getId(), product.getStock(), product.getTotalVendu());
+            } else if (transaction.getType() == TransactionType.DEPENSE) {
+                int quantity = transaction.getMontant().divide(product.getPrixAchat(), 0, java.math.RoundingMode.DOWN).intValue();
+                product.setStock(product.getStock() - quantity);
+                log.info("Rollback restock: productId={}, quantité={}, stock={}", product.getId(), quantity, product.getStock());
+            }
+            productRepository.save(product);
         }
 
         // Cascade delete pour les virements
@@ -265,7 +283,9 @@ public class TransactionService {
                 toCategoryResponse(transaction.getCategory()),
                 transaction.getNote(),
                 toAccountSummary(transaction.getAccount()),
-                transaction.getTransferId()
+                transaction.getTransferId(),
+                transaction.getProduct() != null ? transaction.getProduct().getId() : null,
+                transaction.getProduct() != null ? transaction.getProduct().getNom() : null
         );
     }
 }

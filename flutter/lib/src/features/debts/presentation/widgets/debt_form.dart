@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 
 class DebtForm extends ConsumerStatefulWidget {
   const DebtForm({
@@ -129,25 +130,10 @@ class _DebtFormState extends ConsumerState<DebtForm> {
 
   Future<void> _onDelete() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showDeleteConfirmDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.debtFormDeleteConfirmTitle),
-        content: Text(l10n.debtFormDeleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
+      title: l10n.debtFormDeleteConfirmTitle,
+      message: l10n.debtFormDeleteConfirmMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {

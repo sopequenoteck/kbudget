@@ -15,5 +15,6 @@ public record AccountResponse(
         String couleur,
         boolean isDefault,
         boolean actif,
-        String currency
+        String currency,
+        boolean isShopAccount
 ) {}

@@ -15,6 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { type ModalType } from '../../../core/services/modal.service';
 import { AccountService } from '../../../core/services/account';
 import { Account } from '../../../core/models/account.model';
+import { PreferenceService } from '../../../core/services/preference';
 
 export interface SpeedDialItem {
   readonly type: ModalType;
@@ -29,6 +30,8 @@ const BASE_ACTIONS: readonly SpeedDialItem[] = [
 ] as const;
 
 const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: '↔️' };
+const PRODUCT_ACTION: SpeedDialItem = { type: 'product', label: 'Nouveau produit', icon: '📦' };
+const SELL_ACTION: SpeedDialItem = { type: 'sell', label: 'Vente rapide', icon: '💸' };
 
 @Component({
   selector: 'app-fab',
@@ -39,9 +42,11 @@ const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', ic
 })
 export class Fab {
   private readonly accountService = inject(AccountService);
+  private readonly preferenceService = inject(PreferenceService);
 
   readonly isOpen = input.required<boolean>();
   readonly isHidden = input<boolean>(false);
+  readonly currentRoute = input<string>('');
   readonly toggled = output<void>();
   readonly actionSelected = output<ModalType>();
 
@@ -52,14 +57,27 @@ export class Fab {
     initialValue: [] as Account[],
   });
 
-  readonly hasEnoughAccounts = computed(() => this.allAccounts().filter((a) => a.actif).length >= 2);
+  readonly hasEnoughAccounts = computed(
+    () => this.allAccounts().filter((a) => a.actif).length >= 2,
+  );
+
+  readonly isOnShopRoute = computed(() => this.currentRoute().startsWith('/shop'));
 
   readonly actions = computed<SpeedDialItem[]>(() => {
-    const base = [...BASE_ACTIONS];
-    if (this.hasEnoughAccounts()) {
-      base.push(TRANSFER_ACTION);
+    if (this.isOnShopRoute() && this.preferenceService.isEnabled('SHOP')) {
+      return [PRODUCT_ACTION, SELL_ACTION];
     }
-    return base;
+
+    const base = BASE_ACTIONS.filter((action) => {
+      if (action.type === 'subscription') return this.preferenceService.isEnabled('SUBSCRIPTIONS');
+      if (action.type === 'debt') return this.preferenceService.isEnabled('DEBTS');
+      return true;
+    });
+    const result = [...base];
+    if (this.hasEnoughAccounts()) {
+      result.push(TRANSFER_ACTION);
+    }
+    return result;
   });
   private animating = false;
 

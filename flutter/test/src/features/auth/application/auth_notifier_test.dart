@@ -16,7 +16,7 @@ void main() {
     mockAuthRepo = MockAuthRepository();
     container = ProviderContainer(
       overrides: [
-        authRepositoryProvider.overrideWithValue(mockAuthRepo),
+        authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
       ],
     );
   });
@@ -44,8 +44,23 @@ void main() {
       verify(mockAuthRepo.hasValidToken()).called(1);
     });
 
-    test('should_beUnauthenticated_when_noToken', () async {
+    test('should_beAuthenticated_when_noTokenButRefreshSucceeds', () async {
       when(mockAuthRepo.hasValidToken()).thenAnswer((_) async => false);
+      when(mockAuthRepo.refresh()).thenAnswer((_) async => const AuthResult(
+            accessToken: 'new_access',
+            refreshToken: 'new_refresh',
+            email: 'test@test.com',
+          ));
+
+      await notifier().checkAuth();
+
+      expect(state(), isA<AuthAuthenticated>());
+      verify(mockAuthRepo.refresh()).called(1);
+    });
+
+    test('should_beUnauthenticated_when_noTokenAndRefreshFails', () async {
+      when(mockAuthRepo.hasValidToken()).thenAnswer((_) async => false);
+      when(mockAuthRepo.refresh()).thenThrow(Exception('No refresh token'));
 
       await notifier().checkAuth();
 
@@ -127,6 +142,23 @@ void main() {
       expect(s, isA<AuthUnauthenticated>());
       expect(
           (s as AuthUnauthenticated).error, 'Email déjà utilisé');
+    });
+
+    test('should_beUnauthenticated_when_forceUnauthenticatedCalled', () async {
+      // Login first
+      when(mockAuthRepo.login('test@test.com', 'password'))
+          .thenAnswer((_) async => const AuthResult(
+                accessToken: 'access',
+                refreshToken: 'refresh',
+                email: 'test@test.com',
+              ));
+      await notifier().login('test@test.com', 'password');
+      expect(state(), isA<AuthAuthenticated>());
+
+      // Force unauthenticated
+      notifier().forceUnauthenticated();
+
+      expect(state(), isA<AuthUnauthenticated>());
     });
 
     test('should_beUnauthenticated_when_logoutCalled', () async {

@@ -67,18 +67,22 @@ void main() {
   }
 
   group('SettingsHubScreen', () {
-    testWidgets('should display 7 items with correct titles', (tester) async {
+    testWidgets('should display 8 items with correct titles', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
       expect(find.text('Profil'), findsOneWidget);
+      expect(find.text('Fonctionnalités & Navigation'), findsOneWidget);
       expect(find.text('Apparence'), findsOneWidget);
       expect(find.text('Comptes'), findsOneWidget);
       expect(find.text('Catégories'), findsOneWidget);
       expect(find.text('Données'), findsOneWidget);
+
+      // Scroll down to reveal remaining items
+      await tester.scrollUntilVisible(find.text('Sécurité'), 100);
+      await tester.pumpAndSettle();
       expect(find.text('Sécurité'), findsOneWidget);
 
-      // Scroll down to reveal last item
       await tester.scrollUntilVisible(find.text('À propos'), 100);
       await tester.pumpAndSettle();
       expect(find.text('À propos'), findsOneWidget);
@@ -124,6 +128,10 @@ void main() {
 
     testWidgets('should not navigate on placeholder tap', (tester) async {
       await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      // Scroll to reveal placeholder "Sécurité"
+      await tester.scrollUntilVisible(find.text('Sécurité'), 100);
       await tester.pumpAndSettle();
 
       // Tap on placeholder "Sécurité"

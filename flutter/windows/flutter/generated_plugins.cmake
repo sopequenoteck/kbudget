@@ -4,7 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
-  firebase_core
+  file_selector_windows
   flutter_secure_storage_windows
   local_auth_windows
   sqlite3_flutter_libs

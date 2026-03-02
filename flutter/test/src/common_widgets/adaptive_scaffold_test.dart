@@ -18,6 +18,28 @@ void main() {
               height: size.height,
               child: AdaptiveScaffold(
                 currentIndex: currentIndex,
+                destinations: const [
+                  NavDestination(
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home,
+                    label: 'Accueil',
+                  ),
+                  NavDestination(
+                    icon: Icons.receipt_long_outlined,
+                    selectedIcon: Icons.receipt_long,
+                    label: 'Transactions',
+                  ),
+                  NavDestination(
+                    icon: Icons.autorenew_outlined,
+                    selectedIcon: Icons.autorenew,
+                    label: 'Abonnements',
+                  ),
+                  NavDestination(
+                    icon: Icons.handshake_outlined,
+                    selectedIcon: Icons.handshake,
+                    label: 'Dettes',
+                  ),
+                ],
                 onDestinationSelected: (_) {},
                 body: const Text('Body'),
                 floatingActionButton: const FloatingActionButton(

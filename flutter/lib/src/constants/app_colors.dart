@@ -27,23 +27,51 @@ class AppColors {
   static const Color gray800 = Color(0xFF1F2937);
   static const Color gray900 = Color(0xFF111827);
 
+  // Secondary - Indigo
+  static const Color indigo50 = Color(0xFFEEF2FF);
+  static const Color indigo100 = Color(0xFFE0E7FF);
+  static const Color indigo200 = Color(0xFFC7D2FE);
+  static const Color indigo300 = Color(0xFFA5B4FC);
+  static const Color indigo400 = Color(0xFF818CF8);
+  static const Color indigo500 = Color(0xFF6366F1);
+  static const Color indigo600 = Color(0xFF4F46E5);
+  static const Color indigo700 = Color(0xFF4338CA);
+  static const Color indigo800 = Color(0xFF3730A3);
+  static const Color indigo900 = Color(0xFF312E81);
+
   // Feedback
-  static const Color success = Color(0xFF10B981);
+  static const Color success = Color(0xFF22C55E);
   static const Color error = Color(0xFFEF4444);
-  static const Color warning = Color(0xFFF59E0B);
+  static const Color warning = Color(0xFFEAB308);
   static const Color info = Color(0xFF3B82F6);
 
+  // Feedback - Light backgrounds
+  static const Color successLight = Color(0xFFDCFCE7);
+  static const Color warningLight = Color(0xFFFEF9C3);
+  static const Color errorLight = Color(0xFFFEE2E2);
+  static const Color infoLight = Color(0xFFDBEAFE);
+
+  // Feedback - Text on light
+  static const Color textSuccess = Color(0xFF16A34A);
+  static const Color textError = Color(0xFFDC2626);
+  static const Color textWarning = Color(0xFFCA8A04);
+  static const Color textInfo = Color(0xFF2563EB);
+
+  // Subscription
+  static const Color violet400 = Color(0xFFA78BFA);
+  static const Color violet500 = Color(0xFF8B5CF6);
+
   // Semantic - Light theme
-  static const Color incomeLight = Color(0xFF10B981);
-  static const Color expenseLight = Color(0xFFEF4444);
-  static const Color debtOweLight = Color(0xFFF59E0B);
-  static const Color debtOwedLight = Color(0xFF3B82F6);
+  static const Color incomeLight = Color(0xFF16A34A);
+  static const Color expenseLight = Color(0xFFDC2626);
+  static const Color debtOweLight = Color(0xFFDC2626);
+  static const Color debtOwedLight = Color(0xFF16A34A);
   static const Color subscriptionLight = Color(0xFF8B5CF6);
 
   // Semantic - Dark theme
-  static const Color incomeDark = Color(0xFF34D399);
+  static const Color incomeDark = Color(0xFF4ADE80);
   static const Color expenseDark = Color(0xFFF87171);
-  static const Color debtOweDark = Color(0xFFFBBF24);
-  static const Color debtOwedDark = Color(0xFF60A5FA);
+  static const Color debtOweDark = Color(0xFFF87171);
+  static const Color debtOwedDark = Color(0xFF4ADE80);
   static const Color subscriptionDark = Color(0xFFA78BFA);
 }

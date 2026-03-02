@@ -7,14 +7,21 @@
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
     [attr.aria-controls]="isOpen() ? 'select-picker-listbox' : null"
-    [attr.aria-activedescendant]="highlightedIndex() >= 0 ? 'select-picker-option-' + filteredItems()[highlightedIndex()]?.id : null"
+    [attr.aria-activedescendant]="
+      highlightedIndex() >= 0
+        ? 'select-picker-option-' + filteredItems()[highlightedIndex()]?.id
+        : null
+    "
     (click)="toggle()"
     (keydown)="onKeydown($event)"
   >
     @if (selectedItem()) {
       <span class="select-picker__selected">
         @if (selectedItem()!.color) {
-          <span class="select-picker__color" [style.background-color]="selectedItem()!.color"></span>
+          <span
+            class="select-picker__color"
+            [style.background-color]="selectedItem()!.color"
+          ></span>
         }
         @if (selectedItem()!.icon) {
           <span class="select-picker__icon">{{ selectedItem()!.icon }}</span>
@@ -98,10 +105,22 @@
       (click)="close()"
       (keydown.escape)="close()"
     >
-      <div class="select-picker__sheet" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" role="document" (click)="$event.stopPropagation()" (keydown.escape)="close()">
+      <div
+        class="select-picker__sheet"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        role="document"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="close()"
+      >
         <div class="select-picker__sheet-header">
           <span class="select-picker__sheet-title">{{ placeholder() }}</span>
-          <button type="button" class="select-picker__sheet-close" (click)="close()" aria-label="Fermer">
+          <button
+            type="button"
+            class="select-picker__sheet-close"
+            (click)="close()"
+            aria-label="Fermer"
+          >
             &times;
           </button>
         </div>
@@ -134,7 +153,10 @@
               (mouseenter)="highlightedIndex.set(i)"
             >
               @if (item.color) {
-                <span class="select-picker__item-color" [style.background-color]="item.color"></span>
+                <span
+                  class="select-picker__item-color"
+                  [style.background-color]="item.color"
+                ></span>
               }
               @if (item.icon) {
                 <span class="select-picker__item-icon">{{ item.icon }}</span>

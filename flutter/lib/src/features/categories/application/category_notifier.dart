@@ -2,135 +2,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
-import 'package:k_budget/src/domain/repositories/category_repository.dart';
+import 'package:k_budget/src/domain/repositories/crud_repository.dart';
+import 'package:k_budget/src/features/common/application/crud_notifier.dart';
 
 final categoryNotifierProvider =
     NotifierProvider<CategoryNotifier, ListState<Category>>(
   CategoryNotifier.new,
 );
 
-class CategoryNotifier extends Notifier<ListState<Category>> {
-  static const _pageSize = 20;
-  List<Category> _allItems = [];
+class CategoryNotifier extends CrudNotifier<Category> {
+  @override
+  CrudRepository<Category> get repo => ref.read(categoryRepositoryProvider);
 
   @override
-  ListState<Category> build() => const ListState<Category>();
+  String itemId(Category item) => item.id;
 
-  CategoryRepository get _repo => ref.read(categoryRepositoryProvider);
+  @override
+  void sortItems(List<Category> items) =>
+      items.sort((a, b) => a.nom.compareTo(b.nom));
 
-  Future<void> loadItems() async {
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      _allItems = await _repo.getAll();
-      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
-      _refreshPage(resetPage: true);
-    } on Exception catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Impossible de charger les catégories: $e',
-      );
-    }
-  }
+  @override
+  String get entityLabel => 'catégories';
 
-  Future<void> refresh() async => loadItems();
-
-  void loadMore() {
-    if (!state.hasMore || state.isLoading) return;
-    final nextPage = state.currentPage + 1;
-    final end = (nextPage + 1) * _pageSize;
-    final page = _allItems.take(end).toList();
-    state = state.copyWith(
-      items: page,
-      currentPage: nextPage,
-      hasMore: end < _allItems.length,
-    );
-  }
-
-  Future<void> create(Category item) async {
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      final created = await _repo.create(item);
-      _allItems.add(created);
-      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
-      _refreshPage();
-    } on Exception catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erreur lors de la création: $e',
-      );
-    }
-  }
-
-  Future<void> update(Category item) async {
-    final existing = _allItems.where((e) => e.id == item.id).firstOrNull;
+  @override
+  String? validateUpdate(Category item) {
+    final existing = allItems.where((e) => e.id == item.id).firstOrNull;
     if (existing != null && existing.isSystem) {
-      state = state.copyWith(
-        error: 'Les catégories système ne peuvent pas être modifiées',
-      );
-      return;
+      return 'Les catégories système ne peuvent pas être modifiées';
     }
-    state = state.copyWith(
-      mutatingIds: {...state.mutatingIds, item.id},
-      error: null,
-    );
-    try {
-      final updated = await _repo.update(item);
-      final index = _allItems.indexWhere((e) => e.id == item.id);
-      if (index != -1) _allItems[index] = updated;
-      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
-      _refreshPage();
-      state = state.copyWith(
-        mutatingIds: {...state.mutatingIds}..remove(item.id),
-      );
-    } on Exception catch (e) {
-      state = state.copyWith(
-        mutatingIds: {...state.mutatingIds}..remove(item.id),
-        error: 'Erreur lors de la modification: $e',
-      );
-    }
+    return null;
   }
 
-  Future<void> delete(String id) async {
-    final index = _allItems.indexWhere((e) => e.id == id);
-    if (index == -1) return;
-    final saved = _allItems[index];
-
-    if (saved.isSystem) {
-      state = state.copyWith(
-        error: 'Les catégories système ne peuvent pas être supprimées',
-      );
-      return;
+  @override
+  String? validateDelete(String id) {
+    final existing = allItems.where((e) => e.id == id).firstOrNull;
+    if (existing != null && existing.isSystem) {
+      return 'Les catégories système ne peuvent pas être supprimées';
     }
-
-    _allItems.removeAt(index);
-    state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
-    _refreshPage();
-
-    try {
-      await _repo.delete(id);
-      state = state.copyWith(
-        mutatingIds: {...state.mutatingIds}..remove(id),
-      );
-    } on Exception catch (e) {
-      _allItems.insert(index, saved);
-      _allItems.sort((a, b) => a.nom.compareTo(b.nom));
-      _refreshPage();
-      state = state.copyWith(
-        mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la suppression: $e',
-      );
-    }
-  }
-
-  void _refreshPage({bool resetPage = false}) {
-    final page = resetPage ? 0 : state.currentPage;
-    final end = (page + 1) * _pageSize;
-    final items = _allItems.take(end).toList();
-    state = state.copyWith(
-      items: items,
-      isLoading: false,
-      currentPage: page,
-      hasMore: end < _allItems.length,
-    );
+    return null;
   }
 }

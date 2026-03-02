@@ -1,0 +1,88 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="product-form">
+  <div class="image-picker" (click)="fileInput.click()">
+    @if (imagePreview()) {
+      <img class="image-picker__preview" [src]="imagePreview()" alt="Image produit" />
+    } @else {
+      <span class="image-picker__placeholder">📷</span>
+    }
+  </div>
+  <input #fileInput type="file" accept="image/*" hidden (change)="onImagePicked($event)" />
+
+  @if (imagePreview()) {
+    <button type="button" class="btn-remove-image" (click)="removeImage()">Supprimer l'image</button>
+  }
+
+  <app-form-field
+    label="Nom"
+    fieldId="nom"
+    [showError]="isInvalid('nom')"
+    [errorMessage]="form.get('nom')?.hasError('required') ? 'Nom requis' : '100 caracteres maximum'"
+  >
+    <input id="nom" type="text" formControlName="nom" />
+  </app-form-field>
+
+  <div class="form-row">
+    <app-form-field
+      label="Prix d'achat"
+      fieldId="prixAchat"
+      [showError]="isInvalid('prixAchat')"
+      [errorMessage]="'Le prix doit etre superieur a 0'"
+    >
+      <input id="prixAchat" type="number" formControlName="prixAchat" step="0.01" min="0.01" />
+    </app-form-field>
+
+    <app-form-field
+      label="Prix de vente"
+      fieldId="prixVente"
+      [showError]="isInvalid('prixVente')"
+      [errorMessage]="'Le prix doit etre superieur a 0'"
+    >
+      <input id="prixVente" type="number" formControlName="prixVente" step="0.01" min="0.01" />
+    </app-form-field>
+  </div>
+
+  <div
+    class="marge-indicator"
+    [class.marge-indicator--positive]="marge() > 0"
+    [class.marge-indicator--negative]="marge() < 0"
+  >
+    Marge : {{ marge() | number: '1.2-2' }} €
+  </div>
+
+  @if (!isEditMode()) {
+    <app-form-field
+      label="Stock initial"
+      fieldId="stock"
+      [showError]="isInvalid('stock')"
+      [errorMessage]="'Le stock doit etre superieur ou egal a 0'"
+    >
+      <input id="stock" type="number" formControlName="stock" min="0" />
+    </app-form-field>
+  }
+
+  <app-form-field
+    label="Description"
+    fieldId="description"
+    [showError]="isInvalid('description')"
+    [errorMessage]="'500 caracteres maximum'"
+  >
+    <textarea id="description" formControlName="description" rows="3"></textarea>
+  </app-form-field>
+
+  @if (isEditMode()) {
+    <label class="checkbox-field">
+      <input type="checkbox" formControlName="actif" />
+      Produit actif
+    </label>
+  }
+
+  <div class="form-actions">
+    @if (isEditMode()) {
+      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+    }
+    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+    <button type="submit" class="btn-primary">
+      {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
+    </button>
+  </div>
+</form>

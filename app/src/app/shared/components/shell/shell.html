@@ -23,10 +23,19 @@
         @if (userName(); as user) {
           <div class="shell-dropdown-name">{{ user.name }}</div>
         }
-        <a class="shell-dropdown-item" routerLink="/settings" role="menuitem" (click)="closeDropdown()">
+        <a
+          class="shell-dropdown-item"
+          routerLink="/settings"
+          role="menuitem"
+          (click)="closeDropdown()"
+        >
           <span>&#9881;&#65039;</span> Paramètres
         </a>
-        <button class="shell-dropdown-item shell-dropdown-logout" role="menuitem" (click)="onLogout()">
+        <button
+          class="shell-dropdown-item shell-dropdown-logout"
+          role="menuitem"
+          (click)="onLogout()"
+        >
           <span>&#128682;</span> Déconnexion
         </button>
       </div>
@@ -44,24 +53,36 @@
 }
 
 <nav class="shell-sidebar" [class.open]="sidebarOpen()">
-  <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="onNavClick()">&#127968; Accueil</a>
-  <a routerLink="/transactions" routerLinkActive="active" (click)="onNavClick()">&#128176; Transactions</a>
-  <a routerLink="/subscriptions" routerLinkActive="active" (click)="onNavClick()">&#128260; Abonnements</a>
-  <a routerLink="/debts" routerLinkActive="active" (click)="onNavClick()">&#129309; Dettes</a>
+  @for (item of navItems(); track item.route) {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="item.route === '/dashboard' ? { exact: true } : { exact: false }"
+      (click)="onNavClick()"
+      >{{ item.icon }} {{ item.label }}</a
+    >
+  }
 </nav>
 
 <main class="shell-content">
   <router-outlet />
 </main>
 
+<bottom-nav [items]="navItems()" [activeRoute]="currentRoute()" />
+
 <app-fab
   [isOpen]="speedDialOpen()"
   [isHidden]="modalService.modalOpen()"
+  [currentRoute]="currentRoute()"
   (toggled)="onFabToggle()"
   (actionSelected)="onSpeedDialAction($event)"
 />
 
-<app-modal [isOpen]="modalService.modalOpen()" [title]="modalService.modalTitle()" (closed)="onModalClose()">
+<app-modal
+  [isOpen]="modalService.modalOpen()"
+  [title]="modalService.modalTitle()"
+  (closed)="onModalClose()"
+>
   @if (modalService.activeModal() === 'transaction') {
     <div modal-header-actions class="type-toggle" role="group" aria-label="Type de transaction">
       <button
@@ -167,8 +188,20 @@
       />
     }
     @case ('transfer') {
-      <app-transfer-form
-        (saved)="onTransferSaved()"
+      <app-transfer-form (saved)="onTransferSaved()" (cancelled)="onModalClose()" />
+    }
+    @case ('product') {
+      <app-product-form
+        [product]="$any(modalService.editingEntity())"
+        (saved)="onProductSaved($event)"
+        (cancelled)="onModalClose()"
+        (deleted)="onProductDeleted($event)"
+      />
+    }
+    @case ('sell') {
+      <app-sell-dialog
+        [products]="sellableProducts()"
+        (confirmed)="onSellConfirmed($event)"
         (cancelled)="onModalClose()"
       />
     }

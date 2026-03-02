@@ -486,9 +486,7 @@ describe('AuthService', () => {
       // Arrange
       localStorage.setItem('budget_token', expiredToken());
       localStorage.setItem('budget_refresh_token', 'expired-refresh');
-      apiService.post.mockReturnValue(
-        throwError(() => new HttpErrorResponse({ status: 401 })),
-      );
+      apiService.post.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
       vi.spyOn(console, 'log').mockReturnValue(undefined);
 
       // Act
@@ -513,10 +511,7 @@ describe('AuthService', () => {
       // Arrange
       localStorage.setItem('budget_token', validToken());
       localStorage.setItem('budget_refresh_token', 'some-refresh');
-      localStorage.setItem(
-        'budget_user',
-        JSON.stringify({ name: 'User', email: 'user@test.com' }),
-      );
+      localStorage.setItem('budget_user', JSON.stringify({ name: 'User', email: 'user@test.com' }));
 
       // Act
       TestBed.resetTestingModule();

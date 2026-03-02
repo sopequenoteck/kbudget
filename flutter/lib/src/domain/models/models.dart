@@ -3,6 +3,7 @@ export 'app_config.dart';
 export 'category.dart';
 export 'debt.dart';
 export 'list_state.dart';
+export 'product.dart';
 export 'subscription.dart';
 export 'transaction.dart';
 export 'user.dart';

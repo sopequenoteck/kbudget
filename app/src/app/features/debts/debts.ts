@@ -84,9 +84,7 @@ export class Debts {
     this.groupByCurrency(this.debtsOnMeDoit()),
   );
 
-  readonly sectionTotalJeDoisByCurrency = computed(() =>
-    this.groupByCurrency(this.debtsJeDois()),
-  );
+  readonly sectionTotalJeDoisByCurrency = computed(() => this.groupByCurrency(this.debtsJeDois()));
 
   private groupByCurrency(debts: Debt[]): { currency: string; total: number }[] {
     const byCurrency = new Map<string, number>();

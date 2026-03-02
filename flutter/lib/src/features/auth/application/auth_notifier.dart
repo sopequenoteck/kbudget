@@ -1,23 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/remote/api_client.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
 
-final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  final dioAsync = ref.watch(authenticatedDioProvider);
-  return dioAsync.when(
-    data: (dio) => AuthRemoteDataSource(dio),
-    loading: () => AuthRemoteDataSource(Dio()),
-    error: (_, _) => AuthRemoteDataSource(Dio()),
-  );
+final authRemoteDataSourceProvider =
+    FutureProvider<AuthRemoteDataSource>((ref) async {
+  final dio = await ref.watch(apiClientProvider.future);
+  return AuthRemoteDataSource(dio);
 });
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final dataSource = ref.watch(authRemoteDataSourceProvider);
+final authRepositoryProvider = FutureProvider<AuthRepository>((ref) async {
+  final dataSource = await ref.watch(authRemoteDataSourceProvider.future);
   return AuthRepositoryImpl(dataSource);
 });
 
@@ -32,22 +29,35 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     return const AuthState.initial();
   }
 
-  AuthRepository get _repo => ref.read(authRepositoryProvider);
+  Future<AuthRepository> get _repo => ref.read(authRepositoryProvider.future);
 
   Future<void> checkAuth() async {
-    final hasToken = await _repo.hasValidToken();
+    final repo = await _repo;
+    final hasToken = await repo.hasValidToken();
     if (hasToken) {
       state = const AuthState.authenticated();
     } else {
-      state = const AuthState.unauthenticated();
+      // Access token expiré ou absent — tenter un refresh
+      try {
+        await repo.refresh();
+        state = const AuthState.authenticated();
+      } on Exception {
+        state = const AuthState.unauthenticated();
+      }
     }
+    _notifyListeners();
+  }
+
+  void forceUnauthenticated() {
+    state = const AuthState.unauthenticated();
     _notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
     state = const AuthState.authenticating();
     try {
-      await _repo.login(email, password);
+      final repo = await _repo;
+      await repo.login(email, password);
       state = const AuthState.authenticated();
     } on DioException catch (e) {
       final message = e.response?.statusCode == 401
@@ -64,7 +74,8 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
       String email, String password, String? name) async {
     state = const AuthState.authenticating();
     try {
-      await _repo.register(email, password, name);
+      final repo = await _repo;
+      await repo.register(email, password, name);
       state = const AuthState.authenticated();
     } on DioException catch (e) {
       final message = e.response?.statusCode == 409
@@ -78,7 +89,8 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
   }
 
   Future<void> logout() async {
-    await _repo.logout();
+    final repo = await _repo;
+    await repo.logout();
     state = const AuthState.unauthenticated();
     _notifyListeners();
   }

@@ -2,42 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/common_widgets/user_menu_button.dart';
 
+class NavDestination {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+
+  const NavDestination({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+  });
+}
+
 class AdaptiveScaffold extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
   final Widget body;
   final Widget? floatingActionButton;
+  final List<NavDestination> destinations;
 
   static const double _breakpoint = 768;
-
-  static const List<_Destination> _destinations = [
-    _Destination(
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home,
-      label: 'Accueil',
-    ),
-    _Destination(
-      icon: Icons.receipt_long_outlined,
-      selectedIcon: Icons.receipt_long,
-      label: 'Transactions',
-    ),
-    _Destination(
-      icon: Icons.autorenew_outlined,
-      selectedIcon: Icons.autorenew,
-      label: 'Abonnements',
-    ),
-    _Destination(
-      icon: Icons.handshake_outlined,
-      selectedIcon: Icons.handshake,
-      label: 'Dettes',
-    ),
-  ];
 
   const AdaptiveScaffold({
     super.key,
     required this.currentIndex,
     required this.onDestinationSelected,
     required this.body,
+    required this.destinations,
     this.floatingActionButton,
   });
 
@@ -103,7 +94,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: widget.currentIndex,
         onTap: widget.onDestinationSelected,
-        items: AdaptiveScaffold._destinations
+        items: widget.destinations
             .map(
               (d) => BottomNavigationBarItem(
                 icon: Icon(d.icon),
@@ -165,7 +156,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 children: [
                   const SizedBox(height: 8),
                   // Navigation items
-                  ...AdaptiveScaffold._destinations.asMap().entries.map(
+                  ...widget.destinations.asMap().entries.map(
                         (entry) => _buildSidebarItem(
                           theme,
                           entry.value,
@@ -186,7 +177,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   Widget _buildSidebarItem(
     ThemeData theme,
-    _Destination destination,
+    NavDestination destination,
     int index,
   ) {
     final isSelected = index == widget.currentIndex;
@@ -239,16 +230,4 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       ),
     );
   }
-}
-
-class _Destination {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-
-  const _Destination({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-  });
 }

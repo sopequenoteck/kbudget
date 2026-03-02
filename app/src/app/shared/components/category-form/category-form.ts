@@ -12,10 +12,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { CategoryService } from '../../../core/services/category';
 import { Category, CategoryRequest } from '../../../core/models/category.model';
-import {
-  CATEGORY_COLORS,
-  randomColor,
-} from '../../../core/constants/category.constants';
+import { CATEGORY_COLORS, randomColor } from '../../../core/constants/category.constants';
 import { EmojiInput } from '../emoji-input/emoji-input';
 
 @Component({
@@ -93,8 +90,7 @@ export class CategoryForm implements OnInit {
         : await firstValueFrom(this.categoryService.create(request));
       this.saved.emit(result);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
       this.errorMessage.set(message);
     } finally {
       this.submitting.set(false);

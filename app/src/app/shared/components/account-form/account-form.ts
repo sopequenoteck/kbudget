@@ -35,10 +35,18 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
 };
 
 const ACCOUNT_COLORS: string[] = [
-  '#3b82f6', '#10b981', '#f59e0b',
-  '#ef4444', '#f97316', '#84cc16',
-  '#22c55e', '#06b6d4', '#6366f1',
-  '#8b5cf6', '#ec4899', '#78716c',
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#f97316',
+  '#84cc16',
+  '#22c55e',
+  '#06b6d4',
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#78716c',
 ];
 
 @Component({
@@ -87,7 +95,7 @@ export class AccountForm {
 
   readonly selectedCurrency = computed(() => {
     const acc = this.account();
-    return acc ? acc.currency : (this.form.get('currency')?.value || 'EUR');
+    return acc ? acc.currency : this.form.get('currency')?.value || 'EUR';
   });
 
   constructor() {

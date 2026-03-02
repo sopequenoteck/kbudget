@@ -24,9 +24,9 @@ export class CurrencyService {
   );
 
   getAll(): Observable<CurrencyInfo[]> {
-    return this.api.get<CurrencyInfo[]>('/currencies').pipe(
-      tap((currencies) => this._currencies.set(currencies)),
-    );
+    return this.api
+      .get<CurrencyInfo[]>('/currencies')
+      .pipe(tap((currencies) => this._currencies.set(currencies)));
   }
 
   loadIfEmpty(): void {

@@ -24,4 +24,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<Transaction> findByTransferId(UUID transferId);
 
     boolean existsByAccountId(UUID accountId);
+
+    List<Transaction> findByProductIdAndUserIdOrderByDateDesc(UUID productId, UUID userId);
 }

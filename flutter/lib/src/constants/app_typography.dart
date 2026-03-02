@@ -19,4 +19,12 @@ class AppTypography {
   static const FontWeight medium = FontWeight.w500;
   static const FontWeight semiBold = FontWeight.w600;
   static const FontWeight bold = FontWeight.w700;
+
+  // Line heights
+  static const double lineHeightTight = 1.25;
+  static const double lineHeightNormal = 1.5;
+  static const double lineHeightRelaxed = 1.75;
+
+  // Monospace font
+  static const String fontMono = 'monospace';
 }

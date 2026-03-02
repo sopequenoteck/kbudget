@@ -12,21 +12,13 @@
   />
 
   @if (!hasExactMatch() && searchTerm()) {
-    <button
-      type="button"
-      class="category-picker__create"
-      (click)="openCreateModal()"
-    >
+    <button type="button" class="category-picker__create" (click)="openCreateModal()">
       + Créer "{{ searchTerm() }}"
     </button>
   }
 </div>
 
-<app-modal
-  [isOpen]="showCreateModal()"
-  title="Nouvelle categorie"
-  (closed)="onCreateCancelled()"
->
+<app-modal [isOpen]="showCreateModal()" title="Nouvelle categorie" (closed)="onCreateCancelled()">
   <app-category-form
     [initialName]="searchTerm()"
     (saved)="onCategorySaved($event)"

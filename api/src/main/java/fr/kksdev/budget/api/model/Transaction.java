@@ -48,6 +48,10 @@ public class Transaction {
     @Column(name = "transfer_id")
     private UUID transferId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

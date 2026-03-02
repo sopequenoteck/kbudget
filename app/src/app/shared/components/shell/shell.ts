@@ -14,6 +14,8 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { filter, firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
+import { PreferenceService } from '../../../core/services/preference';
+import { FEATURES, type Feature } from '../../../core/models/preference.model';
 import { ThemeService } from '../../../core/services/theme';
 import { TransactionService } from '../../../core/services/transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
@@ -32,12 +34,21 @@ import {
 } from '../../../core/models/subscription.model';
 import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { type Account, type AccountRequest } from '../../../core/models/account.model';
+import {
+  type Product,
+  type ProductRequest,
+  type ProductUpdateRequest,
+} from '../../../core/models/product.model';
+import { ProductService } from '../../../core/services/product';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
 import { CategoryForm } from '../category-form/category-form';
 import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
+import { ProductForm } from '../../../features/shop/components/product-form/product-form';
+import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
+import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -47,6 +58,7 @@ import { Modal } from '../modal/modal';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    BottomNav,
     Fab,
     Modal,
     TransactionForm,
@@ -55,6 +67,8 @@ import { Modal } from '../modal/modal';
     CategoryForm,
     AccountForm,
     TransferForm,
+    ProductForm,
+    SellDialog,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -62,6 +76,7 @@ import { Modal } from '../modal/modal';
 })
 export class Shell {
   private readonly authService = inject(AuthService);
+  readonly preferenceService = inject(PreferenceService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
@@ -69,6 +84,7 @@ export class Shell {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
   private readonly accountService = inject(AccountService);
+  private readonly productService = inject(ProductService);
   readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
@@ -94,6 +110,26 @@ export class Shell {
   readonly Frequency = Frequency;
   readonly debtType = signal(DebtType.EMPRUNT);
   readonly DebtType = DebtType;
+  readonly navItems = computed(() => {
+    const fixed = [
+      { label: 'Accueil', route: '/dashboard', icon: '🏠' },
+      { label: 'Transactions', route: '/transactions', icon: '💰' },
+    ];
+    const navOrder = this.preferenceService.navOrder();
+    const enabled = this.preferenceService.enabledFeatures();
+    const optional = navOrder
+      .filter((f: Feature) => enabled.includes(f))
+      .map((f: Feature) => {
+        const meta = FEATURES.find((m) => m.value === f)!;
+        return { label: meta.label, route: meta.route, icon: meta.icon };
+      });
+    return [...fixed, ...optional];
+  });
+  readonly currentRoute = computed(() => {
+    const e = this.navigationEnd();
+    return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
+  });
+  readonly sellableProducts = signal<Product[]>([]);
 
   constructor() {
     effect(() => {
@@ -124,6 +160,37 @@ export class Shell {
       if (modal === 'debt') {
         const entity = this.modalService.editingEntity() as Debt | null;
         this.debtType.set(entity?.sens ?? DebtType.EMPRUNT);
+      }
+    });
+
+    effect(async () => {
+      const modal = this.modalService.activeModal();
+      if (modal === 'sell') {
+        const all = await firstValueFrom(this.productService.getAll(true));
+        this.sellableProducts.set(all.filter((p) => p.actif && p.stock > 0));
+      }
+    });
+
+    // Load user preferences after authentication
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        this.preferenceService.loadPreferences();
+      }
+    });
+
+    // Redirect if current route is a disabled feature
+    effect(() => {
+      const items = this.navItems();
+      const nav = this.navigationEnd();
+      if (nav instanceof NavigationEnd) {
+        const url = nav.urlAfterRedirects;
+        const validRoutes = items.map((i) => i.route);
+        const isSettings = url.startsWith('/settings');
+        const isDashboard = url === '/dashboard' || url === '/';
+        const isKnownRoute = validRoutes.some((r) => url.startsWith(r));
+        if (!isSettings && !isDashboard && !isKnownRoute && this.preferenceService.isLoaded()) {
+          this.router.navigate(['/dashboard']);
+        }
       }
     });
   }
@@ -276,6 +343,34 @@ export class Shell {
       this.modalService.closeModal();
     } catch (error) {
       if (isDevMode()) console.error('Failed to delete account:', error);
+    }
+  }
+
+  async onProductSaved(request: ProductRequest | ProductUpdateRequest): Promise<void> {
+    const editing = this.modalService.editingEntity() as Product | null;
+    if (editing) {
+      await firstValueFrom(this.productService.update(editing.id, request as ProductUpdateRequest));
+    } else {
+      await firstValueFrom(this.productService.create(request));
+    }
+    this.modalService.closeModal();
+  }
+
+  async onSellConfirmed(event: { productId: string; quantity: number }): Promise<void> {
+    try {
+      await firstValueFrom(this.productService.sell(event.productId, event.quantity));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to sell product:', error);
+    }
+  }
+
+  async onProductDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.productService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete product:', error);
     }
   }
 }

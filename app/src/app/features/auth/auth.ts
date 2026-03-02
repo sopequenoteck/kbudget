@@ -84,9 +84,7 @@ export class Auth {
     const { name, email, password } = this.registerForm.getRawValue();
 
     try {
-      await firstValueFrom(
-        this.authService.register({ name: name || undefined, email, password }),
-      );
+      await firstValueFrom(this.authService.register({ name: name || undefined, email, password }));
       this.router.navigateByUrl('/');
     } catch (message) {
       this.errorMessage.set(message as string);

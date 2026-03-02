@@ -60,7 +60,9 @@
   cursor: pointer;
   border-radius: var(--radius-md);
   outline: none;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 
   &:hover:not(.active) {
     color: var(--text-primary);

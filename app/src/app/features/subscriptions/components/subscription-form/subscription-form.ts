@@ -113,7 +113,7 @@ export class SubscriptionForm {
       actif: raw.actif,
       categoryId: raw.categoryId || undefined,
       accountId: raw.accountId || undefined,
-      currency: raw.accountId ? undefined : (raw.currency || undefined),
+      currency: raw.accountId ? undefined : raw.currency || undefined,
     };
 
     this.saved.emit(request);

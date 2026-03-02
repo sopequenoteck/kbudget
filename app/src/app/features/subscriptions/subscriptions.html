@@ -2,8 +2,10 @@
   <section class="summary">
     @for (ct of monthlyTotalsByCurrency(); track ct.currency) {
       <div class="summary__card">
-        <span class="summary__label">Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span>
-        <span class="summary__value">{{ ct.total | amount : null : ct.currency }}</span>
+        <span class="summary__label"
+          >Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span
+        >
+        <span class="summary__value">{{ ct.total | amount: null : ct.currency }}</span>
       </div>
     }
   </section>

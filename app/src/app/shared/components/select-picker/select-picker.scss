@@ -37,7 +37,8 @@
     min-width: 0;
   }
 
-  &__color, &__item-color {
+  &__color,
+  &__item-color {
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -58,7 +59,8 @@
     text-overflow: ellipsis;
   }
 
-  &__secondary, &__item-secondary {
+  &__secondary,
+  &__item-secondary {
     color: var(--text-secondary);
     font-size: var(--font-size-xs);
     white-space: nowrap;

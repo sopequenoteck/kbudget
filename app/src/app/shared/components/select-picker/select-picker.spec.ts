@@ -1,8 +1,5 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-import {
-  BrowserTestingModule,
-  platformBrowserTesting,
-} from '@angular/platform-browser/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 
 import { SelectPicker } from './select-picker';
 import { SelectPickerItem } from './select-picker.model';
@@ -211,7 +208,9 @@ describe('SelectPicker', () => {
 
     const component = fixture.componentInstance;
     let emittedValue = '';
-    component.registerOnChange((v: string) => { emittedValue = v; });
+    component.registerOnChange((v: string) => {
+      emittedValue = v;
+    });
 
     component.open();
     component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
@@ -250,7 +249,9 @@ describe('SelectPicker', () => {
 
     const component = fixture.componentInstance;
     let emittedValue = 'initial';
-    component.registerOnChange((v: string) => { emittedValue = v; });
+    component.registerOnChange((v: string) => {
+      emittedValue = v;
+    });
 
     component.writeValue('acc-2');
     expect(component.selectedId()).toBe('acc-2');

@@ -119,6 +119,15 @@ public class CategoryService {
                     .build();
             categoryRepository.save(virement);
 
+            Category boutique = Category.builder()
+                    .nom("Boutique")
+                    .icone("🛍️")
+                    .couleur("#f59e0b")
+                    .isSystem(true)
+                    .user(user)
+                    .build();
+            categoryRepository.save(boutique);
+
             log.info("Catégories système créées pour userId {}", user.getId());
         } catch (Exception e) {
             log.error("Échec du seeding des catégories système pour userId {}: {}", user.getId(), e.getMessage());
@@ -143,6 +152,25 @@ public class CategoryService {
         ajustement = categoryRepository.save(ajustement);
         log.info("Catégorie système 'Ajustement' créée pour userId {}", userId);
         return ajustement;
+    }
+
+    @Transactional
+    public Category findOrCreateShopCategory(UUID userId) {
+        Category existing = findSystemCategoryByNom("Boutique", userId);
+        if (existing != null) {
+            return existing;
+        }
+
+        Category boutique = Category.builder()
+                .nom("Boutique")
+                .icone("🛍️")
+                .couleur("#f59e0b")
+                .isSystem(true)
+                .user(userRepository.getReferenceById(userId))
+                .build();
+        boutique = categoryRepository.save(boutique);
+        log.info("Catégorie système 'Boutique' créée pour userId {}", userId);
+        return boutique;
     }
 
     public Category findSystemCategoryByNom(String nom, UUID userId) {

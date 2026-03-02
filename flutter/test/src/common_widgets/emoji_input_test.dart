@@ -102,7 +102,7 @@ void main() {
         );
         emojiPicker.onEmojiSelected!(
           Category.SMILEYS,
-          Emoji('\u{1F600}', 'grinning face'),
+          const Emoji('\u{1F600}', 'grinning face'),
         );
         await tester.pumpAndSettle();
 
@@ -196,7 +196,7 @@ void main() {
         );
         emojiPicker.onEmojiSelected!(
           Category.SMILEYS,
-          Emoji('\u{2764}', 'red heart'),
+          const Emoji('\u{2764}', 'red heart'),
         );
         await tester.pumpAndSettle();
 

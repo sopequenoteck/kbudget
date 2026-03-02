@@ -64,11 +64,13 @@ export class AuthService {
   refreshAccessToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
-      return throwError(() => new HttpErrorResponse({ status: 401, statusText: 'No refresh token' }));
+      return throwError(
+        () => new HttpErrorResponse({ status: 401, statusText: 'No refresh token' }),
+      );
     }
-    return this.apiService.post<AuthResponse>('/auth/refresh', { refreshToken }).pipe(
-      tap((response) => this.saveAuth(response)),
-    );
+    return this.apiService
+      .post<AuthResponse>('/auth/refresh', { refreshToken })
+      .pipe(tap((response) => this.saveAuth(response)));
   }
 
   logout(): void {

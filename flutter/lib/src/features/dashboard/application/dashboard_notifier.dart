@@ -39,6 +39,13 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      // S'assurer que les providers async sont resolus
+      // avant de lire les repositories (evite fallback local)
+      final mode = await ref.read(dataModeProvider.future);
+      if (mode == DataMode.server) {
+        await ref.read(authenticatedDioProvider.future);
+      }
+
       // Charger le nom utilisateur
       final userName = await ref.read(currentUserNameProvider.future);
 
