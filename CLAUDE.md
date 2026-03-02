@@ -263,6 +263,8 @@ Approche **signals-first** obligatoire :
 - N/A (pas de persistance locale, lecture seule depuis le serveur) (065-angular-data-settings)
 - TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals (066-angular-transfer-form)
 - N/A (server-only, pas de stockage local) (066-angular-transfer-form)
+- TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, Angular CDK (deja present) (067-angular-responsive-nav)
+- N/A (pas de persistance, reutilise PreferenceService existant) (067-angular-responsive-nav)
 
 ### Backend (api/)
 

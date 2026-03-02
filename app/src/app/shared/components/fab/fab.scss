@@ -109,6 +109,26 @@
   transition: transform var(--duration-normal) var(--easing-default);
 }
 
+// -- Mobile: FAB above bottom nav --
+.fab-button {
+  bottom: calc(var(--bottom-nav-height) + var(--space-4));
+}
+
+.speed-dial-menu {
+  bottom: calc(var(--bottom-nav-height) + var(--space-4) + 56px + var(--space-3));
+}
+
+// -- Desktop: restore original positions --
+@media (min-width: 768px) {
+  .fab-button {
+    bottom: var(--space-6);
+  }
+
+  .speed-dial-menu {
+    bottom: calc(var(--space-6) + 56px + var(--space-3));
+  }
+}
+
 @keyframes speed-dial-in {
   from {
     opacity: 0;

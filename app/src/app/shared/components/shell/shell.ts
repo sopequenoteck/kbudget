@@ -40,6 +40,7 @@ import { DebtForm } from '../../../features/debts/components/debt-form/debt-form
 import { CategoryForm } from '../category-form/category-form';
 import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
+import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 
@@ -49,6 +50,7 @@ import { Modal } from '../modal/modal';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    BottomNav,
     Fab,
     Modal,
     TransactionForm,
@@ -111,6 +113,10 @@ export class Shell {
         return { label: meta.label, route: meta.route, icon: meta.icon };
       });
     return [...fixed, ...optional];
+  });
+  readonly currentRoute = computed(() => {
+    const e = this.navigationEnd();
+    return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
 
   constructor() {

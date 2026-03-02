@@ -68,6 +68,8 @@
   <router-outlet />
 </main>
 
+<bottom-nav [items]="navItems()" [activeRoute]="currentRoute()" />
+
 <app-fab
   [isOpen]="speedDialOpen()"
   [isHidden]="modalService.modalOpen()"
