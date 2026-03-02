@@ -48,8 +48,7 @@ export const routes: Routes = [
         path: 'shop',
         canActivate: [featureGuard],
         data: { feature: 'SHOP' },
-        loadComponent: () =>
-          import('./features/shop/shop-placeholder').then((m) => m.ShopPlaceholder),
+        loadChildren: () => import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
       },
       {
         path: 'settings',

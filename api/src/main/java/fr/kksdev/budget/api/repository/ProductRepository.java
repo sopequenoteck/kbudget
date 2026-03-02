@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findByUserIdAndActifTrueOrderByCreatedAtDesc(UUID userId);
+
+    List<Product> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }

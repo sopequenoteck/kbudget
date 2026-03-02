@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.controller;
 import fr.kksdev.budget.api.dto.request.ProductRequest;
 import fr.kksdev.budget.api.dto.request.ProductUpdateRequest;
 import fr.kksdev.budget.api.dto.request.RestockRequest;
+import fr.kksdev.budget.api.dto.request.SellRequest;
 import fr.kksdev.budget.api.dto.response.ProductResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.service.ProductService;
@@ -39,9 +40,11 @@ public class ProductController {
 
     @Operation(summary = "Lister les produits actifs")
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAll(Authentication authentication) {
+    public ResponseEntity<List<ProductResponse>> getAll(
+            @RequestParam(defaultValue = "false") boolean includeInactive,
+            Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        return ResponseEntity.ok(productService.getAllByUser(userId));
+        return ResponseEntity.ok(productService.getAllByUser(userId, includeInactive));
     }
 
     @Operation(summary = "Consulter un produit")
@@ -77,9 +80,11 @@ public class ProductController {
     @PostMapping("/{id}/sell")
     public ResponseEntity<ProductResponse> sell(
             @PathVariable UUID id,
+            @Valid @RequestBody(required = false) SellRequest request,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        return ResponseEntity.ok(productService.sell(id, userId));
+        int quantity = request != null ? request.quantity() : 1;
+        return ResponseEntity.ok(productService.sell(id, userId, quantity));
     }
 
     @Operation(summary = "Restocker un produit")

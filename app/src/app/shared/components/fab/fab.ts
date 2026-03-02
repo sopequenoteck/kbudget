@@ -30,6 +30,8 @@ const BASE_ACTIONS: readonly SpeedDialItem[] = [
 ] as const;
 
 const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: '↔️' };
+const PRODUCT_ACTION: SpeedDialItem = { type: 'product', label: 'Nouveau produit', icon: '📦' };
+const SELL_ACTION: SpeedDialItem = { type: 'sell', label: 'Vente rapide', icon: '💸' };
 
 @Component({
   selector: 'app-fab',
@@ -44,6 +46,7 @@ export class Fab {
 
   readonly isOpen = input.required<boolean>();
   readonly isHidden = input<boolean>(false);
+  readonly currentRoute = input<string>('');
   readonly toggled = output<void>();
   readonly actionSelected = output<ModalType>();
 
@@ -58,7 +61,13 @@ export class Fab {
     () => this.allAccounts().filter((a) => a.actif).length >= 2,
   );
 
+  readonly isOnShopRoute = computed(() => this.currentRoute().startsWith('/shop'));
+
   readonly actions = computed<SpeedDialItem[]>(() => {
+    if (this.isOnShopRoute() && this.preferenceService.isEnabled('SHOP')) {
+      return [PRODUCT_ACTION, SELL_ACTION];
+    }
+
     const base = BASE_ACTIONS.filter((action) => {
       if (action.type === 'subscription') return this.preferenceService.isEnabled('SUBSCRIPTIONS');
       if (action.type === 'debt') return this.preferenceService.isEnabled('DEBTS');

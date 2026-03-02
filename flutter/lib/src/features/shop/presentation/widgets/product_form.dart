@@ -363,6 +363,71 @@ class _ProductFormState extends ConsumerState<ProductForm> {
         ),
         const SizedBox(height: AppSpacing.space4),
 
+        // Prix d'achat + Prix de vente (côte à côte)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: AppFormField(
+                label: "Prix d'achat",
+                showError: _showErrors && _validatePrixAchat() != null,
+                errorMessage: _validatePrixAchat() ?? '',
+                child: TextField(
+                  controller: _prixAchatController,
+                  decoration: const InputDecoration.collapsed(hintText: '0.00'),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                    DecimalTextInputFormatter(),
+                  ],
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.space3),
+            Expanded(
+              child: AppFormField(
+                label: 'Prix de vente',
+                showError: _showErrors && _validatePrixVente() != null,
+                errorMessage: _validatePrixVente() ?? '',
+                child: TextField(
+                  controller: _prixVenteController,
+                  decoration: const InputDecoration.collapsed(hintText: '0.00'),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                    DecimalTextInputFormatter(),
+                  ],
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Margin indicator
+        _buildMargeIndicateur(),
+
+        // Stock initial (création uniquement)
+        if (!_isEditMode) ...[
+          AppFormField(
+            label: 'Stock initial',
+            showError: _showErrors && _validateStock() != null,
+            errorMessage: _validateStock() ?? '',
+            child: TextField(
+              controller: _stockController,
+              decoration: const InputDecoration.collapsed(hintText: '0'),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+        ],
+
         // Description
         AppFormField(
           label: 'Description',
@@ -388,62 +453,6 @@ class _ProductFormState extends ConsumerState<ProductForm> {
           ),
         ),
         const SizedBox(height: AppSpacing.space4),
-
-        // Prix d'achat
-        AppFormField(
-          label: "Prix d'achat",
-          showError: _showErrors && _validatePrixAchat() != null,
-          errorMessage: _validatePrixAchat() ?? '',
-          child: TextField(
-            controller: _prixAchatController,
-            decoration: const InputDecoration.collapsed(hintText: '0.00'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
-              DecimalTextInputFormatter(),
-            ],
-            onChanged: (_) => setState(() {}),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space4),
-
-        // Prix de vente
-        AppFormField(
-          label: 'Prix de vente',
-          showError: _showErrors && _validatePrixVente() != null,
-          errorMessage: _validatePrixVente() ?? '',
-          child: TextField(
-            controller: _prixVenteController,
-            decoration: const InputDecoration.collapsed(hintText: '0.00'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
-              DecimalTextInputFormatter(),
-            ],
-            onChanged: (_) => setState(() {}),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space4),
-
-        // Margin indicator
-        _buildMargeIndicateur(),
-
-        // Stock initial (création uniquement)
-        if (!_isEditMode) ...[
-          AppFormField(
-            label: 'Stock initial',
-            showError: _showErrors && _validateStock() != null,
-            errorMessage: _validateStock() ?? '',
-            child: TextField(
-              controller: _stockController,
-              decoration: const InputDecoration.collapsed(hintText: '0'),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.space4),
-        ],
         const SizedBox(height: AppSpacing.space6),
 
         // Action buttons

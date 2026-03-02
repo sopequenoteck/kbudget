@@ -37,6 +37,14 @@
     line-height: 1;
   }
 
+  &__image {
+    width: var(--space-10);
+    height: var(--space-10);
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+
   &__content {
     flex: 1;
     min-width: 0;

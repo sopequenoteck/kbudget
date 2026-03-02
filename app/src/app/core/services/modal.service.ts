@@ -5,6 +5,7 @@ import { type Subscription } from '../models/subscription.model';
 import { type Debt } from '../models/debt.model';
 import { type Category } from '../models/category.model';
 import { type Account } from '../models/account.model';
+import { type Product } from '../models/product.model';
 
 export type ModalType =
   | 'transaction'
@@ -12,9 +13,11 @@ export type ModalType =
   | 'debt'
   | 'category'
   | 'account'
-  | 'transfer';
+  | 'transfer'
+  | 'product'
+  | 'sell';
 
-type EditableEntity = Transaction | Subscription | Debt | Category | Account;
+type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product;
 
 const CREATE_TITLES: Record<ModalType, string> = {
   transaction: 'Nouvelle transaction',
@@ -23,6 +26,8 @@ const CREATE_TITLES: Record<ModalType, string> = {
   category: 'Nouvelle catégorie',
   account: 'Nouveau compte',
   transfer: 'Nouveau virement',
+  product: 'Nouveau produit',
+  sell: 'Vente rapide',
 };
 
 const EDIT_TITLES: Record<ModalType, string> = {
@@ -32,6 +37,8 @@ const EDIT_TITLES: Record<ModalType, string> = {
   category: 'Modifier la catégorie',
   account: 'Modifier le compte',
   transfer: 'Virement',
+  product: 'Modifier le produit',
+  sell: 'Vente rapide',
 };
 
 @Injectable({ providedIn: 'root' })

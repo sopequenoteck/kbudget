@@ -73,6 +73,7 @@
 <app-fab
   [isOpen]="speedDialOpen()"
   [isHidden]="modalService.modalOpen()"
+  [currentRoute]="currentRoute()"
   (toggled)="onFabToggle()"
   (actionSelected)="onSpeedDialAction($event)"
 />
@@ -188,6 +189,21 @@
     }
     @case ('transfer') {
       <app-transfer-form (saved)="onTransferSaved()" (cancelled)="onModalClose()" />
+    }
+    @case ('product') {
+      <app-product-form
+        [product]="$any(modalService.editingEntity())"
+        (saved)="onProductSaved($event)"
+        (cancelled)="onModalClose()"
+        (deleted)="onProductDeleted($event)"
+      />
+    }
+    @case ('sell') {
+      <app-sell-dialog
+        [products]="sellableProducts()"
+        (confirmed)="onSellConfirmed($event)"
+        (cancelled)="onModalClose()"
+      />
     }
   }
 </app-modal>

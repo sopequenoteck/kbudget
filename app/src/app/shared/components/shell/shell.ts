@@ -34,12 +34,20 @@ import {
 } from '../../../core/models/subscription.model';
 import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
 import { type Account, type AccountRequest } from '../../../core/models/account.model';
+import {
+  type Product,
+  type ProductRequest,
+  type ProductUpdateRequest,
+} from '../../../core/models/product.model';
+import { ProductService } from '../../../core/services/product';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
 import { CategoryForm } from '../category-form/category-form';
 import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
+import { ProductForm } from '../../../features/shop/components/product-form/product-form';
+import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
@@ -59,6 +67,8 @@ import { Modal } from '../modal/modal';
     CategoryForm,
     AccountForm,
     TransferForm,
+    ProductForm,
+    SellDialog,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -74,6 +84,7 @@ export class Shell {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
   private readonly accountService = inject(AccountService);
+  private readonly productService = inject(ProductService);
   readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
@@ -118,6 +129,7 @@ export class Shell {
     const e = this.navigationEnd();
     return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
+  readonly sellableProducts = signal<Product[]>([]);
 
   constructor() {
     effect(() => {
@@ -148,6 +160,14 @@ export class Shell {
       if (modal === 'debt') {
         const entity = this.modalService.editingEntity() as Debt | null;
         this.debtType.set(entity?.sens ?? DebtType.EMPRUNT);
+      }
+    });
+
+    effect(async () => {
+      const modal = this.modalService.activeModal();
+      if (modal === 'sell') {
+        const all = await firstValueFrom(this.productService.getAll(true));
+        this.sellableProducts.set(all.filter((p) => p.actif && p.stock > 0));
       }
     });
 
@@ -323,6 +343,34 @@ export class Shell {
       this.modalService.closeModal();
     } catch (error) {
       if (isDevMode()) console.error('Failed to delete account:', error);
+    }
+  }
+
+  async onProductSaved(request: ProductRequest | ProductUpdateRequest): Promise<void> {
+    const editing = this.modalService.editingEntity() as Product | null;
+    if (editing) {
+      await firstValueFrom(this.productService.update(editing.id, request as ProductUpdateRequest));
+    } else {
+      await firstValueFrom(this.productService.create(request));
+    }
+    this.modalService.closeModal();
+  }
+
+  async onSellConfirmed(event: { productId: string; quantity: number }): Promise<void> {
+    try {
+      await firstValueFrom(this.productService.sell(event.productId, event.quantity));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to sell product:', error);
+    }
+  }
+
+  async onProductDeleted(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.productService.delete(id));
+      this.modalService.closeModal();
+    } catch (error) {
+      if (isDevMode()) console.error('Failed to delete product:', error);
     }
   }
 }

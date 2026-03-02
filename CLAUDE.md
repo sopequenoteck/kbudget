@@ -265,6 +265,8 @@ Approche **signals-first** obligatoire :
 - N/A (server-only, pas de stockage local) (066-angular-transfer-form)
 - TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, Angular CDK (deja present) (067-angular-responsive-nav)
 - N/A (pas de persistance, reutilise PreferenceService existant) (067-angular-responsive-nav)
+- TypeScript 5.9 (Angular), Java 21 (backend modification mineure) + Angular 21, Angular Reactive Forms, Angular Router, Angular Signals (068-angular-shop-module)
+- Server-only (API REST, pas de stockage local) (068-angular-shop-module)
 
 ### Backend (api/)
 
@@ -296,3 +298,4 @@ Approche **signals-first** obligatoire :
 - 065-angular-data-settings: HealthService (signal-based, GET /actuator/health); DataSettings component (statut serveur, reload avec confirmation); route /settings/data; fix tokens CSS dark mode (--bg-warning, --text-warning)
 - 066-angular-transfer-form: TransferForm (standalone, OnPush, Reactive Forms) + differentAccountsValidator (cross-field); AccountService.transfer() POST /accounts/transfer; FAB TRANSFER_ACTION conditionnel (≥ 2 comptes actifs); Shell @case('transfer') + onTransferSaved(); 7 tests unitaires
 - 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Material standard)
+- 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop

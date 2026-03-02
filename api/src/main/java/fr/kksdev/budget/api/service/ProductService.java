@@ -65,10 +65,12 @@ public class ProductService {
         return toResponse(product);
     }
 
-    public List<ProductResponse> getAllByUser(UUID userId) {
+    public List<ProductResponse> getAllByUser(UUID userId, boolean includeInactive) {
         checkShopEnabled(userId);
-        return productRepository.findByUserIdAndActifTrueOrderByCreatedAtDesc(userId)
-                .stream()
+        List<Product> products = includeInactive
+                ? productRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                : productRepository.findByUserIdAndActifTrueOrderByCreatedAtDesc(userId);
+        return products.stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -105,7 +107,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse sell(UUID productId, UUID userId) {
+    public ProductResponse sell(UUID productId, UUID userId, int quantity) {
         checkShopEnabled(userId);
         Product product = findByIdAndUser(productId, userId);
 
@@ -113,21 +115,22 @@ public class ProductService {
             log.error("Vente refusée (inactif): productId={}, userId={}", productId, userId);
             throw new ConflictException("Le produit " + product.getNom() + " est inactif");
         }
-        if (product.getStock() <= 0) {
-            log.error("Vente refusée (stock=0): productId={}, userId={}", productId, userId);
+        if (product.getStock() < quantity) {
+            log.error("Vente refusée (stock insuffisant): productId={}, userId={}, stock={}, quantity={}", productId, userId, product.getStock(), quantity);
             throw new ConflictException("Stock insuffisant pour le produit " + product.getNom());
         }
 
         int stockBefore = product.getStock();
-        product.setStock(stockBefore - 1);
-        product.setTotalVendu(product.getTotalVendu() + 1);
+        product.setStock(stockBefore - quantity);
+        product.setTotalVendu(product.getTotalVendu() + quantity);
 
         Account shopAccount = getOrCreateShopAccount(userId);
         Category shopCategory = categoryService.findOrCreateShopCategory(userId);
 
+        BigDecimal montant = product.getPrixVente().multiply(BigDecimal.valueOf(quantity));
         Transaction transaction = Transaction.builder()
-                .montant(product.getPrixVente())
-                .libelle("Vente: " + product.getNom())
+                .montant(montant)
+                .libelle("Vente: " + product.getNom() + (quantity > 1 ? " x" + quantity : ""))
                 .type(TransactionType.RECETTE)
                 .date(LocalDate.now())
                 .product(product)
@@ -138,7 +141,7 @@ public class ProductService {
         transactionRepository.save(transaction);
 
         product = productRepository.save(product);
-        log.info("Vente produit: id={}, nom={}, userId={}, stock={}->{}, montant={}", productId, product.getNom(), userId, stockBefore, product.getStock(), product.getPrixVente());
+        log.info("Vente produit: id={}, nom={}, userId={}, quantité={}, stock={}->{}, montant={}", productId, product.getNom(), userId, quantity, stockBefore, product.getStock(), montant);
         return toResponse(product);
     }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -15,6 +15,13 @@ export class ListItem {
   readonly subtitle = input<string>('');
   readonly rightSubtitle = input<string>('');
   readonly valueClass = input<string>('');
+  readonly imageUrl = input<string | null>(null);
+
+  readonly webImageUrl = computed(() => {
+    const url = this.imageUrl();
+    if (!url) return null;
+    return url.startsWith('http') || url.startsWith('data:') ? url : null;
+  });
 
   readonly pressed = output<void>();
 

@@ -1,0 +1,33 @@
+@if (visible()) {
+  <div
+    class="restock-overlay"
+    (click)="onCancel()"
+    (keydown.escape)="onCancel()"
+    role="presentation"
+  >
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+    <div
+      class="restock-card"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-label="Ajouter du stock"
+    >
+      <h3>Ajouter du stock</h3>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <app-form-field
+          label="Quantité"
+          fieldId="restockQuantity"
+          [showError]="isInvalid('quantity')"
+          [errorMessage]="'Minimum 1'"
+        >
+          <input id="restockQuantity" type="number" formControlName="quantity" min="1" />
+        </app-form-field>
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+          <button type="submit" class="btn-primary">Confirmer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
