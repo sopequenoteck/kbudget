@@ -537,7 +537,9 @@ Response `201` :
 
 ### Lister `GET /api/products`
 
-Response `200` (produits actifs uniquement, tries par date de creation decroissante) :
+Parametre optionnel : `?includeInactive=true` pour inclure les produits desactives (defaut `false`).
+
+Response `200` (tries par date de creation decroissante) :
 
 ```json
 [
@@ -574,6 +576,18 @@ Request (remplacement complet, champ `actif` obligatoire) :
   "actif": true
 }
 ```
+
+### Vendre `POST /api/products/{id}/sell`
+
+Request (body optionnel, defaut `quantity: 1`) :
+
+```json
+{
+  "quantity": 3
+}
+```
+
+Response `200` : le produit mis a jour (stock decremente, totalVendu incremente).
 
 ### Supprimer `DELETE /api/products/{id}`
 
