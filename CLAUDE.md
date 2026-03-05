@@ -254,7 +254,7 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl (060-flutter-shop-products)
 - API REST uniquement (pas de Drift/SQLite pour cette feature) (060-flutter-shop-products)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, image_picker, path_provider (061-flutter-product-form)
-- API REST uniquement (pas de Drift/SQLite — remote only). Images stockees en fichier local (app documents directory). (061-flutter-product-form)
+- API REST uniquement (pas de Drift/SQLite — remote only). Images envoyees en base64 data URI ; fichier local conserve uniquement pour le preview rapide. (061-flutter-product-form)
 - TypeScript 5.9 (Angular SCSS), Dart >= 3.6 (Flutter) + Angular 21 (SCSS tokens), Flutter >= 3.27 (Dart constants + ThemeData) (063-shared-design-tokens)
 - N/A (fichiers statiques de configuration) (063-shared-design-tokens)
 - TypeScript 5.9, Angular 21 + Angular CDK (`@angular/cdk/drag-drop` pour le DnD), Angular Signals, Angular Router (064-angular-feature-toggles)
@@ -298,4 +298,4 @@ Approche **signals-first** obligatoire :
 - 065-angular-data-settings: HealthService (signal-based, GET /actuator/health); DataSettings component (statut serveur, reload avec confirmation); route /settings/data; fix tokens CSS dark mode (--bg-warning, --text-warning)
 - 066-angular-transfer-form: TransferForm (standalone, OnPush, Reactive Forms) + differentAccountsValidator (cross-field); AccountService.transfer() POST /accounts/transfer; FAB TRANSFER_ACTION conditionnel (≥ 2 comptes actifs); Shell @case('transfer') + onTransferSaved(); 7 tests unitaires
 - 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Material standard)
-- 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop
+- 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop; image sync Flutter↔Angular via base64 data URI — ImageUtils (flutter) + compressImage canvas (Angular, maxWidth=1024, quality=0.85)

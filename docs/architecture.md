@@ -116,7 +116,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | nom | String | Nom du produit (max 100) |
 | description | String | Description (nullable, max 500) |
 | icone | String | Emoji (nullable) |
-| imageUrl | String | URL image (nullable, max 500) |
+| imageUrl | String | Image en base64 data URI (nullable) — format partage Flutter/Angular |
 | prixAchat | BigDecimal | Prix d'achat |
 | prixVente | BigDecimal | Prix de vente |
 | stock | Integer | Stock disponible (>= 0) |
@@ -166,7 +166,11 @@ app/src/app/
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
     ├── settings/      # Parametres (categories, comptes, fonctionnalites)
-    └── shop/          # Module Boutique (placeholder)
+    └── shop/          # Module Boutique (liste, detail, formulaire, sell/restock)
+        ├── shop-list/         # Grille produits + filtres actifs/inactifs
+        ├── shop-detail/       # Detail produit + historique ventes
+        ├── components/        # ProductForm, SellDialog, RestockDialog
+        └── shop.routes.ts     # Routing lazy-loaded
 ```
 
 ### Principes
@@ -192,11 +196,13 @@ app/src/app/
 | Abonnements | `/subscriptions` | Liste, total mensuel |
 | Dettes/Prets | `/debts` | Suivi dans les deux sens |
 | Parametres | `/settings` | Parametres utilisateur |
+| Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
+| Detail produit | `/shop/:id` | Infos, vente, restock, historique |
 
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs)
+- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs). Sur `/shop` : Nouveau produit + Vente rapide (si SHOP actif)
 - Saisie en 2-3 taps
 
 ## Flux d'authentification

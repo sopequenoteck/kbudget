@@ -167,11 +167,11 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | Methode | Route | Description |
 |---------|-------|-------------|
 | POST | `/api/products` | Creer un produit |
-| GET | `/api/products` | Lister les produits actifs |
+| GET | `/api/products` | Lister les produits (`?includeInactive=true` pour inclure les inactifs) |
 | GET | `/api/products/{id}` | Detail d'un produit |
 | PUT | `/api/products/{id}` | Modifier un produit |
 | DELETE | `/api/products/{id}` | Supprimer un produit |
-| POST | `/api/products/{id}/sell` | Vendre 1 unité (stock -1, transaction RECETTE) |
+| POST | `/api/products/{id}/sell` | Vendre N unites (body `{"quantity": N}` optionnel, defaut 1) |
 | POST | `/api/products/{id}/restock` | Réapprovisionner (stock +qty, transaction DEPENSE) |
 | GET | `/api/products/{id}/sales` | Historique des transactions liées au produit |
 

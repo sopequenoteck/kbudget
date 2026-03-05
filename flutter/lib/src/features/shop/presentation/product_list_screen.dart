@@ -13,6 +13,7 @@ import 'package:k_budget/src/features/shop/application/product_notifier.dart';
 import 'package:k_budget/src/domain/enums/modal_type.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/image_utils.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
@@ -165,33 +166,49 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           itemBuilder: (context, index) {
             final product = state.items[index];
 
-            final hasImage = product.imageUrl != null &&
-                File(product.imageUrl!).existsSync();
+            final imageUrl = product.imageUrl;
+            final isBase64 = ImageUtils.isBase64DataUri(imageUrl);
+            final isLocalFile = imageUrl != null &&
+                !isBase64 &&
+                File(imageUrl).existsSync();
 
-            final leading = hasImage
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    child: Image.file(
-                      File(product.imageUrl!),
-                      width: AppSpacing.space10,
-                      height: AppSpacing.space10,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Container(
-                    width: AppSpacing.space10,
-                    height: AppSpacing.space10,
-                    decoration: BoxDecoration(
-                      color: AppColors.amber100,
-                      borderRadius: BorderRadius.circular(AppRadius.round),
-                    ),
-                    child: Center(
-                      child: Text(
-                        product.icone ?? '📦',
-                        style: const TextStyle(fontSize: AppTypography.sizeLg),
-                      ),
-                    ),
-                  );
+            final Widget leading;
+            if (isBase64) {
+              leading = ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Image.memory(
+                  ImageUtils.base64DataUriToBytes(imageUrl!),
+                  width: AppSpacing.space10,
+                  height: AppSpacing.space10,
+                  fit: BoxFit.cover,
+                ),
+              );
+            } else if (isLocalFile) {
+              leading = ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Image.file(
+                  File(imageUrl),
+                  width: AppSpacing.space10,
+                  height: AppSpacing.space10,
+                  fit: BoxFit.cover,
+                ),
+              );
+            } else {
+              leading = Container(
+                width: AppSpacing.space10,
+                height: AppSpacing.space10,
+                decoration: BoxDecoration(
+                  color: AppColors.amber100,
+                  borderRadius: BorderRadius.circular(AppRadius.round),
+                ),
+                child: Center(
+                  child: Text(
+                    product.icone ?? '📦',
+                    style: const TextStyle(fontSize: AppTypography.sizeLg),
+                  ),
+                ),
+              );
+            }
 
             final listItem = InkWell(
               onTap: () {
