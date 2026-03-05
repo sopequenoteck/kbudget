@@ -116,7 +116,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | nom | String | Nom du produit (max 100) |
 | description | String | Description (nullable, max 500) |
 | icone | String | Emoji (nullable) |
-| imageUrl | String | URL image (nullable, max 500) |
+| imageUrl | String | Image en base64 data URI (nullable) — format partage Flutter/Angular |
 | prixAchat | BigDecimal | Prix d'achat |
 | prixVente | BigDecimal | Prix de vente |
 | stock | Integer | Stock disponible (>= 0) |

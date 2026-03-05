@@ -7,6 +7,7 @@ import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:k_budget/src/domain/enums/modal_type.dart';
 import 'package:k_budget/src/domain/enums/transaction_type.dart';
 import 'package:k_budget/src/domain/models/product.dart';
@@ -78,17 +79,29 @@ class ProductDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, Product product) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasImage = product.imageUrl != null &&
-        File(product.imageUrl!).existsSync();
+    final imageUrl = product.imageUrl;
+    final isBase64 = ImageUtils.isBase64DataUri(imageUrl);
+    final isLocalFile =
+        imageUrl != null && !isBase64 && File(imageUrl).existsSync();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (hasImage)
+        if (isBase64)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: Image.memory(
+              ImageUtils.base64DataUriToBytes(imageUrl!),
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          )
+        else if (isLocalFile)
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.lg),
             child: Image.file(
-              File(product.imageUrl!),
+              File(imageUrl),
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
