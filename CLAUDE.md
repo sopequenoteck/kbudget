@@ -267,6 +267,8 @@ Approche **signals-first** obligatoire :
 - N/A (pas de persistance, reutilise PreferenceService existant) (067-angular-responsive-nav)
 - TypeScript 5.9 (Angular), Java 21 (backend modification mineure) + Angular 21, Angular Reactive Forms, Angular Router, Angular Signals (068-angular-shop-module)
 - Server-only (API REST, pas de stockage local) (068-angular-shop-module)
+- TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + `@ng-icons/core` + `@ng-icons/phosphor-icons` v33.1.0 (Angular), `phosphor_flutter` v2.1.0 (Flutter) (069-phosphor-icons-migration)
+- N/A (aucun changement de modele de donnees) (069-phosphor-icons-migration)
 
 ### Backend (api/)
 
@@ -283,7 +285,7 @@ Approche **signals-first** obligatoire :
 ### Mobile natif (flutter/)
 
 - Dart >= 3.6, Flutter >= 3.27
-- flutter_riverpod, go_router, drift, dio, flutter_secure_storage, image_picker, path_provider
+- flutter_riverpod, go_router, drift, dio, flutter_secure_storage, image_picker, path_provider, phosphor_flutter
 - freezed, json_serializable, shimmer, intl
 - flutter_test, mockito, build_runner
 
@@ -297,5 +299,6 @@ Approche **signals-first** obligatoire :
 - 064-angular-feature-toggles: PreferenceService (signal-based, GET/PUT /users/me/preferences) + featureGuard (CanActivateFn paramétré); Settings > Fonctionnalités (toggle, DnD navOrder, confirmation dialog); sidebar dynamique via computed() + @for; FAB filtré par features; ShopPlaceholder /shop; 11 tests unitaires
 - 065-angular-data-settings: HealthService (signal-based, GET /actuator/health); DataSettings component (statut serveur, reload avec confirmation); route /settings/data; fix tokens CSS dark mode (--bg-warning, --text-warning)
 - 066-angular-transfer-form: TransferForm (standalone, OnPush, Reactive Forms) + differentAccountsValidator (cross-field); AccountService.transfer() POST /accounts/transfer; FAB TRANSFER_ACTION conditionnel (≥ 2 comptes actifs); Shell @case('transfer') + onTransferSaved(); 7 tests unitaires
-- 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Material standard)
+- 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Phosphor standard)
 - 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop; image sync Flutter↔Angular via base64 data URI — ImageUtils (flutter) + compressImage canvas (Angular, maxWidth=1024, quality=0.85)
+- 069-phosphor-icons-migration: All system icons migrated to Phosphor Icons — phosphor_flutter v2.1.0 (Flutter, ~60 icons), @ng-icons/core + @ng-icons/phosphor-icons v33.1.0 (Angular, ~20 emojis); docs/design-tokens.md section Icons ajoutée; icon-mapping.md créé; 525 tests Flutter passent
