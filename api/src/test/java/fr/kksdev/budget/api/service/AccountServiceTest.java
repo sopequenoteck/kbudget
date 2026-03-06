@@ -318,8 +318,9 @@ class AccountServiceTest {
     }
 
     @Test
-    void should_useUserDefaultCurrency_when_noCurrencyInRequest() {
-        var user = User.builder().id(userId).email("test@mail.com").defaultCurrency(Currency.XOF).build();
+    void should_useUserPrimaryCurrency_when_noCurrencyInRequest() {
+        var user = User.builder().id(userId).email("test@mail.com").build();
+        var preference = UserPreference.builder().currencies(List.of(Currency.XOF)).build();
         var request = new AccountRequest("Compte défaut", AccountType.COURANT, null, null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
@@ -336,6 +337,7 @@ class AccountServiceTest {
 
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Compte défaut", userId)).thenReturn(false);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(accountRepository.save(any(Account.class))).thenReturn(saved);
         when(transactionRepository.calculateBalanceByAccountId(saved.getId())).thenReturn(BigDecimal.ZERO);
 

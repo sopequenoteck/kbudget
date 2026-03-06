@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 
 import java.util.List;
@@ -9,5 +10,6 @@ public record UserPreferenceResponse(
         List<Feature> enabledFeatures,
         List<Feature> navOrder,
         UUID shopAccountId,
-        Boolean includeShopInBalance
+        Boolean includeShopInBalance,
+        List<Currency> currencies
 ) {}

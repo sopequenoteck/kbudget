@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.AccountRepository;
@@ -27,6 +28,7 @@ public class PreferenceService {
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final ExchangeRateService exchangeRateService;
 
     public UserPreferenceResponse getPreferences(UUID userId) {
         UserPreference preference = getOrCreate(userId);
@@ -58,6 +60,16 @@ public class PreferenceService {
         if (request.includeShopInBalance() != null) {
             preference.setIncludeShopInBalance(request.includeShopInBalance());
         }
+        if (request.currencies() != null) {
+            validateCurrencies(request.currencies());
+            Currency oldPrimary = preference.getCurrencies().isEmpty() ? null : preference.getCurrencies().get(0);
+            preference.setCurrencies(new ArrayList<>(request.currencies()));
+            Currency newPrimary = request.currencies().get(0);
+            if (oldPrimary != null && oldPrimary != newPrimary) {
+                exchangeRateService.rebaseRates(userId, newPrimary);
+                log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
+            }
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -78,6 +90,7 @@ public class PreferenceService {
                             .user(userRepository.getReferenceById(userId))
                             .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
                             .navOrder(new ArrayList<>(DEFAULT_FEATURES))
+                            .currencies(new ArrayList<>(List.of(Currency.EUR)))
                             .includeShopInBalance(false)
                             .build();
                     return userPreferenceRepository.save(newPreference);
@@ -121,12 +134,25 @@ public class PreferenceService {
         return getOrCreate(userId);
     }
 
+    private void validateCurrencies(List<Currency> currencies) {
+        if (currencies.isEmpty()) {
+            throw new IllegalArgumentException("Au moins une devise requise");
+        }
+        Set<Currency> seen = new HashSet<>();
+        for (Currency currency : currencies) {
+            if (!seen.add(currency)) {
+                throw new IllegalArgumentException("La liste de devises ne doit pas contenir de doublons");
+            }
+        }
+    }
+
     private UserPreferenceResponse toResponse(UserPreference preference) {
         return new UserPreferenceResponse(
                 preference.getEnabledFeatures(),
                 preference.getNavOrder(),
                 preference.getShopAccountId(),
-                preference.getIncludeShopInBalance()
+                preference.getIncludeShopInBalance(),
+                preference.getCurrencies()
         );
     }
 }

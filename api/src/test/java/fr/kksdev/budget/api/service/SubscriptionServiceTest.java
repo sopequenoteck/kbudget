@@ -8,6 +8,7 @@ import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
@@ -49,6 +50,9 @@ class SubscriptionServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private PreferenceService preferenceService;
+
     @InjectMocks
     private SubscriptionService subscriptionService;
 
@@ -80,8 +84,10 @@ class SubscriptionServiceTest {
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
         var saved = buildSubscription(user);
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
         SubscriptionResponse response = subscriptionService.create(request, userId);
@@ -118,8 +124,10 @@ class SubscriptionServiceTest {
         var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
         SubscriptionResponse response = subscriptionService.create(request, userId);
@@ -190,8 +198,10 @@ class SubscriptionServiceTest {
         var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
                 Frequency.MENSUEL, LocalDate.of(2026, 2, 1), false, null, null, null);
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(existing));
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(existing);
 
         SubscriptionResponse response = subscriptionService.update(subscriptionId, request, userId);
@@ -274,8 +284,9 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    void should_useUserDefaultCurrency_when_noAccountAndNoCurrency() {
-        var user = User.builder().id(userId).email("test@mail.com").defaultCurrency(Currency.XOF).build();
+    void should_useUserPrimaryCurrency_when_noAccountAndNoCurrency() {
+        var user = User.builder().id(userId).email("test@mail.com").build();
+        var preference = UserPreference.builder().currencies(List.of(Currency.XOF)).build();
         var saved = Subscription.builder()
                 .id(subscriptionId)
                 .nom("Disney+")
@@ -291,6 +302,7 @@ class SubscriptionServiceTest {
 
         when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
         SubscriptionResponse response = subscriptionService.create(request, userId);

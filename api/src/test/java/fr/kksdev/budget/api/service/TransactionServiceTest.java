@@ -4,9 +4,11 @@ import fr.kksdev.budget.api.dto.request.TransactionRequest;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -45,6 +47,9 @@ class TransactionServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private PreferenceService preferenceService;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -237,10 +242,11 @@ class TransactionServiceTest {
                 .type(TransactionType.RECETTE).date(LocalDate.of(2026, 2, 1))
                 .libelle("Salaire").account(account).user(user).build();
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
                 .thenReturn(List.of(depense, recette));
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
 
         List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(2, 2026, userId);
 
@@ -256,11 +262,11 @@ class TransactionServiceTest {
 
     @Test
     void should_return_empty_list_when_no_transactions() {
-        var user = buildUser();
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)))
                 .thenReturn(List.of());
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
 
         List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(3, 2026, userId);
 

@@ -65,7 +65,8 @@ public class AccountService {
         BigDecimal soldeInitial = request.soldeInitial() != null ? request.soldeInitial() : BigDecimal.ZERO;
 
         User user = userRepository.getReferenceById(userId);
-        Currency currency = request.currency() != null ? request.currency() : user.getDefaultCurrency();
+        Currency currency = request.currency() != null ? request.currency()
+                : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
 
         Account account = Account.builder()
                 .nom(request.nom())

@@ -164,7 +164,7 @@ class ProductServiceTest {
         when(productRepository.findByUserIdAndActifTrueOrderByCreatedAtDesc(userId))
                 .thenReturn(List.of(product));
 
-        List<ProductResponse> result = productService.getAllByUser(userId);
+        List<ProductResponse> result = productService.getAllByUser(userId, false);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().nom()).isEqualTo("T-shirt");
@@ -243,7 +243,7 @@ class ProductServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
 
-        ProductResponse response = productService.sell(productId, userId);
+        ProductResponse response = productService.sell(productId, userId, 1);
 
         assertThat(response.stock()).isEqualTo(4);
         assertThat(response.totalVendu()).isEqualTo(4);
@@ -258,7 +258,7 @@ class ProductServiceTest {
         when(preferenceService.isFeatureEnabled(userId, Feature.SHOP)).thenReturn(true);
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
-        assertThatThrownBy(() -> productService.sell(productId, userId))
+        assertThatThrownBy(() -> productService.sell(productId, userId, 1))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Stock insuffisant");
     }
@@ -270,7 +270,7 @@ class ProductServiceTest {
         when(preferenceService.isFeatureEnabled(userId, Feature.SHOP)).thenReturn(true);
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
-        assertThatThrownBy(() -> productService.sell(productId, userId))
+        assertThatThrownBy(() -> productService.sell(productId, userId, 1))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("inactif");
     }
@@ -279,7 +279,7 @@ class ProductServiceTest {
     void should_throw_feature_disabled_when_shop_not_enabled_on_sell() {
         when(preferenceService.isFeatureEnabled(userId, Feature.SHOP)).thenReturn(false);
 
-        assertThatThrownBy(() -> productService.sell(productId, userId))
+        assertThatThrownBy(() -> productService.sell(productId, userId, 1))
                 .isInstanceOf(FeatureDisabledException.class)
                 .hasMessage("Fonctionnalité SHOP désactivée");
     }
@@ -289,7 +289,7 @@ class ProductServiceTest {
         when(preferenceService.isFeatureEnabled(userId, Feature.SHOP)).thenReturn(true);
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> productService.sell(productId, userId))
+        assertThatThrownBy(() -> productService.sell(productId, userId, 1))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Produit non trouvé");
     }
@@ -311,7 +311,7 @@ class ProductServiceTest {
         });
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
 
-        productService.sell(productId, userId);
+        productService.sell(productId, userId, 1);
 
         verify(transactionRepository).save(any(Transaction.class));
     }
@@ -402,7 +402,7 @@ class ProductServiceTest {
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
 
-        productService.sell(productId, userId);
+        productService.sell(productId, userId, 1);
 
         verify(accountRepository).save(any(Account.class));
     }
@@ -410,7 +410,7 @@ class ProductServiceTest {
     // === getSalesHistory (feature 057) ===
 
     @Test
-    void should_return_only_recette_transactions_in_sales_history() {
+    void should_return_all_transactions_in_sales_history() {
         Transaction saleTx = Transaction.builder()
                 .id(UUID.randomUUID())
                 .montant(new BigDecimal("15.00"))
@@ -441,11 +441,11 @@ class ProductServiceTest {
 
         List<TransactionResponse> history = productService.getSalesHistory(productId, userId);
 
-        assertThat(history).hasSize(1);
+        assertThat(history).hasSize(2);
         assertThat(history.get(0).type()).isEqualTo(TransactionType.RECETTE);
         assertThat(history.get(0).libelle()).isEqualTo("Vente: T-shirt");
-        assertThat(history.get(0).productId()).isEqualTo(productId);
-        assertThat(history.get(0).productName()).isEqualTo("T-shirt");
+        assertThat(history.get(1).type()).isEqualTo(TransactionType.DEPENSE);
+        assertThat(history.get(1).libelle()).isEqualTo("Stock: T-shirt x10");
     }
 
     @Test

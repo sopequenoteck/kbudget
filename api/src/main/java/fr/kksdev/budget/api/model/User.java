@@ -1,6 +1,5 @@
 package fr.kksdev.budget.api.model;
 
-import fr.kksdev.budget.api.enums.Currency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,11 +26,6 @@ public class User {
     private String password;
 
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "default_currency", nullable = false, length = 3)
-    @Builder.Default
-    private Currency defaultCurrency = Currency.EUR;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

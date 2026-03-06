@@ -3,9 +3,11 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.DebtRequest;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -43,6 +45,9 @@ class DebtServiceTest {
     @Mock
     private CategoryService categoryService;
 
+    @Mock
+    private PreferenceService preferenceService;
+
     @InjectMocks
     private DebtService debtService;
 
@@ -73,8 +78,10 @@ class DebtServiceTest {
                 DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null);
         var saved = buildDebt(user);
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
 
         DebtResponse response = debtService.create(request, userId);
@@ -109,8 +116,10 @@ class DebtServiceTest {
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null);
 
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
 
         DebtResponse response = debtService.create(request, userId);

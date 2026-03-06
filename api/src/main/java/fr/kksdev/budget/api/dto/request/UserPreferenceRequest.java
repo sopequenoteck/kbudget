@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.request;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,5 +11,6 @@ public record UserPreferenceRequest(
         @NotNull List<Feature> enabledFeatures,
         List<Feature> navOrder,
         UUID shopAccountId,
-        Boolean includeShopInBalance
+        Boolean includeShopInBalance,
+        List<Currency> currencies
 ) {}

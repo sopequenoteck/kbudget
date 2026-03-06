@@ -39,6 +39,7 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
     private final ProductRepository productRepository;
+    private final PreferenceService preferenceService;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -163,8 +164,8 @@ public class TransactionService {
         Map<String, List<Transaction>> byCurrency = transactions.stream()
                 .collect(Collectors.groupingBy(t -> t.getAccount().getCurrency().name()));
 
-        // Determine user default currency for ordering
-        String defaultCurrency = userRepository.getReferenceById(userId).getDefaultCurrency().name();
+        // Determine user primary currency for ordering
+        String defaultCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0).name();
 
         List<MonthlySummaryResponse> summaries = byCurrency.entrySet().stream()
                 .map(entry -> {

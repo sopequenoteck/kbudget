@@ -33,6 +33,7 @@ public class SubscriptionService {
     private final CategoryRepository categoryRepository;
     private final CategoryService categoryService;
     private final AccountRepository accountRepository;
+    private final PreferenceService preferenceService;
 
     @Transactional
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
@@ -113,7 +114,7 @@ public class SubscriptionService {
         if (requestCurrency != null) {
             return requestCurrency;
         }
-        return user.getDefaultCurrency();
+        return preferenceService.getOrCreatePreference(user.getId()).getCurrencies().get(0);
     }
 
     private Account resolveAccount(UUID accountId, UUID userId) {

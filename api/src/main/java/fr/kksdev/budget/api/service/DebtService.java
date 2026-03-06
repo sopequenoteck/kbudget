@@ -29,11 +29,13 @@ public class DebtService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryService categoryService;
+    private final PreferenceService preferenceService;
 
     @Transactional
     public DebtResponse create(DebtRequest request, UUID userId) {
         User user = userRepository.getReferenceById(userId);
-        Currency currency = request.currency() != null ? request.currency() : user.getDefaultCurrency();
+        Currency currency = request.currency() != null ? request.currency()
+                : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
 
         Debt debt = Debt.builder()
                 .personne(request.personne())

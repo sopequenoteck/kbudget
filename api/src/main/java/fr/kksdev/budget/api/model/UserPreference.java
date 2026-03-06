@@ -1,6 +1,8 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.model.converter.CurrencyListConverter;
 import fr.kksdev.budget.api.model.converter.FeatureListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,6 +47,11 @@ public class UserPreference {
     @Column(name = "include_shop_in_balance", nullable = false)
     @Builder.Default
     private Boolean includeShopInBalance = false;
+
+    @Convert(converter = CurrencyListConverter.class)
+    @Column(name = "currencies", nullable = false, length = 100)
+    @Builder.Default
+    private List<Currency> currencies = List.of(Currency.EUR);
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
