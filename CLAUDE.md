@@ -269,11 +269,13 @@ Approche **signals-first** obligatoire :
 - Server-only (API REST, pas de stockage local) (068-angular-shop-module)
 - TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + `@ng-icons/core` + `@ng-icons/phosphor-icons` v33.1.0 (Angular), `phosphor_flutter` v2.1.0 (Flutter) (069-phosphor-icons-migration)
 - N/A (aucun changement de modele de donnees) (069-phosphor-icons-migration)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio (070-currency-dashboard)
+- PostgreSQL 15+ (nouvelle table `exchange_rates`, enrichissement `user_preferences`), SQLite/Drift non utilise (taux serveur uniquement) (070-currency-dashboard)
 
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V11
+- PostgreSQL 15+, Flyway migrations V1-V12
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
