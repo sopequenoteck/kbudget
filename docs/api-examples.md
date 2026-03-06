@@ -593,6 +593,52 @@ Response `200` : le produit mis a jour (stock decremente, totalVendu incremente)
 
 Response `204` (corps vide, suppression physique).
 
+## Taux de conversion
+
+### Lister `GET /api/exchange-rates`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "baseCurrency": "EUR",
+    "targetCurrency": "XOF",
+    "rate": 655.957000,
+    "updatedAt": "2026-03-06T10:00:00"
+  }
+]
+```
+
+### Creer ou mettre a jour `PUT /api/exchange-rates`
+
+Request (upsert — cree ou met a jour le taux pour la paire) :
+
+```json
+{
+  "baseCurrency": "EUR",
+  "targetCurrency": "XOF",
+  "rate": 655.957
+}
+```
+
+Response `200` :
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "baseCurrency": "EUR",
+  "targetCurrency": "XOF",
+  "rate": 655.957000,
+  "updatedAt": "2026-03-06T10:00:00"
+}
+```
+
+### Supprimer `DELETE /api/exchange-rates/{baseCurrency}/{targetCurrency}`
+
+Response `204` (corps vide).
+
 ## Preferences utilisateur
 
 ### Consulter `GET /api/users/me/preferences`
@@ -602,7 +648,10 @@ Response `200` (valeurs par defaut) :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"]
+  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["EUR"]
 }
 ```
 
@@ -621,16 +670,20 @@ Response `200` :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "SHOP"]
+  "navOrder": ["SUBSCRIPTIONS", "SHOP"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["EUR"]
 }
 ```
 
-Request (reordonner avec navOrder explicite) :
+Request (reordonner avec navOrder explicite + changer devise principale) :
 
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
+  "currencies": ["XOF", "EUR"]
 }
 ```
 
@@ -639,7 +692,10 @@ Response `200` :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["XOF", "EUR"]
 }
 ```
 
@@ -653,7 +709,7 @@ Response `200` :
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 | `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
 | `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP` |
-| `Currency` | `EUR`, `USD`, `GBP`, `XOF` |
+| `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
 ## Voir aussi
 

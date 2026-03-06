@@ -182,6 +182,14 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | GET | `/api/users/me/preferences` | Consulter les preferences (features activees + ordre nav) |
 | PUT | `/api/users/me/preferences` | Mettre a jour les preferences |
 
+### Taux de conversion
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/exchange-rates` | Lister les taux de l'utilisateur |
+| PUT | `/api/exchange-rates` | Creer ou mettre a jour un taux (upsert) |
+| DELETE | `/api/exchange-rates/{base}/{target}` | Supprimer un taux |
+
 Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
 ## Architecture
@@ -203,10 +211,10 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, Preference)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, ExchangeRate, Preference)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, UserPreference)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie

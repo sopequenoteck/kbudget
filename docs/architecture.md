@@ -142,12 +142,28 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| enabledFeatures | List\<Feature\> | Features optionnelles activees (stocke en VARCHAR via converter) |
-| navOrder | List\<Feature\> | Ordre des onglets de navigation (stocke en VARCHAR via converter) |
+| enabledFeatures | List\<Feature\> | Features optionnelles activees (VARCHAR via converter) |
+| navOrder | List\<Feature\> | Ordre des onglets de navigation (VARCHAR via converter) |
+| shopAccountId | UUID | Compte associe a la boutique (nullable) |
+| includeShopInBalance | Boolean | Inclure le stock boutique dans le solde total (default false) |
+| currencies | List\<Currency\> | Ordre des devises — [0] = devise principale (VARCHAR via converter) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enum `Feature` : `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. Converter JPA `FeatureListConverter` pour la serialisation CSV en base.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`.
+
+### ExchangeRate
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| baseCurrency | Currency | Devise de base (enum) |
+| targetCurrency | Currency | Devise cible (enum) |
+| rate | BigDecimal | Taux de conversion (precision 20, scale 6, > 0) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
+Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatique des taux lors du changement de devise principale via `rebaseRates()`.
 
 ## Architecture frontend
 
