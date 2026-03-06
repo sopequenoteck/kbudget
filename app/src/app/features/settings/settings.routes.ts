@@ -42,4 +42,9 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/data-settings/data-settings').then((m) => m.DataSettings),
   },
+  {
+    path: 'currencies',
+    loadComponent: () =>
+      import('./currency-settings/currency-settings').then((m) => m.CurrencySettings),
+  },
 ];

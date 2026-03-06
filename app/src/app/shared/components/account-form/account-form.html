@@ -1,3 +1,33 @@
+@if (showRateProposal()) {
+  <div class="rate-proposal-overlay" (click)="showRateProposal.set(false)">
+    <div class="rate-proposal-dialog" (click)="$event.stopPropagation()">
+      <h4 class="rate-proposal-dialog__title">Taux de conversion manquant</h4>
+      <p class="rate-proposal-dialog__description">
+        Aucun taux {{ primaryCurrency() }} → {{ proposedCurrency() }} n'est défini.
+      </p>
+      <div class="rate-proposal-dialog__input">
+        <label class="rate-proposal-dialog__label">1 {{ primaryCurrency() }} =</label>
+        <input
+          type="number"
+          step="0.000001"
+          min="0"
+          class="rate-proposal-dialog__field"
+          [ngModel]="proposedRate()"
+          (ngModelChange)="proposedRate.set($event)"
+          placeholder="Ex: 655.957"
+        />
+        <span class="rate-proposal-dialog__currency">{{ proposedCurrency() }}</span>
+      </div>
+      <div class="rate-proposal-dialog__actions">
+        <button type="button" class="btn-outline" (click)="showRateProposal.set(false)">
+          Plus tard
+        </button>
+        <button type="button" class="btn-primary" (click)="saveProposedRate()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+}
+
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
   <!-- Section 1 : Preview card live -->
   <div class="account-form__preview" [style.border-left-color]="selectedColor()">

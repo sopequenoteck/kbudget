@@ -72,6 +72,7 @@
           [title]="transaction.libelle"
           [subtitle]="transaction.category?.nom ?? ''"
           [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
+          [valueSubtitle]="transaction.account?.currency ? (transaction.montant | convertAmount: transaction.account!.currency) : ''"
           [rightSubtitle]="transaction.date | relativeDate"
           [valueClass]="getValueClass(transaction)"
           (pressed)="onTransactionPressed(transaction)"

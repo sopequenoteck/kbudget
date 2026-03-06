@@ -1,4 +1,4 @@
-import { Injectable, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
@@ -16,6 +16,8 @@ export class PreferenceService {
 
   readonly enabledFeatures = signal<Feature[]>([]);
   readonly navOrder = signal<Feature[]>([]);
+  readonly currencies = signal<string[]>(['EUR']);
+  readonly primaryCurrency = computed(() => this.currencies()[0] ?? 'EUR');
   readonly error = signal<string | null>(null);
 
   async loadPreferences(): Promise<void> {
@@ -25,6 +27,7 @@ export class PreferenceService {
       );
       this.enabledFeatures.set(prefs.enabledFeatures);
       this.navOrder.set(prefs.navOrder);
+      this.currencies.set(prefs.currencies ?? ['EUR']);
       this.error.set(null);
     } catch (e) {
       if (isDevMode()) console.error('Failed to load preferences:', e);
@@ -63,6 +66,21 @@ export class PreferenceService {
 
   isLoaded(): boolean {
     return this.enabledFeatures().length > 0;
+  }
+
+  update(request: Partial<UserPreferenceRequest>): void {
+    const merged: UserPreferenceRequest = {
+      enabledFeatures: this.enabledFeatures(),
+      navOrder: this.navOrder(),
+      currencies: this.currencies(),
+      ...request,
+    };
+    firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged)).catch(
+      (e) => {
+        if (isDevMode()) console.error('Failed to update preferences:', e);
+        this.error.set('Impossible de sauvegarder les préférences');
+      },
+    );
   }
 
   reorderNavigation(newNavOrder: Feature[]): void {

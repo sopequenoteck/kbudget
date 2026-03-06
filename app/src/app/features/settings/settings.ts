@@ -11,6 +11,7 @@ import {
   phosphorPalette,
   phosphorFloppyDisk,
   phosphorInfo,
+  phosphorCurrencyCircleDollar,
 } from '@ng-icons/phosphor-icons/regular';
 
 interface SettingsSection {
@@ -80,6 +81,14 @@ const SECTIONS: SettingsSection[] = [
     status: 'active',
   },
   {
+    id: 'currencies',
+    title: 'Devises & Taux',
+    description: 'Gérer les taux de conversion',
+    icon: 'phosphorCurrencyCircleDollar',
+    route: 'currencies',
+    status: 'active',
+  },
+  {
     id: 'data',
     title: 'Données',
     description: 'Serveur et maintenance',
@@ -111,6 +120,7 @@ const SECTIONS: SettingsSection[] = [
       phosphorPalette,
       phosphorFloppyDisk,
       phosphorInfo,
+      phosphorCurrencyCircleDollar,
     }),
   ],
   templateUrl: './settings.html',

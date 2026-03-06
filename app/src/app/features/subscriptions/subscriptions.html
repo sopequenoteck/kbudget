@@ -59,6 +59,7 @@
           [icon]="subscription.category?.icone ?? '🔄'"
           [title]="subscription.nom"
           [value]="formatAmount(subscription)"
+          [valueSubtitle]="subscription.montant | convertAmount: (subscription.currency || 'EUR')"
           [subtitle]="getNextRenewalDate(subscription)"
           (pressed)="onSubscriptionPressed(subscription)"
         />

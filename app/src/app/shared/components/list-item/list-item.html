@@ -14,6 +14,9 @@
 
   <div class="list-item__right">
     <span class="list-item__value" [ngClass]="valueClass()">{{ value() }}</span>
+    @if (valueSubtitle()) {
+      <span class="list-item__value-subtitle">{{ valueSubtitle() }}</span>
+    }
     @if (rightSubtitle()) {
       <span class="list-item__right-subtitle">{{ rightSubtitle() }}</span>
     }

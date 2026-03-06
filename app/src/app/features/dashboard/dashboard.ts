@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   effect,
   inject,
@@ -15,6 +16,10 @@ import { TransactionService } from '../../core/services/transaction';
 import { SubscriptionService } from '../../core/services/subscription';
 import { DebtService } from '../../core/services/debt';
 import { AccountService } from '../../core/services/account';
+import { ConversionService } from '../../core/services/conversion';
+import { PreferenceService } from '../../core/services/preference';
+import { ExchangeRateService } from '../../core/services/exchange-rate';
+import { CurrencyPillSelector } from './components/currency-pill-selector';
 import {
   type Transaction,
   TransactionType,
@@ -35,7 +40,7 @@ import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe],
+  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,11 +51,44 @@ export class Dashboard {
   private readonly debtService = inject(DebtService);
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
+  private readonly conversionService = inject(ConversionService);
+  private readonly preferenceService = inject(PreferenceService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private persistTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // -- Devise active --
+  readonly activeCurrency = signal('EUR');
+  readonly currencies = computed(() => this.preferenceService.currencies());
 
   // -- Comptes bancaires --
   readonly accountsLoading = signal(true);
   readonly accountsError = signal(false);
   readonly accounts = signal<Account[]>([]);
+
+  readonly convertedTotalBalance = computed(() => {
+    const active = this.accounts().filter((a) => a.actif);
+    const targetCurrency = this.activeCurrency();
+    let total = 0;
+    let hasMissingRate = false;
+
+    for (const a of active) {
+      const cur = a.currency || 'EUR';
+      if (cur === targetCurrency) {
+        total += a.solde;
+      } else {
+        const converted = this.conversionService.convert(a.solde, cur, targetCurrency);
+        if (converted !== null) {
+          total += converted;
+        } else {
+          hasMissingRate = true;
+        }
+      }
+    }
+
+    return { total, hasMissingRate };
+  });
 
   readonly accountTotalsByCurrency = computed<CurrencyTotal[]>(() => {
     const active = this.accounts().filter((a) => a.actif);
@@ -151,6 +189,17 @@ export class Dashboard {
   private debtsSub: RxSub | null = null;
 
   constructor() {
+    // Charger les taux de change et synchroniser la devise active au démarrage
+    effect(() => {
+      this.preferenceService.currencies();
+      this.exchangeRateService.loadRates();
+    });
+
+    effect(() => {
+      const primary = this.preferenceService.primaryCurrency();
+      this.activeCurrency.set(primary);
+    });
+
     effect(() => {
       this.accountService.refreshTrigger();
       this.transactionService.refreshTrigger();
@@ -177,6 +226,14 @@ export class Dashboard {
     effect(() => {
       this.debtService.refreshTrigger();
       this.loadDebts();
+    });
+
+    this.destroyRef.onDestroy(() => {
+      if (this.persistTimeout) {
+        clearTimeout(this.persistTimeout);
+        const currencies = this.preferenceService.currencies();
+        this.preferenceService.update({ currencies });
+      }
     });
   }
 
@@ -298,6 +355,23 @@ export class Dashboard {
         this.debtsLoading.set(false);
       },
     });
+  }
+
+  onCurrencyChange(currency: string): void {
+    this.activeCurrency.set(currency);
+
+    // Reorder currencies : la devise sélectionnée en premier
+    const current = this.currencies();
+    const reordered = [currency, ...current.filter((c) => c !== currency)];
+    this.preferenceService.currencies.set(reordered);
+
+    // Debounce persistance 2s
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
+    this.persistTimeout = setTimeout(() => {
+      this.persistTimeout = null;
+      this.preferenceService.update({ currencies: reordered });
+      this.exchangeRateService.loadRates();
+    }, 2000);
   }
 
   getTransactionIcon(t: Transaction): string {

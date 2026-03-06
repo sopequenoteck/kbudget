@@ -41,6 +41,7 @@ export interface UserPreference {
   navOrder: Feature[];
   shopAccountId: string | null;
   includeShopInBalance: boolean;
+  currencies?: string[];
 }
 
 export interface UserPreferenceRequest {
@@ -48,4 +49,5 @@ export interface UserPreferenceRequest {
   navOrder?: Feature[] | null;
   shopAccountId?: string | null;
   includeShopInBalance?: boolean | null;
+  currencies?: string[] | null;
 }

@@ -8,13 +8,21 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
 import { SelectPicker } from '../select-picker/select-picker';
 import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
 import { CurrencyService } from '../../../core/services/currency';
+import { ExchangeRateService } from '../../../core/services/exchange-rate';
+import { PreferenceService } from '../../../core/services/preference';
+
+const FIXED_RATES: Record<string, number> = {
+  EUR_XOF: 655.957,
+  XOF_EUR: 1 / 655.957,
+};
 
 const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   [AccountType.COURANT]: 'Courant',
@@ -51,7 +59,7 @@ const ACCOUNT_COLORS: string[] = [
 
 @Component({
   selector: 'app-account-form',
-  imports: [ReactiveFormsModule, FormField, EmojiInput, SelectPicker],
+  imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +67,8 @@ const ACCOUNT_COLORS: string[] = [
 export class AccountForm {
   private readonly fb = inject(FormBuilder);
   private readonly currencyService = inject(CurrencyService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly preferenceService = inject(PreferenceService);
 
   readonly account = input<Account | null>(null);
   readonly saved = output<AccountRequest>();
@@ -82,6 +92,12 @@ export class AccountForm {
   });
 
   readonly selectedType = signal<AccountType>(AccountType.COURANT);
+
+  readonly showRateProposal = signal(false);
+  readonly proposedCurrency = signal<string | null>(null);
+  readonly proposedRate = signal<string>('');
+
+  readonly primaryCurrency = this.preferenceService.primaryCurrency;
 
   readonly form = this.fb.nonNullable.group({
     nom: ['', [Validators.required, Validators.maxLength(50)]],
@@ -169,7 +185,43 @@ export class AccountForm {
       if (!isNaN(newBalance) && newBalance !== acc.solde) {
         this.balanceAdjusted.emit(newBalance);
       }
+    } else {
+      this.checkRateProposal(request.currency);
     }
+  }
+
+  private checkRateProposal(accountCurrency: string | undefined): void {
+    if (!accountCurrency) return;
+
+    const primary = this.preferenceService.primaryCurrency();
+    if (accountCurrency === primary) return;
+
+    const rates = this.exchangeRateService.rates();
+    const hasRate = rates.some(
+      (r) =>
+        (r.baseCurrency === primary && r.targetCurrency === accountCurrency) ||
+        (r.baseCurrency === accountCurrency && r.targetCurrency === primary),
+    );
+
+    if (!hasRate) {
+      const key = `${primary}_${accountCurrency}`;
+      const fixedRate = FIXED_RATES[key];
+      this.proposedRate.set(fixedRate ? String(fixedRate) : '');
+      this.proposedCurrency.set(accountCurrency);
+      this.showRateProposal.set(true);
+    }
+  }
+
+  async saveProposedRate(): Promise<void> {
+    const rate = parseFloat(this.proposedRate());
+    if (isNaN(rate) || rate <= 0) return;
+
+    const primary = this.preferenceService.primaryCurrency();
+    const target = this.proposedCurrency();
+    if (!target) return;
+
+    await firstValueFrom(this.exchangeRateService.upsert(primary, target, rate));
+    this.showRateProposal.set(false);
   }
 
   onCancel(): void {

@@ -16,17 +16,35 @@
     </div>
   } @else {
     <div class="accounts-zone__totals">
-      @for (ct of accountTotalsByCurrency(); track ct.currency) {
+      <app-currency-pill-selector
+        [currencies]="currencies()"
+        [activeCurrency]="activeCurrency()"
+        (currencyChange)="onCurrencyChange($event)"
+      />
+      @if (convertedTotalBalance().hasMissingRate) {
+        <!-- Fallback : taux manquants, affichage par devise -->
+        @for (ct of accountTotalsByCurrency(); track ct.currency) {
+          <div class="accounts-zone__total">
+            @if (accountTotalsByCurrency().length > 1) {
+              <span class="accounts-zone__total-currency">{{ ct.currency }}</span>
+            }
+            <span class="accounts-zone__total-label">Solde total</span>
+            <span
+              class="accounts-zone__total-value"
+              [ngClass]="ct.total >= 0 ? 'amount-income' : 'amount-expense'"
+            >
+              {{ ct.total | amount: null : ct.currency }}
+            </span>
+          </div>
+        }
+      } @else {
         <div class="accounts-zone__total">
-          @if (accountTotalsByCurrency().length > 1) {
-            <span class="accounts-zone__total-currency">{{ ct.currency }}</span>
-          }
           <span class="accounts-zone__total-label">Solde total</span>
           <span
             class="accounts-zone__total-value"
-            [ngClass]="ct.total >= 0 ? 'amount-income' : 'amount-expense'"
+            [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
           >
-            {{ ct.total | amount: null : ct.currency }}
+            {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
           </span>
         </div>
       }
