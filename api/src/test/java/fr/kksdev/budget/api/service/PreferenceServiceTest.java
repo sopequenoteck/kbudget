@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,17 +39,25 @@ class PreferenceServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private ExchangeRateService exchangeRateService;
+
     @InjectMocks
     private PreferenceService preferenceService;
 
     private final UUID userId = UUID.randomUUID();
 
     private UserPreference buildPreference(List<Feature> enabled, List<Feature> navOrder) {
+        return buildPreference(enabled, navOrder, List.of(Currency.EUR));
+    }
+
+    private UserPreference buildPreference(List<Feature> enabled, List<Feature> navOrder, List<Currency> currencies) {
         return UserPreference.builder()
                 .id(UUID.randomUUID())
                 .user(User.builder().id(userId).build())
                 .enabledFeatures(new ArrayList<>(enabled))
                 .navOrder(new ArrayList<>(navOrder))
+                .currencies(new ArrayList<>(currencies))
                 .build();
     }
 
@@ -91,7 +101,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.SHOP), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.SHOP), null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.SHOP);
@@ -107,7 +117,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS);
@@ -122,7 +132,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(), null, null, null);
+        var request = new UserPreferenceRequest(List.of(), null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).isEmpty();
@@ -138,7 +148,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SHOP, Feature.SUBSCRIPTIONS), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SHOP, Feature.SUBSCRIPTIONS), null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.SHOP, Feature.SUBSCRIPTIONS);
@@ -158,7 +168,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                null, null
+                null, null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
@@ -176,7 +186,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.SUBSCRIPTIONS),
-                null, null
+                null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -195,7 +205,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
                 List.of(Feature.SUBSCRIPTIONS),
-                null, null
+                null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -214,7 +224,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
-                null, null
+                null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -234,10 +244,90 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS),
-                null, null
+                null, null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.DEBTS, Feature.SHOP, Feature.SUBSCRIPTIONS);
+    }
+
+    // === US4: updatePreferences — currencies & rebaseRates ===
+
+    @Test
+    void should_callRebaseRates_when_primaryCurrencyChanges() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR, Currency.XOF)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.XOF, Currency.EUR));
+        preferenceService.updatePreferences(request, userId);
+
+        verify(exchangeRateService).rebaseRates(userId, Currency.XOF);
+    }
+
+    @Test
+    void should_notCallRebaseRates_when_primaryCurrencyUnchanged() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR, Currency.XOF)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.EUR, Currency.XOF, Currency.USD));
+        preferenceService.updatePreferences(request, userId);
+
+        verify(exchangeRateService, never()).rebaseRates(any(), any());
+    }
+
+    @Test
+    void should_throw_when_currenciesEmpty() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of());
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Au moins une devise requise");
+    }
+
+    @Test
+    void should_throw_when_currenciesContainsDuplicates() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.EUR, Currency.XOF, Currency.EUR));
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("La liste de devises ne doit pas contenir de doublons");
+    }
+
+    @Test
+    void should_updateCurrencies_when_validList() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.EUR, Currency.XOF, Currency.USD));
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.currencies()).containsExactly(Currency.EUR, Currency.XOF, Currency.USD);
     }
 }
