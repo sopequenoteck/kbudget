@@ -8,14 +8,18 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:k_budget/src/utils/next_renewal_date.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -55,6 +59,8 @@ class _SubscriptionListScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(subscriptionNotifierProvider);
     final catState = ref.watch(categoryNotifierProvider);
+    final exchangeRateState = ref.watch(exchangeRateListProvider);
+    final dashboardState = ref.watch(dashboardNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -62,6 +68,11 @@ class _SubscriptionListScreenState
     final categoryMap = <String, Category>{
       for (final c in catState.items) c.id: c,
     };
+
+    // Devise principale : première devise de la config utilisateur
+    final primaryCurrency = dashboardState.currencies.isNotEmpty
+        ? dashboardState.currencies.first
+        : null;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -77,7 +88,14 @@ class _SubscriptionListScreenState
       },
       child: CustomScrollView(
         slivers: [
-          ..._buildContent(state, categoryMap, colorScheme, l10n),
+          ..._buildContent(
+            state,
+            categoryMap,
+            colorScheme,
+            l10n,
+            exchangeRates: exchangeRateState.items,
+            primaryCurrency: primaryCurrency,
+          ),
         ],
       ),
     );
@@ -87,8 +105,10 @@ class _SubscriptionListScreenState
     SubscriptionListState state,
     Map<String, Category> categoryMap,
     ColorScheme colorScheme,
-    AppLocalizations l10n,
-  ) {
+    AppLocalizations l10n, {
+    List<ExchangeRate> exchangeRates = const [],
+    Currency? primaryCurrency,
+  }) {
     // Loading
     if (state.isLoading) {
       return [
@@ -281,6 +301,23 @@ class _SubscriptionListScreenState
             final renewalLabel =
                 l10n.subscriptionNextRenewal(dateFormat.format(renewal));
 
+            // Sous-texte montant converti si devise étrangère
+            String? convertedSubtitle;
+            if (primaryCurrency != null &&
+                sub.currency != primaryCurrency &&
+                exchangeRates.isNotEmpty) {
+              final converted = CurrencyConverter.convert(
+                amount: sub.montant,
+                fromCurrency: sub.currency,
+                toCurrency: primaryCurrency,
+                rates: exchangeRates,
+              );
+              if (converted != null) {
+                convertedSubtitle =
+                    '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+              }
+            }
+
             return ListItem(
               icon: cat?.icone ?? '📅',
               iconBackgroundColor: cat != null
@@ -289,8 +326,8 @@ class _SubscriptionListScreenState
               title: sub.nom,
               subtitle: renewalLabel,
               value: '$formattedAmount$frequencySuffix',
-              rightSubtitle:
-                  sub.actif ? null : l10n.subscriptionBadgeInactif,
+              rightSubtitle: convertedSubtitle ??
+                  (sub.actif ? null : l10n.subscriptionBadgeInactif),
               onPressed: () {
                 ref.read(modalNotifierProvider.notifier).open(
                       ModalType.subscription,

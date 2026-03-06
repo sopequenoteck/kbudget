@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
+import 'package:k_budget/src/common_widgets/app_modal.dart';
 import 'package:k_budget/src/common_widgets/emoji_input.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -13,6 +14,9 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_preview_card.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_type_selector.dart';
 import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
+import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
@@ -134,6 +138,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           actif: true,
         );
         await notifier.create(account);
+
+        if (mounted) {
+          await _proposeRateDialog(_selectedCurrency);
+        }
       }
 
       if (mounted) context.pop();
@@ -148,6 +156,54 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _proposeRateDialog(Currency accountCurrency) async {
+    final currencies = ref.read(currencyConfigNotifierProvider);
+    final primaryCurrency = currencies.isNotEmpty ? currencies.first : Currency.eur;
+
+    if (accountCurrency == primaryCurrency) return;
+
+    final rateState = ref.read(exchangeRateListProvider);
+    final hasRate = rateState.items.any(
+      (r) =>
+          (r.baseCurrency == primaryCurrency && r.targetCurrency == accountCurrency) ||
+          (r.baseCurrency == accountCurrency && r.targetCurrency == primaryCurrency),
+    );
+
+    if (hasRate) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Taux de conversion manquant'),
+        content: Text(
+          'Aucun taux ${primaryCurrency.symbol} → ${accountCurrency.symbol} n\'est défini.\nVoulez-vous le saisir maintenant ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Plus tard'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Saisir le taux'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await AppModal.show(
+        context,
+        title: 'Ajouter un taux',
+        onClose: () {},
+        child: RateForm(
+          baseCurrency: primaryCurrency,
+          onSaved: () => Navigator.of(context).pop(),
+        ),
+      );
     }
   }
 

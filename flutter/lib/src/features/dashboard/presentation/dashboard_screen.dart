@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/currency_pill_selector.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/hero_account_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/mini_cards_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/monthly_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -17,6 +24,8 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  Timer? _debounceTimer;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +33,61 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(dashboardNotifierProvider.notifier).loadDashboard();
     });
+  }
+
+  @override
+  void dispose() {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer!.cancel();
+      // Persister immédiatement si changement en attente
+      final currentState = ref.read(dashboardNotifierProvider);
+      _persistCurrencyChange(currentState.currencies);
+    }
+    super.dispose();
+  }
+
+  void _onCurrencyPillTapped(Currency currency) {
+    final notifier = ref.read(dashboardNotifierProvider.notifier);
+    final currentState = ref.read(dashboardNotifierProvider);
+
+    // Reorder currencies : la devise tapée devient la première
+    final reordered = [
+      currency,
+      ...currentState.currencies.where((c) => c != currency),
+    ];
+
+    // Mise à jour instantanée
+    notifier.setActiveCurrencyAndCurrencies(currency, reordered);
+
+    // Debounce la persistance
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 2000), () {
+      _persistCurrencyChange(reordered);
+    });
+  }
+
+  Future<void> _persistCurrencyChange(List<Currency> currencies) async {
+    try {
+      final dataSource =
+          await ref.read(preferenceRemoteDataSourceProvider.future);
+      final prefs = await dataSource.getPreferences();
+      await dataSource.updatePreferences(
+        UserPreferenceRequest(
+          enabledFeatures: prefs.enabledFeatures,
+          navOrder: prefs.navOrder,
+          currencies:
+              currencies.map((c) => c.name.toUpperCase()).toList(),
+        ),
+      );
+      // Re-fetch les taux inversés par le backend
+      await ref.read(exchangeRateListProvider.notifier).loadItems();
+      final newRates = ref.read(exchangeRateListProvider);
+      ref
+          .read(dashboardNotifierProvider.notifier)
+          .updateExchangeRates(newRates.items);
+    } catch (_) {
+      // Silent failure
+    }
   }
 
   Future<void> _onRefresh() async {
@@ -60,10 +124,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 color: colorScheme.onSurface,
               ),
             ),
+            // Pill selector multi-devises
+            if (state.currencies.length > 1) ...[
+              const SizedBox(height: AppSpacing.space3),
+              CurrencyPillSelector(
+                currencies: state.currencies,
+                activeCurrency: state.activeCurrency,
+                onCurrencyChanged: (c) {
+                  _onCurrencyPillTapped(c);
+                },
+              ),
+            ],
             const SizedBox(height: AppSpacing.space4),
 
             // US1 — Hero compte + liste comptes
-            const HeroAccountSection(),
+            HeroAccountSection(
+              activeCurrency: state.activeCurrency,
+              exchangeRates: state.exchangeRates,
+            ),
             const SizedBox(height: AppSpacing.space5),
 
             // US2 — Resume mensuel
@@ -71,7 +149,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             const SizedBox(height: AppSpacing.space5),
 
             // US4 — Mini-cards (avant les transactions pour le layout)
-            const MiniCardsSection(),
+            MiniCardsSection(
+              activeCurrency: state.activeCurrency,
+              exchangeRates: state.exchangeRates,
+            ),
             const SizedBox(height: AppSpacing.space5),
 
             // US3 — Dernieres operations

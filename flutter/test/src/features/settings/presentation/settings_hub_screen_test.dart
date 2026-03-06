@@ -94,6 +94,9 @@ void main() {
 
       expect(find.text('Général'), findsOneWidget);
       expect(find.text('Gestion'), findsOneWidget);
+
+      await tester.scrollUntilVisible(find.text('Autre'), 100);
+      await tester.pumpAndSettle();
       expect(find.text('Autre'), findsOneWidget);
     });
 

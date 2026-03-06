@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
@@ -21,6 +22,7 @@ void main() {
 
   late MockTransactionRepository mockRepo;
   late MockCategoryRepository mockCatRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
 
   final tx1 = Transaction(
     id: '1',
@@ -64,6 +66,8 @@ void main() {
   setUp(() {
     mockRepo = MockTransactionRepository();
     mockCatRepo = MockCategoryRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
+    when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
   });
 
   Widget buildApp() {
@@ -71,6 +75,7 @@ void main() {
       overrides: [
         transactionRepositoryProvider.overrideWithValue(mockRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
+        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,

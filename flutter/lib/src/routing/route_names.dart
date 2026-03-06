@@ -21,6 +21,7 @@ class RouteNames {
   static const String settingsAccounts = 'accounts';
   static const String settingsCategories = 'categories';
   static const String settingsData = 'data';
+  static const String settingsCurrencies = 'currencies';
 
   // Names
   static const String onboardingName = 'onboarding';
@@ -39,6 +40,7 @@ class RouteNames {
   static const String settingsAccountsName = 'settings-accounts';
   static const String settingsCategoriesName = 'settings-categories';
   static const String settingsDataName = 'settings-data';
+  static const String settingsCurrenciesName = 'settings-currencies';
   static const String shopName = 'shop';
   static const String settingsAccountsNewName = 'settings-accounts-new';
   static const String settingsAccountsEditName = 'settings-accounts-edit';

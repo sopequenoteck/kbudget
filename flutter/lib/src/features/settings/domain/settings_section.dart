@@ -74,6 +74,14 @@ const settingsSections = <SettingsSection>[
     route: '/settings/categories',
   ),
   SettingsSection(
+    icon: PhosphorIconsRegular.currencyCircleDollar,
+    iconColor: Colors.amber,
+    title: 'Devises & Taux',
+    description: 'Devises et taux de conversion',
+    group: SettingsGroup.management,
+    route: '/settings/currencies',
+  ),
+  SettingsSection(
     icon: PhosphorIconsRegular.database,
     iconColor: Colors.indigo,
     title: 'Données',

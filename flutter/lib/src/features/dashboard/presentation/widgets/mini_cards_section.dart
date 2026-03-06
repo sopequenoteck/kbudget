@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
@@ -12,7 +14,14 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class MiniCardsSection extends ConsumerWidget {
-  const MiniCardsSection({super.key});
+  final Currency activeCurrency;
+  final List<ExchangeRate> exchangeRates;
+
+  const MiniCardsSection({
+    super.key,
+    required this.activeCurrency,
+    required this.exchangeRates,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +37,10 @@ class MiniCardsSection extends ConsumerWidget {
           child: _MiniCard(
             icon: PhosphorIconsFill.arrowsClockwise,
             title: 'Abonnements',
-            value: AmountFormatter.format(state.subscriptionMonthlyTotal),
+            value: AmountFormatter.format(
+              state.subscriptionMonthlyTotal,
+              currency: activeCurrency,
+            ),
             subtitle: '${state.activeSubscriptionCount} actifs',
             accentColor: colors.subscriptionColor,
             onTap: () => context.go(RouteNames.subscriptions),
@@ -38,7 +50,10 @@ class MiniCardsSection extends ConsumerWidget {
           child: _MiniCard(
             icon: PhosphorIconsFill.handshake,
             title: 'Dettes',
-            value: AmountFormatter.format(state.debtNetBalance.abs()),
+            value: AmountFormatter.format(
+              state.debtNetBalance.abs(),
+              currency: activeCurrency,
+            ),
             subtitle: state.debtNetBalance > 0
                 ? 'On vous doit'
                 : state.debtNetBalance < 0

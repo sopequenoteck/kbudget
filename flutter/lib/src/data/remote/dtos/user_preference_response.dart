@@ -11,6 +11,7 @@ class UserPreferenceResponse with _$UserPreferenceResponse {
     required List<Feature> navOrder,
     String? shopAccountId,
     required bool includeShopInBalance,
+    @Default(['EUR']) List<String> currencies,
   }) = _UserPreferenceResponse;
 
   factory UserPreferenceResponse.fromJson(Map<String, dynamic> json) =>

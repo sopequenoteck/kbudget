@@ -1,13 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
@@ -56,6 +59,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
         ref.read(subscriptionNotifierProvider.notifier).loadItems(),
         ref.read(debtNotifierProvider.notifier).loadItems(),
         ref.read(categoryNotifierProvider.notifier).loadItems(),
+        ref.read(exchangeRateListProvider.notifier).loadItems(),
       ]);
 
       // Lire les donnees chargees
@@ -63,6 +67,22 @@ class DashboardNotifier extends Notifier<DashboardState> {
       final transactionState = ref.read(transactionNotifierProvider);
       final subscriptionState = ref.read(subscriptionNotifierProvider);
       final debtState = ref.read(debtNotifierProvider);
+      final exchangeRateState = ref.read(exchangeRateListProvider);
+
+      // Charger les devises depuis les preferences (mode server uniquement)
+      List<Currency> currencies = [Currency.eur];
+      if (mode == DataMode.server) {
+        try {
+          final prefDataSource =
+              await ref.read(preferenceRemoteDataSourceProvider.future);
+          final prefs = await prefDataSource.getPreferences();
+          currencies = prefs.currencies
+              .map((s) => Currency.values.byName(s.toLowerCase()))
+              .toList();
+        } catch (_) {
+          // Fallback si erreur serveur
+        }
+      }
 
       // Comptes actifs
       final activeAccounts =
@@ -123,6 +143,10 @@ class DashboardNotifier extends Notifier<DashboardState> {
         activeDebtCount: activDebts.length,
         recentTransactions: recentTransactions,
         userName: userName,
+        exchangeRates: exchangeRateState.items,
+        currencies: currencies,
+        activeCurrency:
+            currencies.isNotEmpty ? currencies.first : Currency.eur,
         isLoading: false,
         error: null,
       );
@@ -144,6 +168,22 @@ class DashboardNotifier extends Notifier<DashboardState> {
     ref.invalidate(currentUserNameProvider);
 
     await loadDashboard();
+  }
+
+  void setActiveCurrency(Currency currency) {
+    state = state.copyWith(activeCurrency: currency);
+  }
+
+  void setActiveCurrencyAndCurrencies(
+      Currency currency, List<Currency> currencies) {
+    state = state.copyWith(
+      activeCurrency: currency,
+      currencies: currencies,
+    );
+  }
+
+  void updateExchangeRates(List<ExchangeRate> rates) {
+    state = state.copyWith(exchangeRates: rates);
   }
 
   Future<void> changeMonth(int month, int year) async {

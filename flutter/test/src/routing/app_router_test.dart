@@ -6,6 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -28,6 +29,7 @@ void main() {
   late MockSubscriptionRepository mockSubscriptionRepo;
   late MockDebtRepository mockDebtRepo;
   late MockCategoryRepository mockCategoryRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -42,6 +44,7 @@ void main() {
     mockSubscriptionRepo = MockSubscriptionRepository();
     mockDebtRepo = MockDebtRepository();
     mockCategoryRepo = MockCategoryRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
 
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
@@ -52,6 +55,7 @@ void main() {
     when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
     when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
     when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
+    when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
     when(mockRepo.getEnabledFeatures()).thenAnswer(
         (_) async => [Feature.subscriptions, Feature.debts]);
     when(mockRepo.getNavOrder())
@@ -68,6 +72,7 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
         currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],

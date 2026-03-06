@@ -23,6 +23,7 @@ import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
@@ -282,6 +283,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.settingsDataName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const DataSettingsScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.settingsCurrencies,
+            name: RouteNames.settingsCurrenciesName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const CurrencySettingsScreen(),
           ),
         ],
       ),

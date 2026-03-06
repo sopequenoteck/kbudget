@@ -1,5 +1,6 @@
 export 'account.dart';
 export 'app_config.dart';
+export 'exchange_rate.dart';
 export 'category.dart';
 export 'debt.dart';
 export 'list_state.dart';

@@ -8,6 +8,7 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
@@ -22,6 +23,8 @@ void main() {
 
   late MockDebtRepository mockDebtRepo;
   late MockCategoryRepository mockCatRepo;
+  late MockAccountRepository mockAccountRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
 
   final debtPret = Debt(
     id: '1',
@@ -64,6 +67,10 @@ void main() {
   setUp(() {
     mockDebtRepo = MockDebtRepository();
     mockCatRepo = MockCategoryRepository();
+    mockAccountRepo = MockAccountRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
+    when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
+    when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
   });
 
   Widget buildApp() {
@@ -71,6 +78,8 @@ void main() {
       overrides: [
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
+        accountRepositoryProvider.overrideWithValue(mockAccountRepo),
+        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,
