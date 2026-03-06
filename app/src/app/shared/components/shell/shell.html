@@ -29,14 +29,14 @@
           role="menuitem"
           (click)="closeDropdown()"
         >
-          <span>&#9881;&#65039;</span> Paramètres
+          <ng-icon name="phosphorGear" size="20" /> Paramètres
         </a>
         <button
           class="shell-dropdown-item shell-dropdown-logout"
           role="menuitem"
           (click)="onLogout()"
         >
-          <span>&#128682;</span> Déconnexion
+          <ng-icon name="phosphorSignOut" size="20" /> Déconnexion
         </button>
       </div>
     }
@@ -59,7 +59,7 @@
       routerLinkActive="active"
       [routerLinkActiveOptions]="item.route === '/dashboard' ? { exact: true } : { exact: false }"
       (click)="onNavClick()"
-      >{{ item.icon }} {{ item.label }}</a
+      ><ng-icon [name]="item.icon" size="20" /> {{ item.label }}</a
     >
   }
 </nav>

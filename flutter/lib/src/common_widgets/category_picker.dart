@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -88,8 +89,8 @@ class CategoryPicker extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.add,
+                    PhosphorIcon(
+                      PhosphorIconsBold.plus,
                       size: 20,
                       color: colorScheme.primary,
                     ),

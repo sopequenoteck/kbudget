@@ -16,6 +16,7 @@ import 'package:k_budget/src/features/transactions/application/transaction_list_
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_day_group.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_summary_card.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   const TransactionListScreen({super.key});
@@ -170,8 +171,8 @@ class _TransactionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -187,7 +188,7 @@ class _TransactionListScreenState
                   const SizedBox(height: AppSpacing.space4),
                   FilledButton.icon(
                     onPressed: () => ref.read(transactionListNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.transactionsRetry),
                   ),
                 ],
@@ -215,8 +216,8 @@ class _TransactionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.receipt_long_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.receipt,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),

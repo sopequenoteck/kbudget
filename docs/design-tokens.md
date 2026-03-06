@@ -364,3 +364,67 @@ Tokens renommes ou modifies par rapport aux versions precedentes.
 | `duration-fast` | `$duration-fast` / `--duration-fast` | `AppDurations.fast` |
 | `color-income` | `--color-income` (theme) | `AppThemeExtension.incomeColor` |
 | `color-subscription` | `--color-subscription` (theme) | `AppThemeExtension.subscriptionColor` |
+
+---
+
+## 8. Icons
+
+### Package
+
+| Platform | Package | Version |
+|----------|---------|---------|
+| Angular | `@ng-icons/core` + `@ng-icons/phosphor-icons` | v33.1.0 |
+| Flutter | `phosphor_flutter` | v2.1.0 |
+
+### Styles
+
+| Style | Usage | Flutter | Angular import |
+|-------|-------|---------|----------------|
+| Regular | Navigation inactive, inline, decoratif | `PhosphorIconsRegular.*` | `@ng-icons/phosphor-icons/regular` |
+| Fill | Navigation active, etats selectionnes | `PhosphorIconsFill.*` | `@ng-icons/phosphor-icons/fill` |
+| Bold | Actions (FAB, boutons, close, delete) | `PhosphorIconsBold.*` | `@ng-icons/phosphor-icons/bold` |
+
+### Tailles
+
+| Contexte | Taille | Exemples |
+|----------|--------|----------|
+| Navigation (bottom nav, sidebar) | 24px | Home, Transactions, Settings |
+| Actions (FAB, boutons primaires) | 24px | Add, Delete, Refresh, Close |
+| Inline (listes, formulaires, prefix) | 20px | Email, Lock, Calendar, Chevron |
+| Decoratif (badges, indicators) | 16px | Check mark on color picker |
+
+### Usage Angular
+
+```typescript
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorHouse } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHouseFill } from '@ng-icons/phosphor-icons/fill';
+import { phosphorPlusBold } from '@ng-icons/phosphor-icons/bold';
+
+@Component({
+  imports: [NgIcon],
+  providers: [provideIcons({ phosphorHouse, phosphorHouseFill, phosphorPlusBold })],
+  template: `<ng-icon name="phosphorHouse" size="24"></ng-icon>`,
+})
+```
+
+### Usage Flutter
+
+```dart
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+// Regular (inline, navigation inactive)
+PhosphorIcon(PhosphorIconsRegular.house, size: 24.0)
+
+// Fill (navigation active)
+PhosphorIcon(PhosphorIconsFill.house, size: 24.0)
+
+// Bold (actions)
+PhosphorIcon(PhosphorIconsBold.plus, size: 24.0)
+```
+
+### Dark mode
+
+Les icones Phosphor heritent de `currentColor` par defaut :
+- **Angular** : `<ng-icon>` utilise `color: inherit` — les tokens CSS s'appliquent automatiquement
+- **Flutter** : `PhosphorIcon` (extends `Icon`) utilise `IconThemeData.color` du theme

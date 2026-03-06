@@ -14,6 +14,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SubscriptionForm extends ConsumerStatefulWidget {
   const SubscriptionForm({
@@ -277,8 +278,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
+                PhosphorIcon(
+                  PhosphorIconsRegular.calendarBlank,
                   size: 18,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -345,7 +346,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
             if (_isEditMode && widget.onDeleted != null)
               IconButton(
                 onPressed: _isSubmitting ? null : _onDelete,
-                icon: const Icon(Icons.delete_outline),
+                icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
                 tooltip: l10n.subscriptionFormDeleteButton,
               ),
@@ -385,8 +386,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.space3),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
+          PhosphorIcon(
+            PhosphorIconsRegular.info,
             size: 18,
             color: colorScheme.onSurfaceVariant,
           ),

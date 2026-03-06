@@ -12,6 +12,23 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorGear,
+  phosphorSignOut,
+  phosphorHouse,
+  phosphorCurrencyDollar,
+  phosphorArrowsClockwise,
+  phosphorHandshake,
+  phosphorStorefront,
+} from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorArrowsClockwiseFill,
+  phosphorHandshakeFill,
+  phosphorStorefrontFill,
+  phosphorHouseFill,
+  phosphorCurrencyDollarFill,
+} from '@ng-icons/phosphor-icons/fill';
 
 import { AuthService } from '../../../core/services/auth';
 import { PreferenceService } from '../../../core/services/preference';
@@ -58,6 +75,7 @@ import { Modal } from '../modal/modal';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    NgIcon,
     BottomNav,
     Fab,
     Modal,
@@ -69,6 +87,22 @@ import { Modal } from '../modal/modal';
     TransferForm,
     ProductForm,
     SellDialog,
+  ],
+  providers: [
+    provideIcons({
+      phosphorGear,
+      phosphorSignOut,
+      phosphorHouse,
+      phosphorHouseFill,
+      phosphorCurrencyDollar,
+      phosphorCurrencyDollarFill,
+      phosphorArrowsClockwise,
+      phosphorArrowsClockwiseFill,
+      phosphorHandshake,
+      phosphorHandshakeFill,
+      phosphorStorefront,
+      phosphorStorefrontFill,
+    }),
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -112,8 +146,8 @@ export class Shell {
   readonly DebtType = DebtType;
   readonly navItems = computed(() => {
     const fixed = [
-      { label: 'Accueil', route: '/dashboard', icon: '🏠' },
-      { label: 'Transactions', route: '/transactions', icon: '💰' },
+      { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
+      { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
     ];
     const navOrder = this.preferenceService.navOrder();
     const enabled = this.preferenceService.enabledFeatures();
@@ -121,7 +155,7 @@ export class Shell {
       .filter((f: Feature) => enabled.includes(f))
       .map((f: Feature) => {
         const meta = FEATURES.find((m) => m.value === f)!;
-        return { label: meta.label, route: meta.route, icon: meta.icon };
+        return { label: meta.label, route: meta.route, icon: meta.icon, filledIcon: meta.filledIcon };
       });
     return [...fixed, ...optional];
   });

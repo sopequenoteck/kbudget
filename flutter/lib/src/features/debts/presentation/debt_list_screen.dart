@@ -17,6 +17,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DebtListScreen extends ConsumerStatefulWidget {
@@ -115,8 +116,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -133,7 +134,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   FilledButton.icon(
                     onPressed: () =>
                         ref.read(debtNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.transactionsRetry),
                   ),
                 ],
@@ -173,8 +174,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.wallet,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),

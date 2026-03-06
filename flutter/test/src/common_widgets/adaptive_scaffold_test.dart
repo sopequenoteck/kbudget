@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
   group('AdaptiveScaffold', () {
@@ -20,31 +21,31 @@ void main() {
                 currentIndex: currentIndex,
                 destinations: const [
                   NavDestination(
-                    icon: Icons.home_outlined,
-                    selectedIcon: Icons.home,
+                    icon: PhosphorIconsRegular.house,
+                    selectedIcon: PhosphorIconsFill.house,
                     label: 'Accueil',
                   ),
                   NavDestination(
-                    icon: Icons.receipt_long_outlined,
-                    selectedIcon: Icons.receipt_long,
+                    icon: PhosphorIconsRegular.receipt,
+                    selectedIcon: PhosphorIconsFill.receipt,
                     label: 'Transactions',
                   ),
                   NavDestination(
-                    icon: Icons.autorenew_outlined,
-                    selectedIcon: Icons.autorenew,
+                    icon: PhosphorIconsRegular.arrowsClockwise,
+                    selectedIcon: PhosphorIconsFill.arrowsClockwise,
                     label: 'Abonnements',
                   ),
                   NavDestination(
-                    icon: Icons.handshake_outlined,
-                    selectedIcon: Icons.handshake,
+                    icon: PhosphorIconsRegular.handshake,
+                    selectedIcon: PhosphorIconsFill.handshake,
                     label: 'Dettes',
                   ),
                 ],
                 onDestinationSelected: (_) {},
                 body: const Text('Body'),
-                floatingActionButton: const FloatingActionButton(
+                floatingActionButton: FloatingActionButton(
                   onPressed: null,
-                  child: Icon(Icons.add),
+                  child: PhosphorIcon(PhosphorIconsBold.plus),
                 ),
               ),
             ),

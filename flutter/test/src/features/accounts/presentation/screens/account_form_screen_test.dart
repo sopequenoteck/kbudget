@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -63,7 +64,7 @@ void main() {
     );
   }
 
-  Finder findAppBarAction(IconData icon) {
+  Finder findAppBarAction(PhosphorIconData icon) {
     return find.descendant(
       of: find.byType(AppBar),
       matching: find.byIcon(icon),
@@ -105,7 +106,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save button in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       expect(find.text('Champ requis'), findsWidgets);
@@ -123,7 +124,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       verify(mockRepo.create(any)).called(1);
@@ -138,7 +139,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       verify(mockRepo.update(any)).called(1);
@@ -149,12 +150,12 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.byIcon(Icons.delete_outline),
+        find.byIcon(PhosphorIconsRegular.trash),
         200,
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsOneWidget);
     });
 
     testWidgets('should_showActiveSwitch_when_editMode', (tester) async {

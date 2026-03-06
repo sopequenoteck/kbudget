@@ -14,7 +14,7 @@
   <div class="features-list">
     @for (feature of features; track feature.value) {
       <div class="feature-item">
-        <span class="feature-item__icon">{{ feature.icon }}</span>
+        <span class="feature-item__icon"><ng-icon [name]="feature.icon" size="24" /></span>
         <div class="feature-item__text">
           <span class="feature-item__label">{{ feature.label }}</span>
           <span class="feature-item__description">{{ feature.description }}</span>
@@ -36,20 +36,20 @@
   <h3 class="features-section__title">Navigation</h3>
   <div class="features-list">
     <div class="nav-item nav-item--locked">
-      <span class="nav-item__icon">🏠</span>
+      <span class="nav-item__icon"><ng-icon name="phosphorHouse" size="24" /></span>
       <span class="nav-item__label">Accueil</span>
-      <span class="nav-item__lock">🔒</span>
+      <span class="nav-item__lock"><ng-icon name="phosphorLock" size="16" /></span>
     </div>
     <div class="nav-item nav-item--locked">
-      <span class="nav-item__icon">💰</span>
+      <span class="nav-item__icon"><ng-icon name="phosphorCurrencyDollar" size="24" /></span>
       <span class="nav-item__label">Transactions</span>
-      <span class="nav-item__lock">🔒</span>
+      <span class="nav-item__lock"><ng-icon name="phosphorLock" size="16" /></span>
     </div>
     <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="nav-drop-list">
       @for (item of enabledNavItems(); track item.value) {
         <div cdkDrag class="nav-item nav-item--draggable">
-          <span cdkDragHandle class="nav-item__handle">⠿</span>
-          <span class="nav-item__icon">{{ item.icon }}</span>
+          <span cdkDragHandle class="nav-item__handle"><ng-icon name="phosphorDotsSixVertical" size="20" /></span>
+          <span class="nav-item__icon"><ng-icon [name]="item.icon" size="24" /></span>
           <span class="nav-item__label">{{ item.label }}</span>
         </div>
       }

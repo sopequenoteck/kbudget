@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
@@ -313,13 +314,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     ];
     final destinations = <NavDestination>[
       const NavDestination(
-        icon: Icons.home_outlined,
-        selectedIcon: Icons.home,
+        icon: PhosphorIconsRegular.house,
+        selectedIcon: PhosphorIconsFill.house,
         label: 'Accueil',
       ),
       const NavDestination(
-        icon: Icons.receipt_long_outlined,
-        selectedIcon: Icons.receipt_long,
+        icon: PhosphorIconsRegular.receipt,
+        selectedIcon: PhosphorIconsFill.receipt,
         label: 'Transactions',
       ),
     ];
@@ -331,24 +332,24 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
         Feature.subscriptions => (
           RouteNames.subscriptions,
           const NavDestination(
-            icon: Icons.autorenew_outlined,
-            selectedIcon: Icons.autorenew,
+            icon: PhosphorIconsRegular.arrowsClockwise,
+            selectedIcon: PhosphorIconsFill.arrowsClockwise,
             label: 'Abonnements',
           ),
         ),
         Feature.debts => (
           RouteNames.debts,
           const NavDestination(
-            icon: Icons.handshake_outlined,
-            selectedIcon: Icons.handshake,
+            icon: PhosphorIconsRegular.handshake,
+            selectedIcon: PhosphorIconsFill.handshake,
             label: 'Dettes',
           ),
         ),
         Feature.shop => (
           RouteNames.shop,
           const NavDestination(
-            icon: Icons.storefront_outlined,
-            selectedIcon: Icons.storefront,
+            icon: PhosphorIconsRegular.storefront,
+            selectedIcon: PhosphorIconsFill.storefront,
             label: 'Boutique',
           ),
         ),

@@ -6,6 +6,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
@@ -23,8 +24,8 @@ class OnboardingScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              Icon(
-                Icons.account_balance_wallet_outlined,
+              PhosphorIcon(
+                PhosphorIconsRegular.wallet,
                 size: 64,
                 color: theme.colorScheme.primary,
               ),
@@ -46,7 +47,7 @@ class OnboardingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space8),
               _ModeCard(
-                icon: Icons.smartphone,
+                icon: PhosphorIconsRegular.deviceMobile,
                 title: 'Mode local',
                 description: 'Vos données restent sur cet appareil',
                 isSelected: state.selectedMode == DataMode.local,
@@ -54,7 +55,7 @@ class OnboardingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space4),
               _ModeCard(
-                icon: Icons.cloud_outlined,
+                icon: PhosphorIconsRegular.cloud,
                 title: 'Mode serveur',
                 description: 'Synchronisez avec votre serveur K-Budget',
                 isSelected: state.selectedMode == DataMode.server,
@@ -111,7 +112,7 @@ class OnboardingScreen extends ConsumerWidget {
 }
 
 class _ModeCard extends StatelessWidget {
-  final IconData icon;
+  final PhosphorIconData icon;
   final String title;
   final String description;
   final bool isSelected;
@@ -154,7 +155,7 @@ class _ModeCard extends StatelessWidget {
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: PhosphorIcon(
                   icon,
                   color: isSelected
                       ? theme.colorScheme.primary
@@ -184,8 +185,8 @@ class _ModeCard extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                Icon(
-                  Icons.check_circle,
+                PhosphorIcon(
+                  PhosphorIconsFill.checkCircle,
                   color: theme.colorScheme.primary,
                 ),
             ],

@@ -8,6 +8,7 @@ import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.d
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class MiniCardsSection extends ConsumerWidget {
@@ -25,7 +26,7 @@ class MiniCardsSection extends ConsumerWidget {
       children: [
         Expanded(
           child: _MiniCard(
-            icon: Icons.autorenew,
+            icon: PhosphorIconsFill.arrowsClockwise,
             title: 'Abonnements',
             value: AmountFormatter.format(state.subscriptionMonthlyTotal),
             subtitle: '${state.activeSubscriptionCount} actifs',
@@ -35,7 +36,7 @@ class MiniCardsSection extends ConsumerWidget {
         ),
         Expanded(
           child: _MiniCard(
-            icon: Icons.handshake,
+            icon: PhosphorIconsFill.handshake,
             title: 'Dettes',
             value: AmountFormatter.format(state.debtNetBalance.abs()),
             subtitle: state.debtNetBalance > 0
@@ -64,7 +65,7 @@ class _MiniCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final PhosphorIconData icon;
   final String title;
   final String value;
   final String subtitle;
@@ -91,7 +92,7 @@ class _MiniCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                PhosphorIcon(
                   icon,
                   size: AppTypography.sizeXl,
                   color: accentColor,

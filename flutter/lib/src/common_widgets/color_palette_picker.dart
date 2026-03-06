@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 
@@ -80,9 +81,9 @@ class ColorPalettePicker extends StatelessWidget {
                       : null,
                 ),
                 child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        size: 18,
+                    ? PhosphorIcon(
+                        PhosphorIconsBold.check,
+                        size: 16,
                         color: color != null
                             ? (ThemeData.estimateBrightnessForColor(color) ==
                                     Brightness.dark

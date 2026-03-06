@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 enum Feature {
   @JsonValue('SUBSCRIPTIONS')
@@ -15,16 +15,16 @@ enum Feature {
     Feature.shop => 'Boutique',
   };
 
-  IconData get icon => switch (this) {
-    Feature.subscriptions => Icons.autorenew,
-    Feature.debts => Icons.handshake,
-    Feature.shop => Icons.storefront,
+  PhosphorIconData get icon => switch (this) {
+    Feature.subscriptions => PhosphorIconsFill.arrowsClockwise,
+    Feature.debts => PhosphorIconsFill.handshake,
+    Feature.shop => PhosphorIconsFill.storefront,
   };
 
-  IconData get outlinedIcon => switch (this) {
-    Feature.subscriptions => Icons.autorenew_outlined,
-    Feature.debts => Icons.handshake_outlined,
-    Feature.shop => Icons.storefront_outlined,
+  PhosphorIconData get outlinedIcon => switch (this) {
+    Feature.subscriptions => PhosphorIconsRegular.arrowsClockwise,
+    Feature.debts => PhosphorIconsRegular.handshake,
+    Feature.shop => PhosphorIconsRegular.storefront,
   };
 
   String get description => switch (this) {

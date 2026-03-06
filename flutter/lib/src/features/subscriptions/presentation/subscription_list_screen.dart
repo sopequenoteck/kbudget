@@ -17,6 +17,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/next_renewal_date.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SubscriptionListScreen extends ConsumerStatefulWidget {
@@ -119,8 +120,8 @@ class _SubscriptionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -138,7 +139,7 @@ class _SubscriptionListScreenState
                     onPressed: () => ref
                         .read(subscriptionNotifierProvider.notifier)
                         .refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.subscriptionsRetry),
                   ),
                 ],
@@ -199,8 +200,8 @@ class _SubscriptionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.repeat_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.arrowsClockwise,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),

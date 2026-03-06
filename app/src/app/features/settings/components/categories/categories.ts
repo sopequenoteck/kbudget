@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorPencilSimple, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -16,7 +18,13 @@ import { Category } from '../../../../core/models/category.model';
 
 @Component({
   selector: 'app-categories',
-  imports: [RouterLink],
+  imports: [RouterLink, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorPencilSimple,
+      phosphorTrash,
+    }),
+  ],
   templateUrl: './categories.html',
   styleUrl: './categories.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

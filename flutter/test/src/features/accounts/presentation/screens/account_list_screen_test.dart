@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -78,7 +79,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Impossible de charger les comptes'), findsOneWidget);
-      expect(find.byIcon(Icons.refresh), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsRegular.arrowClockwise),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_showEmptyState_when_noAccounts', (tester) async {
@@ -106,7 +110,10 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsBold.plus),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_retryLoad_when_retryTapped', (tester) async {

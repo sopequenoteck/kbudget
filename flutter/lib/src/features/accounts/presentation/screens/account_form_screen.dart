@@ -16,6 +16,7 @@ import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? account;
@@ -207,7 +208,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             )
           else
             IconButton(
-              icon: const Icon(Icons.check),
+              icon: const PhosphorIcon(PhosphorIconsBold.check, size: 24),
               onPressed: _onSubmit,
             ),
         ],
@@ -393,7 +394,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: _onDelete,
-                icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                icon: PhosphorIcon(PhosphorIconsRegular.trash, color: colorScheme.error, size: 20),
                 label: Text(
                   l10n.delete,
                   style: TextStyle(color: colorScheme.error),

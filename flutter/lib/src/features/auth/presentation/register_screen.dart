@@ -5,6 +5,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   final String? invitationToken;
@@ -85,11 +86,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 const EdgeInsets.all(AppSpacing.space3),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.verified_outlined,
+                                PhosphorIcon(
+                                  PhosphorIconsRegular.sealCheck,
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary,
+                                  size: 20,
                                 ),
                                 const SizedBox(width: AppSpacing.space2),
                                 const Expanded(
@@ -107,7 +109,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       autofillHints: const [AutofillHints.name],
                       decoration: const InputDecoration(
                         labelText: 'Nom (optionnel)',
-                        prefixIcon: Icon(Icons.person_outlined),
+                        prefixIcon: PhosphorIcon(PhosphorIconsRegular.user, size: 20),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.space4),
@@ -118,7 +120,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       autofillHints: const [AutofillHints.email],
                       decoration: const InputDecoration(
                         labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: PhosphorIcon(PhosphorIconsRegular.envelope, size: 20),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -138,12 +140,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
                         labelText: 'Mot de passe',
-                        prefixIcon: const Icon(Icons.lock_outlined),
+                        prefixIcon: const PhosphorIcon(PhosphorIconsRegular.lock, size: 20),
                         suffixIcon: IconButton(
-                          icon: Icon(
+                          icon: PhosphorIcon(
                             _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? PhosphorIconsRegular.eye
+                                : PhosphorIconsRegular.eyeSlash,
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(() {
@@ -169,12 +172,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                         labelText: 'Confirmer le mot de passe',
-                        prefixIcon: const Icon(Icons.lock_outlined),
+                        prefixIcon: const PhosphorIcon(PhosphorIconsRegular.lock, size: 20),
                         suffixIcon: IconButton(
-                          icon: Icon(
+                          icon: PhosphorIcon(
                             _obscureConfirm
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? PhosphorIconsRegular.eye
+                                : PhosphorIconsRegular.eyeSlash,
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(() {

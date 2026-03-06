@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -146,7 +147,10 @@ void main() {
       await tester.tap(find.text('Mode local'));
       await tester.pump();
 
-      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsFill.checkCircle),
+        findsOneWidget,
+      );
     });
   });
 }

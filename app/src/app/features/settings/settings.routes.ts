@@ -30,12 +30,12 @@ export const SETTINGS_ROUTES: Routes = [
   {
     path: 'budget',
     loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Budget', icon: '📊' },
+    data: { title: 'Budget', icon: 'phosphorChartBar' },
   },
   {
     path: 'notifications',
     loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Notifications', icon: '🔔' },
+    data: { title: 'Notifications', icon: 'phosphorBell' },
   },
   {
     path: 'data',

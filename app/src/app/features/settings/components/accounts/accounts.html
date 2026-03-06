@@ -50,7 +50,7 @@
               (click)="setDefault(account)"
               title="Définir par défaut"
             >
-              ⭐
+              <ng-icon name="phosphorStar" size="20" />
             </button>
           }
           <button
@@ -59,7 +59,7 @@
             (click)="editAccount(account)"
             aria-label="Modifier"
           >
-            ✏️
+            <ng-icon name="phosphorPencilSimple" size="20" />
           </button>
           <button
             type="button"
@@ -67,7 +67,7 @@
             (click)="requestDelete(account.id)"
             aria-label="Supprimer"
           >
-            🗑️
+            <ng-icon name="phosphorTrash" size="20" />
           </button>
         </div>
 

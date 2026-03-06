@@ -17,6 +17,7 @@ import 'package:k_budget/src/features/shop/application/product_notifier.dart';
 import 'package:k_budget/src/features/shop/presentation/widgets/restock_dialog.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -45,7 +46,7 @@ class ProductDetailScreen extends ConsumerWidget {
         title: Text(product?.nom ?? 'Produit'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
+            icon: const PhosphorIcon(PhosphorIconsRegular.pencilSimple, size: 20),
             onPressed: product == null || isMutating
                 ? null
                 : () {
@@ -232,7 +233,7 @@ class ProductDetailScreen extends ConsumerWidget {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.sell),
+                    : const PhosphorIcon(PhosphorIconsRegular.tag, size: 20),
                 label: const Text('Vendre'),
                 onPressed: product.stock == 0 || !product.actif || isMutating
                     ? null
@@ -264,7 +265,7 @@ class ProductDetailScreen extends ConsumerWidget {
             ),
             Expanded(
               child: OutlinedButton.icon(
-                icon: const Icon(Icons.add_shopping_cart),
+                icon: const PhosphorIcon(PhosphorIconsRegular.shoppingCartSimple, size: 20),
                 label: const Text('Ajouter stock'),
                 onPressed: !product.actif || isMutating
                     ? null
@@ -354,7 +355,7 @@ class ProductDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               OutlinedButton.icon(
-                icon: const Icon(Icons.refresh),
+                icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                 label: const Text('Réessayer'),
                 onPressed: () => ref.invalidate(productSalesProvider(id)),
               ),
@@ -416,8 +417,8 @@ class ProductDetailScreen extends ConsumerWidget {
               color: iconBg,
               borderRadius: BorderRadius.circular(AppRadius.round),
             ),
-            child: Icon(
-              isRecette ? Icons.trending_up : Icons.trending_down,
+            child: PhosphorIcon(
+              isRecette ? PhosphorIconsRegular.trendUp : PhosphorIconsRegular.trendDown,
               color: iconColor,
               size: 18,
             ),

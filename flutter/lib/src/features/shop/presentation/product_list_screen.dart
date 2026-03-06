@@ -14,6 +14,7 @@ import 'package:k_budget/src/domain/enums/modal_type.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/image_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ProductListScreen extends ConsumerStatefulWidget {
   const ProductListScreen({super.key});
@@ -88,8 +89,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -106,7 +107,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   FilledButton.icon(
                     onPressed: () =>
                         ref.read(productNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: const Text('Réessayer'),
                   ),
                 ],
@@ -128,8 +129,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.storefront_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.storefront,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
@@ -146,7 +147,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     onPressed: () {
                       ref.read(modalNotifierProvider.notifier).open(ModalType.product);
                     },
-                    icon: const Icon(Icons.add),
+                    icon: const PhosphorIcon(PhosphorIconsBold.plus, size: 20),
                     label: const Text('Créer un produit'),
                   ),
                 ],

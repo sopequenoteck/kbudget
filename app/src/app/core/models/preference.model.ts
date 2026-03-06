@@ -4,6 +4,7 @@ export interface FeatureMetadata {
   readonly value: Feature;
   readonly label: string;
   readonly icon: string;
+  readonly filledIcon: string;
   readonly description: string;
   readonly route: string;
 }
@@ -12,21 +13,24 @@ export const FEATURES: readonly FeatureMetadata[] = [
   {
     value: 'SUBSCRIPTIONS',
     label: 'Abonnements',
-    icon: '🔄',
+    icon: 'phosphorArrowsClockwise',
+    filledIcon: 'phosphorArrowsClockwiseFill',
     description: 'Gérer vos abonnements récurrents',
     route: '/subscriptions',
   },
   {
     value: 'DEBTS',
     label: 'Dettes',
-    icon: '🤝',
+    icon: 'phosphorHandshake',
+    filledIcon: 'phosphorHandshakeFill',
     description: 'Suivre vos prêts et emprunts',
     route: '/debts',
   },
   {
     value: 'SHOP',
     label: 'Boutique',
-    icon: '🏪',
+    icon: 'phosphorStorefront',
+    filledIcon: 'phosphorStorefrontFill',
     description: 'Gérer vos ventes de produits',
     route: '/shop',
   },

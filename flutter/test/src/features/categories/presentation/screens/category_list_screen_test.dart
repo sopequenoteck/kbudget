@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
@@ -78,7 +79,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Impossible de charger les catégories'), findsOneWidget);
-      expect(find.byIcon(Icons.refresh), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsRegular.arrowClockwise),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_show_empty_state_when_no_categories', (tester) async {
@@ -88,7 +92,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Aucune catégorie'), findsOneWidget);
-      expect(find.byIcon(Icons.label_outlined), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsRegular.tag),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_show_list_when_categories_exist', (tester) async {

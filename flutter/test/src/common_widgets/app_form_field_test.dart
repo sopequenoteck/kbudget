@@ -5,6 +5,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Pompe un [AppFormField] dans un arbre de widgets avec le thème complet.
 Future<void> pumpFormField(
@@ -484,13 +485,13 @@ void main() {
       (tester) async {
         await pumpFormField(
           tester,
-          const AppFormField(
+          AppFormField(
             label: 'Sélection',
             child: Row(
               children: [
-                Icon(Icons.calendar_today),
-                SizedBox(width: 8),
-                Text('Choisir une date'),
+                PhosphorIcon(PhosphorIconsRegular.calendar),
+                const SizedBox(width: 8),
+                const Text('Choisir une date'),
               ],
             ),
           ),
@@ -498,7 +499,10 @@ void main() {
 
         expect(find.byType(Row), findsOneWidget);
         expect(find.text('Choisir une date'), findsOneWidget);
-        expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsRegular.calendar),
+          findsOneWidget,
+        );
       },
     );
   });

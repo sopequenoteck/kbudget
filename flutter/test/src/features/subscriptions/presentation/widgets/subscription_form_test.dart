@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -183,7 +184,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find and tap delete icon
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
       await tester.pumpAndSettle();
 
       // Confirmation dialog should appear
@@ -200,7 +201,10 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.delete_outline), findsNothing);
+      expect(
+        find.byIcon(PhosphorIconsRegular.trash),
+        findsNothing,
+      );
     });
 
     testWidgets(

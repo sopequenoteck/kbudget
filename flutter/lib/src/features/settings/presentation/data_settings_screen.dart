@@ -4,6 +4,7 @@ import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DataSettingsScreen extends ConsumerStatefulWidget {
   const DataSettingsScreen({super.key});
@@ -60,12 +61,12 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
                 ButtonSegment(
                   value: DataMode.local,
                   label: Text('Local'),
-                  icon: Icon(Icons.phone_android),
+                  icon: PhosphorIcon(PhosphorIconsRegular.deviceMobile, size: 20),
                 ),
                 ButtonSegment(
                   value: DataMode.server,
                   label: Text('Serveur'),
-                  icon: Icon(Icons.cloud),
+                  icon: PhosphorIcon(PhosphorIconsRegular.cloud, size: 20),
                 ),
               ],
               selected: {state.dataMode},
@@ -91,7 +92,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             controller: _urlController,
             decoration: InputDecoration(
               hintText: 'https://budget.kksdev.fr/api',
-              prefixIcon: const Icon(Icons.link),
+              prefixIcon: const PhosphorIcon(PhosphorIconsRegular.link, size: 20),
               errorText: state.error,
               border: const OutlineInputBorder(),
             ),
@@ -103,7 +104,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
           const SizedBox(height: AppSpacing.space3),
           FilledButton.icon(
             onPressed: state.isLoading ? null : _onSaveUrl,
-            icon: const Icon(Icons.save),
+            icon: const PhosphorIcon(PhosphorIconsRegular.floppyDisk, size: 20),
             label: const Text('Enregistrer'),
           ),
 

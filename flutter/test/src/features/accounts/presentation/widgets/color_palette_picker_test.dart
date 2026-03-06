@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
   Widget buildApp({
@@ -40,7 +41,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should find a check icon on the selected color
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsBold.check),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_callOnChanged_when_colorTapped', (tester) async {

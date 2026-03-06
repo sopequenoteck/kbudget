@@ -8,6 +8,7 @@ import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AccountListTile extends ConsumerWidget {
   final Account account;
@@ -123,8 +124,8 @@ class AccountListTile extends ConsumerWidget {
                 ),
               ),
               PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert,
+                icon: PhosphorIcon(
+                  PhosphorIconsRegular.dotsThreeVertical,
                   color: colorScheme.onSurfaceVariant,
                   size: 20,
                 ),

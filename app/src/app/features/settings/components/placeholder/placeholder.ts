@@ -1,9 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorChartBar, phosphorBell } from '@ng-icons/phosphor-icons/regular';
 
 @Component({
   selector: 'app-placeholder',
-  imports: [RouterLink],
+  imports: [RouterLink, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorChartBar,
+      phosphorBell,
+    }),
+  ],
   templateUrl: './placeholder.html',
   styleUrl: './placeholder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

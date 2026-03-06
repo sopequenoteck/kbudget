@@ -10,6 +10,7 @@ import 'package:k_budget/src/features/categories/presentation/widgets/category_l
 import 'package:k_budget/src/features/categories/presentation/widgets/category_list_tile.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class CategoryListScreen extends ConsumerStatefulWidget {
   const CategoryListScreen({super.key});
@@ -41,7 +42,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
         title: Text(l10n.categoriesTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const PhosphorIcon(PhosphorIconsBold.plus, size: 24),
             onPressed: () => context.push(
               '${RouteNames.settings}/${RouteNames.settingsCategories}/${RouteNames.settingsCategoriesNew}',
             ),
@@ -95,8 +96,8 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -113,7 +114,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
                   FilledButton.icon(
                     onPressed: () =>
                         ref.read(categoryNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.categoriesRetry),
                   ),
                 ],
@@ -135,8 +136,8 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.label_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.tag,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),

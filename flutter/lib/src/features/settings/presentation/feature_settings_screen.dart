@@ -5,6 +5,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class FeatureSettingsScreen extends ConsumerStatefulWidget {
   const FeatureSettingsScreen({super.key});
@@ -50,7 +51,7 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
             return SwitchListTile(
               secondary: CircleAvatar(
                 backgroundColor: theme.colorScheme.primaryContainer,
-                child: Icon(
+                child: PhosphorIcon(
                   feature.icon,
                   color: theme.colorScheme.onPrimaryContainer,
                   size: 20,
@@ -74,8 +75,8 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(
-                Icons.home,
+              child: PhosphorIcon(
+                PhosphorIconsRegular.house,
                 color: theme.colorScheme.outline,
                 size: 20,
               ),
@@ -84,8 +85,8 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
               'Accueil',
               style: TextStyle(color: theme.colorScheme.outline),
             ),
-            trailing: Icon(
-              Icons.lock_outline,
+            trailing: PhosphorIcon(
+              PhosphorIconsRegular.lock,
               color: theme.colorScheme.outline,
               size: 18,
             ),
@@ -93,8 +94,8 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              child: Icon(
-                Icons.receipt_long,
+              child: PhosphorIcon(
+                PhosphorIconsRegular.receipt,
                 color: theme.colorScheme.outline,
                 size: 20,
               ),
@@ -103,8 +104,8 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
               'Transactions',
               style: TextStyle(color: theme.colorScheme.outline),
             ),
-            trailing: Icon(
-              Icons.lock_outline,
+            trailing: PhosphorIcon(
+              PhosphorIconsRegular.lock,
               color: theme.colorScheme.outline,
               size: 18,
             ),
@@ -136,7 +137,7 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
                   key: ValueKey(feature),
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
+                    child: PhosphorIcon(
                       feature.icon,
                       color: theme.colorScheme.onPrimaryContainer,
                       size: 20,
@@ -145,8 +146,8 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
                   title: Text(feature.label),
                   trailing: ReorderableDragStartListener(
                     index: index,
-                    child: Icon(
-                      Icons.drag_handle,
+                    child: PhosphorIcon(
+                      PhosphorIconsRegular.dotsSixVertical,
                       color: theme.colorScheme.outline,
                     ),
                   ),
@@ -242,9 +243,9 @@ class _BottomNavPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final items = <({IconData icon, String label})>[
-      (icon: Icons.home_outlined, label: 'Accueil'),
-      (icon: Icons.receipt_long_outlined, label: 'Transactions'),
+    final items = <({PhosphorIconData icon, String label})>[
+      (icon: PhosphorIconsRegular.house, label: 'Accueil'),
+      (icon: PhosphorIconsRegular.receipt, label: 'Transactions'),
       ...orderedEnabledFeatures.map((f) => (icon: f.outlinedIcon, label: f.label)),
     ];
 
@@ -270,7 +271,7 @@ class _BottomNavPreview extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                PhosphorIcon(
                   item.icon,
                   size: 24,
                   color: theme.colorScheme.onSurfaceVariant,

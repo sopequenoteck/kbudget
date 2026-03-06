@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_shadows.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -80,7 +81,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   }
 
   Widget _buildNavButton({
-    required IconData icon,
+    required PhosphorIconData icon,
     required VoidCallback onPressed,
     required String semanticsLabel,
   }) {
@@ -99,7 +100,7 @@ class _MonthSelectorState extends State<MonthSelector> {
             boxShadow: AppShadows.sm,
           ),
           child: IconButton(
-            icon: Icon(icon),
+            icon: PhosphorIcon(icon),
             onPressed: onPressed,
             color: colorScheme.onSurface,
           ),
@@ -116,7 +117,7 @@ class _MonthSelectorState extends State<MonthSelector> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildNavButton(
-          icon: Icons.chevron_left,
+          icon: PhosphorIconsRegular.caretLeft,
           onPressed: _prevMonth,
           semanticsLabel: 'Mois précédent',
         ),
@@ -135,7 +136,7 @@ class _MonthSelectorState extends State<MonthSelector> {
         ),
         const SizedBox(width: AppSpacing.space4),
         _buildNavButton(
-          icon: Icons.chevron_right,
+          icon: PhosphorIconsRegular.caretRight,
           onPressed: _nextMonth,
           semanticsLabel: 'Mois suivant',
         ),

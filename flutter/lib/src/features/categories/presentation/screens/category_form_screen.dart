@@ -13,6 +13,7 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/categories/presentation/widgets/category_preview_card.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final Category? category;
@@ -184,7 +185,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             )
           else
             IconButton(
-              icon: const Icon(Icons.check),
+              icon: const PhosphorIcon(PhosphorIconsBold.check, size: 24),
               onPressed: _onSubmit,
             ),
         ],
@@ -252,7 +253,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: _onDelete,
-                icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                icon: PhosphorIcon(PhosphorIconsRegular.trash, color: colorScheme.error, size: 20),
                 label: Text(
                   l10n.delete,
                   style: TextStyle(color: colorScheme.error),

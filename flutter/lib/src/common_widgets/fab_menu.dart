@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
@@ -21,22 +22,22 @@ class _FabMenuState extends ConsumerState<FabMenu>
 
   static const _allItems = [
     _SpeedDialItem(
-      icon: Icons.receipt_long,
+      icon: PhosphorIconsBold.receipt,
       label: 'Transaction',
       modalType: ModalType.transaction,
     ),
     _SpeedDialItem(
-      icon: Icons.autorenew,
+      icon: PhosphorIconsBold.arrowsClockwise,
       label: 'Abonnement',
       modalType: ModalType.subscription,
     ),
     _SpeedDialItem(
-      icon: Icons.handshake,
+      icon: PhosphorIconsBold.handshake,
       label: 'Dette',
       modalType: ModalType.debt,
     ),
     _SpeedDialItem(
-      icon: Icons.swap_horiz,
+      icon: PhosphorIconsBold.arrowsLeftRight,
       label: 'Virement',
       modalType: ModalType.transfer,
     ),
@@ -156,7 +157,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
       child: AnimatedRotation(
         turns: _isOpen ? 0.125 : 0,
         duration: const Duration(milliseconds: 250),
-        child: const Icon(Icons.add),
+        child: const PhosphorIcon(PhosphorIconsBold.plus, size: 24),
       ),
     );
   }
@@ -181,7 +182,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
               width: 130,
               child: Row(
                 children: [
-                  Icon(
+                  PhosphorIcon(
                     item.icon,
                     size: 18,
                     color: theme.colorScheme.primary,
@@ -204,12 +205,12 @@ class _FabMenuState extends ConsumerState<FabMenu>
 }
 
 class _SpeedDialItem {
-  final IconData icon;
+  final PhosphorIconData icon;
   final String label;
   final ModalType modalType;
 
   const _SpeedDialItem({
-    required this.icon,
+    required PhosphorIconData this.icon,
     required this.label,
     required this.modalType,
   });

@@ -14,6 +14,7 @@ import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/decimal_input_formatter.dart';
 import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ProductForm extends ConsumerStatefulWidget {
   const ProductForm({
@@ -189,7 +190,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const PhosphorIcon(PhosphorIconsRegular.camera, size: 20),
               title: const Text('Caméra'),
               onTap: () {
                 Navigator.pop(context);
@@ -197,7 +198,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const PhosphorIcon(PhosphorIconsRegular.image, size: 20),
               title: const Text('Galerie'),
               onTap: () {
                 Navigator.pop(context);
@@ -206,7 +207,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
             ),
             if (_localImagePath != null || _imageDataUri != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline),
+                leading: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 title: const Text('Supprimer'),
                 onTap: () {
                   Navigator.pop(context);
@@ -352,8 +353,8 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                             fit: BoxFit.cover,
                           ),
                         )
-                      : Icon(
-                          Icons.add_a_photo,
+                      : PhosphorIcon(
+                          PhosphorIconsRegular.camera,
                           color: colorScheme.onSurfaceVariant,
                         ),
             ),

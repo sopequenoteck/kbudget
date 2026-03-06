@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_durations.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -368,15 +369,15 @@ class _SelectPickerState extends FormFieldState<String?> {
                       if (widget.clearable && hasSelection && widget.enabled)
                         GestureDetector(
                           onTap: _onClear,
-                          child: Icon(
-                            Icons.close,
+                          child: PhosphorIcon(
+                            PhosphorIconsBold.x,
                             size: 18,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         )
                       else
-                        Icon(
-                          Icons.keyboard_arrow_down,
+                        PhosphorIcon(
+                          PhosphorIconsRegular.caretDown,
                           color: colorScheme.onSurfaceVariant,
                         ),
                     ],

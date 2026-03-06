@@ -7,6 +7,7 @@ import 'package:k_budget/src/features/dashboard/presentation/widgets/hero_accoun
 import 'package:k_budget/src/features/dashboard/presentation/widgets/mini_cards_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/monthly_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -89,8 +90,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.account_balance_wallet_outlined,
+            PhosphorIcon(
+              PhosphorIconsRegular.wallet,
               size: 64,
               color: colorScheme.onSurface.withValues(alpha: 0.3),
             ),

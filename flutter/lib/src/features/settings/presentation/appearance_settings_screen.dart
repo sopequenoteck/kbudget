@@ -5,6 +5,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/text_scale_notifier.dart';
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppearanceSettingsScreen extends ConsumerWidget {
   const AppearanceSettingsScreen({super.key});
@@ -33,7 +34,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: _ThemeTile(
-                  icon: Icons.light_mode,
+                  icon: PhosphorIconsRegular.sun,
                   label: 'Clair',
                   isSelected: themeMode == ThemeMode.light,
                   onTap: () => ref
@@ -44,7 +45,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: _ThemeTile(
-                  icon: Icons.dark_mode,
+                  icon: PhosphorIconsRegular.moon,
                   label: 'Sombre',
                   isSelected: themeMode == ThemeMode.dark,
                   onTap: () => ref
@@ -93,7 +94,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
 }
 
 class _ThemeTile extends StatelessWidget {
-  final IconData icon;
+  final PhosphorIconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
@@ -131,7 +132,7 @@ class _ThemeTile extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
+            PhosphorIcon(
               icon,
               size: 28,
               color: isSelected
@@ -150,8 +151,8 @@ class _ThemeTile extends StatelessWidget {
             ),
             if (isSelected) ...[
               const SizedBox(height: AppSpacing.space1),
-              Icon(
-                Icons.check_circle,
+              PhosphorIcon(
+                PhosphorIconsFill.checkCircle,
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
@@ -222,8 +223,8 @@ class _TextScaleTile extends StatelessWidget {
             ),
             if (isSelected) ...[
               const SizedBox(height: AppSpacing.space1),
-              Icon(
-                Icons.check_circle,
+              PhosphorIcon(
+                PhosphorIconsFill.checkCircle,
                 size: 18,
                 color: theme.colorScheme.primary,
               ),

@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DebtForm extends ConsumerStatefulWidget {
   const DebtForm({
@@ -238,8 +239,8 @@ class _DebtFormState extends ConsumerState<DebtForm> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
+                PhosphorIcon(
+                  PhosphorIconsRegular.calendarBlank,
                   size: 18,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -294,7 +295,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
             if (_isEditMode && widget.onDeleted != null)
               IconButton(
                 onPressed: _isSubmitting ? null : _onDelete,
-                icon: const Icon(Icons.delete_outline),
+                icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
                 tooltip: l10n.debtFormDeleteButton,
               ),
@@ -334,8 +335,8 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.space3),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
+          PhosphorIcon(
+            PhosphorIconsRegular.info,
             size: 18,
             color: colorScheme.onSurfaceVariant,
           ),
