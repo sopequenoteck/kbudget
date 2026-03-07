@@ -131,7 +131,7 @@ class _RateFormState extends ConsumerState<RateForm> {
                 horizontal: AppSpacing.space4,
               ),
               child: Text(
-                '${widget.baseCurrency.symbol} — ${widget.baseCurrency.name}',
+                '${widget.baseCurrency.symbol} — ${widget.baseCurrency.displayName}',
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurfaceVariant,

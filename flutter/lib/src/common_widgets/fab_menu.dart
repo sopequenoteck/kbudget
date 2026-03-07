@@ -210,7 +210,7 @@ class _SpeedDialItem {
   final ModalType modalType;
 
   const _SpeedDialItem({
-    required PhosphorIconData this.icon,
+    required this.icon,
     required this.label,
     required this.modalType,
   });

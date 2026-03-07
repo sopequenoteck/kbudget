@@ -5,13 +5,13 @@ import 'package:k_budget/src/utils/currency_converter.dart';
 
 void main() {
   final rates = [
-    ExchangeRate(
+    const ExchangeRate(
       id: '1',
       baseCurrency: Currency.eur,
       targetCurrency: Currency.xof,
       rate: 655.957,
     ),
-    ExchangeRate(
+    const ExchangeRate(
       id: '2',
       baseCurrency: Currency.eur,
       targetCurrency: Currency.usd,

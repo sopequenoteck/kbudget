@@ -485,13 +485,13 @@ void main() {
       (tester) async {
         await pumpFormField(
           tester,
-          AppFormField(
+          const AppFormField(
             label: 'Sélection',
             child: Row(
               children: [
                 PhosphorIcon(PhosphorIconsRegular.calendar),
-                const SizedBox(width: 8),
-                const Text('Choisir une date'),
+                SizedBox(width: 8),
+                Text('Choisir une date'),
               ],
             ),
           ),

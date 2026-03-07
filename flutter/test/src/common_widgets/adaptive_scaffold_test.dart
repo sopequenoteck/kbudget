@@ -43,7 +43,7 @@ void main() {
                 ],
                 onDestinationSelected: (_) {},
                 body: const Text('Body'),
-                floatingActionButton: FloatingActionButton(
+                floatingActionButton: const FloatingActionButton(
                   onPressed: null,
                   child: PhosphorIcon(PhosphorIconsBold.plus),
                 ),

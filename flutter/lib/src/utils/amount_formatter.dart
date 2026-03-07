@@ -13,7 +13,7 @@ class AmountFormatter {
 
   static NumberFormat _getFormatter(Currency currency) {
     return _cache.putIfAbsent(
-      currency.name,
+      currency.displayName,
       () => NumberFormat.currency(
         locale: 'fr_FR',
         symbol: currency.symbol,

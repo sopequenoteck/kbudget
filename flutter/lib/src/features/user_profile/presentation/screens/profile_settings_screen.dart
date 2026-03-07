@@ -210,7 +210,7 @@ class _CurrencySelector extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${selectedCurrency.symbol} — ${selectedCurrency.name}',
+                '${selectedCurrency.symbol} — ${selectedCurrency.displayName}',
                 style: theme.textTheme.bodyLarge,
               ),
             ),
@@ -241,7 +241,7 @@ class _CurrencySelector extends StatelessWidget {
             ),
             ...Currency.values.map(
               (currency) => ListTile(
-                title: Text('${currency.symbol} — ${currency.name}'),
+                title: Text('${currency.symbol} — ${currency.displayName}'),
                 trailing: currency == selectedCurrency
                     ? PhosphorIcon(PhosphorIconsBold.check,
                         color: Theme.of(context).colorScheme.primary,

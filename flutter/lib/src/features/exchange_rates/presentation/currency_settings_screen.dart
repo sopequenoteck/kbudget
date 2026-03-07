@@ -197,7 +197,7 @@ class _CurrencySettingsScreenState
                 ),
                 title: Text(currency.name.toUpperCase()),
                 subtitle: Text(
-                  isPrimary ? 'Principale • ${currency.name}' : currency.name,
+                  isPrimary ? 'Principale • ${currency.displayName}' : currency.displayName,
                   style: TextStyle(
                     fontSize: AppTypography.sizeSm,
                     color: isPrimary
