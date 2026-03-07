@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,6 +73,17 @@ public class PreferenceService {
                 log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
             }
         }
+        if (request.enabledNotificationTypes() != null) {
+            preference.setEnabledNotificationTypes(request.enabledNotificationTypes());
+        }
+        if (request.timezone() != null) {
+            try {
+                ZoneId.of(request.timezone());
+            } catch (DateTimeException e) {
+                throw new IllegalArgumentException("Timezone invalide: " + request.timezone());
+            }
+            preference.setTimezone(request.timezone());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -81,7 +95,23 @@ public class PreferenceService {
         return preference.getEnabledFeatures().contains(feature);
     }
 
-    @Transactional
+    /**
+     * Vérifie si un type de notification est activé pour l'utilisateur.
+     * Par défaut (liste null ou vide), tous les types sont considérés activés (opt-out).
+     */
+    public boolean isNotificationTypeEnabled(UUID userId, NotificationType type) {
+        UserPreference preference = getOrCreate(userId);
+        if (preference.getEnabledNotificationTypes() == null || preference.getEnabledNotificationTypes().isEmpty()) {
+            return true;
+        }
+        return preference.getEnabledNotificationTypes().contains(type);
+    }
+
+    public String getUserTimezone(UUID userId) {
+        UserPreference preference = getOrCreate(userId);
+        return preference.getTimezone() != null ? preference.getTimezone() : "Europe/Paris";
+    }
+
     private UserPreference getOrCreate(UUID userId) {
         return userPreferenceRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -152,7 +182,9 @@ public class PreferenceService {
                 preference.getNavOrder(),
                 preference.getShopAccountId(),
                 preference.getIncludeShopInBalance(),
-                preference.getCurrencies()
+                preference.getCurrencies(),
+                preference.getEnabledNotificationTypes(),
+                preference.getTimezone()
         );
     }
 }

@@ -44,6 +44,9 @@ public class Debt {
     @Column(nullable = false)
     private Boolean rembourse = false;
 
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;

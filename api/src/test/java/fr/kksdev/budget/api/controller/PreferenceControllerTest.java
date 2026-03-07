@@ -61,7 +61,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                null, false, List.of(Currency.EUR)
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -81,7 +81,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
                 List.of(Feature.SHOP, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR)
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -108,7 +108,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                null, false, List.of(Currency.EUR)
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -126,7 +126,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return200_when_disableAllFeatures() throws Exception {
-        var response = new UserPreferenceResponse(List.of(), List.of(), null, false, List.of(Currency.EUR));
+        var response = new UserPreferenceResponse(List.of(), List.of(), null, false, List.of(Currency.EUR), List.of(), "Europe/Paris");
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
@@ -169,7 +169,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR)
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);

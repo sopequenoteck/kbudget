@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.dto.request;
 
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.enums.NotificationType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -12,5 +13,7 @@ public record UserPreferenceRequest(
         List<Feature> navOrder,
         UUID shopAccountId,
         Boolean includeShopInBalance,
-        List<Currency> currencies
+        List<Currency> currencies,
+        List<NotificationType> enabledNotificationTypes,
+        String timezone
 ) {}

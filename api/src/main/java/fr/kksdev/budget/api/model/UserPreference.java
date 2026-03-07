@@ -2,8 +2,10 @@ package fr.kksdev.budget.api.model;
 
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.converter.CurrencyListConverter;
 import fr.kksdev.budget.api.model.converter.FeatureListConverter;
+import fr.kksdev.budget.api.model.converter.NotificationTypeListConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +54,14 @@ public class UserPreference {
     @Column(name = "currencies", nullable = false, length = 100)
     @Builder.Default
     private List<Currency> currencies = List.of(Currency.EUR);
+
+    @Convert(converter = NotificationTypeListConverter.class)
+    @Column(name = "enabled_notification_types")
+    private List<NotificationType> enabledNotificationTypes;
+
+    @Column(name = "timezone")
+    @Builder.Default
+    private String timezone = "Europe/Paris";
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

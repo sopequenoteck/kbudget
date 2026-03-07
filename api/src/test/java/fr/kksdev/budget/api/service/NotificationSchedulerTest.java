@@ -1,0 +1,255 @@
+package fr.kksdev.budget.api.service;
+
+import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.EntityType;
+import fr.kksdev.budget.api.enums.Frequency;
+import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.model.Debt;
+import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.DebtRepository;
+import fr.kksdev.budget.api.repository.NotificationRepository;
+import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class NotificationSchedulerTest {
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private DebtRepository debtRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private PreferenceService preferenceService;
+
+    @Mock
+    private NotificationRepository notificationRepository;
+
+    @InjectMocks
+    private NotificationScheduler notificationScheduler;
+
+    private final UUID userId = UUID.randomUUID();
+    private final UUID subscriptionId = UUID.randomUUID();
+    private final UUID debtId = UUID.randomUUID();
+
+    private User buildUser() {
+        return User.builder().id(userId).email("test@mail.com").name("Test").build();
+    }
+
+    private Subscription buildSubscription(LocalDate dateDebut, Frequency frequence) {
+        return Subscription.builder()
+                .id(subscriptionId)
+                .nom("Netflix")
+                .montant(BigDecimal.valueOf(15.99))
+                .frequence(frequence)
+                .dateDebut(dateDebut)
+                .actif(true)
+                .build();
+    }
+
+    private Debt buildDebt(LocalDate date, LocalDate dueDate) {
+        return Debt.builder()
+                .id(debtId)
+                .personne("Alice")
+                .montant(BigDecimal.valueOf(100))
+                .sens(DebtType.EMPRUNT)
+                .date(date)
+                .dueDate(dueDate)
+                .rembourse(false)
+                .build();
+    }
+
+    @Test
+    void should_create_subscription_notification_when_due_tomorrow() {
+        var user = buildUser();
+        var tomorrow = LocalDate.now().plusDays(1);
+        var sub = buildSubscription(tomorrow, Frequency.MENSUEL);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(true);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(false);
+        when(subscriptionRepository.findByUserIdAndActifTrueOrderByNomAsc(userId)).thenReturn(List.of(sub));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.SUBSCRIPTION_DUE), eq(subscriptionId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService).createNotification(
+                eq(userId),
+                eq(NotificationType.SUBSCRIPTION_DUE),
+                eq("Abonnement Netflix"),
+                eq("Abonnement Netflix — échéance demain"),
+                eq(EntityType.SUBSCRIPTION),
+                eq(subscriptionId)
+        );
+        verify(notificationService).purgeOldNotifications(userId);
+    }
+
+    @Test
+    void should_create_debt_notification_when_due_tomorrow() {
+        var user = buildUser();
+        var tomorrow = LocalDate.now().plusDays(1);
+        var debt = buildDebt(tomorrow, tomorrow);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(false);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(true);
+        when(debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId)).thenReturn(List.of(debt));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.DEBT_DUE), eq(debtId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService).createNotification(
+                eq(userId),
+                eq(NotificationType.DEBT_DUE),
+                eq("Dette Alice"),
+                eq("Dette envers Alice — échéance demain"),
+                eq(EntityType.DEBT),
+                eq(debtId)
+        );
+        verify(notificationService).purgeOldNotifications(userId);
+    }
+
+    @Test
+    void should_not_create_notification_when_type_disabled() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(false);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(false);
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(subscriptionRepository, never()).findByUserIdAndActifTrueOrderByNomAsc(any());
+        verify(debtRepository, never()).findByUserIdAndRembourseFalseOrderByDateDesc(any());
+    }
+
+    @Test
+    void should_not_create_notification_when_subscription_inactive() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(true);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(false);
+        when(subscriptionRepository.findByUserIdAndActifTrueOrderByNomAsc(userId)).thenReturn(List.of());
+
+        notificationScheduler.runDailyJob();
+
+        verify(subscriptionRepository).findByUserIdAndActifTrueOrderByNomAsc(userId);
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_calculate_next_due_date_when_monthly() {
+        ZoneId zoneId = ZoneId.of("Europe/Paris");
+        LocalDate dateDebut = LocalDate.now(zoneId).withDayOfMonth(15).minusMonths(3);
+
+        LocalDate result = notificationScheduler.getNextDueDate(dateDebut, Frequency.MENSUEL, zoneId);
+
+        assertThat(result).isAfterOrEqualTo(LocalDate.now(zoneId));
+        assertThat(result.getDayOfMonth()).isEqualTo(15);
+    }
+
+    @Test
+    void should_calculate_next_due_date_when_yearly() {
+        ZoneId zoneId = ZoneId.of("Europe/Paris");
+        LocalDate dateDebut = LocalDate.now(zoneId).withDayOfMonth(15).minusYears(3);
+
+        LocalDate result = notificationScheduler.getNextDueDate(dateDebut, Frequency.ANNUEL, zoneId);
+
+        assertThat(result).isAfterOrEqualTo(LocalDate.now(zoneId));
+        assertThat(result.getDayOfMonth()).isEqualTo(15);
+        assertThat(result.getMonthValue()).isEqualTo(dateDebut.getMonthValue());
+    }
+
+    @Test
+    void should_clamp_day_when_month_has_fewer_days() {
+        ZoneId zoneId = ZoneId.of("Europe/Paris");
+        LocalDate dateDebut = LocalDate.of(2025, 1, 31);
+
+        LocalDate result = notificationScheduler.getNextDueDate(dateDebut, Frequency.MENSUEL, zoneId);
+
+        assertThat(result).isAfterOrEqualTo(LocalDate.now(zoneId));
+        assertThat(result.getDayOfMonth()).isLessThanOrEqualTo(31);
+    }
+
+    @Test
+    void should_purge_old_notifications_when_job_runs() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(false);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(false);
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService).purgeOldNotifications(userId);
+    }
+
+    @Test
+    void should_not_create_debt_notification_when_due_date_is_null() {
+        var user = buildUser();
+        var tomorrow = LocalDate.now().plusDays(1);
+        var debt = buildDebt(tomorrow, null);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(false);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(true);
+        when(debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId)).thenReturn(List.of(debt));
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_not_create_duplicate_notification_when_already_exists_today() {
+        var user = buildUser();
+        var tomorrow = LocalDate.now().plusDays(1);
+        var debt = buildDebt(tomorrow, tomorrow);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.SUBSCRIPTION_DUE)).thenReturn(false);
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)).thenReturn(true);
+        when(debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId)).thenReturn(List.of(debt));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.DEBT_DUE), eq(debtId), any(LocalDateTime.class))).thenReturn(true);
+
+        notificationScheduler.runDailyJob();
+
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+}
