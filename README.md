@@ -210,15 +210,15 @@ budget/
 
 ```
 api/src/main/java/fr/kksdev/budget/api/
-├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, ExchangeRate, Preference)
+├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, ExchangeRate, Preference, Notification)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType
 ```
 
 ### Frontend (app/)

@@ -72,7 +72,7 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`, `Feature`, `Currency`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`, `Feature`, `Currency`, `NotificationType`, `EntityType`.
 
 ### Entites
 
@@ -80,12 +80,13 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
 - **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), productId (UUID, nullable, FK → Product), updatedAt. FK → User.
 - **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
-- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, rembourse, category (FK → Category), updatedAt. FK → User.
+- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, dueDate (LocalDate, nullable), rembourse, category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
 - **Product** : nom, description (nullable), icone (nullable), imageUrl (nullable), prixAchat, prixVente, stock, totalVendu, actif, createdAt, updatedAt. FK → User.
-- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), currencies (List\<Currency\>, default [EUR]), updatedAt. @OneToOne → User.
+- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), currencies (List\<Currency\>, default [EUR]), enabledNotificationTypes (List\<NotificationType\>, nullable), timezone (String, default "Europe/Paris"), updatedAt. @OneToOne → User.
 - **ExchangeRate** : baseCurrency (Currency), targetCurrency (Currency), rate (BigDecimal, precision 20 scale 6), updatedAt. UNIQUE(user_id, base_currency, target_currency). FK → User.
+- **Notification** : type (NotificationType), entityType (EntityType), entityId (UUID), title, body, read (Boolean, default false), readAt (LocalDateTime, nullable), createdAt. FK → User.
 
 ### Environnements
 
@@ -97,7 +98,7 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 ### Securite
 
 - JWT stateless. Access token (15min) dans header `Authorization: Bearer <token>`. Refresh token (30j) pour renouvellement.
-- Routes publiques : `/auth/**`, `/error`, `/actuator/health`. Tout le reste necessite un JWT valide.
+- Routes publiques : `/auth/**`, `/error`, `/actuator/health`, `/ws/**` (auth WebSocket via STOMP CONNECT frame). Tout le reste necessite un JWT valide.
 - Endpoints auth : `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`.
 - Context path : `/api`. `JwtFilter` valide le token avant chaque requete.
 

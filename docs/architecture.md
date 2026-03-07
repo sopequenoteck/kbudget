@@ -92,6 +92,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | sens | Enum | EMPRUNT / PRET |
 | date | LocalDate | Date |
 | rembourse | Boolean | Rembourse ou non |
+| dueDate | LocalDate | Date d'echeance (nullable) |
 | category | Category | FK → Category (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
@@ -147,10 +148,12 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | shopAccountId | UUID | Compte associe a la boutique (nullable) |
 | includeShopInBalance | Boolean | Inclure le stock boutique dans le solde total (default false) |
 | currencies | List\<Currency\> | Ordre des devises — [0] = devise principale (VARCHAR via converter) |
+| enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
+| timezone | String | Fuseau horaire (default "Europe/Paris") |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
 
 ### ExchangeRate
 
@@ -164,6 +167,21 @@ Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `X
 | user | User | FK → User |
 
 Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatique des taux lors du changement de devise principale via `rebaseRates()`.
+
+### Notification
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE |
+| entityType | EntityType | SUBSCRIPTION / DEBT |
+| entityId | UUID | ID de l'entite liee |
+| title | String | Titre de la notification |
+| body | String | Corps du message |
+| read | Boolean | Lue ou non (default false) |
+| readAt | LocalDateTime | Date de lecture (nullable) |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
 
 ## Architecture frontend
 
