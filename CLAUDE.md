@@ -272,6 +272,8 @@ Approche **signals-first** obligatoire :
 - N/A (aucun changement de modele de donnees) (069-phosphor-icons-migration)
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio (070-currency-dashboard)
 - PostgreSQL 15+ (nouvelle table `exchange_rates`, enrichissement `user_preferences`), SQLite/Drift non utilise (taux serveur uniquement) (070-currency-dashboard)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Spring WebSocket + STOMP, Angular 21 + @stomp/stompjs, Flutter >= 3.27 + stomp_dart_client + flutter_local_notifications (072-notification-system)
+- PostgreSQL 15+ (table `notifications`, enrichissement `user_preferences`) (072-notification-system)
 
 ### Backend (api/)
 
