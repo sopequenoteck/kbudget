@@ -20,7 +20,7 @@ class SettingsSection {
   final String? route;
 
   const SettingsSection({
-    required PhosphorIconData this.icon,
+    required this.icon,
     required this.iconColor,
     required this.title,
     required this.description,
@@ -55,6 +55,14 @@ const settingsSections = <SettingsSection>[
     description: 'Thème, taille texte',
     group: SettingsGroup.general,
     route: '/settings/appearance',
+  ),
+  SettingsSection(
+    icon: PhosphorIconsRegular.bell,
+    iconColor: Colors.amber,
+    title: 'Notifications',
+    description: 'Types d\'alertes et fuseau horaire',
+    group: SettingsGroup.general,
+    route: '/settings/notifications',
   ),
   // Gestion
   SettingsSection(

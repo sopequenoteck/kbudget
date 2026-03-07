@@ -24,6 +24,7 @@ import 'package:k_budget/src/features/onboarding/presentation/server_setup_scree
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
+import 'package:k_budget/src/features/notifications/presentation/notification_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
@@ -53,8 +54,13 @@ import 'package:k_budget/src/features/transactions/application/transaction_notif
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/services/local_notification_service.dart';
+import 'package:k_budget/src/services/stomp_service.dart';
+import 'package:k_budget/src/utils/env_config.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -290,6 +296,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const CurrencySettingsScreen(),
           ),
+          GoRoute(
+            path: RouteNames.settingsNotifications,
+            name: RouteNames.settingsNotificationsName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const NotificationSettingsScreen(),
+          ),
         ],
       ),
     ],
@@ -307,6 +319,57 @@ class _ShellScaffold extends ConsumerStatefulWidget {
 
 class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
   bool _isModalShowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectStomp();
+  }
+
+  @override
+  void dispose() {
+    try {
+      ref.read(stompServiceProvider).disconnect();
+    } catch (_) {
+      // Ignore: provider may not be available during test teardown
+    }
+    super.dispose();
+  }
+
+  Future<void> _connectStomp() async {
+    try {
+      final configRepo = ref.read(appConfigRepositoryProvider);
+      final dataMode = await configRepo.getDataMode();
+      if (dataMode != DataMode.server) return;
+
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      if (token == null) return;
+
+      final serverUrl = await configRepo.getServerUrl();
+      final baseUrl = (serverUrl ?? EnvConfig.apiBaseUrl)
+          .replaceFirst('https', 'wss')
+          .replaceFirst('http', 'ws')
+          .replaceFirst('/api', '/api/ws');
+
+      final stompService = ref.read(stompServiceProvider);
+      final localNotificationService = ref.read(localNotificationServiceProvider);
+
+      stompService.connect(
+        token: token,
+        baseUrl: baseUrl,
+        localNotificationService: localNotificationService,
+        onReconnect: () {
+          ref.read(notificationNotifierProvider.notifier).loadItems();
+        },
+      );
+
+      // Activer le listener STOMP → NotificationNotifier
+      ref.read(notificationStompListenerProvider);
+    } catch (_) {
+      // Ignore: plugin not available in test or local mode
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

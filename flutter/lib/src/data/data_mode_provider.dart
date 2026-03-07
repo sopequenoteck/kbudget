@@ -27,8 +27,11 @@ import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_local.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_remote.dart';
+import 'package:k_budget/src/data/remote/data_sources/notification_remote_data_source.dart';
+import 'package:k_budget/src/domain/repositories/notification_repository.dart';
 import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_remote_data_source.dart';
 import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_repository_impl.dart';
+import 'package:k_budget/src/features/notifications/data/notification_repository_remote.dart';
 import 'package:k_budget/src/features/shop/data/product_repository_remote.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_local.dart';
@@ -238,4 +241,10 @@ final exchangeRateRepositoryProvider = Provider<ExchangeRateRepository>((ref) {
     loading: () => throw StateError('Dio not ready'),
     error: (e, _) => throw StateError('Dio error: $e'),
   );
+});
+
+// Notification repository provider (server-only, no local fallback)
+final notificationRepositoryProvider = FutureProvider<NotificationRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return NotificationRepositoryRemote(NotificationRemoteDataSource(dio));
 });

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/common_widgets/user_menu_button.dart';
+import 'package:k_budget/src/features/notifications/presentation/notification_badge.dart';
+import 'package:k_budget/src/features/notifications/presentation/notification_panel.dart';
 
 class NavDestination {
   final IconData icon;
@@ -38,6 +40,7 @@ class AdaptiveScaffold extends StatefulWidget {
 
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   bool _sidebarExpanded = true;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const double _sidebarExpandedWidth = 220;
   static const double _sidebarCollapsedWidth = 64;
@@ -67,6 +70,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   Widget _buildNarrowLayout(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: const NotificationPanel(),
       appBar: AppBar(
         titleSpacing: 12,
         title: Row(
@@ -84,9 +89,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           ],
         ),
         centerTitle: false,
-        actions: const [
-          UserMenuButton(),
-          SizedBox(width: 8),
+        actions: [
+          NotificationBadge(
+            onTap: () => _scaffoldKey.currentState?.openEndDrawer(),
+          ),
+          const UserMenuButton(),
+          const SizedBox(width: 8),
         ],
       ),
       body: widget.body,
@@ -117,6 +125,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         _sidebarExpanded ? _sidebarExpandedWidth : _sidebarCollapsedWidth;
 
     return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: const NotificationPanel(),
       appBar: AppBar(
         titleSpacing: 12,
         automaticallyImplyLeading: false,
@@ -137,9 +147,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             ],
           ),
         ),
-        actions: const [
-          UserMenuButton(),
-          SizedBox(width: 16),
+        actions: [
+          NotificationBadge(
+            onTap: () => _scaffoldKey.currentState?.openEndDrawer(),
+          ),
+          const UserMenuButton(),
+          const SizedBox(width: 16),
         ],
       ),
       floatingActionButton: widget.floatingActionButton,

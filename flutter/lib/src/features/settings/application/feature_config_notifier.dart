@@ -15,6 +15,8 @@ class FeatureConfigState with _$FeatureConfigState {
   const factory FeatureConfigState({
     @Default([Feature.subscriptions, Feature.debts]) List<Feature> enabledFeatures,
     @Default(Feature.values) List<Feature> navOrder,
+    @Default(NotificationType.values) List<NotificationType> enabledNotificationTypes,
+    @Default('Europe/Paris') String timezone,
     @Default(false) bool isLoading,
     String? error,
   }) = _FeatureConfigState;
@@ -55,6 +57,10 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
       state = state.copyWith(
         enabledFeatures: prefs.enabledFeatures,
         navOrder: prefs.navOrder,
+        enabledNotificationTypes: prefs.enabledNotificationTypes.isEmpty
+            ? NotificationType.values.toList()
+            : prefs.enabledNotificationTypes,
+        timezone: prefs.timezone,
         isLoading: false,
         error: null,
       );
@@ -91,7 +97,12 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final modeAsync = ref.read(dataModeProvider);
     final mode = modeAsync.valueOrNull;
     if (mode == DataMode.server) {
-      unawaited(_syncToServer(current, navOrder: state.navOrder));
+      unawaited(_syncToServer(
+        current,
+        navOrder: state.navOrder,
+        enabledNotificationTypes: state.enabledNotificationTypes,
+        timezone: state.timezone,
+      ));
     }
   }
 
@@ -106,13 +117,50 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final modeAsync = ref.read(dataModeProvider);
     final mode = modeAsync.valueOrNull;
     if (mode == DataMode.server) {
-      unawaited(_syncToServer(state.enabledFeatures, navOrder: newOrder));
+      unawaited(_syncToServer(
+        state.enabledFeatures,
+        navOrder: newOrder,
+        enabledNotificationTypes: state.enabledNotificationTypes,
+        timezone: state.timezone,
+      ));
+    }
+  }
+
+  Future<void> updateNotificationTypes(List<NotificationType> types) async {
+    state = state.copyWith(enabledNotificationTypes: types, error: null);
+
+    final modeAsync = ref.read(dataModeProvider);
+    final mode = modeAsync.valueOrNull;
+    if (mode == DataMode.server) {
+      unawaited(_syncToServer(
+        state.enabledFeatures,
+        navOrder: state.navOrder,
+        enabledNotificationTypes: types,
+        timezone: state.timezone,
+      ));
+    }
+  }
+
+  Future<void> updateTimezone(String timezone) async {
+    state = state.copyWith(timezone: timezone, error: null);
+
+    final modeAsync = ref.read(dataModeProvider);
+    final mode = modeAsync.valueOrNull;
+    if (mode == DataMode.server) {
+      unawaited(_syncToServer(
+        state.enabledFeatures,
+        navOrder: state.navOrder,
+        enabledNotificationTypes: state.enabledNotificationTypes,
+        timezone: timezone,
+      ));
     }
   }
 
   Future<void> _syncToServer(
     List<Feature> features, {
     List<Feature>? navOrder,
+    List<NotificationType>? enabledNotificationTypes,
+    String? timezone,
   }) async {
     try {
       final dataSource =
@@ -121,6 +169,8 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
         UserPreferenceRequest(
           enabledFeatures: features,
           navOrder: navOrder,
+          enabledNotificationTypes: enabledNotificationTypes,
+          timezone: timezone,
         ),
       );
     } on Exception catch (e) {
