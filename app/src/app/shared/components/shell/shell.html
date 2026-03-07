@@ -8,6 +8,7 @@
     <img src="icons/budget-icon-no-background.svg" alt="" class="shell-brand-logo" />
     <span class="shell-brand-name">K-Budget</span>
   </a>
+  <app-notification-badge (clicked)="toggleNotificationPanel()" />
   <div class="shell-user-menu">
     <button
       class="shell-user-trigger"
@@ -207,3 +208,8 @@
     }
   }
 </app-modal>
+
+<app-notification-panel
+  [isOpen]="notificationPanelOpen()"
+  (closed)="closeNotificationPanel()"
+/>

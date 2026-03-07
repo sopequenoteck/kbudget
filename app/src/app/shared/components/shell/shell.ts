@@ -32,6 +32,10 @@ import {
 
 import { AuthService } from '../../../core/services/auth';
 import { PreferenceService } from '../../../core/services/preference';
+import { NotificationService } from '../../../core/services/notification';
+import { StompService } from '../../../core/services/stomp';
+import { NotificationBadge } from '../notification-badge/notification-badge';
+import { NotificationPanel } from '../notification-panel/notification-panel';
 import { FEATURES, type Feature } from '../../../core/models/preference.model';
 import { ThemeService } from '../../../core/services/theme';
 import { TransactionService } from '../../../core/services/transaction';
@@ -87,6 +91,8 @@ import { Modal } from '../modal/modal';
     TransferForm,
     ProductForm,
     SellDialog,
+    NotificationBadge,
+    NotificationPanel,
   ],
   providers: [
     provideIcons({
@@ -110,7 +116,9 @@ import { Modal } from '../modal/modal';
 })
 export class Shell {
   private readonly authService = inject(AuthService);
-  readonly preferenceService = inject(PreferenceService);
+  private readonly preferenceService = inject(PreferenceService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly stompService = inject(StompService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
@@ -138,6 +146,7 @@ export class Shell {
       .slice(0, 2);
   });
   readonly speedDialOpen = signal(false);
+  readonly notificationPanelOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
   readonly subscriptionFrequency = signal(Frequency.MENSUEL);
@@ -212,6 +221,15 @@ export class Shell {
       }
     });
 
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        this.notificationService.loadUnreadCount();
+        this.stompService.connect();
+      } else {
+        this.stompService.disconnect();
+      }
+    });
+
     // Redirect if current route is a disabled feature
     effect(() => {
       const items = this.navItems();
@@ -227,6 +245,18 @@ export class Shell {
         }
       }
     });
+  }
+
+  toggleNotificationPanel(): void {
+    const wasOpen = this.notificationPanelOpen();
+    this.notificationPanelOpen.set(!wasOpen);
+    if (!wasOpen) {
+      this.notificationService.loadNotifications();
+    }
+  }
+
+  closeNotificationPanel(): void {
+    this.notificationPanelOpen.set(false);
   }
 
   toggleSidebar(): void {

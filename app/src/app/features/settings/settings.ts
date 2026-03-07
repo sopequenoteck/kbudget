@@ -54,7 +54,7 @@ const SECTIONS: SettingsSection[] = [
     description: 'Configurer les alertes',
     icon: 'phosphorBell',
     route: 'notifications',
-    status: 'placeholder',
+    status: 'active',
   },
   {
     id: 'profile',

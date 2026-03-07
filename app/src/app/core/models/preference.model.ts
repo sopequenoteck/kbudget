@@ -1,3 +1,5 @@
+import { type NotificationType } from './notification.model';
+
 export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'SHOP';
 
 export interface FeatureMetadata {
@@ -42,6 +44,8 @@ export interface UserPreference {
   shopAccountId: string | null;
   includeShopInBalance: boolean;
   currencies?: string[];
+  enabledNotificationTypes?: NotificationType[];
+  timezone?: string;
 }
 
 export interface UserPreferenceRequest {
@@ -50,4 +54,6 @@ export interface UserPreferenceRequest {
   shopAccountId?: string | null;
   includeShopInBalance?: boolean | null;
   currencies?: string[] | null;
+  enabledNotificationTypes?: NotificationType[] | null;
+  timezone?: string | null;
 }

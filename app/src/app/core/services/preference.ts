@@ -2,6 +2,7 @@ import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
+import { type NotificationType } from '../models/notification.model';
 import {
   type Feature,
   type UserPreference,
@@ -18,6 +19,8 @@ export class PreferenceService {
   readonly navOrder = signal<Feature[]>([]);
   readonly currencies = signal<string[]>(['EUR']);
   readonly primaryCurrency = computed(() => this.currencies()[0] ?? 'EUR');
+  readonly enabledNotificationTypes = signal<NotificationType[]>(['SUBSCRIPTION_DUE', 'DEBT_DUE']);
+  readonly timezone = signal<string>('Europe/Paris');
   readonly error = signal<string | null>(null);
 
   async loadPreferences(): Promise<void> {
@@ -28,6 +31,8 @@ export class PreferenceService {
       this.enabledFeatures.set(prefs.enabledFeatures);
       this.navOrder.set(prefs.navOrder);
       this.currencies.set(prefs.currencies ?? ['EUR']);
+      this.enabledNotificationTypes.set(prefs.enabledNotificationTypes ?? ['SUBSCRIPTION_DUE', 'DEBT_DUE']);
+      this.timezone.set(prefs.timezone ?? 'Europe/Paris');
       this.error.set(null);
     } catch (e) {
       if (isDevMode()) console.error('Failed to load preferences:', e);
@@ -73,6 +78,8 @@ export class PreferenceService {
       enabledFeatures: this.enabledFeatures(),
       navOrder: this.navOrder(),
       currencies: this.currencies(),
+      enabledNotificationTypes: this.enabledNotificationTypes(),
+      timezone: this.timezone(),
       ...request,
     };
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged)).catch(
@@ -81,6 +88,16 @@ export class PreferenceService {
         this.error.set('Impossible de sauvegarder les préférences');
       },
     );
+  }
+
+  updateNotificationTypes(types: NotificationType[]): void {
+    this.enabledNotificationTypes.set(types);
+    this.update({ enabledNotificationTypes: types });
+  }
+
+  updateTimezone(tz: string): void {
+    this.timezone.set(tz);
+    this.update({ timezone: tz });
   }
 
   reorderNavigation(newNavOrder: Feature[]): void {

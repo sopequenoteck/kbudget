@@ -34,8 +34,10 @@ export const SETTINGS_ROUTES: Routes = [
   },
   {
     path: 'notifications',
-    loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Notifications', icon: 'phosphorBell' },
+    loadComponent: () =>
+      import('./components/notification-settings/notification-settings').then(
+        (m) => m.NotificationSettings,
+      ),
   },
   {
     path: 'data',
