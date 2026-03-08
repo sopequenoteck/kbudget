@@ -10,6 +10,8 @@ class RouteNames {
   static const String debts = '/debts';
   static const String settings = '/settings';
   static const String shop = '/shop';
+  static const String budgets = '/budgets';
+  static const String budgetDetails = '/budgets/details';
   static const String login = '/login';
   static const String register = '/register';
   static const String lock = '/lock';
@@ -44,6 +46,8 @@ class RouteNames {
   static const String settingsCurrenciesName = 'settings-currencies';
   static const String settingsNotificationsName = 'settings-notifications';
   static const String shopName = 'shop';
+  static const String budgetsName = 'budgets';
+  static const String budgetDetailsName = 'budget-details';
   static const String settingsAccountsNewName = 'settings-accounts-new';
   static const String settingsAccountsEditName = 'settings-accounts-edit';
 

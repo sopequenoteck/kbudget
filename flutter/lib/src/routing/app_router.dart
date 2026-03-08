@@ -33,6 +33,11 @@ import 'package:k_budget/src/features/categories/presentation/screens/category_f
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
+import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
+import 'package:k_budget/src/features/budgets/presentation/budget_list_screen.dart';
+import 'package:k_budget/src/features/budgets/presentation/budget_detail_screen.dart';
+import 'package:k_budget/src/features/budgets/presentation/widgets/budget_form.dart';
+import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
 import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
@@ -205,6 +210,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     productId: state.pathParameters['id']!,
                     initialProduct: product,
                   );
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: RouteNames.budgets,
+            name: RouteNames.budgetsName,
+            builder: (context, state) => const BudgetListScreen(),
+            routes: [
+              GoRoute(
+                path: 'details',
+                name: RouteNames.budgetDetailsName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final month = state.uri.queryParameters['month'];
+                  return BudgetDetailScreen(month: month);
                 },
               ),
             ],
@@ -426,6 +447,14 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
             label: 'Boutique',
           ),
         ),
+        Feature.budgets => (
+          RouteNames.budgets,
+          const NavDestination(
+            icon: PhosphorIconsRegular.chartPie,
+            selectedIcon: PhosphorIconsFill.chartPie,
+            label: 'Budgets',
+          ),
+        ),
       };
       paths.add(path);
       destinations.add(destination);
@@ -490,6 +519,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     } else if (state.type == ModalType.product) {
       return _ProductFormConsumer(
         product: state.entity as Product?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } else if (state.type == ModalType.budget) {
+      return _BudgetFormConsumer(
+        budget: state.entity as Budget?,
         onDone: () {
           Navigator.of(context).pop();
         },
@@ -703,6 +739,41 @@ class _ProductFormConsumer extends ConsumerWidget {
         }
         onDone();
       },
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _BudgetFormConsumer extends ConsumerWidget {
+  final Budget? budget;
+  final VoidCallback onDone;
+
+  const _BudgetFormConsumer({
+    this.budget,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    return BudgetForm(
+      budget: budget,
+      onSaved: (b) async {
+        if (budget == null) {
+          await ref.read(budgetNotifierProvider.notifier).create(b);
+        } else {
+          await ref.read(budgetNotifierProvider.notifier).update(b);
+        }
+        onDone();
+      },
+      onDeleted: budget != null
+          ? (id) async {
+              await ref.read(budgetNotifierProvider.notifier).delete(id);
+              onDone();
+            }
+          : null,
       onCancelled: onDone,
     );
   }

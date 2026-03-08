@@ -44,6 +44,9 @@ dependencies:
   # Shimmer (skeleton loading)
   shimmer: ^3.0.0
 
+  # Charts
+  fl_chart: ^0.70.2
+
   # Emoji picker
   emoji_picker_flutter: ^4.4.0
 

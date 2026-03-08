@@ -36,6 +36,11 @@ import 'package:k_budget/src/features/shop/data/product_repository_remote.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_local.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_remote.dart';
+import 'package:k_budget/src/data/local/daos/budget_dao.dart';
+import 'package:k_budget/src/data/remote/data_sources/budget_remote_data_source.dart';
+import 'package:k_budget/src/domain/repositories/budget_repository.dart';
+import 'package:k_budget/src/features/budgets/data/budget_repository_local.dart';
+import 'package:k_budget/src/features/budgets/data/budget_repository_remote.dart';
 import 'package:k_budget/src/features/debts/data/debt_repository_local.dart';
 import 'package:k_budget/src/features/debts/data/debt_repository_remote.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -212,6 +217,32 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
     error: (_, _) {
       final db = ref.watch(databaseProvider);
       return AccountRepositoryLocal(AccountDao(db));
+    },
+  );
+});
+
+final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
+  final modeAsync = ref.watch(dataModeProvider);
+  return modeAsync.when(
+    data: (mode) {
+      if (mode == DataMode.server) {
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => BudgetRepositoryRemote(BudgetRemoteDataSource(dio)),
+          loading: () => BudgetRepositoryLocal(BudgetDao(ref.watch(databaseProvider))),
+          error: (_, _) => BudgetRepositoryLocal(BudgetDao(ref.watch(databaseProvider))),
+        );
+      }
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
+    },
+    loading: () {
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
+    },
+    error: (_, _) {
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
     },
   );
 });

@@ -30,6 +30,7 @@ void main() {
   late MockDebtRepository mockDebtRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
+  late MockBudgetRepository mockBudgetRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -45,6 +46,7 @@ void main() {
     mockDebtRepo = MockDebtRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockExchangeRateRepo = MockExchangeRateRepository();
+    mockBudgetRepo = MockBudgetRepository();
 
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
@@ -60,6 +62,8 @@ void main() {
         (_) async => [Feature.subscriptions, Feature.debts]);
     when(mockRepo.getNavOrder())
         .thenAnswer((_) async => Feature.values.toList());
+    when(mockBudgetRepo.getAll(includeInactive: false)).thenAnswer((_) async => []);
+    when(mockBudgetRepo.getOverview()).thenAnswer((_) async => throw Exception('Not configured'));
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
@@ -73,6 +77,7 @@ void main() {
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
+        budgetRepositoryProvider.overrideWithValue(mockBudgetRepo),
         currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],

@@ -1,1 +1,1 @@
-enum Frequency { mensuel, annuel }
+enum Frequency { hebdomadaire, mensuel, annuel }

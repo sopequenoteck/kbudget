@@ -1,5 +1,8 @@
 export 'account.dart';
 export 'app_config.dart';
+export 'budget.dart';
+export 'budget_history.dart';
+export 'budget_overview.dart';
 export 'exchange_rate.dart';
 export 'category.dart';
 export 'debt.dart';

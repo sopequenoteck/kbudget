@@ -12,6 +12,7 @@ import 'package:k_budget/src/features/dashboard/presentation/widgets/currency_pi
 import 'package:k_budget/src/features/dashboard/presentation/widgets/hero_account_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/mini_cards_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/monthly_summary_section.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/budget_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -157,6 +158,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
             // US3 — Dernieres operations
             const RecentTransactionsSection(),
+            const SizedBox(height: AppSpacing.space5),
+
+            // US5 — Resume budgets
+            const BudgetSummarySection(),
             const SizedBox(height: AppSpacing.space4),
           ],
         ),

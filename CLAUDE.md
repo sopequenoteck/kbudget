@@ -279,6 +279,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (table `notifications`, enrichissement `user_preferences`) (072-notification-system)
 - PostgreSQL 15+ (Flyway V17) (073-backend-budget-categories)
 - TypeScript 5.9 + Angular 21, Angular Reactive Forms, ng2-charts (Chart.js), @ng-icons/phosphor-icons (074-angular-budget-categories)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, drift, dio, fl_chart (nouveau), shimmer, intl, phosphor_flutter (075-flutter-budget-categories)
+- SQLite/Drift (local) + API REST/Dio (remote) via strategy pattern `dataModeProvider` (075-flutter-budget-categories)
 
 ### Backend (api/)
 

@@ -139,6 +139,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     final totals = <Currency, double>{};
     for (final sub in allItems.where((s) => s.actif)) {
       final monthly = switch (sub.frequence) {
+        Frequency.hebdomadaire => sub.montant * 4.33,
         Frequency.mensuel => sub.montant,
         Frequency.annuel => sub.montant / 12,
       };

@@ -230,6 +230,7 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
         ref.read(subscriptionNotifierProvider).items.isNotEmpty,
       Feature.debts => ref.read(debtNotifierProvider).items.isNotEmpty,
       Feature.shop => false,
+      Feature.budgets => false,
     };
   }
 }

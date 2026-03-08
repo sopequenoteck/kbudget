@@ -3,6 +3,7 @@ import 'package:k_budget/src/data/local/database.dart' as db;
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/account.dart' as domain;
+import 'package:k_budget/src/domain/models/budget.dart' as domain;
 import 'package:k_budget/src/domain/models/category.dart' as domain;
 import 'package:k_budget/src/domain/models/debt.dart' as domain;
 import 'package:k_budget/src/domain/models/subscription.dart' as domain;
@@ -140,4 +141,28 @@ db.DebtsCompanion debtToDb(domain.Debt d) => db.DebtsCompanion(
       rembourse: Value(d.rembourse),
       categoryId: Value(d.categoryId),
       updatedAt: Value(d.updatedAt),
+    );
+
+// --- Budget ---
+
+domain.Budget budgetFromDb(db.Budget row) => domain.Budget(
+      id: row.id,
+      categoryId: row.categoryId,
+      montant: row.montant,
+      frequence: Frequency.values.byNameOrDefault(row.frequence, Frequency.mensuel),
+      currency: Currency.values.byNameOrDefault(row.currency, Currency.eur),
+      seuilNotification: row.seuilNotification,
+      actif: row.actif,
+      updatedAt: row.updatedAt,
+    );
+
+db.BudgetsCompanion budgetToDb(domain.Budget b) => db.BudgetsCompanion(
+      id: Value(b.id),
+      categoryId: Value(b.categoryId),
+      montant: Value(b.montant),
+      frequence: Value(b.frequence.name),
+      currency: Value(b.currency.name),
+      seuilNotification: Value(b.seuilNotification),
+      actif: Value(b.actif),
+      updatedAt: Value(b.updatedAt),
     );
