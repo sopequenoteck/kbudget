@@ -122,6 +122,7 @@ public class NotificationScheduler {
         LocalDate nextDue = dateDebut;
         while (nextDue.isBefore(today)) {
             nextDue = switch (frequence) {
+                case HEBDOMADAIRE -> nextDue.plusWeeks(1);
                 case MENSUEL -> nextDue.plusMonths(1);
                 case ANNUEL -> nextDue.plusYears(1);
             };

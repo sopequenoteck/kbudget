@@ -275,6 +275,7 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (nouvelle table `exchange_rates`, enrichissement `user_preferences`), SQLite/Drift non utilise (taux serveur uniquement) (070-currency-dashboard)
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Spring WebSocket + STOMP, Angular 21 + @stomp/stompjs, Flutter >= 3.27 + stomp_dart_client + flutter_local_notifications (072-notification-system)
 - PostgreSQL 15+ (table `notifications`, enrichissement `user_preferences`) (072-notification-system)
+- PostgreSQL 15+ (Flyway V17) (073-backend-budget-categories)
 
 ### Backend (api/)
 
