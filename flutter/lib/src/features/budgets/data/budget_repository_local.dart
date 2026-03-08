@@ -43,33 +43,91 @@ class BudgetRepositoryLocal implements BudgetRepository {
 
   @override
   Future<BudgetOverview> getOverview() async {
-    // Local mode: return overview from active budgets without spending calculation
-    final budgets = await getAll();
-    final totalBudget = budgets.fold<double>(0, (sum, b) => sum + b.montant);
+    final now = DateTime.now();
+    final budgetRows = await _dao.getActiveBudgetsWithCategory();
+    final spentMap = await _dao.getSpentByCategoryForMonth(now.month, now.year);
+
+    final items = budgetRows.map((row) {
+      final categoryId = row.read<String>('category_id');
+      final montant = row.read<double>('montant');
+      final frequence = row.read<String>('frequence');
+      final currency = row.read<String>('currency');
+      final montantNormalise = _normalize(montant, frequence);
+      final depense = spentMap[categoryId] ?? 0.0;
+      final pct = montantNormalise > 0 ? (depense / montantNormalise * 100) : 0.0;
+      return BudgetOverviewItem(
+        budgetId: row.read<String>('id'),
+        categoryId: categoryId,
+        categoryNom: row.read<String>('category_nom'),
+        categoryIcone: row.read<String>('category_icone'),
+        categoryCouleur: row.read<String>('category_couleur'),
+        montantBudget: montant,
+        montantBudgetNormalise: montantNormalise,
+        currency: currency,
+        montantDepense: depense,
+        percentage: pct,
+        frequence: frequence,
+      );
+    }).toList();
+
+    final totalBudget = items.fold<double>(0, (s, i) => s + i.montantBudgetNormalise);
+    final totalSpent = items.fold<double>(0, (s, i) => s + i.montantDepense);
+    final currency = items.isNotEmpty ? items.first.currency : 'EUR';
+
     return BudgetOverview(
       month: _currentMonth(),
       totalBudget: totalBudget,
-      totalSpent: 0,
-      percentage: 0,
-      currency: 'EUR',
-      items: [],
+      totalSpent: totalSpent,
+      percentage: totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0,
+      currency: currency,
+      items: items,
     );
   }
 
   @override
   Future<BudgetHistory> getHistory(String month) async {
-    final snapshots = await _dao.getSnapshotsByMonth(month);
-    final totalBudget = snapshots.fold<double>(0, (sum, s) => sum + s.montantBudget);
-    final totalSpent = snapshots.fold<double>(0, (sum, s) => sum + s.montantDepense);
+    final rows = await _dao.getSnapshotsWithCategory(month);
+
+    final items = rows.map((row) {
+      final montantBudget = row.read<double>('montant_budget');
+      final depense = row.read<double>('montant_depense');
+      final pct = montantBudget > 0 ? (depense / montantBudget * 100) : 0.0;
+      final createdAtRaw = row.readNullable<String>('created_at');
+      final createdAt =
+          createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null;
+      return BudgetHistoryItem(
+        categoryId: row.read<String>('category_id'),
+        categoryNom: row.read<String>('category_nom'),
+        categoryIcone: row.read<String>('category_icone'),
+        categoryCouleur: row.read<String>('category_couleur'),
+        montantBudget: montantBudget,
+        currency: row.read<String>('currency'),
+        tauxChange: row.readNullable<double>('taux_change'),
+        montantDepense: depense,
+        percentage: pct,
+        createdAt: createdAt,
+      );
+    }).toList();
+
+    final totalBudget = items.fold<double>(0, (s, i) => s + i.montantBudget);
+    final totalSpent = items.fold<double>(0, (s, i) => s + i.montantDepense);
+    final currency = items.isNotEmpty ? items.first.currency : 'EUR';
+
     return BudgetHistory(
       month: month,
       totalBudget: totalBudget,
       totalSpent: totalSpent,
       percentage: totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0,
-      currency: 'EUR',
-      items: [],
+      currency: currency,
+      items: items,
     );
   }
+
+  double _normalize(double montant, String frequence) => switch (frequence) {
+        'hebdomadaire' => montant * 52 / 12,
+        'annuel' => montant / 12,
+        _ => montant,
+      };
 
   String _currentMonth() {
     final now = DateTime.now();
