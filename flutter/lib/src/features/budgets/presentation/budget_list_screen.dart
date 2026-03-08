@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/month_selector.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -14,6 +15,7 @@ import 'package:k_budget/src/features/budgets/presentation/widgets/budget_summar
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/features/budgets/presentation/budget_month_helpers.dart';
+import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class BudgetListScreen extends ConsumerStatefulWidget {
@@ -90,16 +92,29 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                 horizontal: AppSpacing.space4,
                 vertical: AppSpacing.space3,
               ),
-              child: Center(
-                child: MonthSelector(
-                  initialMonth: _selectedMonth,
-                  initialYear: _selectedYear,
-                  onChanged: (month, year) {
-                    if (!isPastMonthLimit(month, year)) {
-                      _onMonthChanged(month, year);
-                    }
-                  },
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Spacer(),
+                  MonthSelector(
+                    initialMonth: _selectedMonth,
+                    initialYear: _selectedYear,
+                    onChanged: (month, year) {
+                      if (!isPastMonthLimit(month, year)) {
+                        _onMonthChanged(month, year);
+                      }
+                    },
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const PhosphorIcon(
+                      PhosphorIconsRegular.chartBar,
+                      size: 24,
+                    ),
+                    onPressed: () => context.push(RouteNames.budgetDetails),
+                    tooltip: 'Voir les graphiques',
+                  ),
+                ],
               ),
             ),
           ),

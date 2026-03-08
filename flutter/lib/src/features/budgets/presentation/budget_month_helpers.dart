@@ -15,7 +15,7 @@ mixin BudgetMonthHelpers {
 
   bool isPastMonthLimit(int month, int year) {
     final now = DateTime.now();
-    final limit = DateTime(now.year, now.month - 12);
+    final limit = DateTime(now.year - 1, now.month);
     final selected = DateTime(year, month);
     return selected.isBefore(limit);
   }

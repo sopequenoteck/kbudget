@@ -37,6 +37,11 @@ class _FabMenuState extends ConsumerState<FabMenu>
       modalType: ModalType.debt,
     ),
     _SpeedDialItem(
+      icon: PhosphorIconsBold.chartPie,
+      label: 'Budget',
+      modalType: ModalType.budget,
+    ),
+    _SpeedDialItem(
       icon: PhosphorIconsBold.arrowsLeftRight,
       label: 'Virement',
       modalType: ModalType.transfer,
@@ -97,6 +102,9 @@ class _FabMenuState extends ConsumerState<FabMenu>
             }
             if (item.modalType == ModalType.debt) {
               return enabledFeatures.contains(Feature.debts);
+            }
+            if (item.modalType == ModalType.budget) {
+              return enabledFeatures.contains(Feature.budgets);
             }
             return true;
           })

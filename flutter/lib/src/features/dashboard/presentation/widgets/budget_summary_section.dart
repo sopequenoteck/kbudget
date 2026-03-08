@@ -12,11 +12,28 @@ import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:shimmer/shimmer.dart';
 
-class BudgetSummarySection extends ConsumerWidget {
+class BudgetSummarySection extends ConsumerStatefulWidget {
   const BudgetSummarySection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetSummarySection> createState() =>
+      _BudgetSummarySectionState();
+}
+
+class _BudgetSummarySectionState extends ConsumerState<BudgetSummarySection> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(budgetNotifierProvider);
+      if (state.overview == null && !state.isLoading) {
+        ref.read(budgetNotifierProvider.notifier).loadOverview();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final featureConfig = ref.watch(featureConfigNotifierProvider);
 
     if (!featureConfig.enabledFeatures.contains(Feature.budgets)) {
@@ -24,21 +41,6 @@ class BudgetSummarySection extends ConsumerWidget {
     }
 
     final budgetState = ref.watch(budgetNotifierProvider);
-
-    // Charger l'overview si non chargé
-    ref.listen(budgetNotifierProvider, (previous, next) {
-      if (previous?.overview == null && next.overview == null && !next.isLoading) {
-        ref.read(budgetNotifierProvider.notifier).loadOverview();
-      }
-    });
-
-    if (budgetState.overview == null && !budgetState.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (ref.read(budgetNotifierProvider).overview == null) {
-          ref.read(budgetNotifierProvider.notifier).loadOverview();
-        }
-      });
-    }
 
     if (budgetState.isLoading && budgetState.overview == null) {
       return const _BudgetSummarySkeleton();
@@ -78,7 +80,7 @@ class BudgetSummarySection extends ConsumerWidget {
               ),
             ),
             TextButton(
-              onPressed: () => context.push(RouteNames.budgets),
+              onPressed: () => context.push(RouteNames.budgetDetails),
               child: const Text('Voir tout'),
             ),
           ],
