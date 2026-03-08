@@ -90,6 +90,10 @@ export class PreferenceService {
     );
   }
 
+  setCurrencies(currencies: string[]): void {
+    this.currencies.set(currencies);
+  }
+
   updateNotificationTypes(types: NotificationType[]): void {
     this.enabledNotificationTypes.set(types);
     this.update({ enabledNotificationTypes: types });

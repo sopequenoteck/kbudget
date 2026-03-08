@@ -1,6 +1,5 @@
 import { Injectable, inject, isDevMode, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ApiService } from './api';
 import { ExchangeRate } from '../models/exchange-rate.model';
 
@@ -32,21 +31,11 @@ export class ExchangeRateService {
     }
   }
 
-  getAll(): Observable<ExchangeRate[]> {
-    return this.api
-      .get<ExchangeRate[]>('/exchange-rates')
-      .pipe(tap((rates) => this._rates.set(rates)));
-  }
-
   upsert(baseCurrency: string, targetCurrency: string, rate: number): Observable<ExchangeRate> {
-    return this.api
-      .put<ExchangeRate>('/exchange-rates', { baseCurrency, targetCurrency, rate })
-      .pipe(tap(() => this.loadRates()));
+    return this.api.put<ExchangeRate>('/exchange-rates', { baseCurrency, targetCurrency, rate });
   }
 
   delete(baseCurrency: string, targetCurrency: string): Observable<void> {
-    return this.api
-      .delete<void>(`/exchange-rates/${baseCurrency}/${targetCurrency}`)
-      .pipe(tap(() => this.loadRates()));
+    return this.api.delete<void>(`/exchange-rates/${baseCurrency}/${targetCurrency}`);
   }
 }

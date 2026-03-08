@@ -1,6 +1,6 @@
 import { type NotificationType } from './notification.model';
 
-export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'SHOP';
+export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'SHOP' | 'BUDGETS';
 
 export interface FeatureMetadata {
   readonly value: Feature;
@@ -35,6 +35,14 @@ export const FEATURES: readonly FeatureMetadata[] = [
     filledIcon: 'phosphorStorefrontFill',
     description: 'Gérer vos ventes de produits',
     route: '/shop',
+  },
+  {
+    value: 'BUDGETS',
+    label: 'Budgets',
+    icon: 'phosphorChartPie',
+    filledIcon: 'phosphorChartPieFill',
+    description: 'Suivre vos budgets par catégorie',
+    route: '/budgets',
   },
 ] as const;
 
