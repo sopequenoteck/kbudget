@@ -699,16 +699,143 @@ Response `200` :
 }
 ```
 
+## Budgets
+
+### Creer `POST /api/budgets`
+
+Request :
+
+```json
+{
+  "categoryId": "uuid-category",
+  "montant": 400.00,
+  "frequence": "MENSUEL",
+  "currency": "EUR",
+  "seuilNotification": 80
+}
+```
+
+Response `200` :
+
+```json
+{
+  "id": "uuid-budget",
+  "montant": 400.00,
+  "currency": "EUR",
+  "frequence": "MENSUEL",
+  "seuilNotification": 80,
+  "actif": true,
+  "category": {
+    "id": "uuid-category",
+    "nom": "Alimentation",
+    "icone": "🛒",
+    "couleur": "#f59e0b",
+    "isSystem": false
+  },
+  "spent": 0.00,
+  "updatedAt": "2026-03-08T10:00:00"
+}
+```
+
+### Lister `GET /api/budgets`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "uuid-budget",
+    "montant": 400.00,
+    "currency": "EUR",
+    "frequence": "MENSUEL",
+    "seuilNotification": 80,
+    "actif": true,
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false },
+    "spent": 320.50,
+    "updatedAt": "2026-03-08T10:00:00"
+  }
+]
+```
+
+### Consulter `GET /api/budgets/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/budgets/{id}`
+
+Request : meme format que la creation (tous les champs optionnels sauf `categoryId`).
+
+### Supprimer `DELETE /api/budgets/{id}`
+
+Response `204` (pas de corps).
+
+### Vue mensuelle `GET /api/budgets/overview`
+
+Response `200` :
+
+```json
+{
+  "month": "2026-03",
+  "totalBudget": 1500.00,
+  "totalSpent": 980.50,
+  "percentage": 65.37,
+  "currency": "EUR",
+  "items": [
+    {
+      "budgetId": "uuid-budget",
+      "categoryId": "uuid-category",
+      "categoryNom": "Alimentation",
+      "categoryIcone": "🛒",
+      "categoryCouleur": "#f59e0b",
+      "montantBudget": 400.00,
+      "montantBudgetNormalise": 400.00,
+      "currency": "EUR",
+      "montantDepense": 320.50,
+      "percentage": 80.13,
+      "frequence": "MENSUEL"
+    }
+  ]
+}
+```
+
+### Historique `GET /api/budgets/history?month=2026-02`
+
+Response `200` :
+
+```json
+{
+  "month": "2026-02",
+  "totalBudget": 1500.00,
+  "totalSpent": 1200.00,
+  "percentage": 80.00,
+  "currency": "EUR",
+  "items": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Alimentation",
+      "categoryIcone": "🛒",
+      "categoryCouleur": "#f59e0b",
+      "montantBudget": 400.00,
+      "currency": "EUR",
+      "tauxChange": null,
+      "montantDepense": 380.00,
+      "percentage": 95.00,
+      "createdAt": "2026-03-01T00:00:00"
+    }
+  ]
+}
+```
+
 ## Valeurs des enums
 
 | Enum | Valeurs |
 |------|---------|
 | `TransactionType` | `DEPENSE`, `RECETTE` |
-| `Frequency` | `MENSUEL`, `ANNUEL` |
+| `Frequency` | `HEBDOMADAIRE`, `MENSUEL`, `ANNUEL` |
 | `DebtType` | `EMPRUNT`, `PRET` |
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 | `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
-| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP` |
+| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS` |
 | `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
 ## Voir aussi

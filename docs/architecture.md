@@ -199,6 +199,7 @@ app/src/app/
     ├── transactions/  # CRUD transactions
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
+    ├── budgets/       # Module Budgets (liste mensuelle, historique camembert, formulaire)
     ├── settings/      # Parametres (categories, comptes, fonctionnalites)
     └── shop/          # Module Boutique (liste, detail, formulaire, sell/restock)
         ├── shop-list/         # Grille produits + filtres actifs/inactifs
@@ -232,11 +233,12 @@ app/src/app/
 | Parametres | `/settings` | Parametres utilisateur |
 | Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
 | Detail produit | `/shop/:id` | Infos, vente, restock, historique |
+| Budgets | `/budgets` | Vue mensuelle, historique camembert, CRUD budgets (guard BUDGETS) |
 
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs). Sur `/shop` : Nouveau produit + Vente rapide (si SHOP actif)
+- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs), Budget (si BUDGETS actif). Sur `/shop` : Nouveau produit + Vente rapide (si SHOP actif)
 - Saisie en 2-3 taps
 
 ## Flux d'authentification
