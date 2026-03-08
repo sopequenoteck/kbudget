@@ -75,7 +75,7 @@ void main() {
       overrides: [
         transactionRepositoryProvider.overrideWithValue(mockRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
-        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
+        exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,

@@ -11,18 +11,19 @@ final exchangeRateListProvider =
 );
 
 class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
-  late ExchangeRateRepository _repository;
+  Future<ExchangeRateRepository> get _repository =>
+      ref.read(exchangeRateRepositoryProvider.future);
 
   @override
   ListState<ExchangeRate> build() {
-    _repository = ref.watch(exchangeRateRepositoryProvider);
+    ref.watch(exchangeRateRepositoryProvider);
     return const ListState();
   }
 
   Future<void> loadItems() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final rates = await _repository.getAll();
+      final rates = await (await _repository).getAll();
       state = state.copyWith(items: rates, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -33,7 +34,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
       Currency baseCurrency, Currency targetCurrency, double rate) async {
     try {
       final result =
-          await _repository.upsert(baseCurrency, targetCurrency, rate);
+          await (await _repository).upsert(baseCurrency, targetCurrency, rate);
       final items = [...state.items];
       final index = items.indexWhere(
         (r) =>
@@ -52,7 +53,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
 
   Future<void> delete(Currency baseCurrency, Currency targetCurrency) async {
     try {
-      await _repository.delete(baseCurrency, targetCurrency);
+      await (await _repository).delete(baseCurrency, targetCurrency);
       state = state.copyWith(
         items: state.items
             .where((r) => !(r.baseCurrency == baseCurrency &&

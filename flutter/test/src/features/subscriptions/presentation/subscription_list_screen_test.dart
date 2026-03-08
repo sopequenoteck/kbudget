@@ -80,7 +80,7 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockSubRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
         accountRepositoryProvider.overrideWithValue(mockAccRepo),
-        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
+        exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,

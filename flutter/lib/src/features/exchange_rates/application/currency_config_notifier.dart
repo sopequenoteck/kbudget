@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
 final currencyConfigNotifierProvider =
     NotifierProvider<CurrencyConfigNotifier, List<Currency>>(
@@ -51,11 +52,11 @@ class CurrencyConfigNotifier extends Notifier<List<Currency>> {
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
-      final prefs = await dataSource.getPreferences();
+      final featureState = ref.read(featureConfigNotifierProvider);
       await dataSource.updatePreferences(
         UserPreferenceRequest(
-          enabledFeatures: prefs.enabledFeatures,
-          navOrder: prefs.navOrder,
+          enabledFeatures: featureState.enabledFeatures,
+          navOrder: featureState.navOrder,
           currencies: currencies.map((c) => c.name.toUpperCase()).toList(),
         ),
       );

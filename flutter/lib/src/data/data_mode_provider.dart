@@ -224,23 +224,15 @@ final accountRemoteDataSourceProvider =
 });
 
 // Product repository provider (server-only, no local fallback)
-final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  final dioAsync = ref.watch(authenticatedDioProvider);
-  return dioAsync.when(
-    data: (dio) => ProductRepositoryRemote(ProductRemoteDataSource(dio)),
-    loading: () => throw StateError('Dio not ready'),
-    error: (e, _) => throw StateError('Dio error: $e'),
-  );
+final productRepositoryProvider = FutureProvider<ProductRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return ProductRepositoryRemote(ProductRemoteDataSource(dio));
 });
 
 // Exchange rate repository provider (server-only, no local fallback)
-final exchangeRateRepositoryProvider = Provider<ExchangeRateRepository>((ref) {
-  final dioAsync = ref.watch(authenticatedDioProvider);
-  return dioAsync.when(
-    data: (dio) => ExchangeRateRepositoryImpl(ExchangeRateRemoteDataSource(dio)),
-    loading: () => throw StateError('Dio not ready'),
-    error: (e, _) => throw StateError('Dio error: $e'),
-  );
+final exchangeRateRepositoryProvider = FutureProvider<ExchangeRateRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return ExchangeRateRepositoryImpl(ExchangeRateRemoteDataSource(dio));
 });
 
 // Notification repository provider (server-only, no local fallback)

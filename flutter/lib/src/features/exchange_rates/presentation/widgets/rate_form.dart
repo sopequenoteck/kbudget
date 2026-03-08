@@ -8,6 +8,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/utils/currency_converter.dart';
 
 class RateForm extends ConsumerStatefulWidget {
   final Currency baseCurrency;
@@ -56,10 +57,14 @@ class _RateFormState extends ConsumerState<RateForm> {
   }
 
   void _autofillFixedParity(Currency target) {
-    final key = '${widget.baseCurrency.name}_${target.name}';
-    final rate = _fixedParityRates[key];
-    if (rate != null) {
-      _rateController.text = rate.toString();
+    final direct = CurrencyConverter.fixedParityRates[(widget.baseCurrency, target)];
+    if (direct != null) {
+      _rateController.text = direct.toString();
+      return;
+    }
+    final inverse = CurrencyConverter.fixedParityRates[(target, widget.baseCurrency)];
+    if (inverse != null) {
+      _rateController.text = CurrencyConverter.invertRate(inverse).toString();
     }
   }
 
@@ -202,10 +207,3 @@ class _RateFormState extends ConsumerState<RateForm> {
     );
   }
 }
-
-/// Taux de parité fixe connus (parités officielles).
-/// Clé : "base_target".
-const _fixedParityRates = <String, double>{
-  'eur_xof': 655.957,
-  'xof_eur': 0.001524,
-};

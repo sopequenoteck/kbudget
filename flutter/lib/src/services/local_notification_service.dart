@@ -24,6 +24,12 @@ class LocalNotificationService {
     );
 
     await _plugin.initialize(settings: settings);
+
+    // Demander explicitement les permissions iOS
+    await _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+
     _initialized = true;
   }
 

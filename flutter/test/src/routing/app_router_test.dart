@@ -72,7 +72,7 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
-        exchangeRateRepositoryProvider.overrideWithValue(mockExchangeRateRepo),
+        exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
         currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],

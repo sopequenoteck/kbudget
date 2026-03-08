@@ -229,12 +229,13 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
   }
 
   List<_NotificationGroup> _groupByDay(List<NotificationModel> notifications) {
+    final sorted = [...notifications]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final map = <String, List<NotificationModel>>{};
 
-    for (final notification in notifications) {
+    for (final notification in sorted) {
       final local = notification.createdAt.toLocal();
       final date = DateTime(local.year, local.month, local.day);
 

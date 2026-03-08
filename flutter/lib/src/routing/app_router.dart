@@ -355,6 +355,8 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       final stompService = ref.read(stompServiceProvider);
       final localNotificationService = ref.read(localNotificationServiceProvider);
 
+      await localNotificationService.initialize();
+
       stompService.connect(
         token: token,
         baseUrl: baseUrl,
@@ -364,8 +366,6 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
         },
       );
 
-      // Activer le listener STOMP → NotificationNotifier
-      ref.read(notificationStompListenerProvider);
     } catch (_) {
       // Ignore: plugin not available in test or local mode
     }
@@ -376,6 +376,9 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     final featureState = ref.watch(featureConfigNotifierProvider);
     final enabledFeatures = featureState.enabledFeatures;
     final navOrder = featureState.navOrder;
+
+    // Garder le listener STOMP vivant tant que le Shell est monté
+    ref.watch(notificationStompListenerProvider);
 
     // Build dynamic paths and destinations
     final paths = <String>[
