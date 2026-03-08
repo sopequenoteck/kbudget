@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 
 import { CategoryForm } from './category-form';
 import { CategoryService } from '../../../core/services/category';
+import { ModalService } from '../../../core/services/modal.service';
 import { Category } from '../../../core/models/category.model';
 
 if (!getTestBed().platform) {
@@ -24,15 +25,26 @@ describe('CategoryForm', () => {
     update: ReturnType<typeof vi.fn>;
   };
 
+  let modalServiceMock: {
+    closeModal: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     categoryServiceMock = {
       create: vi.fn().mockReturnValue(of(mockCategory)),
       update: vi.fn().mockReturnValue(of(mockCategory)),
     };
 
+    modalServiceMock = {
+      closeModal: vi.fn(),
+    };
+
     TestBed.configureTestingModule({
       imports: [CategoryForm],
-      providers: [{ provide: CategoryService, useValue: categoryServiceMock }],
+      providers: [
+        { provide: CategoryService, useValue: categoryServiceMock },
+        { provide: ModalService, useValue: modalServiceMock },
+      ],
     });
   });
 

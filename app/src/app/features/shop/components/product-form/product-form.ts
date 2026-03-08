@@ -5,21 +5,24 @@ import {
   computed,
   effect,
   inject,
-  input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { DecimalPipe } from '@angular/common';
 import { FormField } from '../../../../shared/components/form-field/form-field';
+import { ProductService } from '../../../../core/services/product';
+import { ModalService } from '../../../../core/services/modal.service';
 import {
   Product,
   ProductRequest,
   ProductUpdateRequest,
 } from '../../../../core/models/product.model';
+import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-product-form',
@@ -30,13 +33,16 @@ import {
 })
 export class ProductForm {
   private readonly fb = inject(FormBuilder);
+  private readonly productService = inject(ProductService);
+  private readonly modalService = inject(ModalService);
 
-  readonly product = input<Product | null>(null);
-  readonly saved = output<ProductRequest | ProductUpdateRequest>();
+  readonly product = computed(() => this.modalService.editingEntity() as Product | null);
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
-  readonly deleted = output<string>();
 
   readonly isEditMode = computed(() => this.product() !== null);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal('');
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   readonly imagePreview = signal<string | null>(null);
@@ -92,36 +98,45 @@ export class ProductForm {
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    if (!validateForm(this.form)) return;
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
 
-    if (this.isEditMode()) {
-      const request: ProductUpdateRequest = {
-        nom: raw.nom,
-        description: raw.description || undefined,
-        icone: this.product()!.icone ?? undefined,
-        imageUrl: this.imagePreview() ?? undefined,
-        prixAchat: Number(raw.prixAchat),
-        prixVente: Number(raw.prixVente),
-        stock: this.product()!.stock,
-        actif: raw.actif,
-      };
-      this.saved.emit(request);
-    } else {
-      const request: ProductRequest = {
-        nom: raw.nom,
-        description: raw.description || undefined,
-        imageUrl: this.imagePreview() ?? undefined,
-        prixAchat: Number(raw.prixAchat),
-        prixVente: Number(raw.prixVente),
-        stock: raw.stock,
-      };
-      this.saved.emit(request);
+    try {
+      const p = this.product();
+      if (p) {
+        const request: ProductUpdateRequest = {
+          nom: raw.nom,
+          description: raw.description || undefined,
+          icone: p.icone ?? undefined,
+          imageUrl: this.imagePreview() ?? undefined,
+          prixAchat: Number(raw.prixAchat),
+          prixVente: Number(raw.prixVente),
+          stock: p.stock,
+          actif: raw.actif,
+        };
+        await firstValueFrom(this.productService.update(p.id, request));
+      } else {
+        const request: ProductRequest = {
+          nom: raw.nom,
+          description: raw.description || undefined,
+          imageUrl: this.imagePreview() ?? undefined,
+          prixAchat: Number(raw.prixAchat),
+          prixVente: Number(raw.prixVente),
+          stock: raw.stock,
+        };
+        await firstValueFrom(this.productService.create(request));
+      }
+      this.modalService.closeModal();
+      this.saved.emit();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      this.submitting.set(false);
     }
   }
 
@@ -174,18 +189,23 @@ export class ProductForm {
     if (el) el.value = '';
   }
 
-  onCancel(): void {
-    this.cancelled.emit();
-  }
-
-  onDelete(): void {
-    if (window.confirm('Supprimer ce produit ?')) {
-      this.deleted.emit(this.product()!.id);
+  async onDelete(): Promise<void> {
+    const p = this.product();
+    if (!p) return;
+    if (!window.confirm('Supprimer ce produit ?')) return;
+    try {
+      await firstValueFrom(this.productService.delete(p.id));
+      this.modalService.closeModal();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
     }
   }
 
+  onCancel(): void {
+    this.modalService.closeModal();
+  }
+
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

@@ -1,4 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="sell-dialog">
+  @if (errorMessage()) {
+    <div class="form-error-banner">{{ errorMessage() }}</div>
+  }
   <app-form-field
     label="Produit"
     fieldId="productId"
@@ -36,6 +39,8 @@
 
   <div class="form-actions">
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="form.invalid">Confirmer</button>
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
+      {{ submitting() ? 'Vente...' : 'Confirmer' }}
+    </button>
   </div>
 </form>

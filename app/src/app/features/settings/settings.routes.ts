@@ -47,6 +47,6 @@ export const SETTINGS_ROUTES: Routes = [
   {
     path: 'currencies',
     loadComponent: () =>
-      import('./currency-settings/currency-settings').then((m) => m.CurrencySettings),
+      import('./components/currency-settings/currency-settings').then((m) => m.CurrencySettings),
   },
 ];

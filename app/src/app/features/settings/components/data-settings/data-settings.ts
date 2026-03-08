@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { RouterLink } from '@angular/router';
 
 import { HealthService, type HealthCheckResult } from '../../../../core/services/health';
@@ -55,7 +56,7 @@ export class DataSettings implements OnInit {
     });
   }
 
-  private runHealthCheck(): void {
+  private async runHealthCheck(): Promise<void> {
     this.isTestRunning.set(true);
     this.healthResult.set({
       status: 'checking',
@@ -64,9 +65,8 @@ export class DataSettings implements OnInit {
       checkedAt: null,
     });
 
-    this.healthService.checkHealth().subscribe((result) => {
-      this.healthResult.set(result);
-      this.isTestRunning.set(false);
-    });
+    const result = await firstValueFrom(this.healthService.checkHealth());
+    this.healthResult.set(result);
+    this.isTestRunning.set(false);
   }
 }

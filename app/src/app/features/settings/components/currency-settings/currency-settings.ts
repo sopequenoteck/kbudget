@@ -1,18 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   inject,
   signal,
 } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCurrencyCircleDollar } from '@ng-icons/phosphor-icons/regular';
 
-import { ExchangeRateService } from '../../../core/services/exchange-rate';
-import { PreferenceService } from '../../../core/services/preference';
-import { AccountService } from '../../../core/services/account';
-import { Account } from '../../../core/models/account.model';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { PreferenceService } from '../../../../core/services/preference';
+import { AccountService } from '../../../../core/services/account';
+import { Account } from '../../../../core/models/account.model';
 import { CurrencyList } from './currency-list';
 import { ExchangeRateManager } from './exchange-rate-manager';
 import { RateCalculator } from './rate-calculator';
@@ -87,7 +87,7 @@ import { RateCalculator } from './rate-calculator';
     `,
   ],
 })
-export class CurrencySettings implements OnInit {
+export class CurrencySettings {
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
   private readonly accountService = inject(AccountService);
@@ -99,12 +99,15 @@ export class CurrencySettings implements OnInit {
 
   readonly allCurrencies = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
-  ngOnInit(): void {
+  constructor() {
     this.rateService.loadRates();
     this.currencies.set(this.prefService.currencies());
-    this.accountService.getAll(true).subscribe({
-      next: (accounts) => this.accounts.set(accounts),
-    });
+    this.loadAccounts();
+  }
+
+  private async loadAccounts(): Promise<void> {
+    const accounts = await firstValueFrom(this.accountService.getAll(true));
+    this.accounts.set(accounts);
   }
 
   onCurrenciesChange(currencies: string[]): void {

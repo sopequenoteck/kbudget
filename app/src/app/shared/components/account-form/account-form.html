@@ -28,6 +28,10 @@
   </div>
 }
 
+@if (errorMessage()) {
+  <div class="form-error-banner">{{ errorMessage() }}</div>
+}
+
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
   <!-- Section 1 : Preview card live -->
   <div class="account-form__preview" [style.border-left-color]="selectedColor()">
@@ -174,8 +178,8 @@
       <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
     }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary">
-      {{ isEditMode() ? 'Modifier' : 'Créer' }}
+    <button type="submit" class="btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Créer' }}
     </button>
   </div>
 </form>

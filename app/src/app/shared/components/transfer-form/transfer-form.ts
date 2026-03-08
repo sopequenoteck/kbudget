@@ -21,7 +21,10 @@ import { FormField } from '../form-field/form-field';
 import { SelectPicker } from '../select-picker/select-picker';
 import { SelectPickerItem } from '../select-picker/select-picker.model';
 import { AccountService } from '../../../core/services/account';
-import { Account, TransferRequest, TransferResponse } from '../../../core/models/account.model';
+import { TransactionService } from '../../../core/services/transaction';
+import { ModalService } from '../../../core/services/modal.service';
+import { Account, TransferRequest } from '../../../core/models/account.model';
+import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
 @Component({
   selector: 'app-transfer-form',
@@ -33,8 +36,10 @@ import { Account, TransferRequest, TransferResponse } from '../../../core/models
 export class TransferForm {
   private readonly fb = inject(FormBuilder);
   private readonly accountService = inject(AccountService);
+  private readonly transactionService = inject(TransactionService);
+  private readonly modalService = inject(ModalService);
 
-  readonly saved = output<TransferResponse>();
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
@@ -77,10 +82,7 @@ export class TransferForm {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (!validateForm(this.form)) return;
 
     this.submitting.set(true);
     this.errorMessage.set('');
@@ -94,8 +96,10 @@ export class TransferForm {
     };
 
     try {
-      const result = await firstValueFrom(this.accountService.transfer(request));
-      this.saved.emit(result);
+      await firstValueFrom(this.accountService.transfer(request));
+      this.transactionService.refreshTrigger.update((v) => v + 1);
+      this.modalService.closeModal();
+      this.saved.emit();
     } catch (err: unknown) {
       const httpErr = err as { error?: { message?: string } };
       const message = httpErr?.error?.message ?? 'Erreur lors du virement';
@@ -109,11 +113,10 @@ export class TransferForm {
   }
 
   onCancel(): void {
-    this.cancelled.emit();
+    this.modalService.closeModal();
   }
 
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

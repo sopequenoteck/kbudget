@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  input,
   output,
   signal,
 } from '@angular/core';
@@ -15,9 +14,12 @@ import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
 import { SelectPicker } from '../select-picker/select-picker';
 import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
+import { AccountService } from '../../../core/services/account';
 import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
+import { ModalService } from '../../../core/services/modal.service';
+import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
 const FIXED_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
@@ -66,17 +68,19 @@ const ACCOUNT_COLORS: string[] = [
 })
 export class AccountForm {
   private readonly fb = inject(FormBuilder);
+  private readonly accountService = inject(AccountService);
   private readonly currencyService = inject(CurrencyService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly preferenceService = inject(PreferenceService);
+  private readonly modalService = inject(ModalService);
 
-  readonly account = input<Account | null>(null);
-  readonly saved = output<AccountRequest>();
-  readonly balanceAdjusted = output<number>();
+  readonly account = computed(() => this.modalService.editingEntity() as Account | null);
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
-  readonly deleted = output<string>();
 
   readonly isEditMode = computed(() => this.account() !== null);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal('');
   readonly selectedEmoji = signal('🏦');
   readonly selectedColor = signal('#3b82f6');
   readonly accountTypes = Object.values(AccountType);
@@ -155,11 +159,11 @@ export class AccountForm {
     this.selectedColor.set(color);
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    if (!validateForm(this.form)) return;
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
     const request: AccountRequest = {
@@ -177,16 +181,26 @@ export class AccountForm {
       }
     }
 
-    this.saved.emit(request);
+    try {
+      const acc = this.account();
+      if (acc) {
+        await firstValueFrom(this.accountService.update(acc.id, request));
 
-    const acc = this.account();
-    if (acc) {
-      const newBalance = Number(raw.newBalance);
-      if (!isNaN(newBalance) && newBalance !== acc.solde) {
-        this.balanceAdjusted.emit(newBalance);
+        // Adjust balance if changed
+        const newBalance = Number(raw.newBalance);
+        if (!isNaN(newBalance) && newBalance !== acc.solde) {
+          await firstValueFrom(this.accountService.adjustBalance(acc.id, newBalance));
+        }
+      } else {
+        await firstValueFrom(this.accountService.create(request));
+        this.checkRateProposal(request.currency);
       }
-    } else {
-      this.checkRateProposal(request.currency);
+      this.modalService.closeModal();
+      this.saved.emit();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      this.submitting.set(false);
     }
   }
 
@@ -224,16 +238,22 @@ export class AccountForm {
     this.showRateProposal.set(false);
   }
 
-  onCancel(): void {
-    this.cancelled.emit();
+  async onDelete(): Promise<void> {
+    const acc = this.account();
+    if (!acc) return;
+    try {
+      await firstValueFrom(this.accountService.delete(acc.id));
+      this.modalService.closeModal();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    }
   }
 
-  onDelete(): void {
-    this.deleted.emit(this.account()!.id);
+  onCancel(): void {
+    this.modalService.closeModal();
   }
 
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

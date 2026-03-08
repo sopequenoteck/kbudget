@@ -6,22 +6,27 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
+import { TransactionService } from '../../../../core/services/transaction';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
 import {
   Transaction,
   TransactionRequest,
   TransactionType,
 } from '../../../../core/models/transaction.model';
+import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-transaction-form',
@@ -33,14 +38,17 @@ import {
 export class TransactionForm {
   private readonly fb = inject(FormBuilder);
   private readonly accountService = inject(AccountService);
+  private readonly transactionService = inject(TransactionService);
+  private readonly modalService = inject(ModalService);
 
-  readonly transaction = input<Transaction | null>(null);
+  readonly transaction = computed(() => this.modalService.editingEntity() as Transaction | null);
   readonly type = input(TransactionType.DEPENSE);
-  readonly saved = output<TransactionRequest>();
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
-  readonly deleted = output<string>();
 
   readonly isEditMode = computed(() => this.transaction() !== null);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal('');
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -90,11 +98,11 @@ export class TransactionForm {
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    if (!validateForm(this.form)) return;
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
     const request: TransactionRequest = {
@@ -107,19 +115,38 @@ export class TransactionForm {
       accountId: raw.accountId || undefined,
     };
 
-    this.saved.emit(request);
+    try {
+      const tx = this.transaction();
+      if (tx) {
+        await firstValueFrom(this.transactionService.update(tx.id, request));
+      } else {
+        await firstValueFrom(this.transactionService.create(request));
+      }
+      this.modalService.closeModal();
+      this.saved.emit();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  async onDelete(): Promise<void> {
+    const tx = this.transaction();
+    if (!tx) return;
+    try {
+      await firstValueFrom(this.transactionService.delete(tx.id));
+      this.modalService.closeModal();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    }
   }
 
   onCancel(): void {
-    this.cancelled.emit();
-  }
-
-  onDelete(): void {
-    this.deleted.emit(this.transaction()!.id);
+    this.modalService.closeModal();
   }
 
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

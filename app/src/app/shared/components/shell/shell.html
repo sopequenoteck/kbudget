@@ -147,29 +147,23 @@
   @switch (modalService.activeModal()) {
     @case ('transaction') {
       <app-transaction-form
-        [transaction]="$any(modalService.editingEntity())"
         [type]="transactionType()"
-        (saved)="onTransactionSaved($event)"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
-        (deleted)="onTransactionDeleted($event)"
       />
     }
     @case ('subscription') {
       <app-subscription-form
-        [subscription]="$any(modalService.editingEntity())"
         [frequence]="subscriptionFrequency()"
-        (saved)="onSubscriptionSaved($event)"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
-        (deleted)="onSubscriptionDeleted($event)"
       />
     }
     @case ('debt') {
       <app-debt-form
-        [debt]="$any(modalService.editingEntity())"
         [sens]="debtType()"
-        (saved)="onDebtSaved($event)"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
-        (deleted)="onDebtDeleted($event)"
       />
     }
     @case ('category') {
@@ -181,28 +175,28 @@
     }
     @case ('account') {
       <app-account-form
-        [account]="$any(modalService.editingEntity())"
-        (saved)="onAccountSaved($event)"
-        (balanceAdjusted)="onBalanceAdjusted($event)"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
-        (deleted)="onAccountDeleted($event)"
       />
     }
     @case ('transfer') {
-      <app-transfer-form (saved)="onTransferSaved()" (cancelled)="onModalClose()" />
+      <app-transfer-form (saved)="onModalClose()" (cancelled)="onModalClose()" />
     }
     @case ('product') {
       <app-product-form
-        [product]="$any(modalService.editingEntity())"
-        (saved)="onProductSaved($event)"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
-        (deleted)="onProductDeleted($event)"
       />
     }
     @case ('sell') {
       <app-sell-dialog
-        [products]="sellableProducts()"
-        (confirmed)="onSellConfirmed($event)"
+        (confirmed)="onModalClose()"
+        (cancelled)="onModalClose()"
+      />
+    }
+    @case ('budget') {
+      <app-budget-form
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
     }

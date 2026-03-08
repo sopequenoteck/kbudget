@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Subscription as RxSub } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
 import { SubscriptionService } from '../../core/services/subscription';
@@ -20,6 +20,7 @@ import { ConversionService } from '../../core/services/conversion';
 import { PreferenceService } from '../../core/services/preference';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
+import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
   type Transaction,
   TransactionType,
@@ -40,7 +41,7 @@ import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector],
+  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +53,7 @@ export class Dashboard {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
   private readonly conversionService = inject(ConversionService);
-  private readonly preferenceService = inject(PreferenceService);
+  readonly preferenceService = inject(PreferenceService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -101,8 +102,6 @@ export class Dashboard {
       .map(([currency, total]) => ({ currency, total }))
       .sort((a, b) => a.currency.localeCompare(b.currency));
   });
-
-  private accountsSub: RxSub | null = null;
 
   // -- Bilan mensuel (US1) --
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -183,11 +182,6 @@ export class Dashboard {
 
   readonly miniCardsLoading = computed(() => this.subscriptionsLoading() || this.debtsLoading());
 
-  private summarySub: RxSub | null = null;
-  private transactionsSub: RxSub | null = null;
-  private subscriptionsSub: RxSub | null = null;
-  private debtsSub: RxSub | null = null;
-
   constructor() {
     // Charger les taux de change et synchroniser la devise active au démarrage
     effect(() => {
@@ -255,106 +249,91 @@ export class Dashboard {
     }
   }
 
-  loadAccounts(): void {
-    this.accountsSub?.unsubscribe();
+  async loadAccounts(): Promise<void> {
     this.accountsLoading.set(true);
     this.accountsError.set(false);
 
-    this.accountsSub = this.accountService.getAll().subscribe({
-      next: (data) => {
-        this.accounts.set(data);
-        this.accountsLoading.set(false);
-      },
-      error: (err) => {
-        if (isDevMode()) {
-          console.error('Failed to load accounts', err);
-        }
-        this.accountsError.set(true);
-        this.accountsLoading.set(false);
-      },
-    });
+    try {
+      const data = await firstValueFrom(this.accountService.getAll());
+      this.accounts.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load accounts', err);
+      }
+      this.accountsError.set(true);
+    } finally {
+      this.accountsLoading.set(false);
+    }
   }
 
-  loadSummary(): void {
-    this.summarySub?.unsubscribe();
+  async loadSummary(): Promise<void> {
     this.summaryLoading.set(true);
     this.summaryError.set(false);
 
-    this.summarySub = this.transactionService
-      .getSummary(this.selectedMonth(), this.selectedYear())
-      .subscribe({
-        next: (data) => {
-          this.summaries.set(data);
-          this.summaryLoading.set(false);
-        },
-        error: (err) => {
-          if (isDevMode()) {
-            console.error('Failed to load summary', err);
-          }
-          this.summaryError.set(true);
-          this.summaryLoading.set(false);
-        },
-      });
+    try {
+      const data = await firstValueFrom(
+        this.transactionService.getSummary(this.selectedMonth(), this.selectedYear()),
+      );
+      this.summaries.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load summary', err);
+      }
+      this.summaryError.set(true);
+    } finally {
+      this.summaryLoading.set(false);
+    }
   }
 
-  loadTransactions(): void {
-    this.transactionsSub?.unsubscribe();
+  async loadTransactions(): Promise<void> {
     this.transactionsLoading.set(true);
     this.transactionsError.set(false);
 
-    this.transactionsSub = this.transactionService.getAll().subscribe({
-      next: (data) => {
-        this.transactions.set(data);
-        this.transactionsLoading.set(false);
-      },
-      error: (err) => {
-        if (isDevMode()) {
-          console.error('Failed to load transactions', err);
-        }
-        this.transactionsError.set(true);
-        this.transactionsLoading.set(false);
-      },
-    });
+    try {
+      const data = await firstValueFrom(this.transactionService.getAll());
+      this.transactions.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load transactions', err);
+      }
+      this.transactionsError.set(true);
+    } finally {
+      this.transactionsLoading.set(false);
+    }
   }
 
-  loadSubscriptions(): void {
-    this.subscriptionsSub?.unsubscribe();
+  async loadSubscriptions(): Promise<void> {
     this.subscriptionsLoading.set(true);
     this.subscriptionsError.set(false);
 
-    this.subscriptionsSub = this.subscriptionService.getAll(true).subscribe({
-      next: (data) => {
-        this.subscriptions.set(data);
-        this.subscriptionsLoading.set(false);
-      },
-      error: (err) => {
-        if (isDevMode()) {
-          console.error('Failed to load subscriptions', err);
-        }
-        this.subscriptionsError.set(true);
-        this.subscriptionsLoading.set(false);
-      },
-    });
+    try {
+      const data = await firstValueFrom(this.subscriptionService.getAll(true));
+      this.subscriptions.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load subscriptions', err);
+      }
+      this.subscriptionsError.set(true);
+    } finally {
+      this.subscriptionsLoading.set(false);
+    }
   }
 
-  loadDebts(): void {
-    this.debtsSub?.unsubscribe();
+  async loadDebts(): Promise<void> {
     this.debtsLoading.set(true);
     this.debtsError.set(false);
 
-    this.debtsSub = this.debtService.getAll(false).subscribe({
-      next: (data) => {
-        this.debts.set(data);
-        this.debtsLoading.set(false);
-      },
-      error: (err) => {
-        if (isDevMode()) {
-          console.error('Failed to load debts', err);
-        }
-        this.debtsError.set(true);
-        this.debtsLoading.set(false);
-      },
-    });
+    try {
+      const data = await firstValueFrom(this.debtService.getAll(false));
+      this.debts.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load debts', err);
+      }
+      this.debtsError.set(true);
+    } finally {
+      this.debtsLoading.set(false);
+    }
   }
 
   onCurrencyChange(currency: string): void {
@@ -363,7 +342,7 @@ export class Dashboard {
     // Reorder currencies : la devise sélectionnée en premier
     const current = this.currencies();
     const reordered = [currency, ...current.filter((c) => c !== currency)];
-    this.preferenceService.currencies.set(reordered);
+    this.preferenceService.setCurrencies(reordered);
 
     // Debounce persistance 2s
     if (this.persistTimeout) clearTimeout(this.persistTimeout);

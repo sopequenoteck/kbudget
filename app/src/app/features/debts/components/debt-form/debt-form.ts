@@ -6,15 +6,20 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { CurrencyService } from '../../../../core/services/currency';
+import { DebtService } from '../../../../core/services/debt';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
+import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-debt-form',
@@ -26,14 +31,17 @@ import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model'
 export class DebtForm {
   private readonly fb = inject(FormBuilder);
   private readonly currencyService = inject(CurrencyService);
+  private readonly debtService = inject(DebtService);
+  private readonly modalService = inject(ModalService);
 
-  readonly debt = input<Debt | null>(null);
+  readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
-  readonly saved = output<DebtRequest>();
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
-  readonly deleted = output<string>();
 
   readonly isEditMode = computed(() => this.debt() !== null);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal('');
 
   readonly currencyItems = this.currencyService.currencyItems;
 
@@ -66,11 +74,11 @@ export class DebtForm {
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    if (!validateForm(this.form)) return;
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
     const request: DebtRequest = {
@@ -83,19 +91,38 @@ export class DebtForm {
       currency: raw.currency || undefined,
     };
 
-    this.saved.emit(request);
+    try {
+      const d = this.debt();
+      if (d) {
+        await firstValueFrom(this.debtService.update(d.id, request));
+      } else {
+        await firstValueFrom(this.debtService.create(request));
+      }
+      this.modalService.closeModal();
+      this.saved.emit();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  async onDelete(): Promise<void> {
+    const d = this.debt();
+    if (!d) return;
+    try {
+      await firstValueFrom(this.debtService.delete(d.id));
+      this.modalService.closeModal();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    }
   }
 
   onCancel(): void {
-    this.cancelled.emit();
-  }
-
-  onDelete(): void {
-    this.deleted.emit(this.debt()!.id);
+    this.modalService.closeModal();
   }
 
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

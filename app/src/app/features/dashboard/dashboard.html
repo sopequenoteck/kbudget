@@ -286,3 +286,10 @@
     </ul>
   }
 </section>
+
+<!-- Section Budgets -->
+@if (preferenceService.isEnabled('BUDGETS')) {
+  <section class="dashboard-section">
+    <app-budget-summary />
+  </section>
+}

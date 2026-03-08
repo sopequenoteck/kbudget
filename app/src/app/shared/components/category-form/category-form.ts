@@ -11,6 +11,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { CategoryService } from '../../../core/services/category';
+import { ModalService } from '../../../core/services/modal.service';
 import { Category, CategoryRequest } from '../../../core/models/category.model';
 import { CATEGORY_COLORS, randomColor } from '../../../core/constants/category.constants';
 import { EmojiInput } from '../emoji-input/emoji-input';
@@ -25,6 +26,7 @@ import { EmojiInput } from '../emoji-input/emoji-input';
 export class CategoryForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly categoryService = inject(CategoryService);
+  private readonly modalService = inject(ModalService);
 
   readonly category = input<Category | null>(null);
   readonly initialName = input('');
