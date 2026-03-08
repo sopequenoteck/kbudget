@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { ConversionService } from '../../core/services/conversion';
-import { PreferenceService } from '../../core/services/preference';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: '€',
@@ -15,14 +14,12 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 @Pipe({
   name: 'convertAmount',
   standalone: true,
-  pure: false, // Doit réagir aux changements de taux et de devise primaire
+  pure: true,
 })
 export class ConvertAmountPipe implements PipeTransform {
   private readonly conversionService = inject(ConversionService);
-  private readonly preferenceService = inject(PreferenceService);
 
-  transform(amount: number, fromCurrency: string): string {
-    const toCurrency = this.preferenceService.primaryCurrency();
+  transform(amount: number, fromCurrency: string, toCurrency: string): string {
     if (!fromCurrency || fromCurrency === toCurrency) return '';
 
     const converted = this.conversionService.convert(amount, fromCurrency, toCurrency);

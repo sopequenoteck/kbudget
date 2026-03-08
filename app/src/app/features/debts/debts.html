@@ -89,7 +89,7 @@
               [subtitle]="getSubtitle(debt)"
               [rightSubtitle]="debt.date | relativeDate"
               [value]="debt.montant | amount: null : debt.currency"
-              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR')"
+              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency()"
               [valueClass]="getValueClass(debt)"
               (pressed)="onDebtPressed(debt)"
             />
@@ -118,7 +118,7 @@
               [subtitle]="getSubtitle(debt)"
               [rightSubtitle]="debt.date | relativeDate"
               [value]="debt.montant | amount: null : debt.currency"
-              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR')"
+              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency()"
               [valueClass]="getValueClass(debt)"
               (pressed)="onDebtPressed(debt)"
             />
