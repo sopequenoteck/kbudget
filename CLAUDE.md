@@ -278,6 +278,7 @@ Approche **signals-first** obligatoire :
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Spring WebSocket + STOMP, Angular 21 + @stomp/stompjs, Flutter >= 3.27 + stomp_dart_client + flutter_local_notifications (072-notification-system)
 - PostgreSQL 15+ (table `notifications`, enrichissement `user_preferences`) (072-notification-system)
 - PostgreSQL 15+ (Flyway V17) (073-backend-budget-categories)
+- TypeScript 5.9 + Angular 21, Angular Reactive Forms, ng2-charts (Chart.js), @ng-icons/phosphor-icons (074-angular-budget-categories)
 
 ### Backend (api/)
 
