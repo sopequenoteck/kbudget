@@ -134,11 +134,11 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
   }
 
   Future<void> _onDelete() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDeleteConfirmDialog(
       context: context,
-      title: 'Supprimer le budget',
-      message:
-          'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.',
+      title: l10n.deleteBudgetTitle,
+      message: l10n.deleteBudgetMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {
@@ -205,7 +205,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         // Catégorie
         if (availableCategories.isEmpty && !_isEditMode)
           _buildEmptyMessage(
-            'Toutes les catégories ont déjà un budget',
+            AppLocalizations.of(context)!.allCategoriesHaveBudgets,
             colorScheme,
           )
         else
@@ -219,7 +219,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             Expanded(
               flex: 3,
               child: AppFormField(
-                label: 'Montant',
+                label: AppLocalizations.of(context)!.amount,
                 showError: _showErrors && _validateMontant() != null,
                 errorMessage: _validateMontant() ?? '',
                 child: TextField(
@@ -250,8 +250,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                     });
                   }
                 },
-                label: 'Devise',
-                placeholder: 'Devise',
+                label: AppLocalizations.of(context)!.currency,
+                placeholder: AppLocalizations.of(context)!.currency,
               ),
             ),
           ],
@@ -269,8 +269,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
               });
             }
           },
-          label: 'Fréquence',
-          placeholder: 'Fréquence',
+          label: AppLocalizations.of(context)!.frequency,
+          placeholder: AppLocalizations.of(context)!.frequency,
         ),
         const SizedBox(height: AppSpacing.space4),
 
@@ -287,7 +287,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                 onPressed: _isSubmitting ? null : _onDelete,
                 icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
-                tooltip: 'Supprimer le budget',
+                tooltip: AppLocalizations.of(context)!.deleteBudgetTitle,
               ),
             const Spacer(),
             OutlinedButton(
@@ -307,7 +307,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                       ),
                     )
                   : Text(
-                      _isEditMode ? 'Modifier' : 'Enregistrer',
+                      _isEditMode
+                          ? AppLocalizations.of(context)!.edit
+                          : AppLocalizations.of(context)!.save,
                     ),
             ),
           ],
@@ -324,7 +326,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     if (_isEditMode) {
       // In edit mode, category is locked — show a read-only field
       final budget = widget.budget!;
-      final label = budget.categoryNom ?? 'Catégorie';
+      final label = budget.categoryNom ?? AppLocalizations.of(context)!.category;
       final icon = budget.categoryIcone;
       final color = parseHexColor(budget.categoryCouleur);
 
@@ -333,7 +335,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Catégorie',
+            AppLocalizations.of(context)!.category,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.medium,
@@ -402,8 +404,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         setState(() => _selectedCategoryId = id);
         if (_showErrors) setState(() {});
       },
-      label: 'Catégorie',
-      placeholder: 'Sélectionner une catégorie',
+      label: AppLocalizations.of(context)!.category,
+      placeholder: AppLocalizations.of(context)!.selectCategory,
       validator: _showErrors
           ? (_) => _validateCategory()
           : null,
@@ -419,7 +421,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Seuil d\'alerte',
+              AppLocalizations.of(context)!.alertThreshold,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,

@@ -178,6 +178,12 @@ abstract class AppLocalizations {
   /// **'Ajouter'**
   String get add;
 
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
   /// No description provided for @loading.
   ///
   /// In fr, this message translates to:
@@ -201,6 +207,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur serveur'**
   String get errorServer;
+
+  /// No description provided for @errorLoadingData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les données'**
+  String get errorLoadingData;
+
+  /// No description provided for @amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get amount;
+
+  /// No description provided for @currency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get currency;
+
+  /// No description provided for @frequency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fréquence'**
+  String get frequency;
+
+  /// No description provided for @category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get category;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner une catégorie'**
+  String get selectCategory;
+
+  /// No description provided for @alertThreshold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil d\'alerte'**
+  String get alertThreshold;
 
   /// No description provided for @onboardingTitle.
   ///
@@ -1131,6 +1179,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de la suppression de la catégorie'**
   String get categoryErrorDelete;
+
+  /// No description provided for @budgetViewCharts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les graphiques'**
+  String get budgetViewCharts;
+
+  /// No description provided for @emptyBudgetList.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun budget'**
+  String get emptyBudgetList;
+
+  /// No description provided for @emptyBudgetCreateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appuyez sur + pour créer un budget'**
+  String get emptyBudgetCreateHint;
+
+  /// No description provided for @budgetDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails budget'**
+  String get budgetDetails;
+
+  /// No description provided for @emptyBudgetData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune donnée pour ce mois'**
+  String get emptyBudgetData;
+
+  /// No description provided for @deleteBudgetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le budget'**
+  String get deleteBudgetTitle;
+
+  /// No description provided for @deleteBudgetMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.'**
+  String get deleteBudgetMessage;
+
+  /// No description provided for @allCategoriesHaveBudgets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les catégories ont déjà un budget'**
+  String get allCategoriesHaveBudgets;
+
+  /// No description provided for @spent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépensé'**
+  String get spent;
+
+  /// No description provided for @budget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Budget'**
+  String get budget;
 }
 
 class _AppLocalizationsDelegate

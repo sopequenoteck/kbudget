@@ -6,6 +6,8 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 
 /// Bottom sheet affichant le détail d'une catégorie de budget.
 ///
@@ -67,12 +69,13 @@ class BudgetCategoryDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final categoryColor = parseHexColor(categoryCouleur);
     final isOverBudget = percentage > 100;
 
-    final currencyEnum = Currency.values.firstWhere(
-      (c) => c.name == currency || c.name == currency.toLowerCase(),
-      orElse: () => Currency.eur,
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
     );
 
     final formattedSpent =
@@ -166,7 +169,7 @@ class BudgetCategoryDetailSheet extends StatelessWidget {
                         spacing: AppSpacing.space1,
                         children: [
                           Text(
-                            'Dépensé',
+                            l10n.spent,
                             style: TextStyle(
                               fontSize: AppTypography.sizeXs,
                               color: colorScheme.onSurfaceVariant,
@@ -187,7 +190,7 @@ class BudgetCategoryDetailSheet extends StatelessWidget {
                         spacing: AppSpacing.space1,
                         children: [
                           Text(
-                            'Budget',
+                            l10n.budget,
                             style: TextStyle(
                               fontSize: AppTypography.sizeXs,
                               color: colorScheme.onSurfaceVariant,

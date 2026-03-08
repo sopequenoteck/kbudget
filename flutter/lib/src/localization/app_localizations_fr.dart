@@ -51,6 +51,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get add => 'Ajouter';
 
   @override
+  String get retry => 'Réessayer';
+
+  @override
   String get loading => 'Chargement...';
 
   @override
@@ -61,6 +64,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorServer => 'Erreur serveur';
+
+  @override
+  String get errorLoadingData => 'Impossible de charger les données';
+
+  @override
+  String get amount => 'Montant';
+
+  @override
+  String get currency => 'Devise';
+
+  @override
+  String get frequency => 'Fréquence';
+
+  @override
+  String get category => 'Catégorie';
+
+  @override
+  String get selectCategory => 'Sélectionner une catégorie';
+
+  @override
+  String get alertThreshold => 'Seuil d\'alerte';
 
   @override
   String get onboardingTitle => 'Bienvenue sur K-Budget';
@@ -543,4 +567,36 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get categoryErrorDelete =>
       'Erreur lors de la suppression de la catégorie';
+
+  @override
+  String get budgetViewCharts => 'Voir les graphiques';
+
+  @override
+  String get emptyBudgetList => 'Aucun budget';
+
+  @override
+  String get emptyBudgetCreateHint => 'Appuyez sur + pour créer un budget';
+
+  @override
+  String get budgetDetails => 'Détails budget';
+
+  @override
+  String get emptyBudgetData => 'Aucune donnée pour ce mois';
+
+  @override
+  String get deleteBudgetTitle => 'Supprimer le budget';
+
+  @override
+  String get deleteBudgetMessage =>
+      'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.';
+
+  @override
+  String get allCategoriesHaveBudgets =>
+      'Toutes les catégories ont déjà un budget';
+
+  @override
+  String get spent => 'Dépensé';
+
+  @override
+  String get budget => 'Budget';
 }

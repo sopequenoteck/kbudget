@@ -6,6 +6,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Widget affichant un budget avec sa progression.
@@ -61,9 +62,9 @@ class BudgetItem extends StatelessWidget {
     final progressColor = isOverBudget ? AppColors.error : (categoryColor ?? colorScheme.primary);
     final clampedProgress = (percentage / 100).clamp(0.0, 1.0);
 
-    final currencyEnum = Currency.values.firstWhere(
-      (c) => c.name == currency || c.name == currency.toLowerCase(),
-      orElse: () => Currency.eur,
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
     );
 
     final formattedSpent = AmountFormatter.format(montantDepense, currency: currencyEnum);

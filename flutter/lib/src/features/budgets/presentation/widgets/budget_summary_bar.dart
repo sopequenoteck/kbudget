@@ -5,6 +5,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Barre de résumé global des budgets du mois.
@@ -44,9 +45,9 @@ class BudgetSummaryBar extends StatelessWidget {
     final progressColor = isOverBudget ? AppColors.error : colorScheme.primary;
     final clampedProgress = (percentage / 100).clamp(0.0, 1.0);
 
-    final currencyEnum = Currency.values.firstWhere(
-      (c) => c.name == currency || c.name == currency.toLowerCase(),
-      orElse: () => Currency.eur,
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
     );
 
     final formattedSpent = AmountFormatter.format(totalSpent, currency: currencyEnum);

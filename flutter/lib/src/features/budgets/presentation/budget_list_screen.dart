@@ -112,7 +112,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                       size: 24,
                     ),
                     onPressed: () => context.push(RouteNames.budgetDetails),
-                    tooltip: 'Voir les graphiques',
+                    tooltip: l10n.budgetViewCharts,
                   ),
                 ],
               ),
@@ -179,7 +179,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                       PhosphorIconsRegular.arrowClockwise,
                       size: 20,
                     ),
-                    label: const Text('Réessayer'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -317,6 +317,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
   }
 
   Widget _buildEmptyState(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space6),
@@ -330,7 +331,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              'Aucun budget',
+              l10n.emptyBudgetList,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.medium,
@@ -339,7 +340,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Appuyez sur + pour créer un budget',
+              l10n.emptyBudgetCreateHint,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 color: colorScheme.onSurface.withValues(alpha: 0.4),

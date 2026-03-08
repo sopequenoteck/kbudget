@@ -13,7 +13,9 @@ import 'package:k_budget/src/features/budgets/presentation/widgets/budget_catego
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_pie_chart.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/features/budgets/presentation/budget_month_helpers.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class BudgetDetailScreen extends ConsumerStatefulWidget {
@@ -94,7 +96,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Détails budget'),
+        title: Text(AppLocalizations.of(context)!.budgetDetails),
       ),
       body: CustomScrollView(
         slivers: [
@@ -345,6 +347,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
   }
 
   Widget _buildErrorState(String error, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space6),
@@ -358,7 +361,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              'Impossible de charger les données',
+              l10n.errorLoadingData,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.medium,
@@ -372,7 +375,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
                 PhosphorIconsRegular.arrowClockwise,
                 size: 20,
               ),
-              label: const Text('Réessayer'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -381,6 +384,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
   }
 
   Widget _buildEmptyState(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space6),
@@ -394,7 +398,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              'Aucune donnée pour ce mois',
+              l10n.emptyBudgetData,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.medium,
@@ -437,9 +441,9 @@ class _BudgetItemRow extends StatelessWidget {
     final categoryColor = parseHexColor(categoryCouleur);
     final isOverBudget = percentage > 100;
 
-    final currencyEnum = Currency.values.firstWhere(
-      (c) => c.name == currency || c.name == currency.toLowerCase(),
-      orElse: () => Currency.eur,
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
     );
 
     final formattedSpent =
