@@ -87,6 +87,8 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), currencies (List\<Currency\>, default [EUR]), enabledNotificationTypes (List\<NotificationType\>, nullable), timezone (String, default "Europe/Paris"), updatedAt. @OneToOne → User.
 - **ExchangeRate** : baseCurrency (Currency), targetCurrency (Currency), rate (BigDecimal, precision 20 scale 6), updatedAt. UNIQUE(user_id, base_currency, target_currency). FK → User.
 - **Notification** : type (NotificationType), entityType (EntityType), entityId (UUID), title, body, read (Boolean, default false), readAt (LocalDateTime, nullable), createdAt. FK → User.
+- **Budget** : montant, frequence (HEBDOMADAIRE/MENSUEL/ANNUEL), currency (Currency, default EUR), seuilNotification (Integer, default 80), actif (Boolean, default true), updatedAt. UNIQUE(user_id, category_id). FK → User + Category.
+- **BudgetSnapshot** : montantBudget, currency, tauxChange (nullable), montantDepense, mois (String yyyy-MM), createdAt. FK → User + Category.
 
 ### Environnements
 
@@ -280,7 +282,7 @@ Approche **signals-first** obligatoire :
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V12
+- PostgreSQL 15+, Flyway migrations V1-V17
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -309,3 +311,4 @@ Approche **signals-first** obligatoire :
 - 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Phosphor standard)
 - 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop; image sync Flutter↔Angular via base64 data URI — ImageUtils (flutter) + compressImage canvas (Angular, maxWidth=1024, quality=0.85)
 - 069-phosphor-icons-migration: All system icons migrated to Phosphor Icons — phosphor_flutter v2.1.0 (Flutter, ~60 icons), @ng-icons/core + @ng-icons/phosphor-icons v33.1.0 (Angular, ~20 emojis); docs/design-tokens.md section Icons ajoutée; icon-mapping.md créé; 525 tests Flutter passent
+- 073-backend-budget-categories: Budget + BudgetSnapshot entities; Flyway V17; BudgetService (CRUD, overview mensuel, history avec snapshots lazy, normalisation HEBDO/MENSUEL/ANNUEL, multi-devise); 7 endpoints /budgets; Feature.BUDGETS; 41 tests (25 service + 16 controller)
