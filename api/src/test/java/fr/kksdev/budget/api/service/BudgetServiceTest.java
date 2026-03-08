@@ -22,6 +22,7 @@ import fr.kksdev.budget.api.repository.ExchangeRateRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,16 +33,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.assertj.core.data.Percentage;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -121,6 +127,14 @@ class BudgetServiceTest {
                 .build();
     }
 
+    private List<Object[]> batchResult(Object[]... rows) {
+        List<Object[]> list = new ArrayList<>();
+        for (Object[] row : rows) {
+            list.add(row);
+        }
+        return list;
+    }
+
     // -------------------------------------------------------------------------
     // US1 — CRUD tests (T017)
     // -------------------------------------------------------------------------
@@ -168,9 +182,9 @@ class BudgetServiceTest {
         var budget = buildBudget(budgetId, category);
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
 
         List<BudgetResponse> result = budgetService.getAll(userId, false);
 
@@ -195,9 +209,9 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserId(userId)).thenReturn(List.of(activeBudget, inactiveBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
 
         List<BudgetResponse> result = budgetService.getAll(userId, true);
 
@@ -229,6 +243,7 @@ class BudgetServiceTest {
         var request = new BudgetRequest(otherCategoryId, new BigDecimal("500.00"), Frequency.MENSUEL, Currency.EUR, 80, true);
 
         when(budgetRepository.findByIdAndUserId(budgetId, userId)).thenReturn(Optional.of(existing));
+        when(categoryRepository.findById(otherCategoryId)).thenReturn(Optional.of(buildCategory(otherCategoryId)));
         when(budgetRepository.existsByCategoryIdAndUserId(otherCategoryId, userId)).thenReturn(true);
 
         assertThatThrownBy(() -> budgetService.update(budgetId, request, userId))
@@ -289,16 +304,18 @@ class BudgetServiceTest {
         var expectedSpent = new BigDecimal("123.45");
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(expectedSpent);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(new Object[]{categoryId, expectedSpent}));
 
         List<BudgetResponse> result = budgetService.getAll(userId, false);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().spent()).isEqualByComparingTo("123.45");
-        verify(transactionRepository).sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class));
+        verify(transactionRepository).sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class));
+        verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                any(), any(), any(), any());
     }
 
     // -------------------------------------------------------------------------
@@ -320,9 +337,9 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(weeklyBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -347,9 +364,9 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(annualBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -387,12 +404,12 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget1, budget2));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(catId1), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("100.00"));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(catId2), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("200.00"));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(
+                        new Object[]{catId1, new BigDecimal("100.00")},
+                        new Object[]{catId2, new BigDecimal("200.00")}
+                ));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -422,9 +439,9 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(usdBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00")}));
         when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.USD, Currency.EUR))
                 .thenReturn(Optional.of(exchangeRate));
 
@@ -433,10 +450,13 @@ class BudgetServiceTest {
         // 100 USD * 0.92 = 92.00 EUR
         assertThat(response.totalBudget()).isEqualByComparingTo("92.00");
         assertThat(response.items().getFirst().montantBudgetNormalise()).isEqualByComparingTo("92.00");
+        // 50 USD * 0.92 = 46.00 EUR
+        assertThat(response.totalSpent()).isEqualByComparingTo("46.00");
+        assertThat(response.items().getFirst().montantDepense()).isEqualByComparingTo("46.00");
     }
 
     @Test
-    void should_throw_when_exchange_rate_missing() {
+    void should_fallback_to_unconverted_amount_when_exchange_rate_missing() {
         var category = buildCategory(categoryId);
         var usdBudget = Budget.builder()
                 .id(budgetId)
@@ -450,15 +470,61 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(usdBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
         when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.USD, Currency.EUR))
                 .thenReturn(Optional.empty());
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.USD))
+                .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> budgetService.getOverview(userId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Taux de change manquant");
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        // Fallback: montant non converti (100 USD utilisé tel quel)
+        assertThat(response.totalBudget()).isEqualByComparingTo("100.00");
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().getFirst().montantBudgetNormalise()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
+    void should_use_inverse_rate_when_direct_rate_missing() {
+        var category = buildCategory(categoryId);
+        var xofBudget = Budget.builder()
+                .id(budgetId)
+                .montant(new BigDecimal("65000.00"))
+                .currency(Currency.XOF)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(true)
+                .category(category)
+                .user(buildUser(userId))
+                .build();
+
+        var inverseRate = ExchangeRate.builder()
+                .baseCurrency(Currency.EUR)
+                .targetCurrency(Currency.XOF)
+                .rate(new BigDecimal("655.957"))
+                .user(buildUser(userId))
+                .build();
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(xofBudget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("32500.00")}));
+        // Direct XOF→EUR absent
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.XOF, Currency.EUR))
+                .thenReturn(Optional.empty());
+        // Inverse EUR→XOF présent
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.XOF))
+                .thenReturn(Optional.of(inverseRate));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        // 65000 * (1 / 655.957) ≈ 99.09 EUR
+        assertThat(response.totalBudget()).isCloseTo(new BigDecimal("99.09"), Percentage.withPercentage(1));
+        // 32500 * (1 / 655.957) ≈ 49.54 EUR
+        assertThat(response.totalSpent()).isCloseTo(new BigDecimal("49.54"), Percentage.withPercentage(1));
+        assertThat(response.items()).hasSize(1);
     }
 
     @Test
@@ -489,9 +555,9 @@ class BudgetServiceTest {
                 .build();
 
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(zeroBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("50.00"));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00")}));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -513,18 +579,68 @@ class BudgetServiceTest {
                 .user(buildUser(userId))
                 .build();
 
-        var actualSpent = new BigDecimal("87.50");
-
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(weeklyBudget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(actualSpent);
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("87.50")}));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
         // Spent comes from transactionRepository, not derived from frequency normalization
         assertThat(response.totalSpent()).isEqualByComparingTo("87.50");
         assertThat(response.items().getFirst().montantDepense()).isEqualByComparingTo("87.50");
+    }
+
+    @Test
+    void should_batchLoadSpent_when_getAllWithMultipleBudgets() {
+        var catId1 = UUID.randomUUID();
+        var catId2 = UUID.randomUUID();
+        var cat1 = buildCategory(catId1);
+        var cat2 = buildCategory(catId2);
+
+        var budget1 = Budget.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("300.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(true)
+                .category(cat1)
+                .user(buildUser(userId))
+                .build();
+        var budget2 = Budget.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("500.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(true)
+                .category(cat2)
+                .user(buildUser(userId))
+                .build();
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget1, budget2));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(
+                        new Object[]{catId1, new BigDecimal("75.00")},
+                        new Object[]{catId2, new BigDecimal("250.00")}
+                ));
+
+        List<BudgetResponse> result = budgetService.getAll(userId, false);
+
+        assertThat(result).hasSize(2);
+        var response1 = result.stream().filter(r -> r.category().id().equals(catId1)).findFirst().orElseThrow();
+        var response2 = result.stream().filter(r -> r.category().id().equals(catId2)).findFirst().orElseThrow();
+        assertThat(response1.spent()).isEqualByComparingTo("75.00");
+        assertThat(response2.spent()).isEqualByComparingTo("250.00");
+
+        // Vérifier que la méthode batch a été appelée une seule fois
+        verify(transactionRepository).sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class));
+        // Vérifier que la méthode unitaire n'a jamais été appelée
+        verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                any(), any(), any(), any());
     }
 
     // -------------------------------------------------------------------------
@@ -539,9 +655,10 @@ class BudgetServiceTest {
 
         when(budgetSnapshotRepository.findByUserIdAndMois(userId, pastMonth)).thenReturn(List.of());
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
-        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("150.00"));
+        List<Object[]> batchResult = Collections.singletonList(new Object[]{categoryId, new BigDecimal("150.00")});
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), eq(List.of(categoryId)), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult);
 
         var snapshot = BudgetSnapshot.builder()
                 .id(UUID.randomUUID())
@@ -555,12 +672,12 @@ class BudgetServiceTest {
                 .build();
 
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser(userId));
-        when(budgetSnapshotRepository.save(any(BudgetSnapshot.class))).thenReturn(snapshot);
+        when(budgetSnapshotRepository.saveAll(anyList())).thenReturn(List.of(snapshot));
 
         BudgetHistoryResponse response = budgetService.getHistory(pastMonth, userId);
 
         assertThat(response.items()).hasSize(1);
-        verify(budgetSnapshotRepository).save(any(BudgetSnapshot.class));
+        verify(budgetSnapshotRepository).saveAll(anyList());
     }
 
     @Test
@@ -650,5 +767,8 @@ class BudgetServiceTest {
         assertThat(item.currency()).isEqualTo("USD");
         // Budget converted: 100 * 0.92 = 92.00
         assertThat(response.totalBudget()).isEqualByComparingTo("92.00");
+        // Spent converted: 50 * 0.92 = 46.00
+        assertThat(response.totalSpent()).isEqualByComparingTo("46.00");
+        assertThat(item.montantDepense()).isEqualByComparingTo("46.00");
     }
 }

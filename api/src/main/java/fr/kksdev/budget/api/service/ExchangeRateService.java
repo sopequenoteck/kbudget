@@ -74,20 +74,43 @@ public class ExchangeRateService {
     }
 
     @Transactional
-    public void rebaseRates(UUID userId, Currency newBaseCurrency) {
+    public void rebaseRates(UUID userId, Currency oldBaseCurrency, Currency newBaseCurrency) {
         List<ExchangeRate> rates = exchangeRateRepository.findAllByUserId(userId);
-        for (ExchangeRate rate : rates) {
-            BigDecimal invertedRate = BigDecimal.ONE.divide(rate.getRate(), 6, RoundingMode.HALF_UP);
-            Currency oldBase = rate.getBaseCurrency();
-            Currency oldTarget = rate.getTargetCurrency();
-            rate.setBaseCurrency(oldTarget);
-            rate.setTargetCurrency(oldBase);
-            rate.setRate(invertedRate);
-            exchangeRateRepository.save(rate);
-            log.info("Taux inversé: {}/{} = {} (anciennement {}/{} = {}) pour userId={}",
-                    rate.getBaseCurrency(), rate.getTargetCurrency(), invertedRate,
-                    oldBase, oldTarget, BigDecimal.ONE.divide(invertedRate, 6, RoundingMode.HALF_UP), userId);
+
+        BigDecimal pivotRate = findPivotRate(rates, oldBaseCurrency, newBaseCurrency);
+        if (pivotRate == null) {
+            log.warn("Taux pivot manquant {} → {} — rebase ignoré pour userId={}", oldBaseCurrency, newBaseCurrency, userId);
+            return;
         }
+
+        for (ExchangeRate rate : rates) {
+            if (rate.getBaseCurrency() != oldBaseCurrency) continue;
+
+            if (rate.getTargetCurrency() == newBaseCurrency) {
+                BigDecimal inverted = BigDecimal.ONE.divide(rate.getRate(), 6, RoundingMode.HALF_UP);
+                rate.setBaseCurrency(newBaseCurrency);
+                rate.setTargetCurrency(oldBaseCurrency);
+                rate.setRate(inverted);
+            } else {
+                BigDecimal crossRate = rate.getRate().divide(pivotRate, 6, RoundingMode.HALF_UP);
+                rate.setBaseCurrency(newBaseCurrency);
+                rate.setRate(crossRate);
+            }
+            exchangeRateRepository.save(rate);
+            log.info("Taux rebasé: {}/{} = {} pour userId={}", rate.getBaseCurrency(), rate.getTargetCurrency(), rate.getRate(), userId);
+        }
+    }
+
+    private BigDecimal findPivotRate(List<ExchangeRate> rates, Currency from, Currency to) {
+        for (ExchangeRate r : rates) {
+            if (r.getBaseCurrency() == from && r.getTargetCurrency() == to) return r.getRate();
+        }
+        for (ExchangeRate r : rates) {
+            if (r.getBaseCurrency() == to && r.getTargetCurrency() == from) {
+                return BigDecimal.ONE.divide(r.getRate(), 6, RoundingMode.HALF_UP);
+            }
+        }
+        return null;
     }
 
     private ExchangeRateResponse toResponse(ExchangeRate rate) {

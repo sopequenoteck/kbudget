@@ -2,10 +2,7 @@ package fr.kksdev.budget.api.model;
 
 import fr.kksdev.budget.api.enums.Currency;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -16,7 +13,10 @@ import java.util.UUID;
 @Table(name = "exchange_rates",
        uniqueConstraints = @UniqueConstraint(
            columnNames = {"user_id", "base_currency", "target_currency"}))
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,6 +24,7 @@ public class ExchangeRate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,11 +32,11 @@ public class ExchangeRate {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "base_currency", nullable = false, length = 3)
+    @Column(name = "base_currency", nullable = false, length = 10)
     private Currency baseCurrency;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "target_currency", nullable = false, length = 3)
+    @Column(name = "target_currency", nullable = false, length = 10)
     private Currency targetCurrency;
 
     @Column(nullable = false, precision = 20, scale = 6)

@@ -29,7 +29,10 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -79,8 +82,12 @@ public class BudgetService {
         List<Budget> budgets = includeInactive
                 ? budgetRepository.findByUserId(userId)
                 : budgetRepository.findByUserIdAndActifTrue(userId);
+        LocalDate now = LocalDate.now();
+        LocalDate firstDay = now.withDayOfMonth(1);
+        LocalDate lastDay = YearMonth.from(now).atEndOfMonth();
+        Map<UUID, BigDecimal> spentMap = getSpentByCategory(budgets, userId, firstDay, lastDay);
         return budgets.stream()
-                .map(b -> toResponseWithSpent(b, userId))
+                .map(b -> toResponse(b, spentMap.getOrDefault(b.getCategory().getId(), BigDecimal.ZERO)))
                 .toList();
     }
 
@@ -106,12 +113,12 @@ public class BudgetService {
             budget.setActif(request.actif());
         }
         if (!request.categoryId().equals(budget.getCategory().getId())) {
-            if (budgetRepository.existsByCategoryIdAndUserId(request.categoryId(), userId)) {
-                throw new ConflictException("Un budget existe déjà pour cette catégorie");
-            }
             Category newCategory = categoryRepository.findById(request.categoryId())
                     .filter(c -> c.getUser().getId().equals(userId))
                     .orElseThrow(() -> new EntityNotFoundException("Catégorie non trouvée"));
+            if (budgetRepository.existsByCategoryIdAndUserId(request.categoryId(), userId)) {
+                throw new ConflictException("Un budget existe déjà pour cette catégorie");
+            }
             budget.setCategory(newCategory);
         }
         Budget saved = budgetRepository.save(budget);
@@ -140,20 +147,25 @@ public class BudgetService {
         BigDecimal totalSpent = BigDecimal.ZERO;
         List<BudgetOverviewItemResponse> items = new ArrayList<>();
 
+        Map<UUID, BigDecimal> spentMap = getSpentByCategory(budgets, userId, firstDay, lastDay);
+
         for (Budget budget : budgets) {
             BigDecimal normalised = normalizeMontantMensuel(budget);
-            BigDecimal spent = transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                    userId, budget.getCategory().getId(), firstDay, lastDay);
+            BigDecimal spent = spentMap.getOrDefault(budget.getCategory().getId(), BigDecimal.ZERO);
 
             BigDecimal normalisedConverted = normalised;
+            BigDecimal spentConverted = spent;
             if (budget.getCurrency() != primaryCurrency) {
-                BigDecimal rate = getExchangeRate(userId, budget.getCurrency(), primaryCurrency);
-                normalisedConverted = normalised.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+                Optional<BigDecimal> rate = getExchangeRate(userId, budget.getCurrency(), primaryCurrency);
+                if (rate.isPresent()) {
+                    normalisedConverted = normalised.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+                    spentConverted = spent.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+                }
             }
 
             BigDecimal percentage = normalisedConverted.compareTo(BigDecimal.ZERO) == 0
                     ? BigDecimal.ZERO
-                    : spent.multiply(BigDecimal.valueOf(100)).divide(normalisedConverted, 2, RoundingMode.HALF_UP);
+                    : spentConverted.multiply(BigDecimal.valueOf(100)).divide(normalisedConverted, 2, RoundingMode.HALF_UP);
 
             items.add(new BudgetOverviewItemResponse(
                     budget.getId(),
@@ -164,13 +176,13 @@ public class BudgetService {
                     budget.getMontant(),
                     normalisedConverted,
                     budget.getCurrency().name(),
-                    spent,
+                    spentConverted,
                     percentage,
                     budget.getFrequence().name()
             ));
 
             totalBudget = totalBudget.add(normalisedConverted);
-            totalSpent = totalSpent.add(spent);
+            totalSpent = totalSpent.add(spentConverted);
         }
 
         BigDecimal totalPercentage = totalBudget.compareTo(BigDecimal.ZERO) == 0
@@ -209,14 +221,17 @@ public class BudgetService {
 
         for (BudgetSnapshot snapshot : snapshots) {
             BigDecimal convertedBudget = snapshot.getMontantBudget();
+            BigDecimal spentConverted = snapshot.getMontantDepense();
             if (snapshot.getTauxChange() != null) {
                 convertedBudget = snapshot.getMontantBudget().multiply(snapshot.getTauxChange())
+                        .setScale(2, RoundingMode.HALF_UP);
+                spentConverted = snapshot.getMontantDepense().multiply(snapshot.getTauxChange())
                         .setScale(2, RoundingMode.HALF_UP);
             }
 
             BigDecimal percentage = convertedBudget.compareTo(BigDecimal.ZERO) == 0
                     ? BigDecimal.ZERO
-                    : snapshot.getMontantDepense().multiply(BigDecimal.valueOf(100))
+                    : spentConverted.multiply(BigDecimal.valueOf(100))
                             .divide(convertedBudget, 2, RoundingMode.HALF_UP);
 
             items.add(new BudgetHistoryItemResponse(
@@ -227,13 +242,13 @@ public class BudgetService {
                     snapshot.getMontantBudget(),
                     snapshot.getCurrency().name(),
                     snapshot.getTauxChange(),
-                    snapshot.getMontantDepense(),
+                    spentConverted,
                     percentage,
                     snapshot.getCreatedAt()
             ));
 
             totalBudget = totalBudget.add(convertedBudget);
-            totalSpent = totalSpent.add(snapshot.getMontantDepense());
+            totalSpent = totalSpent.add(spentConverted);
         }
 
         BigDecimal totalPercentage = totalBudget.compareTo(BigDecimal.ZERO) == 0
@@ -269,6 +284,29 @@ public class BudgetService {
                 null,
                 budget.getUpdatedAt()
         );
+    }
+
+    private BudgetResponse toResponse(Budget budget, BigDecimal spent) {
+        return new BudgetResponse(
+                budget.getId(), budget.getMontant(), budget.getCurrency().name(),
+                budget.getFrequence().name(), budget.getSeuilNotification(),
+                budget.getActif(), toCategoryResponse(budget.getCategory()),
+                spent, budget.getUpdatedAt());
+    }
+
+    private Map<UUID, BigDecimal> getSpentByCategory(List<Budget> budgets, UUID userId,
+            LocalDate firstDay, LocalDate lastDay) {
+        List<UUID> categoryIds = budgets.stream()
+                .map(b -> b.getCategory().getId())
+                .toList();
+        if (categoryIds.isEmpty()) return Map.of();
+        List<Object[]> results = transactionRepository
+                .sumDepenseByUserIdAndCategoryIdsAndDateBetween(userId, categoryIds, firstDay, lastDay);
+        Map<UUID, BigDecimal> map = new HashMap<>();
+        for (Object[] row : results) {
+            map.put((UUID) row[0], (BigDecimal) row[1]);
+        }
+        return map;
     }
 
     private BudgetResponse toResponseWithSpent(Budget budget, UUID userId) {
@@ -316,27 +354,37 @@ public class BudgetService {
         return (currencies != null && !currencies.isEmpty()) ? currencies.get(0) : Currency.EUR;
     }
 
-    private BigDecimal getExchangeRate(UUID userId, Currency from, Currency to) {
-        return exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, from, to)
-                .map(ExchangeRate::getRate)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Taux de change manquant pour " + from.name() + " → " + to.name()));
+    private Optional<BigDecimal> getExchangeRate(UUID userId, Currency from, Currency to) {
+        Optional<BigDecimal> rate = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, from, to)
+                .map(ExchangeRate::getRate);
+        if (rate.isPresent()) {
+            return rate;
+        }
+        Optional<BigDecimal> inverse = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, to, from)
+                .map(ExchangeRate::getRate);
+        if (inverse.isPresent()) {
+            return Optional.of(BigDecimal.ONE.divide(inverse.get(), 6, RoundingMode.HALF_UP));
+        }
+        log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", from, to, userId);
+        return Optional.empty();
     }
 
     private List<BudgetSnapshot> createSnapshotsLazily(String month, YearMonth targetMonth, UUID userId, Currency primaryCurrency) {
         List<Budget> budgets = budgetRepository.findByUserIdAndActifTrue(userId);
         LocalDate firstDay = targetMonth.atDay(1);
         LocalDate lastDay = targetMonth.atEndOfMonth();
-        List<BudgetSnapshot> snapshots = new ArrayList<>();
+        List<BudgetSnapshot> unsaved = new ArrayList<>();
+
+        Map<UUID, BigDecimal> spentByCategory = getSpentByCategory(budgets, userId, firstDay, lastDay);
+        var userRef = userRepository.getReferenceById(userId);
 
         for (Budget budget : budgets) {
             BigDecimal normalised = normalizeMontantMensuel(budget);
-            BigDecimal spent = transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
-                    userId, budget.getCategory().getId(), firstDay, lastDay);
+            BigDecimal spent = spentByCategory.getOrDefault(budget.getCategory().getId(), BigDecimal.ZERO);
 
             BigDecimal tauxChange = null;
             if (budget.getCurrency() != primaryCurrency) {
-                tauxChange = getExchangeRate(userId, budget.getCurrency(), primaryCurrency);
+                tauxChange = getExchangeRate(userId, budget.getCurrency(), primaryCurrency).orElse(null);
             }
 
             BudgetSnapshot snapshot = BudgetSnapshot.builder()
@@ -346,10 +394,11 @@ public class BudgetService {
                     .montantDepense(spent)
                     .mois(month)
                     .category(budget.getCategory())
-                    .user(userRepository.getReferenceById(userId))
+                    .user(userRef)
                     .build();
-            snapshots.add(budgetSnapshotRepository.save(snapshot));
+            unsaved.add(snapshot);
         }
+        List<BudgetSnapshot> snapshots = budgetSnapshotRepository.saveAll(unsaved);
 
         log.info("Snapshots créés: mois={}, count={}, userId={}", month, snapshots.size(), userId);
         return snapshots;

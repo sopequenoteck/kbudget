@@ -13,7 +13,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "budgets",
        uniqueConstraints = @UniqueConstraint(columnNames = {"category_id", "user_id"}))
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"category", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,13 +24,14 @@ public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal montant;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
+    @Column(nullable = false, length = 10)
     @Builder.Default
     private Currency currency = Currency.EUR;
 

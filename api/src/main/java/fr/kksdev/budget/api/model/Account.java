@@ -12,7 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "accounts")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,6 +23,7 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false, length = 50)

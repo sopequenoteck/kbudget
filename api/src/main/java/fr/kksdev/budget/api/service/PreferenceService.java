@@ -69,7 +69,7 @@ public class PreferenceService {
             preference.setCurrencies(new ArrayList<>(request.currencies()));
             Currency newPrimary = request.currencies().get(0);
             if (oldPrimary != null && oldPrimary != newPrimary) {
-                exchangeRateService.rebaseRates(userId, newPrimary);
+                exchangeRateService.rebaseRates(userId, oldPrimary, newPrimary);
                 log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
             }
         }

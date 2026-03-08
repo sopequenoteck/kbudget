@@ -7,10 +7,7 @@ import fr.kksdev.budget.api.model.converter.CurrencyListConverter;
 import fr.kksdev.budget.api.model.converter.FeatureListConverter;
 import fr.kksdev.budget.api.model.converter.NotificationTypeListConverter;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -19,7 +16,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "user_preferences")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,6 +27,7 @@ public class UserPreference {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)

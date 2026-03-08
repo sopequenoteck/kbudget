@@ -266,7 +266,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.XOF, Currency.EUR), null, null);
         preferenceService.updatePreferences(request, userId);
 
-        verify(exchangeRateService).rebaseRates(userId, Currency.XOF);
+        verify(exchangeRateService).rebaseRates(userId, Currency.EUR, Currency.XOF);
     }
 
     @Test
@@ -282,7 +282,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.EUR, Currency.XOF, Currency.USD), null, null);
         preferenceService.updatePreferences(request, userId);
 
-        verify(exchangeRateService, never()).rebaseRates(any(), any());
+        verify(exchangeRateService, never()).rebaseRates(any(), any(), any());
     }
 
     @Test

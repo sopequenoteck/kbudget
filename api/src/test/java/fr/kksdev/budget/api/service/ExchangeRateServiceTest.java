@@ -52,7 +52,7 @@ class ExchangeRateServiceTest {
         when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rate));
         when(exchangeRateRepository.save(any(ExchangeRate.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        exchangeRateService.rebaseRates(userId, Currency.XOF);
+        exchangeRateService.rebaseRates(userId, Currency.EUR, Currency.XOF);
 
         assertThat(rate.getBaseCurrency()).isEqualTo(Currency.XOF);
         assertThat(rate.getTargetCurrency()).isEqualTo(Currency.EUR);
@@ -66,10 +66,61 @@ class ExchangeRateServiceTest {
         when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rate));
         when(exchangeRateRepository.save(any(ExchangeRate.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        exchangeRateService.rebaseRates(userId, Currency.XOF);
+        exchangeRateService.rebaseRates(userId, Currency.EUR, Currency.XOF);
 
         // 1 / 655.957 = 0.001524 (HALF_UP, 6 decimal places)
         assertThat(rate.getRate()).isEqualByComparingTo("0.001524");
+    }
+
+    @Test
+    void should_crossCalculateRates_when_rebaseWithMultipleRates() {
+        // EUR→USD (1.08) + EUR→XOF (655.957), rebase EUR→USD
+        var rateEurUsd = buildRate(Currency.EUR, Currency.USD, "1.080000");
+        var rateEurXof = buildRate(Currency.EUR, Currency.XOF, "655.957000");
+        when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rateEurUsd, rateEurXof));
+        when(exchangeRateRepository.save(any(ExchangeRate.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        exchangeRateService.rebaseRates(userId, Currency.EUR, Currency.USD);
+
+        // EUR→USD devient USD→EUR : 1/1.08 = 0.925926
+        assertThat(rateEurUsd.getBaseCurrency()).isEqualTo(Currency.USD);
+        assertThat(rateEurUsd.getTargetCurrency()).isEqualTo(Currency.EUR);
+        assertThat(rateEurUsd.getRate()).isEqualByComparingTo("0.925926");
+
+        // EUR→XOF devient USD→XOF : 655.957/1.08 = 607.367593
+        assertThat(rateEurXof.getBaseCurrency()).isEqualTo(Currency.USD);
+        assertThat(rateEurXof.getTargetCurrency()).isEqualTo(Currency.XOF);
+        assertThat(rateEurXof.getRate()).isEqualByComparingTo("607.367593");
+
+        verify(exchangeRateRepository, times(2)).save(any(ExchangeRate.class));
+    }
+
+    @Test
+    void should_skipRatesNotInvolvingOldBase() {
+        // USD→GBP ne doit pas être touché lors d'un rebase EUR→XOF
+        var rateEurXof = buildRate(Currency.EUR, Currency.XOF, "655.957000");
+        var rateUsdGbp = buildRate(Currency.USD, Currency.GBP, "0.780000");
+        when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rateEurXof, rateUsdGbp));
+        when(exchangeRateRepository.save(any(ExchangeRate.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        exchangeRateService.rebaseRates(userId, Currency.EUR, Currency.XOF);
+
+        // USD→GBP inchangé
+        assertThat(rateUsdGbp.getBaseCurrency()).isEqualTo(Currency.USD);
+        assertThat(rateUsdGbp.getTargetCurrency()).isEqualTo(Currency.GBP);
+        assertThat(rateUsdGbp.getRate()).isEqualByComparingTo("0.780000");
+        verify(exchangeRateRepository, times(1)).save(any(ExchangeRate.class));
+    }
+
+    @Test
+    void should_logWarning_when_noPivotRateFound() {
+        // Aucun taux lié entre EUR et USD → rebase ignoré, aucun save
+        var rateEurXof = buildRate(Currency.EUR, Currency.XOF, "655.957000");
+        when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rateEurXof));
+
+        exchangeRateService.rebaseRates(userId, Currency.EUR, Currency.USD);
+
+        verify(exchangeRateRepository, never()).save(any(ExchangeRate.class));
     }
 
     @Test

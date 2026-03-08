@@ -36,4 +36,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("categoryId") UUID categoryId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
+
+    @Query(value = "SELECT t.category_id, COALESCE(SUM(t.montant), 0) FROM transactions t " +
+            "WHERE t.user_id = :userId AND t.category_id IN :categoryIds " +
+            "AND t.type = 'DEPENSE' AND t.date >= :from AND t.date <= :to " +
+            "GROUP BY t.category_id",
+            nativeQuery = true)
+    List<Object[]> sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+            @Param("userId") UUID userId,
+            @Param("categoryIds") List<UUID> categoryIds,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

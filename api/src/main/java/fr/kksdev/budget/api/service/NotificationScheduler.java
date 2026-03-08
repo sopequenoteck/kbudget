@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -119,8 +120,21 @@ public class NotificationScheduler {
 
     LocalDate getNextDueDate(LocalDate dateDebut, Frequency frequence, ZoneId zoneId) {
         LocalDate today = LocalDate.now(zoneId);
-        LocalDate nextDue = dateDebut;
-        while (nextDue.isBefore(today)) {
+        if (!dateDebut.isBefore(today)) return dateDebut;
+
+        long periodsElapsed = switch (frequence) {
+            case HEBDOMADAIRE -> ChronoUnit.WEEKS.between(dateDebut, today);
+            case MENSUEL -> ChronoUnit.MONTHS.between(dateDebut, today);
+            case ANNUEL -> ChronoUnit.YEARS.between(dateDebut, today);
+        };
+
+        LocalDate nextDue = switch (frequence) {
+            case HEBDOMADAIRE -> dateDebut.plusWeeks(periodsElapsed);
+            case MENSUEL -> dateDebut.plusMonths(periodsElapsed);
+            case ANNUEL -> dateDebut.plusYears(periodsElapsed);
+        };
+
+        if (nextDue.isBefore(today)) {
             nextDue = switch (frequence) {
                 case HEBDOMADAIRE -> nextDue.plusWeeks(1);
                 case MENSUEL -> nextDue.plusMonths(1);

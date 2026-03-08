@@ -17,6 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationController {
 
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final NotificationService notificationService;
 
     @GetMapping
@@ -26,7 +28,8 @@ public class NotificationController {
             @RequestParam(required = false) Boolean unread,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        Page<NotificationResponse> result = notificationService.getNotifications(userId, PageRequest.of(page, size), unread);
+        int cappedSize = Math.min(size, MAX_PAGE_SIZE);
+        Page<NotificationResponse> result = notificationService.getNotifications(userId, PageRequest.of(page, cappedSize), unread);
         return ResponseEntity.ok(Map.of(
                 "content", result.getContent(),
                 "number", result.getNumber(),
