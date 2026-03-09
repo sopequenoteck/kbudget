@@ -15,6 +15,7 @@ import {
   type BudgetOverview,
   type BudgetHistory,
   type BudgetItem,
+  type UnbudgetedItem,
   budgetAmount,
 } from '../../../../core/models/budget.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -75,7 +76,27 @@ import { BudgetChart } from '../budget-chart';
         [items]="items()"
         [totalSpent]="monthData()!.totalSpent"
         [currency]="monthData()!.currency"
+        [unbudgetedTotal]="unbudgetedTotal()"
       />
+
+      @if (showUnbudgeted() && unbudgetedItems().length > 0) {
+        <div class="unbudgeted-section">
+          <h3 class="unbudgeted-section__title">Dépenses non budgétées</h3>
+          <ul class="budget-list">
+            @for (item of unbudgetedItems(); track item.categoryId) {
+              <li class="budget-item">
+                <div class="budget-item__header">
+                  <span class="budget-item__icon">{{ item.categoryIcone }}</span>
+                  <span class="budget-item__name">{{ item.categoryNom }}</span>
+                  <span class="budget-item__amount">
+                    {{ item.montantDepense | amount: null : monthData()!.currency }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      }
 
       @if (items().length === 0) {
         <div class="state-empty">
@@ -330,6 +351,19 @@ import { BudgetChart } from '../budget-chart';
         transform: rotate(360deg);
       }
     }
+
+    .unbudgeted-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+
+      &__title {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-primary);
+        margin: 0;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -347,6 +381,8 @@ export class BudgetDetail {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
+  readonly showUnbudgeted = signal(false);
+
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
     return (
@@ -357,8 +393,16 @@ export class BudgetDetail {
 
   readonly items = computed<BudgetItem[]>(() => this.monthData()?.items ?? []);
 
+  readonly unbudgetedItems = computed<UnbudgetedItem[]>(
+    () => this.monthData()?.unbudgetedItems ?? [],
+  );
+
+  readonly unbudgetedTotal = computed(() => this.monthData()?.unbudgetedTotal ?? 0);
+
   constructor() {
-    const monthParam = this.route.snapshot.queryParamMap.get('month');
+    const queryParams = this.route.snapshot.queryParamMap;
+
+    const monthParam = queryParams.get('month');
     if (monthParam) {
       const parts = monthParam.split('-');
       if (parts.length === 2) {
@@ -369,6 +413,11 @@ export class BudgetDetail {
           this.selectedMonth.set(month);
         }
       }
+    }
+
+    const showUnbudgetedParam = queryParams.get('showUnbudgeted');
+    if (showUnbudgetedParam === 'true') {
+      this.showUnbudgeted.set(true);
     }
 
     effect(() => {

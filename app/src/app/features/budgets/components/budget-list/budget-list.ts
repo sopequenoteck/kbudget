@@ -50,6 +50,10 @@ import { BudgetChart } from '../budget-chart';
         @if (allCategoriesHaveBudget()) {
           <p class="hint">Toutes vos catégories ont déjà un budget</p>
         }
+        <label class="toggle-inactive">
+          <input type="checkbox" [checked]="showInactive()" (change)="toggleInactive()" />
+          Afficher les inactifs
+        </label>
       </div>
     }
 
@@ -91,7 +95,10 @@ import { BudgetChart } from '../budget-chart';
       } @else {
         <ul class="budget-list">
           @for (item of items(); track item.categoryId) {
-            <li class="budget-item">
+            <li
+              class="budget-item"
+              [class.budget-item--inactive]="isOverviewItem(item) && !$any(item).actif"
+            >
               <div class="budget-item__header">
                 <span class="budget-item__icon">{{ item.categoryIcone }}</span>
                 <span class="budget-item__name">{{ item.categoryNom }}</span>
@@ -126,11 +133,24 @@ import { BudgetChart } from '../budget-chart';
           }
         </ul>
 
+        @if (unbudgetedTotal() > 0) {
+          <div class="budget-item budget-item--other" (click)="onShowUnbudgeted()">
+            <div class="budget-item__header">
+              <span class="budget-item__icon">📦</span>
+              <span class="budget-item__name">Autre</span>
+              <span class="budget-item__amount">
+                {{ unbudgetedTotal() | amount: null : monthData()!.currency }}
+              </span>
+            </div>
+          </div>
+        }
+
         <app-budget-chart
           [items]="items()"
           [totalSpent]="monthData()?.totalSpent ?? 0"
           [currency]="monthData()?.currency ?? 'EUR'"
           [clickable]="true"
+          [unbudgetedTotal]="unbudgetedTotal()"
           (chartClicked)="onChartClick()"
         />
 
@@ -331,6 +351,32 @@ import { BudgetChart } from '../budget-chart';
       font-size: var(--font-size-sm);
       padding: var(--space-4);
     }
+
+    .budget-item--other {
+      background-color: var(--surface-muted, #f3f4f6);
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: var(--shadow-md);
+      }
+    }
+
+    .budget-item--inactive {
+      opacity: 0.5;
+    }
+
+    .toggle-inactive {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+
+      input[type='checkbox'] {
+        cursor: pointer;
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -353,6 +399,8 @@ export class BudgetList {
   readonly allBudgets = signal<Budget[]>([]);
   readonly allCategories = signal<Category[]>([]);
 
+  readonly showInactive = signal(false);
+
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
     return (
@@ -362,6 +410,8 @@ export class BudgetList {
   });
 
   readonly items = computed<BudgetItem[]>(() => this.monthData()?.items ?? []);
+
+  readonly unbudgetedTotal = computed(() => this.monthData()?.unbudgetedTotal ?? 0);
 
   readonly allCategoriesHaveBudget = computed(() => {
     const userCategories = this.allCategories().filter((c) => !c.isSystem);
@@ -401,9 +451,35 @@ export class BudgetList {
     this.error.set(null);
     const month = `${this.selectedYear()}-${String(this.selectedMonth()).padStart(2, '0')}`;
     try {
-      const data = this.isCurrentMonth()
-        ? await firstValueFrom(this.budgetService.getOverview())
-        : await firstValueFrom(this.budgetService.getHistory(month));
+      let data: BudgetOverview | BudgetHistory;
+      if (this.isCurrentMonth() && this.showInactive()) {
+        const budgets = await firstValueFrom(this.budgetService.getAll(true));
+        const overview = await firstValueFrom(this.budgetService.getOverview());
+        const inactiveItems = budgets
+          .filter((b) => !b.actif)
+          .map((b) => ({
+            budgetId: b.id,
+            categoryId: b.category.id,
+            categoryNom: b.category.nom,
+            categoryIcone: b.category.icone,
+            categoryCouleur: b.category.couleur,
+            montantBudget: b.montant,
+            montantBudgetNormalise: b.montant,
+            currency: b.currency,
+            montantDepense: b.spent,
+            percentage: 0,
+            frequence: b.frequence,
+            actif: false,
+          })) as unknown as BudgetItem[];
+        data = {
+          ...overview,
+          items: [...overview.items, ...inactiveItems] as BudgetOverview['items'],
+        };
+      } else if (this.isCurrentMonth()) {
+        data = await firstValueFrom(this.budgetService.getOverview());
+      } else {
+        data = await firstValueFrom(this.budgetService.getHistory(month));
+      }
       this.monthData.set(data);
     } catch (err) {
       if (isDevMode()) console.error('Failed to load budget data', err);
@@ -415,6 +491,11 @@ export class BudgetList {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  toggleInactive(): void {
+    this.showInactive.update((v) => !v);
+    this.loadData();
   }
 
   private async loadAllBudgets(): Promise<void> {
@@ -433,6 +514,13 @@ export class BudgetList {
     } catch (err) {
       if (isDevMode()) console.error('Failed to load categories', err);
     }
+  }
+
+  onShowUnbudgeted(): void {
+    const month = `${this.selectedYear()}-${String(this.selectedMonth()).padStart(2, '0')}`;
+    this.router.navigate(['/budgets/details'], {
+      queryParams: { showUnbudgeted: 'true', month },
+    });
   }
 
   onChartClick(): void {

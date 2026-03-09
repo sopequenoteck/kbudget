@@ -77,21 +77,34 @@ export class BudgetChart {
   readonly totalSpent = input.required<number>();
   readonly currency = input<string>('EUR');
   readonly clickable = input<boolean>(false);
+  readonly unbudgetedTotal = input<number>(0);
   readonly chartClicked = output<void>();
 
-  readonly hasExpenses = computed(() => this.items().some((i) => i.montantDepense > 0));
+  readonly hasExpenses = computed(
+    () => this.items().some((i) => i.montantDepense > 0) || this.unbudgetedTotal() > 0,
+  );
 
   readonly chartData = computed<ChartData<'doughnut'>>(() => {
     const items = this.items();
-    if (items.length === 0) {
+    const labels: string[] = items.map((i) => i.categoryNom);
+    const data: number[] = items.map((i) => i.montantDepense);
+    const colors: string[] = items.map((i) => i.categoryCouleur);
+
+    if (this.unbudgetedTotal() > 0) {
+      labels.push('Autre');
+      data.push(this.unbudgetedTotal());
+      colors.push('#9ca3af');
+    }
+
+    if (labels.length === 0) {
       return { labels: [], datasets: [{ data: [] }] };
     }
     return {
-      labels: items.map((i) => i.categoryNom),
+      labels,
       datasets: [
         {
-          data: items.map((i) => i.montantDepense),
-          backgroundColor: items.map((i) => i.categoryCouleur),
+          data,
+          backgroundColor: colors,
           borderWidth: 0,
         },
       ],

@@ -26,6 +26,8 @@ export interface BudgetOverview {
   percentage: number;
   currency: string;
   items: BudgetOverviewItem[];
+  unbudgetedItems: UnbudgetedItem[];
+  unbudgetedTotal: number;
 }
 
 export interface BudgetOverviewItem {
@@ -49,6 +51,8 @@ export interface BudgetHistory {
   percentage: number;
   currency: string;
   items: BudgetHistoryItem[];
+  unbudgetedItems: UnbudgetedItem[];
+  unbudgetedTotal: number;
 }
 
 export interface BudgetHistoryItem {
@@ -62,6 +66,14 @@ export interface BudgetHistoryItem {
   montantDepense: number;
   percentage: number;
   createdAt: string;
+}
+
+export interface UnbudgetedItem {
+  categoryId: string;
+  categoryNom: string;
+  categoryIcone: string;
+  categoryCouleur: string;
+  montantDepense: number;
 }
 
 export const FREQUENCIES = [
