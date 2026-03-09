@@ -281,6 +281,7 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9 + Angular 21, Angular Reactive Forms, ng2-charts (Chart.js), @ng-icons/phosphor-icons (074-angular-budget-categories)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, drift, dio, fl_chart (nouveau), shimmer, intl, phosphor_flutter (075-flutter-budget-categories)
 - SQLite/Drift (local) + API REST/Dio (remote) via strategy pattern `dataModeProvider` (075-flutter-budget-categories)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_char (076-budget-category-tracking)
 
 ### Backend (api/)
 
