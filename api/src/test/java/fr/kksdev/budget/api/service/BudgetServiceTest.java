@@ -5,8 +5,10 @@ import fr.kksdev.budget.api.dto.response.BudgetHistoryResponse;
 import fr.kksdev.budget.api.dto.response.BudgetOverviewResponse;
 import fr.kksdev.budget.api.dto.response.BudgetResponse;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.Frequency;
+import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
@@ -19,6 +21,7 @@ import fr.kksdev.budget.api.repository.BudgetRepository;
 import fr.kksdev.budget.api.repository.BudgetSnapshotRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.ExchangeRateRepository;
+import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +78,12 @@ class BudgetServiceTest {
 
     @Mock
     private ExchangeRateRepository exchangeRateRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private NotificationRepository notificationRepository;
 
     @InjectMocks
     private BudgetService budgetService;
@@ -770,5 +780,159 @@ class BudgetServiceTest {
         // Spent converted: 50 * 0.92 = 46.00
         assertThat(response.totalSpent()).isEqualByComparingTo("46.00");
         assertThat(item.montantDepense()).isEqualByComparingTo("46.00");
+    }
+
+    // -------------------------------------------------------------------------
+    // US4 — Threshold notification tests (T040)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_send_threshold_notification_when_spending_reaches_seuil() {
+        // Budget 500€ mensuel, seuil 80%, dépenses 400€ → 80% → notification BUDGET_THRESHOLD
+        var category = buildCategory(categoryId);
+        var budget = buildBudget(budgetId, category); // seuil=80, montant=500€, MENSUEL
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("400.00"));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(notificationService).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
+        verify(notificationService, never()).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
+                any(), any(), any(), any());
+    }
+
+    @Test
+    void should_send_exceeded_notification_when_spending_reaches_100_percent() {
+        // Budget 500€ mensuel, dépenses 500€ → 100% → notification BUDGET_EXCEEDED (et aussi BUDGET_THRESHOLD)
+        var category = buildCategory(categoryId);
+        var budget = buildBudget(budgetId, category); // seuil=80, montant=500€
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("500.00"));
+        // BUDGET_THRESHOLD pas encore envoyé
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+        // BUDGET_EXCEEDED pas encore envoyé
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(notificationService).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
+        verify(notificationService).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
+    }
+
+    @Test
+    void should_not_duplicate_threshold_notification_in_same_month() {
+        // Notification BUDGET_THRESHOLD déjà envoyée ce mois → aucune nouvelle notification
+        var category = buildCategory(categoryId);
+        var budget = buildBudget(budgetId, category); // seuil=80, montant=500€
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("400.00")); // 80%
+        // Notification déjà envoyée ce mois
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(true);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(notificationService, never()).createNotification(
+                any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_not_check_when_budget_is_inactive() {
+        // Budget inactif → aucune notification
+        var category = buildCategory(categoryId);
+        var inactiveBudget = Budget.builder()
+                .id(budgetId)
+                .montant(new BigDecimal("500.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(false)
+                .category(category)
+                .user(buildUser(userId))
+                .build();
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(inactiveBudget));
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(
+                any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_not_check_when_no_budget_for_category() {
+        // Pas de budget pour la catégorie → aucune notification
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.empty());
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(
+                any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_respect_custom_seuil_when_spending_exceeds_it() {
+        // Budget avec seuil 60%, dépenses à 65% → notification BUDGET_THRESHOLD
+        var category = buildCategory(categoryId);
+        var budgetWith60Seuil = Budget.builder()
+                .id(budgetId)
+                .montant(new BigDecimal("500.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(60)
+                .actif(true)
+                .category(category)
+                .user(buildUser(userId))
+                .build();
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budgetWith60Seuil));
+        // 325€ / 500€ = 65% → dépasse le seuil de 60%
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("325.00"));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(notificationService).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
+        verify(notificationService, never()).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
+                any(), any(), any(), any());
     }
 }

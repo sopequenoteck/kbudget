@@ -3,8 +3,10 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.BudgetRequest;
 import fr.kksdev.budget.api.dto.response.*;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.Frequency;
+import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
@@ -15,6 +17,7 @@ import fr.kksdev.budget.api.repository.BudgetRepository;
 import fr.kksdev.budget.api.repository.BudgetSnapshotRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.ExchangeRateRepository;
+import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -50,6 +54,8 @@ public class BudgetService {
     private final UserRepository userRepository;
     private final PreferenceService preferenceService;
     private final ExchangeRateRepository exchangeRateRepository;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public BudgetResponse create(BudgetRequest request, UUID userId) {
@@ -189,7 +195,10 @@ public class BudgetService {
                 ? BigDecimal.ZERO
                 : totalSpent.multiply(BigDecimal.valueOf(100)).divide(totalBudget, 2, RoundingMode.HALF_UP);
 
-        return new BudgetOverviewResponse(month, totalBudget, totalSpent, totalPercentage, primaryCurrency.name(), items);
+        List<UnbudgetedItemResponse> unbudgetedItems = getUnbudgetedSpending(userId, YearMonth.from(now), primaryCurrency);
+        BigDecimal unbudgetedTotal = calculateUnbudgetedTotal(unbudgetedItems);
+
+        return new BudgetOverviewResponse(month, totalBudget, totalSpent, totalPercentage, primaryCurrency.name(), items, unbudgetedItems, unbudgetedTotal);
     }
 
     @Transactional
@@ -255,7 +264,82 @@ public class BudgetService {
                 ? BigDecimal.ZERO
                 : totalSpent.multiply(BigDecimal.valueOf(100)).divide(totalBudget, 2, RoundingMode.HALF_UP);
 
-        return new BudgetHistoryResponse(month, totalBudget, totalSpent, totalPercentage, primaryCurrency.name(), items);
+        List<UnbudgetedItemResponse> unbudgetedItems = getUnbudgetedSpending(userId, targetMonth, primaryCurrency);
+        BigDecimal unbudgetedTotal = calculateUnbudgetedTotal(unbudgetedItems);
+
+        return new BudgetHistoryResponse(month, totalBudget, totalSpent, totalPercentage, primaryCurrency.name(), items, unbudgetedItems, unbudgetedTotal);
+    }
+
+    private List<UnbudgetedItemResponse> getUnbudgetedSpending(UUID userId, YearMonth month, Currency primaryCurrency) {
+        LocalDate firstDay = month.atDay(1);
+        LocalDate lastDay = month.atEndOfMonth();
+        List<Object[]> results = transactionRepository.findUnbudgetedSpendingByMonth(userId, firstDay, lastDay);
+        List<UnbudgetedItemResponse> items = new ArrayList<>();
+        for (Object[] row : results) {
+            UUID categoryId = (UUID) row[0];
+            String nom = (String) row[1];
+            String icone = (String) row[2];
+            String couleur = (String) row[3];
+            BigDecimal montant = (BigDecimal) row[4];
+            items.add(new UnbudgetedItemResponse(categoryId, nom, icone, couleur, montant));
+        }
+        return items;
+    }
+
+    private BigDecimal calculateUnbudgetedTotal(List<UnbudgetedItemResponse> items) {
+        return items.stream()
+                .map(UnbudgetedItemResponse::montantDepense)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Transactional
+    public void checkThresholdsForCategory(UUID userId, UUID categoryId) {
+        Optional<Budget> budgetOpt = budgetRepository.findByCategoryIdAndUserId(categoryId, userId);
+        if (budgetOpt.isEmpty() || !budgetOpt.get().getActif()) {
+            return;
+        }
+        Budget budget = budgetOpt.get();
+
+        LocalDate now = LocalDate.now();
+        LocalDate firstDay = now.withDayOfMonth(1);
+        LocalDate lastDay = YearMonth.from(now).atEndOfMonth();
+        BigDecimal spent = transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                userId, categoryId, firstDay, lastDay);
+
+        BigDecimal monthlyBudget = normalizeMontantMensuel(budget);
+        if (monthlyBudget.compareTo(BigDecimal.ZERO) == 0) {
+            return;
+        }
+
+        BigDecimal percentage = spent.multiply(BigDecimal.valueOf(100))
+                .divide(monthlyBudget, 2, RoundingMode.HALF_UP);
+
+        LocalDateTime monthStart = firstDay.atStartOfDay();
+
+        int seuil = budget.getSeuilNotification();
+        if (percentage.compareTo(BigDecimal.valueOf(seuil)) >= 0) {
+            boolean alreadyNotified = notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                    userId, NotificationType.BUDGET_THRESHOLD, budget.getId(), monthStart);
+            if (!alreadyNotified) {
+                String categoryName = budget.getCategory().getNom();
+                String title = "Budget " + categoryName + " : " + percentage.intValue() + "%";
+                String body = "Vous avez atteint " + percentage.intValue() + "% du budget " + categoryName;
+                notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, title, body, EntityType.BUDGET, budget.getId());
+                log.info("Notification BUDGET_THRESHOLD envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
+            }
+        }
+
+        if (percentage.compareTo(BigDecimal.valueOf(100)) >= 0) {
+            boolean alreadyNotified = notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                    userId, NotificationType.BUDGET_EXCEEDED, budget.getId(), monthStart);
+            if (!alreadyNotified) {
+                String categoryName = budget.getCategory().getNom();
+                String title = "Budget " + categoryName + " dépassé !";
+                String body = "Vous avez dépassé le budget " + categoryName + " (" + percentage.intValue() + "%)";
+                notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, title, body, EntityType.BUDGET, budget.getId());
+                log.info("Notification BUDGET_EXCEEDED envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
+            }
+        }
     }
 
     private void checkFeatureEnabled(UUID userId) {

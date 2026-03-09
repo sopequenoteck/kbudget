@@ -9,5 +9,7 @@ public record BudgetHistoryResponse(
         BigDecimal totalSpent,
         BigDecimal percentage,
         String currency,
-        List<BudgetHistoryItemResponse> items
+        List<BudgetHistoryItemResponse> items,
+        List<UnbudgetedItemResponse> unbudgetedItems,
+        BigDecimal unbudgetedTotal
 ) {}

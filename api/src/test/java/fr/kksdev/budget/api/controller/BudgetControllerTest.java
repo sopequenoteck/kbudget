@@ -264,7 +264,9 @@ class BudgetControllerTest {
                 new BigDecimal("200.00"),
                 new BigDecimal("40.00"),
                 "EUR",
-                List.of(item)
+                List.of(item),
+                List.of(),
+                BigDecimal.ZERO
         );
         when(budgetService.getOverview(eq(userId))).thenReturn(overview);
 
@@ -292,7 +294,9 @@ class BudgetControllerTest {
                 new BigDecimal("45.00"),
                 new BigDecimal("45.00"),
                 "EUR",
-                List.of(item)
+                List.of(item),
+                List.of(),
+                BigDecimal.ZERO
         );
         when(budgetService.getOverview(eq(userId))).thenReturn(overview);
 
@@ -320,7 +324,9 @@ class BudgetControllerTest {
                 new BigDecimal("350.00"),
                 new BigDecimal("70.00"),
                 "EUR",
-                List.of(item)
+                List.of(item),
+                List.of(),
+                BigDecimal.ZERO
         );
         when(budgetService.getHistory(eq("2026-02"), eq(userId))).thenReturn(history);
 

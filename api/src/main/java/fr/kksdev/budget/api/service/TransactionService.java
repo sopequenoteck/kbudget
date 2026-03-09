@@ -40,6 +40,7 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final ProductRepository productRepository;
     private final PreferenceService preferenceService;
+    private final BudgetService budgetService;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -62,6 +63,13 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
         log.info("Transaction créée: {} pour userId {}", transaction.getId(), userId);
+        if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+            }
+        }
         return toResponse(transaction);
     }
 
@@ -100,6 +108,13 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
         log.info("Transaction mise à jour: {}", transaction.getId());
+        if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+            }
+        }
         return toResponse(transaction);
     }
 
@@ -111,6 +126,9 @@ public class TransactionService {
             log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
             throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées");
         }
+
+        TransactionType deletedType = transaction.getType();
+        UUID deletedCategoryId = transaction.getCategory() != null ? transaction.getCategory().getId() : null;
 
         // Rollback stock produit si transaction liée à un produit
         if (transaction.getProduct() != null) {
@@ -140,6 +158,14 @@ public class TransactionService {
 
         transactionRepository.delete(transaction);
         log.info("Transaction supprimée: {}", id);
+
+        if (deletedType == TransactionType.DEPENSE && deletedCategoryId != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, deletedCategoryId);
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget après suppression: {}", e.getMessage());
+            }
+        }
     }
 
     public List<TransactionResponse> getByMonth(int month, int year, UUID userId) {

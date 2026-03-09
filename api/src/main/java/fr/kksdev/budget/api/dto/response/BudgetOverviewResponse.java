@@ -9,5 +9,7 @@ public record BudgetOverviewResponse(
         BigDecimal totalSpent,
         BigDecimal percentage,
         String currency,
-        List<BudgetOverviewItemResponse> items
+        List<BudgetOverviewItemResponse> items,
+        List<UnbudgetedItemResponse> unbudgetedItems,
+        BigDecimal unbudgetedTotal
 ) {}
