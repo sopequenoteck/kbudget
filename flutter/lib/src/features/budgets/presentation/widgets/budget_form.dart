@@ -39,6 +39,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
   Currency _selectedCurrency = Currency.eur;
   Frequency _selectedFrequence = Frequency.mensuel;
   int _seuilNotification = 80;
+  bool _actif = true;
   bool _showErrors = false;
   bool _isSubmitting = false;
   bool _initialized = false;
@@ -68,6 +69,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       _selectedCurrency = budget.currency;
       _selectedFrequence = budget.frequence;
       _seuilNotification = budget.seuilNotification;
+      _actif = budget.actif;
     } else {
       // Default to first user currency
       final currencies = ref.read(currencyConfigNotifierProvider);
@@ -116,7 +118,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       frequence: _selectedFrequence,
       currency: _selectedCurrency,
       seuilNotification: _seuilNotification,
-      actif: widget.budget?.actif ?? true,
+      actif: _actif,
       categoryNom: widget.budget?.categoryNom,
       categoryIcone: widget.budget?.categoryIcone,
       categoryCouleur: widget.budget?.categoryCouleur,
@@ -276,7 +278,19 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
 
         // Seuil de notification
         _buildSeuilSlider(colorScheme),
-        const SizedBox(height: AppSpacing.space6),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Toggle actif (mode édition uniquement)
+        if (_isEditMode) ...[
+          SwitchListTile(
+            title: Text(AppLocalizations.of(context)!.budgetActive),
+            value: _actif,
+            onChanged: (v) => setState(() => _actif = v),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: AppSpacing.space4),
+        ] else
+          const SizedBox(height: AppSpacing.space2),
 
         // Action buttons
         Row(

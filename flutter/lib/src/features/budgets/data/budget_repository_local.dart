@@ -1,8 +1,10 @@
 import 'package:k_budget/src/data/local/daos/budget_dao.dart';
+import 'package:k_budget/src/data/local/database.dart' show BudgetSnapshotsCompanion;
 import 'package:k_budget/src/data/local/mappers.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
-import 'package:k_budget/src/domain/models/budget_overview.dart';
 import 'package:k_budget/src/domain/models/budget_history.dart';
+import 'package:k_budget/src/domain/models/budget_overview.dart';
+import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
 
 class BudgetRepositoryLocal implements BudgetRepository {
@@ -70,9 +72,28 @@ class BudgetRepositoryLocal implements BudgetRepository {
       );
     }).toList();
 
+    // Conversion multi-devises : en mode local, la table exchange_rates n'est
+    // pas stockée dans Drift (remote-only). Les montants sont agrégés tels quels,
+    // sans conversion. L'utilisateur en mode local est supposé utiliser une
+    // devise unique. Pour la conversion multi-devises, passer en mode serveur.
     final totalBudget = items.fold<double>(0, (s, i) => s + i.montantBudgetNormalise);
     final totalSpent = items.fold<double>(0, (s, i) => s + i.montantDepense);
     final currency = items.isNotEmpty ? items.first.currency : 'EUR';
+
+    // Dépenses non budgétées
+    final unbudgetedRows =
+        await _dao.getUnbudgetedSpendingForMonth(now.month, now.year);
+    final unbudgetedItems = unbudgetedRows
+        .map((row) => UnbudgetedItem(
+              categoryId: row.read<String>('id'),
+              categoryNom: row.read<String>('nom'),
+              categoryIcone: row.read<String>('icone'),
+              categoryCouleur: row.read<String>('couleur'),
+              montantDepense: row.read<double>('total'),
+            ))
+        .toList();
+    final unbudgetedTotal =
+        unbudgetedItems.fold<double>(0, (s, i) => s + i.montantDepense);
 
     return BudgetOverview(
       month: _currentMonth(),
@@ -81,12 +102,54 @@ class BudgetRepositoryLocal implements BudgetRepository {
       percentage: totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0,
       currency: currency,
       items: items,
+      unbudgetedItems: unbudgetedItems,
+      unbudgetedTotal: unbudgetedTotal,
     );
   }
 
   @override
   Future<BudgetHistory> getHistory(String month) async {
-    final rows = await _dao.getSnapshotsWithCategory(month);
+    var rows = await _dao.getSnapshotsWithCategory(month);
+
+    final monthParts = month.split('-');
+    final yearNum = int.parse(monthParts[0]);
+    final monthNum = int.parse(monthParts[1]);
+
+    // Création lazy des snapshots pour les mois passés sans données
+    if (rows.isEmpty) {
+      final now = DateTime.now();
+      final isPast = yearNum < now.year ||
+          (yearNum == now.year && monthNum < now.month);
+
+      if (isPast) {
+        final budgetRows = await _dao.getActiveBudgetsWithCategory();
+        final spentMap =
+            await _dao.getSpentByCategoryForMonth(monthNum, yearNum);
+
+        for (final row in budgetRows) {
+          final categoryId = row.read<String>('category_id');
+          final montant = row.read<double>('montant');
+          final frequence = row.read<String>('frequence');
+          final currency = row.read<String>('currency');
+          final montantNormalise = _normalize(montant, frequence);
+          final depense = spentMap[categoryId] ?? 0.0;
+
+          await _dao.insertSnapshot(BudgetSnapshotsCompanion.insert(
+            id: '${categoryId}_$month',
+            categoryId: categoryId,
+            montantBudget: montantNormalise,
+            currency: currency,
+            // tauxChange est absent : remote-only, pas de conversion locale
+            montantDepense: depense,
+            mois: month,
+            createdAt: DateTime.now(),
+          ));
+        }
+
+        // Re-fetch les snapshots nouvellement créés
+        rows = await _dao.getSnapshotsWithCategory(month);
+      }
+    }
 
     final items = rows.map((row) {
       final montantBudget = row.read<double>('montant_budget');
@@ -113,6 +176,21 @@ class BudgetRepositoryLocal implements BudgetRepository {
     final totalSpent = items.fold<double>(0, (s, i) => s + i.montantDepense);
     final currency = items.isNotEmpty ? items.first.currency : 'EUR';
 
+    // Dépenses non budgétées pour ce mois historique
+    final unbudgetedRows =
+        await _dao.getUnbudgetedSpendingForMonth(monthNum, yearNum);
+    final unbudgetedItems = unbudgetedRows
+        .map((row) => UnbudgetedItem(
+              categoryId: row.read<String>('id'),
+              categoryNom: row.read<String>('nom'),
+              categoryIcone: row.read<String>('icone'),
+              categoryCouleur: row.read<String>('couleur'),
+              montantDepense: row.read<double>('total'),
+            ))
+        .toList();
+    final unbudgetedTotal =
+        unbudgetedItems.fold<double>(0, (s, i) => s + i.montantDepense);
+
     return BudgetHistory(
       month: month,
       totalBudget: totalBudget,
@@ -120,6 +198,8 @@ class BudgetRepositoryLocal implements BudgetRepository {
       percentage: totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0,
       currency: currency,
       items: items,
+      unbudgetedItems: unbudgetedItems,
+      unbudgetedTotal: unbudgetedTotal,
     );
   }
 

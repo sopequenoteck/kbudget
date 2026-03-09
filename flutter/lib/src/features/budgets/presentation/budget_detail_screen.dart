@@ -11,6 +11,7 @@ import 'package:k_budget/src/domain/models/budget_overview.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_category_detail_sheet.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_pie_chart.dart';
+import 'package:k_budget/src/features/budgets/presentation/widgets/unbudgeted_detail_sheet.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
@@ -180,6 +181,15 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
       );
     }).toList();
 
+    // Ajouter "Autre" au camembert si des dépenses non budgétées existent
+    if (overview != null && overview.unbudgetedTotal > 0) {
+      allPieItems.add(PieChartItem(
+        label: AppLocalizations.of(context)!.budgetOtherCategory,
+        value: overview.unbudgetedTotal,
+        color: const Color(0xFF9ca3af),
+      ));
+    }
+
     final displayItems =
         pieItems.isNotEmpty ? allPieItems : <PieChartItem>[];
 
@@ -206,6 +216,15 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
                   montantBudget: item.montantBudgetNormalise,
                   percentage: item.percentage,
                   currency: item.currency,
+                );
+              } else if (overview != null &&
+                  index == items.length &&
+                  overview.unbudgetedTotal > 0) {
+                UnbudgetedDetailSheet.show(
+                  context,
+                  items: overview.unbudgetedItems,
+                  total: overview.unbudgetedTotal,
+                  currency: overview.currency,
                 );
               }
             },
@@ -245,6 +264,26 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
           },
         ),
       ),
+      // Ligne "Autre" si des dépenses non budgétées existent
+      if (overview != null && overview.unbudgetedTotal > 0)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: InkWell(
+              onTap: () => UnbudgetedDetailSheet.show(
+                context,
+                items: overview.unbudgetedItems,
+                total: overview.unbudgetedTotal,
+                currency: overview.currency,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: _buildOtherRow(
+                overview.unbudgetedTotal,
+                overview.currency,
+              ),
+            ),
+          ),
+        ),
       const SliverToBoxAdapter(
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
@@ -278,6 +317,15 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
       );
     }).toList();
 
+    // Ajouter "Autre" au camembert si des dépenses non budgétées existent
+    if (history != null && history.unbudgetedTotal > 0) {
+      allPieItems.add(PieChartItem(
+        label: AppLocalizations.of(context)!.budgetOtherCategory,
+        value: history.unbudgetedTotal,
+        color: const Color(0xFF9ca3af),
+      ));
+    }
+
     return [
       // Graphique camembert
       SliverToBoxAdapter(
@@ -301,6 +349,15 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
                   montantBudget: item.montantBudget,
                   percentage: item.percentage,
                   currency: item.currency,
+                );
+              } else if (history != null &&
+                  index == items.length &&
+                  history.unbudgetedTotal > 0) {
+                UnbudgetedDetailSheet.show(
+                  context,
+                  items: history.unbudgetedItems,
+                  total: history.unbudgetedTotal,
+                  currency: history.currency,
                 );
               }
             },
@@ -340,10 +397,84 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
           },
         ),
       ),
+      // Ligne "Autre" si des dépenses non budgétées existent
+      if (history != null && history.unbudgetedTotal > 0)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: InkWell(
+              onTap: () => UnbudgetedDetailSheet.show(
+                context,
+                items: history.unbudgetedItems,
+                total: history.unbudgetedTotal,
+                currency: history.currency,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: _buildOtherRow(
+                history.unbudgetedTotal,
+                history.currency,
+              ),
+            ),
+          ),
+        ),
       const SliverToBoxAdapter(
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
     ];
+  }
+
+  Widget _buildOtherRow(double total, String currency) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.space3,
+        horizontal: AppSpacing.space2,
+      ),
+      child: Row(
+        spacing: AppSpacing.space3,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: const BoxDecoration(
+              color: Color(0xFF9ca3af),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const Text(
+            '📦',
+            style: TextStyle(fontSize: AppTypography.sizeMd),
+          ),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.budgetOtherCategory,
+              style: TextStyle(
+                fontSize: AppTypography.sizeSm,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Text(
+            AmountFormatter.format(total, currency: currencyEnum),
+            style: TextStyle(
+              fontSize: AppTypography.sizeSm,
+              fontWeight: AppTypography.semiBold,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          PhosphorIcon(
+            PhosphorIconsRegular.caretRight,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildErrorState(String error, ColorScheme colorScheme) {

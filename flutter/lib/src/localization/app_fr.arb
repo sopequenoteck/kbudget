@@ -213,5 +213,10 @@
   "deleteBudgetMessage": "Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.",
   "allCategoriesHaveBudgets": "Toutes les catégories ont déjà un budget",
   "spent": "Dépensé",
-  "budget": "Budget"
+  "budget": "Budget",
+  "total": "Total",
+  "budgetOtherCategory": "Autre",
+  "budgetOtherCategoryDetail": "Dépenses non budgétées",
+  "budgetActive": "Budget actif",
+  "budgetShowInactive": "Afficher les inactifs"
 }

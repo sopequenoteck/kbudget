@@ -122,11 +122,11 @@ class _MonthSelectorState extends State<MonthSelector> {
           semanticsLabel: 'Mois précédent',
         ),
         const SizedBox(width: AppSpacing.space4),
-        SizedBox(
-          width: 160,
+        Flexible(
           child: Text(
             _formattedLabel,
             textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: AppTypography.sizeLg,
               fontWeight: AppTypography.semiBold,

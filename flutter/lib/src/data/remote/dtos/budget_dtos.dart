@@ -45,6 +45,8 @@ class BudgetOverviewResponse with _$BudgetOverviewResponse {
     required double percentage,
     required String currency,
     required List<BudgetOverviewItemResponse> items,
+    @Default([]) List<Map<String, dynamic>> unbudgetedItems,
+    @Default(0) double unbudgetedTotal,
   }) = _BudgetOverviewResponse;
 
   factory BudgetOverviewResponse.fromJson(Map<String, dynamic> json) =>
@@ -80,6 +82,8 @@ class BudgetHistoryResponse with _$BudgetHistoryResponse {
     required double percentage,
     required String currency,
     required List<BudgetHistoryItemResponse> items,
+    @Default([]) List<Map<String, dynamic>> unbudgetedItems,
+    @Default(0) double unbudgetedTotal,
   }) = _BudgetHistoryResponse;
 
   factory BudgetHistoryResponse.fromJson(Map<String, dynamic> json) =>

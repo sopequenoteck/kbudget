@@ -18,10 +18,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
 
   BudgetRepository get _repo => ref.read(budgetRepositoryProvider);
 
-  Future<void> loadItems() async {
+  Future<void> loadItems({bool includeInactive = false}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll();
+      _allItems = await _repo.getAll(includeInactive: includeInactive);
       _allItems.sort((a, b) => (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
       _refreshPage(resetPage: true);
     } on Exception catch (e) {

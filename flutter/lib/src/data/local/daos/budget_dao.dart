@@ -78,4 +78,24 @@ class BudgetDao extends DatabaseAccessor<AppDatabase> with _$BudgetDaoMixin {
       variables: [Variable.withString(month)],
     ).get();
   }
+
+  /// Dépenses par catégorie non budgétée pour un mois donné
+  Future<List<QueryRow>> getUnbudgetedSpendingForMonth(int month, int year) {
+    final start = DateTime(year, month);
+    final end = DateTime(year, month + 1);
+    return customSelect(
+      'SELECT c.id, c.nom, c.icone, c.couleur, SUM(t.montant) as total '
+      'FROM transactions t '
+      'JOIN categories c ON t.category_id = c.id '
+      'WHERE t.date >= ? AND t.date < ? AND t.type = ? '
+      'AND t.category_id IS NOT NULL '
+      'AND t.category_id NOT IN (SELECT category_id FROM budgets WHERE actif = 1) '
+      'GROUP BY c.id, c.nom, c.icone, c.couleur',
+      variables: [
+        Variable.withDateTime(start),
+        Variable.withDateTime(end),
+        Variable.withString('depense'),
+      ],
+    ).get();
+  }
 }

@@ -599,4 +599,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get budget => 'Budget';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get budgetOtherCategory => 'Autre';
+
+  @override
+  String get budgetOtherCategoryDetail => 'Dépenses non budgétées';
+
+  @override
+  String get budgetActive => 'Budget actif';
+
+  @override
+  String get budgetShowInactive => 'Afficher les inactifs';
 }

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 
 part 'budget_history.freezed.dart';
 part 'budget_history.g.dart';
@@ -12,6 +13,8 @@ class BudgetHistory with _$BudgetHistory {
     required double percentage,
     required String currency,
     required List<BudgetHistoryItem> items,
+    @Default([]) List<UnbudgetedItem> unbudgetedItems,
+    @Default(0) double unbudgetedTotal,
   }) = _BudgetHistory;
 
   factory BudgetHistory.fromJson(Map<String, dynamic> json) =>

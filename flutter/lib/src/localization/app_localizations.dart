@@ -1239,6 +1239,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Budget'**
   String get budget;
+
+  /// No description provided for @total.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @budgetOtherCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get budgetOtherCategory;
+
+  /// No description provided for @budgetOtherCategoryDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses non budgétées'**
+  String get budgetOtherCategoryDetail;
+
+  /// No description provided for @budgetActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Budget actif'**
+  String get budgetActive;
+
+  /// No description provided for @budgetShowInactive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les inactifs'**
+  String get budgetShowInactive;
 }
 
 class _AppLocalizationsDelegate

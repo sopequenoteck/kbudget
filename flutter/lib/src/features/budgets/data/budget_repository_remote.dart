@@ -2,8 +2,9 @@ import 'package:k_budget/src/data/remote/data_sources/budget_remote_data_source.
 import 'package:k_budget/src/data/remote/dtos/budget_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
-import 'package:k_budget/src/domain/models/budget_overview.dart';
 import 'package:k_budget/src/domain/models/budget_history.dart';
+import 'package:k_budget/src/domain/models/budget_overview.dart';
+import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 
@@ -63,6 +64,10 @@ class BudgetRepositoryRemote implements BudgetRepository {
         percentage: item.percentage,
         frequence: item.frequence,
       )).toList(),
+      unbudgetedItems: response.unbudgetedItems
+          .map((json) => UnbudgetedItem.fromJson(json))
+          .toList(),
+      unbudgetedTotal: response.unbudgetedTotal,
     );
   }
 
@@ -87,6 +92,10 @@ class BudgetRepositoryRemote implements BudgetRepository {
         percentage: item.percentage,
         createdAt: item.createdAt,
       )).toList(),
+      unbudgetedItems: response.unbudgetedItems
+          .map((json) => UnbudgetedItem.fromJson(json))
+          .toList(),
+      unbudgetedTotal: response.unbudgetedTotal,
     );
   }
 

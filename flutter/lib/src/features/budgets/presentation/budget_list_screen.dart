@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/month_selector.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/domain/enums/modal_type.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/domain/models/budget_history.dart';
@@ -12,10 +14,13 @@ import 'package:k_budget/src/features/budgets/application/budget_list_state.dart
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_item.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_summary_bar.dart';
+import 'package:k_budget/src/features/budgets/presentation/widgets/unbudgeted_detail_sheet.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/features/budgets/presentation/budget_month_helpers.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class BudgetListScreen extends ConsumerStatefulWidget {
@@ -29,6 +34,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     with BudgetMonthHelpers {
   late int _selectedMonth;
   late int _selectedYear;
+  bool _showInactive = false;
 
   @override
   int get selectedMonth => _selectedMonth;
@@ -45,7 +51,9 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final budgetState = ref.read(budgetNotifierProvider);
       if (budgetState.items.isEmpty && !budgetState.isLoading) {
-        ref.read(budgetNotifierProvider.notifier).loadItems();
+        ref
+            .read(budgetNotifierProvider.notifier)
+            .loadItems(includeInactive: _showInactive);
       }
       ref.read(budgetNotifierProvider.notifier).loadOverview();
     });
@@ -95,17 +103,32 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Spacer(),
-                  MonthSelector(
-                    initialMonth: _selectedMonth,
-                    initialYear: _selectedYear,
-                    onChanged: (month, year) {
-                      if (!isPastMonthLimit(month, year)) {
-                        _onMonthChanged(month, year);
-                      }
+                  IconButton(
+                    icon: PhosphorIcon(
+                      _showInactive
+                          ? PhosphorIconsFill.eye
+                          : PhosphorIconsRegular.eye,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      setState(() => _showInactive = !_showInactive);
+                      ref
+                          .read(budgetNotifierProvider.notifier)
+                          .loadItems(includeInactive: _showInactive);
                     },
+                    tooltip: l10n.budgetShowInactive,
                   ),
-                  const Spacer(),
+                  Flexible(
+                    child: MonthSelector(
+                      initialMonth: _selectedMonth,
+                      initialYear: _selectedYear,
+                      onChanged: (month, year) {
+                        if (!isPastMonthLimit(month, year)) {
+                          _onMonthChanged(month, year);
+                        }
+                      },
+                    ),
+                  ),
                   IconButton(
                     icon: const PhosphorIcon(
                       PhosphorIconsRegular.chartBar,
@@ -236,7 +259,8 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
           itemBuilder: (context, index) {
             final item = items[index];
             final budget = _findBudget(state.items, item.budgetId);
-            return BudgetItem(
+            final isInactive = budget != null && !budget.actif;
+            final budgetItem = BudgetItem(
               categoryNom: item.categoryNom,
               categoryIcone: item.categoryIcone,
               categoryCouleur: item.categoryCouleur,
@@ -251,9 +275,29 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                       )
                   : null,
             );
+            return isInactive
+                ? Opacity(opacity: 0.5, child: budgetItem)
+                : budgetItem;
           },
         ),
       ),
+      // Section "Autre" — dépenses hors budget
+      if (overview != null && overview.unbudgetedTotal > 0)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: InkWell(
+              onTap: () => UnbudgetedDetailSheet.show(
+                context,
+                items: overview.unbudgetedItems,
+                total: overview.unbudgetedTotal,
+                currency: overview.currency,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: _buildOtherRow(overview.unbudgetedTotal, overview.currency),
+            ),
+          ),
+        ),
       const SliverToBoxAdapter(
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
@@ -310,6 +354,23 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
           },
         ),
       ),
+      // Section "Autre" — dépenses hors budget
+      if (history != null && history.unbudgetedTotal > 0)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
+            child: InkWell(
+              onTap: () => UnbudgetedDetailSheet.show(
+                context,
+                items: history.unbudgetedItems,
+                total: history.unbudgetedTotal,
+                currency: history.currency,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: _buildOtherRow(history.unbudgetedTotal, history.currency),
+            ),
+          ),
+        ),
       const SliverToBoxAdapter(
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
@@ -348,6 +409,60 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildOtherRow(double total, String currency) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.space3,
+        horizontal: AppSpacing.space2,
+      ),
+      child: Row(
+        spacing: AppSpacing.space3,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: const BoxDecoration(
+              color: Color(0xFF9ca3af),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const Text(
+            '📦',
+            style: TextStyle(fontSize: AppTypography.sizeMd),
+          ),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.budgetOtherCategory,
+              style: TextStyle(
+                fontSize: AppTypography.sizeSm,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Text(
+            AmountFormatter.format(total, currency: currencyEnum),
+            style: TextStyle(
+              fontSize: AppTypography.sizeSm,
+              fontWeight: AppTypography.semiBold,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          PhosphorIcon(
+            PhosphorIconsRegular.caretRight,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }
