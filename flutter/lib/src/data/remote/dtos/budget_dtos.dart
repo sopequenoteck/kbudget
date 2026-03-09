@@ -45,7 +45,7 @@ class BudgetOverviewResponse with _$BudgetOverviewResponse {
     required double percentage,
     required String currency,
     required List<BudgetOverviewItemResponse> items,
-    @Default([]) List<Map<String, dynamic>> unbudgetedItems,
+    @Default([]) List<UnbudgetedItemDto> unbudgetedItems,
     @Default(0) double unbudgetedTotal,
   }) = _BudgetOverviewResponse;
 
@@ -82,7 +82,7 @@ class BudgetHistoryResponse with _$BudgetHistoryResponse {
     required double percentage,
     required String currency,
     required List<BudgetHistoryItemResponse> items,
-    @Default([]) List<Map<String, dynamic>> unbudgetedItems,
+    @Default([]) List<UnbudgetedItemDto> unbudgetedItems,
     @Default(0) double unbudgetedTotal,
   }) = _BudgetHistoryResponse;
 
@@ -107,4 +107,19 @@ class BudgetHistoryItemResponse with _$BudgetHistoryItemResponse {
 
   factory BudgetHistoryItemResponse.fromJson(Map<String, dynamic> json) =>
       _$BudgetHistoryItemResponseFromJson(json);
+}
+
+@freezed
+class UnbudgetedItemDto with _$UnbudgetedItemDto {
+  const factory UnbudgetedItemDto({
+    required String categoryId,
+    required String categoryNom,
+    required String categoryIcone,
+    required String categoryCouleur,
+    required double montantDepense,
+    String? currency,
+  }) = _UnbudgetedItemDto;
+
+  factory UnbudgetedItemDto.fromJson(Map<String, dynamic> json) =>
+      _$UnbudgetedItemDtoFromJson(json);
 }

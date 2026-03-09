@@ -61,6 +61,9 @@ class AppColors {
   static const Color violet400 = Color(0xFFA78BFA);
   static const Color violet500 = Color(0xFF8B5CF6);
 
+  // Budget - Unbudgeted category
+  static const Color unbudgetedGray = Color(0xFF9CA3AF);
+
   // Semantic - Light theme
   static const Color incomeLight = Color(0xFF16A34A);
   static const Color expenseLight = Color(0xFFDC2626);

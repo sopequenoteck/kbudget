@@ -201,6 +201,10 @@ public class BudgetService {
         return new BudgetOverviewResponse(month, totalBudget, totalSpent, totalPercentage, primaryCurrency.name(), items, unbudgetedItems, unbudgetedTotal);
     }
 
+    /**
+     * Récupère l'historique d'un mois passé. Nécessite @Transactional (read-write)
+     * car crée les snapshots de manière lazy si absents ({@link #createSnapshotsLazily}).
+     */
     @Transactional
     public BudgetHistoryResponse getHistory(String month, UUID userId) {
         checkFeatureEnabled(userId);
@@ -274,16 +278,31 @@ public class BudgetService {
         LocalDate firstDay = month.atDay(1);
         LocalDate lastDay = month.atEndOfMonth();
         List<Object[]> results = transactionRepository.findUnbudgetedSpendingByMonth(userId, firstDay, lastDay);
-        List<UnbudgetedItemResponse> items = new ArrayList<>();
+        Map<UUID, UnbudgetedItemResponse> merged = new HashMap<>();
         for (Object[] row : results) {
-            UUID categoryId = (UUID) row[0];
+            UUID catId = (UUID) row[0];
             String nom = (String) row[1];
             String icone = (String) row[2];
             String couleur = (String) row[3];
             BigDecimal montant = (BigDecimal) row[4];
-            items.add(new UnbudgetedItemResponse(categoryId, nom, icone, couleur, montant));
+            String currencyCode = (String) row[5];
+            Currency rowCurrency = Currency.valueOf(currencyCode);
+            BigDecimal montantConverti = montant;
+            if (rowCurrency != primaryCurrency) {
+                Optional<BigDecimal> rate = getExchangeRate(userId, rowCurrency, primaryCurrency);
+                if (rate.isPresent()) {
+                    montantConverti = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+                }
+            }
+            if (merged.containsKey(catId)) {
+                UnbudgetedItemResponse existing = merged.get(catId);
+                BigDecimal newTotal = existing.montantDepense().add(montantConverti);
+                merged.put(catId, new UnbudgetedItemResponse(catId, nom, icone, couleur, newTotal, primaryCurrency.name()));
+            } else {
+                merged.put(catId, new UnbudgetedItemResponse(catId, nom, icone, couleur, montantConverti, primaryCurrency.name()));
+            }
         }
-        return items;
+        return new ArrayList<>(merged.values());
     }
 
     private BigDecimal calculateUnbudgetedTotal(List<UnbudgetedItemResponse> items) {
@@ -294,6 +313,9 @@ public class BudgetService {
 
     @Transactional
     public void checkThresholdsForCategory(UUID userId, UUID categoryId) {
+        if (userId == null || categoryId == null) {
+            return;
+        }
         Optional<Budget> budgetOpt = budgetRepository.findByCategoryIdAndUserId(categoryId, userId);
         if (budgetOpt.isEmpty() || !budgetOpt.get().getActif()) {
             return;
@@ -454,7 +476,7 @@ public class BudgetService {
     }
 
     private List<BudgetSnapshot> createSnapshotsLazily(String month, YearMonth targetMonth, UUID userId, Currency primaryCurrency) {
-        List<Budget> budgets = budgetRepository.findByUserIdAndActifTrue(userId);
+        List<Budget> budgets = budgetRepository.findByUserId(userId);
         LocalDate firstDay = targetMonth.atDay(1);
         LocalDate lastDay = targetMonth.atEndOfMonth();
         List<BudgetSnapshot> unsaved = new ArrayList<>();

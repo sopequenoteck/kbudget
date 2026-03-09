@@ -289,13 +289,6 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
-    test('should_setSelectedMonth_when_setMonthCalled', () {
-      notifier().setMonth(3, 2026);
-
-      expect(state().selectedMonth, 3);
-      expect(state().selectedYear, 2026);
-    });
-
     test('should_loadNextPage_when_loadMoreCalled', () async {
       final items = List.generate(
         25,

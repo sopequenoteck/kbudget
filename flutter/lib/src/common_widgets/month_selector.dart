@@ -8,8 +8,9 @@ import 'package:k_budget/src/constants/app_typography.dart';
 
 /// Sélecteur de mois avec boutons précédent/suivant et label formaté en français.
 ///
-/// Widget uncontrolled : gère son propre état interne (mois/année) après
-/// initialisation et notifie le parent via [onChanged].
+/// Gère son propre état interne (mois/année) après initialisation et notifie
+/// le parent via [onChanged]. Synchronise l'état si le parent change
+/// [initialMonth] ou [initialYear] via rebuild.
 class MonthSelector extends StatefulWidget {
   const MonthSelector({
     super.key,
@@ -48,6 +49,21 @@ class _MonthSelectorState extends State<MonthSelector> {
     } else {
       _month = now.month;
       _year = now.year;
+    }
+  }
+
+  @override
+  void didUpdateWidget(MonthSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialMonth != oldWidget.initialMonth ||
+        widget.initialYear != oldWidget.initialYear) {
+      final newMonth = widget.initialMonth;
+      if (newMonth != null && newMonth >= 1 && newMonth <= 12) {
+        setState(() {
+          _month = newMonth;
+          _year = widget.initialYear ?? _year;
+        });
+      }
     }
   }
 

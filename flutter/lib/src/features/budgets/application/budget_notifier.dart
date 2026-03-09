@@ -33,22 +33,26 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   }
 
   Future<void> loadOverview() async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final overview = await _repo.getOverview();
-      state = state.copyWith(overview: overview);
+      state = state.copyWith(overview: overview, isLoading: false);
     } on Exception catch (e) {
       state = state.copyWith(
+        isLoading: false,
         error: 'Impossible de charger l\'aperçu: $e',
       );
     }
   }
 
   Future<void> loadHistory(String month) async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final history = await _repo.getHistory(month);
-      state = state.copyWith(history: history);
+      state = state.copyWith(history: history, isLoading: false);
     } on Exception catch (e) {
       state = state.copyWith(
+        isLoading: false,
         error: 'Impossible de charger l\'historique: $e',
       );
     }
@@ -57,10 +61,6 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   Future<void> refresh() async {
     await loadItems();
     await loadOverview();
-  }
-
-  void setMonth(int month, int year) {
-    state = state.copyWith(selectedMonth: month, selectedYear: year);
   }
 
   void loadMore() {

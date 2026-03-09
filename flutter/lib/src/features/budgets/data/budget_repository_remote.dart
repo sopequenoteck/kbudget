@@ -65,7 +65,13 @@ class BudgetRepositoryRemote implements BudgetRepository {
         frequence: item.frequence,
       )).toList(),
       unbudgetedItems: response.unbudgetedItems
-          .map((json) => UnbudgetedItem.fromJson(json))
+          .map((dto) => UnbudgetedItem(
+                categoryId: dto.categoryId,
+                categoryNom: dto.categoryNom,
+                categoryIcone: dto.categoryIcone,
+                categoryCouleur: dto.categoryCouleur,
+                montantDepense: dto.montantDepense,
+              ))
           .toList(),
       unbudgetedTotal: response.unbudgetedTotal,
     );
@@ -93,7 +99,13 @@ class BudgetRepositoryRemote implements BudgetRepository {
         createdAt: item.createdAt,
       )).toList(),
       unbudgetedItems: response.unbudgetedItems
-          .map((json) => UnbudgetedItem.fromJson(json))
+          .map((dto) => UnbudgetedItem(
+                categoryId: dto.categoryId,
+                categoryNom: dto.categoryNom,
+                categoryIcone: dto.categoryIcone,
+                categoryCouleur: dto.categoryCouleur,
+                montantDepense: dto.montantDepense,
+              ))
           .toList(),
       unbudgetedTotal: response.unbudgetedTotal,
     );

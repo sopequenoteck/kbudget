@@ -366,11 +366,6 @@ void main() {
     });
 
     testWidgets('should_render_in_narrow_container', (tester) async {
-      // Capturer les erreurs d'overflow (attendues dans un conteneur étroit)
-      final errors = <FlutterErrorDetails>[];
-      final oldHandler = FlutterError.onError;
-      FlutterError.onError = (details) => errors.add(details);
-
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
@@ -388,15 +383,9 @@ void main() {
         ),
       );
 
-      FlutterError.onError = oldHandler;
-
-      // Le widget doit se rendre (avec overflow visuel) sans crash
+      // Le widget se rend sans overflow grâce à Flexible + ellipsis
       expect(find.byType(MonthSelector), findsOneWidget);
-      // L'overflow est attendu (widget 288px dans container 200px)
-      expect(
-        errors.any((e) => e.toString().contains('overflowed')),
-        isTrue,
-      );
+      expect(tester.takeException(), isNull);
     });
   });
 }

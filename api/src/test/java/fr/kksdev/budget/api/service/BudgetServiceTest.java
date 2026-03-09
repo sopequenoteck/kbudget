@@ -664,7 +664,7 @@ class BudgetServiceTest {
         var pastMonth = YearMonth.now().minusMonths(1).toString();
 
         when(budgetSnapshotRepository.findByUserIdAndMois(userId, pastMonth)).thenReturn(List.of());
-        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
+        when(budgetRepository.findByUserId(userId)).thenReturn(List.of(budget));
         List<Object[]> batchResult = Collections.singletonList(new Object[]{categoryId, new BigDecimal("150.00")});
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), eq(List.of(categoryId)), any(LocalDate.class), any(LocalDate.class)))
@@ -714,7 +714,7 @@ class BudgetServiceTest {
         assertThat(response.items()).hasSize(1);
         assertThat(response.totalSpent()).isEqualByComparingTo("200.00");
         verify(budgetSnapshotRepository, never()).save(any());
-        verify(budgetRepository, never()).findByUserIdAndActifTrue(any());
+        verify(budgetRepository, never()).findByUserId(any());
     }
 
     @Test
@@ -722,7 +722,7 @@ class BudgetServiceTest {
         var pastMonth = YearMonth.now().minusMonths(1).toString();
 
         when(budgetSnapshotRepository.findByUserIdAndMois(userId, pastMonth)).thenReturn(List.of());
-        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of());
+        when(budgetRepository.findByUserId(userId)).thenReturn(List.of());
 
         BudgetHistoryResponse response = budgetService.getHistory(pastMonth, userId);
 
@@ -861,6 +861,39 @@ class BudgetServiceTest {
 
         verify(notificationService, never()).createNotification(
                 any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_send_exceeded_notification_even_when_threshold_already_notified() {
+        // THRESHOLD déjà notifié, dépenses à 100% → EXCEEDED envoyé, THRESHOLD PAS re-envoyé
+        var category = buildCategory(categoryId);
+        var budget = buildBudget(budgetId, category); // seuil=80, montant=500€
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("500.00")); // 100%
+        // THRESHOLD déjà envoyé ce mois
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(true);
+        // EXCEEDED pas encore envoyé
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        // THRESHOLD ne doit PAS être re-envoyé (déjà notifié)
+        verify(notificationService, never()).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
+        // EXCEEDED doit être envoyé
+        verify(notificationService).createNotification(
+                eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
+                any(String.class), any(String.class),
+                eq(EntityType.BUDGET), eq(budgetId));
     }
 
     @Test

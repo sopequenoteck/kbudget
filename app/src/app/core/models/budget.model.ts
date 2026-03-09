@@ -42,6 +42,7 @@ export interface BudgetOverviewItem {
   montantDepense: number;
   percentage: number;
   frequence: string;
+  actif?: boolean;
 }
 
 export interface BudgetHistory {
@@ -92,5 +93,5 @@ export function budgetAmount(item: BudgetItem): number {
   if (isOverviewItem(item)) {
     return item.montantBudgetNormalise;
   }
-  return item.tauxChange ? item.montantBudget * item.tauxChange : item.montantBudget;
+  return item.tauxChange != null ? item.montantBudget * item.tauxChange : item.montantBudget;
 }

@@ -77,7 +77,7 @@ void main() {
     testWidgets('should_toggle_notification_type_when_switch_tapped',
         (tester) async {
       // Arrange — subscriptionDue activé, debtDue désactivé
-      final configState = FeatureConfigState(
+      const configState = FeatureConfigState(
         isLoading: false,
         enabledNotificationTypes: [NotificationType.subscriptionDue],
       );

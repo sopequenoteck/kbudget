@@ -85,7 +85,7 @@ export class BudgetChart {
   );
 
   readonly chartData = computed<ChartData<'doughnut'>>(() => {
-    const items = this.items();
+    const items = this.items().filter((i) => i.montantDepense > 0);
     const labels: string[] = items.map((i) => i.categoryNom);
     const data: number[] = items.map((i) => i.montantDepense);
     const colors: string[] = items.map((i) => i.categoryCouleur);

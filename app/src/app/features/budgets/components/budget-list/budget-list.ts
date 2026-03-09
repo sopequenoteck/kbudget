@@ -12,7 +12,6 @@ import { firstValueFrom } from 'rxjs';
 
 import { BudgetService } from '../../../../core/services/budget';
 import { ModalService } from '../../../../core/services/modal.service';
-import { PreferenceService } from '../../../../core/services/preference';
 import { CategoryService } from '../../../../core/services/category';
 import {
   type Budget,
@@ -97,7 +96,7 @@ import { BudgetChart } from '../budget-chart';
           @for (item of items(); track item.categoryId) {
             <li
               class="budget-item"
-              [class.budget-item--inactive]="isOverviewItem(item) && !$any(item).actif"
+              [class.budget-item--inactive]="isOverviewItem(item) && !item.actif"
             >
               <div class="budget-item__header">
                 <span class="budget-item__icon">{{ item.categoryIcone }}</span>
@@ -384,7 +383,6 @@ export class BudgetList {
   private readonly router = inject(Router);
   private readonly budgetService = inject(BudgetService);
   private readonly modalService = inject(ModalService);
-  private readonly preferenceService = inject(PreferenceService);
   private readonly categoryService = inject(CategoryService);
 
   readonly Math = Math;
@@ -400,6 +398,8 @@ export class BudgetList {
   readonly allCategories = signal<Category[]>([]);
 
   readonly showInactive = signal(false);
+
+  private loadVersion = 0;
 
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
@@ -447,6 +447,7 @@ export class BudgetList {
   }
 
   async loadData(): Promise<void> {
+    const version = ++this.loadVersion;
     this.loading.set(true);
     this.error.set(null);
     const month = `${this.selectedYear()}-${String(this.selectedMonth()).padStart(2, '0')}`;
@@ -480,8 +481,10 @@ export class BudgetList {
       } else {
         data = await firstValueFrom(this.budgetService.getHistory(month));
       }
+      if (version !== this.loadVersion) return;
       this.monthData.set(data);
     } catch (err) {
+      if (version !== this.loadVersion) return;
       if (isDevMode()) console.error('Failed to load budget data', err);
       this.error.set(
         this.isCurrentMonth()
@@ -489,6 +492,7 @@ export class BudgetList {
           : "Impossible de charger l'historique des budgets",
       );
     } finally {
+      if (version !== this.loadVersion) return;
       this.loading.set(false);
     }
   }

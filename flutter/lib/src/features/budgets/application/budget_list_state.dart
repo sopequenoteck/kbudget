@@ -16,7 +16,5 @@ class BudgetListState with _$BudgetListState {
     @Default({}) Set<String> mutatingIds,
     BudgetOverview? overview,
     BudgetHistory? history,
-    int? selectedMonth,
-    int? selectedYear,
   }) = _BudgetListState;
 }

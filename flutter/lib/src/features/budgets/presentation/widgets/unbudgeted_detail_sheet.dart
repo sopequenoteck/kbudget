@@ -5,9 +5,11 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Bottom sheet affichant la liste des catégories non budgétées avec leurs dépenses.
 ///
@@ -42,6 +44,65 @@ class UnbudgetedDetailSheet extends StatelessWidget {
         items: items,
         total: total,
         currency: currency,
+      ),
+    );
+  }
+
+  /// Widget réutilisable pour la ligne "Autre" (dépenses non budgétées).
+  static Widget buildOtherRow(
+    BuildContext context,
+    double total,
+    String currency,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final currencyEnum = Currency.values.byNameOrDefault(
+      currency.toLowerCase(),
+      Currency.eur,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.space3,
+        horizontal: AppSpacing.space2,
+      ),
+      child: Row(
+        spacing: AppSpacing.space3,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: const BoxDecoration(
+              color: AppColors.unbudgetedGray,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const Text(
+            '📦',
+            style: TextStyle(fontSize: AppTypography.sizeMd),
+          ),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.budgetOtherCategory,
+              style: TextStyle(
+                fontSize: AppTypography.sizeSm,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Text(
+            AmountFormatter.format(total, currency: currencyEnum),
+            style: TextStyle(
+              fontSize: AppTypography.sizeSm,
+              fontWeight: AppTypography.semiBold,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          PhosphorIcon(
+            PhosphorIconsRegular.caretRight,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }
@@ -87,7 +148,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                   width: AppSpacing.space12,
                   height: AppSpacing.space12,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9ca3af),
+                    color: AppColors.unbudgetedGray,
                     borderRadius: BorderRadius.circular(AppRadius.round),
                   ),
                   child: const Center(

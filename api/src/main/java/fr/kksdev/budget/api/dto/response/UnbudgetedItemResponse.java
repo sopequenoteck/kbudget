@@ -8,5 +8,6 @@ public record UnbudgetedItemResponse(
         String categoryNom,
         String categoryIcone,
         String categoryCouleur,
-        BigDecimal montantDepense
+        BigDecimal montantDepense,
+        String currency
 ) {}

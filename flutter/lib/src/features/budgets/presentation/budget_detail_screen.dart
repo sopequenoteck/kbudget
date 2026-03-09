@@ -81,7 +81,6 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
       _selectedMonth = month;
       _selectedYear = year;
     });
-    ref.read(budgetNotifierProvider.notifier).setMonth(month, year);
 
     if (isCurrentMonth) {
       ref.read(budgetNotifierProvider.notifier).loadOverview();
@@ -186,7 +185,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
       allPieItems.add(PieChartItem(
         label: AppLocalizations.of(context)!.budgetOtherCategory,
         value: overview.unbudgetedTotal,
-        color: const Color(0xFF9ca3af),
+        color: AppColors.unbudgetedGray,
       ));
     }
 
@@ -277,7 +276,8 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
                 currency: overview.currency,
               ),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              child: _buildOtherRow(
+              child: UnbudgetedDetailSheet.buildOtherRow(
+                context,
                 overview.unbudgetedTotal,
                 overview.currency,
               ),
@@ -322,7 +322,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
       allPieItems.add(PieChartItem(
         label: AppLocalizations.of(context)!.budgetOtherCategory,
         value: history.unbudgetedTotal,
-        color: const Color(0xFF9ca3af),
+        color: AppColors.unbudgetedGray,
       ));
     }
 
@@ -410,7 +410,8 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
                 currency: history.currency,
               ),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              child: _buildOtherRow(
+              child: UnbudgetedDetailSheet.buildOtherRow(
+                context,
                 history.unbudgetedTotal,
                 history.currency,
               ),
@@ -421,60 +422,6 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen>
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
     ];
-  }
-
-  Widget _buildOtherRow(double total, String currency) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final currencyEnum = Currency.values.byNameOrDefault(
-      currency.toLowerCase(),
-      Currency.eur,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: AppSpacing.space3,
-        horizontal: AppSpacing.space2,
-      ),
-      child: Row(
-        spacing: AppSpacing.space3,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
-              color: Color(0xFF9ca3af),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const Text(
-            '📦',
-            style: TextStyle(fontSize: AppTypography.sizeMd),
-          ),
-          Expanded(
-            child: Text(
-              AppLocalizations.of(context)!.budgetOtherCategory,
-              style: TextStyle(
-                fontSize: AppTypography.sizeSm,
-                fontWeight: AppTypography.medium,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-          Text(
-            AmountFormatter.format(total, currency: currencyEnum),
-            style: TextStyle(
-              fontSize: AppTypography.sizeSm,
-              fontWeight: AppTypography.semiBold,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          PhosphorIcon(
-            PhosphorIconsRegular.caretRight,
-            size: 16,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildErrorState(String error, ColorScheme colorScheme) {
