@@ -281,7 +281,7 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9 + Angular 21, Angular Reactive Forms, ng2-charts (Chart.js), @ng-icons/phosphor-icons (074-angular-budget-categories)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, drift, dio, fl_chart (nouveau), shimmer, intl, phosphor_flutter (075-flutter-budget-categories)
 - SQLite/Drift (local) + API REST/Dio (remote) via strategy pattern `dataModeProvider` (075-flutter-budget-categories)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_char (076-budget-category-tracking)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_chart (076-budget-category-tracking)
 
 ### Backend (api/)
 
@@ -318,3 +318,4 @@ Approche **signals-first** obligatoire :
 - 073-backend-budget-categories: Budget + BudgetSnapshot entities; Flyway V17; BudgetService (CRUD, overview mensuel, history avec snapshots lazy, normalisation HEBDO/MENSUEL/ANNUEL, multi-devise); 7 endpoints /budgets; Feature.BUDGETS; 41 tests (25 service + 16 controller)
 - 074-angular-budget-categories: BudgetService Angular + BudgetListComponent + BudgetForm + graphiques ng2-charts; 7 endpoints /budgets consommés
 - 075-flutter-budget-categories: BudgetListScreen + BudgetDetailScreen + BudgetForm (CRUD + overview mensuel + historique fl_chart); BudgetNotifier (CrudNotifier pattern); local (Drift) + remote (Dio) via dataModeProvider; 20 tests unitaires BudgetNotifier; localisation 18 clés l10n; fix Currency lookup → byNameOrDefault(); fix _hasExistingData shop
+- 076-budget-category-tracking: Unbudgeted spending tracking (backend currency field + multi-currency aggregation, Angular budget-list section, Flutter UnbudgetedDetailSheet + AppColors.unbudgetedGray + UnbudgetedItemDto); MonthSelector.didUpdateWidget(); snapshot cleanup on budget delete; null guard checkThresholdsForCategory; JavaDoc getHistory() @Transactional

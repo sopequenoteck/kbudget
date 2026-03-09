@@ -794,7 +794,18 @@ Response `200` :
       "percentage": 80.13,
       "frequence": "MENSUEL"
     }
-  ]
+  ],
+  "unbudgetedItems": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Courses",
+      "categoryIcone": "🛍️",
+      "categoryCouleur": "#6b7280",
+      "montantDepense": 45.00,
+      "currency": "EUR"
+    }
+  ],
+  "unbudgetedTotal": 45.00
 }
 ```
 
@@ -822,7 +833,18 @@ Response `200` :
       "percentage": 95.00,
       "createdAt": "2026-03-01T00:00:00"
     }
-  ]
+  ],
+  "unbudgetedItems": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Courses",
+      "categoryIcone": "🛍️",
+      "categoryCouleur": "#6b7280",
+      "montantDepense": 52.30,
+      "currency": "EUR"
+    }
+  ],
+  "unbudgetedTotal": 52.30
 }
 ```
 
