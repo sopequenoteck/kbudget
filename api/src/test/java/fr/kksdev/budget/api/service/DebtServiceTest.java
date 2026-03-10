@@ -175,7 +175,7 @@ class DebtServiceTest {
         var user = buildUser();
         when(debtRepository.findByUserIdOrderByDateDesc(userId))
                 .thenReturn(List.of(buildDebt(user)));
-        when(transactionRepository.sumByDebtId(any(UUID.class))).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtIds(any(List.class))).thenReturn(List.of());
 
         List<DebtResponse> result = debtService.getAllByUser(userId);
 
@@ -188,7 +188,7 @@ class DebtServiceTest {
         var user = buildUser();
         when(debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId))
                 .thenReturn(List.of(buildDebt(user)));
-        when(transactionRepository.sumByDebtId(any(UUID.class))).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtIds(any(List.class))).thenReturn(List.of());
 
         List<DebtResponse> result = debtService.getUnpaidByUser(userId);
 
@@ -249,6 +249,7 @@ class DebtServiceTest {
         var debt = buildDebt(user);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.findByDebtIdOrderByDateDesc(debtId)).thenReturn(List.of());
 
         debtService.delete(debtId, userId);
 
@@ -266,8 +267,8 @@ class DebtServiceTest {
         var account = buildAccount(user);
         var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
-        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO, new BigDecimal("50.00"));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
@@ -285,8 +286,8 @@ class DebtServiceTest {
         var account = buildAccount(user);
         var request = new DebtRepayRequest(account.getId(), null);
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
-        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO, new BigDecimal("100.00"));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
@@ -305,8 +306,8 @@ class DebtServiceTest {
         var account = buildAccount(user);
         var request = new DebtRepayRequest(account.getId(), null);
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
-        when(transactionRepository.sumByDebtId(debtId)).thenReturn(new BigDecimal("30.00"), new BigDecimal("100.00"));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(new BigDecimal("30.00"));
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> {
@@ -327,7 +328,7 @@ class DebtServiceTest {
         var debt = buildDebt(user);
         var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("200.00"));
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
@@ -342,7 +343,7 @@ class DebtServiceTest {
         debt.setRembourse(true);
         var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("50.00"));
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -357,7 +358,7 @@ class DebtServiceTest {
         account.setActif(false);
         var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
 
-        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
 
@@ -466,6 +467,34 @@ class DebtServiceTest {
     }
 
     @Test
+    void should_convertAmount_when_currencyChanges() {
+        var user = buildUser();
+        var debt = buildDebt(user); // EUR, montant=100
+        var usdAccount = buildAccount(user);
+        usdAccount.setCurrency(Currency.USD);
+        var request = new DebtRequest("Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.now(), null, null, null,
+                usdAccount.getId(), null, null, null);
+
+        var rate = ExchangeRate.builder()
+                .baseCurrency(Currency.EUR).targetCurrency(Currency.USD)
+                .rate(new BigDecimal("1.10")).build();
+
+        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(accountRepository.findById(usdAccount.getId())).thenReturn(Optional.of(usdAccount));
+        when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rate));
+        when(transactionRepository.findByDebtIdOrderByDateDesc(debt.getId())).thenReturn(List.of());
+        when(debtRepository.save(any(Debt.class))).thenReturn(debt);
+        when(transactionRepository.sumByDebtId(any(UUID.class))).thenReturn(BigDecimal.ZERO);
+
+        debtService.update(debtId, request, userId);
+
+        // 100 * 1.10 = 110.00 USD
+        assertThat(debt.getMontant()).isEqualByComparingTo(new BigDecimal("110.00"));
+        assertThat(debt.getCurrency()).isEqualTo(Currency.USD);
+    }
+
+    @Test
     void should_reject_when_exchangeRateUnavailable() {
         var user = buildUser();
         var debt = buildDebt(user); // EUR
@@ -540,5 +569,86 @@ class DebtServiceTest {
         assertThatThrownBy(() -> debtService.snooze(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("pas de rappel");
+    }
+
+    // -------------------------------------------------------------------------
+    // Post-audit FIX-1, FIX-4, FIX-6
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_convertPayments_when_currencyChanges() {
+        var user = buildUser();
+        var debt = buildDebt(user); // EUR
+        var usdAccount = buildAccount(user);
+        usdAccount.setCurrency(Currency.USD);
+        var request = new DebtRequest("Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.now(), null, null, null,
+                usdAccount.getId(), null, null, null);
+
+        var rate = ExchangeRate.builder()
+                .baseCurrency(Currency.EUR).targetCurrency(Currency.USD)
+                .rate(new BigDecimal("1.10")).build();
+
+        var payment = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("50.00"))
+                .libelle("Remboursement - Alice")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.now())
+                .debt(debt)
+                .user(user)
+                .build();
+
+        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(accountRepository.findById(usdAccount.getId())).thenReturn(Optional.of(usdAccount));
+        when(exchangeRateRepository.findAllByUserId(userId)).thenReturn(List.of(rate));
+        when(transactionRepository.findByDebtIdOrderByDateDesc(debt.getId())).thenReturn(List.of(payment));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+        when(debtRepository.save(any(Debt.class))).thenReturn(debt);
+        when(transactionRepository.sumByDebtId(any(UUID.class))).thenReturn(BigDecimal.ZERO);
+
+        debtService.update(debtId, request, userId);
+
+        assertThat(payment.getMontant()).isEqualByComparingTo(new BigDecimal("55.00"));
+    }
+
+    @Test
+    void should_detachAndAnnotatePayments_when_deleteDebt() {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var payment = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("50.00"))
+                .libelle("Remboursement - Alice")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.now())
+                .debt(debt)
+                .user(user)
+                .build();
+
+        when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.findByDebtIdOrderByDateDesc(debtId)).thenReturn(List.of(payment));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        debtService.delete(debtId, userId);
+
+        assertThat(payment.getDebt()).isNull();
+        assertThat(payment.getLibelle()).contains("dette supprimée").contains("Alice");
+        verify(transactionRepository).save(payment);
+        verify(debtRepository).delete(debt);
+    }
+
+    @Test
+    void should_reject_when_zeroAmount() {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var request = new DebtRepayRequest(UUID.randomUUID(), BigDecimal.ZERO);
+
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+
+        assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("montant du remboursement doit être positif");
     }
 }

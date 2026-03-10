@@ -97,6 +97,11 @@ public class TransactionService {
             throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées");
         }
 
+        // Interdire le changement de type sur les transactions liées à une dette
+        if (transaction.getDebt() != null && request.type() != transaction.getType()) {
+            throw new IllegalArgumentException("Le type d'une transaction liée à une dette ne peut pas être modifié");
+        }
+
         // Propager le montant si c'est une transaction de virement
         if (transaction.getTransferId() != null && request.montant().compareTo(transaction.getMontant()) != 0) {
             propagateTransferAmount(transaction, request.montant());
@@ -111,6 +116,13 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
         log.info("Transaction mise à jour: {}", transaction.getId());
+        if (transaction.getDebt() != null) {
+            Debt debt = transaction.getDebt();
+            BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+            BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+            debt.setRembourse(remaining.compareTo(BigDecimal.ZERO) <= 0);
+            debtRepository.save(debt);
+        }
         if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
             try {
                 budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());

@@ -80,7 +80,7 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
 - **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), productId (UUID, nullable, FK → Product), updatedAt. FK → User.
 - **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
-- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, dueDate (LocalDate, nullable), rembourse, category (FK → Category), updatedAt. FK → User.
+- **Debt** : personne, montant, sens (EMPRUNT/PRET), date, currency (Currency, default EUR), rembourse, dueDate (LocalDate, nullable), account (FK → Account, nullable), includeInBalance (Boolean, default false), reminderDate (LocalDate, nullable), reminderTime (LocalTime, nullable), category (FK → Category), updatedAt. FK → User.
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
 - **Product** : nom, description (nullable), icone (nullable), imageUrl (nullable), prixAchat, prixVente, stock, totalVendu, actif, createdAt, updatedAt. FK → User.
@@ -287,7 +287,7 @@ Approche **signals-first** obligatoire :
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V17
+- PostgreSQL 15+, Flyway migrations V1-V18
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -320,3 +320,4 @@ Approche **signals-first** obligatoire :
 - 074-angular-budget-categories: BudgetService Angular + BudgetListComponent + BudgetForm + graphiques ng2-charts; 7 endpoints /budgets consommés
 - 075-flutter-budget-categories: BudgetListScreen + BudgetDetailScreen + BudgetForm (CRUD + overview mensuel + historique fl_chart); BudgetNotifier (CrudNotifier pattern); local (Drift) + remote (Dio) via dataModeProvider; 20 tests unitaires BudgetNotifier; localisation 18 clés l10n; fix Currency lookup → byNameOrDefault(); fix _hasExistingData shop
 - 076-budget-category-tracking: Unbudgeted spending tracking (backend currency field + multi-currency aggregation, Angular budget-list section, Flutter UnbudgetedDetailSheet + AppColors.unbudgetedGray + UnbudgetedItemDto); MonthSelector.didUpdateWidget(); snapshot cleanup on budget delete; null guard checkThresholdsForCategory; JavaDoc getHistory() @Transactional
+- 077-backend-debt-enhancements: DebtService — repayment tracking (POST /debts/{id}/repay, GET /debts/{id}/payments), account association with currency forcing/conversion, snooze reminders (POST /debts/{id}/snooze); NotificationScheduler — DEBT_REMINDER type + checkDebtReminders() minutely job; AccountService — GET /accounts/total-balance aggregating accounts + debts by currency; Flyway V18; guard: debt transaction type immutable; ~55 tests (418 total)

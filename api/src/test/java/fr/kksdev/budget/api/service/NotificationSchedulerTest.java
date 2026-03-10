@@ -284,7 +284,7 @@ class NotificationSchedulerTest {
         var time = LocalTime.now();
         var debt = buildDebtWithReminder(now, time.minusMinutes(1));
 
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
         when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
         when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt));
@@ -307,7 +307,7 @@ class NotificationSchedulerTest {
     void should_skipNotification_when_debtRepaid() {
         var user = buildUser();
 
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
         when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
         when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of());
@@ -323,7 +323,7 @@ class NotificationSchedulerTest {
         var now = LocalDate.now();
         var debt = buildDebtWithReminder(now, LocalTime.of(10, 0));
 
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
         when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
         when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt));
@@ -338,7 +338,7 @@ class NotificationSchedulerTest {
     void should_skipNotification_when_reminderTypeDisabled() {
         var user = buildUser();
 
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(false);
 
         notificationScheduler.checkDebtReminders();
@@ -364,7 +364,7 @@ class NotificationSchedulerTest {
                 .reminderTime(LocalTime.of(9, 0))
                 .build();
 
-        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
         when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
         when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt1, debt2));

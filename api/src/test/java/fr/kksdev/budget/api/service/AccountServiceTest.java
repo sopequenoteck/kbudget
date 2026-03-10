@@ -434,7 +434,7 @@ class AccountServiceTest {
         when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
         when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
-        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtIds(any())).thenReturn(List.of());
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
 
         TotalBalanceResponse result = accountService.getTotalBalance(userId);
@@ -456,7 +456,7 @@ class AccountServiceTest {
         when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
         when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
-        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtIds(any())).thenReturn(List.of());
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
 
         TotalBalanceResponse result = accountService.getTotalBalance(userId);
@@ -478,7 +478,7 @@ class AccountServiceTest {
         when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
         when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
-        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtIds(any())).thenReturn(List.of());
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
 
         TotalBalanceResponse result = accountService.getTotalBalance(userId);

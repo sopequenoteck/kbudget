@@ -31,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -87,16 +89,20 @@ public class DebtService {
     }
 
     public List<DebtResponse> getAllByUser(UUID userId) {
-        return debtRepository.findByUserIdOrderByDateDesc(userId)
-                .stream()
-                .map(this::toResponse)
+        List<Debt> debts = debtRepository.findByUserIdOrderByDateDesc(userId);
+        if (debts.isEmpty()) return List.of();
+        Map<UUID, BigDecimal> paidMap = buildPaidMap(debts);
+        return debts.stream()
+                .map(d -> toResponse(d, paidMap.getOrDefault(d.getId(), BigDecimal.ZERO)))
                 .toList();
     }
 
     public List<DebtResponse> getUnpaidByUser(UUID userId) {
-        return debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId)
-                .stream()
-                .map(this::toResponse)
+        List<Debt> debts = debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId);
+        if (debts.isEmpty()) return List.of();
+        Map<UUID, BigDecimal> paidMap = buildPaidMap(debts);
+        return debts.stream()
+                .map(d -> toResponse(d, paidMap.getOrDefault(d.getId(), BigDecimal.ZERO)))
                 .toList();
     }
 
@@ -131,8 +137,14 @@ public class DebtService {
                 if (rate == null) {
                     throw new IllegalArgumentException("Taux de change indisponible pour " + debt.getCurrency() + " → " + newCurrency);
                 }
+                // request.montant() est dans la devise source (ancienne) — conversion vers la nouvelle devise du compte
                 debt.setMontant(request.montant().multiply(rate).setScale(2, RoundingMode.HALF_UP));
                 debt.setCurrency(newCurrency);
+                List<Transaction> payments = transactionRepository.findByDebtIdOrderByDateDesc(debt.getId());
+                for (Transaction tx : payments) {
+                    tx.setMontant(tx.getMontant().multiply(rate).setScale(2, RoundingMode.HALF_UP));
+                    transactionRepository.save(tx);
+                }
             } else {
                 debt.setMontant(request.montant());
             }
@@ -156,7 +168,9 @@ public class DebtService {
 
     @Transactional
     public DebtResponse repay(UUID debtId, DebtRepayRequest request, UUID userId) {
-        Debt debt = findByIdAndUser(debtId, userId);
+        Debt debt = debtRepository.findByIdForUpdate(debtId)
+                .filter(d -> d.getUser().getId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Dette non trouvée"));
 
         if (Boolean.TRUE.equals(debt.getRembourse())) {
             throw new IllegalArgumentException("Cette dette est déjà remboursée");
@@ -166,6 +180,9 @@ public class DebtService {
         BigDecimal montantRestant = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
 
         BigDecimal amount = request.amount() != null ? request.amount() : montantRestant;
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Le montant du remboursement doit être positif");
+        }
         if (amount.compareTo(montantRestant) > 0) {
             throw new IllegalArgumentException("Le montant dépasse le montant restant (" + montantRestant + ")");
         }
@@ -193,15 +210,15 @@ public class DebtService {
         transactionRepository.save(transaction);
 
         // Recalculer si dette totalement remboursée
-        BigDecimal newPaid = transactionRepository.sumByDebtId(debt.getId());
-        BigDecimal newRemaining = debt.getMontant().subtract(newPaid != null ? newPaid : BigDecimal.ZERO);
+        BigDecimal newPaid = (paid != null ? paid : BigDecimal.ZERO).add(amount);
+        BigDecimal newRemaining = debt.getMontant().subtract(newPaid);
         if (newRemaining.compareTo(BigDecimal.ZERO) <= 0) {
             debt.setRembourse(true);
             debtRepository.save(debt);
         }
 
         log.info("Remboursement effectué: debtId={}, montant={}, userId={}", debtId, amount, userId);
-        return toResponse(debt);
+        return toResponse(debt, newPaid);
     }
 
     public List<DebtPaymentResponse> getPayments(UUID debtId, UUID userId) {
@@ -234,6 +251,12 @@ public class DebtService {
     @Transactional
     public void delete(UUID id, UUID userId) {
         Debt debt = findByIdAndUser(id, userId);
+        List<Transaction> payments = transactionRepository.findByDebtIdOrderByDateDesc(id);
+        for (Transaction tx : payments) {
+            tx.setDebt(null);
+            tx.setLibelle(tx.getLibelle() + " (dette supprimée - " + debt.getPersonne() + ")");
+            transactionRepository.save(tx);
+        }
         debtRepository.delete(debt);
         log.info("Dette supprimée: {}", id);
     }
@@ -320,6 +343,10 @@ public class DebtService {
 
     private DebtResponse toResponse(Debt debt) {
         BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+        return toResponse(debt, paid);
+    }
+
+    private DebtResponse toResponse(Debt debt, BigDecimal paid) {
         BigDecimal montantRestant = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
         return new DebtResponse(
                 debt.getId(),
@@ -337,5 +364,17 @@ public class DebtService {
                 debt.getReminderDate(),
                 debt.getReminderTime()
         );
+    }
+
+    private Map<UUID, BigDecimal> buildPaidMap(List<Debt> debts) {
+        List<UUID> debtIds = debts.stream().map(Debt::getId).toList();
+        List<Object[]> rows = transactionRepository.sumByDebtIds(debtIds);
+        Map<UUID, BigDecimal> map = new HashMap<>();
+        for (Object[] row : rows) {
+            UUID debtId = (UUID) row[0];
+            BigDecimal sum = (BigDecimal) row[1];
+            map.put(debtId, sum);
+        }
+        return map;
     }
 }

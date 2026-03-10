@@ -139,6 +139,9 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | GET | `/api/debts/{id}` | Detail |
 | PUT | `/api/debts/{id}` | Modifier |
 | DELETE | `/api/debts/{id}` | Supprimer |
+| POST | `/api/debts/{id}/repay` | Rembourser (partiel ou total) |
+| GET | `/api/debts/{id}/payments` | Historique des remboursements |
+| POST | `/api/debts/{id}/snooze` | Reporter le rappel |
 
 ### Comptes
 
@@ -151,6 +154,7 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | DELETE | `/api/accounts/{id}` | Supprimer |
 | POST | `/api/accounts/transfer` | Virement entre deux comptes |
 | PUT | `/api/accounts/{id}/default` | Definir comme compte par defaut |
+| GET | `/api/accounts/total-balance` | Solde total (comptes + dettes) par devise |
 
 ### Categories
 

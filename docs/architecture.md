@@ -91,8 +91,13 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | montant | BigDecimal | Montant |
 | sens | Enum | EMPRUNT / PRET |
 | date | LocalDate | Date |
+| currency | Currency | Devise (default EUR) |
 | rembourse | Boolean | Rembourse ou non |
 | dueDate | LocalDate | Date d'echeance (nullable) |
+| account | Account | FK → Account (nullable) |
+| includeInBalance | Boolean | Inclure dans le solde total (default false) |
+| reminderDate | LocalDate | Date du rappel (nullable) |
+| reminderTime | LocalTime | Heure du rappel (nullable) |
 | category | Category | FK → Category (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |

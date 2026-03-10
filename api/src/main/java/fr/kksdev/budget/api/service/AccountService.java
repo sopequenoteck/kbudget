@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -277,6 +278,19 @@ public class AccountService {
 
         // Ajuster par les dettes non remboursées
         List<Debt> unpaidDebts = debtRepository.findByUserIdAndRembourseFalse(userId);
+
+        // Batch: charger tous les montants payés en une requête
+        List<UUID> eligibleDebtIds = unpaidDebts.stream()
+                .filter(d -> d.getAccount() != null || Boolean.TRUE.equals(d.getIncludeInBalance()))
+                .map(Debt::getId)
+                .toList();
+        Map<UUID, BigDecimal> paidMap = new HashMap<>();
+        if (!eligibleDebtIds.isEmpty()) {
+            for (Object[] row : transactionRepository.sumByDebtIds(eligibleDebtIds)) {
+                paidMap.put((UUID) row[0], (BigDecimal) row[1]);
+            }
+        }
+
         for (Debt debt : unpaidDebts) {
             boolean eligible;
             if (debt.getAccount() != null) {
@@ -286,8 +300,8 @@ public class AccountService {
             }
 
             if (eligible) {
-                BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
-                BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+                BigDecimal paid = paidMap.getOrDefault(debt.getId(), BigDecimal.ZERO);
+                BigDecimal remaining = debt.getMontant().subtract(paid);
 
                 Currency currency = debt.getCurrency();
                 if (debt.getSens() == DebtType.EMPRUNT) {

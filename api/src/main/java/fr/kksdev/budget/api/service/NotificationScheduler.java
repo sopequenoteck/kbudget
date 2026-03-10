@@ -53,7 +53,7 @@ public class NotificationScheduler {
                 LocalDate tomorrow = LocalDate.now(zoneId).plusDays(1);
 
                 count += processSubscriptions(userId, tomorrow, zoneId);
-                count += processDebts(userId, tomorrow);
+                count += processDebts(userId, tomorrow, zoneId);
 
                 log.info("Purge des anciennes notifications pour userId={}", userId);
                 notificationService.purgeOldNotifications(userId);
@@ -75,7 +75,7 @@ public class NotificationScheduler {
         for (Subscription sub : subscriptions) {
             LocalDate nextDue = getNextDueDate(sub.getDateDebut(), sub.getFrequence(), zoneId);
             if (nextDue.equals(tomorrow)) {
-                LocalDateTime since = LocalDateTime.now().minusHours(24);
+                LocalDateTime since = LocalDateTime.now(zoneId).minusHours(24);
                 if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(userId, NotificationType.SUBSCRIPTION_DUE, sub.getId(), since)) {
                     continue;
                 }
@@ -94,7 +94,7 @@ public class NotificationScheduler {
         return count;
     }
 
-    private int processDebts(UUID userId, LocalDate tomorrow) {
+    private int processDebts(UUID userId, LocalDate tomorrow, ZoneId zoneId) {
         if (!preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_DUE)) {
             return 0;
         }
@@ -103,7 +103,7 @@ public class NotificationScheduler {
         List<Debt> debts = debtRepository.findByUserIdAndRembourseFalseOrderByDateDesc(userId);
         for (Debt debt : debts) {
             if (debt.getDueDate() != null && debt.getDueDate().equals(tomorrow)) {
-                LocalDateTime since = LocalDateTime.now().minusHours(24);
+                LocalDateTime since = LocalDateTime.now(zoneId).minusHours(24);
                 if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(userId, NotificationType.DEBT_DUE, debt.getId(), since)) {
                     continue;
                 }
@@ -122,9 +122,9 @@ public class NotificationScheduler {
         return count;
     }
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(fixedDelay = 60_000)
     public void checkDebtReminders() {
-        List<User> users = userRepository.findAll();
+        List<User> users = debtRepository.findUsersWithActiveReminders();
         int count = 0;
         for (User user : users) {
             UUID userId = user.getId();
@@ -139,7 +139,7 @@ public class NotificationScheduler {
 
                 List<Debt> dueDebts = debtRepository.findDueReminders(userId, dateInTz, timeInTz);
                 for (Debt debt : dueDebts) {
-                    LocalDateTime since = LocalDateTime.now().minusHours(24);
+                    LocalDateTime since = LocalDateTime.now(zoneId).minusHours(24);
                     if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
                             userId, NotificationType.DEBT_REMINDER, debt.getId(), since)) {
                         continue;

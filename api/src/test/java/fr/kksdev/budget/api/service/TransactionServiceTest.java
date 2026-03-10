@@ -10,8 +10,12 @@ import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.model.Debt;
+import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
+import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,7 +53,16 @@ class TransactionServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
+    private ProductRepository productRepository;
+
+    @Mock
     private PreferenceService preferenceService;
+
+    @Mock
+    private BudgetService budgetService;
+
+    @Mock
+    private DebtRepository debtRepository;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -284,6 +297,40 @@ class TransactionServiceTest {
         transactionService.delete(transactionId, userId);
 
         verify(transactionRepository).delete(transaction);
+    }
+
+    @Test
+    void should_throwException_when_changingTypeOfDebtTransaction() {
+        var user = buildUser();
+        var account = buildDefaultAccount(user);
+        var debt = Debt.builder()
+                .id(UUID.randomUUID())
+                .personne("Alice")
+                .montant(new BigDecimal("100.00"))
+                .sens(DebtType.EMPRUNT)
+                .date(LocalDate.now())
+                .rembourse(false)
+                .user(user)
+                .build();
+        var transaction = Transaction.builder()
+                .id(transactionId)
+                .montant(new BigDecimal("50.00"))
+                .libelle("Remboursement - Alice")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.now())
+                .account(account)
+                .debt(debt)
+                .user(user)
+                .build();
+        var request = new TransactionRequest(
+                new BigDecimal("50.00"), "Remboursement - Alice", TransactionType.RECETTE,
+                LocalDate.now(), null, null, accountId);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+
+        assertThatThrownBy(() -> transactionService.update(transactionId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("type d'une transaction liée à une dette");
     }
 
     @Test
