@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record DebtRequest(
@@ -18,5 +19,9 @@ public record DebtRequest(
         @NotNull LocalDate date,
         Boolean rembourse,
         UUID categoryId,
-        Currency currency
+        Currency currency,
+        UUID accountId,
+        Boolean includeInBalance,
+        LocalDate reminderDate,
+        LocalTime reminderTime
 ) {}

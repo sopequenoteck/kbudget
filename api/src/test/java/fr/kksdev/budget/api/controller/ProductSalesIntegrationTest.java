@@ -219,12 +219,12 @@ class ProductSalesIntegrationTest {
         var tx1 = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("15.00"), "Vente: Bracelet",
                 TransactionType.RECETTE, LocalDate.of(2026, 2, 28),
-                null, null, null, null, productId, "Bracelet"
+                null, null, null, null, productId, "Bracelet", null
         );
         var tx2 = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("15.00"), "Vente: Bracelet",
                 TransactionType.RECETTE, LocalDate.of(2026, 2, 27),
-                null, null, null, null, productId, "Bracelet"
+                null, null, null, null, productId, "Bracelet", null
         );
         when(productService.getSalesHistory(productId, userId)).thenReturn(List.of(tx1, tx2));
 

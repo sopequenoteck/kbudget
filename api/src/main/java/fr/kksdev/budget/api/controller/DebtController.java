@@ -1,6 +1,9 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.dto.request.DebtRepayRequest;
 import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.request.DebtSnoozeRequest;
+import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.service.DebtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,6 +67,35 @@ public class DebtController {
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.ok(debtService.update(id, request, userId));
+    }
+
+    @Operation(summary = "Rembourser une dette")
+    @PostMapping("/{id}/repay")
+    public ResponseEntity<DebtResponse> repay(
+            @PathVariable UUID id,
+            @Valid @RequestBody DebtRepayRequest request,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(debtService.repay(id, request, userId));
+    }
+
+    @Operation(summary = "Historique des remboursements d'une dette")
+    @GetMapping("/{id}/payments")
+    public ResponseEntity<List<DebtPaymentResponse>> getPayments(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(debtService.getPayments(id, userId));
+    }
+
+    @Operation(summary = "Reporter un rappel de dette")
+    @PostMapping("/{id}/snooze")
+    public ResponseEntity<DebtResponse> snooze(
+            @PathVariable UUID id,
+            @Valid @RequestBody DebtSnoozeRequest request,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(debtService.snooze(id, request, userId));
     }
 
     @Operation(summary = "Supprimer une dette")

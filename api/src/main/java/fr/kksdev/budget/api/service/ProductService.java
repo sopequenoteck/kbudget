@@ -265,7 +265,8 @@ public class ProductService {
                         acc.getCurrency().name()) : null,
                 transaction.getTransferId(),
                 transaction.getProduct() != null ? transaction.getProduct().getId() : null,
-                transaction.getProduct() != null ? transaction.getProduct().getNom() : null
+                transaction.getProduct() != null ? transaction.getProduct().getNom() : null,
+                transaction.getDebt() != null ? transaction.getDebt().getId() : null
         );
     }
 }

@@ -7,9 +7,11 @@ import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +54,9 @@ class NotificationSchedulerTest {
 
     @Mock
     private NotificationRepository notificationRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @InjectMocks
     private NotificationScheduler notificationScheduler;
@@ -251,5 +257,124 @@ class NotificationSchedulerTest {
         notificationScheduler.runDailyJob();
 
         verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+
+    // -------------------------------------------------------------------------
+    // T030 — US4: checkDebtReminders (scheduler chaque minute)
+    // -------------------------------------------------------------------------
+
+    private Debt buildDebtWithReminder(LocalDate reminderDate, LocalTime reminderTime) {
+        return Debt.builder()
+                .id(debtId)
+                .personne("Alice")
+                .montant(BigDecimal.valueOf(100))
+                .sens(DebtType.EMPRUNT)
+                .date(LocalDate.of(2026, 1, 1))
+                .currency(Currency.EUR)
+                .rembourse(false)
+                .reminderDate(reminderDate)
+                .reminderTime(reminderTime)
+                .build();
+    }
+
+    @Test
+    void should_createNotification_when_reminderDue() {
+        var user = buildUser();
+        var now = LocalDate.now();
+        var time = LocalTime.now();
+        var debt = buildDebtWithReminder(now, time.minusMinutes(1));
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.DEBT_REMINDER), eq(debtId), any(LocalDateTime.class))).thenReturn(false);
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+
+        notificationScheduler.checkDebtReminders();
+
+        verify(notificationService).createNotification(
+                eq(userId),
+                eq(NotificationType.DEBT_REMINDER),
+                eq("Rappel dette - Alice"),
+                any(String.class),
+                eq(EntityType.DEBT),
+                eq(debtId)
+        );
+    }
+
+    @Test
+    void should_skipNotification_when_debtRepaid() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of());
+
+        notificationScheduler.checkDebtReminders();
+
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_skipNotification_when_alreadyNotified24h() {
+        var user = buildUser();
+        var now = LocalDate.now();
+        var debt = buildDebtWithReminder(now, LocalTime.of(10, 0));
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.DEBT_REMINDER), eq(debtId), any(LocalDateTime.class))).thenReturn(true);
+
+        notificationScheduler.checkDebtReminders();
+
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_skipNotification_when_reminderTypeDisabled() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(false);
+
+        notificationScheduler.checkDebtReminders();
+
+        verify(debtRepository, never()).findDueReminders(any(), any(), any());
+    }
+
+    @Test
+    void should_processMultipleDebts_when_multipleDue() {
+        var user = buildUser();
+        var now = LocalDate.now();
+        var debt1 = buildDebtWithReminder(now, LocalTime.of(10, 0));
+        var debt2Id = UUID.randomUUID();
+        var debt2 = Debt.builder()
+                .id(debt2Id)
+                .personne("Bob")
+                .montant(BigDecimal.valueOf(200))
+                .sens(DebtType.PRET)
+                .date(LocalDate.of(2026, 1, 1))
+                .currency(Currency.EUR)
+                .rembourse(false)
+                .reminderDate(now)
+                .reminderTime(LocalTime.of(9, 0))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(debtRepository.findDueReminders(eq(userId), any(LocalDate.class), any(LocalTime.class))).thenReturn(List.of(debt1, debt2));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.DEBT_REMINDER), any(UUID.class), any(LocalDateTime.class))).thenReturn(false);
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByDebtId(debt2Id)).thenReturn(BigDecimal.valueOf(50));
+
+        notificationScheduler.checkDebtReminders();
+
+        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Rappel dette - Alice"), any(String.class), eq(EntityType.DEBT), eq(debtId));
+        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Rappel dette - Bob"), any(String.class), eq(EntityType.DEBT), eq(debt2Id));
     }
 }

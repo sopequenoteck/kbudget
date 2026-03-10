@@ -6,7 +6,11 @@ import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
+import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.repository.AccountRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -49,6 +53,9 @@ class AccountServiceTest {
 
     @Mock
     private PreferenceService preferenceService;
+
+    @Mock
+    private DebtRepository debtRepository;
 
     @InjectMocks
     private AccountService accountService;
@@ -389,5 +396,139 @@ class AccountServiceTest {
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Le virement entre comptes de devises différentes n'est pas autorisé");
+    }
+
+    // -------------------------------------------------------------------------
+    // T026 — US3: getTotalBalance
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_sumAccountBalances_when_noDebts() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("1000.00"));
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(new BigDecimal("500.00"));
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of());
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances()).hasSize(1);
+        assertThat(result.balances().getFirst().amount()).isEqualByComparingTo(new BigDecimal("1500.00"));
+    }
+
+    @Test
+    void should_subtractEmprunt_when_debtWithAccount() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("1000.00"));
+        var debt = Debt.builder()
+                .id(UUID.randomUUID()).personne("Alice").montant(new BigDecimal("200.00"))
+                .sens(DebtType.EMPRUNT).currency(Currency.EUR).rembourse(false)
+                .account(account).includeInBalance(false).user(user).build();
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
+        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances().getFirst().amount()).isEqualByComparingTo(new BigDecimal("800.00"));
+    }
+
+    @Test
+    void should_addPret_when_debtWithAccount() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("1000.00"));
+        var debt = Debt.builder()
+                .id(UUID.randomUUID()).personne("Bob").montant(new BigDecimal("300.00"))
+                .sens(DebtType.PRET).currency(Currency.EUR).rembourse(false)
+                .account(account).includeInBalance(false).user(user).build();
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
+        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances().getFirst().amount()).isEqualByComparingTo(new BigDecimal("1300.00"));
+    }
+
+    @Test
+    void should_subtractEmprunt_when_includeInBalanceTrue() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("1000.00"));
+        var debt = Debt.builder()
+                .id(UUID.randomUUID()).personne("Alice").montant(new BigDecimal("150.00"))
+                .sens(DebtType.EMPRUNT).currency(Currency.EUR).rembourse(false)
+                .account(null).includeInBalance(true).user(user).build();
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
+        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(BigDecimal.ZERO);
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances().getFirst().amount()).isEqualByComparingTo(new BigDecimal("850.00"));
+    }
+
+    @Test
+    void should_ignoreDebt_when_noAccountAndIncludeInBalanceFalse() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("1000.00"));
+        var debt = Debt.builder()
+                .id(UUID.randomUUID()).personne("Alice").montant(new BigDecimal("150.00"))
+                .sens(DebtType.EMPRUNT).currency(Currency.EUR).rembourse(false)
+                .account(null).includeInBalance(false).user(user).build();
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of(debt));
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances().getFirst().amount()).isEqualByComparingTo(new BigDecimal("1000.00"));
+    }
+
+    @Test
+    void should_groupByCurrency_when_multiCurrency() {
+        var user = buildUser();
+        var eurAccount = buildAccount(user);
+        eurAccount.setSoldeInitial(new BigDecimal("1000.00"));
+        var usdAccountId = UUID.randomUUID();
+        var usdAccount = Account.builder()
+                .id(usdAccountId).nom("USD Account").type(AccountType.COURANT)
+                .soldeInitial(new BigDecimal("500.00")).icone("💵").couleur("#22c55e")
+                .currency(Currency.USD).actif(true).user(user).build();
+        var prefs = UserPreference.builder().currencies(List.of(Currency.EUR, Currency.USD)).build();
+
+        when(accountRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(eurAccount, usdAccount));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.calculateBalanceByAccountId(usdAccountId)).thenReturn(BigDecimal.ZERO);
+        when(debtRepository.findByUserIdAndRembourseFalse(userId)).thenReturn(List.of());
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        TotalBalanceResponse result = accountService.getTotalBalance(userId);
+
+        assertThat(result.balances()).hasSize(2);
+        assertThat(result.balances().get(0).currency()).isEqualTo(Currency.EUR);
+        assertThat(result.balances().get(1).currency()).isEqualTo(Currency.USD);
     }
 }

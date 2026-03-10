@@ -8,10 +8,12 @@ import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
+import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.Product;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -41,6 +43,7 @@ public class TransactionService {
     private final ProductRepository productRepository;
     private final PreferenceService preferenceService;
     private final BudgetService budgetService;
+    private final DebtRepository debtRepository;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -158,6 +161,18 @@ public class TransactionService {
 
         transactionRepository.delete(transaction);
         log.info("Transaction supprimée: {}", id);
+
+        // Recalculer rembourse si transaction liée à une dette (FR-023)
+        if (transaction.getDebt() != null) {
+            Debt debt = transaction.getDebt();
+            BigDecimal newPaid = transactionRepository.sumByDebtId(debt.getId());
+            BigDecimal newRemaining = debt.getMontant().subtract(newPaid != null ? newPaid : BigDecimal.ZERO);
+            if (newRemaining.compareTo(BigDecimal.ZERO) > 0 && Boolean.TRUE.equals(debt.getRembourse())) {
+                debt.setRembourse(false);
+                debtRepository.save(debt);
+                log.info("Dette réouverte après suppression remboursement: debtId={}", debt.getId());
+            }
+        }
 
         if (deletedType == TransactionType.DEPENSE && deletedCategoryId != null) {
             try {
@@ -312,7 +327,8 @@ public class TransactionService {
                 toAccountSummary(transaction.getAccount()),
                 transaction.getTransferId(),
                 transaction.getProduct() != null ? transaction.getProduct().getId() : null,
-                transaction.getProduct() != null ? transaction.getProduct().getNom() : null
+                transaction.getProduct() != null ? transaction.getProduct().getNom() : null,
+                transaction.getDebt() != null ? transaction.getDebt().getId() : null
         );
     }
 }

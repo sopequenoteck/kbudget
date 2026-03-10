@@ -1,14 +1,26 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.dto.request.DebtRepayRequest;
 import fr.kksdev.budget.api.dto.request.DebtRequest;
+import fr.kksdev.budget.api.dto.request.DebtSnoozeRequest;
+import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
+import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Debt;
+import fr.kksdev.budget.api.model.ExchangeRate;
+import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
+import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
+import fr.kksdev.budget.api.repository.ExchangeRateRepository;
+import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,14 +43,28 @@ public class DebtService {
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
     private final CategoryService categoryService;
     private final PreferenceService preferenceService;
+    private final ExchangeRateRepository exchangeRateRepository;
 
     @Transactional
     public DebtResponse create(DebtRequest request, UUID userId) {
         User user = userRepository.getReferenceById(userId);
-        Currency currency = request.currency() != null ? request.currency()
-                : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+
+        validateReminderFields(request);
+
+        Account account = resolveAccount(request.accountId(), userId);
+        Currency currency;
+        if (account != null) {
+            currency = account.getCurrency();
+        } else {
+            currency = request.currency() != null ? request.currency()
+                    : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+        }
+        boolean includeInBalance = account != null ? false
+                : Boolean.TRUE.equals(request.includeInBalance());
 
         Debt debt = Debt.builder()
                 .personne(request.personne())
@@ -45,6 +74,10 @@ public class DebtService {
                 .rembourse(request.rembourse() != null ? request.rembourse() : false)
                 .category(resolveCategory(request.categoryId(), userId))
                 .currency(currency)
+                .account(account)
+                .includeInBalance(includeInBalance)
+                .reminderDate(request.reminderDate())
+                .reminderTime(request.reminderTime())
                 .user(user)
                 .build();
 
@@ -76,20 +109,125 @@ public class DebtService {
     public DebtResponse update(UUID id, DebtRequest request, UUID userId) {
         Debt debt = findByIdAndUser(id, userId);
 
+        validateReminderFields(request);
+
+        Account account = resolveAccount(request.accountId(), userId);
+        boolean includeInBalance = account != null ? false
+                : Boolean.TRUE.equals(request.includeInBalance());
+
         debt.setPersonne(request.personne());
-        debt.setMontant(request.montant());
         debt.setSens(request.sens());
         debt.setDate(request.date());
         if (request.rembourse() != null) {
             debt.setRembourse(request.rembourse());
         }
         debt.setCategory(resolveCategory(request.categoryId(), userId));
-        if (request.currency() != null) {
-            debt.setCurrency(request.currency());
+
+        // Logique devise/compte (US2)
+        if (account != null) {
+            Currency newCurrency = account.getCurrency();
+            if (debt.getCurrency() != newCurrency) {
+                BigDecimal rate = findPivotRate(userId, debt.getCurrency(), newCurrency);
+                if (rate == null) {
+                    throw new IllegalArgumentException("Taux de change indisponible pour " + debt.getCurrency() + " → " + newCurrency);
+                }
+                debt.setMontant(request.montant().multiply(rate).setScale(2, RoundingMode.HALF_UP));
+                debt.setCurrency(newCurrency);
+            } else {
+                debt.setMontant(request.montant());
+            }
+        } else {
+            debt.setMontant(request.montant());
+            // Dissociation: conserver la devise actuelle sauf si explicitement fournie
+            if (request.currency() != null) {
+                debt.setCurrency(request.currency());
+            }
         }
+
+        debt.setAccount(account);
+        debt.setIncludeInBalance(includeInBalance);
+        debt.setReminderDate(request.reminderDate());
+        debt.setReminderTime(request.reminderTime());
 
         debt = debtRepository.save(debt);
         log.info("Dette mise à jour: {}", debt.getId());
+        return toResponse(debt);
+    }
+
+    @Transactional
+    public DebtResponse repay(UUID debtId, DebtRepayRequest request, UUID userId) {
+        Debt debt = findByIdAndUser(debtId, userId);
+
+        if (Boolean.TRUE.equals(debt.getRembourse())) {
+            throw new IllegalArgumentException("Cette dette est déjà remboursée");
+        }
+
+        BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+        BigDecimal montantRestant = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+
+        BigDecimal amount = request.amount() != null ? request.amount() : montantRestant;
+        if (amount.compareTo(montantRestant) > 0) {
+            throw new IllegalArgumentException("Le montant dépasse le montant restant (" + montantRestant + ")");
+        }
+
+        Account account = accountRepository.findById(request.accountId())
+                .filter(a -> a.getUser().getId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Compte non trouvé"));
+        if (!Boolean.TRUE.equals(account.getActif())) {
+            throw new IllegalArgumentException("Le compte est inactif");
+        }
+
+        TransactionType txType = debt.getSens() == DebtType.EMPRUNT
+                ? TransactionType.DEPENSE : TransactionType.RECETTE;
+
+        Transaction transaction = Transaction.builder()
+                .montant(amount)
+                .libelle("Remboursement - " + debt.getPersonne())
+                .type(txType)
+                .date(LocalDate.now())
+                .category(debt.getCategory())
+                .account(account)
+                .debt(debt)
+                .user(userRepository.getReferenceById(userId))
+                .build();
+        transactionRepository.save(transaction);
+
+        // Recalculer si dette totalement remboursée
+        BigDecimal newPaid = transactionRepository.sumByDebtId(debt.getId());
+        BigDecimal newRemaining = debt.getMontant().subtract(newPaid != null ? newPaid : BigDecimal.ZERO);
+        if (newRemaining.compareTo(BigDecimal.ZERO) <= 0) {
+            debt.setRembourse(true);
+            debtRepository.save(debt);
+        }
+
+        log.info("Remboursement effectué: debtId={}, montant={}, userId={}", debtId, amount, userId);
+        return toResponse(debt);
+    }
+
+    public List<DebtPaymentResponse> getPayments(UUID debtId, UUID userId) {
+        findByIdAndUser(debtId, userId);
+        return transactionRepository.findByDebtIdOrderByDateDesc(debtId).stream()
+                .map(t -> new DebtPaymentResponse(
+                        t.getId(),
+                        t.getMontant(),
+                        t.getDate(),
+                        t.getAccount() != null ? t.getAccount().getNom() : null
+                ))
+                .toList();
+    }
+
+    @Transactional
+    public DebtResponse snooze(UUID debtId, DebtSnoozeRequest request, UUID userId) {
+        Debt debt = findByIdAndUser(debtId, userId);
+
+        if (debt.getReminderDate() == null || debt.getReminderTime() == null) {
+            throw new IllegalArgumentException("Cette dette n'a pas de rappel configuré");
+        }
+
+        debt.setReminderDate(request.reminderDate());
+        debt.setReminderTime(request.reminderTime());
+        debt = debtRepository.save(debt);
+        log.info("Rappel reporté: debtId={}, nouvelleDate={}, userId={}", debtId, request.reminderDate(), userId);
         return toResponse(debt);
     }
 
@@ -98,6 +236,26 @@ public class DebtService {
         Debt debt = findByIdAndUser(id, userId);
         debtRepository.delete(debt);
         log.info("Dette supprimée: {}", id);
+    }
+
+    private void validateReminderFields(DebtRequest request) {
+        boolean hasDate = request.reminderDate() != null;
+        boolean hasTime = request.reminderTime() != null;
+        if (hasDate ^ hasTime) {
+            throw new IllegalArgumentException("reminderDate et reminderTime doivent être fournis ensemble");
+        }
+    }
+
+    private Account resolveAccount(UUID accountId, UUID userId) {
+        if (accountId == null) {
+            return null;
+        }
+        return accountRepository.findById(accountId)
+                .filter(a -> a.getUser().getId().equals(userId))
+                .orElseThrow(() -> {
+                    log.error("Compte non trouvé: id={}, userId={}", accountId, userId);
+                    return new EntityNotFoundException("Compte non trouvé");
+                });
     }
 
     private Debt findByIdAndUser(UUID id, UUID userId) {
@@ -121,6 +279,19 @@ public class DebtService {
                 });
     }
 
+    private BigDecimal findPivotRate(UUID userId, Currency from, Currency to) {
+        List<ExchangeRate> rates = exchangeRateRepository.findAllByUserId(userId);
+        for (ExchangeRate r : rates) {
+            if (r.getBaseCurrency() == from && r.getTargetCurrency() == to) return r.getRate();
+        }
+        for (ExchangeRate r : rates) {
+            if (r.getBaseCurrency() == to && r.getTargetCurrency() == from) {
+                return BigDecimal.ONE.divide(r.getRate(), 6, RoundingMode.HALF_UP);
+            }
+        }
+        return null;
+    }
+
     private CategoryResponse toCategoryResponse(Category category) {
         if (category == null) {
             return null;
@@ -134,16 +305,37 @@ public class DebtService {
         );
     }
 
+    private AccountSummary toAccountSummary(Account account) {
+        if (account == null) {
+            return null;
+        }
+        return new AccountSummary(
+                account.getId(),
+                account.getNom(),
+                account.getIcone(),
+                account.getCouleur(),
+                account.getCurrency().name()
+        );
+    }
+
     private DebtResponse toResponse(Debt debt) {
+        BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+        BigDecimal montantRestant = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
         return new DebtResponse(
                 debt.getId(),
                 debt.getPersonne(),
                 debt.getMontant(),
                 debt.getSens(),
                 debt.getDate(),
+                debt.getDueDate(),
+                debt.getCurrency().name(),
                 debt.getRembourse(),
+                montantRestant,
                 toCategoryResponse(debt.getCategory()),
-                debt.getCurrency().name()
+                toAccountSummary(debt.getAccount()),
+                debt.getIncludeInBalance(),
+                debt.getReminderDate(),
+                debt.getReminderTime()
         );
     }
 }

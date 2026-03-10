@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.request.AdjustBalanceRequest;
 import fr.kksdev.budget.api.dto.request.TransferRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,13 @@ public class AccountController {
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.ok(accountService.getAccounts(userId, includeInactive));
+    }
+
+    @Operation(summary = "Patrimoine total groupé par devise")
+    @GetMapping("/total-balance")
+    public ResponseEntity<TotalBalanceResponse> getTotalBalance(Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(accountService.getTotalBalance(userId));
     }
 
     @Operation(summary = "Consulter un compte par son ID")

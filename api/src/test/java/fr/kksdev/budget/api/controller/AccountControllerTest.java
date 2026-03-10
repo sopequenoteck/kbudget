@@ -4,8 +4,11 @@ import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.dto.response.CurrencyBalance;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -387,5 +390,36 @@ class AccountControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.solde").value(-100.00));
+    }
+
+    // --- T027 — Total Balance ---
+
+    @Test
+    void should_return_200_when_get_total_balance() throws Exception {
+        var response = new TotalBalanceResponse(List.of(
+                new CurrencyBalance(Currency.EUR, new BigDecimal("1500.00"))));
+
+        when(accountService.getTotalBalance(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/total-balance")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balances[0].currency").value("EUR"))
+                .andExpect(jsonPath("$.balances[0].amount").value(1500.00));
+    }
+
+    @Test
+    void should_return_200_when_get_total_balance_multi_currency() throws Exception {
+        var response = new TotalBalanceResponse(List.of(
+                new CurrencyBalance(Currency.EUR, new BigDecimal("1500.00")),
+                new CurrencyBalance(Currency.USD, new BigDecimal("500.00"))));
+
+        when(accountService.getTotalBalance(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/total-balance")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balances").isArray())
+                .andExpect(jsonPath("$.balances.length()").value(2));
     }
 }

@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"category", "account", "product", "user"})
+@ToString(exclude = {"category", "account", "product", "debt", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -55,6 +55,10 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "debt_id")
+    private Debt debt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

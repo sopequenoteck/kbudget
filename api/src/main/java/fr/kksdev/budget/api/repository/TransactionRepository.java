@@ -48,6 +48,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
+    @Query(value = "SELECT COALESCE(SUM(t.montant), 0) FROM transactions t WHERE t.debt_id = :debtId", nativeQuery = true)
+    BigDecimal sumByDebtId(@Param("debtId") UUID debtId);
+
+    List<Transaction> findByDebtIdOrderByDateDesc(UUID debtId);
+
     @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +

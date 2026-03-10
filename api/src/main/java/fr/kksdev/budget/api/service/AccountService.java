@@ -3,15 +3,20 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.request.TransferRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.dto.response.CurrencyBalance;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
+import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -23,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -38,6 +45,7 @@ public class AccountService {
     private final UserRepository userRepository;
     private final CategoryService categoryService;
     private final PreferenceService preferenceService;
+    private final DebtRepository debtRepository;
 
     public List<AccountResponse> getAccounts(UUID userId, boolean includeInactive) {
         List<Account> accounts = includeInactive
@@ -255,6 +263,53 @@ public class AccountService {
         transactionRepository.save(adjustment);
         log.info("Solde ajusté: accountId={}, diff={}, userId={}", accountId, diff, userId);
         return toResponse(account);
+    }
+
+    public TotalBalanceResponse getTotalBalance(UUID userId) {
+        // Somme des soldes des comptes actifs par devise
+        Map<Currency, BigDecimal> balances = new LinkedHashMap<>();
+        List<Account> activeAccounts = accountRepository.findByUserIdAndActifTrue(userId);
+        for (Account account : activeAccounts) {
+            BigDecimal txBalance = transactionRepository.calculateBalanceByAccountId(account.getId());
+            BigDecimal total = account.getSoldeInitial().add(txBalance);
+            balances.merge(account.getCurrency(), total, BigDecimal::add);
+        }
+
+        // Ajuster par les dettes non remboursées
+        List<Debt> unpaidDebts = debtRepository.findByUserIdAndRembourseFalse(userId);
+        for (Debt debt : unpaidDebts) {
+            boolean eligible;
+            if (debt.getAccount() != null) {
+                eligible = true; // Dettes avec compte: toujours incluses
+            } else {
+                eligible = Boolean.TRUE.equals(debt.getIncludeInBalance());
+            }
+
+            if (eligible) {
+                BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+                BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+
+                Currency currency = debt.getCurrency();
+                if (debt.getSens() == DebtType.EMPRUNT) {
+                    balances.merge(currency, remaining.negate(), BigDecimal::add);
+                } else {
+                    balances.merge(currency, remaining, BigDecimal::add);
+                }
+            }
+        }
+
+        // Trier: devise principale en premier
+        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+        List<CurrencyBalance> result = balances.entrySet().stream()
+                .sorted((a, b) -> {
+                    if (a.getKey() == primaryCurrency && b.getKey() != primaryCurrency) return -1;
+                    if (a.getKey() != primaryCurrency && b.getKey() == primaryCurrency) return 1;
+                    return a.getKey().compareTo(b.getKey());
+                })
+                .map(e -> new CurrencyBalance(e.getKey(), e.getValue()))
+                .toList();
+
+        return new TotalBalanceResponse(result);
     }
 
     @Transactional

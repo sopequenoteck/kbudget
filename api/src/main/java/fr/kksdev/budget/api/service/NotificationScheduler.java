@@ -9,14 +9,17 @@ import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
+import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -33,6 +36,7 @@ public class NotificationScheduler {
     private final NotificationService notificationService;
     private final PreferenceService preferenceService;
     private final NotificationRepository notificationRepository;
+    private final TransactionRepository transactionRepository;
 
     @Scheduled(cron = "0 0 6 * * *")
     public void runDailyJob() {
@@ -116,6 +120,52 @@ public class NotificationScheduler {
             }
         }
         return count;
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void checkDebtReminders() {
+        List<User> users = userRepository.findAll();
+        int count = 0;
+        for (User user : users) {
+            UUID userId = user.getId();
+            try {
+                if (!preferenceService.isNotificationTypeEnabled(userId, NotificationType.DEBT_REMINDER)) {
+                    continue;
+                }
+                String timezone = preferenceService.getUserTimezone(userId);
+                ZoneId zoneId = ZoneId.of(timezone);
+                LocalDate dateInTz = LocalDate.now(zoneId);
+                LocalTime timeInTz = LocalTime.now(zoneId);
+
+                List<Debt> dueDebts = debtRepository.findDueReminders(userId, dateInTz, timeInTz);
+                for (Debt debt : dueDebts) {
+                    LocalDateTime since = LocalDateTime.now().minusHours(24);
+                    if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                            userId, NotificationType.DEBT_REMINDER, debt.getId(), since)) {
+                        continue;
+                    }
+
+                    BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+                    BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+
+                    notificationService.createNotification(
+                            userId,
+                            NotificationType.DEBT_REMINDER,
+                            "Rappel dette - " + debt.getPersonne(),
+                            "Rappel : dette envers " + debt.getPersonne() + " — " + remaining + " " + debt.getCurrency().getSymbol() + " restant",
+                            EntityType.DEBT,
+                            debt.getId()
+                    );
+                    count++;
+                    log.info("Notification rappel dette créée: {} pour userId={}", debt.getPersonne(), userId);
+                }
+            } catch (Exception e) {
+                log.error("Erreur traitement rappels dette pour userId={}", userId, e);
+            }
+        }
+        if (count > 0) {
+            log.info("Rappels dette traités: {} notifications générées", count);
+        }
     }
 
     LocalDate getNextDueDate(LocalDate dateDebut, Frequency frequence, ZoneId zoneId) {
