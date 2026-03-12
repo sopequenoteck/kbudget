@@ -158,7 +158,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
 
 ### ExchangeRate
 
@@ -178,7 +178,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE |
+| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED |
 | entityType | EntityType | SUBSCRIPTION / DEBT |
 | entityId | UUID | ID de l'entite liee |
 | title | String | Titre de la notification |

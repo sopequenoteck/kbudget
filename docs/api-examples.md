@@ -259,7 +259,12 @@ Request :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": false
+  "rembourse": false,
+  "currency": "EUR",
+  "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "includeInBalance": true,
+  "reminderDate": "2026-03-01",
+  "reminderTime": "09:00"
 }
 ```
 
@@ -272,7 +277,15 @@ Response `200` :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": false
+  "dueDate": null,
+  "currency": "EUR",
+  "rembourse": false,
+  "montantRestant": 50.00,
+  "category": null,
+  "account": { "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "nom": "Compte Courant" },
+  "includeInBalance": true,
+  "reminderDate": "2026-03-01",
+  "reminderTime": "09:00"
 }
 ```
 
@@ -286,7 +299,12 @@ Request :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": true
+  "rembourse": true,
+  "currency": "EUR",
+  "accountId": null,
+  "includeInBalance": false,
+  "reminderDate": null,
+  "reminderTime": null
 }
 ```
 
@@ -299,7 +317,15 @@ Response `200` :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": true
+  "dueDate": null,
+  "currency": "EUR",
+  "rembourse": true,
+  "montantRestant": 0.00,
+  "category": null,
+  "account": null,
+  "includeInBalance": false,
+  "reminderDate": null,
+  "reminderTime": null
 }
 ```
 
@@ -315,18 +341,76 @@ Response `200` :
     "montant": 50.00,
     "sens": "EMPRUNT",
     "date": "2026-02-01",
-    "rembourse": false
-  },
-  {
-    "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
-    "personne": "Marie",
-    "montant": 25.00,
-    "sens": "PRET",
-    "date": "2026-01-20",
-    "rembourse": false
+    "dueDate": null,
+    "currency": "EUR",
+    "rembourse": false,
+    "montantRestant": 30.00,
+    "category": null,
+    "account": { "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "nom": "Compte Courant" },
+    "includeInBalance": true,
+    "reminderDate": "2026-03-01",
+    "reminderTime": "09:00"
   }
 ]
 ```
+
+### Rembourser `POST /api/debts/{id}/repay`
+
+Request :
+
+```json
+{
+  "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "amount": 20.00
+}
+```
+
+> `amount` optionnel — si omis, rembourse le montant restant (solde complet).
+
+Response `200` : la dette mise a jour (meme format que ci-dessus, `montantRestant` recalcule, `rembourse: true` si solde).
+
+### Historique paiements `GET /api/debts/{id}/payments`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "f1a2b3c4-d5e6-7890-abcd-123456789012",
+    "amount": 20.00,
+    "date": "2026-02-15",
+    "accountName": "Compte Courant"
+  }
+]
+```
+
+### Reporter le rappel `POST /api/debts/{id}/snooze`
+
+Request :
+
+```json
+{
+  "reminderDate": "2026-04-01",
+  "reminderTime": "10:00"
+}
+```
+
+Response `200` : la dette mise a jour avec les nouveaux `reminderDate` et `reminderTime`.
+
+### Solde total `GET /api/accounts/total-balance`
+
+Response `200` :
+
+```json
+{
+  "balances": [
+    { "currency": "EUR", "amount": 3450.00 },
+    { "currency": "XOF", "amount": 150000.00 }
+  ]
+}
+```
+
+> Agregation des soldes de tous les comptes actifs + dettes avec `includeInBalance=true`, par devise.
 
 ## Comptes
 
