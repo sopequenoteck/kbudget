@@ -1,4 +1,4 @@
-export type NotificationType = 'SUBSCRIPTION_DUE' | 'DEBT_DUE';
+export type NotificationType = 'SUBSCRIPTION_DUE' | 'DEBT_DUE' | 'DEBT_REMINDER' | 'BUDGET_THRESHOLD' | 'BUDGET_EXCEEDED';
 
 export type EntityType = 'SUBSCRIPTION' | 'DEBT';
 

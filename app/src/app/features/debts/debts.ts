@@ -9,9 +9,9 @@ import {
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { DebtService } from '../../core/services/debt';
 import { PreferenceService } from '../../core/services/preference';
-import { ModalService } from '../../core/services/modal.service';
 import { Debt, DebtType } from '../../core/models/debt.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -29,7 +29,7 @@ type StatusFilter = 'ALL' | 'EN_COURS' | 'REMBOURSE';
 })
 export class Debts {
   private readonly debtService = inject(DebtService);
-  private readonly modalService = inject(ModalService);
+  private readonly router = inject(Router);
   readonly preferenceService = inject(PreferenceService);
 
   readonly loading = signal(true);
@@ -142,6 +142,6 @@ export class Debts {
   }
 
   onDebtPressed(debt: Debt): void {
-    this.modalService.openModal('debt', debt);
+    this.router.navigate(['/debts', debt.id]);
   }
 }

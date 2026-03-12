@@ -49,6 +49,12 @@
                 <div class="notification-time">
                   {{ notification.createdAt | date: 'HH:mm' }}
                 </div>
+                @if (notification.type === 'DEBT_DUE' || notification.type === 'DEBT_REMINDER') {
+                  <div class="notification-actions">
+                    <button class="notification-action-btn" (click)="onRepayAction($event, notification)">Rembourser</button>
+                    <button class="notification-action-btn notification-action-btn--secondary" (click)="onSnoozeAction($event, notification)">Reporter</button>
+                  </div>
+                }
               </div>
               <button
                 class="notification-delete"
@@ -63,4 +69,19 @@
       }
     </div>
   </aside>
+}
+
+@if (showRepayDialog() && activeDebt()) {
+  <app-repay-dialog
+    [debt]="activeDebt()!"
+    (closed)="showRepayDialog.set(false)"
+    (repaid)="onRepaid($event, activeNotification()!)"
+  />
+}
+@if (showSnoozeDialog() && activeDebt()) {
+  <app-snooze-dialog
+    [debt]="activeDebt()!"
+    (closed)="showSnoozeDialog.set(false)"
+    (snoozed)="onSnoozed($event, activeNotification()!)"
+  />
 }

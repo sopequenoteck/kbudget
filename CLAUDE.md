@@ -283,6 +283,7 @@ Approche **signals-first** obligatoire :
 - SQLite/Drift (local) + API REST/Dio (remote) via strategy pattern `dataModeProvider` (075-flutter-budget-categories)
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_chart (076-budget-category-tracking)
 - PostgreSQL 15+ (Flyway V18) (077-backend-debt-enhancements)
+- TypeScript 5.9, Angular 21 + Angular Reactive Forms, Angular Signals, Angular Router, @ng-icons/phosphor-icons (078-angular-debt-enhancements)
 
 ### Backend (api/)
 

@@ -1,0 +1,67 @@
+<div
+  class="repay-overlay"
+  (click)="onCancel()"
+  (keydown.escape)="onCancel()"
+  role="presentation"
+>
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+  <div
+    class="repay-card"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-label="Enregistrer un remboursement"
+  >
+    <h3>Rembourser</h3>
+    <p class="repay-subtitle">{{ debt().personne }}</p>
+
+    @if (errorMessage()) {
+      <div class="form-error-banner">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <app-form-field
+        label="Compte"
+        fieldId="repayAccountId"
+        [showError]="isInvalid('accountId')"
+        [errorMessage]="'Sélectionnez un compte'"
+      >
+        <select id="repayAccountId" formControlName="accountId">
+          <option value="" disabled>Choisir un compte</option>
+          @for (account of accounts(); track account.id) {
+            <option [value]="account.id">{{ account.icone }} {{ account.nom }}</option>
+          }
+        </select>
+      </app-form-field>
+
+      <app-form-field
+        label="Montant"
+        fieldId="repayAmount"
+        [showError]="isInvalid('amount')"
+        [errorMessage]="'Montant entre 0,01 et ' + debt().montantRestant"
+      >
+        <div class="amount-input-wrapper">
+          <input
+            id="repayAmount"
+            type="number"
+            formControlName="amount"
+            step="0.01"
+            min="0.01"
+            [attr.max]="debt().montantRestant"
+          />
+          <span class="amount-input-wrapper__suffix">{{ debt().currency || 'EUR' }}</span>
+        </div>
+      </app-form-field>
+
+      <div class="form-actions">
+        <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="form.invalid || submitting() || accounts().length === 0"
+        >
+          {{ submitting() ? 'Enregistrement...' : 'Rembourser' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -15,9 +15,12 @@ import { firstValueFrom } from 'rxjs';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
+import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { CurrencyService } from '../../../../core/services/currency';
 import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
+import { AccountService } from '../../../../core/services/account';
+import { Account } from '../../../../core/models/account.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
@@ -33,6 +36,7 @@ export class DebtForm {
   private readonly currencyService = inject(CurrencyService);
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
+  private readonly accountService = inject(AccountService);
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -45,6 +49,18 @@ export class DebtForm {
 
   readonly currencyItems = this.currencyService.currencyItems;
 
+  private readonly accounts = signal<Account[]>([]);
+
+  readonly accountItems = computed<SelectPickerItem[]>(() =>
+    this.accounts().map((a) => ({
+      id: a.id,
+      label: a.nom,
+      icon: a.icone,
+      secondaryText: null,
+      color: a.couleur,
+    })),
+  );
+
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
     montant: ['', [Validators.required, Validators.min(0.01)]],
@@ -52,12 +68,24 @@ export class DebtForm {
     rembourse: [false],
     categoryId: [''],
     currency: [''],
+    accountId: [''],
+    includeInBalance: [false],
+    reminderDate: [''],
+    reminderTime: [''],
   });
 
   readonly selectedCurrency = computed(() => this.form.get('currency')?.value || 'EUR');
 
+  readonly hasAccount = computed(() => !!this.form.get('accountId')?.value);
+
+  readonly hasReminderDate = computed(() => !!this.form.get('reminderDate')?.value);
+
   constructor() {
     this.currencyService.loadIfEmpty();
+
+    firstValueFrom(this.accountService.getAll()).then((accounts) => {
+      this.accounts.set(accounts.filter((a) => a.actif));
+    });
 
     effect(() => {
       const d = this.debt();
@@ -69,7 +97,20 @@ export class DebtForm {
           rembourse: d.rembourse,
           categoryId: d.category?.id ?? '',
           currency: d.currency || '',
+          accountId: d.account?.id ?? '',
+          includeInBalance: d.includeInBalance,
+          reminderDate: d.reminderDate ?? '',
+          reminderTime: d.reminderTime ?? '',
         });
+      }
+    });
+
+    this.form.get('accountId')?.valueChanges.subscribe((accountId) => {
+      if (accountId) {
+        const account = this.accounts().find((a) => a.id === accountId);
+        if (account) {
+          this.form.patchValue({ currency: account.currency, includeInBalance: true });
+        }
       }
     });
   }
@@ -89,6 +130,10 @@ export class DebtForm {
       rembourse: raw.rembourse,
       categoryId: raw.categoryId || undefined,
       currency: raw.currency || undefined,
+      accountId: raw.accountId || null,
+      includeInBalance: raw.includeInBalance,
+      reminderDate: raw.reminderDate || null,
+      reminderTime: raw.reminderDate ? (raw.reminderTime || '09:00') : null,
     };
 
     try {

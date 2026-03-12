@@ -55,6 +55,7 @@ import { BudgetForm } from '../../../features/budgets/components/budget-form/bud
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
+import { Toast } from '../toast/toast';
 
 @Component({
   selector: 'app-shell',
@@ -77,6 +78,7 @@ import { Modal } from '../modal/modal';
     BudgetForm,
     NotificationBadge,
     NotificationPanel,
+    Toast,
   ],
   providers: [
     provideIcons({

@@ -1,0 +1,190 @@
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="retry()">Réessayer</button>
+  </div>
+} @else if (debt(); as d) {
+  <header class="detail-header">
+    <div class="detail-header__top">
+      <button class="btn-icon" (click)="onBack()" aria-label="Retour">
+        <ng-icon name="phosphorArrowLeft" size="24" />
+      </button>
+      <div class="detail-header__title-block">
+        <h1>{{ d.personne }}</h1>
+        <span
+          class="badge-sens"
+          [ngClass]="d.sens === DebtType.EMPRUNT ? 'badge-sens--emprunt' : 'badge-sens--pret'"
+        >
+          {{ d.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt' }}
+        </span>
+        @if (d.rembourse) {
+          <span class="badge-rembourse">Remboursé</span>
+        }
+      </div>
+      <button class="btn-icon" (click)="onEdit()" aria-label="Modifier">
+        <ng-icon name="phosphorPencilSimple" size="24" />
+      </button>
+    </div>
+  </header>
+
+  <section class="detail-amounts">
+    <div class="amount-card amount-card--initial">
+      <span class="amount-label">Montant initial</span>
+      <span
+        class="amount-value"
+        [ngClass]="d.sens === DebtType.EMPRUNT ? 'amount-owe' : 'amount-owed'"
+      >
+        {{ d.montant | amount: null : (d.currency || 'EUR') }}
+      </span>
+    </div>
+    <div class="amount-card amount-card--remaining" [class.amount-card--done]="d.rembourse">
+      <span class="amount-label">Montant restant</span>
+      <span
+        class="amount-value amount-value--lg"
+        [ngClass]="d.rembourse ? 'amount-zero' : (d.sens === DebtType.EMPRUNT ? 'amount-owe' : 'amount-owed')"
+      >
+        {{ d.montantRestant | amount: null : (d.currency || 'EUR') }}
+      </span>
+    </div>
+  </section>
+
+  <section class="detail-progress">
+    <div class="progress-header">
+      <span class="progress-label">Remboursement</span>
+      <span class="progress-percent">{{ progressPercent() }} %</span>
+    </div>
+    <div class="progress-bar-track">
+      <div
+        class="progress-bar-fill"
+        [style.width.%]="progressPercent()"
+        [ngClass]="d.sens === DebtType.EMPRUNT ? 'progress-bar-fill--emprunt' : 'progress-bar-fill--pret'"
+      ></div>
+    </div>
+  </section>
+
+  <section class="detail-info">
+    <div class="info-row">
+      <span class="info-label">Date</span>
+      <span class="info-value">{{ formatDate(d.date) }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Devise</span>
+      <span class="info-value">{{ d.currency || 'EUR' }}</span>
+    </div>
+
+    @if (d.dueDate) {
+      <div class="info-row">
+        <span class="info-label">
+          <ng-icon name="phosphorCalendar" size="16" />
+          Échéance
+        </span>
+        <span class="info-value">{{ formatDate(d.dueDate) }}</span>
+      </div>
+    }
+
+    @if (d.category) {
+      <div class="info-row">
+        <span class="info-label">Catégorie</span>
+        <span class="info-value">{{ d.category.icone }} {{ d.category.nom }}</span>
+      </div>
+    }
+
+    @if (d.account) {
+      <div class="info-row">
+        <span class="info-label">
+          <ng-icon name="phosphorBank" size="16" />
+          Compte
+        </span>
+        <span class="info-value">{{ d.account.icone }} {{ d.account.nom }}</span>
+      </div>
+    }
+
+    @if (d.includeInBalance) {
+      <div class="info-row">
+        <span class="info-label">Solde</span>
+        <span class="info-value info-value--highlight">Inclus dans le solde</span>
+      </div>
+    }
+
+    @if (d.reminderDate) {
+      <div class="info-row">
+        <span class="info-label">
+          <ng-icon name="phosphorBell" size="16" />
+          Rappel
+        </span>
+        <span class="info-value">
+          {{ formatDate(d.reminderDate) }}
+          @if (d.reminderTime) {
+            à {{ d.reminderTime }}
+          }
+        </span>
+      </div>
+    }
+  </section>
+
+  <div class="detail-actions">
+    @if (!d.rembourse) {
+      <button class="btn-repay" (click)="showRepayDialog.set(true)">
+        <ng-icon name="phosphorArrowCircleDown" size="20" />
+        Rembourser
+      </button>
+    }
+    @if (d.reminderDate) {
+      <button class="btn-snooze" (click)="showSnoozeDialog.set(true)">
+        <ng-icon name="phosphorBell" size="20" />
+        Reporter le rappel
+      </button>
+    }
+  </div>
+
+  <section class="detail-payments">
+    <div class="payments-header">
+      <h2>Paiements</h2>
+      @if (payments().length > 0) {
+        <span class="payments-total">
+          {{ paymentsTotal() | amount: null : (d.currency || 'EUR') }}
+        </span>
+      }
+    </div>
+    @if (paymentsLoading()) {
+      <div class="payments-loading">
+        <div class="spinner"></div>
+      </div>
+    } @else if (payments().length === 0) {
+      <p class="payments-empty">Aucun paiement enregistré</p>
+    } @else {
+      <ul class="payments-list">
+        @for (payment of payments(); track payment.id) {
+          <li class="payment-item">
+            <div class="payment-info">
+              <span class="payment-account">{{ payment.accountName }}</span>
+              <span class="payment-date">{{ formatDate(payment.date) }}</span>
+            </div>
+            <span class="payment-amount">{{ payment.amount | amount: null : (d.currency || 'EUR') }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (showRepayDialog()) {
+    <app-repay-dialog
+      [debt]="d"
+      (closed)="showRepayDialog.set(false)"
+      (repaid)="onRepaid($event)"
+    />
+  }
+
+  @if (showSnoozeDialog()) {
+    <app-snooze-dialog
+      [debt]="d"
+      (closed)="showSnoozeDialog.set(false)"
+      (snoozed)="onSnoozed($event)"
+    />
+  }
+}

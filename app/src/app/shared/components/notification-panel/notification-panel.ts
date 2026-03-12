@@ -11,13 +11,19 @@ import {
   phosphorCalendarCheck,
   phosphorHandCoins,
 } from '@ng-icons/phosphor-icons/regular';
+import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification';
 import { type NotificationModel, type NotificationType } from '../../../core/models/notification.model';
+import { DebtService } from '../../../core/services/debt';
+import { ToastService } from '../toast/toast.service';
+import { type Debt } from '../../../core/models/debt.model';
+import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
+import { SnoozeDialog } from '../../../features/debts/components/snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, NgIcon],
+  imports: [DatePipe, NgIcon, RepayDialog, SnoozeDialog],
   providers: [
     provideIcons({
       phosphorBellRinging,
@@ -36,10 +42,16 @@ import { type NotificationModel, type NotificationType } from '../../../core/mod
 })
 export class NotificationPanel {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly debtService = inject(DebtService);
+  private readonly toastService = inject(ToastService);
   readonly notificationService = inject(NotificationService);
   readonly isOpen = input(false);
   readonly closed = output<void>();
   readonly confirmDeleteAll = signal(false);
+  readonly activeDebt = signal<Debt | null>(null);
+  readonly activeNotification = signal<NotificationModel | null>(null);
+  readonly showRepayDialog = signal(false);
+  readonly showSnoozeDialog = signal(false);
 
   readonly groupedNotifications = computed(() => {
     const notifications = this.notificationService.notifications();
@@ -74,6 +86,11 @@ export class NotificationPanel {
         return 'phosphorCalendarCheck';
       case 'DEBT_DUE':
         return 'phosphorHandCoins';
+      case 'DEBT_REMINDER':
+        return 'phosphorBellRinging';
+      case 'BUDGET_THRESHOLD':
+      case 'BUDGET_EXCEEDED':
+        return 'phosphorWarning';
       default:
         return 'phosphorBell';
     }
@@ -109,6 +126,46 @@ export class NotificationPanel {
 
   onClose(): void {
     this.closed.emit();
+  }
+
+  async onRepayAction(event: Event, notification: NotificationModel): Promise<void> {
+    event.stopPropagation();
+    if (!notification.entityId) return;
+    try {
+      const debt = await firstValueFrom(this.debtService.getById(notification.entityId));
+      this.activeDebt.set(debt);
+      this.activeNotification.set(notification);
+      this.showRepayDialog.set(true);
+    } catch {
+      this.toastService.error('Impossible de charger la dette');
+    }
+  }
+
+  async onSnoozeAction(event: Event, notification: NotificationModel): Promise<void> {
+    event.stopPropagation();
+    if (!notification.entityId) return;
+    try {
+      const debt = await firstValueFrom(this.debtService.getById(notification.entityId));
+      this.activeDebt.set(debt);
+      this.activeNotification.set(notification);
+      this.showSnoozeDialog.set(true);
+    } catch {
+      this.toastService.error('Impossible de charger la dette');
+    }
+  }
+
+  onRepaid(_updatedDebt: Debt, notification: NotificationModel): void {
+    this.showRepayDialog.set(false);
+    this.activeDebt.set(null);
+    this.toastService.success('Remboursement enregistré');
+    this.notificationService.markAsRead(notification.id);
+  }
+
+  onSnoozed(_updatedDebt: Debt, notification: NotificationModel): void {
+    this.showSnoozeDialog.set(false);
+    this.activeDebt.set(null);
+    this.toastService.success('Rappel reporté');
+    this.notificationService.markAsRead(notification.id);
   }
 
   private scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null;
