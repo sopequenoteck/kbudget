@@ -4,4 +4,5 @@ export interface SelectPickerItem {
   icon: string | null;
   secondaryText: string | null;
   color: string | null;
+  iconUrl?: string | null;
 }

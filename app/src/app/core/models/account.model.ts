@@ -17,6 +17,13 @@ export interface Account {
   isDefault: boolean;
   actif: boolean;
   currency: string;
+  bankCode: string;
+  bankName: string | null;
+  bankCountry: string | null;
+  bankBrandColor: string | null;
+  bankLogoUrl: string | null;
+  bankCustomName: string | null;
+  bankCustomLogo: string | null;
 }
 
 export interface AccountSummary {
@@ -35,6 +42,9 @@ export interface AccountRequest {
   couleur?: string;
   actif?: boolean;
   currency?: string;
+  bankCode?: string;
+  bankCustomName?: string;
+  bankCustomLogo?: string;
 }
 
 export interface TransferRequest {

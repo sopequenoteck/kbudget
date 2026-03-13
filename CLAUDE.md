@@ -288,6 +288,8 @@ Approche **signals-first** obligatoire :
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, Phosphor Icons (080-debt-enhancements)
 - PostgreSQL 15+ (Flyway V18), SQLite/Drift non utilisé (server-only pour les opérations de dette) (080-debt-enhancements)
 - PostgreSQL 15+ (Flyway V19) (081-backend-bank-accounts)
+- TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals, @ng-icons/phosphor-icons (082-angular-bank-accounts)
+- Server-only (API REST GET /banks + GET/PATCH /accounts) — pas de stockage local, cache signal dans BankService (082-angular-bank-accounts)
 
 ### Backend (api/)
 
@@ -330,3 +332,4 @@ Approche **signals-first** obligatoire :
 - 079-flutter-debt-enhancements: DebtDetailScreen (montant restant, barre progression, historique paiements, badge remboursé); RepayBottomSheet (compte + montant); SnoozeDialog; DebtForm enrichi (compte, rappel, includeInBalance); NotificationPanel — actions Rembourser/Reporter; routes /debts/:id; DebtPayment model; 37 tests passent
 - 080-debt-enhancements: Spec consolidée cross-plateforme (KKS-194/195/196) — 76 tâches documentées, 423 tests backend + 37 tests Flutter validés. Spec rétroactive couvrant KKS-077/078/079.
 - 081-backend-bank-accounts: Bank record + BankRegistry (29 banques statiques FR/TG/International); BankService (getAllBanks trié, resolveBank); BankController GET /banks (public); Account enrichi (+bankCode, bankCustomName, bankCustomLogo); AccountRequest/Response enrichis (+7 champs bank résolus); Flyway V19; 29 logos SVG dans static/bank-logos/; 442 tests (27 nouveaux)
+- 082-angular-bank-accounts: BankService Angular (GET /banks, cache signal); BankSelect composant (groupement FR/TG/International, recherche temps réel); AccountBankIcon composant (résolution logo : SVG banque / data URI custom / emoji fallback); AccountForm enrichi (sélecteur banque, masquage conditionnel icône/couleur, upload logo custom compressé); image.utils.ts (compressImage partagé entre AccountForm et ProductForm); SelectPicker étendu (+imageUrl sur SelectPickerItem); AccountModel enrichi (+7 champs bank); 347 tests passent

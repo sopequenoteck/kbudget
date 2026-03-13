@@ -26,9 +26,12 @@
   <ul class="account-list">
     @for (account of accounts(); track account.id) {
       <li class="account-list__item" [class.inactive]="!account.actif">
-        <span class="account-list__icon">{{ account.icone }}</span>
+        <app-account-bank-icon [account]="account" [size]="32" />
         <div class="account-list__info">
           <span class="account-list__name">{{ account.nom }}</span>
+          @if (account.bankName) {
+            <span class="account-list__bank">{{ account.bankName }}</span>
+          }
           <span class="account-list__type">{{ account.type }}</span>
         </div>
         <span class="account-list__solde" [class.amount-expense]="account.solde < 0">

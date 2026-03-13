@@ -58,6 +58,7 @@ export class DebtForm {
       icon: a.icone,
       secondaryText: null,
       color: a.couleur,
+      iconUrl: a.bankLogoUrl ?? a.bankCustomLogo ?? null,
     })),
   );
 

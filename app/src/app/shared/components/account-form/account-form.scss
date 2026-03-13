@@ -278,6 +278,34 @@
   }
 }
 
+// Bank logo preview in the preview card
+.account-form__preview-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+// Custom bank logo preview
+.bank-logo-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bank-logo-preview__img {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  border: 1px solid var(--border-default);
+}
+
+.bank-logo-upload {
+  display: inline-flex;
+  cursor: pointer;
+}
+
 // Section 5 : Actions
 .form-actions {
   display: flex;

@@ -1,0 +1,24 @@
+<span
+  class="account-bank-icon"
+  [style.width.px]="size()"
+  [style.height.px]="size()"
+  [style.background-color]="brandColor() ? brandColor() + '1a' : null"
+>
+  @if (showBankLogo() || showCustomLogo()) {
+    <img
+      class="account-bank-icon__img"
+      [src]="logoSrc()"
+      [alt]="account().nom"
+      [width]="size()"
+      [height]="size()"
+      (error)="onImgError($event)"
+    />
+    <span class="account-bank-icon__emoji-fallback" style="display: none" [style.font-size.px]="size() * 0.7">
+      {{ account().icone }}
+    </span>
+  } @else {
+    <span class="account-bank-icon__emoji" [style.font-size.px]="size() * 0.7">
+      {{ account().icone }}
+    </span>
+  }
+</span>

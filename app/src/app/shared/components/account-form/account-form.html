@@ -35,7 +35,15 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="account-form">
   <!-- Section 1 : Preview card live -->
   <div class="account-form__preview" [style.border-left-color]="selectedColor()">
-    <span class="account-form__preview-emoji">{{ selectedEmoji() }}</span>
+    @if (isKnownBank()) {
+      @if (bankSelectRef()?.selectedBank(); as bank) {
+        @if (bank.logoUrl) {
+          <img class="account-form__preview-logo" [src]="bank.logoUrl" [alt]="bank.name" width="32" height="32" />
+        }
+      }
+    } @else {
+      <span class="account-form__preview-emoji">{{ selectedEmoji() }}</span>
+    }
     <div class="account-form__preview-info">
       <span class="account-form__preview-name" [class.placeholder]="!form.get('nom')?.value">
         {{ form.get('nom')?.value || 'Nom du compte' }}
@@ -64,31 +72,70 @@
     </div>
   </fieldset>
 
-  <!-- Section 3 : Personnalisation -->
+  <!-- Section: Banque -->
   <fieldset class="account-form__section">
-    <legend class="account-form__section-title">Personnalisation</legend>
+    <legend class="account-form__section-title">Banque</legend>
+    <app-bank-select
+      [ngModel]="selectedBankCode()"
+      (ngModelChange)="onBankCodeChange($event)"
+      [ngModelOptions]="{standalone: true}"
+    />
+  </fieldset>
 
-    <div class="account-form__field">
-      <span class="account-form__label">Icône</span>
-      <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
-    </div>
+  <!-- Section: Personnalisation banque (OTHER only) -->
+  @if (!isKnownBank()) {
+    <fieldset class="account-form__section">
+      <legend class="account-form__section-title">Personnalisation</legend>
 
-    <div class="account-form__field">
-      <span id="accountColorLabel" class="account-form__label">Couleur</span>
-      <div class="color-swatches" role="radiogroup" aria-labelledby="accountColorLabel">
-        @for (color of accountColors; track color) {
-          <button
-            type="button"
-            class="color-swatch"
-            [class.active]="selectedColor() === color"
-            [style.background-color]="color"
-            (click)="selectColor(color)"
-            [attr.aria-label]="'Couleur ' + color"
-          ></button>
+      <div class="account-form__field">
+        <span class="account-form__label">Icône</span>
+        <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
+      </div>
+
+      <div class="account-form__field">
+        <span id="accountColorLabel" class="account-form__label">Couleur</span>
+        <div class="color-swatches" role="radiogroup" aria-labelledby="accountColorLabel">
+          @for (color of accountColors; track color) {
+            <button
+              type="button"
+              class="color-swatch"
+              [class.active]="selectedColor() === color"
+              [style.background-color]="color"
+              (click)="selectColor(color)"
+              [attr.aria-label]="'Couleur ' + color"
+            ></button>
+          }
+        </div>
+      </div>
+
+      <app-form-field label="Nom de la banque (optionnel)" fieldId="bankCustomName">
+        <input
+          id="bankCustomName"
+          type="text"
+          maxlength="100"
+          placeholder="Ex: Ma banque"
+          [ngModel]="bankCustomName()"
+          (ngModelChange)="onBankCustomNameChange($event)"
+          [ngModelOptions]="{standalone: true}"
+        />
+      </app-form-field>
+
+      <div class="account-form__field">
+        <span class="account-form__label">Logo personnalisé (optionnel)</span>
+        @if (bankCustomLogo()) {
+          <div class="bank-logo-preview">
+            <img [src]="bankCustomLogo()" alt="Logo personnalisé" class="bank-logo-preview__img" />
+            <button type="button" class="btn-outline btn-outline--sm" (click)="removeBankLogo()">Supprimer</button>
+          </div>
+        } @else {
+          <label class="btn-outline btn-outline--sm bank-logo-upload">
+            Choisir un fichier
+            <input type="file" accept="image/*" (change)="onBankLogoUpload($event)" hidden />
+          </label>
         }
       </div>
-    </div>
-  </fieldset>
+    </fieldset>
+  }
 
   <!-- Section 4 : Détails -->
   <fieldset class="account-form__section">

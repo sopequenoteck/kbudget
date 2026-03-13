@@ -6,6 +6,7 @@ import {
   inject,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -13,13 +14,16 @@ import { firstValueFrom } from 'rxjs';
 import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
 import { SelectPicker } from '../select-picker/select-picker';
+import { BankSelect } from '../bank-select/bank-select';
 import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
 import { AccountService } from '../../../core/services/account';
+import { BankService } from '../../../core/services/bank';
 import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
 import { ModalService } from '../../../core/services/modal.service';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
+import { compressImage } from '../../utils/image.utils';
 
 const FIXED_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
@@ -61,7 +65,7 @@ const ACCOUNT_COLORS: string[] = [
 
 @Component({
   selector: 'app-account-form',
-  imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker],
+  imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker, BankSelect],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,10 +73,13 @@ const ACCOUNT_COLORS: string[] = [
 export class AccountForm {
   private readonly fb = inject(FormBuilder);
   private readonly accountService = inject(AccountService);
+  private readonly bankService = inject(BankService);
   private readonly currencyService = inject(CurrencyService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly modalService = inject(ModalService);
+
+  readonly bankSelectRef = viewChild(BankSelect);
 
   readonly account = computed(() => this.modalService.editingEntity() as Account | null);
   readonly saved = output<void>();
@@ -83,6 +90,11 @@ export class AccountForm {
   readonly errorMessage = signal('');
   readonly selectedEmoji = signal('🏦');
   readonly selectedColor = signal('#3b82f6');
+  readonly selectedBankCode = signal('OTHER');
+  readonly bankCustomName = signal('');
+  readonly bankCustomLogo = signal<string | null>(null);
+
+  readonly isKnownBank = computed(() => this.bankSelectRef()?.isKnownBank() ?? false);
   readonly accountTypes = Object.values(AccountType);
   readonly AccountType = AccountType;
   readonly typeLabels = ACCOUNT_TYPE_LABELS;
@@ -134,6 +146,9 @@ export class AccountForm {
         this.selectedType.set(acc.type);
         this.selectedEmoji.set(acc.icone);
         this.selectedColor.set(acc.couleur);
+        this.selectedBankCode.set(acc.bankCode ?? 'OTHER');
+        this.bankCustomName.set(acc.bankCustomName ?? '');
+        this.bankCustomLogo.set(acc.bankCustomLogo ?? null);
         this.form.patchValue({ newBalance: String(acc.solde) });
         this.form.get('type')!.disable();
       } else {
@@ -144,6 +159,33 @@ export class AccountForm {
 
   onEmojiSelected(emoji: string): void {
     this.selectedEmoji.set(emoji);
+  }
+
+  onBankCodeChange(code: string): void {
+    this.selectedBankCode.set(code);
+    if (code !== 'OTHER') {
+      const bank = this.bankService.getBankByCode(code);
+      if (bank?.brandColor) {
+        this.selectedColor.set(bank.brandColor);
+        this.form.patchValue({ couleur: bank.brandColor });
+      }
+    }
+  }
+
+  onBankCustomNameChange(value: string): void {
+    this.bankCustomName.set(value);
+  }
+
+  onBankLogoUpload(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    compressImage(file, 512, 0.8).then(dataUri => {
+      this.bankCustomLogo.set(dataUri);
+    });
+  }
+
+  removeBankLogo(): void {
+    this.bankCustomLogo.set(null);
   }
 
   selectType(type: AccountType): void {
@@ -172,6 +214,9 @@ export class AccountForm {
       icone: this.selectedEmoji(),
       couleur: raw.couleur,
       actif: raw.actif,
+      bankCode: this.selectedBankCode(),
+      bankCustomName: this.selectedBankCode() === 'OTHER' ? this.bankCustomName() || undefined : undefined,
+      bankCustomLogo: this.selectedBankCode() === 'OTHER' ? this.bankCustomLogo() || undefined : undefined,
     };
 
     if (!this.isEditMode()) {

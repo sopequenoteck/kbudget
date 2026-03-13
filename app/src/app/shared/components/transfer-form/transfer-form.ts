@@ -56,6 +56,7 @@ export class TransferForm {
       icon: a.icone,
       secondaryText: `${a.solde.toFixed(2)} ${a.currency}`,
       color: a.couleur,
+      iconUrl: a.bankLogoUrl ?? a.bankCustomLogo ?? null,
     })),
   );
 

@@ -15,10 +15,11 @@ import { AccountService } from '../../../../core/services/account';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe, RouterLink, NgIcon],
+  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon],
   providers: [
     provideIcons({
       phosphorStar,
