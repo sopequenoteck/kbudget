@@ -285,6 +285,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V18) (077-backend-debt-enhancements)
 - TypeScript 5.9, Angular 21 + Angular Reactive Forms, Angular Signals, Angular Router, @ng-icons/phosphor-icons (078-angular-debt-enhancements)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl, phosphor_flutter (079-flutter-debt-enhancements)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, Phosphor Icons (080-debt-enhancements)
+- PostgreSQL 15+ (Flyway V18), SQLite/Drift non utilisé (server-only pour les opérations de dette) (080-debt-enhancements)
 
 ### Backend (api/)
 
@@ -325,3 +327,4 @@ Approche **signals-first** obligatoire :
 - 077-backend-debt-enhancements: DebtService — repayment tracking (POST /debts/{id}/repay, GET /debts/{id}/payments), account association with currency forcing/conversion, snooze reminders (POST /debts/{id}/snooze); NotificationScheduler — DEBT_REMINDER type + checkDebtReminders() minutely job; AccountService — GET /accounts/total-balance aggregating accounts + debts by currency; Flyway V18; guard: debt transaction type immutable; ~55 tests (418 total)
 - 078-angular-debt-enhancements: DebtService Angular (repay, payments, snooze, totalBalance); DebtDetailComponent (montant restant, barre progression, historique paiements, badge remboursé); RepayDialog + SnoozeDialog; DebtListComponent câblé; toast feedback; 9 tests unitaires
 - 079-flutter-debt-enhancements: DebtDetailScreen (montant restant, barre progression, historique paiements, badge remboursé); RepayBottomSheet (compte + montant); SnoozeDialog; DebtForm enrichi (compte, rappel, includeInBalance); NotificationPanel — actions Rembourser/Reporter; routes /debts/:id; DebtPayment model; 37 tests passent
+- 080-debt-enhancements: Spec consolidée cross-plateforme (KKS-194/195/196) — 76 tâches documentées, 423 tests backend + 37 tests Flutter validés. Spec rétroactive couvrant KKS-077/078/079.

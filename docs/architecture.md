@@ -64,6 +64,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | note | String | Note libre (nullable) |
 | account | Account | FK → Account |
 | transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
+| debt | Debt | FK → Debt (nullable, lie la transaction a un remboursement de dette) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -102,17 +103,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
-### DebtPayment
-
-| Champ | Type | Description |
-|-------|------|-------------|
-| id | UUID | Identifiant |
-| debt | Debt | FK → Debt |
-| montant | BigDecimal | Montant rembourse |
-| date | LocalDate | Date du paiement |
-| transaction | Transaction | FK → Transaction (nullable) |
-| createdAt | LocalDateTime | Date de creation |
-| user | User | FK → User |
+> Remboursements : les transactions de remboursement sont liees a la dette via le champ `debt` (FK `debt_id`) sur l'entite `Transaction`. `DebtPaymentResponse` est un DTO de projection (pas une entite JPA).
 
 ### Category
 
