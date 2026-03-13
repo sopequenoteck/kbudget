@@ -55,6 +55,16 @@ public class Account {
     @Builder.Default
     private Boolean actif = true;
 
+    @Column(name = "bank_code", nullable = false, length = 20)
+    @Builder.Default
+    private String bankCode = "OTHER";
+
+    @Column(name = "bank_custom_name", length = 100)
+    private String bankCustomName;
+
+    @Column(name = "bank_custom_logo", columnDefinition = "TEXT")
+    private String bankCustomLogo;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

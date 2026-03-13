@@ -57,6 +57,9 @@ class AccountServiceTest {
     @Mock
     private DebtRepository debtRepository;
 
+    @Mock
+    private BankService bankService;
+
     @InjectMocks
     private AccountService accountService;
 
@@ -70,6 +73,8 @@ class AccountServiceTest {
                 .includeShopInBalance(false)
                 .build();
         lenient().when(preferenceService.getOrCreatePreference(any(UUID.class))).thenReturn(prefs);
+        lenient().when(bankService.resolveBank(any(Account.class))).thenReturn(
+                new BankService.BankResolvedInfo("OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null));
     }
 
     private User buildUser() {
@@ -93,7 +98,7 @@ class AccountServiceTest {
     @Test
     void should_createAccount_when_validRequest() {
         var user = buildUser();
-        var request = new AccountRequest("Livret A", AccountType.EPARGNE, new BigDecimal("5000.00"), null, null, null, null);
+        var request = new AccountRequest("Livret A", AccountType.EPARGNE, new BigDecimal("5000.00"), null, null, null, null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Livret A")
@@ -125,7 +130,7 @@ class AccountServiceTest {
     @Test
     void should_applyDefaultIconAndColor_when_notProvided() {
         var user = buildUser();
-        var request = new AccountRequest("Espèces", AccountType.ESPECES, null, null, null, null, null);
+        var request = new AccountRequest("Espèces", AccountType.ESPECES, null, null, null, null, null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Espèces")
@@ -204,7 +209,7 @@ class AccountServiceTest {
     void should_preventDeactivation_when_isDefault() {
         var user = buildUser();
         var account = buildAccount(user);
-        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, false, null);
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, false, null, null, null, null);
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Compte Principal", userId, accountId)).thenReturn(false);
@@ -272,7 +277,7 @@ class AccountServiceTest {
 
     @Test
     void should_throw_when_duplicateName() {
-        var request = new AccountRequest("Existant", AccountType.COURANT, null, null, null, null, null);
+        var request = new AccountRequest("Existant", AccountType.COURANT, null, null, null, null, null, null, null, null);
 
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue("Existant", userId)).thenReturn(true);
 
@@ -300,7 +305,7 @@ class AccountServiceTest {
     @Test
     void should_useExplicitCurrency_when_providedInRequest() {
         var user = buildUser();
-        var request = new AccountRequest("Compte XOF", AccountType.COURANT, null, null, null, null, Currency.XOF);
+        var request = new AccountRequest("Compte XOF", AccountType.COURANT, null, null, null, null, Currency.XOF, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Compte XOF")
@@ -328,7 +333,7 @@ class AccountServiceTest {
     void should_useUserPrimaryCurrency_when_noCurrencyInRequest() {
         var user = User.builder().id(userId).email("test@mail.com").build();
         var preference = UserPreference.builder().currencies(List.of(Currency.XOF)).build();
-        var request = new AccountRequest("Compte défaut", AccountType.COURANT, null, null, null, null, null);
+        var request = new AccountRequest("Compte défaut", AccountType.COURANT, null, null, null, null, null, null, null, null);
         var saved = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Compte défaut")
@@ -357,7 +362,7 @@ class AccountServiceTest {
     void should_rejectCurrencyChange_when_updatingAccount() {
         var user = buildUser();
         var account = buildAccount(user); // has EUR by default
-        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, null, Currency.XOF);
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, null, Currency.XOF, null, null, null);
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Compte Principal", userId, accountId)).thenReturn(false);

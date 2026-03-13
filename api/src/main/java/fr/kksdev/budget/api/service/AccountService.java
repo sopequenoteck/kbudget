@@ -47,6 +47,7 @@ public class AccountService {
     private final CategoryService categoryService;
     private final PreferenceService preferenceService;
     private final DebtRepository debtRepository;
+    private final BankService bankService;
 
     public List<AccountResponse> getAccounts(UUID userId, boolean includeInactive) {
         List<Account> accounts = includeInactive
@@ -77,6 +78,11 @@ public class AccountService {
         Currency currency = request.currency() != null ? request.currency()
                 : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
 
+        String bankCode = request.bankCode() != null ? request.bankCode().toUpperCase() : "OTHER";
+        if (BankRegistry.findByCode(bankCode).isEmpty()) {
+            throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+        }
+
         Account account = Account.builder()
                 .nom(request.nom())
                 .type(type)
@@ -85,10 +91,17 @@ public class AccountService {
                 .couleur(couleur)
                 .currency(currency)
                 .user(user)
+                .bankCode(bankCode)
+                .bankCustomName(request.bankCustomName())
+                .bankCustomLogo(request.bankCustomLogo())
                 .build();
 
         account = accountRepository.save(account);
-        log.info("Compte créé: {} pour userId {}", account.getId(), userId);
+        if (!"OTHER".equals(bankCode)) {
+            log.info("Compte créé: {} pour userId {}, bankCode={}", account.getId(), userId, bankCode);
+        } else {
+            log.info("Compte créé: {} pour userId {}", account.getId(), userId);
+        }
         return toResponse(account);
     }
 
@@ -109,11 +122,25 @@ public class AccountService {
             throw new IllegalArgumentException("Impossible de désactiver le compte par défaut");
         }
 
+        if (request.bankCode() != null) {
+            String newBankCode = request.bankCode().toUpperCase();
+            if (BankRegistry.findByCode(newBankCode).isEmpty()) {
+                throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+            }
+            String oldBankCode = account.getBankCode();
+            if (!newBankCode.equals(oldBankCode)) {
+                log.info("Banque modifiée sur compte {}: {} -> {}", account.getId(), oldBankCode, newBankCode);
+            }
+            account.setBankCode(newBankCode);
+        }
+
         account.setNom(request.nom());
         account.setType(request.type());
         // soldeInitial est ignoré en PUT (figé après création)
         account.setIcone(request.icone() != null ? request.icone() : request.type().getDefaultIcone());
         account.setCouleur(request.couleur() != null ? request.couleur() : request.type().getDefaultCouleur());
+        account.setBankCustomName(request.bankCustomName());
+        account.setBankCustomLogo(request.bankCustomLogo());
         if (request.actif() != null) {
             account.setActif(request.actif());
         }
@@ -359,6 +386,7 @@ public class AccountService {
         UUID shopAccountId = preferenceService.getOrCreatePreference(account.getUser().getId()).getShopAccountId();
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(account.getId());
         BigDecimal solde = account.getSoldeInitial().add(balance);
+        BankService.BankResolvedInfo bankInfo = bankService.resolveBank(account);
         return new AccountResponse(
                 account.getId(),
                 account.getNom(),
@@ -370,7 +398,14 @@ public class AccountService {
                 Boolean.TRUE.equals(account.getIsDefault()),
                 Boolean.TRUE.equals(account.getActif()),
                 account.getCurrency().name(),
-                account.getId().equals(shopAccountId)
+                account.getId().equals(shopAccountId),
+                bankInfo.bankCode(),
+                bankInfo.bankName(),
+                bankInfo.bankCountry(),
+                bankInfo.bankBrandColor(),
+                bankInfo.bankLogoUrl(),
+                bankInfo.bankCustomName(),
+                bankInfo.bankCustomLogo()
         );
     }
 }

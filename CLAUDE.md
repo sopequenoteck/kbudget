@@ -287,6 +287,7 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl, phosphor_flutter (079-flutter-debt-enhancements)
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, Phosphor Icons (080-debt-enhancements)
 - PostgreSQL 15+ (Flyway V18), SQLite/Drift non utilisé (server-only pour les opérations de dette) (080-debt-enhancements)
+- PostgreSQL 15+ (Flyway V19) (081-backend-bank-accounts)
 
 ### Backend (api/)
 
