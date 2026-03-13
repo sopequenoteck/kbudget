@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/notification.dart';
+import 'package:k_budget/src/features/debts/presentation/widgets/repay_bottom_sheet.dart';
+import 'package:k_budget/src/features/debts/presentation/widgets/snooze_dialog.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class NotificationPanel extends ConsumerStatefulWidget {
   const NotificationPanel({super.key});
@@ -27,20 +33,21 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
   Widget build(BuildContext context) {
     final state = ref.watch(notificationNotifierProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.85,
       child: SafeArea(
         child: Column(
           children: [
-            _buildHeader(theme, state),
+            _buildHeader(theme, state, l10n),
             const Divider(height: 1),
             Expanded(
               child: state.isLoading && state.items.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : state.items.isEmpty
-                      ? _buildEmptyState(theme)
-                      : _buildList(state, theme),
+                      ? _buildEmptyState(theme, l10n)
+                      : _buildList(state, theme, l10n),
             ),
           ],
         ),
@@ -48,7 +55,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, ListState<NotificationModel> state) {
+  Widget _buildHeader(ThemeData theme, ListState<NotificationModel> state, AppLocalizations l10n) {
     final unreadCount = ref.watch(unreadCountProvider);
 
     return Padding(
@@ -56,7 +63,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
       child: Row(
         children: [
           Text(
-            'Notifications',
+            l10n.notificationTitle,
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
@@ -64,24 +71,24 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             IconButton(
               onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
               icon: const PhosphorIcon(PhosphorIconsRegular.checks, size: 20),
-              tooltip: 'Tout marquer lu',
+              tooltip: l10n.notificationMarkAllRead,
             ),
           if (state.items.isNotEmpty)
             IconButton(
-              onPressed: _onDeleteAll,
+              onPressed: () => _onDeleteAll(l10n),
               icon: PhosphorIcon(
                 PhosphorIconsRegular.trash,
                 size: 20,
                 color: theme.colorScheme.error,
               ),
-              tooltip: "Vider l'historique",
+              tooltip: l10n.notificationClearHistory,
             ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState(ThemeData theme, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -93,7 +100,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
           ),
           const SizedBox(height: AppSpacing.space4),
           Text(
-            'Aucune notification',
+            l10n.notificationEmpty,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
@@ -103,8 +110,8 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     );
   }
 
-  Widget _buildList(ListState<NotificationModel> state, ThemeData theme) {
-    final groups = _groupByDay(state.items);
+  Widget _buildList(ListState<NotificationModel> state, ThemeData theme, AppLocalizations l10n) {
+    final groups = _groupByDay(state.items, l10n);
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -134,7 +141,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                   ),
                 ),
               ),
-              ...group.notifications.map((n) => _buildNotificationItem(n, theme)),
+              ...group.notifications.map((n) => _buildNotificationItem(n, theme, l10n)),
             ],
           );
         },
@@ -142,7 +149,10 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     );
   }
 
-  Widget _buildNotificationItem(NotificationModel notification, ThemeData theme) {
+  Widget _buildNotificationItem(NotificationModel notification, ThemeData theme, AppLocalizations l10n) {
+    final isDebtNotification = notification.type == NotificationType.debtDue ||
+        notification.type == NotificationType.debtReminder;
+
     return Dismissible(
       key: Key(notification.id),
       direction: DismissDirection.endToStart,
@@ -193,25 +203,103 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             ),
           ],
         ),
-        onTap: () {
-          if (!notification.read) {
-            ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
-          }
-        },
+        onTap: () => _onNotificationTap(notification),
+        trailing: isDebtNotification && notification.entityId != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () => _onRepayAction(notification, l10n),
+                    icon: const PhosphorIcon(
+                      PhosphorIconsRegular.currencyCircleDollar,
+                      size: 18,
+                    ),
+                    tooltip: l10n.notificationRepayTooltip,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  ),
+                  IconButton(
+                    onPressed: () => _onSnoozeAction(notification, l10n),
+                    icon: const PhosphorIcon(
+                      PhosphorIconsRegular.bellSlash,
+                      size: 18,
+                    ),
+                    tooltip: l10n.notificationSnoozeTooltip,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  ),
+                ],
+              )
+            : null,
       ),
     );
   }
 
-  void _onDeleteAll() {
+  void _onNotificationTap(NotificationModel notification) {
+    if (!notification.read) {
+      ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+
+    if ((notification.type == NotificationType.debtDue ||
+            notification.type == NotificationType.debtReminder) &&
+        notification.entityId != null) {
+      Navigator.of(context).pop();
+      context.push('/debts/${notification.entityId}');
+    }
+  }
+
+  Future<void> _onRepayAction(NotificationModel notification, AppLocalizations l10n) async {
+    if (notification.entityId == null) return;
+    if (!notification.read) {
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+    try {
+      final repo = ref.read(debtRepositoryProvider);
+      final debt = await repo.getById(notification.entityId!);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      RepayBottomSheet.show(context: context, debt: debt);
+    } on Exception {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.notificationLoadError)),
+      );
+    }
+  }
+
+  Future<void> _onSnoozeAction(NotificationModel notification, AppLocalizations l10n) async {
+    if (notification.entityId == null) return;
+    if (!notification.read) {
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+
+    try {
+      final repo = ref.read(debtRepositoryProvider);
+      final debt = await repo.getById(notification.entityId!);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      SnoozeDialog.show(
+        context: context,
+        debt: debt,
+      );
+    } on Exception {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.notificationLoadError)),
+      );
+    }
+  }
+
+  void _onDeleteAll(AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Vider l'historique"),
-        content: const Text('Supprimer toutes les notifications ? Cette action est irréversible.'),
+        title: Text(l10n.notificationClearConfirmTitle),
+        content: Text(l10n.notificationClearConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -221,14 +309,14 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
   }
 
-  List<_NotificationGroup> _groupByDay(List<NotificationModel> notifications) {
+  List<_NotificationGroup> _groupByDay(List<NotificationModel> notifications, AppLocalizations l10n) {
     final sorted = [...notifications]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -241,9 +329,9 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
 
       String label;
       if (date == today) {
-        label = "Aujourd'hui";
+        label = l10n.notificationGroupToday;
       } else if (date == yesterday) {
-        label = 'Hier';
+        label = l10n.notificationGroupYesterday;
       } else {
         label = DateFormat.yMMMMd('fr_FR').format(local);
       }

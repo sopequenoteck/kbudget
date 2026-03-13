@@ -284,6 +284,7 @@ Approche **signals-first** obligatoire :
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_chart (076-budget-category-tracking)
 - PostgreSQL 15+ (Flyway V18) (077-backend-debt-enhancements)
 - TypeScript 5.9, Angular 21 + Angular Reactive Forms, Angular Signals, Angular Router, @ng-icons/phosphor-icons (078-angular-debt-enhancements)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl, phosphor_flutter (079-flutter-debt-enhancements)
 
 ### Backend (api/)
 

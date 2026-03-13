@@ -37,4 +37,27 @@ class DebtRemoteDataSource {
   Future<void> delete(String id) async {
     await _dio.delete<void>('/debts/$id');
   }
+
+  Future<DebtResponse> repay(String id, RepayRequest request) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/debts/$id/repay',
+      data: request.toJson(),
+    );
+    return DebtResponse.fromJson(response.data!);
+  }
+
+  Future<List<PaymentResponse>> getPayments(String id) async {
+    final response = await _dio.get<List<dynamic>>('/debts/$id/payments');
+    return response.data!
+        .map((e) => PaymentResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<DebtResponse> snooze(String id, SnoozeRequest request) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/debts/$id/snooze',
+      data: request.toJson(),
+    );
+    return DebtResponse.fromJson(response.data!);
+  }
 }

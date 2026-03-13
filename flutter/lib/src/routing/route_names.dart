@@ -8,6 +8,7 @@ class RouteNames {
   static const String transactions = '/transactions';
   static const String subscriptions = '/subscriptions';
   static const String debts = '/debts';
+  static const String debtDetail = ':id'; // relatif
   static const String settings = '/settings';
   static const String shop = '/shop';
   static const String budgets = '/budgets';
@@ -48,6 +49,7 @@ class RouteNames {
   static const String shopName = 'shop';
   static const String budgetsName = 'budgets';
   static const String budgetDetailsName = 'budget-details';
+  static const String debtDetailName = 'debt-detail';
   static const String settingsAccountsNewName = 'settings-accounts-new';
   static const String settingsAccountsEditName = 'settings-accounts-edit';
 

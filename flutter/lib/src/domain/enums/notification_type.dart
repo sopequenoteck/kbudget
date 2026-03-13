@@ -5,15 +5,19 @@ enum NotificationType {
   @JsonValue('SUBSCRIPTION_DUE')
   subscriptionDue,
   @JsonValue('DEBT_DUE')
-  debtDue;
+  debtDue,
+  @JsonValue('DEBT_REMINDER')
+  debtReminder;
 
   String get label => switch (this) {
         NotificationType.subscriptionDue => 'Échéance abonnement',
         NotificationType.debtDue => 'Échéance dette',
+        NotificationType.debtReminder => 'Rappel dette',
       };
 
   PhosphorIconData get icon => switch (this) {
         NotificationType.subscriptionDue => PhosphorIconsRegular.calendarCheck,
         NotificationType.debtDue => PhosphorIconsRegular.handCoins,
+        NotificationType.debtReminder => PhosphorIconsRegular.bellRinging,
       };
 }

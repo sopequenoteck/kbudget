@@ -18,6 +18,7 @@ import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/register_screen.dart';
 import 'package:k_budget/src/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
+import 'package:k_budget/src/features/debts/presentation/debt_detail_screen.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
@@ -195,6 +196,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.debts,
             name: RouteNames.debtsName,
             builder: (context, state) => const DebtListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.debtDetail,
+                name: RouteNames.debtDetailName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final debt = state.extra as Debt?;
+                  return DebtDetailScreen(
+                    debtId: state.pathParameters['id']!,
+                    initialDebt: debt,
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.shop,

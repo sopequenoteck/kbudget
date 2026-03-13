@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:mockito/mockito.dart';
@@ -276,6 +277,186 @@ void main() {
       notifier().setFilter(DebtStatusFilter.rembourse);
 
       expect(state().summary, summaryBefore);
+    });
+  });
+
+  group('DebtNotifier — repay', () {
+    test('should_repay_debt_when_valid_amount', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      final repaidDebt = debt1.copyWith(remainingAmount: 0.0, rembourse: false);
+      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => repaidDebt);
+
+      final result = await notifier().repay('1', 'account-1', 50.0);
+
+      expect(result, isTrue);
+      expect(state().items.first.remainingAmount, 0.0);
+      expect(state().error, isNull);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_update_remaining_when_partial_repay', () async {
+      final debtWithAmount = debt1.copyWith(remainingAmount: 500.0, montant: 500.0);
+      when(mockRepo.getAll()).thenAnswer((_) async => [debtWithAmount]);
+      await notifier().loadItems();
+
+      final partiallyRepaid = debtWithAmount.copyWith(remainingAmount: 300.0);
+      when(mockRepo.repay(any, any, any))
+          .thenAnswer((_) async => partiallyRepaid);
+
+      final result = await notifier().repay('1', 'account-1', 200.0);
+
+      expect(result, isTrue);
+      expect(state().items.first.remainingAmount, 300.0);
+      expect(state().items.first.rembourse, isFalse);
+    });
+
+    test('should_mark_repaid_when_full_repay', () async {
+      final debtWithAmount = debt1.copyWith(remainingAmount: 100.0, montant: 500.0);
+      when(mockRepo.getAll()).thenAnswer((_) async => [debtWithAmount]);
+      await notifier().loadItems();
+
+      final fullyRepaid = debtWithAmount.copyWith(
+        remainingAmount: 0.0,
+        rembourse: true,
+      );
+      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => fullyRepaid);
+
+      await notifier().repay('1', 'account-1', 100.0);
+
+      expect(state().items.first.rembourse, isTrue);
+      expect(state().items.first.remainingAmount, 0.0);
+    });
+
+    test('should_show_error_when_repay_fails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.repay(any, any, any))
+          .thenThrow(Exception('Server error'));
+
+      final result = await notifier().repay('1', 'account-1', 50.0);
+
+      expect(result, isFalse);
+      expect(state().error, contains('Erreur lors du remboursement'));
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_set_mutatingId_when_repay_in_progress', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.repay(any, any, any)).thenAnswer(
+        (_) => Future.delayed(
+          const Duration(milliseconds: 100),
+          () => debt1.copyWith(remainingAmount: 0.0),
+        ),
+      );
+
+      final future = notifier().repay('1', 'account-1', 50.0);
+      expect(state().mutatingIds, contains('1'));
+
+      await future;
+      expect(state().mutatingIds, isEmpty);
+    });
+  });
+
+  group('DebtNotifier — snooze', () {
+    test('should_snooze_reminder_when_future_date', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      final snoozed = debt1.copyWith(
+        reminderDate: DateTime(2026, 4, 1),
+        reminderTime: '14:00',
+      );
+      when(mockRepo.snooze(any, any, any)).thenAnswer((_) async => snoozed);
+
+      final result = await notifier().snooze('1', '2026-04-01', '14:00');
+
+      expect(result, isTrue);
+      expect(state().items.first.reminderDate, DateTime(2026, 4, 1));
+      expect(state().items.first.reminderTime, '14:00');
+      expect(state().error, isNull);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_show_error_when_snooze_fails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.snooze(any, any, any))
+          .thenThrow(Exception('Server error'));
+
+      final result = await notifier().snooze('1', '2026-04-01', '14:00');
+
+      expect(result, isFalse);
+      expect(state().error, contains('Erreur lors du report'));
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_set_mutatingId_when_snooze_in_progress', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.snooze(any, any, any)).thenAnswer(
+        (_) => Future.delayed(
+          const Duration(milliseconds: 100),
+          () => debt1.copyWith(reminderTime: '14:00'),
+        ),
+      );
+
+      final future = notifier().snooze('1', '2026-04-01', '14:00');
+      expect(state().mutatingIds, contains('1'));
+
+      await future;
+      expect(state().mutatingIds, isEmpty);
+    });
+  });
+
+  group('debtPaymentsProvider', () {
+    test('should_load_payments_when_debt_has_history', () async {
+      final payments = [
+        DebtPayment(
+          id: 'p1',
+          montant: 50.0,
+          date: DateTime(2026, 3, 1),
+        ),
+        DebtPayment(
+          id: 'p2',
+          montant: 30.0,
+          date: DateTime(2026, 3, 5),
+        ),
+      ];
+      when(mockRepo.getPayments(any)).thenAnswer((_) async => payments);
+
+      final result = await container.read(
+        debtPaymentsProvider('debt-1').future,
+      );
+
+      expect(result, hasLength(2));
+      expect(result.first.id, 'p1');
+      expect(result.first.montant, 50.0);
+    });
+
+    test('should_return_empty_when_no_payments', () async {
+      when(mockRepo.getPayments(any)).thenAnswer((_) async => []);
+
+      final result = await container.read(
+        debtPaymentsProvider('debt-1').future,
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('should_show_error_when_getPayments_fails', () async {
+      when(mockRepo.getPayments(any))
+          .thenThrow(Exception('Network error'));
+
+      final future = container.read(debtPaymentsProvider('debt-1').future);
+
+      await expectLater(future, throwsA(isA<Exception>()));
     });
   });
 }

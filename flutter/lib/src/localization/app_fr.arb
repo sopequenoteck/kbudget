@@ -120,6 +120,14 @@
   "debtFormDeleteConfirmTitle": "Supprimer la dette",
   "debtFormDeleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.",
   "debtFormNoCategories": "Créez une catégorie d'abord",
+  "debtFormAccountPicker": "Compte bancaire",
+  "debtFormAccountPlaceholder": "Aucun compte",
+  "debtFormDueDateField": "Date d'échéance",
+  "debtFormDueDatePlaceholder": "Aucune échéance",
+  "debtFormReminderField": "Rappel",
+  "debtFormReminderPlaceholder": "Aucun rappel",
+  "debtFormReminderTimeField": "Heure de rappel",
+  "debtFormIncludeInBalance": "Inclure dans le patrimoine",
 
   "debtsTitle": "Dettes",
   "debtsSummaryEmprunts": "Emprunts",
@@ -134,6 +142,57 @@
   "debtsSectionPrets": "Prêts",
   "debtsSectionEmprunts": "Emprunts",
   "debtBadgeRembourse": "Remboursé",
+
+  "debtDetailInitialAmount": "Montant initial",
+  "debtDetailRemainingAmount": "Montant restant",
+  "debtDetailRepayButton": "Rembourser",
+  "debtDetailSnoozeButton": "Reporter le rappel",
+  "debtDetailProgress": "Progression",
+  "debtDetailDate": "Date",
+  "debtDetailCurrency": "Devise",
+  "debtDetailAccount": "Compte",
+  "debtDetailAccountDeleted": "Compte supprimé",
+  "debtDetailDueDate": "Échéance",
+  "debtDetailCategory": "Catégorie",
+  "debtDetailIncludedInBalance": "Inclus dans le solde",
+  "debtDetailReminder": "Rappel",
+  "debtDetailPayments": "Paiements",
+  "debtDetailTotalRepaid": "Total remboursé",
+  "debtDetailNoPayments": "Aucun paiement enregistré",
+  "debtDetailPaymentsError": "Erreur lors du chargement des paiements",
+  "debtDetailBadgeEmprunt": "Emprunt",
+  "debtDetailBadgePret": "Prêt",
+  "debtDetailBadgeRepaid": "Remboursé",
+
+  "repayTitle": "Rembourser",
+  "repayAccountLabel": "Compte source",
+  "repayAccountPlaceholder": "Sélectionner un compte",
+  "repayAccountRequired": "Compte requis",
+  "repayAmountLabel": "Montant",
+  "repayAmountRequired": "Montant requis",
+  "repayAmountInvalid": "Montant invalide",
+  "repayAmountMax": "Maximum: {amount}",
+  "@repayAmountMax": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "repayNoAccounts": "Aucun compte actif. Créez un compte dans les paramètres.",
+  "repaySuccess": "Remboursement enregistré",
+  "repayError": "Erreur lors du remboursement",
+
+  "snoozeTitle": "Reporter le rappel",
+  "snoozeDateLabel": "Nouvelle date",
+  "snoozeTimeLabel": "Heure",
+  "snoozeDateFutureRequired": "La date doit être dans le futur",
+  "snoozeSuccess": "Rappel reporté",
+  "snoozeError": "Erreur lors du report",
+  "snoozeSubmitButton": "Reporter",
+
+  "yes": "Oui",
+  "no": "Non",
 
   "transferFormSourcePicker": "Compte source",
   "transferFormDestinationPicker": "Compte destination",
@@ -218,5 +277,17 @@
   "budgetOtherCategory": "Autre",
   "budgetOtherCategoryDetail": "Dépenses non budgétées",
   "budgetActive": "Budget actif",
-  "budgetShowInactive": "Afficher les inactifs"
+  "budgetShowInactive": "Afficher les inactifs",
+
+  "notificationTitle": "Notifications",
+  "notificationMarkAllRead": "Tout marquer lu",
+  "notificationClearHistory": "Vider l'historique",
+  "notificationEmpty": "Aucune notification",
+  "notificationClearConfirmTitle": "Vider l'historique",
+  "notificationClearConfirmMessage": "Supprimer toutes les notifications ? Cette action est irréversible.",
+  "notificationRepayTooltip": "Rembourser",
+  "notificationSnoozeTooltip": "Reporter",
+  "notificationLoadError": "Impossible de charger la dette",
+  "notificationGroupToday": "Aujourd'hui",
+  "notificationGroupYesterday": "Hier"
 }

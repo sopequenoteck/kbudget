@@ -101,7 +101,12 @@ saisie rapide est la priorité absolue.
 - Le design DOIT être responsive mais optimisé mobile
   en priorité
 - Les interactions DOIVENT fonctionner offline quand possible
-  (PWA service worker côté Angular, SQLite local côté Flutter)
+  (PWA service worker côté Angular, SQLite local côté Flutter).
+  **Exception** : les features dont les données doivent être
+  fraîches en temps réel (remboursements, paiements, soldes
+  agrégés, préférences, comptes, catégories, shop) peuvent
+  utiliser le mode server-only (API REST sans Drift/SQLite)
+  si justifié dans le plan
 
 ### V. Testabilité
 
@@ -234,4 +239,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 2.1.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-02-22
+**Version**: 2.1.1 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-03-13

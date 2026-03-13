@@ -345,6 +345,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtFormNoCategories => 'Créez une catégorie d\'abord';
 
   @override
+  String get debtFormAccountPicker => 'Compte bancaire';
+
+  @override
+  String get debtFormAccountPlaceholder => 'Aucun compte';
+
+  @override
+  String get debtFormDueDateField => 'Date d\'échéance';
+
+  @override
+  String get debtFormDueDatePlaceholder => 'Aucune échéance';
+
+  @override
+  String get debtFormReminderField => 'Rappel';
+
+  @override
+  String get debtFormReminderPlaceholder => 'Aucun rappel';
+
+  @override
+  String get debtFormReminderTimeField => 'Heure de rappel';
+
+  @override
+  String get debtFormIncludeInBalance => 'Inclure dans le patrimoine';
+
+  @override
   String get debtsTitle => 'Dettes';
 
   @override
@@ -382,6 +406,130 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtBadgeRembourse => 'Remboursé';
+
+  @override
+  String get debtDetailInitialAmount => 'Montant initial';
+
+  @override
+  String get debtDetailRemainingAmount => 'Montant restant';
+
+  @override
+  String get debtDetailRepayButton => 'Rembourser';
+
+  @override
+  String get debtDetailSnoozeButton => 'Reporter le rappel';
+
+  @override
+  String get debtDetailProgress => 'Progression';
+
+  @override
+  String get debtDetailDate => 'Date';
+
+  @override
+  String get debtDetailCurrency => 'Devise';
+
+  @override
+  String get debtDetailAccount => 'Compte';
+
+  @override
+  String get debtDetailAccountDeleted => 'Compte supprimé';
+
+  @override
+  String get debtDetailDueDate => 'Échéance';
+
+  @override
+  String get debtDetailCategory => 'Catégorie';
+
+  @override
+  String get debtDetailIncludedInBalance => 'Inclus dans le solde';
+
+  @override
+  String get debtDetailReminder => 'Rappel';
+
+  @override
+  String get debtDetailPayments => 'Paiements';
+
+  @override
+  String get debtDetailTotalRepaid => 'Total remboursé';
+
+  @override
+  String get debtDetailNoPayments => 'Aucun paiement enregistré';
+
+  @override
+  String get debtDetailPaymentsError =>
+      'Erreur lors du chargement des paiements';
+
+  @override
+  String get debtDetailBadgeEmprunt => 'Emprunt';
+
+  @override
+  String get debtDetailBadgePret => 'Prêt';
+
+  @override
+  String get debtDetailBadgeRepaid => 'Remboursé';
+
+  @override
+  String get repayTitle => 'Rembourser';
+
+  @override
+  String get repayAccountLabel => 'Compte source';
+
+  @override
+  String get repayAccountPlaceholder => 'Sélectionner un compte';
+
+  @override
+  String get repayAccountRequired => 'Compte requis';
+
+  @override
+  String get repayAmountLabel => 'Montant';
+
+  @override
+  String get repayAmountRequired => 'Montant requis';
+
+  @override
+  String get repayAmountInvalid => 'Montant invalide';
+
+  @override
+  String repayAmountMax(String amount) {
+    return 'Maximum: $amount';
+  }
+
+  @override
+  String get repayNoAccounts =>
+      'Aucun compte actif. Créez un compte dans les paramètres.';
+
+  @override
+  String get repaySuccess => 'Remboursement enregistré';
+
+  @override
+  String get repayError => 'Erreur lors du remboursement';
+
+  @override
+  String get snoozeTitle => 'Reporter le rappel';
+
+  @override
+  String get snoozeDateLabel => 'Nouvelle date';
+
+  @override
+  String get snoozeTimeLabel => 'Heure';
+
+  @override
+  String get snoozeDateFutureRequired => 'La date doit être dans le futur';
+
+  @override
+  String get snoozeSuccess => 'Rappel reporté';
+
+  @override
+  String get snoozeError => 'Erreur lors du report';
+
+  @override
+  String get snoozeSubmitButton => 'Reporter';
+
+  @override
+  String get yes => 'Oui';
+
+  @override
+  String get no => 'Non';
 
   @override
   String get transferFormSourcePicker => 'Compte source';
@@ -614,4 +762,38 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get budgetShowInactive => 'Afficher les inactifs';
+
+  @override
+  String get notificationTitle => 'Notifications';
+
+  @override
+  String get notificationMarkAllRead => 'Tout marquer lu';
+
+  @override
+  String get notificationClearHistory => 'Vider l\'historique';
+
+  @override
+  String get notificationEmpty => 'Aucune notification';
+
+  @override
+  String get notificationClearConfirmTitle => 'Vider l\'historique';
+
+  @override
+  String get notificationClearConfirmMessage =>
+      'Supprimer toutes les notifications ? Cette action est irréversible.';
+
+  @override
+  String get notificationRepayTooltip => 'Rembourser';
+
+  @override
+  String get notificationSnoozeTooltip => 'Reporter';
+
+  @override
+  String get notificationLoadError => 'Impossible de charger la dette';
+
+  @override
+  String get notificationGroupToday => 'Aujourd\'hui';
+
+  @override
+  String get notificationGroupYesterday => 'Hier';
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 
@@ -115,6 +116,59 @@ class DebtNotifier extends Notifier<DebtListState> {
     }
   }
 
+  Future<bool> repay(String debtId, String accountId, double? amount) async {
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, debtId},
+      error: null,
+    );
+    try {
+      final updated = await _repo.repay(debtId, accountId, amount);
+      final index = _allItems.indexWhere((e) => e.id == debtId);
+      if (index != -1) _allItems[index] = updated;
+      _allItems.sort((a, b) => b.date.compareTo(a.date));
+      _refreshPage();
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(debtId),
+      );
+      return true;
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(debtId),
+        error: 'Erreur lors du remboursement: $e',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> snooze(
+      String debtId, String reminderDate, String reminderTime) async {
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, debtId},
+      error: null,
+    );
+    try {
+      final updated = await _repo.snooze(debtId, reminderDate, reminderTime);
+      final index = _allItems.indexWhere((e) => e.id == debtId);
+      if (index != -1) _allItems[index] = updated;
+      _refreshPage();
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(debtId),
+      );
+      return true;
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(debtId),
+        error: 'Erreur lors du report: $e',
+      );
+      return false;
+    }
+  }
+
+  Debt? getDebtById(String id) {
+    final index = _allItems.indexWhere((e) => e.id == id);
+    return index != -1 ? _allItems[index] : null;
+  }
+
   List<Debt> _applyFilter(List<Debt> items, DebtStatusFilter filter) {
     return switch (filter) {
       DebtStatusFilter.all => items,
@@ -130,13 +184,13 @@ class DebtNotifier extends Notifier<DebtListState> {
           (totalEmprunts: 0.0, totalPrets: 0.0);
       if (debt.sens == DebtType.emprunt) {
         result[debt.currency] = (
-          totalEmprunts: prev.totalEmprunts + debt.montant,
+          totalEmprunts: prev.totalEmprunts + (debt.remainingAmount ?? debt.montant),
           totalPrets: prev.totalPrets,
         );
       } else {
         result[debt.currency] = (
           totalEmprunts: prev.totalEmprunts,
-          totalPrets: prev.totalPrets + debt.montant,
+          totalPrets: prev.totalPrets + (debt.remainingAmount ?? debt.montant),
         );
       }
     }
@@ -157,3 +211,9 @@ class DebtNotifier extends Notifier<DebtListState> {
     );
   }
 }
+
+final debtPaymentsProvider =
+    FutureProvider.family<List<DebtPayment>, String>((ref, debtId) async {
+  final repo = ref.read(debtRepositoryProvider);
+  return repo.getPayments(debtId);
+});

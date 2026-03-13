@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/segmented_filter.dart';
@@ -15,7 +16,6 @@ import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.d
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
-import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -357,10 +357,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       rightSubtitle:
           convertedSubtitle ?? (debt.rembourse ? l10n.debtBadgeRembourse : null),
       onPressed: () {
-        ref.read(modalNotifierProvider.notifier).open(
-              ModalType.debt,
-              entity: debt,
-            );
+        context.push('/debts/${debt.id}', extra: debt);
       },
     );
   }

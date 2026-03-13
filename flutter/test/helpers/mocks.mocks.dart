@@ -13,25 +13,26 @@ import 'package:k_budget/src/domain/models/budget_history.dart' as _i13;
 import 'package:k_budget/src/domain/models/budget_overview.dart' as _i12;
 import 'package:k_budget/src/domain/models/category.dart' as _i7;
 import 'package:k_budget/src/domain/models/debt.dart' as _i6;
+import 'package:k_budget/src/domain/models/debt_payment.dart' as _i21;
 import 'package:k_budget/src/domain/models/exchange_rate.dart' as _i10;
 import 'package:k_budget/src/domain/models/monthly_summary.dart' as _i18;
 import 'package:k_budget/src/domain/models/product.dart' as _i9;
 import 'package:k_budget/src/domain/models/subscription.dart' as _i5;
 import 'package:k_budget/src/domain/models/transaction.dart' as _i4;
 import 'package:k_budget/src/domain/repositories/account_repository.dart'
-    as _i22;
+    as _i23;
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart'
     as _i14;
 import 'package:k_budget/src/domain/repositories/auth_repository.dart' as _i3;
 import 'package:k_budget/src/domain/repositories/budget_repository.dart'
-    as _i25;
+    as _i26;
 import 'package:k_budget/src/domain/repositories/category_repository.dart'
-    as _i21;
+    as _i22;
 import 'package:k_budget/src/domain/repositories/debt_repository.dart' as _i20;
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart'
-    as _i24;
+    as _i25;
 import 'package:k_budget/src/domain/repositories/product_repository.dart'
-    as _i23;
+    as _i24;
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart'
     as _i19;
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart'
@@ -703,13 +704,67 @@ class MockDebtRepository extends _i1.Mock implements _i20.DebtRepository {
             returnValueForMissingStub: _i15.Future<void>.value(),
           )
           as _i15.Future<void>);
+
+  @override
+  _i15.Future<_i6.Debt> repay(String? id, String? accountId, double? amount) =>
+      (super.noSuchMethod(
+            Invocation.method(#repay, [id, accountId, amount]),
+            returnValue: _i15.Future<_i6.Debt>.value(
+              _FakeDebt_4(
+                this,
+                Invocation.method(#repay, [id, accountId, amount]),
+              ),
+            ),
+            returnValueForMissingStub: _i15.Future<_i6.Debt>.value(
+              _FakeDebt_4(
+                this,
+                Invocation.method(#repay, [id, accountId, amount]),
+              ),
+            ),
+          )
+          as _i15.Future<_i6.Debt>);
+
+  @override
+  _i15.Future<List<_i21.DebtPayment>> getPayments(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getPayments, [id]),
+            returnValue: _i15.Future<List<_i21.DebtPayment>>.value(
+              <_i21.DebtPayment>[],
+            ),
+            returnValueForMissingStub:
+                _i15.Future<List<_i21.DebtPayment>>.value(<_i21.DebtPayment>[]),
+          )
+          as _i15.Future<List<_i21.DebtPayment>>);
+
+  @override
+  _i15.Future<_i6.Debt> snooze(
+    String? id,
+    String? reminderDate,
+    String? reminderTime,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#snooze, [id, reminderDate, reminderTime]),
+            returnValue: _i15.Future<_i6.Debt>.value(
+              _FakeDebt_4(
+                this,
+                Invocation.method(#snooze, [id, reminderDate, reminderTime]),
+              ),
+            ),
+            returnValueForMissingStub: _i15.Future<_i6.Debt>.value(
+              _FakeDebt_4(
+                this,
+                Invocation.method(#snooze, [id, reminderDate, reminderTime]),
+              ),
+            ),
+          )
+          as _i15.Future<_i6.Debt>);
 }
 
 /// A class which mocks [CategoryRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCategoryRepository extends _i1.Mock
-    implements _i21.CategoryRepository {
+    implements _i22.CategoryRepository {
   @override
   _i15.Stream<List<_i7.Category>> watchAll() =>
       (super.noSuchMethod(
@@ -784,7 +839,7 @@ class MockCategoryRepository extends _i1.Mock
 /// A class which mocks [AccountRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAccountRepository extends _i1.Mock implements _i22.AccountRepository {
+class MockAccountRepository extends _i1.Mock implements _i23.AccountRepository {
   @override
   _i15.Stream<List<_i8.Account>> watchAll() =>
       (super.noSuchMethod(
@@ -889,7 +944,7 @@ class MockAccountRepository extends _i1.Mock implements _i22.AccountRepository {
 /// A class which mocks [ProductRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockProductRepository extends _i1.Mock implements _i23.ProductRepository {
+class MockProductRepository extends _i1.Mock implements _i24.ProductRepository {
   @override
   _i15.Future<List<_i9.Product>> getAll() =>
       (super.noSuchMethod(
@@ -993,7 +1048,7 @@ class MockProductRepository extends _i1.Mock implements _i23.ProductRepository {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockExchangeRateRepository extends _i1.Mock
-    implements _i24.ExchangeRateRepository {
+    implements _i25.ExchangeRateRepository {
   @override
   _i15.Future<List<_i10.ExchangeRate>> getAll() =>
       (super.noSuchMethod(
@@ -1055,7 +1110,7 @@ class MockExchangeRateRepository extends _i1.Mock
 /// A class which mocks [BudgetRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBudgetRepository extends _i1.Mock implements _i25.BudgetRepository {
+class MockBudgetRepository extends _i1.Mock implements _i26.BudgetRepository {
   @override
   _i15.Future<List<_i11.Budget>> getAll({bool? includeInactive = false}) =>
       (super.noSuchMethod(
