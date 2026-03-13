@@ -156,6 +156,12 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/accounts/{id}/default` | Definir comme compte par defaut |
 | GET | `/api/accounts/total-balance` | Solde total (comptes + dettes) par devise |
 
+### Banques
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/banks` | Lister les 29 banques supportees (public, sans auth) |
+
 ### Categories
 
 | Methode | Route | Description |
@@ -215,7 +221,7 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, ExchangeRate, Preference, Notification)
+├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
 ├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)
@@ -242,7 +248,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 ## Securite
 
 - JWT stateless, access token valide 15 minutes, refresh token valide 30 jours
-- Toutes les routes protegees sauf `/api/auth/**` et `/api/actuator/health`
+- Toutes les routes protegees sauf `/api/auth/**`, `/api/actuator/health`, `/api/banks` et `/api/bank-logos/**`
 - Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
 - Mots de passe hashes en BCrypt
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
@@ -261,7 +267,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 cd api && mvn test
 ```
 
-211 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
+442 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
 
 ## Documentation complementaire
 

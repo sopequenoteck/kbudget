@@ -48,6 +48,10 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | couleur | String | Couleur hexadecimale (#RRGGBB) |
 | isDefault | Boolean | Compte par defaut |
 | actif | Boolean | Compte actif ou non |
+| currency | Currency | Devise du compte (default EUR) |
+| bankCode | String | Code de la banque associee (default "OTHER") |
+| bankCustomName | String | Nom personnalise si bankCode="OTHER" (nullable) |
+| bankCustomLogo | String | Logo personnalise en base64 data URI (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 

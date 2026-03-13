@@ -77,7 +77,7 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 ### Entites
 
 - **User** : email (unique), password (BCrypt), name, createdAt. UUID.
-- **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, updatedAt. FK → User.
+- **Account** : nom, type (COURANT/EPARGNE/ESPECES), soldeInitial, icone, couleur, isDefault, actif, bankCode (String, default "OTHER"), bankCustomName (String, nullable), bankCustomLogo (String/TEXT, nullable), updatedAt. FK → User.
 - **Transaction** : montant, libelle, type (DEPENSE/RECETTE), date, category (FK → Category), note, account (FK → Account), transferId (UUID, nullable), productId (UUID, nullable, FK → Product), updatedAt. FK → User.
 - **Subscription** : nom, montant, frequence (MENSUEL/ANNUEL), dateDebut, actif, category (FK → Category), account (FK → Account, nullable), updatedAt. FK → User.
 - **Debt** : personne, montant, sens (EMPRUNT/PRET), date, currency (Currency, default EUR), rembourse, dueDate (LocalDate, nullable), account (FK → Account, nullable), includeInBalance (Boolean, default false), reminderDate (LocalDate, nullable), reminderTime (LocalTime, nullable), category (FK → Category), updatedAt. FK → User.
@@ -292,7 +292,7 @@ Approche **signals-first** obligatoire :
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V18
+- PostgreSQL 15+, Flyway migrations V1-V19
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -329,3 +329,4 @@ Approche **signals-first** obligatoire :
 - 078-angular-debt-enhancements: DebtService Angular (repay, payments, snooze, totalBalance); DebtDetailComponent (montant restant, barre progression, historique paiements, badge remboursé); RepayDialog + SnoozeDialog; DebtListComponent câblé; toast feedback; 9 tests unitaires
 - 079-flutter-debt-enhancements: DebtDetailScreen (montant restant, barre progression, historique paiements, badge remboursé); RepayBottomSheet (compte + montant); SnoozeDialog; DebtForm enrichi (compte, rappel, includeInBalance); NotificationPanel — actions Rembourser/Reporter; routes /debts/:id; DebtPayment model; 37 tests passent
 - 080-debt-enhancements: Spec consolidée cross-plateforme (KKS-194/195/196) — 76 tâches documentées, 423 tests backend + 37 tests Flutter validés. Spec rétroactive couvrant KKS-077/078/079.
+- 081-backend-bank-accounts: Bank record + BankRegistry (29 banques statiques FR/TG/International); BankService (getAllBanks trié, resolveBank); BankController GET /banks (public); Account enrichi (+bankCode, bankCustomName, bankCustomLogo); AccountRequest/Response enrichis (+7 champs bank résolus); Flyway V19; 29 logos SVG dans static/bank-logos/; 442 tests (27 nouveaux)

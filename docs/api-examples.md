@@ -425,7 +425,8 @@ Request :
   "soldeInitial": 1500.00,
   "icone": "🐷",
   "couleur": "#22c55e",
-  "actif": true
+  "actif": true,
+  "bankCode": "OTHER"
 }
 ```
 
@@ -441,7 +442,16 @@ Response `201` :
   "icone": "🐷",
   "couleur": "#22c55e",
   "isDefault": false,
-  "actif": true
+  "actif": true,
+  "currency": "EUR",
+  "isShopAccount": false,
+  "bankCode": "OTHER",
+  "bankName": "Autre",
+  "bankCountry": null,
+  "bankBrandColor": "#6b7280",
+  "bankLogoUrl": "/api/bank-logos/other.svg",
+  "bankCustomName": null,
+  "bankCustomLogo": null
 }
 ```
 
@@ -460,7 +470,16 @@ Response `200` :
     "icone": "🏦",
     "couleur": "#3b82f6",
     "isDefault": true,
-    "actif": true
+    "actif": true,
+    "currency": "EUR",
+    "isShopAccount": false,
+    "bankCode": "OTHER",
+    "bankName": "Autre",
+    "bankCountry": null,
+    "bankBrandColor": "#6b7280",
+    "bankLogoUrl": "/api/bank-logos/other.svg",
+    "bankCustomName": null,
+    "bankCustomLogo": null
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -471,7 +490,16 @@ Response `200` :
     "icone": "🐷",
     "couleur": "#22c55e",
     "isDefault": false,
-    "actif": true
+    "actif": true,
+    "currency": "EUR",
+    "isShopAccount": false,
+    "bankCode": "OTHER",
+    "bankName": "Autre",
+    "bankCountry": null,
+    "bankBrandColor": "#6b7280",
+    "bankLogoUrl": "/api/bank-logos/other.svg",
+    "bankCustomName": null,
+    "bankCustomLogo": null
   }
 ]
 ```
@@ -529,7 +557,16 @@ Response `200` :
   "icone": "🐷",
   "couleur": "#22c55e",
   "isDefault": true,
-  "actif": true
+  "actif": true,
+  "currency": "EUR",
+  "isShopAccount": false,
+  "bankCode": "OTHER",
+  "bankName": "Autre",
+  "bankCountry": null,
+  "bankBrandColor": "#6b7280",
+  "bankLogoUrl": "/api/bank-logos/other.svg",
+  "bankCustomName": null,
+  "bankCustomLogo": null
 }
 ```
 
@@ -931,6 +968,49 @@ Response `200` :
   "unbudgetedTotal": 52.30
 }
 ```
+
+## Banques
+
+### Lister `GET /api/banks`
+
+Endpoint public (pas de token requis). Retourne les 29 banques supportees, triees par pays (FR, TG, International) puis par nom.
+
+Response `200` :
+
+```json
+[
+  {
+    "code": "BIA",
+    "name": "BIA",
+    "country": "FR",
+    "brandColor": "#003366",
+    "logoUrl": "/api/bank-logos/bia.svg"
+  },
+  {
+    "code": "BNP",
+    "name": "BNP Paribas",
+    "country": "FR",
+    "brandColor": "#00915a",
+    "logoUrl": "/api/bank-logos/bnp.svg"
+  },
+  {
+    "code": "ECOBANK",
+    "name": "Ecobank",
+    "country": "TG",
+    "brandColor": "#0033a0",
+    "logoUrl": "/api/bank-logos/ecobank.svg"
+  },
+  {
+    "code": "OTHER",
+    "name": "Autre",
+    "country": null,
+    "brandColor": "#6b7280",
+    "logoUrl": "/api/bank-logos/other.svg"
+  }
+]
+```
+
+> 29 entrees au total. Extraits ci-dessus pour illustration.
 
 ## Valeurs des enums
 
