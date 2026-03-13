@@ -102,6 +102,18 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
+### DebtPayment
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| debt | Debt | FK → Debt |
+| montant | BigDecimal | Montant rembourse |
+| date | LocalDate | Date du paiement |
+| transaction | Transaction | FK → Transaction (nullable) |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
+
 ### Category
 
 | Champ | Type | Description |
@@ -234,7 +246,8 @@ app/src/app/
 | Dashboard | `/dashboard` | Soldes par compte, solde total, KPI mensuels, resume abonnements, etat dettes |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
-| Dettes/Prets | `/debts` | Suivi dans les deux sens |
+| Dettes/Prets | `/debts` | Liste, resume, filtres |
+| Detail dette | `/debts/:id` | Montant restant, historique paiements, rembourser, snooze |
 | Parametres | `/settings` | Parametres utilisateur |
 | Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
 | Detail produit | `/shop/:id` | Infos, vente, restock, historique |
