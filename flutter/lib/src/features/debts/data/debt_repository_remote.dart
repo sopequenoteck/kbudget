@@ -58,7 +58,7 @@ class DebtRepositoryRemote implements DebtRepository {
     return responses
         .map((r) => DebtPayment(
               id: r.id,
-              montant: r.montant,
+              montant: r.amount,
               date: DateTime.parse(r.date),
               accountName: r.accountName,
             ))
@@ -84,16 +84,16 @@ class DebtRepositoryRemote implements DebtRepository {
         currency: Currency.values
             .byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
         rembourse: r.rembourse,
-        categoryId: r.categoryId,
+        categoryId: r.category?.id,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
-        accountId: r.accountId,
-        accountName: r.accountName,
+        accountId: r.account?.id,
+        accountName: r.account?.nom,
         includeInBalance: r.includeInBalance,
         dueDate: r.dueDate != null ? DateTime.parse(r.dueDate!) : null,
         reminderDate:
             r.reminderDate != null ? DateTime.parse(r.reminderDate!) : null,
         reminderTime: r.reminderTime,
-        remainingAmount: r.remainingAmount,
+        remainingAmount: r.montantRestant,
       );
 
   DebtRequest _toRequest(Debt d) => DebtRequest(

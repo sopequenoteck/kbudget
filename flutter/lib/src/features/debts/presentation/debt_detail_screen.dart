@@ -79,9 +79,9 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     // Listen for changes from notifier
-    final debtState = ref.watch(debtNotifierProvider);
+    ref.watch(debtNotifierProvider); // trigger rebuild on state change
     final updatedDebt =
-        debtState.items.where((d) => d.id == widget.debtId).firstOrNull;
+        ref.read(debtNotifierProvider.notifier).getDebtById(widget.debtId);
     if (updatedDebt != null && updatedDebt != _debt) {
       _debt = updatedDebt;
     }

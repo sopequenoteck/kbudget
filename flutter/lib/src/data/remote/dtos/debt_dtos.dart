@@ -34,19 +34,39 @@ class DebtResponse with _$DebtResponse {
     required String date,
     required String currency,
     required bool rembourse,
-    String? categoryId,
-    String? updatedAt,
-    String? accountId,
-    String? accountName,
     @Default(false) bool includeInBalance,
+    double? montantRestant,
+    DebtCategoryResponse? category,
+    DebtAccountSummary? account,
+    String? updatedAt,
     String? dueDate,
     String? reminderDate,
     String? reminderTime,
-    double? remainingAmount,
   }) = _DebtResponse;
 
   factory DebtResponse.fromJson(Map<String, dynamic> json) =>
       _$DebtResponseFromJson(json);
+}
+
+@freezed
+class DebtCategoryResponse with _$DebtCategoryResponse {
+  const factory DebtCategoryResponse({
+    required String id,
+  }) = _DebtCategoryResponse;
+
+  factory DebtCategoryResponse.fromJson(Map<String, dynamic> json) =>
+      _$DebtCategoryResponseFromJson(json);
+}
+
+@freezed
+class DebtAccountSummary with _$DebtAccountSummary {
+  const factory DebtAccountSummary({
+    required String id,
+    String? nom,
+  }) = _DebtAccountSummary;
+
+  factory DebtAccountSummary.fromJson(Map<String, dynamic> json) =>
+      _$DebtAccountSummaryFromJson(json);
 }
 
 @freezed
@@ -75,7 +95,7 @@ class SnoozeRequest with _$SnoozeRequest {
 class PaymentResponse with _$PaymentResponse {
   const factory PaymentResponse({
     required String id,
-    required double montant,
+    required double amount,
     required String date,
     String? accountName,
   }) = _PaymentResponse;

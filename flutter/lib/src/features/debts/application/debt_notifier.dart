@@ -214,6 +214,6 @@ class DebtNotifier extends Notifier<DebtListState> {
 
 final debtPaymentsProvider =
     FutureProvider.family<List<DebtPayment>, String>((ref, debtId) async {
-  final repo = ref.read(debtRepositoryProvider);
+  final repo = ref.watch(debtRepositoryProvider);
   return repo.getPayments(debtId);
 });
