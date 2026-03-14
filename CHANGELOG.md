@@ -6,6 +6,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Unreleased]
 
 ### Added
+- Associer une banque à un compte — BankRegistry 29 banques statiques (FR/TG/International), endpoint GET /banks, Flyway V19, AccountRequest/Response enrichis (KKS-081)
+- Associer une banque à un compte (Angular) — BankSelect, AccountBankIcon, AccountForm enrichi, image.utils.ts (KKS-082)
 - Associer une banque à un compte (Flutter) — BankSelectPicker, AccountBankIcon, 29 logos SVG, Drift migration v3 (KKS-083)
 
 ## [2.1.1] - 2026-02-20
