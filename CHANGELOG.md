@@ -5,6 +5,9 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+- Associer une banque à un compte (Flutter) — BankSelectPicker, AccountBankIcon, 29 logos SVG, Drift migration v3 (KKS-083)
+
 ## [2.1.1] - 2026-02-20
 
 ### Added
