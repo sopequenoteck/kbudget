@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
@@ -210,6 +211,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
               icon: a.icone,
               color: parseHexColor(a.couleur),
               secondaryText: AmountFormatter.format(a.solde),
+              imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
 

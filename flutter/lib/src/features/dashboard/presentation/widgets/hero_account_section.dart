@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -9,7 +10,6 @@ import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
-import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -126,21 +126,7 @@ class _HeroCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: AppSpacing.space12,
-                height: AppSpacing.space12,
-                decoration: BoxDecoration(
-                  color: parseHexColor(account.couleur) ?? colorScheme.primary,
-                  borderRadius: BorderRadius.circular(AppRadius.round),
-                ),
-                child: Center(
-                  child: Text(
-                    account.icone,
-                    style:
-                        const TextStyle(fontSize: AppTypography.sizeXl),
-                  ),
-                ),
-              ),
+              AccountBankIcon(account: account, size: AppSpacing.space12),
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Text(
@@ -222,20 +208,7 @@ class _AccountRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: AppSpacing.space9,
-            height: AppSpacing.space9,
-            decoration: BoxDecoration(
-              color: parseHexColor(account.couleur) ?? colorScheme.primary,
-              borderRadius: BorderRadius.circular(AppRadius.round),
-            ),
-            child: Center(
-              child: Text(
-                account.icone,
-                style: const TextStyle(fontSize: AppTypography.sizeMd),
-              ),
-            ),
-          ),
+          AccountBankIcon(account: account, size: AppSpacing.space9),
           const SizedBox(width: AppSpacing.space3),
           Expanded(
             child: Text(

@@ -86,6 +86,7 @@ flutter:
   assets:
     - assets/fonts/Inter/
     - assets/budget-icon-no-background.svg
+    - assets/banks/
 
   fonts:
     - family: Inter

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
@@ -333,6 +334,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
                     id: a.id,
                     label: a.nom,
                     icon: a.icone,
+                    imageUrl: resolveBankAssetPath(a),
                   ))
               .toList(),
           selectedId: _selectedAccountId,

@@ -34,6 +34,9 @@ class Accounts extends Table {
   TextColumn get currency => text().withDefault(const Constant('eur'))();
   BoolColumn get actif => boolean().withDefault(const Constant(true))();
   DateTimeColumn get updatedAt => dateTime().nullable()();
+  TextColumn get bankCode => text().nullable()();
+  TextColumn get bankCustomName => text().nullable()();
+  TextColumn get bankCustomLogo => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -134,5 +137,16 @@ class AppDatabase extends _$AppDatabase {
         );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 3) {
+            await m.addColumn(accounts, accounts.bankCode);
+            await m.addColumn(accounts, accounts.bankCustomName);
+            await m.addColumn(accounts, accounts.bankCustomLogo);
+          }
+        },
+      );
 }

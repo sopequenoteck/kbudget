@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
@@ -165,6 +166,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
                     id: a.id,
                     label: a.nom,
                     icon: a.icone,
+                    imageUrl: resolveBankAssetPath(a),
                   ))
               .toList(),
           selectedId: effectiveAccountId,

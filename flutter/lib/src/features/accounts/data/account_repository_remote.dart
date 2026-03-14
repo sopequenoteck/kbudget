@@ -70,6 +70,13 @@ class AccountRepositoryRemote implements AccountRepository {
         actif: r.actif,
         solde: r.solde,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
+        bankCode: r.bankCode ?? 'OTHER',
+        bankName: r.bankName,
+        bankCountry: r.bankCountry,
+        bankBrandColor: r.bankBrandColor,
+        bankLogoUrl: r.bankLogoUrl,
+        bankCustomName: r.bankCustomName,
+        bankCustomLogo: r.bankCustomLogo,
       );
 
   AccountRequest _toRequest(Account a) => AccountRequest(
@@ -81,5 +88,8 @@ class AccountRepositoryRemote implements AccountRepository {
         isDefault: a.isDefault,
         currency: a.currency.name.toUpperCase(),
         actif: a.actif,
+        bankCode: a.bankCode,
+        bankCustomName: a.bankCode == 'OTHER' ? a.bankCustomName : null,
+        bankCustomLogo: a.bankCode == 'OTHER' ? a.bankCustomLogo : null,
       );
 }

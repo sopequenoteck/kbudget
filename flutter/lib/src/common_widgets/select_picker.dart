@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_durations.dart';
@@ -12,6 +15,7 @@ class SelectPickerItem {
   final String? icon;
   final Color? color;
   final String? secondaryText;
+  final String? imageUrl;
 
   const SelectPickerItem({
     required this.id,
@@ -19,6 +23,7 @@ class SelectPickerItem {
     this.icon,
     this.color,
     this.secondaryText,
+    this.imageUrl,
   })  : assert(id != '', 'SelectPickerItem id must not be empty'),
         assert(label != '', 'SelectPickerItem label must not be empty');
 }
@@ -201,6 +206,24 @@ class _SelectPickerState extends FormFieldState<String?> {
     );
   }
 
+  Widget _buildImageWidget(String imageUrl, double size) {
+    if (imageUrl.startsWith('assets/')) {
+      return SvgPicture.asset(imageUrl, width: size, height: size);
+    }
+    if (imageUrl.contains('data:image')) {
+      try {
+        final commaIndex = imageUrl.indexOf(',');
+        if (commaIndex != -1) {
+          final bytes = base64Decode(imageUrl.substring(commaIndex + 1));
+          return Image.memory(bytes, width: size, height: size);
+        }
+      } catch (_) {
+        // fall through
+      }
+    }
+    return SizedBox(width: size, height: size);
+  }
+
   Widget _buildItemTile(BuildContext ctx, SelectPickerItem item) {
     final colorScheme = Theme.of(ctx).colorScheme;
     final isSelected = item.id == value;
@@ -222,7 +245,10 @@ class _SelectPickerState extends FormFieldState<String?> {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space3),
           child: Row(
             children: [
-              if (item.icon != null) ...[
+              if (item.imageUrl != null) ...[
+                _buildImageWidget(item.imageUrl!, 24),
+                const SizedBox(width: AppSpacing.space3),
+              ] else if (item.icon != null) ...[
                 Text(item.icon!, style: const TextStyle(fontSize: 24)),
                 const SizedBox(width: AppSpacing.space3),
               ],
@@ -311,7 +337,10 @@ class _SelectPickerState extends FormFieldState<String?> {
                   child: Row(
                     children: [
                       if (hasSelection) ...[
-                        if (selectedItem.icon != null) ...[
+                        if (selectedItem.imageUrl != null) ...[
+                          _buildImageWidget(selectedItem.imageUrl!, 24),
+                          const SizedBox(width: AppSpacing.space3),
+                        ] else if (selectedItem.icon != null) ...[
                           Text(
                             selectedItem.icon!,
                             style: const TextStyle(fontSize: 24),

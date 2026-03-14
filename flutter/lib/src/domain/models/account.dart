@@ -18,6 +18,13 @@ class Account with _$Account {
     @Default(true) bool actif,
     @Default(0) double solde,
     DateTime? updatedAt,
+    @Default('OTHER') String bankCode,
+    String? bankName,
+    String? bankCountry,
+    String? bankBrandColor,
+    String? bankLogoUrl,
+    String? bankCustomName,
+    String? bankCustomLogo,
   }) = _Account;
 
   factory Account.fromJson(Map<String, dynamic> json) =>

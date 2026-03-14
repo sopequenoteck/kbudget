@@ -72,6 +72,9 @@ domain.Account accountFromDb(db.Account row) => domain.Account(
       currency: Currency.values.byNameOrDefault(row.currency, Currency.eur),
       actif: row.actif,
       updatedAt: row.updatedAt,
+      bankCode: row.bankCode ?? 'OTHER',
+      bankCustomName: row.bankCustomName,
+      bankCustomLogo: row.bankCustomLogo,
     );
 
 db.AccountsCompanion accountToDb(domain.Account a) => db.AccountsCompanion(
@@ -85,6 +88,9 @@ db.AccountsCompanion accountToDb(domain.Account a) => db.AccountsCompanion(
       currency: Value(a.currency.name),
       actif: Value(a.actif),
       updatedAt: Value(a.updatedAt),
+      bankCode: Value(a.bankCode),
+      bankCustomName: Value(a.bankCustomName),
+      bankCustomLogo: Value(a.bankCustomLogo),
     );
 
 // --- Subscription ---

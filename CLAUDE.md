@@ -290,6 +290,8 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V19) (081-backend-bank-accounts)
 - TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals, @ng-icons/phosphor-icons (082-angular-bank-accounts)
 - Server-only (API REST GET /banks + GET/PATCH /accounts) — pas de stockage local, cache signal dans BankService (082-angular-bank-accounts)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_svg (nouveau), image_picker, shimmer, phosphor_flutter (083-flutter-bank-accounts)
+- SQLite/Drift (table Accounts enrichie +3 colonnes) + API REST/Dio (GET /api/banks, GET/POST/PUT /api/accounts) (083-flutter-bank-accounts)
 
 ### Backend (api/)
 
