@@ -428,3 +428,21 @@ PhosphorIcon(PhosphorIconsBold.plus, size: 24.0)
 Les icones Phosphor heritent de `currentColor` par defaut :
 - **Angular** : `<ng-icon>` utilise `color: inherit` — les tokens CSS s'appliquent automatiquement
 - **Flutter** : `PhosphorIcon` (extends `Icon`) utilise `IconThemeData.color` du theme
+
+---
+
+## 8. Dashboard visual tokens
+
+Tokens specifiques au dashboard Angular (definis dans `_dark.scss` et `_light.scss`). Non utilises par Flutter.
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--hero-gradient` | `linear-gradient(135deg, amber-900, indigo-900)` | `linear-gradient(135deg, amber-50, indigo-50)` | Fond hero card patrimoine |
+| `--glass-bg` | `rgba(31, 41, 55, 0.6)` | `var(--surface-raised)` | Fond glassmorphism cards |
+| `--glass-border` | `rgba(255, 255, 255, 0.08)` | `var(--border-default)` | Bordure glassmorphism |
+| `--glass-blur` | `20px` | `0px` | Blur backdrop-filter |
+| `--page-gradient-color` | `rgba(251, 191, 36, 0.08)` | `rgba(245, 158, 11, 0.05)` | Gradient radial fond page |
+| `--font-size-hero` | `2.25rem` | `2.25rem` | Font-size montant patrimoine |
+| `--shadow-hero-text` | `0 2px 8px rgba(0, 0, 0, 0.3)` | `none` | Text-shadow montant patrimoine |
+
+> **Note** : Le glassmorphism (`backdrop-filter: blur()`) est applique uniquement en dark mode. En light mode, les cards utilisent un fond opaque via les tokens fallback.
