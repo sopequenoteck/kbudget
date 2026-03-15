@@ -311,6 +311,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionBadgeInactif => 'Inactif';
 
   @override
+  String get subscriptionPay => 'Payer';
+
+  @override
+  String get subscriptionPaySuccess => 'Paiement enregistré';
+
+  @override
+  String get subscriptionPaymentHistory => 'Historique des paiements';
+
+  @override
+  String get subscriptionNoPayments => 'Aucun paiement';
+
+  @override
+  String subscriptionPayments(int count) {
+    return '$count paiements';
+  }
+
+  @override
   String get debtFormPersonField => 'Personne';
 
   @override
@@ -796,4 +813,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notificationGroupYesterday => 'Hier';
+
+  @override
+  String get recurringTitle => 'Récurrences';
+
+  @override
+  String get recurringOverdue => 'En retard';
+
+  @override
+  String get recurringToday => 'Aujourd\'hui';
+
+  @override
+  String get recurringUpcoming => 'À venir';
+
+  @override
+  String get recurringValidate => 'Valider';
+
+  @override
+  String get recurringSkip => 'Passer';
+
+  @override
+  String get recurringDeactivate => 'Désactiver';
+
+  @override
+  String get recurringEmpty => 'Aucune récurrence active';
+
+  @override
+  String get recurringDeactivateConfirm => 'Désactiver cette récurrence ?';
+
+  @override
+  String get recurringValidateSuccess => 'Transaction créée';
+
+  @override
+  String get recurringSkipSuccess => 'Échéance avancée';
+
+  @override
+  String get recurringDeactivateSuccess => 'Récurrence désactivée';
+
+  @override
+  String get frequencyHebdomadaire => '/semaine';
+
+  @override
+  String get frequencyMensuel => '/mois';
+
+  @override
+  String get frequencyAnnuel => '/an';
 }

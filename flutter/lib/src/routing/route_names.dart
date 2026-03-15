@@ -9,6 +9,7 @@ class RouteNames {
   static const String subscriptions = '/subscriptions';
   static const String debts = '/debts';
   static const String debtDetail = ':id'; // relatif
+  static const String subscriptionDetail = ':id'; // relatif
   static const String settings = '/settings';
   static const String shop = '/shop';
   static const String budgets = '/budgets';
@@ -50,6 +51,7 @@ class RouteNames {
   static const String budgetsName = 'budgets';
   static const String budgetDetailsName = 'budget-details';
   static const String debtDetailName = 'debt-detail';
+  static const String subscriptionDetailName = 'subscription-detail';
   static const String settingsAccountsNewName = 'settings-accounts-new';
   static const String settingsAccountsEditName = 'settings-accounts-edit';
 
@@ -64,4 +66,8 @@ class RouteNames {
   // Names (categories)
   static const String settingsCategoriesNewName = 'settings-categories-new';
   static const String settingsCategoriesEditName = 'settings-categories-edit';
+
+  // Recurring transactions
+  static const String recurring = '/transactions/recurring';
+  static const String recurringName = 'recurring';
 }

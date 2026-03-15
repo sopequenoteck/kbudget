@@ -41,7 +41,9 @@ import 'package:k_budget/src/features/budgets/presentation/widgets/budget_form.d
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
 import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
+import 'package:k_budget/src/features/recurring/presentation/recurring_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/subscription_detail_screen.dart';
 import 'package:k_budget/src/domain/models/product.dart';
 import 'package:k_budget/src/features/shop/application/product_notifier.dart';
 import 'package:k_budget/src/features/shop/presentation/widgets/product_form.dart';
@@ -186,11 +188,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.transactions,
             name: RouteNames.transactionsName,
             builder: (context, state) => const TransactionListScreen(),
+            routes: [
+              GoRoute(
+                path: 'recurring',
+                name: RouteNames.recurringName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => const RecurringListScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.subscriptions,
             name: RouteNames.subscriptionsName,
             builder: (context, state) => const SubscriptionListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.subscriptionDetail,
+                name: RouteNames.subscriptionDetailName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final subscription = state.extra as Subscription?;
+                  return SubscriptionDetailScreen(
+                    subscriptionId: state.pathParameters['id']!,
+                    initialSubscription: subscription,
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.debts,

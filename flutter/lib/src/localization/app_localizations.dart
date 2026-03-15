@@ -688,6 +688,36 @@ abstract class AppLocalizations {
   /// **'Inactif'**
   String get subscriptionBadgeInactif;
 
+  /// No description provided for @subscriptionPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer'**
+  String get subscriptionPay;
+
+  /// No description provided for @subscriptionPaySuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement enregistré'**
+  String get subscriptionPaySuccess;
+
+  /// No description provided for @subscriptionPaymentHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des paiements'**
+  String get subscriptionPaymentHistory;
+
+  /// No description provided for @subscriptionNoPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement'**
+  String get subscriptionNoPayments;
+
+  /// No description provided for @subscriptionPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} paiements'**
+  String subscriptionPayments(int count);
+
   /// No description provided for @debtFormPersonField.
   ///
   /// In fr, this message translates to:
@@ -1623,6 +1653,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Hier'**
   String get notificationGroupYesterday;
+
+  /// No description provided for @recurringTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récurrences'**
+  String get recurringTitle;
+
+  /// No description provided for @recurringOverdue.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get recurringOverdue;
+
+  /// No description provided for @recurringToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get recurringToday;
+
+  /// No description provided for @recurringUpcoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'À venir'**
+  String get recurringUpcoming;
+
+  /// No description provided for @recurringValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get recurringValidate;
+
+  /// No description provided for @recurringSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get recurringSkip;
+
+  /// No description provided for @recurringDeactivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver'**
+  String get recurringDeactivate;
+
+  /// No description provided for @recurringEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune récurrence active'**
+  String get recurringEmpty;
+
+  /// No description provided for @recurringDeactivateConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver cette récurrence ?'**
+  String get recurringDeactivateConfirm;
+
+  /// No description provided for @recurringValidateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transaction créée'**
+  String get recurringValidateSuccess;
+
+  /// No description provided for @recurringSkipSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance avancée'**
+  String get recurringSkipSuccess;
+
+  /// No description provided for @recurringDeactivateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récurrence désactivée'**
+  String get recurringDeactivateSuccess;
+
+  /// No description provided for @frequencyHebdomadaire.
+  ///
+  /// In fr, this message translates to:
+  /// **'/semaine'**
+  String get frequencyHebdomadaire;
+
+  /// No description provided for @frequencyMensuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/mois'**
+  String get frequencyMensuel;
+
+  /// No description provided for @frequencyAnnuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/an'**
+  String get frequencyAnnuel;
 }
 
 class _AppLocalizationsDelegate

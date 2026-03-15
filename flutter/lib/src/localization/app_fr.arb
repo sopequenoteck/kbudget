@@ -108,6 +108,18 @@
     }
   },
   "subscriptionBadgeInactif": "Inactif",
+  "subscriptionPay": "Payer",
+  "subscriptionPaySuccess": "Paiement enregistré",
+  "subscriptionPaymentHistory": "Historique des paiements",
+  "subscriptionNoPayments": "Aucun paiement",
+  "subscriptionPayments": "{count} paiements",
+  "@subscriptionPayments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "debtFormPersonField": "Personne",
   "debtFormAmountField": "Montant",
@@ -289,5 +301,21 @@
   "notificationSnoozeTooltip": "Reporter",
   "notificationLoadError": "Impossible de charger la dette",
   "notificationGroupToday": "Aujourd'hui",
-  "notificationGroupYesterday": "Hier"
+  "notificationGroupYesterday": "Hier",
+
+  "recurringTitle": "Récurrences",
+  "recurringOverdue": "En retard",
+  "recurringToday": "Aujourd'hui",
+  "recurringUpcoming": "À venir",
+  "recurringValidate": "Valider",
+  "recurringSkip": "Passer",
+  "recurringDeactivate": "Désactiver",
+  "recurringEmpty": "Aucune récurrence active",
+  "recurringDeactivateConfirm": "Désactiver cette récurrence ?",
+  "recurringValidateSuccess": "Transaction créée",
+  "recurringSkipSuccess": "Échéance avancée",
+  "recurringDeactivateSuccess": "Récurrence désactivée",
+  "frequencyHebdomadaire": "/semaine",
+  "frequencyMensuel": "/mois",
+  "frequencyAnnuel": "/an"
 }

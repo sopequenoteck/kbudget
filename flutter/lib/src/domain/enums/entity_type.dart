@@ -4,5 +4,11 @@ enum EntityType {
   @JsonValue('SUBSCRIPTION')
   subscription,
   @JsonValue('DEBT')
-  debt;
+  debt,
+  @JsonValue('RECURRING_TRANSACTION')
+  recurringTransaction,
+  @JsonValue('BUDGET')
+  budget,
+  @JsonValue('TRANSACTION')
+  transaction;
 }

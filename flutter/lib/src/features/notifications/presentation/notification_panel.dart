@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -11,6 +12,8 @@ import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/repay_bottom_sheet.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/snooze_dialog.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
+import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
+import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
 class NotificationPanel extends ConsumerStatefulWidget {
@@ -152,6 +155,10 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
   Widget _buildNotificationItem(NotificationModel notification, ThemeData theme, AppLocalizations l10n) {
     final isDebtNotification = notification.type == NotificationType.debtDue ||
         notification.type == NotificationType.debtReminder;
+    final isRecurringNotification =
+        notification.type == NotificationType.recurringTransactionDue;
+    final isSubscriptionNotification =
+        notification.type == NotificationType.subscriptionDue;
 
     return Dismissible(
       key: Key(notification.id),
@@ -230,7 +237,47 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                   ),
                 ],
               )
-            : null,
+            : isRecurringNotification && notification.entityId != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () => _onValidateRecurringAction(notification),
+                        icon: const PhosphorIcon(
+                          PhosphorIconsRegular.check,
+                          size: 18,
+                          color: AppColors.success,
+                        ),
+                        tooltip: 'Valider',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      ),
+                      IconButton(
+                        onPressed: () => _onSkipRecurringAction(notification),
+                        icon: const PhosphorIcon(
+                          PhosphorIconsRegular.skipForward,
+                          size: 18,
+                          color: AppColors.warning,
+                        ),
+                        tooltip: 'Passer',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      ),
+                    ],
+                  )
+                : isSubscriptionNotification && notification.entityId != null
+                    ? IconButton(
+                        onPressed: () => _onPaySubscriptionAction(notification),
+                        icon: PhosphorIcon(
+                          PhosphorIconsRegular.currencyEur,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
+                        tooltip: 'Payer',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      )
+                    : null,
       ),
     );
   }
@@ -245,6 +292,17 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
         notification.entityId != null) {
       Navigator.of(context).pop();
       context.push('/debts/${notification.entityId}');
+    } else if (notification.type == NotificationType.recurringTransactionDue) {
+      Navigator.of(context).pop();
+      context.push('/transactions/recurring');
+    } else if (notification.type == NotificationType.subscriptionDue &&
+        notification.entityId != null) {
+      Navigator.of(context).pop();
+      context.push('/subscriptions/${notification.entityId}');
+    } else if (notification.type == NotificationType.budgetThreshold ||
+        notification.type == NotificationType.budgetExceeded) {
+      Navigator.of(context).pop();
+      context.push('/budgets');
     }
   }
 
@@ -288,6 +346,30 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
         SnackBar(content: Text(l10n.notificationLoadError)),
       );
     }
+  }
+
+  Future<void> _onValidateRecurringAction(NotificationModel notification) async {
+    if (notification.entityId == null) return;
+    if (!notification.read) {
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+    await ref.read(recurringListNotifierProvider.notifier).validate(notification.entityId!);
+  }
+
+  Future<void> _onSkipRecurringAction(NotificationModel notification) async {
+    if (notification.entityId == null) return;
+    if (!notification.read) {
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+    await ref.read(recurringListNotifierProvider.notifier).skip(notification.entityId!);
+  }
+
+  Future<void> _onPaySubscriptionAction(NotificationModel notification) async {
+    if (notification.entityId == null) return;
+    if (!notification.read) {
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+    }
+    await ref.read(subscriptionNotifierProvider.notifier).pay(notification.entityId!);
   }
 
   void _onDeleteAll(AppLocalizations l10n) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/segmented_filter.dart';
@@ -13,8 +14,8 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
-import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
+import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -329,10 +330,10 @@ class _SubscriptionListScreenState
               rightSubtitle: convertedSubtitle ??
                   (sub.actif ? null : l10n.subscriptionBadgeInactif),
               onPressed: () {
-                ref.read(modalNotifierProvider.notifier).open(
-                      ModalType.subscription,
-                      entity: sub,
-                    );
+                context.push(
+                  '${RouteNames.subscriptions}/${sub.id}',
+                  extra: sub,
+                );
               },
             );
           },
