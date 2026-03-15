@@ -19,6 +19,8 @@ import { SelectPicker } from '../../../../shared/components/select-picker/select
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
 import { TransactionService } from '../../../../core/services/transaction';
+import { RecurringTransactionService } from '../../../../core/services/recurring-transaction';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
 import {
@@ -26,6 +28,8 @@ import {
   TransactionRequest,
   TransactionType,
 } from '../../../../core/models/transaction.model';
+import { RecurringTransactionRequest } from '../../../../core/models/recurring-transaction.model';
+import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
@@ -39,6 +43,8 @@ export class TransactionForm {
   private readonly fb = inject(FormBuilder);
   private readonly accountService = inject(AccountService);
   private readonly transactionService = inject(TransactionService);
+  private readonly recurringTransactionService = inject(RecurringTransactionService);
+  private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
 
   readonly transaction = computed(() => this.modalService.editingEntity() as Transaction | null);
@@ -46,9 +52,15 @@ export class TransactionForm {
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
-  readonly isEditMode = computed(() => this.transaction() !== null);
+  readonly isEditing = computed(() => this.transaction() !== null && !this.modalService.asRecurring());
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+
+  readonly frequencyOptions: SelectPickerItem[] = [
+    { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
+    { id: Frequency.MENSUEL, label: 'Mensuel', icon: null, secondaryText: null, color: null },
+    { id: Frequency.ANNUEL, label: 'Annuel', icon: null, secondaryText: null, color: null },
+  ];
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -76,12 +88,50 @@ export class TransactionForm {
     categoryId: [''],
     note: ['', [Validators.maxLength(500)]],
     accountId: [''],
+    isRecurring: [false],
+    frequency: [{ value: Frequency.MENSUEL, disabled: true }],
+    nextOccurrence: [{ value: '', disabled: true }],
+  });
+
+  readonly today = new Date().toISOString().split('T')[0];
+
+  private readonly isRecurringSignal = toSignal(this.form.get('isRecurring')!.valueChanges, {
+    initialValue: false,
   });
 
   constructor() {
     effect(() => {
+      const isRecurring = this.isRecurringSignal();
+      if (isRecurring) {
+        this.form.get('frequency')!.enable();
+        this.form.get('nextOccurrence')!.enable();
+        this.form.get('date')!.disable();
+      } else {
+        this.form.get('frequency')!.disable();
+        this.form.get('nextOccurrence')!.disable();
+        this.form.get('date')!.enable();
+      }
+    });
+
+    effect(() => {
       const tx = this.transaction();
-      if (tx) {
+      const asRecurring = this.modalService.asRecurring();
+
+      if (asRecurring && tx) {
+        this.form.patchValue({
+          libelle: tx.libelle,
+          montant: String(tx.montant),
+          categoryId: tx.category?.id ?? '',
+          note: tx.note ?? '',
+          accountId: tx.account?.id ?? '',
+          isRecurring: true,
+          frequency: Frequency.MENSUEL,
+          nextOccurrence: this.today,
+        });
+        this.form.get('frequency')!.enable();
+        this.form.get('nextOccurrence')!.enable();
+        this.form.get('date')!.disable();
+      } else if (tx) {
         this.form.patchValue({
           libelle: tx.libelle,
           montant: String(tx.montant),
@@ -106,22 +156,37 @@ export class TransactionForm {
     this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
-    const request: TransactionRequest = {
-      libelle: raw.libelle,
-      montant: Number(raw.montant),
-      type: this.type(),
-      date: raw.date,
-      categoryId: raw.categoryId || undefined,
-      note: raw.note || undefined,
-      accountId: raw.accountId || undefined,
-    };
 
     try {
-      const tx = this.transaction();
-      if (tx) {
-        await firstValueFrom(this.transactionService.update(tx.id, request));
+      if (raw.isRecurring) {
+        const request: RecurringTransactionRequest = {
+          libelle: raw.libelle,
+          montant: Number(raw.montant),
+          type: this.type(),
+          frequency: raw.frequency as Frequency,
+          nextOccurrence: raw.nextOccurrence,
+          categoryId: raw.categoryId || undefined,
+          note: raw.note || undefined,
+          accountId: raw.accountId || undefined,
+        };
+        await firstValueFrom(this.recurringTransactionService.create(request));
+        this.toastService.success('Transaction récurrente créée');
       } else {
-        await firstValueFrom(this.transactionService.create(request));
+        const request: TransactionRequest = {
+          libelle: raw.libelle,
+          montant: Number(raw.montant),
+          type: this.type(),
+          date: raw.date,
+          categoryId: raw.categoryId || undefined,
+          note: raw.note || undefined,
+          accountId: raw.accountId || undefined,
+        };
+        const tx = this.transaction();
+        if (tx && !this.modalService.asRecurring()) {
+          await firstValueFrom(this.transactionService.update(tx.id, request));
+        } else {
+          await firstValueFrom(this.transactionService.create(request));
+        }
       }
       this.modalService.closeModal();
       this.saved.emit();

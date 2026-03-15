@@ -297,6 +297,7 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V20) (085-recurring-transactions-backend)
 - TypeScript 5.9 + Angular 21, Angular Router, Angular Signals, @ng-icons/phosphor-icons (086-angular-recurring-transactions)
 - N/A (server-only, consomme API REST) (086-angular-recurring-transactions)
+- N/A (server-only, consomme API REST POST /transactions/recurring) (087-angular-recurring-form)
 
 ### Backend (api/)
 

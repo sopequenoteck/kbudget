@@ -11,6 +11,8 @@ import { Subscription } from 'rxjs';
 import { forkJoin } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorRepeat } from '@ng-icons/phosphor-icons/regular';
 import { TransactionService } from '../../core/services/transaction';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
@@ -22,7 +24,8 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 
 @Component({
   selector: 'app-transactions',
-  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, ConvertAmountPipe],
+  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, ConvertAmountPipe],
+  providers: [provideIcons({ phosphorRepeat })],
   templateUrl: './transactions.html',
   styleUrl: './transactions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -129,5 +132,10 @@ export class Transactions {
   onTransactionPressed(transaction: Transaction): void {
     if (transaction.type === TransactionType.AJUSTEMENT) return;
     this.modalService.openModal('transaction', transaction);
+  }
+
+  onMakeRecurring(event: Event, transaction: Transaction): void {
+    event.stopPropagation();
+    this.modalService.openModal('transaction', transaction, { asRecurring: true });
   }
 }

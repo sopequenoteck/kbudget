@@ -24,14 +24,49 @@
     </app-form-field>
   </div>
 
-  <app-form-field
-    label="Date"
-    fieldId="date"
-    [showError]="isInvalid('date')"
-    [errorMessage]="'Date requise'"
-  >
-    <input id="date" type="date" formControlName="date" />
-  </app-form-field>
+  @if (!isEditing()) {
+    <div class="recurring-toggle">
+      <label class="recurring-toggle__label" for="isRecurring">
+        <input
+          id="isRecurring"
+          type="checkbox"
+          formControlName="isRecurring"
+          class="recurring-toggle__checkbox"
+        />
+        <span class="recurring-toggle__track"></span>
+        <span class="recurring-toggle__text">Transaction récurrente</span>
+      </label>
+    </div>
+  }
+
+  @if (form.get('isRecurring')?.value) {
+    <app-form-field label="Fréquence" fieldId="frequency">
+      <app-select-picker
+        formControlName="frequency"
+        [items]="frequencyOptions"
+        placeholder="Sélectionner une fréquence"
+        [clearable]="false"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Prochaine occurrence"
+      fieldId="nextOccurrence"
+      [showError]="isInvalid('nextOccurrence')"
+      [errorMessage]="'Date requise'"
+    >
+      <input id="nextOccurrence" type="date" formControlName="nextOccurrence" [min]="today" />
+    </app-form-field>
+  } @else {
+    <app-form-field
+      label="Date"
+      fieldId="date"
+      [showError]="isInvalid('date')"
+      [errorMessage]="'Date requise'"
+    >
+      <input id="date" type="date" formControlName="date" />
+    </app-form-field>
+  }
 
   @if (hasAccounts()) {
     <app-form-field label="Compte" fieldId="accountId">
@@ -39,10 +74,10 @@
         formControlName="accountId"
         [items]="accountItems()"
         placeholder="Selectionner un compte"
-        [clearable]="!isEditMode() || !!form.get('accountId')?.value"
+        [clearable]="!isEditing() || !!form.get('accountId')?.value"
       />
     </app-form-field>
-  } @else if (!isEditMode()) {
+  } @else if (!isEditing()) {
     <div class="form-info">Créez un compte dans les paramètres pour associer vos transactions</div>
   }
 
@@ -60,12 +95,12 @@
   </app-form-field>
 
   <div class="form-actions">
-    @if (isEditMode()) {
+    @if (isEditing()) {
       <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
     }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
     <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
+      {{ submitting() ? 'Enregistrement...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

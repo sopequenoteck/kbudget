@@ -176,6 +176,43 @@
   }
 }
 
+// -- Item transaction avec bouton récurrente --
+.transaction-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  app-list-item {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// -- Bouton "Rendre récurrente" --
+.btn-recurring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-right: var(--space-3);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
+
+  &:hover {
+    background-color: var(--hover-bg);
+    color: var(--color-primary);
+  }
+}
+
 // -- États --
 .state-loading,
 .state-empty,

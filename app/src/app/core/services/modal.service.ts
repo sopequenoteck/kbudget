@@ -49,6 +49,7 @@ const EDIT_TITLES: Record<ModalType, string> = {
 export class ModalService {
   readonly activeModal = signal<ModalType | null>(null);
   readonly editingEntity = signal<EditableEntity | null>(null);
+  readonly asRecurring = signal(false);
   readonly modalOpen = computed(() => this.activeModal() !== null);
   readonly modalTitle = computed(() => {
     const type = this.activeModal();
@@ -56,13 +57,15 @@ export class ModalService {
     return this.editingEntity() ? EDIT_TITLES[type] : CREATE_TITLES[type];
   });
 
-  openModal(type: ModalType, entity?: EditableEntity): void {
+  openModal(type: ModalType, entity?: EditableEntity, options?: { asRecurring?: boolean }): void {
     this.editingEntity.set(entity ?? null);
+    this.asRecurring.set(options?.asRecurring ?? false);
     this.activeModal.set(type);
   }
 
   closeModal(): void {
     this.activeModal.set(null);
     this.editingEntity.set(null);
+    this.asRecurring.set(false);
   }
 }

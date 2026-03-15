@@ -73,7 +73,7 @@
 } @else {
   <ul class="transaction-list">
     @for (transaction of filteredTransactions(); track transaction.id) {
-      <li>
+      <li class="transaction-item">
         <app-list-item
           [icon]="getIcon(transaction)"
           [title]="transaction.libelle"
@@ -84,6 +84,17 @@
           [valueClass]="getValueClass(transaction)"
           (pressed)="onTransactionPressed(transaction)"
         />
+        @if (transaction.type !== 'AJUSTEMENT') {
+          <button
+            class="btn-recurring"
+            type="button"
+            (click)="onMakeRecurring($event, transaction)"
+            title="Rendre récurrente"
+            aria-label="Rendre cette transaction récurrente"
+          >
+            <ng-icon name="phosphorRepeat" size="16" />
+          </button>
+        }
       </li>
     }
   </ul>
