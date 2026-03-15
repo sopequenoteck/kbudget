@@ -21,6 +21,7 @@ export class PreferenceService {
   readonly primaryCurrency = computed(() => this.currencies()[0] ?? 'EUR');
   readonly enabledNotificationTypes = signal<NotificationType[]>(['SUBSCRIPTION_DUE', 'DEBT_DUE']);
   readonly timezone = signal<string>('Europe/Paris');
+  readonly textScale = signal<string>('MEDIUM');
   readonly error = signal<string | null>(null);
 
   async loadPreferences(): Promise<void> {
@@ -33,6 +34,7 @@ export class PreferenceService {
       this.currencies.set(prefs.currencies ?? ['EUR']);
       this.enabledNotificationTypes.set(prefs.enabledNotificationTypes ?? ['SUBSCRIPTION_DUE', 'DEBT_DUE']);
       this.timezone.set(prefs.timezone ?? 'Europe/Paris');
+      this.textScale.set(prefs.textScale ?? 'MEDIUM');
       this.error.set(null);
     } catch (e) {
       if (isDevMode()) console.error('Failed to load preferences:', e);
@@ -80,6 +82,7 @@ export class PreferenceService {
       currencies: this.currencies(),
       enabledNotificationTypes: this.enabledNotificationTypes(),
       timezone: this.timezone(),
+      textScale: this.textScale(),
       ...request,
     };
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged)).catch(
@@ -102,6 +105,11 @@ export class PreferenceService {
   updateTimezone(tz: string): void {
     this.timezone.set(tz);
     this.update({ timezone: tz });
+  }
+
+  updateTextScale(scale: string): void {
+    this.textScale.set(scale);
+    this.update({ textScale: scale });
   }
 
   reorderNavigation(newNavOrder: Feature[]): void {

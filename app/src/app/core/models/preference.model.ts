@@ -54,6 +54,7 @@ export interface UserPreference {
   currencies?: string[];
   enabledNotificationTypes?: NotificationType[];
   timezone?: string;
+  textScale?: string;
 }
 
 export interface UserPreferenceRequest {
@@ -64,4 +65,5 @@ export interface UserPreferenceRequest {
   currencies?: string[] | null;
   enabledNotificationTypes?: NotificationType[] | null;
   timezone?: string | null;
+  textScale?: string | null;
 }

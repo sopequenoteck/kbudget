@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.model;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.TextScale;
 import fr.kksdev.budget.api.model.converter.CurrencyListConverter;
 import fr.kksdev.budget.api.model.converter.FeatureListConverter;
 import fr.kksdev.budget.api.model.converter.NotificationTypeListConverter;
@@ -63,6 +64,11 @@ public class UserPreference {
     @Column(name = "timezone")
     @Builder.Default
     private String timezone = "Europe/Paris";
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "text_scale", length = 20)
+    private TextScale textScale = TextScale.MEDIUM;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

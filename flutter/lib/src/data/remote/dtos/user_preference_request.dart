@@ -14,6 +14,7 @@ class UserPreferenceRequest with _$UserPreferenceRequest {
     List<String>? currencies,
     List<NotificationType>? enabledNotificationTypes,
     String? timezone,
+    String? textScale,
   }) = _UserPreferenceRequest;
 
   factory UserPreferenceRequest.fromJson(Map<String, dynamic> json) =>

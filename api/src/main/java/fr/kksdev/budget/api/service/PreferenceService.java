@@ -84,6 +84,9 @@ public class PreferenceService {
             }
             preference.setTimezone(request.timezone());
         }
+        if (request.textScale() != null) {
+            preference.setTextScale(request.textScale());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -184,7 +187,8 @@ public class PreferenceService {
                 preference.getIncludeShopInBalance(),
                 preference.getCurrencies(),
                 preference.getEnabledNotificationTypes(),
-                preference.getTimezone()
+                preference.getTimezone(),
+                preference.getTextScale()
         );
     }
 }

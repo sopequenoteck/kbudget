@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.enums.TextScale;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import fr.kksdev.budget.api.service.PreferenceService;
@@ -61,7 +62,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -81,7 +82,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
                 List.of(Feature.SHOP, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -108,7 +109,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
                 List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -126,7 +127,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return200_when_disableAllFeatures() throws Exception {
-        var response = new UserPreferenceResponse(List.of(), List.of(), null, false, List.of(Currency.EUR), List.of(), "Europe/Paris");
+        var response = new UserPreferenceResponse(List.of(), List.of(), null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM);
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
@@ -169,7 +170,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
                 List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris"
+                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);

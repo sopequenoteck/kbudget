@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.dto.request;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.TextScale;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -15,5 +16,6 @@ public record UserPreferenceRequest(
         Boolean includeShopInBalance,
         List<Currency> currencies,
         List<NotificationType> enabledNotificationTypes,
-        String timezone
+        String timezone,
+        TextScale textScale
 ) {}
