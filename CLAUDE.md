@@ -305,6 +305,8 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9, SCSS + Angular 21 (standalone components, OnPush, Signals) (091-dashboard-visual-revamp)
 - N/A (aucun changement de données) (091-dashboard-visual-revamp)
 - TypeScript 5.9, SCSS + Angular 21 (standalone, OnPush, Signals), Phosphor Icons (092-bottom-nav-revamp)
+- TypeScript 5.9, SCSS + Angular 21 (Signals, OnPush, standalone) (093-angular-text-scale)
+- localStorage (clé `budget_text_scale`) (093-angular-text-scale)
 
 ### Backend (api/)
 
