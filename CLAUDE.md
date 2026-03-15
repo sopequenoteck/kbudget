@@ -300,11 +300,12 @@ Approche **signals-first** obligatoire :
 - N/A (server-only, consomme API REST POST /transactions/recurring) (087-angular-recurring-form)
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, intl, shimmer, phosphor_flutter (088-flutter-recurring-transactions)
 - Server-only (API REST — recurring transactions et subscription payments; pas de Drift pour cette feature) (088-flutter-recurring-transactions)
+- PostgreSQL 15+ (Flyway V20), pas de Drift/SQLite pour cette feature (server-only) (089-recurring-transactions)
 
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V19
+- PostgreSQL 15+, Flyway migrations V1-V20
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
