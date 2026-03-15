@@ -110,9 +110,9 @@ Le scheduler quotidien (8h) détecte les échéances dues et crée des notificat
 - **FR-004**: Le système DOIT passer une occurrence via POST /transactions/recurring/{id}/skip (avance date sans transaction)
 - **FR-005**: Le système DOIT désactiver une récurrence via POST /transactions/recurring/{id}/deactivate
 - **FR-006**: Le système DOIT payer un abonnement via POST /subscriptions/{id}/pay (crée transaction liée par subscriptionId)
-- **FR-007**: Le système DOIT fournir l'historique des paiements (GET /subscriptions/{id}/payments) et le nombre total de paiements (GET /subscriptions/{id}/total-paid). Le cumul monétaire est calculé côté frontend
+- **FR-007**: Le système DOIT fournir l'historique des paiements (GET /subscriptions/{id}/payments) et le nombre total de paiements (GET /subscriptions/{id}/payments/total). Le cumul monétaire est calculé côté frontend
 - **FR-008**: Le scheduler quotidien DOIT détecter les échéances et créer des notifications sans créer de transactions automatiquement
-- **FR-008b**: Le cumul monétaire des paiements d'un abonnement DOIT être calculé côté frontend à partir de la liste des paiements (GET /subscriptions/{id}/payments). L'endpoint GET /subscriptions/{id}/total-paid retourne le nombre de paiements (count), pas la somme monétaire
+- **FR-008b**: Le cumul monétaire des paiements d'un abonnement DOIT être calculé côté frontend à partir de la liste des paiements (GET /subscriptions/{id}/payments). L'endpoint GET /subscriptions/{id}/payments/total retourne le nombre de paiements (count), pas la somme monétaire
 - **FR-009**: Les transactions récurrentes "templates" NE DOIVENT PAS apparaître dans GET /transactions standard
 - **FR-010**: Toutes les données DOIVENT être isolées par utilisateur authentifié
 
@@ -174,7 +174,7 @@ ALTER TABLE transactions ADD COLUMN subscription_id UUID REFERENCES subscription
 | POST | /transactions/recurring/{id}/deactivate | Désactiver une récurrence |
 | POST | /subscriptions/{id}/pay | Payer un abonnement |
 | GET | /subscriptions/{id}/payments | Historique paiements abonnement |
-| GET | /subscriptions/{id}/total-paid | Total cumulé paiements |
+| GET | /subscriptions/{id}/payments/total | Total cumulé paiements |
 
 ### Services créés
 

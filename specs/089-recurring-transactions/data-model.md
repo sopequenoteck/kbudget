@@ -32,7 +32,7 @@ Aucune modification de la table. Les paiements sont tracés via les transactions
 
 **Requêtes dérivées** :
 - `GET /subscriptions/{id}/payments` → `SELECT * FROM transactions WHERE subscription_id = ? AND user_id = ? ORDER BY date DESC`
-- `GET /subscriptions/{id}/total-paid` → `SELECT COUNT(*) FROM transactions WHERE subscription_id = ? AND user_id = ?`
+- `GET /subscriptions/{id}/payments/total` → `SELECT COUNT(*) FROM transactions WHERE subscription_id = ? AND user_id = ?`
 
 ### Notification (enrichie)
 

@@ -110,7 +110,7 @@ Historique des paiements d'un abonnement.
 
 ---
 
-### GET /subscriptions/{id}/total-paid
+### GET /subscriptions/{id}/payments/total
 
 Nombre total de paiements effectués pour un abonnement (count, pas somme monétaire).
 
