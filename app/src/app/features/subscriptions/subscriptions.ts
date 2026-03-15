@@ -7,6 +7,7 @@ import {
   isDevMode,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { SubscriptionService } from '../../core/services/subscription';
 import { PreferenceService } from '../../core/services/preference';
@@ -28,6 +29,7 @@ type StatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 export class Subscriptions {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly modalService = inject(ModalService);
+  private readonly router = inject(Router);
   readonly preferenceService = inject(PreferenceService);
 
   readonly statusFilter = signal<StatusFilter>('ALL');
@@ -118,6 +120,6 @@ export class Subscriptions {
   }
 
   onSubscriptionPressed(subscription: Subscription): void {
-    this.modalService.openModal('subscription', subscription);
+    this.router.navigate(['/subscriptions', subscription.id]);
   }
 }

@@ -1,0 +1,86 @@
+<header class="recurring-header">
+  <button class="btn-icon" (click)="goBack()" aria-label="Retour">
+    <ng-icon name="phosphorArrowLeft" size="24" />
+  </button>
+  <h1 class="recurring-header__title">Transactions récurrentes</h1>
+</header>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>{{ error() }}</p>
+    <button class="btn-outline" (click)="reload()">Réessayer</button>
+  </div>
+} @else if (sortedRecurringTransactions().length === 0) {
+  <div class="state-empty">
+    <ng-icon name="phosphorRepeat" size="40" />
+    <p>Aucune transaction récurrente</p>
+  </div>
+} @else {
+  <ul class="recurring-list">
+    @for (item of sortedRecurringTransactions(); track item.id) {
+      <li class="recurring-item">
+        <div class="recurring-item__main">
+          <span class="recurring-item__icon">{{ item.category.icone }}</span>
+          <div class="recurring-item__info">
+            <span class="recurring-item__label">{{ item.libelle }}</span>
+            <span class="recurring-item__meta">
+              {{ item.account.nom }} &middot; {{ getFrequencyLabel(item.frequency) }}
+            </span>
+          </div>
+          <div class="recurring-item__right">
+            <span class="recurring-item__amount">
+              {{ item.montant | amount: item.type }}
+            </span>
+            <span class="recurring-item__date">
+              {{ item.nextOccurrence | date: 'dd/MM/yyyy' }}
+            </span>
+            @switch (getStatus(item.nextOccurrence)) {
+              @case ('overdue') {
+                <span class="badge badge--overdue">En retard</span>
+              }
+              @case ('today') {
+                <span class="badge badge--today">Aujourd'hui</span>
+              }
+              @default {
+                <span class="badge badge--upcoming">À venir</span>
+              }
+            }
+          </div>
+        </div>
+        <div class="recurring-item__actions">
+          <button
+            class="btn-action btn-action--primary"
+            [disabled]="actionInProgress() === item.id"
+            (click)="onValidate(item)"
+            aria-label="Valider"
+          >
+            <ng-icon name="phosphorCheck" size="16" />
+            Valider
+          </button>
+          <button
+            class="btn-action btn-action--secondary"
+            [disabled]="actionInProgress() === item.id"
+            (click)="onSkip(item)"
+            aria-label="Passer"
+          >
+            <ng-icon name="phosphorSkipForward" size="16" />
+            Passer
+          </button>
+          <button
+            class="btn-action btn-action--danger"
+            [disabled]="actionInProgress() === item.id"
+            (click)="onDeactivate(item)"
+            aria-label="Désactiver"
+          >
+            <ng-icon name="phosphorPause" size="16" />
+            Désactiver
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}

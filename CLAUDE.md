@@ -295,6 +295,8 @@ Approche **signals-first** obligatoire :
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, flutter_svg (084-bank-accounts)
 - PostgreSQL 15+ (Flyway V19), SQLite/Drift (migration v3, +3 colonnes) (084-bank-accounts)
 - PostgreSQL 15+ (Flyway V20) (085-recurring-transactions-backend)
+- TypeScript 5.9 + Angular 21, Angular Router, Angular Signals, @ng-icons/phosphor-icons (086-angular-recurring-transactions)
+- N/A (server-only, consomme API REST) (086-angular-recurring-transactions)
 
 ### Backend (api/)
 

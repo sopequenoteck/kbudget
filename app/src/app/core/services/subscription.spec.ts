@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { SubscriptionService } from './subscription';
 import { ApiService } from './api';
 import { Subscription, SubscriptionRequest, Frequency } from '../models/subscription.model';
+import { SubscriptionPaymentResponse } from '../models/subscription-payment.model';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
@@ -161,5 +162,68 @@ describe('SubscriptionService', () => {
 
     // Assert
     expect(service.refreshTrigger()).toBe(3);
+  });
+
+  it('should_call_pay_endpoint_when_pay_called', () => {
+    // Arrange
+    const mockPayment: SubscriptionPaymentResponse = {
+      id: 'pay-1',
+      montant: 13.99,
+      date: '2026-03-15',
+      subscriptionName: 'Netflix',
+      accountName: 'Compte courant',
+    };
+    apiService.post.mockReturnValue(of(mockPayment));
+
+    // Act
+    service.pay('uuid-1').subscribe((result) => {
+      // Assert
+      expect(result).toEqual(mockPayment);
+    });
+
+    expect(apiService.post).toHaveBeenCalledWith('/subscriptions/uuid-1/pay', {});
+  });
+
+  it('should_call_getPayments_endpoint_when_getPayments_called', () => {
+    // Arrange
+    const mockPayments: SubscriptionPaymentResponse[] = [
+      {
+        id: 'pay-1',
+        montant: 13.99,
+        date: '2026-03-15',
+        subscriptionName: 'Netflix',
+        accountName: 'Compte courant',
+      },
+      {
+        id: 'pay-2',
+        montant: 13.99,
+        date: '2026-02-15',
+        subscriptionName: 'Netflix',
+        accountName: 'Compte courant',
+      },
+    ];
+    apiService.get.mockReturnValue(of(mockPayments));
+
+    // Act
+    service.getPayments('uuid-1').subscribe((result) => {
+      // Assert
+      expect(result).toEqual(mockPayments);
+    });
+
+    expect(apiService.get).toHaveBeenCalledWith('/subscriptions/uuid-1/payments');
+  });
+
+  it('should_call_getTotalPaid_endpoint_when_getTotalPaid_called', () => {
+    // Arrange
+    const mockTotal = { total: 27.98, count: 2 };
+    apiService.get.mockReturnValue(of(mockTotal));
+
+    // Act
+    service.getTotalPaid('uuid-1').subscribe((result) => {
+      // Assert
+      expect(result).toEqual(mockTotal);
+    });
+
+    expect(apiService.get).toHaveBeenCalledWith('/subscriptions/uuid-1/payments/total');
   });
 });

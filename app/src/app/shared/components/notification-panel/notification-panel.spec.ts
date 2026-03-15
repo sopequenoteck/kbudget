@@ -9,6 +9,8 @@ import { DebtService } from '../../../core/services/debt';
 import { ToastService } from '../toast/toast.service';
 import { type NotificationModel } from '../../../core/models/notification.model';
 import { Debt, DebtType } from '../../../core/models/debt.model';
+import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
+import { SubscriptionService } from '../../../core/services/subscription';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
@@ -70,6 +72,16 @@ describe('NotificationPanel', () => {
     error: ReturnType<typeof vi.fn>;
   };
 
+  let recurringTransactionServiceMock: {
+    validate: ReturnType<typeof vi.fn>;
+    skip: ReturnType<typeof vi.fn>;
+    deactivate: ReturnType<typeof vi.fn>;
+  };
+
+  let subscriptionServiceMock: {
+    pay: ReturnType<typeof vi.fn>;
+  };
+
   const createNotificationServiceMock = (notifications: NotificationModel[]) => {
     const notificationsSignal = signal(notifications);
     const unreadCountSignal = signal(notifications.filter((n) => !n.read).length);
@@ -101,6 +113,16 @@ describe('NotificationPanel', () => {
       success: vi.fn(),
       error: vi.fn(),
     };
+
+    recurringTransactionServiceMock = {
+      validate: vi.fn().mockReturnValue(of({})),
+      skip: vi.fn().mockReturnValue(of({})),
+      deactivate: vi.fn().mockReturnValue(of({})),
+    };
+
+    subscriptionServiceMock = {
+      pay: vi.fn().mockReturnValue(of({})),
+    };
   });
 
   const setupTestBed = () => {
@@ -110,6 +132,8 @@ describe('NotificationPanel', () => {
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
+        { provide: SubscriptionService, useValue: subscriptionServiceMock },
       ],
     });
   };
@@ -172,7 +196,7 @@ describe('NotificationPanel', () => {
     expect(buttonTexts).toContain('Reporter');
   });
 
-  it('should_not_show_action_buttons_for_subscription_notification', () => {
+  it('should_show_pay_button_for_subscription_notification', () => {
     const subscriptionNotification = makeNotification({
       id: 'notif-sub',
       type: 'SUBSCRIPTION_DUE',
@@ -189,7 +213,8 @@ describe('NotificationPanel', () => {
     fixture.detectChanges();
 
     const actionButtons = fixture.nativeElement.querySelectorAll('.notification-action-btn');
-    expect(actionButtons.length).toBe(0);
+    expect(actionButtons.length).toBe(1);
+    expect(actionButtons[0].textContent.trim()).toBe('Payer');
   });
 
   it('should_not_show_action_buttons_for_budget_threshold_notification', () => {
@@ -303,5 +328,39 @@ describe('NotificationPanel', () => {
     expect(component.getIconForType('DEBT_REMINDER')).toBe('phosphorBellRinging');
     expect(component.getIconForType('BUDGET_THRESHOLD')).toBe('phosphorWarning');
     expect(component.getIconForType('BUDGET_EXCEEDED')).toBe('phosphorWarning');
+  });
+
+  it('should_show_validate_skip_buttons_for_recurring_notification', () => {
+    const recurringNotification = makeNotification({
+      id: 'notif-recurring',
+      type: 'RECURRING_TRANSACTION_DUE',
+      title: 'Transaction récurrente',
+      message: 'Loyer à valider',
+      entityType: 'RECURRING_TRANSACTION',
+      entityId: 'rec-1',
+    });
+    notificationServiceMock = createNotificationServiceMock([recurringNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const actionButtons = fixture.nativeElement.querySelectorAll('.notification-action-btn');
+    expect(actionButtons.length).toBeGreaterThanOrEqual(2);
+
+    const buttonTexts = Array.from(actionButtons).map((btn: Element) =>
+      (btn as HTMLElement).textContent?.trim(),
+    );
+    expect(buttonTexts).toContain('Valider');
+    expect(buttonTexts).toContain('Passer');
+  });
+
+  it('should_return_repeat_icon_for_recurring_notification', () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    expect(component.getIconForType('RECURRING_TRANSACTION_DUE')).toBe('phosphorRepeat');
   });
 });

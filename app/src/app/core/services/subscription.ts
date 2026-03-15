@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api';
 import { Subscription, SubscriptionRequest } from '../models/subscription.model';
+import { SubscriptionPaymentResponse } from '../models/subscription-payment.model';
 
 @Injectable({
   providedIn: 'root',
@@ -37,5 +38,17 @@ export class SubscriptionService {
 
   delete(id: string): Observable<void> {
     return this.api.delete<void>(`/subscriptions/${id}`).pipe(tap(() => this.refresh()));
+  }
+
+  pay(id: string): Observable<SubscriptionPaymentResponse> {
+    return this.api.post<SubscriptionPaymentResponse>(`/subscriptions/${id}/pay`, {});
+  }
+
+  getPayments(id: string): Observable<SubscriptionPaymentResponse[]> {
+    return this.api.get<SubscriptionPaymentResponse[]>(`/subscriptions/${id}/payments`);
+  }
+
+  getTotalPaid(id: string): Observable<{ total: number; count: number }> {
+    return this.api.get<{ total: number; count: number }>(`/subscriptions/${id}/payments/total`);
   }
 }
