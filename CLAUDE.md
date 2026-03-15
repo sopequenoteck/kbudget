@@ -84,7 +84,7 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - **Category** : nom, icone, couleur, isSystem, updatedAt. FK → User.
 - **RefreshToken** : token (unique), status (ACTIVE/CONSUMED/REVOKED), createdAt, expiresAt. FK → User.
 - **Product** : nom, description (nullable), icone (nullable), imageUrl (nullable), prixAchat, prixVente, stock, totalVendu, actif, createdAt, updatedAt. FK → User.
-- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), currencies (List\<Currency\>, default [EUR]), enabledNotificationTypes (List\<NotificationType\>, nullable), timezone (String, default "Europe/Paris"), updatedAt. @OneToOne → User.
+- **UserPreference** : enabledFeatures (List\<Feature\>), navOrder (List\<Feature\>), shopAccountId (UUID, nullable, FK → Account), includeShopInBalance (Boolean, default false), currencies (List\<Currency\>, default [EUR]), enabledNotificationTypes (List\<NotificationType\>, nullable), timezone (String, default "Europe/Paris"), textScale (TextScale, default MEDIUM), updatedAt. @OneToOne → User.
 - **ExchangeRate** : baseCurrency (Currency), targetCurrency (Currency), rate (BigDecimal, precision 20 scale 6), updatedAt. UNIQUE(user_id, base_currency, target_currency). FK → User.
 - **Notification** : type (NotificationType), entityType (EntityType), entityId (UUID), title, body, read (Boolean, default false), readAt (LocalDateTime, nullable), createdAt. FK → User.
 - **Budget** : montant, frequence (HEBDOMADAIRE/MENSUEL/ANNUEL), currency (Currency, default EUR), seuilNotification (Integer, default 80), actif (Boolean, default true), updatedAt. UNIQUE(user_id, category_id). FK → User + Category.
@@ -307,11 +307,13 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9, SCSS + Angular 21 (standalone, OnPush, Signals), Phosphor Icons (092-bottom-nav-revamp)
 - TypeScript 5.9, SCSS + Angular 21 (Signals, OnPush, standalone) (093-angular-text-scale)
 - localStorage (clé `budget_text_scale`) (093-angular-text-scale)
+- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Angular 21 (094-sync-text-scale-api)
+- PostgreSQL 15+ (Flyway V21) (094-sync-text-scale-api)
 
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V20
+- PostgreSQL 15+, Flyway migrations V1-V21
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -358,3 +360,4 @@ Approche **signals-first** obligatoire :
 - 089-recurring-transactions: Spec consolidée rétroactive cross-plateforme KKS-159 — 67 tâches documentées, 1493 tests validés (488 backend + 379 Angular + 626 Flutter)
 - 091-dashboard-visual-revamp: Dashboard Angular refonte visuelle iOS-like — hero card gradient amber→indigo, glassmorphism cards (dark mode), badges variation, barres budget vertes + animation, transactions en cards individuelles, gradient radial page, micro-interactions tap; transaction subtitle affiche nom du compte; 379 tests inchangés
 - 092-bottom-nav-revamp: Bottom nav Angular refonte visuelle iOS-like — pill indicator (pseudo-élément ::before sur onglet actif), glassmorphism (dark mode, tokens 091 réutilisés), bordure supérieure subtile (light mode), police réduite via data-item-count pour 6+ items; 379 tests inchangés
+- 094-sync-text-scale-api: TextScale enum (SMALL/MEDIUM/LARGE); Flyway V21 (ALTER TABLE user_preferences); PreferenceService + DTOs enrichis (+textScale); Angular TextScaleService bridgé vers PreferenceService via effect() (API source de vérité, localStorage comme cache); Flutter TextScaleNotifier sync API (local-first, server override, fire-and-forget write)
