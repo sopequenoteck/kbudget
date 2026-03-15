@@ -63,10 +63,9 @@ public class DebtService {
             currency = account.getCurrency();
         } else {
             currency = request.currency() != null ? request.currency()
-                    : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+                    : preferenceService.getOrCreatePreference(userId).getCurrencies().getFirst();
         }
-        boolean includeInBalance = account != null ? false
-                : Boolean.TRUE.equals(request.includeInBalance());
+        boolean includeInBalance = account == null && Boolean.TRUE.equals(request.includeInBalance());
 
         Debt debt = Debt.builder()
                 .personne(request.personne())
@@ -118,8 +117,7 @@ public class DebtService {
         validateReminderFields(request);
 
         Account account = resolveAccount(request.accountId(), userId);
-        boolean includeInBalance = account != null ? false
-                : Boolean.TRUE.equals(request.includeInBalance());
+        boolean includeInBalance = account == null && Boolean.TRUE.equals(request.includeInBalance());
 
         debt.setPersonne(request.personne());
         debt.setSens(request.sens());
