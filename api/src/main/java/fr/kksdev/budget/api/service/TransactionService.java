@@ -77,7 +77,7 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> getAllByUser(UUID userId) {
-        return transactionRepository.findByUserIdOrderByDateDesc(userId)
+        return transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -199,7 +199,7 @@ public class TransactionService {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
-        return transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to)
+        return transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(userId, from, to)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -211,7 +211,7 @@ public class TransactionService {
         LocalDate to = yearMonth.atEndOfMonth();
 
         List<Transaction> transactions = transactionRepository
-                .findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to);
+                .findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(userId, from, to);
 
         // Group transactions by account currency
         Map<String, List<Transaction>> byCurrency = transactions.stream()
@@ -301,32 +301,6 @@ public class TransactionService {
                 });
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
-        return new CategoryResponse(
-                category.getId(),
-                category.getNom(),
-                category.getIcone(),
-                category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
-        );
-    }
-
-    private AccountSummary toAccountSummary(Account account) {
-        if (account == null) {
-            return null;
-        }
-        return new AccountSummary(
-                account.getId(),
-                account.getNom(),
-                account.getIcone(),
-                account.getCouleur(),
-                account.getCurrency().name()
-        );
-    }
-
     private TransactionResponse toResponse(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
@@ -334,9 +308,9 @@ public class TransactionService {
                 transaction.getLibelle(),
                 transaction.getType(),
                 transaction.getDate(),
-                toCategoryResponse(transaction.getCategory()),
+                CategoryResponse.from(transaction.getCategory()),
                 transaction.getNote(),
-                toAccountSummary(transaction.getAccount()),
+                AccountSummary.from(transaction.getAccount()),
                 transaction.getTransferId(),
                 transaction.getProduct() != null ? transaction.getProduct().getId() : null,
                 transaction.getProduct() != null ? transaction.getProduct().getNom() : null,

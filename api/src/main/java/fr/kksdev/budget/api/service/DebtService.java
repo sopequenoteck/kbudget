@@ -315,32 +315,6 @@ public class DebtService {
         return null;
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
-        return new CategoryResponse(
-                category.getId(),
-                category.getNom(),
-                category.getIcone(),
-                category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
-        );
-    }
-
-    private AccountSummary toAccountSummary(Account account) {
-        if (account == null) {
-            return null;
-        }
-        return new AccountSummary(
-                account.getId(),
-                account.getNom(),
-                account.getIcone(),
-                account.getCouleur(),
-                account.getCurrency().name()
-        );
-    }
-
     private DebtResponse toResponse(Debt debt) {
         BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
         return toResponse(debt, paid);
@@ -358,8 +332,8 @@ public class DebtService {
                 debt.getCurrency().name(),
                 debt.getRembourse(),
                 montantRestant,
-                toCategoryResponse(debt.getCategory()),
-                toAccountSummary(debt.getAccount()),
+                CategoryResponse.from(debt.getCategory()),
+                AccountSummary.from(debt.getAccount()),
                 debt.getIncludeInBalance(),
                 debt.getReminderDate(),
                 debt.getReminderTime()

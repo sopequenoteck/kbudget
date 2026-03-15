@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
@@ -166,6 +167,59 @@ public class NotificationScheduler {
         if (count > 0) {
             log.info("Rappels dette traités: {} notifications générées", count);
         }
+    }
+
+    @Scheduled(cron = "0 0 8 * * *")
+    public void checkRecurringTransactions() {
+        log.info("Démarrage du job récurrences");
+        int count = 0;
+
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            UUID userId = user.getId();
+            try {
+                count += processRecurringTransactions(userId);
+            } catch (Exception e) {
+                log.error("Erreur traitement récurrences pour userId={}", userId, e);
+            }
+        }
+
+        log.info("Job récurrences terminé: {} notifications générées", count);
+    }
+
+    private int processRecurringTransactions(UUID userId) {
+        if (!preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)) {
+            return 0;
+        }
+
+        String timezone = preferenceService.getUserTimezone(userId);
+        ZoneId zoneId = ZoneId.of(timezone);
+        LocalDate today = LocalDate.now(zoneId);
+
+        int count = 0;
+        List<Transaction> dueRecurrences = transactionRepository
+                .findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(userId, today);
+
+        for (Transaction recurring : dueRecurrences) {
+            LocalDateTime since = LocalDateTime.now(zoneId).minusHours(24);
+            if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                    userId, NotificationType.RECURRING_TRANSACTION_DUE, recurring.getId(), since)) {
+                continue;
+            }
+
+            String currency = recurring.getAccount() != null ? recurring.getAccount().getCurrency().getSymbol() : "€";
+            notificationService.createNotification(
+                    userId,
+                    NotificationType.RECURRING_TRANSACTION_DUE,
+                    "Transaction récurrente " + recurring.getLibelle(),
+                    recurring.getLibelle() + " " + recurring.getMontant() + currency + " — échéance " + recurring.getNextOccurrence(),
+                    EntityType.TRANSACTION,
+                    recurring.getId()
+            );
+            log.info("Notification récurrence créée: {} pour userId={}", recurring.getLibelle(), userId);
+            count++;
+        }
+        return count;
     }
 
     LocalDate getNextDueDate(LocalDate dateDebut, Frequency frequence, ZoneId zoneId) {

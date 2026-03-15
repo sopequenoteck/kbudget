@@ -1,13 +1,17 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Subscription;
+import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
-import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
@@ -344,6 +348,162 @@ class NotificationSchedulerTest {
         notificationScheduler.checkDebtReminders();
 
         verify(debtRepository, never()).findDueReminders(any(), any(), any());
+    }
+
+    // -------------------------------------------------------------------------
+    // T017/T018 — US3: checkRecurringTransactions (scheduler 8h)
+    // -------------------------------------------------------------------------
+
+    private Account buildAccount() {
+        return Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte courant")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💳")
+                .couleur("#000000")
+                .currency(Currency.EUR)
+                .build();
+    }
+
+    private Transaction buildRecurringTransaction(UUID id, LocalDate nextOccurrence, boolean recurringActive) {
+        return Transaction.builder()
+                .id(id)
+                .montant(BigDecimal.valueOf(800))
+                .libelle("Loyer")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.now())
+                .isRecurring(true)
+                .frequency(Frequency.MENSUEL)
+                .nextOccurrence(nextOccurrence)
+                .recurringActive(recurringActive)
+                .account(buildAccount())
+                .user(buildUser())
+                .build();
+    }
+
+    @Test
+    void should_createNotification_when_recurringTransactionDue() {
+        var user = buildUser();
+        var recurringId = UUID.randomUUID();
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of(recurring));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.RECURRING_TRANSACTION_DUE), eq(recurringId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService).createNotification(
+                eq(userId),
+                eq(NotificationType.RECURRING_TRANSACTION_DUE),
+                eq("Transaction récurrente Loyer"),
+                any(String.class),
+                eq(EntityType.TRANSACTION),
+                eq(recurringId)
+        );
+    }
+
+    @Test
+    void should_notCreateNotification_when_noRecurringDue() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of());
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_createNotificationDaily_when_notValidatedYesterday() {
+        var user = buildUser();
+        var recurringId = UUID.randomUUID();
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of(recurring));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.RECURRING_TRANSACTION_DUE), eq(recurringId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService).createNotification(
+                eq(userId),
+                eq(NotificationType.RECURRING_TRANSACTION_DUE),
+                any(String.class),
+                any(String.class),
+                eq(EntityType.TRANSACTION),
+                eq(recurringId)
+        );
+    }
+
+    @Test
+    void should_notDuplicate_when_schedulerRunsTwiceSameDay() {
+        var user = buildUser();
+        var recurringId = UUID.randomUUID();
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of(recurring));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.RECURRING_TRANSACTION_DUE), eq(recurringId), any(LocalDateTime.class))).thenReturn(true);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_skipNotification_when_recurringTransactionDueDisabled() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(false);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(transactionRepository, never()).findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(any(), any());
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_notNotify_when_recurrenceInactive() {
+        var user = buildUser();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        // La query filtre recurringActive=true, donc elle renvoie une liste vide
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of());
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_notCreateTransaction_when_schedulerRuns() {
+        var user = buildUser();
+        var recurringId = UUID.randomUUID();
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of(recurring));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.RECURRING_TRANSACTION_DUE), eq(recurringId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(transactionRepository, never()).save(any());
     }
 
     @Test

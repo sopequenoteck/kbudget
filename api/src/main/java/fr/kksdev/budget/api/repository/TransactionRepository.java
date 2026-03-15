@@ -12,9 +12,21 @@ import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
-    List<Transaction> findByUserIdOrderByDateDesc(UUID userId);
+    List<Transaction> findByUserIdAndIsRecurringFalseOrderByDateDesc(UUID userId);
 
-    List<Transaction> findByUserIdAndDateBetweenOrderByDateDesc(UUID userId, LocalDate from, LocalDate to);
+    List<Transaction> findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(UUID userId, LocalDate from, LocalDate to);
+
+    List<Transaction> findByUserIdAndIsRecurringTrueAndRecurringActiveTrueOrderByNextOccurrenceAsc(UUID userId);
+
+    List<Transaction> findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(UUID userId, LocalDate date);
+
+    List<Transaction> findBySubscriptionIdAndUserIdOrderByDateDesc(UUID subscriptionId, UUID userId);
+
+    @Query("SELECT COALESCE(SUM(t.montant), 0) FROM Transaction t WHERE t.subscription.id = :subscriptionId AND t.user.id = :userId")
+    BigDecimal sumBySubscriptionIdAndUserId(@Param("subscriptionId") UUID subscriptionId, @Param("userId") UUID userId);
+
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.subscription.id = :subscriptionId AND t.user.id = :userId")
+    long countBySubscriptionIdAndUserId(@Param("subscriptionId") UUID subscriptionId, @Param("userId") UUID userId);
 
     @Query(value = "SELECT COALESCE(SUM(CASE WHEN t.type = 'RECETTE' THEN t.montant " +
             "WHEN t.type = 'AJUSTEMENT' THEN t.montant ELSE -t.montant END), 0) " +

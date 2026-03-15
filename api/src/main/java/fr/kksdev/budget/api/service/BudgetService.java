@@ -386,7 +386,7 @@ public class BudgetService {
                 budget.getFrequence().name(),
                 budget.getSeuilNotification(),
                 budget.getActif(),
-                toCategoryResponse(budget.getCategory()),
+                CategoryResponse.from(budget.getCategory()),
                 null,
                 budget.getUpdatedAt()
         );
@@ -396,7 +396,7 @@ public class BudgetService {
         return new BudgetResponse(
                 budget.getId(), budget.getMontant(), budget.getCurrency().name(),
                 budget.getFrequence().name(), budget.getSeuilNotification(),
-                budget.getActif(), toCategoryResponse(budget.getCategory()),
+                budget.getActif(), CategoryResponse.from(budget.getCategory()),
                 spent, budget.getUpdatedAt());
     }
 
@@ -428,7 +428,7 @@ public class BudgetService {
                 budget.getFrequence().name(),
                 budget.getSeuilNotification(),
                 budget.getActif(),
-                toCategoryResponse(budget.getCategory()),
+                CategoryResponse.from(budget.getCategory()),
                 spent,
                 budget.getUpdatedAt()
         );
@@ -444,15 +444,6 @@ public class BudgetService {
         };
     }
 
-    private CategoryResponse toCategoryResponse(Category cat) {
-        return new CategoryResponse(
-                cat.getId(),
-                cat.getNom(),
-                cat.getIcone(),
-                cat.getCouleur(),
-                cat.getIsSystem()
-        );
-    }
 
     private Currency getPrimaryCurrency(UUID userId) {
         var preference = preferenceService.getOrCreatePreference(userId);

@@ -1,5 +1,7 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.model.Category;
+
 import java.util.UUID;
 
 public record CategoryResponse(
@@ -8,4 +10,17 @@ public record CategoryResponse(
         String icone,
         String couleur,
         boolean isSystem
-) {}
+) {
+    public static CategoryResponse from(Category category) {
+        if (category == null) {
+            return null;
+        }
+        return new CategoryResponse(
+                category.getId(),
+                category.getNom(),
+                category.getIcone(),
+                category.getCouleur(),
+                Boolean.TRUE.equals(category.getIsSystem())
+        );
+    }
+}

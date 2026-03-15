@@ -69,6 +69,12 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | account | Account | FK → Account |
 | transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
 | debt | Debt | FK → Debt (nullable, lie la transaction a un remboursement de dette) |
+| product | Product | FK → Product (nullable, lie la transaction a un produit) |
+| subscription | Subscription | FK → Subscription (nullable, paiement d'abonnement) |
+| isRecurring | Boolean | Transaction recurrente (default false) |
+| frequency | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL (nullable, si isRecurring) |
+| nextOccurrence | LocalDate | Prochaine occurrence (nullable, si isRecurring) |
+| recurringActive | Boolean | Recurrence active (default true, si isRecurring) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 

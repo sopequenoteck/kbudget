@@ -129,6 +129,19 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | GET | `/api/subscriptions/{id}` | Detail |
 | PUT | `/api/subscriptions/{id}` | Modifier |
 | DELETE | `/api/subscriptions/{id}` | Supprimer |
+| POST | `/api/subscriptions/{id}/pay` | Payer un abonnement (cree une transaction) |
+| GET | `/api/subscriptions/{id}/payments` | Historique des paiements |
+| GET | `/api/subscriptions/{id}/payments/total` | Cumul des paiements |
+
+### Transactions recurrentes
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/transactions/recurring` | Creer une transaction recurrente |
+| GET | `/api/transactions/recurring` | Lister les recurrences actives |
+| POST | `/api/transactions/recurring/{id}/validate` | Valider une occurrence (cree une transaction) |
+| PATCH | `/api/transactions/recurring/{id}/skip` | Passer une occurrence |
+| PATCH | `/api/transactions/recurring/{id}/deactivate` | Desactiver une recurrence |
 
 ### Dettes
 
@@ -221,7 +234,7 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification)
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
 ├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)

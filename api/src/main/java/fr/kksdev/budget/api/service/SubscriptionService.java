@@ -151,32 +151,6 @@ public class SubscriptionService {
                 });
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
-        return new CategoryResponse(
-                category.getId(),
-                category.getNom(),
-                category.getIcone(),
-                category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
-        );
-    }
-
-    private AccountSummary toAccountSummary(Account account) {
-        if (account == null) {
-            return null;
-        }
-        return new AccountSummary(
-                account.getId(),
-                account.getNom(),
-                account.getIcone(),
-                account.getCouleur(),
-                account.getCurrency().name()
-        );
-    }
-
     private SubscriptionResponse toResponse(Subscription subscription) {
         return new SubscriptionResponse(
                 subscription.getId(),
@@ -185,8 +159,8 @@ public class SubscriptionService {
                 subscription.getFrequence(),
                 subscription.getDateDebut(),
                 subscription.getActif(),
-                toCategoryResponse(subscription.getCategory()),
-                toAccountSummary(subscription.getAccount()),
+                CategoryResponse.from(subscription.getCategory()),
+                AccountSummary.from(subscription.getAccount()),
                 subscription.getCurrency().name()
         );
     }

@@ -5,5 +5,6 @@ public enum NotificationType {
     DEBT_DUE,
     BUDGET_THRESHOLD,
     BUDGET_EXCEEDED,
-    DEBT_REMINDER
+    DEBT_REMINDER,
+    RECURRING_TRANSACTION_DUE
 }

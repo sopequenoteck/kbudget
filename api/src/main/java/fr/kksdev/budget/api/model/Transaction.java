@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"category", "account", "product", "debt", "user"})
+@ToString(exclude = {"category", "account", "product", "debt", "subscription", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -59,6 +60,25 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "debt_id")
     private Debt debt;
+
+    @Column(name = "is_recurring", nullable = false)
+    @Builder.Default
+    private Boolean isRecurring = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "frequency")
+    private Frequency frequency;
+
+    @Column(name = "next_occurrence")
+    private LocalDate nextOccurrence;
+
+    @Column(name = "recurring_active", nullable = false)
+    @Builder.Default
+    private Boolean recurringActive = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

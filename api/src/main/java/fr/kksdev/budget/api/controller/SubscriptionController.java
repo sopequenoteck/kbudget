@@ -1,7 +1,9 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionPaymentResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
+import fr.kksdev.budget.api.service.SubscriptionPaymentService;
 import fr.kksdev.budget.api.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
+    private final SubscriptionPaymentService subscriptionPaymentService;
 
     @Operation(summary = "Créer un abonnement")
     @PostMapping
@@ -74,5 +78,33 @@ public class SubscriptionController {
         UUID userId = (UUID) authentication.getPrincipal();
         subscriptionService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Payer un abonnement")
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<SubscriptionPaymentResponse> pay(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(subscriptionPaymentService.pay(id, userId));
+    }
+
+    @Operation(summary = "Historique des paiements d'un abonnement")
+    @GetMapping("/{id}/payments")
+    public ResponseEntity<List<SubscriptionPaymentResponse>> getPayments(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(subscriptionPaymentService.getPayments(id, userId));
+    }
+
+    @Operation(summary = "Cumul des paiements d'un abonnement")
+    @GetMapping("/{id}/payments/total")
+    public ResponseEntity<Map<String, Object>> getTotalPaid(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(subscriptionPaymentService.getTotalPaid(id, userId));
     }
 }

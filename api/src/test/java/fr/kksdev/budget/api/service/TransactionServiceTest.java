@@ -170,7 +170,7 @@ class TransactionServiceTest {
         var account = buildDefaultAccount(user);
         var transactions = List.of(buildTransaction(user, account));
 
-        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(transactions);
+        when(transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(userId)).thenReturn(transactions);
 
         List<TransactionResponse> result = transactionService.getAllByUser(userId);
 
@@ -181,7 +181,7 @@ class TransactionServiceTest {
 
     @Test
     void should_return_empty_list_when_user_has_no_transactions() {
-        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of());
+        when(transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(userId)).thenReturn(List.of());
 
         List<TransactionResponse> result = transactionService.getAllByUser(userId);
 
@@ -256,7 +256,7 @@ class TransactionServiceTest {
                 .libelle("Salaire").account(account).user(user).build();
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
+        when(transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
                 .thenReturn(List.of(depense, recette));
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
@@ -276,7 +276,7 @@ class TransactionServiceTest {
     @Test
     void should_return_empty_list_when_no_transactions() {
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
+        when(transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)))
                 .thenReturn(List.of());
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);

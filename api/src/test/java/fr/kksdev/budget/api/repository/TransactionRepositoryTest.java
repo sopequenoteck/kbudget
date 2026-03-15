@@ -102,7 +102,7 @@ class TransactionRepositoryTest {
 
     @Test
     void should_find_by_userId_ordered_by_date_desc() {
-        List<Transaction> transactions = transactionRepository.findByUserIdOrderByDateDesc(user1.getId());
+        List<Transaction> transactions = transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(user1.getId());
 
         assertThat(transactions).hasSize(2);
         assertThat(transactions.get(0).getLibelle()).isEqualTo("Courses");
@@ -111,8 +111,8 @@ class TransactionRepositoryTest {
 
     @Test
     void should_isolate_transactions_by_user() {
-        List<Transaction> user1Transactions = transactionRepository.findByUserIdOrderByDateDesc(user1.getId());
-        List<Transaction> user2Transactions = transactionRepository.findByUserIdOrderByDateDesc(user2.getId());
+        List<Transaction> user1Transactions = transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(user1.getId());
+        List<Transaction> user2Transactions = transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(user2.getId());
 
         assertThat(user1Transactions).hasSize(2);
         assertThat(user2Transactions).hasSize(1);
@@ -121,7 +121,7 @@ class TransactionRepositoryTest {
 
     @Test
     void should_find_by_userId_and_date_between() {
-        List<Transaction> transactions = transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(
+        List<Transaction> transactions = transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
                 user1.getId(),
                 LocalDate.of(2026, 1, 10),
                 LocalDate.of(2026, 1, 31));
