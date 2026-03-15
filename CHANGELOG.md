@@ -10,6 +10,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Associer une banque à un compte (Angular) — BankSelect, AccountBankIcon, AccountForm enrichi, image.utils.ts (KKS-082)
 - Associer une banque à un compte (Flutter) — BankSelectPicker, AccountBankIcon, 29 logos SVG, Drift migration v3 (KKS-083)
 - Transactions récurrentes backend — RecurringTransactionController (5 endpoints), SubscriptionPaymentService (payer/historique/cumul), Flyway V20, Transaction enrichie (+isRecurring, frequency, nextOccurrence, recurringActive, subscription FK, product FK) (KKS-085)
+- Transactions récurrentes & paiements abonnements (Angular) — RecurringList (validate/skip/deactivate), SubscriptionDetail (historique paiements + total cumulé), NotificationPanel étendu (actions RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE) (KKS-086)
 
 ### Changed
 - CategoryResponse.from() et AccountSummary.from() static factories remplacent les méthodes privées dupliquées dans 5 services (KKS-085)
