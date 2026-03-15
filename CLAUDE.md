@@ -301,6 +301,7 @@ Approche **signals-first** obligatoire :
 - Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, intl, shimmer, phosphor_flutter (088-flutter-recurring-transactions)
 - Server-only (API REST — recurring transactions et subscription payments; pas de Drift pour cette feature) (088-flutter-recurring-transactions)
 - PostgreSQL 15+ (Flyway V20), pas de Drift/SQLite pour cette feature (server-only) (089-recurring-transactions)
+- TypeScript 5.9, Angular 21 + Angular Signals, Angular Router, Angular HttpClient, @ng-icons/phosphor-icons (090-finance-dashboard)
 
 ### Backend (api/)
 

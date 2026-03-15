@@ -32,17 +32,17 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
         border-radius: var(--radius-round);
         border: none;
         cursor: pointer;
-        font-size: var(--text-sm);
-        font-weight: 500;
-        background: var(--color-surface-container-highest);
-        color: var(--color-on-surface-variant);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
         white-space: nowrap;
-        transition: all 200ms ease;
+        transition: all var(--duration-normal) var(--easing-default);
       }
       .pill.active {
         background: var(--color-primary);
-        color: var(--color-on-primary);
-        font-weight: 600;
+        color: var(--color-primary-contrast);
+        font-weight: var(--font-weight-semibold);
       }
     `,
   ],

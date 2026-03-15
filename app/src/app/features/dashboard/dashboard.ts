@@ -8,17 +8,16 @@ import {
   isDevMode,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { DecimalPipe, NgClass } from '@angular/common';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import {filter, firstValueFrom} from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
-import { SubscriptionService } from '../../core/services/subscription';
-import { DebtService } from '../../core/services/debt';
 import { AccountService } from '../../core/services/account';
 import { ConversionService } from '../../core/services/conversion';
 import { PreferenceService } from '../../core/services/preference';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
+import { BudgetService } from '../../core/services/budget';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -26,46 +25,64 @@ import {
   TransactionType,
   type MonthlySummary,
 } from '../../core/models/transaction.model';
-import { type Subscription, Frequency } from '../../core/models/subscription.model';
-import { type Debt, DebtType } from '../../core/models/debt.model';
 import { type Account } from '../../core/models/account.model';
-
-interface CurrencyTotal {
-  currency: string;
-  total: number;
-}
-import { ModalService } from '../../core/services/modal.service';
+import { type BudgetOverview } from '../../core/models/budget.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {AuthService} from '../../core/services/auth';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
+  imports: [DecimalPipe, NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard {
   private readonly transactionService = inject(TransactionService);
-  private readonly subscriptionService = inject(SubscriptionService);
-  private readonly debtService = inject(DebtService);
   private readonly accountService = inject(AccountService);
-  private readonly modalService = inject(ModalService);
-  private readonly conversionService = inject(ConversionService);
+  private readonly budgetService = inject(BudgetService);
+  readonly conversionService = inject(ConversionService);
   readonly preferenceService = inject(PreferenceService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
+  private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
+
+  private readonly navigationEnd = toSignal(
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
+  );
+  readonly currentRoute = computed(() => {
+    const e = this.navigationEnd();
+    return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
+  });
+  readonly isOnDashboard = computed(() => {
+    const url = this.currentRoute();
+    return url === '/dashboard' || url === '/';
+  });
+
+  readonly userName = this.authService.currentUser;
 
   // -- Devise active --
   readonly activeCurrency = signal('EUR');
   readonly currencies = computed(() => this.preferenceService.currencies());
+  readonly secondaryCurrency = computed(() => {
+    const all = this.currencies();
+    if (all.length < 2) return null;
+    const active = this.activeCurrency();
+    const primary = this.preferenceService.primaryCurrency();
+    if (active !== primary) return primary;
+    return all.find(c => c !== active) ?? null;
+  });
 
-  // -- Comptes bancaires --
-  readonly accountsLoading = signal(true);
-  readonly accountsError = signal(false);
+  // -- Comptes bancaires (total balance) --
+  readonly totalBalanceLoading = signal(true);
+  readonly totalBalanceError = signal(false);
   readonly accounts = signal<Account[]>([]);
 
   readonly convertedTotalBalance = computed(() => {
@@ -91,31 +108,41 @@ export class Dashboard {
     return { total, hasMissingRate };
   });
 
-  readonly accountTotalsByCurrency = computed<CurrencyTotal[]>(() => {
+  // Solde total en devise principale (premiere devise des preferences)
+  readonly primaryCurrencyBalance = computed(() => {
     const active = this.accounts().filter((a) => a.actif);
-    const byCurrency = new Map<string, number>();
+    const primaryCurrency = this.preferenceService.primaryCurrency();
+    let total = 0;
+
     for (const a of active) {
       const cur = a.currency || 'EUR';
-      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + a.solde);
+      if (cur === primaryCurrency) {
+        total += a.solde;
+      } else {
+        const converted = this.conversionService.convert(a.solde, cur, primaryCurrency);
+        if (converted !== null) {
+          total += converted;
+        }
+      }
     }
-    return Array.from(byCurrency.entries())
-      .map(([currency, total]) => ({ currency, total }))
-      .sort((a, b) => a.currency.localeCompare(b.currency));
+
+    return total;
   });
 
-  // -- Bilan mensuel (US1) --
-  readonly selectedMonth = signal(new Date().getMonth() + 1);
-  readonly selectedYear = signal(new Date().getFullYear());
+  // -- Bilan mensuel (mois courant + mois precedent) --
   readonly summaryLoading = signal(true);
   readonly summaryError = signal(false);
-  readonly summaries = signal<MonthlySummary[]>([]);
+  readonly currentSummary = signal<MonthlySummary | null>(null);
+  readonly previousSummary = signal<MonthlySummary | null>(null);
 
-  readonly selectedMonthLabel = computed(() => {
-    const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
-    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  // -- Budget overview --
+  readonly budgetOverview = signal<BudgetOverview | null>(null);
+  readonly budgetLoading = signal(true);
+  readonly budgetCurrentMonth = computed(() => {
+    return new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   });
 
-  // -- Dernières transactions (US2) --
+  // -- Dernières transactions --
   readonly transactionsLoading = signal(true);
   readonly transactionsError = signal(false);
   readonly transactions = signal<Transaction[]>([]);
@@ -126,64 +153,56 @@ export class Dashboard {
       .slice(0, 5),
   );
 
-  // -- Abonnements actifs (US3) --
-  readonly subscriptionsLoading = signal(true);
-  readonly subscriptionsError = signal(false);
-  readonly subscriptions = signal<Subscription[]>([]);
+  // -- Computed signals derives --
 
-  readonly activeSubscriptions = computed(() =>
-    [...this.subscriptions()].sort((a, b) => a.nom.localeCompare(b.nom)).slice(0, 3),
-  );
-
-  readonly monthlySubTotalsByCurrency = computed<CurrencyTotal[]>(() => {
-    const byCurrency = new Map<string, number>();
-    for (const s of this.subscriptions()) {
-      const cur = s.currency || 'EUR';
-      const monthly = s.frequence === Frequency.ANNUEL ? s.montant / 12 : s.montant;
-      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + monthly);
-    }
-    return Array.from(byCurrency.entries())
-      .map(([currency, total]) => ({ currency, total }))
-      .sort((a, b) => a.currency.localeCompare(b.currency));
+  readonly netDuMois = computed(() => {
+    const summary = this.currentSummary();
+    if (!summary) return 0;
+    return summary.totalRecettes - summary.totalDepenses;
   });
 
-  // -- Dettes en cours (US4) --
-  readonly debtsLoading = signal(true);
-  readonly debtsError = signal(false);
-  readonly debts = signal<Debt[]>([]);
-
-  readonly activeDebts = computed(() =>
-    [...this.debts()]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3),
-  );
-
-  readonly totalJeDoisByCurrency = computed<CurrencyTotal[]>(() => {
-    const byCurrency = new Map<string, number>();
-    for (const d of this.debts().filter((d) => d.sens === DebtType.EMPRUNT)) {
-      const cur = d.currency || 'EUR';
-      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
-    }
-    return Array.from(byCurrency.entries())
-      .map(([currency, total]) => ({ currency, total }))
-      .sort((a, b) => a.currency.localeCompare(b.currency));
+  readonly patrimoineDebutMois = computed(() => {
+    return this.primaryCurrencyBalance() - this.netDuMois();
   });
 
-  readonly totalOnMeDoitByCurrency = computed<CurrencyTotal[]>(() => {
-    const byCurrency = new Map<string, number>();
-    for (const d of this.debts().filter((d) => d.sens === DebtType.PRET)) {
-      const cur = d.currency || 'EUR';
-      byCurrency.set(cur, (byCurrency.get(cur) ?? 0) + d.montant);
-    }
-    return Array.from(byCurrency.entries())
-      .map(([currency, total]) => ({ currency, total }))
-      .sort((a, b) => a.currency.localeCompare(b.currency));
+  readonly variationPatrimoinePct = computed(() => {
+    const debut = this.patrimoineDebutMois();
+    if (debut === 0) return null;
+    return (this.netDuMois() / debut) * 100;
   });
 
-  readonly miniCardsLoading = computed(() => this.subscriptionsLoading() || this.debtsLoading());
+  readonly variationRevenus = computed(() => {
+    const current = this.currentSummary()?.totalRecettes ?? 0;
+    const previous = this.previousSummary()?.totalRecettes ?? 0;
+    return current - previous;
+  });
+
+  readonly variationDepenses = computed(() => {
+    const current = this.currentSummary()?.totalDepenses ?? 0;
+    const previous = this.previousSummary()?.totalDepenses ?? 0;
+    return current - previous;
+  });
+
+  readonly previousMonthName = computed(() => {
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+    return prev.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+  });
+
+  readonly sortedBudgetItems = computed(() => {
+    const items = this.budgetOverview()?.items ?? [];
+    return [...items]
+      .sort((a, b) => {
+        const aExceeded = a.percentage >= 100;
+        const bExceeded = b.percentage >= 100;
+        if (aExceeded !== bExceeded) return aExceeded ? -1 : 1;
+        return b.percentage - a.percentage;
+      })
+      .slice(0, 4);
+  });
 
   constructor() {
-    // Charger les taux de change et synchroniser la devise active au démarrage
+    // Charger les taux de change et synchroniser la devise active au demarrage
     effect(() => {
       this.preferenceService.currencies();
       this.exchangeRateService.loadRates();
@@ -194,32 +213,11 @@ export class Dashboard {
       this.activeCurrency.set(primary);
     });
 
+    // Refresh au retour sur le dashboard (via refreshTrigger)
     effect(() => {
       this.accountService.refreshTrigger();
       this.transactionService.refreshTrigger();
-      this.loadAccounts();
-    });
-
-    effect(() => {
-      this.transactionService.refreshTrigger();
-      this.selectedMonth();
-      this.selectedYear();
-      this.loadSummary();
-    });
-
-    effect(() => {
-      this.transactionService.refreshTrigger();
-      this.loadTransactions();
-    });
-
-    effect(() => {
-      this.subscriptionService.refreshTrigger();
-      this.loadSubscriptions();
-    });
-
-    effect(() => {
-      this.debtService.refreshTrigger();
-      this.loadDebts();
+      this.loadAll();
     });
 
     this.destroyRef.onDestroy(() => {
@@ -228,30 +226,46 @@ export class Dashboard {
         const currencies = this.preferenceService.currencies();
         this.preferenceService.update({ currencies });
       }
+      if (this.autoRefreshTimer) {
+        clearInterval(this.autoRefreshTimer);
+      }
     });
+
+    // Auto-refresh toutes les 60s
+    this.autoRefreshTimer = setInterval(() => this.silentRefresh(), 60_000);
   }
 
-  prevMonth(): void {
-    if (this.selectedMonth() === 1) {
-      this.selectedMonth.set(12);
-      this.selectedYear.update((y) => y - 1);
-    } else {
-      this.selectedMonth.update((m) => m - 1);
-    }
+  async loadAll(): Promise<void> {
+    await Promise.all([
+      this.loadAccounts(),
+      this.loadSummaries(),
+      this.loadBudgetOverview(),
+      this.loadTransactions(),
+      this.exchangeRateService.loadRates(),
+    ]);
   }
 
-  nextMonth(): void {
-    if (this.selectedMonth() === 12) {
-      this.selectedMonth.set(1);
-      this.selectedYear.update((y) => y + 1);
-    } else {
-      this.selectedMonth.update((m) => m + 1);
+  async silentRefresh(): Promise<void> {
+    try {
+      const now = new Date();
+      const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+
+      await Promise.all([
+        firstValueFrom(this.accountService.getAll()).then((data) => this.accounts.set(data)),
+        firstValueFrom(this.transactionService.getSummary(now.getMonth() + 1, now.getFullYear())).then((data) => this.currentSummary.set(data[0] ?? null)),
+        firstValueFrom(this.transactionService.getSummary(prev.getMonth() + 1, prev.getFullYear())).then((data) => this.previousSummary.set(data[0] ?? null)),
+        firstValueFrom(this.budgetService.getOverview()).then((data) => this.budgetOverview.set(data)),
+        firstValueFrom(this.transactionService.getAll()).then((data) => this.transactions.set(data)),
+        this.exchangeRateService.loadRates(),
+      ]);
+    } catch {
+      // Silent fail — donnees existantes restent affichees
     }
   }
 
   async loadAccounts(): Promise<void> {
-    this.accountsLoading.set(true);
-    this.accountsError.set(false);
+    this.totalBalanceLoading.set(true);
+    this.totalBalanceError.set(false);
 
     try {
       const data = await firstValueFrom(this.accountService.getAll());
@@ -260,28 +274,49 @@ export class Dashboard {
       if (isDevMode()) {
         console.error('Failed to load accounts', err);
       }
-      this.accountsError.set(true);
+      this.totalBalanceError.set(true);
     } finally {
-      this.accountsLoading.set(false);
+      this.totalBalanceLoading.set(false);
     }
   }
 
-  async loadSummary(): Promise<void> {
+  async loadSummaries(): Promise<void> {
     this.summaryLoading.set(true);
     this.summaryError.set(false);
 
     try {
-      const data = await firstValueFrom(
-        this.transactionService.getSummary(this.selectedMonth(), this.selectedYear()),
-      );
-      this.summaries.set(data);
+      const now = new Date();
+      const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+
+      const [current, previous] = await Promise.all([
+        firstValueFrom(this.transactionService.getSummary(now.getMonth() + 1, now.getFullYear())),
+        firstValueFrom(this.transactionService.getSummary(prev.getMonth() + 1, prev.getFullYear())),
+      ]);
+
+      this.currentSummary.set(current[0] ?? null);
+      this.previousSummary.set(previous[0] ?? null);
     } catch (err) {
       if (isDevMode()) {
-        console.error('Failed to load summary', err);
+        console.error('Failed to load summaries', err);
       }
       this.summaryError.set(true);
     } finally {
       this.summaryLoading.set(false);
+    }
+  }
+
+  async loadBudgetOverview(): Promise<void> {
+    this.budgetLoading.set(true);
+
+    try {
+      const data = await firstValueFrom(this.budgetService.getOverview());
+      this.budgetOverview.set(data);
+    } catch (err) {
+      if (isDevMode()) {
+        console.error('Failed to load budget overview', err);
+      }
+    } finally {
+      this.budgetLoading.set(false);
     }
   }
 
@@ -299,40 +334,6 @@ export class Dashboard {
       this.transactionsError.set(true);
     } finally {
       this.transactionsLoading.set(false);
-    }
-  }
-
-  async loadSubscriptions(): Promise<void> {
-    this.subscriptionsLoading.set(true);
-    this.subscriptionsError.set(false);
-
-    try {
-      const data = await firstValueFrom(this.subscriptionService.getAll(true));
-      this.subscriptions.set(data);
-    } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load subscriptions', err);
-      }
-      this.subscriptionsError.set(true);
-    } finally {
-      this.subscriptionsLoading.set(false);
-    }
-  }
-
-  async loadDebts(): Promise<void> {
-    this.debtsLoading.set(true);
-    this.debtsError.set(false);
-
-    try {
-      const data = await firstValueFrom(this.debtService.getAll(false));
-      this.debts.set(data);
-    } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load debts', err);
-      }
-      this.debtsError.set(true);
-    } finally {
-      this.debtsLoading.set(false);
     }
   }
 
@@ -361,23 +362,19 @@ export class Dashboard {
     return t.type === TransactionType.RECETTE ? 'amount-income' : 'amount-expense';
   }
 
-  getDebtIcon(d: Debt): string {
-    return d.category?.icone ?? (d.sens === DebtType.EMPRUNT ? '📤' : '📥');
-  }
+  getTransactionConvertedValue(t: Transaction): string {
+    const txCurrency = t.account?.currency || 'EUR';
+    const target = this.activeCurrency();
+    if (txCurrency === target) return '';
 
-  getDebtValueClass(d: Debt): string {
-    return d.sens === DebtType.EMPRUNT ? 'amount-expense' : 'amount-income';
-  }
+    const converted = this.conversionService.convert(t.montant, txCurrency, target);
+    if (converted === null) return '';
 
-  onTransactionClick(t: Transaction): void {
-    this.modalService.openModal('transaction', t);
-  }
+    const formatted = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: target,
+    }).format(Math.abs(converted));
 
-  onSubscriptionClick(s: Subscription): void {
-    this.modalService.openModal('subscription', s);
-  }
-
-  onDebtClick(d: Debt): void {
-    this.modalService.openModal('debt', d);
+    return `≈ ${formatted}`;
   }
 }

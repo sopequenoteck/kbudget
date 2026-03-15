@@ -8,8 +8,10 @@
     <img src="icons/budget-icon-no-background.svg" alt="" class="shell-brand-logo" />
     <span class="shell-brand-name">K-Budget</span>
   </a>
-  <app-notification-badge (clicked)="toggleNotificationPanel()" />
-  <div class="shell-user-menu">
+
+  <div class="shell-header__actions">
+    <app-notification-badge (clicked)="toggleNotificationPanel()" />
+    <div class="shell-user-menu">
     <button
       class="shell-user-trigger"
       (click)="toggleDropdown()"
@@ -41,6 +43,7 @@
         </button>
       </div>
     }
+  </div>
   </div>
 </header>
 
