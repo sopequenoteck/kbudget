@@ -444,5 +444,6 @@ Tokens specifiques au dashboard Angular (definis dans `_dark.scss` et `_light.sc
 | `--page-gradient-color` | `rgba(251, 191, 36, 0.08)` | `rgba(245, 158, 11, 0.05)` | Gradient radial fond page |
 | `--font-size-hero` | `2.25rem` | `2.25rem` | Font-size montant patrimoine |
 | `--shadow-hero-text` | `0 2px 8px rgba(0, 0, 0, 0.3)` | `none` | Text-shadow montant patrimoine |
+| `--nav-border-top` | `1px solid rgba(255, 255, 255, 0.08)` | `1px solid var(--border-default)` | Bordure supérieure bottom nav |
 
-> **Note** : Le glassmorphism (`backdrop-filter: blur()`) est applique uniquement en dark mode. En light mode, les cards utilisent un fond opaque via les tokens fallback.
+> **Note** : Le glassmorphism (`backdrop-filter: blur()`) est applique uniquement en dark mode. En light mode, les cards et la bottom nav utilisent un fond opaque via les tokens fallback.
