@@ -35,11 +35,11 @@
           {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
         </span>
         @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
-          <span class="patrimoine-variation"
+          <span class="variation-badge"
             [ngClass]="{
-              'patrimoine-variation--positive': netDuMois() > 0,
-              'patrimoine-variation--negative': netDuMois() < 0,
-              'patrimoine-variation--neutral': netDuMois() === 0
+              'variation-badge--positive': netDuMois() > 0,
+              'variation-badge--negative': netDuMois() < 0,
+              'variation-badge--neutral': netDuMois() === 0
             }"
           >
             {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
@@ -80,8 +80,8 @@
         <span class="summary-card__value">
           {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
         </span>
-        <span class="summary-card__variation"
-          [ngClass]="variationRevenus() >= 0 ? 'summary-card__variation--positive' : 'summary-card__variation--negative'"
+        <span class="variation-badge"
+          [ngClass]="variationRevenus() >= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
         >
           {{ variationRevenus() >= 0 ? '↑' : '↓' }} {{ variationRevenus() >= 0 ? '+' : '' }}{{ variationRevenus() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
         </span>
@@ -98,8 +98,8 @@
         <span class="summary-card__value">
           {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
         </span>
-        <span class="summary-card__variation"
-          [ngClass]="variationDepenses() <= 0 ? 'summary-card__variation--positive' : 'summary-card__variation--negative'"
+        <span class="variation-badge"
+          [ngClass]="variationDepenses() <= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
         >
           {{ variationDepenses() > 0 ? '↑' : '↓' }} {{ variationDepenses() >= 0 ? '+' : '' }}{{ variationDepenses() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
         </span>
@@ -156,7 +156,7 @@
           <app-list-item
             [icon]="getTransactionIcon(transaction)"
             [title]="transaction.libelle"
-            [subtitle]="(transaction.date | relativeDate) + ' ' + (transaction.account?.currency || 'EUR')"
+            [subtitle]="(transaction.date | relativeDate) + (transaction.account?.nom ? ' · ' + transaction.account!.nom : '')"
             [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
             [valueClass]="getTransactionValueClass(transaction)"
             [valueSubtitle]="getTransactionConvertedValue(transaction)"

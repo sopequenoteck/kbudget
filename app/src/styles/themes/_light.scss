@@ -58,4 +58,13 @@
   --color-debt-owe: #dc2626;
   --color-debt-owed: #16a34a;
   --color-subscription: #8b5cf6;
+
+  // -- Dashboard visual revamp --
+  --hero-gradient: linear-gradient(135deg, var(--amber-50) 0%, var(--indigo-50) 100%);
+  --glass-bg: var(--surface-raised);
+  --glass-border: var(--border-default);
+  --glass-blur: 0px;
+  --page-gradient-color: rgba(245, 158, 11, 0.05);
+  --font-size-hero: 2.25rem;
+  --shadow-hero-text: none;
 }

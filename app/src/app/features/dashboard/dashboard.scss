@@ -3,6 +3,19 @@
   flex-direction: column;
   gap: var(--space-5);
   padding: var(--space-4);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40vh;
+    background: radial-gradient(ellipse at top center, var(--page-gradient-color) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
 }
 
 // -- Zone solde total --
@@ -10,6 +23,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+
+  .shell-greeting {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
 
   &__totals {
     display: flex;
@@ -24,9 +43,15 @@
     align-items: flex-start;
     gap: var(--space-1);
     padding: var(--space-4);
-    background-color: var(--surface-default);
+    background: var(--hero-gradient);
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--duration-fast) var(--easing-default);
+
+    &:active {
+      transform: scale(0.97);
+    }
+
   }
 
   &__total-label {
@@ -38,26 +63,35 @@
   }
 
   &__total-value {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-hero);
     font-weight: var(--font-weight-bold);
+    text-shadow: var(--shadow-hero-text);
   }
 }
 
-// -- Variation patrimoine --
-.patrimoine-variation {
-  font-size: var(--font-size-sm);
+// -- Badges variation --
+.variation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-round);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 
   &--positive {
-    color: var(--color-income);
+    background: var(--bg-success);
+    color: var(--text-success);
   }
 
   &--negative {
-    color: var(--color-expense);
+    background: var(--bg-error);
+    color: var(--text-error);
   }
 
   &--neutral {
-    color: var(--text-tertiary);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
   }
 }
 
@@ -98,8 +132,19 @@
   gap: var(--space-2);
   padding: var(--space-4);
   border-radius: var(--radius-xl);
-  background-color: var(--surface-default);
-  box-shadow: var(--shadow-md);
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: none;
+  transition: transform var(--duration-fast) var(--easing-default);
+
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
 
   &__dot {
     width: 8px;
@@ -127,19 +172,6 @@
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
     white-space: nowrap;
-  }
-
-  &__variation {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-
-    &--positive {
-      color: var(--color-income);
-    }
-
-    &--negative {
-      color: var(--color-expense);
-    }
   }
 
   &__converted {
@@ -198,13 +230,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  gap: var(--space-2);
 
-  li:not(:last-child) {
-    border-bottom: 1px solid var(--border-default);
+  li {
+    background-color: var(--surface-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
   }
 }
 

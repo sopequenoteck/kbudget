@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
 
 import { type BudgetOverview, type BudgetOverviewItem } from '../../../../core/models/budget.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -41,6 +41,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
                 class="budget-bar__fill"
                 [class.budget-bar__fill--warning]="item.percentage >= 80 && item.percentage <= 100"
                 [class.budget-bar__fill--exceeded]="item.percentage > 100"
+                [class.budget-bar__fill--initial]="!animated()"
                 [style.width.%]="min(item.percentage, 100)"
               ></div>
               @if (item.percentage > 100) {
@@ -96,24 +97,20 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     .budget-summary__list {
       list-style: none;
       margin: 0;
-      padding: var(--space-4);
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
-      background-color: var(--surface-default);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-sm);
+      gap: var(--space-2);
     }
 
     .budget-item {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
-
-      &:not(:last-child) {
-        padding-bottom: var(--space-3);
-        border-bottom: 1px solid var(--border-default);
-      }
+      padding: var(--space-3);
+      background-color: var(--surface-default);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
     }
 
     .budget-item__header {
@@ -123,9 +120,16 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     }
 
     .budget-item__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-8);
+      height: var(--space-8);
       font-size: var(--font-size-base);
       line-height: 1;
       flex-shrink: 0;
+      background-color: var(--color-primary-light);
+      border-radius: var(--radius-round);
     }
 
     .budget-item__name {
@@ -153,7 +157,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     .budget-bar {
       position: relative;
       width: 100%;
-      height: 7px;
+      height: 10px;
       background-color: var(--border-default);
       border-radius: var(--radius-round);
       overflow: hidden;
@@ -162,9 +166,13 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     .budget-bar__fill {
       height: 100%;
       border-radius: var(--radius-round);
-      background-color: var(--color-primary);
-      transition: width var(--duration-normal) var(--easing-default);
+      background-color: var(--color-income);
+      transition: width var(--duration-slow) var(--easing-out);
       min-width: 0;
+
+      &.budget-bar__fill--initial {
+        width: 0 !important;
+      }
 
       &.budget-bar__fill--warning {
         background-color: var(--text-warning);
@@ -190,6 +198,15 @@ export class BudgetSummary {
   readonly items = input.required<BudgetOverviewItem[]>();
   readonly overview = input<BudgetOverview | null>(null);
   readonly isLoading = input<boolean>(false);
+  readonly animated = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.items().length > 0 && !this.animated()) {
+        setTimeout(() => this.animated.set(true), 0);
+      }
+    });
+  }
 
   min(a: number, b: number): number {
     return Math.min(a, b);
