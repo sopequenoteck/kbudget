@@ -155,6 +155,7 @@
         <li>
           <app-list-item
             [icon]="getTransactionIcon(transaction)"
+            [iconColor]="transaction.category?.couleur ?? null"
             [title]="transaction.libelle"
             [subtitle]="(transaction.date | relativeDate) + (transaction.account?.nom ? ' · ' + transaction.account!.nom : '')"
             [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"

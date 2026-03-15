@@ -2,7 +2,7 @@
   @if (webImageUrl()) {
     <img class="list-item__image" [src]="webImageUrl()" [alt]="title()" />
   } @else {
-    <span class="list-item__icon">{{ icon() }}</span>
+    <span class="list-item__icon" [style.backgroundColor]="iconColor() ? iconColor()! + '26' : null">{{ icon() }}</span>
   }
 
   <div class="list-item__content">

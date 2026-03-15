@@ -25,7 +25,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
         @for (item of items(); track item.budgetId) {
           <li class="budget-item">
             <div class="budget-item__header">
-              <span class="budget-item__icon">{{ item.categoryIcone }}</span>
+              <span class="budget-item__icon" [style.backgroundColor]="item.categoryCouleur + '26'">{{ item.categoryIcone }}</span>
               <span class="budget-item__name">{{ item.categoryNom }}</span>
               <span
                 class="budget-item__amounts"

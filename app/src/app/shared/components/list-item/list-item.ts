@@ -17,6 +17,7 @@ export class ListItem {
   readonly valueSubtitle = input<string>('');
   readonly valueClass = input<string>('');
   readonly imageUrl = input<string | null>(null);
+  readonly iconColor = input<string | null>(null);
 
   readonly webImageUrl = computed(() => {
     const url = this.imageUrl();
