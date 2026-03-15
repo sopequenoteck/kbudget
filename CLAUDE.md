@@ -298,6 +298,8 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9 + Angular 21, Angular Router, Angular Signals, @ng-icons/phosphor-icons (086-angular-recurring-transactions)
 - N/A (server-only, consomme API REST) (086-angular-recurring-transactions)
 - N/A (server-only, consomme API REST POST /transactions/recurring) (087-angular-recurring-form)
+- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, intl, shimmer, phosphor_flutter (088-flutter-recurring-transactions)
+- Server-only (API REST — recurring transactions et subscription payments; pas de Drift pour cette feature) (088-flutter-recurring-transactions)
 
 ### Backend (api/)
 
@@ -345,3 +347,4 @@ Approche **signals-first** obligatoire :
 - 085-recurring-transactions-backend: RecurringTransactionController (5 endpoints /transactions/recurring); RecurringTransactionService (create, listActive, validate, skip, deactivate); SubscriptionPaymentService (pay, getPayments, getTotalPaid); SubscriptionController +3 endpoints (pay/payments/total); Flyway V20 (+isRecurring, frequency, nextOccurrence, recurringActive, subscription_id sur transactions); Transaction enrichie (+product FK, +debt FK ManyToOne, +subscription FK); CategoryResponse.from() + AccountSummary.from() static factories (dédupliquent 5 services); count query countBySubscriptionIdAndUserId; EntityType +RECURRING_TRANSACTION; NotificationType +RECURRING_TRANSACTION_DUE; NotificationScheduler +checkRecurringTransactions(); 488 tests passent
 - 086-angular-recurring-transactions: RecurringTransactionService (signal-based, loadActive/validate/skip/deactivate); SubscriptionService enrichi (pay, getPayments, getTotalPaid); RecurringList component (liste triée overdue/today/upcoming, 3 actions); SubscriptionDetail component (infos, payer, historique paiements + total cumulé); NotificationPanel gère RECURRING_TRANSACTION_DUE (Valider/Passer) et SUBSCRIPTION_DUE (Payer); 375 tests passent
 - 087-angular-recurring-form: TransactionForm enrichi avec toggle récurrente (isRecurring, frequency, nextOccurrence) ; RecurringTransactionService.create() + RecurringTransactionRequest ; ModalService.asRecurring signal ; action "Rendre récurrente" (phosphorRepeat) dans la liste des transactions avec pré-remplissage du formulaire ; 4 nouveaux tests (379 total)
+- 088-flutter-recurring-transactions: RecurringListScreen (validate/skip/deactivate via swipe); SubscriptionDetailScreen (historique paiements + total cumulé); NotificationPanel étendu (RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE + navigation /budgets); EntityType +BUDGET +TRANSACTION; NotificationType +budgetThreshold +budgetExceeded; 626 tests passent

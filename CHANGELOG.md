@@ -12,6 +12,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Transactions récurrentes backend — RecurringTransactionController (5 endpoints), SubscriptionPaymentService (payer/historique/cumul), Flyway V20, Transaction enrichie (+isRecurring, frequency, nextOccurrence, recurringActive, subscription FK, product FK) (KKS-085)
 - Transactions récurrentes & paiements abonnements (Angular) — RecurringList (validate/skip/deactivate), SubscriptionDetail (historique paiements + total cumulé), NotificationPanel étendu (actions RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE) (KKS-086)
 - Création et conversion de transactions récurrentes (Angular) — TransactionForm enrichi (toggle récurrente, fréquence, prochaine occurrence), RecurringTransactionService.create(), action "Rendre récurrente" dans la liste des transactions (KKS-087)
+- Transactions récurrentes & paiements abonnements (Flutter) — RecurringListScreen (validate/skip/deactivate), SubscriptionDetailScreen (historique paiements + total cumulé), NotificationPanel étendu (RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE + deep links budget), EntityType aligné avec backend (+BUDGET +TRANSACTION) (KKS-088)
 
 ### Changed
 - CategoryResponse.from() et AccountSummary.from() static factories remplacent les méthodes privées dupliquées dans 5 services (KKS-085)
