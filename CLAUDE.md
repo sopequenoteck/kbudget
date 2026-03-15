@@ -304,6 +304,7 @@ Approche **signals-first** obligatoire :
 - TypeScript 5.9, Angular 21 + Angular Signals, Angular Router, Angular HttpClient, @ng-icons/phosphor-icons (090-finance-dashboard)
 - TypeScript 5.9, SCSS + Angular 21 (standalone components, OnPush, Signals) (091-dashboard-visual-revamp)
 - N/A (aucun changement de données) (091-dashboard-visual-revamp)
+- TypeScript 5.9, SCSS + Angular 21 (standalone, OnPush, Signals), Phosphor Icons (092-bottom-nav-revamp)
 
 ### Backend (api/)
 

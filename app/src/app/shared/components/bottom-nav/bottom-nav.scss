@@ -5,10 +5,16 @@
   left: 0;
   right: 0;
   height: var(--bottom-nav-height);
-  background: var(--surface-default);
-  box-shadow: 0 -1px 8px rgb(0 0 0 / 0.08);
+  background-color: var(--glass-bg);
+  border-top: var(--nav-border-top);
+  box-shadow: none;
   z-index: var(--z-sticky);
   padding-bottom: env(safe-area-inset-bottom);
+
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
 }
 
 .bottom-nav {
@@ -27,25 +33,47 @@
   padding: var(--space-2) var(--space-1);
   text-decoration: none;
   color: var(--text-secondary);
+  position: relative;
   transition: color var(--duration-normal) var(--easing-default);
 
   &.active {
     color: var(--color-primary);
     font-weight: var(--font-weight-semibold);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 32px;
+      border-radius: var(--radius-round);
+      background-color: var(--color-primary-light);
+      z-index: 0;
+      transition: opacity var(--duration-normal) var(--easing-default);
+    }
   }
 }
 
 .bottom-nav-icon {
   font-size: 1.5rem;
   line-height: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .bottom-nav-label {
   font-size: var(--font-size-xs);
   line-height: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
   text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+// Police réduite pour 6+ items
+:host([data-item-count="6"]) .bottom-nav-label {
+  font-size: 0.625rem;
 }
