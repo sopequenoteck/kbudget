@@ -66,6 +66,15 @@
           </button>
           <button
             type="button"
+            class="btn-icon"
+            (click)="triggerImport(account.id)"
+            title="Importer un CSV"
+            aria-label="Importer un CSV"
+          >
+            <ng-icon name="phosphorUploadSimple" size="20" />
+          </button>
+          <button
+            type="button"
             class="btn-icon btn-icon--danger"
             (click)="requestDelete(account.id)"
             aria-label="Supprimer"

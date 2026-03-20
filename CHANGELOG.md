@@ -5,6 +5,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-03-20
+
+### Added
+- Settings Angular alignement sur Flutter — hub 3 groupes (General, Gestion, Autre) avec headers et couleurs d'icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; page A propos enrichie (statut serveur, grille stats 2x2, contact mailto, glassmorphism dark mode) (KKS-098)
+- Import de releves bancaires CSV — parsing API (Commons CSV), review interactif Angular, brouillons persistants (7j expiration), categorisation par apprentissage (regles pattern→categorie), deduplication fuzzy (Jaro-Winkler seuil 0.85), profils d'import pre-configures (SG) et personnalises, mapping manuel colonnes, actions groupees, nettoyage intelligent des libelles; Flyway V22-V23, 15 endpoints /imports/**, 3 composants Angular (ImportSettings, ImportReview, CsvMapping) (KKS-099)
+
 ## [4.1.0] - 2026-03-20
 
 ### Added
@@ -230,7 +236,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0
 [3.0.0]: https://github.com/sopequenoteck/budget/compare/v2.1.1...v3.0.0

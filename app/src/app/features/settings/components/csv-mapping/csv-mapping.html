@@ -1,0 +1,307 @@
+<a class="section-back" routerLink="/settings/import">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Import CSV</span>
+</a>
+
+<h2 class="mapping-title">Mapping des colonnes</h2>
+<p class="mapping-description">
+  Le format de votre fichier n'a pas été reconnu automatiquement. Configurez le mapping des colonnes
+  pour importer vos transactions.
+</p>
+
+@if (fileName()) {
+  <div class="file-badge">
+    <ng-icon name="phosphorUploadSimple" size="16" />
+    <span>{{ fileName() }}</span>
+  </div>
+}
+
+@if (!file && !fileName()) {
+  <div class="mapping-warning">
+    <ng-icon name="phosphorWarningCircle" size="18" />
+    <span>Aucun fichier trouvé. Veuillez retourner à la page d'import et réessayer.</span>
+  </div>
+} @else {
+
+  <!-- Preview table -->
+  <section class="mapping-section">
+    <h3 class="mapping-section__title">Aperçu du fichier</h3>
+
+    @if (previewLoading()) {
+      <div class="state-loading">
+        <div class="spinner spinner--sm"></div>
+      </div>
+    } @else if (previewError()) {
+      <div class="mapping-error">{{ previewError() }}</div>
+    } @else if (preview()) {
+      <p class="mapping-section__hint">
+        {{ preview()!.totalRows }} ligne{{ preview()!.totalRows > 1 ? 's' : '' }} détectée{{ preview()!.totalRows > 1 ? 's' : '' }} ·
+        Séparateur : <code>{{ preview()!.detectedSeparator === '\t' ? '\\t' : preview()!.detectedSeparator }}</code> ·
+        Encodage : {{ preview()!.detectedEncoding }}
+      </p>
+      <div class="preview-table-wrapper">
+        <table class="preview-table">
+          <thead>
+            <tr>
+              @for (header of preview()!.headers; track $index) {
+                <th class="preview-table__th">{{ header }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of preview()!.rows; track $index) {
+              <tr>
+                @for (cell of row; track $index) {
+                  <td class="preview-table__td">{{ cell }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- Parsing parameters -->
+  <section class="mapping-section">
+    <h3 class="mapping-section__title">Paramètres de lecture</h3>
+    <div class="mapping-grid">
+
+      <div class="form-group">
+        <label class="form-label" for="separator">Séparateur</label>
+        <select
+          id="separator"
+          class="form-select"
+          [ngModel]="separator()"
+          (ngModelChange)="separator.set($event); onSeparatorChange()"
+        >
+          @for (sep of SEPARATORS; track sep.value) {
+            <option [value]="sep.value">{{ sep.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="encoding">Encodage</label>
+        <select
+          id="encoding"
+          class="form-select"
+          [ngModel]="encoding()"
+          (ngModelChange)="encoding.set($event); onEncodingChange()"
+        >
+          @for (enc of ENCODINGS; track enc) {
+            <option [value]="enc">{{ enc }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="date-format">Format de date</label>
+        <select
+          id="date-format"
+          class="form-select"
+          [ngModel]="dateFormat()"
+          (ngModelChange)="dateFormat.set($event)"
+        >
+          @for (fmt of DATE_FORMATS; track fmt) {
+            <option [value]="fmt">{{ fmt }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="decimal-sep">Séparateur décimal</label>
+        <select
+          id="decimal-sep"
+          class="form-select"
+          [ngModel]="decimalSeparator()"
+          (ngModelChange)="decimalSeparator.set($event)"
+        >
+          <option value=",">Virgule (,)</option>
+          <option value=".">Point (.)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="skip-lines">Lignes d'en-tête à ignorer</label>
+        <input
+          id="skip-lines"
+          type="number"
+          class="form-input"
+          min="0"
+          max="10"
+          [ngModel]="skipHeaderLines()"
+          (ngModelChange)="skipHeaderLines.set(+$event); onSkipHeaderLinesChange()"
+        />
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Column mapping -->
+  <section class="mapping-section">
+    <h3 class="mapping-section__title">Mapping des colonnes</h3>
+
+    @if (headers().length === 0) {
+      <p class="state-empty">Chargez l'aperçu pour sélectionner les colonnes.</p>
+    } @else {
+      <div class="mapping-grid">
+
+        <div class="form-group">
+          <label class="form-label" for="col-date">Colonne Date <span class="required">*</span></label>
+          <select
+            id="col-date"
+            class="form-select"
+            [ngModel]="dateColumn()"
+            (ngModelChange)="dateColumn.set($event)"
+          >
+            <option value="">-- Sélectionner --</option>
+            @for (h of headers(); track h) {
+              <option [value]="h">{{ h }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="col-label">Colonne Libellé <span class="required">*</span></label>
+          <select
+            id="col-label"
+            class="form-select"
+            [ngModel]="labelColumn()"
+            (ngModelChange)="labelColumn.set($event)"
+          >
+            <option value="">-- Sélectionner --</option>
+            @for (h of headers(); track h) {
+              <option [value]="h">{{ h }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label class="form-label">Mode montant <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="amountMode"
+                value="single"
+                [ngModel]="amountMode()"
+                (ngModelChange)="amountMode.set($event)"
+              />
+              Colonne unique (montant signé)
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="amountMode"
+                value="split"
+                [ngModel]="amountMode()"
+                (ngModelChange)="amountMode.set($event)"
+              />
+              Deux colonnes (débit / crédit)
+            </label>
+          </div>
+        </div>
+
+        @if (amountMode() === 'single') {
+          <div class="form-group">
+            <label class="form-label" for="col-amount">Colonne Montant <span class="required">*</span></label>
+            <select
+              id="col-amount"
+              class="form-select"
+              [ngModel]="amountColumn()"
+              (ngModelChange)="amountColumn.set($event)"
+            >
+              <option value="">-- Sélectionner --</option>
+              @for (h of headers(); track h) {
+                <option [value]="h">{{ h }}</option>
+              }
+            </select>
+          </div>
+        } @else {
+          <div class="form-group">
+            <label class="form-label" for="col-debit">Colonne Débit <span class="required">*</span></label>
+            <select
+              id="col-debit"
+              class="form-select"
+              [ngModel]="debitColumn()"
+              (ngModelChange)="debitColumn.set($event)"
+            >
+              <option value="">-- Sélectionner --</option>
+              @for (h of headers(); track h) {
+                <option [value]="h">{{ h }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="col-credit">Colonne Crédit <span class="required">*</span></label>
+            <select
+              id="col-credit"
+              class="form-select"
+              [ngModel]="creditColumn()"
+              (ngModelChange)="creditColumn.set($event)"
+            >
+              <option value="">-- Sélectionner --</option>
+              @for (h of headers(); track h) {
+                <option [value]="h">{{ h }}</option>
+              }
+            </select>
+          </div>
+        }
+
+      </div>
+    }
+  </section>
+
+  <!-- Save as profile -->
+  <section class="mapping-section">
+    <h3 class="mapping-section__title">Profil d'import</h3>
+    <div class="form-group form-group--inline">
+      <input
+        id="save-profile"
+        type="checkbox"
+        class="form-checkbox"
+        [ngModel]="saveAsProfile()"
+        (ngModelChange)="saveAsProfile.set($event)"
+      />
+      <label class="form-label form-label--checkbox" for="save-profile">
+        Sauvegarder ce mapping comme profil réutilisable
+      </label>
+    </div>
+    @if (saveAsProfile()) {
+      <div class="form-group" style="margin-top: var(--space-3);">
+        <label class="form-label" for="profile-name">Nom du profil <span class="required">*</span></label>
+        <input
+          id="profile-name"
+          type="text"
+          class="form-input"
+          placeholder="ex: Ma banque togolaise"
+          [ngModel]="profileName()"
+          (ngModelChange)="profileName.set($event)"
+        />
+      </div>
+    }
+  </section>
+
+  <!-- Error -->
+  @if (importError()) {
+    <div class="mapping-error">{{ importError() }}</div>
+  }
+
+  <!-- Actions -->
+  <div class="mapping-actions">
+    <a class="btn-outline" routerLink="/settings/import">Annuler</a>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="importing() || !isValid()"
+      (click)="import()"
+    >
+      @if (importing()) {
+        <span class="spinner spinner--sm"></span>
+      }
+      Importer
+    </button>
+  </div>
+
+}

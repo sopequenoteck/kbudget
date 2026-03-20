@@ -72,7 +72,7 @@ Controller (@RestController) → Service (@Service) → Repository (JpaRepositor
   DTOs (request/response)                              Entities JPA (@Entity)
 ```
 
-Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`, `Feature`, `Currency`, `NotificationType`, `EntityType`.
+Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller/`, `service/`, `repository/`, `model/`, `dto/`, `enums/`. Enums : `TransactionType`, `Frequency`, `DebtType`, `TokenStatus`, `AccountType`, `Feature`, `Currency`, `NotificationType`, `EntityType`, `ImportDraftStatus`, `ImportLineStatus`, `ImportProfileSource`.
 
 ### Entites
 
@@ -89,6 +89,11 @@ Package base : `fr.kksdev.budget.api` — sous-packages : `config/`, `controller
 - **Notification** : type (NotificationType), entityType (EntityType), entityId (UUID), title, body, read (Boolean, default false), readAt (LocalDateTime, nullable), createdAt. FK → User.
 - **Budget** : montant, frequence (HEBDOMADAIRE/MENSUEL/ANNUEL), currency (Currency, default EUR), seuilNotification (Integer, default 80), actif (Boolean, default true), updatedAt. UNIQUE(user_id, category_id). FK → User + Category.
 - **BudgetSnapshot** : montantBudget, currency, tauxChange (nullable), montantDepense, mois (String yyyy-MM), createdAt. FK → User + Category.
+- **ImportDraft** : status (ImportDraftStatus: PENDING/COMPLETED/EXPIRED), fileName, totalLines, readyCount, reviewCount, duplicateCount, skippedCount, profileId (UUID, nullable), profileSource (ImportProfileSource), createdAt, expiresAt, updatedAt. FK → User + Account. UNIQUE(user_id, account_id) WHERE status = 'PENDING'.
+- **ImportDraftLine** : lineNumber, rawLabel, cleanLabel, amount (BigDecimal), date (LocalDate), transactionType (TransactionType), status (ImportLineStatus: READY/NEEDS_REVIEW/DUPLICATE/SKIPPED), statusMessage (nullable), duplicateTransactionId (UUID, nullable), createdAt, updatedAt. FK → ImportDraft (CASCADE) + Category (nullable).
+- **CategoryRule** : pattern (String, max 200), createdAt. FK → User + Category. UNIQUE(user_id, pattern).
+- **ImportHistory** : transactionCount, fileName (nullable), importedAt. FK → User + Account.
+- **ImportProfile** : name, separator, dateFormat, dateColumn, amountColumn (nullable), debitColumn (nullable), creditColumn (nullable), labelColumn, encoding, decimalSeparator, skipHeaderLines, createdAt, updatedAt. FK → User.
 
 ### Environnements
 
@@ -316,11 +321,13 @@ Approche **signals-first** obligatoire :
 - localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
 - TypeScript 5.9 + Angular 21, @ng-icons/phosphor-icons, Angular Signals (098-angular-settings-alignment)
 - N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
+- Java 21 (backend), TypeScript 5.9 (frontend Angular) + Spring Boot 4.0.2, Spring Data JPA, Apache Commons CSV 1.11.0 (nouveau), Apache Commons Text 1.12.0 (nouveau), Angular 21 (099-csv-import)
+- PostgreSQL 15+ (Flyway V22-V23 — 5 nouvelles tables + colonne updatedAt) (099-csv-import)
 
 ### Backend (api/)
 
 - Java 21, Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6
-- PostgreSQL 15+, Flyway migrations V1-V21
+- PostgreSQL 15+, Flyway migrations V1-V23
 - JUnit 5, Spring Boot Test, Mockito, H2 (profil test)
 
 ### Frontend PWA (app/)
@@ -337,6 +344,7 @@ Approche **signals-first** obligatoire :
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
+- 099-csv-import: ImportController (15 endpoints /imports/**); ImportService + CsvParsingService (Commons CSV) + LabelCleaningService (extraction structurelle PRELEVEMENT/VIR/RETRAIT DAB + regex SG) + DeduplicationService (Jaro-Winkler seuil 0.85, fenetre dates ±3j) + CategoryRuleService (CRUD regles, application auto) + ImportProfileRegistry (profil SG pre-configure) + ImportDraftCleanupJob (cron 3h); 5 entites JPA (ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile); 3 enums (ImportDraftStatus, ImportLineStatus, ImportProfileSource); CsvProfileNotFoundException 422; Flyway V22-V23; Angular: ImportSettings + ImportReview + CsvMapping; ImportService + CategoryRuleService + ApiService.postFormData(); icone import sur page comptes
 - 098-angular-settings-alignment: Settings Angular alignement Flutter — hub 3 groupes headers (General, Gestion, Autre), couleurs icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; About enrichi (HealthService, forkJoin stats, glassmorphism); 389 tests passent
 - 097-angular-emoji-picker: EmojiInput Angular refonte — emoji-mart picker (lazy-loaded) avec categories, recents, recherche; theme dark/light via tokens DS (setProperty sur host); position fixed; locale fr (recherche EN limitation dataset); text scale rem; API publique inchangee (value/valueChange); 10 tests (389 total)
 - 096-flutter-dashboard-refonte: DashboardScreen refonte complete (CustomScrollView + SliverList); PatrimoineCard (gradient amber→indigo, variation mensuelle pill, conversion ≈); IncomeExpenseCards (REVENUS/DEPENSES, +/- colores, delta mois precedent pill, conversion ≈); DashboardHeader (salutation); RecentTransactionsSection (badges devise, conversion ≈, nom compte); BudgetSummarySection (tri % decroissant, max 4 items, chargement integre au notifier); suppression HeroAccountSection/MonthlySummarySection/MiniCardsSection; 55 tests dashboard passent

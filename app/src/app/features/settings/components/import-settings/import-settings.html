@@ -1,0 +1,301 @@
+<a class="section-back" routerLink="/settings">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Paramètres</span>
+</a>
+
+<h2 class="import-title">Import CSV</h2>
+<p class="import-description">
+  Importez vos transactions depuis un relevé bancaire au format CSV.
+</p>
+
+<!-- Brouillons en cours -->
+<section class="import-section">
+  <h3 class="import-section__title">
+    <ng-icon name="phosphorClockCounterClockwise" size="18" />
+    Brouillons en cours
+  </h3>
+
+  @if (draftsLoading()) {
+    <div class="state-loading">
+      <div class="spinner spinner--sm"></div>
+    </div>
+  } @else if (drafts().length === 0) {
+    <p class="state-empty">Aucun brouillon en cours.</p>
+  } @else {
+    <ul class="draft-list">
+      @for (draft of drafts(); track draft.id) {
+        <li class="draft-list__item">
+          <ng-icon name="phosphorFileCsv" size="20" class="draft-list__icon" />
+          <div class="draft-list__info">
+            <span class="draft-list__account">{{ draft.accountName }}</span>
+            @if (draft.fileName) {
+              <span class="draft-list__filename">{{ draft.fileName }}</span>
+            }
+            <span class="draft-list__meta">
+              {{ draft.totalLines }} ligne{{ draft.totalLines > 1 ? 's' : '' }} · {{ formatDate(draft.createdAt) }}
+            </span>
+          </div>
+          <div class="draft-list__actions">
+            <button
+              type="button"
+              class="btn-outline btn-outline--sm"
+              (click)="resumeDraft(draft.id)"
+            >
+              <ng-icon name="phosphorArrowCounterClockwise" size="14" />
+              Reprendre
+            </button>
+            <button
+              type="button"
+              class="btn-icon btn-icon--danger"
+              [disabled]="deletingDraftId() === draft.id"
+              (click)="deleteDraft(draft.id)"
+              title="Supprimer le brouillon"
+            >
+              <ng-icon name="phosphorTrash" size="16" />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Historique -->
+<section class="import-section">
+  <h3 class="import-section__title">
+    <ng-icon name="phosphorUploadSimple" size="18" />
+    Historique
+  </h3>
+
+  @if (historyLoading()) {
+    <div class="state-loading">
+      <div class="spinner spinner--sm"></div>
+    </div>
+  } @else if (history().length === 0) {
+    <p class="state-empty">Aucun import finalisé.</p>
+  } @else {
+    <ul class="history-list">
+      @for (entry of history(); track entry.id) {
+        <li class="history-list__item">
+          <div class="history-list__info">
+            <span class="history-list__account">{{ entry.accountName }}</span>
+            @if (entry.fileName) {
+              <span class="history-list__filename">{{ entry.fileName }}</span>
+            }
+            <span class="history-list__meta">
+              {{ entry.transactionCount }} transaction{{ entry.transactionCount > 1 ? 's' : '' }} · {{ formatDate(entry.importedAt) }}
+            </span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Règles de catégorisation -->
+<section class="import-section">
+  <div class="import-section__header">
+    <h3 class="import-section__title">
+      <ng-icon name="phosphorFunnelSimple" size="18" />
+      Règles de catégorisation
+    </h3>
+    <button type="button" class="btn-icon btn-icon--primary" (click)="openAddRuleForm()" title="Ajouter une règle">
+      <ng-icon name="phosphorPlus" size="16" />
+    </button>
+  </div>
+  <p class="import-section__hint">
+    Les règles permettent de catégoriser automatiquement les lignes dont le libellé contient le pattern défini.
+  </p>
+
+  @if (rules().length === 0) {
+    <p class="state-empty">Aucune règle définie.</p>
+  } @else {
+    <ul class="rule-list">
+      @for (rule of rules(); track rule.id) {
+        <li class="rule-list__item">
+          <span class="rule-list__pattern">{{ rule.pattern }}</span>
+          <span class="rule-list__arrow">→</span>
+          <span class="rule-list__category">
+            {{ rule.categoryIcon }} {{ rule.categoryName }}
+          </span>
+          <div class="rule-list__actions">
+            <button
+              type="button"
+              class="btn-icon btn-icon--sm"
+              (click)="openEditRuleForm(rule)"
+              title="Modifier la règle"
+            >
+              <ng-icon name="phosphorPencilSimple" size="14" />
+            </button>
+            <button
+              type="button"
+              class="btn-icon btn-icon--danger btn-icon--sm"
+              (click)="deleteRule(rule.id)"
+              title="Supprimer la règle"
+            >
+              <ng-icon name="phosphorTrash" size="14" />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (showRuleForm()) {
+    <div class="rule-form">
+      <h4 class="rule-form__title">
+        {{ editingRuleId() ? 'Modifier la règle' : 'Ajouter une règle' }}
+      </h4>
+      <div class="form-group">
+        <label class="form-label" for="rule-pattern">Pattern</label>
+        <input
+          id="rule-pattern"
+          type="text"
+          class="form-input"
+          placeholder="ex: CARREFOUR"
+          [ngModel]="ruleFormPattern()"
+          (ngModelChange)="ruleFormPattern.set($event)"
+        />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rule-category">Catégorie</label>
+        <select
+          id="rule-category"
+          class="form-select"
+          [ngModel]="ruleFormCategoryId()"
+          (ngModelChange)="ruleFormCategoryId.set($event)"
+        >
+          <option value="">-- Sélectionner une catégorie --</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+          }
+        </select>
+      </div>
+      @if (ruleFormError()) {
+        <div class="upload-error">{{ ruleFormError() }}</div>
+      }
+      <div class="rule-form__actions">
+        <button type="button" class="btn-outline btn-outline--sm" (click)="cancelRuleForm()">
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn-primary btn-primary--sm"
+          [disabled]="ruleFormSaving()"
+          (click)="saveRule()"
+        >
+          @if (ruleFormSaving()) {
+            <span class="spinner spinner--sm"></span>
+          }
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- Profils d'import -->
+<section class="import-section">
+  <h3 class="import-section__title">
+    <ng-icon name="phosphorGitBranch" size="18" />
+    Profils d'import
+  </h3>
+  <p class="import-section__hint">
+    Les profils pré-configurés sont fournis par le système. Vos profils personnalisés sont créés lors du mapping manuel.
+  </p>
+
+  @if (profilesLoading()) {
+    <div class="state-loading">
+      <div class="spinner spinner--sm"></div>
+    </div>
+  } @else if (profiles().length === 0) {
+    <p class="state-empty">Aucun profil disponible.</p>
+  } @else {
+    <ul class="profile-list">
+      @for (profile of profiles(); track (profile.id ?? profile.name)) {
+        <li class="profile-list__item">
+          <ng-icon
+            [name]="profile.source === 'REGISTRY' ? 'phosphorLockSimple' : 'phosphorGitBranch'"
+            size="16"
+            class="profile-list__icon"
+            [class.profile-list__icon--registry]="profile.source === 'REGISTRY'"
+          />
+          <div class="profile-list__info">
+            <span class="profile-list__name">{{ profile.name }}</span>
+            <span class="profile-list__badge" [class.profile-list__badge--registry]="profile.source === 'REGISTRY'">
+              {{ profile.source === 'REGISTRY' ? 'Pré-configuré' : 'Personnalisé' }}
+            </span>
+          </div>
+          @if (profile.editable && profile.id) {
+            <button
+              type="button"
+              class="btn-icon btn-icon--danger btn-icon--sm"
+              [disabled]="deletingProfileId() === profile.id"
+              (click)="deleteProfile(profile.id)"
+              title="Supprimer le profil"
+            >
+              <ng-icon name="phosphorTrash" size="14" />
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Nouvel import -->
+<section class="import-section">
+  <h3 class="import-section__title">
+    <ng-icon name="phosphorUploadSimple" size="18" />
+    Nouvel import
+  </h3>
+
+  <div class="import-form">
+    <div class="form-group">
+      <label class="form-label" for="account-select">Compte de destination</label>
+      @if (accounts().length === 0) {
+        <p class="form-hint">Aucun compte disponible.</p>
+      } @else {
+        <select
+          id="account-select"
+          class="form-select"
+          [value]="selectedAccountId()"
+          (change)="onAccountChange($any($event.target).value)"
+        >
+          @for (account of accounts(); track account.id) {
+            <option [value]="account.id">{{ account.icone }} {{ account.nom }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <div class="upload-zone" (click)="triggerFileInput()" [class.upload-zone--disabled]="uploading()">
+      <input
+        id="csv-file-input"
+        type="file"
+        accept=".csv,.txt"
+        class="upload-zone__input"
+        (change)="onFileSelected($event)"
+        [disabled]="uploading()"
+      />
+      @if (uploading()) {
+        <div class="upload-zone__content">
+          <div class="spinner"></div>
+          <p class="upload-zone__text">Import en cours...</p>
+        </div>
+      } @else {
+        <div class="upload-zone__content">
+          <span class="upload-zone__icon">&#8679;</span>
+          <p class="upload-zone__text">Cliquez pour sélectionner un fichier CSV</p>
+          <p class="upload-zone__hint">Formats acceptés : .csv, .txt</p>
+        </div>
+      }
+    </div>
+
+    @if (uploadError()) {
+      <div class="upload-error">
+        {{ uploadError() }}
+      </div>
+    }
+  </div>
+</section>

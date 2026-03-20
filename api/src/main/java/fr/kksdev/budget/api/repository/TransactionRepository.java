@@ -69,6 +69,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByDebtIdOrderByDateDesc(UUID debtId);
 
+    List<Transaction> findByUserIdAndAccountIdAndDateBetween(UUID userId, UUID accountId, LocalDate from, LocalDate to);
+
     @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +

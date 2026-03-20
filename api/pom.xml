@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.kksdev.budget</groupId>
     <artifactId>api</artifactId>
-    <version>4.1.0</version>
+    <version>4.2.0</version>
     <name>k-budget-api</name>
     <description>K-Budget API — Gestion de budget personnel</description>
     <url/>
@@ -109,6 +109,18 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- CSV parsing -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.12.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

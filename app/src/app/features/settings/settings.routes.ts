@@ -49,4 +49,19 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/currency-settings/currency-settings').then((m) => m.CurrencySettings),
   },
+  {
+    path: 'import',
+    loadComponent: () =>
+      import('./components/import-settings/import-settings').then((m) => m.ImportSettings),
+  },
+  {
+    path: 'import/review/:draftId',
+    loadComponent: () =>
+      import('./components/import-review/import-review').then((m) => m.ImportReview),
+  },
+  {
+    path: 'import/mapping',
+    loadComponent: () =>
+      import('./components/csv-mapping/csv-mapping').then((m) => m.CsvMapping),
+  },
 ];
