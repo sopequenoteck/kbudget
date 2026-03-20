@@ -93,6 +93,34 @@ Declenchee via `EntityNotFoundException` quand :
 }
 ```
 
+### 409 Conflict
+
+Declenchee par `ConflictException` :
+- Un brouillon d'import actif (PENDING) existe deja pour le compte cible
+- Pattern de libelle de regle de categorisation deja existant pour l'utilisateur
+
+```json
+{
+  "timestamp": "2026-03-20T14:30:25",
+  "status": 409,
+  "message": "Un brouillon d'import actif existe deja pour ce compte"
+}
+```
+
+### 422 Unprocessable Entity
+
+Declenchee par `CsvProfileNotFoundException` :
+- Le format CSV uploade ne correspond a aucun profil connu (ni registre ni custom)
+- Utiliser `/imports/upload-with-mapping` avec un mapping manuel
+
+```json
+{
+  "timestamp": "2026-03-20T14:30:25",
+  "status": 422,
+  "message": "Aucun profil d'import trouve pour le format CSV"
+}
+```
+
 ### 500 Internal Server Error
 
 Declenchee par le handler generique `Exception`. Le message est toujours le meme — aucun detail technique n'est expose au client.

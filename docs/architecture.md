@@ -202,6 +202,73 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | createdAt | LocalDateTime | Date de creation |
 | user | User | FK → User |
 
+### ImportDraft
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| status | Enum | PENDING / CONFIRMED / CANCELLED |
+| originalFilename | String | Nom du fichier CSV uploade |
+| profileId | String | Identifiant du profil utilise (nullable) |
+| account | Account | FK → Account cible |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
+### ImportDraftLine
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| draft | ImportDraft | FK → ImportDraft |
+| lineNumber | Integer | Numero de ligne dans le CSV |
+| rawData | String | Donnee brute (JSON) |
+| date | LocalDate | Date parsee (nullable) |
+| libelle | String | Libelle parse (nullable) |
+| montant | BigDecimal | Montant parse (nullable) |
+| type | Enum | DEPENSE / RECETTE (nullable) |
+| category | Category | FK → Category (nullable, suggestion ou choix utilisateur) |
+| status | Enum | PENDING / IMPORTED / IGNORED / ERROR |
+| errorMessage | String | Message d'erreur de parsing (nullable) |
+
+### CategoryRule
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| pattern | String | Motif de correspondance sur le libelle (insensible a la casse) |
+| category | Category | FK → Category a appliquer |
+| priority | Integer | Priorite (plus grand = prioritaire) |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
+
+### ImportHistory
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| originalFilename | String | Nom du fichier source |
+| profileId | String | Profil utilise (nullable) |
+| totalLines | Integer | Nombre total de lignes CSV |
+| importedCount | Integer | Lignes importees en transactions |
+| ignoredCount | Integer | Lignes ignorees |
+| errorCount | Integer | Lignes en erreur |
+| account | Account | FK → Account cible |
+| confirmedAt | LocalDateTime | Date de confirmation |
+| user | User | FK → User |
+
+### ImportProfile
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | String | Identifiant (slug, ex: "bnp-particuliers") |
+| name | String | Nom affiche |
+| source | Enum | BUILTIN / CUSTOM |
+| columnMapping | String | Mapping colonnes JSON (nullable pour profils custom) |
+| separator | Character | Separateur CSV (defaut ';') |
+| encoding | String | Encodage (defaut "UTF-8") |
+| user | User | FK → User (nullable pour les profils BUILTIN) |
+
 ## Architecture frontend
 
 ### Projet Angular : `budget-app` (dossier `app/`)

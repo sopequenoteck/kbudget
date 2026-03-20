@@ -213,6 +213,27 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | PUT | `/api/exchange-rates` | Creer ou mettre a jour un taux (upsert) |
 | DELETE | `/api/exchange-rates/{base}/{target}` | Supprimer un taux |
 
+### Import CSV
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/imports/upload` | Upload CSV et creation brouillon (auto-detection profil) |
+| POST | `/api/imports/upload-with-mapping` | Upload CSV avec mapping manuel des colonnes |
+| POST | `/api/imports/preview` | Preview CSV (headers, separateur, encoding) |
+| GET | `/api/imports/drafts` | Lister les brouillons PENDING |
+| GET | `/api/imports/drafts/{draftId}` | Detail d'un brouillon avec lignes |
+| PUT | `/api/imports/drafts/{draftId}/lines/{lineId}` | Mettre a jour une ligne (categorie, statut) |
+| PUT | `/api/imports/drafts/{draftId}/lines/batch` | Actions groupees sur plusieurs lignes |
+| POST | `/api/imports/drafts/{draftId}/confirm` | Confirmer et creer les transactions |
+| DELETE | `/api/imports/drafts/{draftId}` | Supprimer un brouillon |
+| GET | `/api/imports/history` | Historique pagine des imports finalises |
+| GET | `/api/imports/profiles` | Profils pre-configures et personnalises |
+| DELETE | `/api/imports/profiles/{profileId}` | Supprimer un profil personnalise |
+| GET | `/api/imports/rules` | Regles de categorisation |
+| POST | `/api/imports/rules` | Creer une regle de categorisation |
+| PUT | `/api/imports/rules/{ruleId}` | Modifier une regle |
+| DELETE | `/api/imports/rules/{ruleId}` | Supprimer une regle |
+
 Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
 ## Architecture
@@ -234,14 +255,14 @@ budget/
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
-├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification)
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification, Import)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
 ├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType, ImportDraftStatus, ImportLineStatus, ImportProfileSource
 ```
 
 ### Frontend (app/)
