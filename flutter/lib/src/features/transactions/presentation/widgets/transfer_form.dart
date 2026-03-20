@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -135,6 +136,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
               color: parseHexColor(a.couleur),
               secondaryText:
                   AmountFormatter.format(a.solde, currency: a.currency),
+              imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
 
@@ -147,6 +149,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
               color: parseHexColor(a.couleur),
               secondaryText:
                   AmountFormatter.format(a.solde, currency: a.currency),
+              imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
 

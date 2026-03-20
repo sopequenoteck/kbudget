@@ -1,7 +1,9 @@
-import { Injectable, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
+import { ExchangeRateService } from './exchange-rate';
+import { type NotificationType } from '../models/notification.model';
 import {
   type Feature,
   type UserPreference,
@@ -13,9 +15,15 @@ import {
 })
 export class PreferenceService {
   private readonly apiService = inject(ApiService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
 
   readonly enabledFeatures = signal<Feature[]>([]);
   readonly navOrder = signal<Feature[]>([]);
+  readonly currencies = signal<string[]>(['EUR']);
+  readonly primaryCurrency = computed(() => this.currencies()[0] ?? 'EUR');
+  readonly enabledNotificationTypes = signal<NotificationType[]>(['SUBSCRIPTION_DUE', 'DEBT_DUE']);
+  readonly timezone = signal<string>('Europe/Paris');
+  readonly textScale = signal<string>('MEDIUM');
   readonly error = signal<string | null>(null);
 
   async loadPreferences(): Promise<void> {
@@ -25,6 +33,10 @@ export class PreferenceService {
       );
       this.enabledFeatures.set(prefs.enabledFeatures);
       this.navOrder.set(prefs.navOrder);
+      this.currencies.set(prefs.currencies ?? ['EUR']);
+      this.enabledNotificationTypes.set(prefs.enabledNotificationTypes ?? ['SUBSCRIPTION_DUE', 'DEBT_DUE']);
+      this.timezone.set(prefs.timezone ?? 'Europe/Paris');
+      this.textScale.set(prefs.textScale ?? 'MEDIUM');
       this.error.set(null);
     } catch (e) {
       if (isDevMode()) console.error('Failed to load preferences:', e);
@@ -63,6 +75,51 @@ export class PreferenceService {
 
   isLoaded(): boolean {
     return this.enabledFeatures().length > 0;
+  }
+
+  update(request: Partial<UserPreferenceRequest>): void {
+    const oldPrimary = this.currencies()[0];
+    const merged: UserPreferenceRequest = {
+      enabledFeatures: this.enabledFeatures(),
+      navOrder: this.navOrder(),
+      currencies: this.currencies(),
+      enabledNotificationTypes: this.enabledNotificationTypes(),
+      timezone: this.timezone(),
+      textScale: this.textScale(),
+      ...request,
+    };
+    firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged))
+      .then(() => {
+        const newPrimary = merged.currencies?.[0];
+        if (newPrimary && newPrimary !== oldPrimary) {
+          this.exchangeRateService.loadRates().catch(() => {
+            this.error.set('Taux de change périmés — rechargez la page');
+          });
+        }
+      })
+      .catch((e) => {
+        if (isDevMode()) console.error('Failed to update preferences:', e);
+        this.error.set('Impossible de sauvegarder les préférences');
+      });
+  }
+
+  setCurrencies(currencies: string[]): void {
+    this.currencies.set(currencies);
+  }
+
+  updateNotificationTypes(types: NotificationType[]): void {
+    this.enabledNotificationTypes.set(types);
+    this.update({ enabledNotificationTypes: types });
+  }
+
+  updateTimezone(tz: string): void {
+    this.timezone.set(tz);
+    this.update({ timezone: tz });
+  }
+
+  updateTextScale(scale: string): void {
+    this.textScale.set(scale);
+    this.update({ textScale: scale });
   }
 
   reorderNavigation(newNavOrder: Feature[]): void {

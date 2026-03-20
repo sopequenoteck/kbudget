@@ -3,15 +3,20 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.request.TransferRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.dto.response.CurrencyBalance;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
+import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -23,7 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -38,6 +46,8 @@ public class AccountService {
     private final UserRepository userRepository;
     private final CategoryService categoryService;
     private final PreferenceService preferenceService;
+    private final DebtRepository debtRepository;
+    private final BankService bankService;
 
     public List<AccountResponse> getAccounts(UUID userId, boolean includeInactive) {
         List<Account> accounts = includeInactive
@@ -65,7 +75,13 @@ public class AccountService {
         BigDecimal soldeInitial = request.soldeInitial() != null ? request.soldeInitial() : BigDecimal.ZERO;
 
         User user = userRepository.getReferenceById(userId);
-        Currency currency = request.currency() != null ? request.currency() : user.getDefaultCurrency();
+        Currency currency = request.currency() != null ? request.currency()
+                : preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+
+        String bankCode = request.bankCode() != null ? request.bankCode().toUpperCase() : "OTHER";
+        if (BankRegistry.findByCode(bankCode).isEmpty()) {
+            throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+        }
 
         Account account = Account.builder()
                 .nom(request.nom())
@@ -75,10 +91,17 @@ public class AccountService {
                 .couleur(couleur)
                 .currency(currency)
                 .user(user)
+                .bankCode(bankCode)
+                .bankCustomName(request.bankCustomName())
+                .bankCustomLogo(request.bankCustomLogo())
                 .build();
 
         account = accountRepository.save(account);
-        log.info("Compte créé: {} pour userId {}", account.getId(), userId);
+        if (!"OTHER".equals(bankCode)) {
+            log.info("Compte créé: {} pour userId {}, bankCode={}", account.getId(), userId, bankCode);
+        } else {
+            log.info("Compte créé: {} pour userId {}", account.getId(), userId);
+        }
         return toResponse(account);
     }
 
@@ -99,11 +122,25 @@ public class AccountService {
             throw new IllegalArgumentException("Impossible de désactiver le compte par défaut");
         }
 
+        if (request.bankCode() != null) {
+            String newBankCode = request.bankCode().toUpperCase();
+            if (BankRegistry.findByCode(newBankCode).isEmpty()) {
+                throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+            }
+            String oldBankCode = account.getBankCode();
+            if (!newBankCode.equals(oldBankCode)) {
+                log.info("Banque modifiée sur compte {}: {} -> {}", account.getId(), oldBankCode, newBankCode);
+            }
+            account.setBankCode(newBankCode);
+        }
+
         account.setNom(request.nom());
         account.setType(request.type());
         // soldeInitial est ignoré en PUT (figé après création)
         account.setIcone(request.icone() != null ? request.icone() : request.type().getDefaultIcone());
         account.setCouleur(request.couleur() != null ? request.couleur() : request.type().getDefaultCouleur());
+        account.setBankCustomName(request.bankCustomName());
+        account.setBankCustomLogo(request.bankCustomLogo());
         if (request.actif() != null) {
             account.setActif(request.actif());
         }
@@ -256,6 +293,66 @@ public class AccountService {
         return toResponse(account);
     }
 
+    public TotalBalanceResponse getTotalBalance(UUID userId) {
+        // Somme des soldes des comptes actifs par devise
+        Map<Currency, BigDecimal> balances = new LinkedHashMap<>();
+        List<Account> activeAccounts = accountRepository.findByUserIdAndActifTrue(userId);
+        for (Account account : activeAccounts) {
+            BigDecimal txBalance = transactionRepository.calculateBalanceByAccountId(account.getId());
+            BigDecimal total = account.getSoldeInitial().add(txBalance);
+            balances.merge(account.getCurrency(), total, BigDecimal::add);
+        }
+
+        // Ajuster par les dettes non remboursées
+        List<Debt> unpaidDebts = debtRepository.findByUserIdAndRembourseFalse(userId);
+
+        // Batch: charger tous les montants payés en une requête
+        List<UUID> eligibleDebtIds = unpaidDebts.stream()
+                .filter(d -> d.getAccount() != null || Boolean.TRUE.equals(d.getIncludeInBalance()))
+                .map(Debt::getId)
+                .toList();
+        Map<UUID, BigDecimal> paidMap = new HashMap<>();
+        if (!eligibleDebtIds.isEmpty()) {
+            for (Object[] row : transactionRepository.sumByDebtIds(eligibleDebtIds)) {
+                paidMap.put((UUID) row[0], (BigDecimal) row[1]);
+            }
+        }
+
+        for (Debt debt : unpaidDebts) {
+            boolean eligible;
+            if (debt.getAccount() != null) {
+                eligible = true; // Dettes avec compte: toujours incluses
+            } else {
+                eligible = Boolean.TRUE.equals(debt.getIncludeInBalance());
+            }
+
+            if (eligible) {
+                BigDecimal paid = paidMap.getOrDefault(debt.getId(), BigDecimal.ZERO);
+                BigDecimal remaining = debt.getMontant().subtract(paid);
+
+                Currency currency = debt.getCurrency();
+                if (debt.getSens() == DebtType.EMPRUNT) {
+                    balances.merge(currency, remaining.negate(), BigDecimal::add);
+                } else {
+                    balances.merge(currency, remaining, BigDecimal::add);
+                }
+            }
+        }
+
+        // Trier: devise principale en premier
+        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+        List<CurrencyBalance> result = balances.entrySet().stream()
+                .sorted((a, b) -> {
+                    if (a.getKey() == primaryCurrency && b.getKey() != primaryCurrency) return -1;
+                    if (a.getKey() != primaryCurrency && b.getKey() == primaryCurrency) return 1;
+                    return a.getKey().compareTo(b.getKey());
+                })
+                .map(e -> new CurrencyBalance(e.getKey(), e.getValue()))
+                .toList();
+
+        return new TotalBalanceResponse(result);
+    }
+
     @Transactional
     public void createDefaultAccount(User user) {
         try {
@@ -289,6 +386,7 @@ public class AccountService {
         UUID shopAccountId = preferenceService.getOrCreatePreference(account.getUser().getId()).getShopAccountId();
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(account.getId());
         BigDecimal solde = account.getSoldeInitial().add(balance);
+        BankService.BankResolvedInfo bankInfo = bankService.resolveBank(account);
         return new AccountResponse(
                 account.getId(),
                 account.getNom(),
@@ -300,7 +398,14 @@ public class AccountService {
                 Boolean.TRUE.equals(account.getIsDefault()),
                 Boolean.TRUE.equals(account.getActif()),
                 account.getCurrency().name(),
-                account.getId().equals(shopAccountId)
+                account.getId().equals(shopAccountId),
+                bankInfo.bankCode(),
+                bankInfo.bankName(),
+                bankInfo.bankCountry(),
+                bankInfo.bankBrandColor(),
+                bankInfo.bankLogoUrl(),
+                bankInfo.bankCustomName(),
+                bankInfo.bankCustomLogo()
         );
     }
 }

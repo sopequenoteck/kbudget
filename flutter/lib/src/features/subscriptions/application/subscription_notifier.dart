@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
+import 'package:k_budget/src/domain/models/subscription_payment.dart';
+import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 
@@ -122,6 +124,22 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     await update(item.copyWith(actif: !item.actif));
   }
 
+  Future<void> pay(String id) async {
+    state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
+    try {
+      await _repo.pay(id);
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+      );
+    } on Exception catch (e) {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove(id),
+        error: 'Erreur lors du paiement: $e',
+      );
+      rethrow;
+    }
+  }
+
   List<Subscription> _applyFilter(
     List<Subscription> items,
     SubscriptionStatusFilter filter,
@@ -139,6 +157,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     final totals = <Currency, double>{};
     for (final sub in allItems.where((s) => s.actif)) {
       final monthly = switch (sub.frequence) {
+        Frequency.hebdomadaire => sub.montant * 4.33,
         Frequency.mensuel => sub.montant,
         Frequency.annuel => sub.montant / 12,
       };
@@ -146,6 +165,9 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     }
     return totals;
   }
+
+  Subscription? getSubscriptionById(String id) =>
+      _allItems.where((e) => e.id == id).firstOrNull;
 
   void _refreshPage({bool resetPage = false}) {
     final filtered = _applyFilter(_allItems, state.activeFilter);
@@ -161,3 +183,17 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     );
   }
 }
+
+final subscriptionPaymentsProvider =
+    FutureProvider.family<List<SubscriptionPayment>, String>(
+        (ref, subscriptionId) async {
+  final repo = ref.watch(subscriptionRepositoryProvider);
+  return repo.getPayments(subscriptionId);
+});
+
+final subscriptionTotalPaidProvider =
+    FutureProvider.family<SubscriptionTotalPaid, String>(
+        (ref, subscriptionId) async {
+  final repo = ref.watch(subscriptionRepositoryProvider);
+  return repo.getTotalPaid(subscriptionId);
+});

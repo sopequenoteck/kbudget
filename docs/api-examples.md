@@ -259,7 +259,12 @@ Request :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": false
+  "rembourse": false,
+  "currency": "EUR",
+  "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "includeInBalance": true,
+  "reminderDate": "2026-03-01",
+  "reminderTime": "09:00"
 }
 ```
 
@@ -272,7 +277,15 @@ Response `200` :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": false
+  "dueDate": null,
+  "currency": "EUR",
+  "rembourse": false,
+  "montantRestant": 50.00,
+  "category": null,
+  "account": { "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "nom": "Compte Courant" },
+  "includeInBalance": true,
+  "reminderDate": "2026-03-01",
+  "reminderTime": "09:00"
 }
 ```
 
@@ -286,7 +299,12 @@ Request :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": true
+  "rembourse": true,
+  "currency": "EUR",
+  "accountId": null,
+  "includeInBalance": false,
+  "reminderDate": null,
+  "reminderTime": null
 }
 ```
 
@@ -299,7 +317,15 @@ Response `200` :
   "montant": 50.00,
   "sens": "EMPRUNT",
   "date": "2026-02-01",
-  "rembourse": true
+  "dueDate": null,
+  "currency": "EUR",
+  "rembourse": true,
+  "montantRestant": 0.00,
+  "category": null,
+  "account": null,
+  "includeInBalance": false,
+  "reminderDate": null,
+  "reminderTime": null
 }
 ```
 
@@ -315,18 +341,76 @@ Response `200` :
     "montant": 50.00,
     "sens": "EMPRUNT",
     "date": "2026-02-01",
-    "rembourse": false
-  },
-  {
-    "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
-    "personne": "Marie",
-    "montant": 25.00,
-    "sens": "PRET",
-    "date": "2026-01-20",
-    "rembourse": false
+    "dueDate": null,
+    "currency": "EUR",
+    "rembourse": false,
+    "montantRestant": 30.00,
+    "category": null,
+    "account": { "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "nom": "Compte Courant" },
+    "includeInBalance": true,
+    "reminderDate": "2026-03-01",
+    "reminderTime": "09:00"
   }
 ]
 ```
+
+### Rembourser `POST /api/debts/{id}/repay`
+
+Request :
+
+```json
+{
+  "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "amount": 20.00
+}
+```
+
+> `amount` optionnel — si omis, rembourse le montant restant (solde complet).
+
+Response `200` : la dette mise a jour (meme format que ci-dessus, `montantRestant` recalcule, `rembourse: true` si solde).
+
+### Historique paiements `GET /api/debts/{id}/payments`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "f1a2b3c4-d5e6-7890-abcd-123456789012",
+    "amount": 20.00,
+    "date": "2026-02-15",
+    "accountName": "Compte Courant"
+  }
+]
+```
+
+### Reporter le rappel `POST /api/debts/{id}/snooze`
+
+Request :
+
+```json
+{
+  "reminderDate": "2026-04-01",
+  "reminderTime": "10:00"
+}
+```
+
+Response `200` : la dette mise a jour avec les nouveaux `reminderDate` et `reminderTime`.
+
+### Solde total `GET /api/accounts/total-balance`
+
+Response `200` :
+
+```json
+{
+  "balances": [
+    { "currency": "EUR", "amount": 3450.00 },
+    { "currency": "XOF", "amount": 150000.00 }
+  ]
+}
+```
+
+> Agregation des soldes de tous les comptes actifs + dettes avec `includeInBalance=true`, par devise.
 
 ## Comptes
 
@@ -341,7 +425,8 @@ Request :
   "soldeInitial": 1500.00,
   "icone": "🐷",
   "couleur": "#22c55e",
-  "actif": true
+  "actif": true,
+  "bankCode": "OTHER"
 }
 ```
 
@@ -357,7 +442,16 @@ Response `201` :
   "icone": "🐷",
   "couleur": "#22c55e",
   "isDefault": false,
-  "actif": true
+  "actif": true,
+  "currency": "EUR",
+  "isShopAccount": false,
+  "bankCode": "OTHER",
+  "bankName": "Autre",
+  "bankCountry": null,
+  "bankBrandColor": "#6b7280",
+  "bankLogoUrl": "/api/bank-logos/other.svg",
+  "bankCustomName": null,
+  "bankCustomLogo": null
 }
 ```
 
@@ -376,7 +470,16 @@ Response `200` :
     "icone": "🏦",
     "couleur": "#3b82f6",
     "isDefault": true,
-    "actif": true
+    "actif": true,
+    "currency": "EUR",
+    "isShopAccount": false,
+    "bankCode": "OTHER",
+    "bankName": "Autre",
+    "bankCountry": null,
+    "bankBrandColor": "#6b7280",
+    "bankLogoUrl": "/api/bank-logos/other.svg",
+    "bankCustomName": null,
+    "bankCustomLogo": null
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -387,7 +490,16 @@ Response `200` :
     "icone": "🐷",
     "couleur": "#22c55e",
     "isDefault": false,
-    "actif": true
+    "actif": true,
+    "currency": "EUR",
+    "isShopAccount": false,
+    "bankCode": "OTHER",
+    "bankName": "Autre",
+    "bankCountry": null,
+    "bankBrandColor": "#6b7280",
+    "bankLogoUrl": "/api/bank-logos/other.svg",
+    "bankCustomName": null,
+    "bankCustomLogo": null
   }
 ]
 ```
@@ -445,7 +557,16 @@ Response `200` :
   "icone": "🐷",
   "couleur": "#22c55e",
   "isDefault": true,
-  "actif": true
+  "actif": true,
+  "currency": "EUR",
+  "isShopAccount": false,
+  "bankCode": "OTHER",
+  "bankName": "Autre",
+  "bankCountry": null,
+  "bankBrandColor": "#6b7280",
+  "bankLogoUrl": "/api/bank-logos/other.svg",
+  "bankCustomName": null,
+  "bankCustomLogo": null
 }
 ```
 
@@ -537,7 +658,9 @@ Response `201` :
 
 ### Lister `GET /api/products`
 
-Response `200` (produits actifs uniquement, tries par date de creation decroissante) :
+Parametre optionnel : `?includeInactive=true` pour inclure les produits desactives (defaut `false`).
+
+Response `200` (tries par date de creation decroissante) :
 
 ```json
 [
@@ -575,9 +698,67 @@ Request (remplacement complet, champ `actif` obligatoire) :
 }
 ```
 
+### Vendre `POST /api/products/{id}/sell`
+
+Request (body optionnel, defaut `quantity: 1`) :
+
+```json
+{
+  "quantity": 3
+}
+```
+
+Response `200` : le produit mis a jour (stock decremente, totalVendu incremente).
+
 ### Supprimer `DELETE /api/products/{id}`
 
 Response `204` (corps vide, suppression physique).
+
+## Taux de conversion
+
+### Lister `GET /api/exchange-rates`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "baseCurrency": "EUR",
+    "targetCurrency": "XOF",
+    "rate": 655.957000,
+    "updatedAt": "2026-03-06T10:00:00"
+  }
+]
+```
+
+### Creer ou mettre a jour `PUT /api/exchange-rates`
+
+Request (upsert — cree ou met a jour le taux pour la paire) :
+
+```json
+{
+  "baseCurrency": "EUR",
+  "targetCurrency": "XOF",
+  "rate": 655.957
+}
+```
+
+Response `200` :
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "baseCurrency": "EUR",
+  "targetCurrency": "XOF",
+  "rate": 655.957000,
+  "updatedAt": "2026-03-06T10:00:00"
+}
+```
+
+### Supprimer `DELETE /api/exchange-rates/{baseCurrency}/{targetCurrency}`
+
+Response `204` (corps vide).
 
 ## Preferences utilisateur
 
@@ -588,7 +769,10 @@ Response `200` (valeurs par defaut) :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"]
+  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["EUR"]
 }
 ```
 
@@ -607,16 +791,20 @@ Response `200` :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "SHOP"]
+  "navOrder": ["SUBSCRIPTIONS", "SHOP"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["EUR"]
 }
 ```
 
-Request (reordonner avec navOrder explicite) :
+Request (reordonner avec navOrder explicite + changer devise principale) :
 
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
+  "currencies": ["XOF", "EUR"]
 }
 ```
 
@@ -625,21 +813,216 @@ Response `200` :
 ```json
 {
   "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]
+  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
+  "shopAccountId": null,
+  "includeShopInBalance": false,
+  "currencies": ["XOF", "EUR"]
 }
 ```
+
+## Budgets
+
+### Creer `POST /api/budgets`
+
+Request :
+
+```json
+{
+  "categoryId": "uuid-category",
+  "montant": 400.00,
+  "frequence": "MENSUEL",
+  "currency": "EUR",
+  "seuilNotification": 80
+}
+```
+
+Response `200` :
+
+```json
+{
+  "id": "uuid-budget",
+  "montant": 400.00,
+  "currency": "EUR",
+  "frequence": "MENSUEL",
+  "seuilNotification": 80,
+  "actif": true,
+  "category": {
+    "id": "uuid-category",
+    "nom": "Alimentation",
+    "icone": "🛒",
+    "couleur": "#f59e0b",
+    "isSystem": false
+  },
+  "spent": 0.00,
+  "updatedAt": "2026-03-08T10:00:00"
+}
+```
+
+### Lister `GET /api/budgets`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "uuid-budget",
+    "montant": 400.00,
+    "currency": "EUR",
+    "frequence": "MENSUEL",
+    "seuilNotification": 80,
+    "actif": true,
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false },
+    "spent": 320.50,
+    "updatedAt": "2026-03-08T10:00:00"
+  }
+]
+```
+
+### Consulter `GET /api/budgets/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/budgets/{id}`
+
+Request : meme format que la creation (tous les champs optionnels sauf `categoryId`).
+
+### Supprimer `DELETE /api/budgets/{id}`
+
+Response `204` (pas de corps).
+
+### Vue mensuelle `GET /api/budgets/overview`
+
+Response `200` :
+
+```json
+{
+  "month": "2026-03",
+  "totalBudget": 1500.00,
+  "totalSpent": 980.50,
+  "percentage": 65.37,
+  "currency": "EUR",
+  "items": [
+    {
+      "budgetId": "uuid-budget",
+      "categoryId": "uuid-category",
+      "categoryNom": "Alimentation",
+      "categoryIcone": "🛒",
+      "categoryCouleur": "#f59e0b",
+      "montantBudget": 400.00,
+      "montantBudgetNormalise": 400.00,
+      "currency": "EUR",
+      "montantDepense": 320.50,
+      "percentage": 80.13,
+      "frequence": "MENSUEL"
+    }
+  ],
+  "unbudgetedItems": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Courses",
+      "categoryIcone": "🛍️",
+      "categoryCouleur": "#6b7280",
+      "montantDepense": 45.00,
+      "currency": "EUR"
+    }
+  ],
+  "unbudgetedTotal": 45.00
+}
+```
+
+### Historique `GET /api/budgets/history?month=2026-02`
+
+Response `200` :
+
+```json
+{
+  "month": "2026-02",
+  "totalBudget": 1500.00,
+  "totalSpent": 1200.00,
+  "percentage": 80.00,
+  "currency": "EUR",
+  "items": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Alimentation",
+      "categoryIcone": "🛒",
+      "categoryCouleur": "#f59e0b",
+      "montantBudget": 400.00,
+      "currency": "EUR",
+      "tauxChange": null,
+      "montantDepense": 380.00,
+      "percentage": 95.00,
+      "createdAt": "2026-03-01T00:00:00"
+    }
+  ],
+  "unbudgetedItems": [
+    {
+      "categoryId": "uuid-category",
+      "categoryNom": "Courses",
+      "categoryIcone": "🛍️",
+      "categoryCouleur": "#6b7280",
+      "montantDepense": 52.30,
+      "currency": "EUR"
+    }
+  ],
+  "unbudgetedTotal": 52.30
+}
+```
+
+## Banques
+
+### Lister `GET /api/banks`
+
+Endpoint public (pas de token requis). Retourne les 29 banques supportees, triees par pays (FR, TG, International) puis par nom.
+
+Response `200` :
+
+```json
+[
+  {
+    "code": "BIA",
+    "name": "BIA",
+    "country": "FR",
+    "brandColor": "#003366",
+    "logoUrl": "/api/bank-logos/bia.svg"
+  },
+  {
+    "code": "BNP",
+    "name": "BNP Paribas",
+    "country": "FR",
+    "brandColor": "#00915a",
+    "logoUrl": "/api/bank-logos/bnp.svg"
+  },
+  {
+    "code": "ECOBANK",
+    "name": "Ecobank",
+    "country": "TG",
+    "brandColor": "#0033a0",
+    "logoUrl": "/api/bank-logos/ecobank.svg"
+  },
+  {
+    "code": "OTHER",
+    "name": "Autre",
+    "country": null,
+    "brandColor": "#6b7280",
+    "logoUrl": "/api/bank-logos/other.svg"
+  }
+]
+```
+
+> 29 entrees au total. Extraits ci-dessus pour illustration.
 
 ## Valeurs des enums
 
 | Enum | Valeurs |
 |------|---------|
 | `TransactionType` | `DEPENSE`, `RECETTE` |
-| `Frequency` | `MENSUEL`, `ANNUEL` |
+| `Frequency` | `HEBDOMADAIRE`, `MENSUEL`, `ANNUEL` |
 | `DebtType` | `EMPRUNT`, `PRET` |
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 | `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
-| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP` |
-| `Currency` | `EUR`, `USD`, `GBP`, `XOF` |
+| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS` |
+| `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
 ## Voir aussi
 

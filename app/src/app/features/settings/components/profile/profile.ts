@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -19,6 +20,7 @@ export class Profile {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly currencyService = inject(CurrencyService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly currentUser = this.authService.currentUser;
   readonly saving = signal(false);
@@ -28,11 +30,11 @@ export class Profile {
 
   constructor() {
     this.currencyService.loadIfEmpty();
-    this.userService.getProfile().subscribe((profile) => {
+    firstValueFrom(this.userService.getProfile()).then((profile) => {
       this.currencyControl.setValue(profile.defaultCurrency || 'EUR', { emitEvent: false });
     });
 
-    this.currencyControl.valueChanges.subscribe((code) => {
+    this.currencyControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((code) => {
       if (code) {
         this.onCurrencyChange(code);
       }

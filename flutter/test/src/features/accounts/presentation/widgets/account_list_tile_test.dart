@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_list_tile.dart';
@@ -94,7 +95,7 @@ void main() {
       await tester.pumpWidget(buildApp(normalAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
       await tester.pumpAndSettle();
 
       expect(find.text('Supprimer'), findsOneWidget);
@@ -105,7 +106,7 @@ void main() {
       await tester.pumpWidget(buildApp(defaultAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
       await tester.pumpAndSettle();
 
       expect(find.text('Définir par défaut'), findsNothing);
@@ -117,7 +118,7 @@ void main() {
       await tester.pumpWidget(buildApp(normalAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
       await tester.pumpAndSettle();
 
       expect(find.text('Définir par défaut'), findsOneWidget);

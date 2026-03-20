@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
@@ -14,6 +15,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TransactionForm extends ConsumerStatefulWidget {
   const TransactionForm({
@@ -223,6 +225,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               icon: a.icone,
               color: parseHexColor(a.couleur),
               secondaryText: AmountFormatter.format(a.solde),
+              imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
 
@@ -291,8 +294,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
+                PhosphorIcon(
+                  PhosphorIconsRegular.calendarBlank,
                   size: 18,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -360,7 +363,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             if (_isEditMode && widget.onDeleted != null)
               IconButton(
                 onPressed: _isSubmitting ? null : _onDelete,
-                icon: const Icon(Icons.delete_outline),
+                icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
                 tooltip: l10n.transactionFormDeleteButton,
               ),
@@ -400,8 +403,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.space3),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
+          PhosphorIcon(
+            PhosphorIconsRegular.info,
             size: 18,
             color: colorScheme.onSurfaceVariant,
           ),

@@ -2,6 +2,7 @@ import { Category } from './category.model';
 import { AccountSummary } from './account.model';
 
 export enum Frequency {
+  HEBDOMADAIRE = 'HEBDOMADAIRE',
   MENSUEL = 'MENSUEL',
   ANNUEL = 'ANNUEL',
 }

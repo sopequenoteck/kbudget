@@ -9,11 +9,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "debts")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"account", "category", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,6 +25,7 @@ public class Debt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false)
@@ -37,12 +42,29 @@ public class Debt {
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
+    @Column(nullable = false, length = 10)
     @Builder.Default
     private Currency currency = Currency.EUR;
 
     @Column(nullable = false)
     private Boolean rembourse = false;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean includeInBalance = false;
+
+    @Column(name = "reminder_date")
+    private LocalDate reminderDate;
+
+    @Column(name = "reminder_time")
+    private LocalTime reminderTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

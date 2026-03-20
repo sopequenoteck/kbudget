@@ -88,6 +88,11 @@
     color: var(--text-primary);
   }
 
+  &__bank {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+  }
+
   &__type {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);

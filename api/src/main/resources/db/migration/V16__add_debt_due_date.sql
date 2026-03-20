@@ -1,0 +1,1 @@
+ALTER TABLE debts ADD COLUMN due_date DATE;

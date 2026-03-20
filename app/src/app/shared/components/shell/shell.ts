@@ -6,40 +6,43 @@ import {
   ElementRef,
   HostListener,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter, firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorGear,
+  phosphorSignOut,
+  phosphorHouse,
+  phosphorCurrencyDollar,
+  phosphorArrowsClockwise,
+  phosphorHandshake,
+  phosphorStorefront,
+  phosphorChartPie,
+} from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorArrowsClockwiseFill,
+  phosphorHandshakeFill,
+  phosphorStorefrontFill,
+  phosphorHouseFill,
+  phosphorCurrencyDollarFill,
+  phosphorChartPieFill,
+} from '@ng-icons/phosphor-icons/fill';
 
 import { AuthService } from '../../../core/services/auth';
 import { PreferenceService } from '../../../core/services/preference';
+import { NotificationService } from '../../../core/services/notification';
+import { StompService } from '../../../core/services/stomp';
+import { NotificationBadge } from '../notification-badge/notification-badge';
+import { NotificationPanel } from '../notification-panel/notification-panel';
 import { FEATURES, type Feature } from '../../../core/models/preference.model';
 import { ThemeService } from '../../../core/services/theme';
-import { TransactionService } from '../../../core/services/transaction';
-import { SubscriptionService } from '../../../core/services/subscription';
-import { DebtService } from '../../../core/services/debt';
-import { AccountService } from '../../../core/services/account';
 import { ModalService, type ModalType } from '../../../core/services/modal.service';
-import {
-  type Transaction,
-  type TransactionRequest,
-  TransactionType,
-} from '../../../core/models/transaction.model';
-import {
-  Frequency,
-  type Subscription,
-  type SubscriptionRequest,
-} from '../../../core/models/subscription.model';
-import { DebtType, type Debt, type DebtRequest } from '../../../core/models/debt.model';
-import { type Account, type AccountRequest } from '../../../core/models/account.model';
-import {
-  type Product,
-  type ProductRequest,
-  type ProductUpdateRequest,
-} from '../../../core/models/product.model';
-import { ProductService } from '../../../core/services/product';
+import { type Transaction, TransactionType } from '../../../core/models/transaction.model';
+import { Frequency, type Subscription } from '../../../core/models/subscription.model';
+import { DebtType, type Debt } from '../../../core/models/debt.model';
 import { TransactionForm } from '../../../features/transactions/components/transaction-form/transaction-form';
 import { SubscriptionForm } from '../../../features/subscriptions/components/subscription-form/subscription-form';
 import { DebtForm } from '../../../features/debts/components/debt-form/debt-form';
@@ -48,9 +51,11 @@ import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
 import { ProductForm } from '../../../features/shop/components/product-form/product-form';
 import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
+import { BudgetForm } from '../../../features/budgets/components/budget-form/budget-form';
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
+import { Toast } from '../toast/toast';
 
 @Component({
   selector: 'app-shell',
@@ -58,6 +63,7 @@ import { Modal } from '../modal/modal';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    NgIcon,
     BottomNav,
     Fab,
     Modal,
@@ -69,6 +75,28 @@ import { Modal } from '../modal/modal';
     TransferForm,
     ProductForm,
     SellDialog,
+    BudgetForm,
+    NotificationBadge,
+    NotificationPanel,
+    Toast,
+  ],
+  providers: [
+    provideIcons({
+      phosphorGear,
+      phosphorSignOut,
+      phosphorHouse,
+      phosphorHouseFill,
+      phosphorCurrencyDollar,
+      phosphorCurrencyDollarFill,
+      phosphorArrowsClockwise,
+      phosphorArrowsClockwiseFill,
+      phosphorHandshake,
+      phosphorHandshakeFill,
+      phosphorStorefront,
+      phosphorStorefrontFill,
+      phosphorChartPie,
+      phosphorChartPieFill,
+    }),
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
@@ -76,15 +104,12 @@ import { Modal } from '../modal/modal';
 })
 export class Shell {
   private readonly authService = inject(AuthService);
-  readonly preferenceService = inject(PreferenceService);
+  private readonly preferenceService = inject(PreferenceService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly stompService = inject(StompService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
-  private readonly transactionService = inject(TransactionService);
-  private readonly subscriptionService = inject(SubscriptionService);
-  private readonly debtService = inject(DebtService);
-  private readonly accountService = inject(AccountService);
-  private readonly productService = inject(ProductService);
   readonly modalService = inject(ModalService);
   private readonly navigationEnd = toSignal(
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)),
@@ -104,6 +129,7 @@ export class Shell {
       .slice(0, 2);
   });
   readonly speedDialOpen = signal(false);
+  readonly notificationPanelOpen = signal(false);
   readonly transactionType = signal(TransactionType.DEPENSE);
   readonly TransactionType = TransactionType;
   readonly subscriptionFrequency = signal(Frequency.MENSUEL);
@@ -112,8 +138,8 @@ export class Shell {
   readonly DebtType = DebtType;
   readonly navItems = computed(() => {
     const fixed = [
-      { label: 'Accueil', route: '/dashboard', icon: '🏠' },
-      { label: 'Transactions', route: '/transactions', icon: '💰' },
+      { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
+      { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
     ];
     const navOrder = this.preferenceService.navOrder();
     const enabled = this.preferenceService.enabledFeatures();
@@ -121,7 +147,7 @@ export class Shell {
       .filter((f: Feature) => enabled.includes(f))
       .map((f: Feature) => {
         const meta = FEATURES.find((m) => m.value === f)!;
-        return { label: meta.label, route: meta.route, icon: meta.icon };
+        return { label: meta.label, route: meta.route, icon: meta.icon, filledIcon: meta.filledIcon };
       });
     return [...fixed, ...optional];
   });
@@ -129,7 +155,6 @@ export class Shell {
     const e = this.navigationEnd();
     return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
-  readonly sellableProducts = signal<Product[]>([]);
 
   constructor() {
     effect(() => {
@@ -139,6 +164,7 @@ export class Shell {
       this.modalService.closeModal();
     });
 
+    // Sync type toggles when editing existing entities
     effect(() => {
       const modal = this.modalService.activeModal();
       if (modal === 'transaction') {
@@ -163,18 +189,19 @@ export class Shell {
       }
     });
 
-    effect(async () => {
-      const modal = this.modalService.activeModal();
-      if (modal === 'sell') {
-        const all = await firstValueFrom(this.productService.getAll(true));
-        this.sellableProducts.set(all.filter((p) => p.actif && p.stock > 0));
-      }
-    });
-
     // Load user preferences after authentication
     effect(() => {
       if (this.authService.isAuthenticated()) {
         this.preferenceService.loadPreferences();
+      }
+    });
+
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        this.notificationService.loadUnreadCount();
+        this.stompService.connect();
+      } else {
+        this.stompService.disconnect();
       }
     });
 
@@ -193,6 +220,18 @@ export class Shell {
         }
       }
     });
+  }
+
+  toggleNotificationPanel(): void {
+    const wasOpen = this.notificationPanelOpen();
+    this.notificationPanelOpen.set(!wasOpen);
+    if (!wasOpen) {
+      this.notificationService.loadNotifications();
+    }
+  }
+
+  closeNotificationPanel(): void {
+    this.notificationPanelOpen.set(false);
   }
 
   toggleSidebar(): void {
@@ -256,121 +295,5 @@ export class Shell {
 
   onModalClose(): void {
     this.modalService.closeModal();
-  }
-
-  async onTransactionSaved(request: TransactionRequest): Promise<void> {
-    const editing = this.modalService.editingEntity() as Transaction | null;
-    if (editing) {
-      await firstValueFrom(this.transactionService.update(editing.id, request));
-    } else {
-      await firstValueFrom(this.transactionService.create(request));
-    }
-    this.modalService.closeModal();
-  }
-
-  async onSubscriptionSaved(request: SubscriptionRequest): Promise<void> {
-    const editing = this.modalService.editingEntity() as Subscription | null;
-    if (editing) {
-      await firstValueFrom(this.subscriptionService.update(editing.id, request));
-    } else {
-      await firstValueFrom(this.subscriptionService.create(request));
-    }
-    this.modalService.closeModal();
-  }
-
-  async onDebtSaved(request: DebtRequest): Promise<void> {
-    const editing = this.modalService.editingEntity() as Debt | null;
-    if (editing) {
-      await firstValueFrom(this.debtService.update(editing.id, request));
-    } else {
-      await firstValueFrom(this.debtService.create(request));
-    }
-    this.modalService.closeModal();
-  }
-
-  async onTransactionDeleted(id: string): Promise<void> {
-    try {
-      await firstValueFrom(this.transactionService.delete(id));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to delete transaction:', error);
-    }
-  }
-
-  async onSubscriptionDeleted(id: string): Promise<void> {
-    try {
-      await firstValueFrom(this.subscriptionService.delete(id));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to delete subscription:', error);
-    }
-  }
-
-  async onDebtDeleted(id: string): Promise<void> {
-    try {
-      await firstValueFrom(this.debtService.delete(id));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to delete debt:', error);
-    }
-  }
-
-  async onAccountSaved(request: AccountRequest): Promise<void> {
-    const editing = this.modalService.editingEntity() as Account | null;
-    if (editing) {
-      await firstValueFrom(this.accountService.update(editing.id, request));
-    } else {
-      await firstValueFrom(this.accountService.create(request));
-    }
-    this.modalService.closeModal();
-  }
-
-  async onBalanceAdjusted(newBalance: number): Promise<void> {
-    const editing = this.modalService.editingEntity() as Account | null;
-    if (editing) {
-      await firstValueFrom(this.accountService.adjustBalance(editing.id, newBalance));
-    }
-  }
-
-  onTransferSaved(): void {
-    this.transactionService.refreshTrigger.update((v) => v + 1);
-    this.modalService.closeModal();
-  }
-
-  async onAccountDeleted(id: string): Promise<void> {
-    try {
-      await firstValueFrom(this.accountService.delete(id));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to delete account:', error);
-    }
-  }
-
-  async onProductSaved(request: ProductRequest | ProductUpdateRequest): Promise<void> {
-    const editing = this.modalService.editingEntity() as Product | null;
-    if (editing) {
-      await firstValueFrom(this.productService.update(editing.id, request as ProductUpdateRequest));
-    } else {
-      await firstValueFrom(this.productService.create(request));
-    }
-    this.modalService.closeModal();
-  }
-
-  async onSellConfirmed(event: { productId: string; quantity: number }): Promise<void> {
-    try {
-      await firstValueFrom(this.productService.sell(event.productId, event.quantity));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to sell product:', error);
-    }
-  }
-
-  async onProductDeleted(id: string): Promise<void> {
-    try {
-      await firstValueFrom(this.productService.delete(id));
-      this.modalService.closeModal();
-    } catch (error) {
-      if (isDevMode()) console.error('Failed to delete product:', error);
-    }
   }
 }

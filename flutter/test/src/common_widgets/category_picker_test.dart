@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 Future<void> pumpCategoryPicker(
   WidgetTester tester,
@@ -479,7 +480,10 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.close), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsBold.x),
+          findsOneWidget,
+        );
       },
     );
 
@@ -496,7 +500,10 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsOneWidget,
+        );
       },
     );
 
@@ -516,7 +523,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(Icons.close));
+        await tester.tap(find.byIcon(PhosphorIconsBold.x));
         await tester.pumpAndSettle();
 
         expect(changedId, isNull);

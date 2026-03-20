@@ -251,6 +251,14 @@
     }
   }
 
+  &__icon-img,
+  &__item-icon-img {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+  }
+
   &__empty {
     padding: var(--space-3);
     text-align: center;

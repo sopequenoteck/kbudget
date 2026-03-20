@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -27,6 +29,8 @@ void main() {
   late MockSubscriptionRepository mockSubscriptionRepo;
   late MockDebtRepository mockDebtRepo;
   late MockCategoryRepository mockCategoryRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
+  late MockBudgetRepository mockBudgetRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -41,6 +45,8 @@ void main() {
     mockSubscriptionRepo = MockSubscriptionRepository();
     mockDebtRepo = MockDebtRepository();
     mockCategoryRepo = MockCategoryRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
+    mockBudgetRepo = MockBudgetRepository();
 
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
@@ -51,10 +57,13 @@ void main() {
     when(mockSubscriptionRepo.getAll()).thenAnswer((_) async => []);
     when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
     when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
+    when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
     when(mockRepo.getEnabledFeatures()).thenAnswer(
         (_) async => [Feature.subscriptions, Feature.debts]);
     when(mockRepo.getNavOrder())
         .thenAnswer((_) async => Feature.values.toList());
+    when(mockBudgetRepo.getAll(includeInactive: false)).thenAnswer((_) async => []);
+    when(mockBudgetRepo.getOverview()).thenAnswer((_) async => throw Exception('Not configured'));
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
@@ -67,6 +76,8 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
+        exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
+        budgetRepositoryProvider.overrideWithValue(mockBudgetRepo),
         currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],
@@ -159,7 +170,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(
+        find.byIcon(PhosphorIconsBold.plus),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should_show_navigation_rail_when_wide_screen',

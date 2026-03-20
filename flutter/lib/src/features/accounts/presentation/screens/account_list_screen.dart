@@ -10,6 +10,7 @@ import 'package:k_budget/src/features/accounts/presentation/widgets/account_list
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_list_tile.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AccountListScreen extends ConsumerStatefulWidget {
   const AccountListScreen({super.key});
@@ -40,7 +41,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
         title: Text(l10n.accountsTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const PhosphorIcon(PhosphorIconsBold.plus, size: 24),
             onPressed: () => context.push(
               '${RouteNames.settings}/${RouteNames.settingsAccounts}/${RouteNames.settingsAccountsNew}',
             ),
@@ -92,8 +93,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -110,7 +111,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
                   FilledButton.icon(
                     onPressed: () =>
                         ref.read(accountNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.accountsRetry),
                   ),
                 ],
@@ -132,8 +133,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.wallet,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),

@@ -11,6 +11,17 @@ import {
   viewChildren,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorPlusBold,
+  phosphorCurrencyDollarBold,
+  phosphorArrowsClockwiseBold,
+  phosphorHandshakeBold,
+  phosphorArrowsLeftRightBold,
+  phosphorPackageBold,
+  phosphorTagBold,
+  phosphorChartPieBold,
+} from '@ng-icons/phosphor-icons/bold';
 
 import { type ModalType } from '../../../core/services/modal.service';
 import { AccountService } from '../../../core/services/account';
@@ -24,18 +35,31 @@ export interface SpeedDialItem {
 }
 
 const BASE_ACTIONS: readonly SpeedDialItem[] = [
-  { type: 'transaction', label: 'Transaction', icon: '💰' },
-  { type: 'subscription', label: 'Abonnement', icon: '🔄' },
-  { type: 'debt', label: 'Dette', icon: '🤝' },
+  { type: 'transaction', label: 'Transaction', icon: 'phosphorCurrencyDollarBold' },
+  { type: 'subscription', label: 'Abonnement', icon: 'phosphorArrowsClockwiseBold' },
+  { type: 'debt', label: 'Dette', icon: 'phosphorHandshakeBold' },
 ] as const;
 
-const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: '↔️' };
-const PRODUCT_ACTION: SpeedDialItem = { type: 'product', label: 'Nouveau produit', icon: '📦' };
-const SELL_ACTION: SpeedDialItem = { type: 'sell', label: 'Vente rapide', icon: '💸' };
+const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: 'phosphorArrowsLeftRightBold' };
+const PRODUCT_ACTION: SpeedDialItem = { type: 'product', label: 'Nouveau produit', icon: 'phosphorPackageBold' };
+const SELL_ACTION: SpeedDialItem = { type: 'sell', label: 'Vente rapide', icon: 'phosphorTagBold' };
+const BUDGET_ACTION: SpeedDialItem = { type: 'budget', label: 'Nouveau budget', icon: 'phosphorChartPieBold' };
 
 @Component({
   selector: 'app-fab',
-  imports: [],
+  imports: [NgIcon],
+  providers: [
+    provideIcons({
+      phosphorPlusBold,
+      phosphorCurrencyDollarBold,
+      phosphorArrowsClockwiseBold,
+      phosphorHandshakeBold,
+      phosphorArrowsLeftRightBold,
+      phosphorPackageBold,
+      phosphorTagBold,
+      phosphorChartPieBold,
+    }),
+  ],
   templateUrl: './fab.html',
   styleUrl: './fab.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,9 +85,13 @@ export class Fab {
     () => this.allAccounts().filter((a) => a.actif).length >= 2,
   );
 
+  readonly isOnBudgetsRoute = computed(() => this.currentRoute().startsWith('/budgets'));
   readonly isOnShopRoute = computed(() => this.currentRoute().startsWith('/shop'));
 
   readonly actions = computed<SpeedDialItem[]>(() => {
+    if (this.isOnBudgetsRoute() && this.preferenceService.isEnabled('BUDGETS')) {
+      return [BUDGET_ACTION];
+    }
     if (this.isOnShopRoute() && this.preferenceService.isEnabled('SHOP')) {
       return [PRODUCT_ACTION, SELL_ACTION];
     }

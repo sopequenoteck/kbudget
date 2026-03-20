@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
@@ -81,14 +82,17 @@ void main() {
 
         // 2 icônes de verrou pour les items fixes
         expect(
-          find.byIcon(Icons.lock_outline),
+          find.byIcon(PhosphorIconsRegular.lock),
           findsNWidgets(2),
         );
 
         // Pas d'icône drag_handle pour les items du noyau
-        // (drag_handle est présent pour les features activées : subscriptions + debts = 2)
-        // On vérifie que les lock_outline sont bien présents et distincts des drag_handle
-        expect(find.byIcon(Icons.drag_handle), findsNWidgets(2));
+        // (dotsSixVertical est présent pour les features activées : subscriptions + debts = 2)
+        // On vérifie que les lock sont bien présents et distincts des dotsSixVertical
+        expect(
+          find.byIcon(PhosphorIconsRegular.dotsSixVertical),
+          findsNWidgets(2),
+        );
       },
     );
 
@@ -105,8 +109,11 @@ void main() {
         expect(find.text('Abonnements'), findsWidgets);
         expect(find.text('Dettes'), findsWidgets);
 
-        // 2 icônes drag_handle (une pour chaque feature activée)
-        expect(find.byIcon(Icons.drag_handle), findsNWidgets(2));
+        // 2 icônes dotsSixVertical (une pour chaque feature activée)
+        expect(
+          find.byIcon(PhosphorIconsRegular.dotsSixVertical),
+          findsNWidgets(2),
+        );
       },
     );
 
@@ -124,8 +131,11 @@ void main() {
           findsOneWidget,
         );
 
-        // Pas de drag handle car aucune feature activée
-        expect(find.byIcon(Icons.drag_handle), findsNothing);
+        // Pas de dotsSixVertical car aucune feature activée
+        expect(
+          find.byIcon(PhosphorIconsRegular.dotsSixVertical),
+          findsNothing,
+        );
       },
     );
 

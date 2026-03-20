@@ -33,6 +33,7 @@ public class SubscriptionService {
     private final CategoryRepository categoryRepository;
     private final CategoryService categoryService;
     private final AccountRepository accountRepository;
+    private final PreferenceService preferenceService;
 
     @Transactional
     public SubscriptionResponse create(SubscriptionRequest request, UUID userId) {
@@ -113,7 +114,7 @@ public class SubscriptionService {
         if (requestCurrency != null) {
             return requestCurrency;
         }
-        return user.getDefaultCurrency();
+        return preferenceService.getOrCreatePreference(user.getId()).getCurrencies().get(0);
     }
 
     private Account resolveAccount(UUID accountId, UUID userId) {
@@ -150,32 +151,6 @@ public class SubscriptionService {
                 });
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
-        return new CategoryResponse(
-                category.getId(),
-                category.getNom(),
-                category.getIcone(),
-                category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
-        );
-    }
-
-    private AccountSummary toAccountSummary(Account account) {
-        if (account == null) {
-            return null;
-        }
-        return new AccountSummary(
-                account.getId(),
-                account.getNom(),
-                account.getIcone(),
-                account.getCouleur(),
-                account.getCurrency().name()
-        );
-    }
-
     private SubscriptionResponse toResponse(Subscription subscription) {
         return new SubscriptionResponse(
                 subscription.getId(),
@@ -184,8 +159,8 @@ public class SubscriptionService {
                 subscription.getFrequence(),
                 subscription.getDateDebut(),
                 subscription.getActif(),
-                toCategoryResponse(subscription.getCategory()),
-                toAccountSummary(subscription.getAccount()),
+                CategoryResponse.from(subscription.getCategory()),
+                AccountSummary.from(subscription.getAccount()),
                 subscription.getCurrency().name()
         );
     }

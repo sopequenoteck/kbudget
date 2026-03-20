@@ -6,6 +6,7 @@ import { type Debt } from '../models/debt.model';
 import { type Category } from '../models/category.model';
 import { type Account } from '../models/account.model';
 import { type Product } from '../models/product.model';
+import { type Budget } from '../models/budget.model';
 
 export type ModalType =
   | 'transaction'
@@ -15,9 +16,10 @@ export type ModalType =
   | 'account'
   | 'transfer'
   | 'product'
-  | 'sell';
+  | 'sell'
+  | 'budget';
 
-type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product;
+type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product | Budget;
 
 const CREATE_TITLES: Record<ModalType, string> = {
   transaction: 'Nouvelle transaction',
@@ -28,6 +30,7 @@ const CREATE_TITLES: Record<ModalType, string> = {
   transfer: 'Nouveau virement',
   product: 'Nouveau produit',
   sell: 'Vente rapide',
+  budget: 'Nouveau budget',
 };
 
 const EDIT_TITLES: Record<ModalType, string> = {
@@ -39,12 +42,14 @@ const EDIT_TITLES: Record<ModalType, string> = {
   transfer: 'Virement',
   product: 'Modifier le produit',
   sell: 'Vente rapide',
+  budget: 'Modifier le budget',
 };
 
 @Injectable({ providedIn: 'root' })
 export class ModalService {
   readonly activeModal = signal<ModalType | null>(null);
   readonly editingEntity = signal<EditableEntity | null>(null);
+  readonly asRecurring = signal(false);
   readonly modalOpen = computed(() => this.activeModal() !== null);
   readonly modalTitle = computed(() => {
     const type = this.activeModal();
@@ -52,13 +57,15 @@ export class ModalService {
     return this.editingEntity() ? EDIT_TITLES[type] : CREATE_TITLES[type];
   });
 
-  openModal(type: ModalType, entity?: EditableEntity): void {
+  openModal(type: ModalType, entity?: EditableEntity, options?: { asRecurring?: boolean }): void {
     this.editingEntity.set(entity ?? null);
+    this.asRecurring.set(options?.asRecurring ?? false);
     this.activeModal.set(type);
   }
 
   closeModal(): void {
     this.activeModal.set(null);
     this.editingEntity.set(null);
+    this.asRecurring.set(false);
   }
 }

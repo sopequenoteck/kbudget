@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -63,7 +64,7 @@ void main() {
   Finder findSubmitButton() {
     return find.descendant(
       of: find.byType(AppBar),
-      matching: find.byIcon(Icons.check),
+      matching: find.byIcon(PhosphorIconsBold.check),
     );
   }
 
@@ -82,7 +83,7 @@ void main() {
       expect(find.byType(ColorPalettePicker), findsOneWidget);
       final paletteCheck = find.descendant(
         of: find.byType(ColorPalettePicker),
-        matching: find.byIcon(Icons.check),
+        matching: find.byIcon(PhosphorIconsBold.check),
       );
       expect(paletteCheck, findsOneWidget);
     });
@@ -175,7 +176,7 @@ void main() {
       await tester.pumpWidget(buildApp(category: existingCategory));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsOneWidget);
     });
 
     testWidgets('should_not_show_delete_button_when_create_mode',
@@ -183,7 +184,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.delete_outline), findsNothing);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsNothing);
     });
 
     testWidgets('should_show_confirmation_dialog_when_delete_tapped',
@@ -191,7 +192,7 @@ void main() {
       await tester.pumpWidget(buildApp(category: existingCategory));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
       await tester.pumpAndSettle();
 
       expect(find.text('Supprimer la catégorie'), findsOneWidget);
@@ -218,7 +219,7 @@ void main() {
       await container.read(categoryNotifierProvider.notifier).loadItems();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
       await tester.pumpAndSettle();
 
       await tester.tap(findDialogDeleteButton());
@@ -231,7 +232,7 @@ void main() {
       await tester.pumpWidget(buildApp(category: existingCategory));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Annuler'));

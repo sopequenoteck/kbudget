@@ -3,6 +3,7 @@ import 'package:k_budget/src/data/remote/dtos/debt_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 
 class DebtRepositoryRemote implements DebtRepository {
@@ -44,16 +45,55 @@ class DebtRepositoryRemote implements DebtRepository {
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
 
+  @override
+  Future<Debt> repay(String id, String accountId, double? amount) async {
+    final request = RepayRequest(accountId: accountId, amount: amount);
+    final response = await _dataSource.repay(id, request);
+    return _toDomain(response);
+  }
+
+  @override
+  Future<List<DebtPayment>> getPayments(String id) async {
+    final responses = await _dataSource.getPayments(id);
+    return responses
+        .map((r) => DebtPayment(
+              id: r.id,
+              montant: r.amount,
+              date: DateTime.parse(r.date),
+              accountName: r.accountName,
+            ))
+        .toList();
+  }
+
+  @override
+  Future<Debt> snooze(
+      String id, String reminderDate, String reminderTime) async {
+    final request =
+        SnoozeRequest(reminderDate: reminderDate, reminderTime: reminderTime);
+    final response = await _dataSource.snooze(id, request);
+    return _toDomain(response);
+  }
+
   Debt _toDomain(DebtResponse r) => Debt(
         id: r.id,
         personne: r.personne,
         montant: r.montant,
-        sens: DebtType.values.byNameOrDefault(r.sens.toLowerCase(), DebtType.emprunt),
+        sens: DebtType.values
+            .byNameOrDefault(r.sens.toLowerCase(), DebtType.emprunt),
         date: DateTime.parse(r.date),
-        currency: Currency.values.byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
+        currency: Currency.values
+            .byNameOrDefault(r.currency.toLowerCase(), Currency.eur),
         rembourse: r.rembourse,
-        categoryId: r.categoryId,
+        categoryId: r.category?.id,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
+        accountId: r.account?.id,
+        accountName: r.account?.nom,
+        includeInBalance: r.includeInBalance,
+        dueDate: r.dueDate != null ? DateTime.parse(r.dueDate!) : null,
+        reminderDate:
+            r.reminderDate != null ? DateTime.parse(r.reminderDate!) : null,
+        reminderTime: r.reminderTime,
+        remainingAmount: r.montantRestant,
       );
 
   DebtRequest _toRequest(Debt d) => DebtRequest(
@@ -63,5 +103,11 @@ class DebtRepositoryRemote implements DebtRepository {
         date: d.date.toIso8601String(),
         rembourse: d.rembourse,
         categoryId: d.categoryId,
+        accountId: d.accountId,
+        currency: d.currency.name.toUpperCase(),
+        includeInBalance: d.includeInBalance,
+        reminderDate: d.reminderDate?.toIso8601String().split('T').first,
+        reminderTime: d.reminderTime,
+        dueDate: d.dueDate?.toIso8601String().split('T').first,
       );
 }

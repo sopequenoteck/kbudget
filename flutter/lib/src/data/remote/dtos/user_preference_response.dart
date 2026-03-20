@@ -11,6 +11,10 @@ class UserPreferenceResponse with _$UserPreferenceResponse {
     required List<Feature> navOrder,
     String? shopAccountId,
     required bool includeShopInBalance,
+    @Default(['EUR']) List<String> currencies,
+    @Default([]) List<NotificationType> enabledNotificationTypes,
+    @Default('Europe/Paris') String timezone,
+    String? textScale,
   }) = _UserPreferenceResponse;
 
   factory UserPreferenceResponse.fromJson(Map<String, dynamic> json) =>

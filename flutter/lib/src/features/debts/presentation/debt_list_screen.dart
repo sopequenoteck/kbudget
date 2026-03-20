@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/segmented_filter.dart';
@@ -9,14 +10,18 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
-import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DebtListScreen extends ConsumerStatefulWidget {
@@ -47,6 +52,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(debtNotifierProvider);
     final catState = ref.watch(categoryNotifierProvider);
+    final exchangeRateState = ref.watch(exchangeRateListProvider);
+    final dashboardState = ref.watch(dashboardNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -54,6 +61,11 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     final categoryMap = <String, Category>{
       for (final c in catState.items) c.id: c,
     };
+
+    // Devise principale : première devise de la config utilisateur
+    final primaryCurrency = dashboardState.currencies.isNotEmpty
+        ? dashboardState.currencies.first
+        : null;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -69,7 +81,15 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       },
       child: CustomScrollView(
         slivers: [
-          ..._buildContent(state, categoryMap, colorScheme, l10n, theme),
+          ..._buildContent(
+            state,
+            categoryMap,
+            colorScheme,
+            l10n,
+            theme,
+            exchangeRates: exchangeRateState.items,
+            primaryCurrency: primaryCurrency,
+          ),
         ],
       ),
     );
@@ -80,8 +100,10 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     Map<String, Category> categoryMap,
     ColorScheme colorScheme,
     AppLocalizations l10n,
-    ThemeData theme,
-  ) {
+    ThemeData theme, {
+    List<ExchangeRate> exchangeRates = const [],
+    Currency? primaryCurrency,
+  }) {
     final themeExt = theme.extension<AppThemeExtension>();
 
     // Loading
@@ -115,8 +137,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -133,7 +155,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   FilledButton.icon(
                     onPressed: () =>
                         ref.read(debtNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.transactionsRetry),
                   ),
                 ],
@@ -173,8 +195,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.wallet,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
@@ -222,6 +244,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
             dateFormat,
             l10n,
             themeExt,
+            exchangeRates: exchangeRates,
+            primaryCurrency: primaryCurrency,
           ),
         ),
       ],
@@ -242,6 +266,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
             dateFormat,
             l10n,
             themeExt,
+            exchangeRates: exchangeRates,
+            primaryCurrency: primaryCurrency,
           ),
         ),
       ],
@@ -291,8 +317,10 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     ColorScheme colorScheme,
     DateFormat dateFormat,
     AppLocalizations l10n,
-    AppThemeExtension? themeExt,
-  ) {
+    AppThemeExtension? themeExt, {
+    List<ExchangeRate> exchangeRates = const [],
+    Currency? primaryCurrency,
+  }) {
     final cat =
         debt.categoryId != null ? categoryMap[debt.categoryId] : null;
 
@@ -300,6 +328,23 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       debt.montant,
       currency: debt.currency,
     );
+
+    // Sous-texte montant converti si devise étrangère
+    String? convertedSubtitle;
+    if (primaryCurrency != null &&
+        debt.currency != primaryCurrency &&
+        exchangeRates.isNotEmpty) {
+      final converted = CurrencyConverter.convert(
+        amount: debt.montant,
+        fromCurrency: debt.currency,
+        toCurrency: primaryCurrency,
+        rates: exchangeRates,
+      );
+      if (converted != null) {
+        convertedSubtitle =
+            '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+      }
+    }
 
     return ListItem(
       icon: cat?.icone ?? '💰',
@@ -309,12 +354,10 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       title: debt.personne,
       subtitle: dateFormat.format(debt.date),
       value: formattedAmount,
-      rightSubtitle: debt.rembourse ? l10n.debtBadgeRembourse : null,
+      rightSubtitle:
+          convertedSubtitle ?? (debt.rembourse ? l10n.debtBadgeRembourse : null),
       onPressed: () {
-        ref.read(modalNotifierProvider.notifier).open(
-              ModalType.debt,
-              entity: debt,
-            );
+        context.push('/debts/${debt.id}', extra: debt);
       },
     );
   }

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
+import 'package:k_budget/src/domain/models/subscription_payment.dart';
+import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:mockito/mockito.dart';
@@ -231,6 +233,79 @@ void main() {
 
       expect(state().activeFilter, SubscriptionStatusFilter.actif);
       expect(state().items, hasLength(2));
+    });
+  });
+
+  group('SubscriptionNotifier — pay', () {
+    test('should_pay_subscription_when_pay_called', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
+      await notifier().loadItems();
+
+      final payment = SubscriptionPayment(
+        id: 'pay-1',
+        montant: sub1.montant,
+        date: DateTime(2026, 3, 15),
+        subscriptionName: sub1.nom,
+      );
+      when(mockRepo.pay(any)).thenAnswer((_) async => payment);
+
+      await notifier().pay(sub1.id);
+
+      verify(mockRepo.pay(sub1.id)).called(1);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_set_error_when_pay_fails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
+      await notifier().loadItems();
+
+      when(mockRepo.pay(any)).thenThrow(Exception('Network error'));
+
+      expect(
+        () async => notifier().pay(sub1.id),
+        throwsException,
+      );
+    });
+  });
+
+  group('SubscriptionNotifier — payments providers', () {
+    test('should_load_payments_when_subscriptionPaymentsProvider_watched',
+        () async {
+      final payment1 = SubscriptionPayment(
+        id: 'pay-1',
+        montant: 15.99,
+        date: DateTime(2026, 3, 1),
+      );
+      final payment2 = SubscriptionPayment(
+        id: 'pay-2',
+        montant: 15.99,
+        date: DateTime(2026, 2, 1),
+      );
+      when(mockRepo.getPayments('1'))
+          .thenAnswer((_) async => [payment1, payment2]);
+
+      final result = await container
+          .read(subscriptionPaymentsProvider('1').future);
+
+      expect(result, hasLength(2));
+      expect(result.first.montant, 15.99);
+    });
+
+    test('should_load_total_paid_when_subscriptionTotalPaidProvider_watched',
+        () async {
+      const total = SubscriptionTotalPaid(
+        subscriptionId: '1',
+        subscriptionName: 'Netflix',
+        totalPaid: 47.97,
+        paymentCount: 3,
+      );
+      when(mockRepo.getTotalPaid('1')).thenAnswer((_) async => total);
+
+      final result = await container
+          .read(subscriptionTotalPaidProvider('1').future);
+
+      expect(result.totalPaid, 47.97);
+      expect(result.paymentCount, 3);
     });
   });
 

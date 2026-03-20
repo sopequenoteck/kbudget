@@ -56,41 +56,29 @@ class UserControllerTest {
 
     @Test
     void should_returnProfile_when_authenticated() throws Exception {
-        var response = new UserResponse("Test", "test@mail.com", "EUR");
+        var response = new UserResponse("Test", "test@mail.com");
         when(userService.getProfile(userId)).thenReturn(response);
 
         mockMvc.perform(get("/users/me")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test"))
-                .andExpect(jsonPath("$.email").value("test@mail.com"))
-                .andExpect(jsonPath("$.defaultCurrency").value("EUR"));
+                .andExpect(jsonPath("$.email").value("test@mail.com"));
     }
 
     @Test
-    void should_updateDefaultCurrency_when_validRequest() throws Exception {
-        var response = new UserResponse("Test", "test@mail.com", "XOF");
+    void should_updateName_when_validRequest() throws Exception {
+        var response = new UserResponse("Updated", "test@mail.com");
         when(userService.updateProfile(eq(userId), any())).thenReturn(response);
 
         mockMvc.perform(put("/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"defaultCurrency": "XOF"}
+                                {"name": "Updated"}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.defaultCurrency").value("XOF"));
-    }
-
-    @Test
-    void should_return400_when_invalidCurrency() throws Exception {
-        mockMvc.perform(put("/users/me")
-                        .header("Authorization", BEARER_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"defaultCurrency": "INVALID"}
-                                """))
-                .andExpect(status().isBadRequest());
+                .andExpect(jsonPath("$.name").value("Updated"));
     }
 
     @Test

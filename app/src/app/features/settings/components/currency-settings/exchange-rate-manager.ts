@@ -1,0 +1,600 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorPencilSimple,
+  phosphorTrash,
+  phosphorPlus,
+  phosphorArrowRight,
+  phosphorX,
+  phosphorFloppyDisk,
+} from '@ng-icons/phosphor-icons/regular';
+import { firstValueFrom } from 'rxjs';
+
+import { ExchangeRate } from '../../../../core/models/exchange-rate.model';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+
+const FIXED_PARITY_RATES: Record<string, number> = {
+  EUR_XOF: 655.957,
+};
+
+const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
+
+@Component({
+  selector: 'app-exchange-rate-manager',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, FormsModule, NgIcon],
+  viewProviders: [
+    provideIcons({
+      phosphorPencilSimple,
+      phosphorTrash,
+      phosphorPlus,
+      phosphorArrowRight,
+      phosphorX,
+      phosphorFloppyDisk,
+    }),
+  ],
+  template: `
+    <!-- Section : Taux de conversion -->
+    <div class="settings-section">
+      <h3 class="settings-section__title">Taux de conversion</h3>
+      <p class="settings-section__desc">
+        Devise de référence : <strong>{{ primaryCurrency() }}</strong>
+      </p>
+
+      @if (loading()) {
+        <div class="loading-placeholder">Chargement des taux...</div>
+      }
+
+      @if (!loading() && rates().length === 0 && !showForm()) {
+        <p class="empty-state">Aucun taux configuré.</p>
+      }
+
+      @if (rates().length > 0) {
+        <ul class="rate-list">
+          @for (rate of rates(); track rate.id) {
+            <li class="rate-item">
+              <span class="rate-item__label">
+                {{ rate.baseCurrency }}
+                <ng-icon name="phosphorArrowRight" size="14" />
+                {{ rate.targetCurrency }}
+              </span>
+              <span class="rate-item__value">{{ rate.rate | number: '1.0-6' }}</span>
+              <div class="rate-item__actions">
+                <button
+                  class="icon-btn"
+                  title="Modifier"
+                  (click)="startEdit(rate)"
+                  aria-label="Modifier ce taux"
+                >
+                  <ng-icon name="phosphorPencilSimple" size="16" />
+                </button>
+                <button
+                  class="icon-btn icon-btn--danger"
+                  title="Supprimer"
+                  (click)="confirmDelete(rate)"
+                  aria-label="Supprimer ce taux"
+                >
+                  <ng-icon name="phosphorTrash" size="16" />
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (!showForm()) {
+        <button class="add-btn" (click)="openForm()">
+          <ng-icon name="phosphorPlus" size="16" />
+          Ajouter un taux
+        </button>
+      }
+    </div>
+
+    <!-- Formulaire upsert -->
+    @if (showForm()) {
+      <div class="settings-section settings-section--form">
+        <h3 class="settings-section__title">
+          {{ editingRate() ? 'Modifier le taux' : 'Ajouter un taux' }}
+        </h3>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Devise de base</label>
+            <div class="form-readonly">{{ primaryCurrency() }}</div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="targetCurrency">Devise cible</label>
+            @if (editingRate()) {
+              <div class="form-readonly">{{ formTargetCurrency() }}</div>
+            } @else {
+              <select
+                id="targetCurrency"
+                class="form-select"
+                [ngModel]="formTargetCurrency()"
+                (ngModelChange)="onTargetCurrencyChange($event)"
+              >
+                <option value="" disabled>Choisir une devise</option>
+                @for (currency of availableTargetCurrencies(); track currency) {
+                  <option [value]="currency">{{ currency }}</option>
+                }
+              </select>
+            }
+          </div>
+
+          <div class="form-field form-field--full">
+            <label class="form-label" for="rateInput">Taux</label>
+            <input
+              id="rateInput"
+              type="number"
+              class="form-input"
+              [ngModel]="formRate()"
+              (ngModelChange)="formRate.set($event)"
+              min="0.000001"
+              step="0.000001"
+              placeholder="Ex: 655.957"
+            />
+          </div>
+        </div>
+
+        @if (formError()) {
+          <p class="form-error">{{ formError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button class="btn btn--ghost" (click)="cancelForm()">
+            <ng-icon name="phosphorX" size="16" />
+            Annuler
+          </button>
+          <button
+            class="btn btn--primary"
+            [disabled]="isSaving()"
+            (click)="saveRate()"
+          >
+            <ng-icon name="phosphorFloppyDisk" size="16" />
+            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Dialog de confirmation de suppression -->
+    @if (rateToDelete()) {
+      <div class="dialog-overlay" (click)="cancelDelete()">
+        <div class="dialog" (click)="$event.stopPropagation()">
+          <p class="dialog__message">
+            Supprimer le taux
+            <strong>{{ rateToDelete()!.baseCurrency }} → {{ rateToDelete()!.targetCurrency }}</strong> ?
+          </p>
+          <div class="dialog__actions">
+            <button class="btn btn--ghost" (click)="cancelDelete()">Annuler</button>
+            <button class="btn btn--danger" [disabled]="isDeleting()" (click)="deleteRate()">
+              {{ isDeleting() ? 'Suppression...' : 'Supprimer' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  `,
+  styles: [
+    `
+      .settings-section {
+        background: var(--surface-default);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-xl);
+        padding: var(--space-5);
+        margin-bottom: var(--space-4);
+
+        &__title {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-semibold);
+          color: var(--text-primary);
+          margin-bottom: var(--space-2);
+        }
+
+        &__desc {
+          font-size: var(--font-size-sm);
+          color: var(--text-secondary);
+          margin-bottom: var(--space-4);
+        }
+
+        &--form {
+          border-color: var(--color-primary);
+          border-width: 2px;
+        }
+      }
+
+      .loading-placeholder {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        padding: var(--space-3) 0;
+      }
+
+      .empty-state {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-bottom: var(--space-3);
+      }
+
+      .rate-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 var(--space-4) 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .rate-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: var(--surface-raised);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+
+        &__label {
+          display: flex;
+          align-items: center;
+          gap: var(--space-1);
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-medium);
+          color: var(--text-primary);
+          flex: 1;
+        }
+
+        &__value {
+          font-size: var(--font-size-sm);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-primary);
+          font-variant-numeric: tabular-nums;
+        }
+
+        &__actions {
+          display: flex;
+          gap: var(--space-1);
+        }
+      }
+
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--easing-default),
+          color var(--duration-fast) var(--easing-default);
+
+        &:hover {
+          background-color: var(--hover-bg);
+          color: var(--text-primary);
+        }
+
+        &--danger:hover {
+          background-color: var(--color-error-light, rgba(239, 68, 68, 0.1));
+          color: var(--color-error, #ef4444);
+        }
+      }
+
+      .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border: 1px dashed var(--border-default);
+        border-radius: var(--radius-lg);
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        cursor: pointer;
+        transition: border-color var(--duration-fast) var(--easing-default),
+          color var(--duration-fast) var(--easing-default);
+
+        &:hover {
+          border-color: var(--color-primary);
+          color: var(--color-primary);
+        }
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+        margin-bottom: var(--space-4);
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+
+        &--full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .form-label {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--text-secondary);
+      }
+
+      .form-readonly {
+        padding: var(--space-2) var(--space-3);
+        background: var(--surface-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        font-size: var(--font-size-sm);
+        color: var(--text-primary);
+        font-weight: var(--font-weight-semibold);
+      }
+
+      .form-select {
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        background: var(--surface-default);
+        color: var(--text-primary);
+        font-size: var(--font-size-sm);
+        cursor: pointer;
+        appearance: auto;
+
+        &:focus {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+      }
+
+      .form-input {
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        background: var(--surface-default);
+        color: var(--text-primary);
+        font-size: var(--font-size-sm);
+        width: 100%;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+
+        &::placeholder {
+          color: var(--text-tertiary, var(--text-secondary));
+        }
+      }
+
+      .form-error {
+        font-size: var(--font-size-sm);
+        color: var(--color-error, #ef4444);
+        margin-bottom: var(--space-3);
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        transition: opacity var(--duration-fast) var(--easing-default),
+          background-color var(--duration-fast) var(--easing-default);
+        border: none;
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        &--primary {
+          background-color: var(--color-primary);
+          color: var(--text-inverse);
+
+          &:hover:not(:disabled) {
+            opacity: 0.85;
+          }
+        }
+
+        &--ghost {
+          background: transparent;
+          border: 1px solid var(--border-default);
+          color: var(--text-secondary);
+
+          &:hover:not(:disabled) {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+          }
+        }
+
+        &--danger {
+          background-color: var(--color-error, #ef4444);
+          color: white;
+
+          &:hover:not(:disabled) {
+            opacity: 0.85;
+          }
+        }
+      }
+
+      .dialog-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: var(--space-4);
+      }
+
+      .dialog {
+        background: var(--surface-default);
+        border-radius: var(--radius-xl);
+        padding: var(--space-6);
+        max-width: 400px;
+        width: 100%;
+        box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
+
+        &__message {
+          font-size: var(--font-size-sm);
+          color: var(--text-primary);
+          margin-bottom: var(--space-5);
+          line-height: 1.5;
+        }
+
+        &__actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: var(--space-2);
+        }
+      }
+    `,
+  ],
+})
+export class ExchangeRateManager {
+  private readonly rateService = inject(ExchangeRateService);
+
+  readonly primaryCurrency = input.required<string>();
+  readonly rates = input.required<ExchangeRate[]>();
+  readonly loading = input.required<boolean>();
+
+  readonly rateSaved = output<void>();
+  readonly rateDeleted = output<void>();
+
+  readonly FIXED_PARITY_RATES = FIXED_PARITY_RATES;
+  readonly ALL_CURRENCIES = ALL_CURRENCIES;
+
+  readonly showForm = signal(false);
+  readonly editingRate = signal<ExchangeRate | null>(null);
+  readonly formTargetCurrency = signal('');
+  readonly formRate = signal<number | null>(null);
+  readonly formError = signal<string | null>(null);
+  readonly isSaving = signal(false);
+  readonly rateToDelete = signal<ExchangeRate | null>(null);
+  readonly isDeleting = signal(false);
+
+  readonly availableTargetCurrencies = computed(() => {
+    const primary = this.primaryCurrency();
+    const existingTargets = this.rates().map((r) => r.targetCurrency);
+    return ALL_CURRENCIES.filter(
+      (c) => c !== primary && !existingTargets.includes(c),
+    );
+  });
+
+  openForm(): void {
+    this.editingRate.set(null);
+    this.formTargetCurrency.set('');
+    this.formRate.set(null);
+    this.formError.set(null);
+    this.showForm.set(true);
+  }
+
+  startEdit(rate: ExchangeRate): void {
+    this.editingRate.set(rate);
+    this.formTargetCurrency.set(rate.targetCurrency);
+    this.formRate.set(rate.rate);
+    this.formError.set(null);
+    this.showForm.set(true);
+  }
+
+  cancelForm(): void {
+    this.showForm.set(false);
+    this.editingRate.set(null);
+    this.formTargetCurrency.set('');
+    this.formRate.set(null);
+    this.formError.set(null);
+  }
+
+  onTargetCurrencyChange(currency: string): void {
+    this.formTargetCurrency.set(currency);
+    const key = `${this.primaryCurrency()}_${currency}`;
+    const fixed = FIXED_PARITY_RATES[key];
+    if (fixed !== undefined) {
+      this.formRate.set(fixed);
+    }
+  }
+
+  async saveRate(): Promise<void> {
+    const target = this.formTargetCurrency();
+    const rate = this.formRate();
+
+    if (!target) {
+      this.formError.set('Veuillez sélectionner une devise cible.');
+      return;
+    }
+    if (!rate || rate <= 0) {
+      this.formError.set('Veuillez saisir un taux valide (> 0).');
+      return;
+    }
+
+    this.formError.set(null);
+    this.isSaving.set(true);
+    try {
+      await firstValueFrom(
+        this.rateService.upsert(this.primaryCurrency(), target, rate),
+      );
+      this.cancelForm();
+      this.rateSaved.emit();
+    } catch {
+      this.formError.set("Erreur lors de l'enregistrement du taux.");
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  confirmDelete(rate: ExchangeRate): void {
+    this.rateToDelete.set(rate);
+  }
+
+  cancelDelete(): void {
+    this.rateToDelete.set(null);
+  }
+
+  async deleteRate(): Promise<void> {
+    const rate = this.rateToDelete();
+    if (!rate) return;
+
+    this.isDeleting.set(true);
+    try {
+      await firstValueFrom(
+        this.rateService.delete(rate.baseCurrency, rate.targetCurrency),
+      );
+      this.rateToDelete.set(null);
+      this.rateDeleted.emit();
+    } catch {
+      this.rateToDelete.set(null);
+    } finally {
+      this.isDeleting.set(false);
+    }
+  }
+}

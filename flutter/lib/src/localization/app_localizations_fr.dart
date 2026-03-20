@@ -51,6 +51,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get add => 'Ajouter';
 
   @override
+  String get retry => 'Réessayer';
+
+  @override
   String get loading => 'Chargement...';
 
   @override
@@ -61,6 +64,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorServer => 'Erreur serveur';
+
+  @override
+  String get errorLoadingData => 'Impossible de charger les données';
+
+  @override
+  String get amount => 'Montant';
+
+  @override
+  String get currency => 'Devise';
+
+  @override
+  String get frequency => 'Fréquence';
+
+  @override
+  String get category => 'Catégorie';
+
+  @override
+  String get selectCategory => 'Sélectionner une catégorie';
+
+  @override
+  String get alertThreshold => 'Seuil d\'alerte';
 
   @override
   String get onboardingTitle => 'Bienvenue sur K-Budget';
@@ -287,6 +311,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionBadgeInactif => 'Inactif';
 
   @override
+  String get subscriptionPay => 'Payer';
+
+  @override
+  String get subscriptionPaySuccess => 'Paiement enregistré';
+
+  @override
+  String get subscriptionPaymentHistory => 'Historique des paiements';
+
+  @override
+  String get subscriptionNoPayments => 'Aucun paiement';
+
+  @override
+  String subscriptionPayments(int count) {
+    return '$count paiements';
+  }
+
+  @override
   String get debtFormPersonField => 'Personne';
 
   @override
@@ -319,6 +360,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtFormNoCategories => 'Créez une catégorie d\'abord';
+
+  @override
+  String get debtFormAccountPicker => 'Compte bancaire';
+
+  @override
+  String get debtFormAccountPlaceholder => 'Aucun compte';
+
+  @override
+  String get debtFormDueDateField => 'Date d\'échéance';
+
+  @override
+  String get debtFormDueDatePlaceholder => 'Aucune échéance';
+
+  @override
+  String get debtFormReminderField => 'Rappel';
+
+  @override
+  String get debtFormReminderPlaceholder => 'Aucun rappel';
+
+  @override
+  String get debtFormReminderTimeField => 'Heure de rappel';
+
+  @override
+  String get debtFormIncludeInBalance => 'Inclure dans le patrimoine';
 
   @override
   String get debtsTitle => 'Dettes';
@@ -358,6 +423,130 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debtBadgeRembourse => 'Remboursé';
+
+  @override
+  String get debtDetailInitialAmount => 'Montant initial';
+
+  @override
+  String get debtDetailRemainingAmount => 'Montant restant';
+
+  @override
+  String get debtDetailRepayButton => 'Rembourser';
+
+  @override
+  String get debtDetailSnoozeButton => 'Reporter le rappel';
+
+  @override
+  String get debtDetailProgress => 'Progression';
+
+  @override
+  String get debtDetailDate => 'Date';
+
+  @override
+  String get debtDetailCurrency => 'Devise';
+
+  @override
+  String get debtDetailAccount => 'Compte';
+
+  @override
+  String get debtDetailAccountDeleted => 'Compte supprimé';
+
+  @override
+  String get debtDetailDueDate => 'Échéance';
+
+  @override
+  String get debtDetailCategory => 'Catégorie';
+
+  @override
+  String get debtDetailIncludedInBalance => 'Inclus dans le solde';
+
+  @override
+  String get debtDetailReminder => 'Rappel';
+
+  @override
+  String get debtDetailPayments => 'Paiements';
+
+  @override
+  String get debtDetailTotalRepaid => 'Total remboursé';
+
+  @override
+  String get debtDetailNoPayments => 'Aucun paiement enregistré';
+
+  @override
+  String get debtDetailPaymentsError =>
+      'Erreur lors du chargement des paiements';
+
+  @override
+  String get debtDetailBadgeEmprunt => 'Emprunt';
+
+  @override
+  String get debtDetailBadgePret => 'Prêt';
+
+  @override
+  String get debtDetailBadgeRepaid => 'Remboursé';
+
+  @override
+  String get repayTitle => 'Rembourser';
+
+  @override
+  String get repayAccountLabel => 'Compte source';
+
+  @override
+  String get repayAccountPlaceholder => 'Sélectionner un compte';
+
+  @override
+  String get repayAccountRequired => 'Compte requis';
+
+  @override
+  String get repayAmountLabel => 'Montant';
+
+  @override
+  String get repayAmountRequired => 'Montant requis';
+
+  @override
+  String get repayAmountInvalid => 'Montant invalide';
+
+  @override
+  String repayAmountMax(String amount) {
+    return 'Maximum: $amount';
+  }
+
+  @override
+  String get repayNoAccounts =>
+      'Aucun compte actif. Créez un compte dans les paramètres.';
+
+  @override
+  String get repaySuccess => 'Remboursement enregistré';
+
+  @override
+  String get repayError => 'Erreur lors du remboursement';
+
+  @override
+  String get snoozeTitle => 'Reporter le rappel';
+
+  @override
+  String get snoozeDateLabel => 'Nouvelle date';
+
+  @override
+  String get snoozeTimeLabel => 'Heure';
+
+  @override
+  String get snoozeDateFutureRequired => 'La date doit être dans le futur';
+
+  @override
+  String get snoozeSuccess => 'Rappel reporté';
+
+  @override
+  String get snoozeError => 'Erreur lors du report';
+
+  @override
+  String get snoozeSubmitButton => 'Reporter';
+
+  @override
+  String get yes => 'Oui';
+
+  @override
+  String get no => 'Non';
 
   @override
   String get transferFormSourcePicker => 'Compte source';
@@ -543,4 +732,130 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get categoryErrorDelete =>
       'Erreur lors de la suppression de la catégorie';
+
+  @override
+  String get budgetViewCharts => 'Voir les graphiques';
+
+  @override
+  String get emptyBudgetList => 'Aucun budget';
+
+  @override
+  String get emptyBudgetCreateHint => 'Appuyez sur + pour créer un budget';
+
+  @override
+  String get budgetDetails => 'Détails budget';
+
+  @override
+  String get emptyBudgetData => 'Aucune donnée pour ce mois';
+
+  @override
+  String get deleteBudgetTitle => 'Supprimer le budget';
+
+  @override
+  String get deleteBudgetMessage =>
+      'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.';
+
+  @override
+  String get allCategoriesHaveBudgets =>
+      'Toutes les catégories ont déjà un budget';
+
+  @override
+  String get spent => 'Dépensé';
+
+  @override
+  String get budget => 'Budget';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get budgetOtherCategory => 'Autre';
+
+  @override
+  String get budgetOtherCategoryDetail => 'Dépenses non budgétées';
+
+  @override
+  String get budgetActive => 'Budget actif';
+
+  @override
+  String get budgetShowInactive => 'Afficher les inactifs';
+
+  @override
+  String get notificationTitle => 'Notifications';
+
+  @override
+  String get notificationMarkAllRead => 'Tout marquer lu';
+
+  @override
+  String get notificationClearHistory => 'Vider l\'historique';
+
+  @override
+  String get notificationEmpty => 'Aucune notification';
+
+  @override
+  String get notificationClearConfirmTitle => 'Vider l\'historique';
+
+  @override
+  String get notificationClearConfirmMessage =>
+      'Supprimer toutes les notifications ? Cette action est irréversible.';
+
+  @override
+  String get notificationRepayTooltip => 'Rembourser';
+
+  @override
+  String get notificationSnoozeTooltip => 'Reporter';
+
+  @override
+  String get notificationLoadError => 'Impossible de charger la dette';
+
+  @override
+  String get notificationGroupToday => 'Aujourd\'hui';
+
+  @override
+  String get notificationGroupYesterday => 'Hier';
+
+  @override
+  String get recurringTitle => 'Récurrences';
+
+  @override
+  String get recurringOverdue => 'En retard';
+
+  @override
+  String get recurringToday => 'Aujourd\'hui';
+
+  @override
+  String get recurringUpcoming => 'À venir';
+
+  @override
+  String get recurringValidate => 'Valider';
+
+  @override
+  String get recurringSkip => 'Passer';
+
+  @override
+  String get recurringDeactivate => 'Désactiver';
+
+  @override
+  String get recurringEmpty => 'Aucune récurrence active';
+
+  @override
+  String get recurringDeactivateConfirm => 'Désactiver cette récurrence ?';
+
+  @override
+  String get recurringValidateSuccess => 'Transaction créée';
+
+  @override
+  String get recurringSkipSuccess => 'Échéance avancée';
+
+  @override
+  String get recurringDeactivateSuccess => 'Récurrence désactivée';
+
+  @override
+  String get frequencyHebdomadaire => '/semaine';
+
+  @override
+  String get frequencyMensuel => '/mois';
+
+  @override
+  String get frequencyAnnuel => '/an';
 }

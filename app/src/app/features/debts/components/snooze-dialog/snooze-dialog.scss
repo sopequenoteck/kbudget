@@ -1,0 +1,70 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  animation: fade-in var(--duration-fast) var(--ease-default);
+}
+
+.dialog-panel {
+  position: relative;
+  background: var(--surface-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  width: min(90vw, 400px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: scale-in var(--duration-fast) var(--ease-default);
+
+  h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+  }
+}
+
+.form-error-banner {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-danger);
+  color: var(--text-danger);
+  font-size: var(--font-size-sm);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

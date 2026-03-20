@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
@@ -17,11 +18,14 @@ import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/register_screen.dart';
 import 'package:k_budget/src/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
+import 'package:k_budget/src/features/debts/presentation/debt_detail_screen.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
+import 'package:k_budget/src/features/notifications/presentation/notification_settings_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
@@ -30,9 +34,16 @@ import 'package:k_budget/src/features/categories/presentation/screens/category_f
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
+import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
+import 'package:k_budget/src/features/budgets/presentation/budget_list_screen.dart';
+import 'package:k_budget/src/features/budgets/presentation/budget_detail_screen.dart';
+import 'package:k_budget/src/features/budgets/presentation/widgets/budget_form.dart';
+import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
 import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
+import 'package:k_budget/src/features/recurring/presentation/recurring_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/subscription_detail_screen.dart';
 import 'package:k_budget/src/domain/models/product.dart';
 import 'package:k_budget/src/features/shop/application/product_notifier.dart';
 import 'package:k_budget/src/features/shop/presentation/widgets/product_form.dart';
@@ -51,8 +62,14 @@ import 'package:k_budget/src/features/transactions/application/transaction_notif
 import 'package:k_budget/src/features/transactions/presentation/transaction_list_screen.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/services/local_notification_service.dart';
+import 'package:k_budget/src/services/stomp_service.dart';
+import 'package:k_budget/src/utils/env_config.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -172,16 +189,52 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: RouteNames.transactions,
             name: RouteNames.transactionsName,
             builder: (context, state) => const TransactionListScreen(),
+            routes: [
+              GoRoute(
+                path: 'recurring',
+                name: RouteNames.recurringName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => const RecurringListScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.subscriptions,
             name: RouteNames.subscriptionsName,
             builder: (context, state) => const SubscriptionListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.subscriptionDetail,
+                name: RouteNames.subscriptionDetailName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final subscription = state.extra as Subscription?;
+                  return SubscriptionDetailScreen(
+                    subscriptionId: state.pathParameters['id']!,
+                    initialSubscription: subscription,
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.debts,
             name: RouteNames.debtsName,
             builder: (context, state) => const DebtListScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.debtDetail,
+                name: RouteNames.debtDetailName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final debt = state.extra as Debt?;
+                  return DebtDetailScreen(
+                    debtId: state.pathParameters['id']!,
+                    initialDebt: debt,
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.shop,
@@ -197,6 +250,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     productId: state.pathParameters['id']!,
                     initialProduct: product,
                   );
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: RouteNames.budgets,
+            name: RouteNames.budgetsName,
+            builder: (context, state) => const BudgetListScreen(),
+            routes: [
+              GoRoute(
+                path: 'details',
+                name: RouteNames.budgetDetailsName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) {
+                  final month = state.uri.queryParameters['month'];
+                  return BudgetDetailScreen(month: month);
                 },
               ),
             ],
@@ -282,6 +351,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const DataSettingsScreen(),
           ),
+          GoRoute(
+            path: RouteNames.settingsCurrencies,
+            name: RouteNames.settingsCurrenciesName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const CurrencySettingsScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.settingsNotifications,
+            name: RouteNames.settingsNotificationsName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const NotificationSettingsScreen(),
+          ),
         ],
       ),
     ],
@@ -301,10 +382,65 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
   bool _isModalShowing = false;
 
   @override
+  void initState() {
+    super.initState();
+    _connectStomp();
+  }
+
+  @override
+  void dispose() {
+    try {
+      ref.read(stompServiceProvider).disconnect();
+    } catch (_) {
+      // Ignore: provider may not be available during test teardown
+    }
+    super.dispose();
+  }
+
+  Future<void> _connectStomp() async {
+    try {
+      final configRepo = ref.read(appConfigRepositoryProvider);
+      final dataMode = await configRepo.getDataMode();
+      if (dataMode != DataMode.server) return;
+
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      if (token == null) return;
+
+      final serverUrl = await configRepo.getServerUrl();
+      final baseUrl = (serverUrl ?? EnvConfig.apiBaseUrl)
+          .replaceFirst('https', 'wss')
+          .replaceFirst('http', 'ws')
+          .replaceFirst('/api', '/api/ws');
+
+      final stompService = ref.read(stompServiceProvider);
+      final localNotificationService = ref.read(localNotificationServiceProvider);
+
+      await localNotificationService.initialize();
+
+      stompService.connect(
+        token: token,
+        baseUrl: baseUrl,
+        localNotificationService: localNotificationService,
+        onReconnect: () {
+          ref.read(notificationNotifierProvider.notifier).loadItems();
+        },
+      );
+
+    } catch (_) {
+      // Ignore: plugin not available in test or local mode
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final featureState = ref.watch(featureConfigNotifierProvider);
     final enabledFeatures = featureState.enabledFeatures;
     final navOrder = featureState.navOrder;
+
+    // Garder les listeners STOMP vivants tant que le Shell est monté
+    ref.watch(notificationStompListenerProvider);
+    ref.watch(exchangeRateStompListenerProvider);
 
     // Build dynamic paths and destinations
     final paths = <String>[
@@ -313,13 +449,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     ];
     final destinations = <NavDestination>[
       const NavDestination(
-        icon: Icons.home_outlined,
-        selectedIcon: Icons.home,
+        icon: PhosphorIconsRegular.house,
+        selectedIcon: PhosphorIconsFill.house,
         label: 'Accueil',
       ),
       const NavDestination(
-        icon: Icons.receipt_long_outlined,
-        selectedIcon: Icons.receipt_long,
+        icon: PhosphorIconsRegular.receipt,
+        selectedIcon: PhosphorIconsFill.receipt,
         label: 'Transactions',
       ),
     ];
@@ -331,25 +467,33 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
         Feature.subscriptions => (
           RouteNames.subscriptions,
           const NavDestination(
-            icon: Icons.autorenew_outlined,
-            selectedIcon: Icons.autorenew,
+            icon: PhosphorIconsRegular.arrowsClockwise,
+            selectedIcon: PhosphorIconsFill.arrowsClockwise,
             label: 'Abonnements',
           ),
         ),
         Feature.debts => (
           RouteNames.debts,
           const NavDestination(
-            icon: Icons.handshake_outlined,
-            selectedIcon: Icons.handshake,
+            icon: PhosphorIconsRegular.handshake,
+            selectedIcon: PhosphorIconsFill.handshake,
             label: 'Dettes',
           ),
         ),
         Feature.shop => (
           RouteNames.shop,
           const NavDestination(
-            icon: Icons.storefront_outlined,
-            selectedIcon: Icons.storefront,
+            icon: PhosphorIconsRegular.storefront,
+            selectedIcon: PhosphorIconsFill.storefront,
             label: 'Boutique',
+          ),
+        ),
+        Feature.budgets => (
+          RouteNames.budgets,
+          const NavDestination(
+            icon: PhosphorIconsRegular.chartPie,
+            selectedIcon: PhosphorIconsFill.chartPie,
+            label: 'Budgets',
           ),
         ),
       };
@@ -416,6 +560,13 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     } else if (state.type == ModalType.product) {
       return _ProductFormConsumer(
         product: state.entity as Product?,
+        onDone: () {
+          Navigator.of(context).pop();
+        },
+      );
+    } else if (state.type == ModalType.budget) {
+      return _BudgetFormConsumer(
+        budget: state.entity as Budget?,
         onDone: () {
           Navigator.of(context).pop();
         },
@@ -629,6 +780,41 @@ class _ProductFormConsumer extends ConsumerWidget {
         }
         onDone();
       },
+      onCancelled: onDone,
+    );
+  }
+}
+
+class _BudgetFormConsumer extends ConsumerWidget {
+  final Budget? budget;
+  final VoidCallback onDone;
+
+  const _BudgetFormConsumer({
+    this.budget,
+    required this.onDone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modalState = ref.watch(modalNotifierProvider);
+    if (modalState is! ModalOpen) return const SizedBox.shrink();
+
+    return BudgetForm(
+      budget: budget,
+      onSaved: (b) async {
+        if (budget == null) {
+          await ref.read(budgetNotifierProvider.notifier).create(b);
+        } else {
+          await ref.read(budgetNotifierProvider.notifier).update(b);
+        }
+        onDone();
+      },
+      onDeleted: budget != null
+          ? (id) async {
+              await ref.read(budgetNotifierProvider.notifier).delete(id);
+              onDone();
+            }
+          : null,
       onCancelled: onDone,
     );
   }

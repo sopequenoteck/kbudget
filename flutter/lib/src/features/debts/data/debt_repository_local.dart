@@ -1,6 +1,7 @@
 import 'package:k_budget/src/data/local/daos/debt_dao.dart';
 import 'package:k_budget/src/data/local/mappers.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 
 class DebtRepositoryLocal implements DebtRepository {
@@ -42,5 +43,18 @@ class DebtRepositoryLocal implements DebtRepository {
   @override
   Future<void> delete(String id) async {
     await _dao.deleteDebt(id);
+  }
+
+  @override
+  Future<Debt> repay(String id, String accountId, double? amount) async {
+    throw Exception('Remboursement disponible en mode serveur uniquement');
+  }
+
+  @override
+  Future<List<DebtPayment>> getPayments(String id) async => [];
+
+  @override
+  Future<Debt> snooze(String id, String reminderDate, String reminderTime) async {
+    throw Exception('Report de rappel disponible en mode serveur uniquement');
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppModal {
   AppModal._();
@@ -183,7 +184,7 @@ class _ModalContent extends StatelessWidget {
                               Navigator.of(context).pop();
                               onClose();
                             },
-                            icon: const Icon(Icons.close),
+                            icon: const PhosphorIcon(PhosphorIconsBold.x, size: 24),
                           ),
                         ),
                       ],

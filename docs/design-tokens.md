@@ -364,3 +364,86 @@ Tokens renommes ou modifies par rapport aux versions precedentes.
 | `duration-fast` | `$duration-fast` / `--duration-fast` | `AppDurations.fast` |
 | `color-income` | `--color-income` (theme) | `AppThemeExtension.incomeColor` |
 | `color-subscription` | `--color-subscription` (theme) | `AppThemeExtension.subscriptionColor` |
+
+---
+
+## 8. Icons
+
+### Package
+
+| Platform | Package | Version |
+|----------|---------|---------|
+| Angular | `@ng-icons/core` + `@ng-icons/phosphor-icons` | v33.1.0 |
+| Flutter | `phosphor_flutter` | v2.1.0 |
+
+### Styles
+
+| Style | Usage | Flutter | Angular import |
+|-------|-------|---------|----------------|
+| Regular | Navigation inactive, inline, decoratif | `PhosphorIconsRegular.*` | `@ng-icons/phosphor-icons/regular` |
+| Fill | Navigation active, etats selectionnes | `PhosphorIconsFill.*` | `@ng-icons/phosphor-icons/fill` |
+| Bold | Actions (FAB, boutons, close, delete) | `PhosphorIconsBold.*` | `@ng-icons/phosphor-icons/bold` |
+
+### Tailles
+
+| Contexte | Taille | Exemples |
+|----------|--------|----------|
+| Navigation (bottom nav, sidebar) | 24px | Home, Transactions, Settings |
+| Actions (FAB, boutons primaires) | 24px | Add, Delete, Refresh, Close |
+| Inline (listes, formulaires, prefix) | 20px | Email, Lock, Calendar, Chevron |
+| Decoratif (badges, indicators) | 16px | Check mark on color picker |
+
+### Usage Angular
+
+```typescript
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorHouse } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHouseFill } from '@ng-icons/phosphor-icons/fill';
+import { phosphorPlusBold } from '@ng-icons/phosphor-icons/bold';
+
+@Component({
+  imports: [NgIcon],
+  providers: [provideIcons({ phosphorHouse, phosphorHouseFill, phosphorPlusBold })],
+  template: `<ng-icon name="phosphorHouse" size="24"></ng-icon>`,
+})
+```
+
+### Usage Flutter
+
+```dart
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+// Regular (inline, navigation inactive)
+PhosphorIcon(PhosphorIconsRegular.house, size: 24.0)
+
+// Fill (navigation active)
+PhosphorIcon(PhosphorIconsFill.house, size: 24.0)
+
+// Bold (actions)
+PhosphorIcon(PhosphorIconsBold.plus, size: 24.0)
+```
+
+### Dark mode
+
+Les icones Phosphor heritent de `currentColor` par defaut :
+- **Angular** : `<ng-icon>` utilise `color: inherit` — les tokens CSS s'appliquent automatiquement
+- **Flutter** : `PhosphorIcon` (extends `Icon`) utilise `IconThemeData.color` du theme
+
+---
+
+## 8. Dashboard visual tokens
+
+Tokens specifiques au dashboard Angular (definis dans `_dark.scss` et `_light.scss`). Non utilises par Flutter.
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--hero-gradient` | `linear-gradient(135deg, amber-900, indigo-900)` | `linear-gradient(135deg, amber-50, indigo-50)` | Fond hero card patrimoine |
+| `--glass-bg` | `rgba(31, 41, 55, 0.6)` | `var(--surface-raised)` | Fond glassmorphism cards |
+| `--glass-border` | `rgba(255, 255, 255, 0.08)` | `var(--border-default)` | Bordure glassmorphism |
+| `--glass-blur` | `20px` | `0px` | Blur backdrop-filter |
+| `--page-gradient-color` | `rgba(251, 191, 36, 0.08)` | `rgba(245, 158, 11, 0.05)` | Gradient radial fond page |
+| `--font-size-hero` | `2.25rem` | `2.25rem` | Font-size montant patrimoine |
+| `--shadow-hero-text` | `0 2px 8px rgba(0, 0, 0, 0.3)` | `none` | Text-shadow montant patrimoine |
+| `--nav-border-top` | `1px solid rgba(255, 255, 255, 0.08)` | `1px solid var(--border-default)` | Bordure supérieure bottom nav |
+
+> **Note** : Le glassmorphism (`backdrop-filter: blur()`) est applique uniquement en dark mode. En light mode, les cards et la bottom nav utilisent un fond opaque via les tokens fallback.

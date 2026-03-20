@@ -30,16 +30,23 @@ export const SETTINGS_ROUTES: Routes = [
   {
     path: 'budget',
     loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Budget', icon: '📊' },
+    data: { title: 'Budget', icon: 'phosphorChartBar' },
   },
   {
     path: 'notifications',
-    loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Notifications', icon: '🔔' },
+    loadComponent: () =>
+      import('./components/notification-settings/notification-settings').then(
+        (m) => m.NotificationSettings,
+      ),
   },
   {
     path: 'data',
     loadComponent: () =>
       import('./components/data-settings/data-settings').then((m) => m.DataSettings),
+  },
+  {
+    path: 'currencies',
+    loadComponent: () =>
+      import('./components/currency-settings/currency-settings').then((m) => m.CurrencySettings),
   },
 ];

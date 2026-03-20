@@ -29,12 +29,24 @@
 }
 
 .theme-section {
+  margin-bottom: var(--space-6);
+
   &__label {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     margin-bottom: var(--space-3);
   }
+}
+
+.text-preview {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--surface-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
+  transition: font-size var(--duration-normal) var(--easing-default);
 }
 
 .segmented-control {

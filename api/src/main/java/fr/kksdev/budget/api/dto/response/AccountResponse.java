@@ -16,5 +16,12 @@ public record AccountResponse(
         boolean isDefault,
         boolean actif,
         String currency,
-        boolean isShopAccount
+        boolean isShopAccount,
+        String bankCode,
+        String bankName,
+        String bankCountry,
+        String bankBrandColor,
+        String bankLogoUrl,
+        String bankCustomName,
+        String bankCustomLogo
 ) {}

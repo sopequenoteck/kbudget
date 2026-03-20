@@ -9,14 +9,24 @@ import {
 import { firstValueFrom } from 'rxjs';
 
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorStar, phosphorPencilSimple, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
 import { AccountService } from '../../../../core/services/account';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe, RouterLink],
+  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon],
+  providers: [
+    provideIcons({
+      phosphorStar,
+      phosphorPencilSimple,
+      phosphorTrash,
+    }),
+  ],
   templateUrl: './accounts.html',
   styleUrl: './accounts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

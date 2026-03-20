@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -171,7 +171,7 @@ class ProductControllerIntegrationTest {
     @Test
     void should_returnActiveProducts_when_listingProducts() throws Exception {
         var response = buildResponse();
-        when(productService.getAllByUser(userId)).thenReturn(List.of(response));
+        when(productService.getAllByUser(eq(userId), anyBoolean())).thenReturn(List.of(response));
 
         mockMvc.perform(get("/products")
                         .header("Authorization", BEARER_TOKEN))
@@ -183,7 +183,7 @@ class ProductControllerIntegrationTest {
 
     @Test
     void should_returnEmptyList_when_noProducts() throws Exception {
-        when(productService.getAllByUser(userId)).thenReturn(List.of());
+        when(productService.getAllByUser(eq(userId), anyBoolean())).thenReturn(List.of());
 
         mockMvc.perform(get("/products")
                         .header("Authorization", BEARER_TOKEN))
@@ -311,7 +311,7 @@ class ProductControllerIntegrationTest {
 
     @Test
     void should_returnForbidden_when_shopDisabled() throws Exception {
-        when(productService.getAllByUser(userId))
+        when(productService.getAllByUser(eq(userId), anyBoolean()))
                 .thenThrow(new FeatureDisabledException("SHOP"));
 
         mockMvc.perform(get("/products")
@@ -324,7 +324,7 @@ class ProductControllerIntegrationTest {
 
     @Test
     void should_isolateData_when_differentUsers() throws Exception {
-        when(productService.getAllByUser(userId)).thenReturn(List.of(buildResponse()));
+        when(productService.getAllByUser(eq(userId), anyBoolean())).thenReturn(List.of(buildResponse()));
 
         mockMvc.perform(get("/products")
                         .header("Authorization", BEARER_TOKEN))
@@ -361,7 +361,7 @@ class ProductControllerIntegrationTest {
                 new BigDecimal("8.50"), new BigDecimal("15.00"),
                 0, 0, true, now, now
         );
-        when(productService.getAllByUser(userId)).thenReturn(List.of(zeroStockResponse));
+        when(productService.getAllByUser(eq(userId), anyBoolean())).thenReturn(List.of(zeroStockResponse));
 
         mockMvc.perform(get("/products")
                         .header("Authorization", BEARER_TOKEN))

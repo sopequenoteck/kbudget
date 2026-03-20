@@ -1,4 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="subscription-form">
+  @if (errorMessage()) {
+    <div class="form-error-banner">{{ errorMessage() }}</div>
+  }
   <div class="form-row form-row--name-amount">
     <app-form-field
       label="Nom"
@@ -68,8 +71,8 @@
       <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
     }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary">
-      {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
+    <button type="submit" class="btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

@@ -8,6 +8,7 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -94,8 +95,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(
-                      Icons.account_balance_wallet,
+                    PhosphorIcon(
+                      PhosphorIconsRegular.wallet,
                       size: 64,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -123,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       autofillHints: const [AutofillHints.email],
                       decoration: const InputDecoration(
                         labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: PhosphorIcon(PhosphorIconsRegular.envelope, size: 20),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -143,12 +144,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
                         labelText: 'Mot de passe',
-                        prefixIcon: const Icon(Icons.lock_outlined),
+                        prefixIcon: const PhosphorIcon(PhosphorIconsRegular.lock, size: 20),
                         suffixIcon: IconButton(
-                          icon: Icon(
+                          icon: PhosphorIcon(
                             _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? PhosphorIconsRegular.eye
+                                : PhosphorIconsRegular.eyeSlash,
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(() {

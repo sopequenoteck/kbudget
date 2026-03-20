@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorStorefront } from '@ng-icons/phosphor-icons/regular';
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
 import { Product } from '../../../core/models/product.model';
@@ -19,7 +21,12 @@ type ProductFilter = 'active' | 'inactive' | 'all';
 
 @Component({
   selector: 'app-shop-list',
-  imports: [ListItem, AmountPipe],
+  imports: [ListItem, AmountPipe, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorStorefront,
+    }),
+  ],
   templateUrl: './shop-list.html',
   styleUrl: './shop-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

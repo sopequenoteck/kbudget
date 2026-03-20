@@ -10,7 +10,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_tokens")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,6 +21,7 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 64)

@@ -1,21 +1,34 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
+import 'package:k_budget/src/common_widgets/app_modal.dart';
+import 'package:k_budget/src/common_widgets/bank_select_picker.dart';
 import 'package:k_budget/src/common_widgets/emoji_input.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/accounts/application/bank_provider.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_preview_card.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_type_selector.dart';
 import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
+import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/image_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   final Account? account;
@@ -34,10 +47,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   late String _selectedColor;
   late Currency _selectedCurrency;
   late bool _isActive;
+  late String _selectedBankCode;
+  String? _bankCustomName;
+  String? _bankCustomLogo;
+  String? _bankLogoLocalPath;
 
   final _nameController = TextEditingController();
   final _initialBalanceController = TextEditingController();
   final _newBalanceController = TextEditingController();
+  final _bankCustomNameController = TextEditingController();
 
   bool _showErrors = false;
   bool _isSubmitting = false;
@@ -53,12 +71,19 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       _selectedCurrency = a.currency;
       _isActive = a.actif;
       _nameController.text = a.nom;
+      _selectedBankCode = a.bankCode;
+      _bankCustomName = a.bankCustomName;
+      _bankCustomLogo = a.bankCustomLogo;
+      if (_bankCustomName != null) {
+        _bankCustomNameController.text = _bankCustomName!;
+      }
     } else {
       _selectedType = AccountType.courant;
       _selectedEmoji = AccountTypeSelector.defaultEmoji(AccountType.courant);
       _selectedColor = AccountTypeSelector.defaultColor(AccountType.courant);
       _selectedCurrency = Currency.eur;
       _isActive = true;
+      _selectedBankCode = 'OTHER';
       _initialBalanceController.text = '0';
     }
   }
@@ -68,6 +93,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     _nameController.dispose();
     _initialBalanceController.dispose();
     _newBalanceController.dispose();
+    _bankCustomNameController.dispose();
     super.dispose();
   }
 
@@ -84,6 +110,100 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     final parsed = double.tryParse(value.replaceAll(',', '.'));
     if (parsed == null) return l10n.validationAmountPositive;
     return null;
+  }
+
+  void _onBankCodeChanged(String code) {
+    setState(() {
+      _selectedBankCode = code;
+      if (code != 'OTHER') {
+        // Auto-fill color with bank brand color
+        final banksAsync = ref.read(banksProvider);
+        final bank = banksAsync.whenOrNull(
+          data: (list) => list.where((b) => b.code == code).firstOrNull,
+        );
+        if (bank != null) {
+          final brandColor = parseHexColor(bank.brandColor);
+          if (brandColor != null) {
+            _selectedColor =
+                '#${brandColor.r.toInt().toRadixString(16).padLeft(2, '0')}${brandColor.g.toInt().toRadixString(16).padLeft(2, '0')}${brandColor.b.toInt().toRadixString(16).padLeft(2, '0')}';
+          }
+        }
+        // Reset custom fields
+        _bankCustomName = null;
+        _bankCustomLogo = null;
+        _bankLogoLocalPath = null;
+        _bankCustomNameController.clear();
+      } else {
+        _bankCustomName = null;
+        _bankCustomLogo = null;
+        _bankLogoLocalPath = null;
+        _bankCustomNameController.clear();
+      }
+    });
+  }
+
+  Future<void> _pickBankLogo() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  const PhosphorIcon(PhosphorIconsRegular.camera, size: 20),
+              title: const Text('Caméra'),
+              onTap: () {
+                Navigator.pop(context);
+                _doPickBankLogo(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading:
+                  const PhosphorIcon(PhosphorIconsRegular.image, size: 20),
+              title: const Text('Galerie'),
+              onTap: () {
+                Navigator.pop(context);
+                _doPickBankLogo(ImageSource.gallery);
+              },
+            ),
+            if (_bankCustomLogo != null)
+              ListTile(
+                leading:
+                    const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
+                title: const Text('Supprimer'),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _bankCustomLogo = null;
+                    _bankLogoLocalPath = null;
+                  });
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _doPickBankLogo(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        imageQuality: 80,
+      );
+      if (picked == null) return;
+      final file = File(picked.path);
+      final dataUri = ImageUtils.fileToBase64DataUri(file);
+      setState(() {
+        _bankLogoLocalPath = picked.path;
+        _bankCustomLogo = dataUri;
+      });
+    } on Exception {
+      // Permission denied or cancelled — silent no-op
+    }
   }
 
   Future<void> _onSubmit() async {
@@ -106,6 +226,14 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           icone: _selectedEmoji,
           couleur: _selectedColor,
           actif: _isActive,
+          bankCode: _selectedBankCode,
+          bankCustomName: _selectedBankCode == 'OTHER'
+              ? (_bankCustomNameController.text.trim().isEmpty
+                  ? null
+                  : _bankCustomNameController.text.trim())
+              : null,
+          bankCustomLogo:
+              _selectedBankCode == 'OTHER' ? _bankCustomLogo : null,
         );
         await notifier.update(updated);
 
@@ -131,8 +259,20 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           couleur: _selectedColor,
           currency: _selectedCurrency,
           actif: true,
+          bankCode: _selectedBankCode,
+          bankCustomName: _selectedBankCode == 'OTHER'
+              ? (_bankCustomNameController.text.trim().isEmpty
+                  ? null
+                  : _bankCustomNameController.text.trim())
+              : null,
+          bankCustomLogo:
+              _selectedBankCode == 'OTHER' ? _bankCustomLogo : null,
         );
         await notifier.create(account);
+
+        if (mounted) {
+          await _proposeRateDialog(_selectedCurrency);
+        }
       }
 
       if (mounted) context.pop();
@@ -147,6 +287,54 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _proposeRateDialog(Currency accountCurrency) async {
+    final currencies = ref.read(currencyConfigNotifierProvider);
+    final primaryCurrency = currencies.isNotEmpty ? currencies.first : Currency.eur;
+
+    if (accountCurrency == primaryCurrency) return;
+
+    final rateState = ref.read(exchangeRateListProvider);
+    final hasRate = rateState.items.any(
+      (r) =>
+          (r.baseCurrency == primaryCurrency && r.targetCurrency == accountCurrency) ||
+          (r.baseCurrency == accountCurrency && r.targetCurrency == primaryCurrency),
+    );
+
+    if (hasRate) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Taux de conversion manquant'),
+        content: Text(
+          'Aucun taux ${primaryCurrency.symbol} → ${accountCurrency.symbol} n\'est défini.\nVoulez-vous le saisir maintenant ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Plus tard'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Saisir le taux'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await AppModal.show(
+        context,
+        title: 'Ajouter un taux',
+        onClose: () {},
+        child: RateForm(
+          baseCurrency: primaryCurrency,
+          onSaved: () => Navigator.of(context).pop(),
+        ),
+      );
     }
   }
 
@@ -207,7 +395,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             )
           else
             IconButton(
-              icon: const Icon(Icons.check),
+              icon: const PhosphorIcon(PhosphorIconsBold.check, size: 24),
               onPressed: _onSubmit,
             ),
         ],
@@ -220,6 +408,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             emoji: _selectedEmoji,
             name: _nameController.text,
             colorHex: _selectedColor,
+            bankCode: _selectedBankCode != 'OTHER' ? _selectedBankCode : null,
+          ),
+          const SizedBox(height: AppSpacing.space6),
+
+          // Bank selector
+          BankSelectPicker(
+            selectedBankCode: _selectedBankCode,
+            onChanged: _onBankCodeChanged,
+            banks: ref.watch(banksProvider),
           ),
           const SizedBox(height: AppSpacing.space6),
 
@@ -231,26 +428,64 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           ),
           const SizedBox(height: AppSpacing.space6),
 
-          // Emoji + Color row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              EmojiInput(
-                label: l10n.accountFormIconField,
-                initialValue: _selectedEmoji,
-                onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
-              ),
-              const SizedBox(width: AppSpacing.space4),
-              Expanded(
-                child: ColorPalettePicker(
-                  label: l10n.accountFormColorField,
-                  selectedColor: _selectedColor,
-                  onChanged: (color) => setState(() => _selectedColor = color),
+          // Emoji + Color row (masqué si une banque connue est sélectionnée)
+          if (_selectedBankCode == 'OTHER') ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EmojiInput(
+                  label: l10n.accountFormIconField,
+                  initialValue: _selectedEmoji,
+                  onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
                 ),
+                const SizedBox(width: AppSpacing.space4),
+                Expanded(
+                  child: ColorPalettePicker(
+                    label: l10n.accountFormColorField,
+                    selectedColor: _selectedColor,
+                    onChanged: (color) =>
+                        setState(() => _selectedColor = color),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.space6),
+
+            // Custom bank name
+            AppFormField(
+              label: 'Nom de la banque',
+              child: TextField(
+                controller: _bankCustomNameController,
+                decoration: const InputDecoration.collapsed(
+                  hintText: 'Optionnel',
+                ),
+                style: TextStyle(
+                  fontSize: AppTypography.sizeMd,
+                  color: colorScheme.onSurface,
+                ),
+                maxLength: 50,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                buildCounter: (
+                  _, {
+                  required currentLength,
+                  required isFocused,
+                  maxLength,
+                }) =>
+                    null,
+                onChanged: (v) => setState(() => _bankCustomName = v.trim()),
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space6),
+            ),
+            const SizedBox(height: AppSpacing.space6),
+
+            // Custom logo upload
+            _BankLogoUpload(
+              localPath: _bankLogoLocalPath,
+              dataUri: _bankCustomLogo,
+              onTap: _pickBankLogo,
+            ),
+            const SizedBox(height: AppSpacing.space6),
+          ] else
+            const SizedBox(height: AppSpacing.space0),
 
           // Name field
           AppFormField(
@@ -393,7 +628,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: _onDelete,
-                icon: Icon(Icons.delete_outline, color: colorScheme.error),
+                icon: PhosphorIcon(PhosphorIconsRegular.trash, color: colorScheme.error, size: 20),
                 label: Text(
                   l10n.delete,
                   style: TextStyle(color: colorScheme.error),
@@ -405,6 +640,72 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const SizedBox(height: AppSpacing.space12),
         ],
       ),
+    );
+  }
+}
+
+class _BankLogoUpload extends StatelessWidget {
+  const _BankLogoUpload({
+    required this.localPath,
+    required this.dataUri,
+    required this.onTap,
+  });
+
+  final String? localPath;
+  final String? dataUri;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasImage = localPath != null || dataUri != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Logo personnalisé',
+          style: TextStyle(
+            fontSize: AppTypography.sizeSm,
+            fontWeight: AppTypography.medium,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space2),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: hasImage
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    child: localPath != null
+                        ? Image.file(
+                            File(localPath!),
+                            width: 72,
+                            height: 72,
+                            fit: BoxFit.contain,
+                          )
+                        : Image.memory(
+                            ImageUtils.base64DataUriToBytes(dataUri!),
+                            width: 72,
+                            height: 72,
+                            fit: BoxFit.contain,
+                          ),
+                  )
+                : PhosphorIcon(
+                    PhosphorIconsRegular.upload,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -13,7 +13,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"category", "account", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,6 +24,7 @@ public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(nullable = false)
@@ -37,7 +41,7 @@ public class Subscription {
     private LocalDate dateDebut;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
+    @Column(nullable = false, length = 10)
     @Builder.Default
     private Currency currency = Currency.EUR;
 

@@ -6,16 +6,21 @@ import 'package:k_budget/src/common_widgets/month_selector.dart';
 import 'package:k_budget/src/common_widgets/segmented_filter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_day_group.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_summary_card.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   const TransactionListScreen({super.key});
@@ -56,6 +61,9 @@ class _TransactionListScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(transactionListNotifierProvider);
     final catState = ref.watch(categoryNotifierProvider);
+    final accState = ref.watch(accountNotifierProvider);
+    final exchangeRateState = ref.watch(exchangeRateListProvider);
+    final dashboardState = ref.watch(dashboardNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -64,6 +72,11 @@ class _TransactionListScreenState
     final categoryMap = <String, Category>{
       for (final c in catState.items) c.id: c,
     };
+
+    // Devise principale : première devise de la config utilisateur
+    final primaryCurrency = dashboardState.currencies.isNotEmpty
+        ? dashboardState.currencies.first
+        : null;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -136,7 +149,15 @@ class _TransactionListScreenState
           ),
 
           // Contenu principal
-          ..._buildContent(state, categoryMap, colorScheme, l10n),
+          ..._buildContent(
+            state,
+            categoryMap,
+            colorScheme,
+            l10n,
+            accounts: accState.items,
+            exchangeRates: exchangeRateState.items,
+            primaryCurrency: primaryCurrency,
+          ),
         ],
       ),
     );
@@ -146,8 +167,11 @@ class _TransactionListScreenState
     TransactionListState state,
     Map<String, Category> categoryMap,
     ColorScheme colorScheme,
-    AppLocalizations l10n,
-  ) {
+    AppLocalizations l10n, {
+    List<Account> accounts = const [],
+    List<ExchangeRate> exchangeRates = const [],
+    Currency? primaryCurrency,
+  }) {
     // Loading
     if (state.isLoading) {
       return [
@@ -170,8 +194,8 @@ class _TransactionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.error_outline,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.warning,
                     size: 48,
                     color: colorScheme.error,
                   ),
@@ -187,7 +211,7 @@ class _TransactionListScreenState
                   const SizedBox(height: AppSpacing.space4),
                   FilledButton.icon(
                     onPressed: () => ref.read(transactionListNotifierProvider.notifier).refresh(),
-                    icon: const Icon(Icons.refresh),
+                    icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
                     label: Text(l10n.transactionsRetry),
                   ),
                 ],
@@ -215,8 +239,8 @@ class _TransactionListScreenState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.receipt_long_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.receipt,
                     size: 48,
                     color: colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
@@ -254,6 +278,9 @@ class _TransactionListScreenState
             date: day,
             transactions: dayTxs,
             categories: categoryMap,
+            accounts: accounts,
+            exchangeRates: exchangeRates,
+            primaryCurrency: primaryCurrency,
             onTransactionTap: (tx) {
               if (tx.type == TransactionType.ajustement) return;
               ref.read(modalNotifierProvider.notifier).open(

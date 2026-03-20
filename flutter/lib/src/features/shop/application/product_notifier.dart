@@ -17,13 +17,13 @@ class ProductNotifier extends Notifier<ProductListState> {
   @override
   ProductListState build() => const ProductListState();
 
-  ProductRepository get _repo =>
-      ref.read(productRepositoryProvider);
+  Future<ProductRepository> get _repo =>
+      ref.read(productRepositoryProvider.future);
 
   Future<void> loadItems() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll();
+      _allItems = await (await _repo).getAll();
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
       _refreshPage(resetPage: true);
     } on Exception catch (e) {
@@ -51,7 +51,7 @@ class ProductNotifier extends Notifier<ProductListState> {
   Future<void> create(Product item) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final created = await _repo.create(item);
+      final created = await (await _repo).create(item);
       _allItems.add(created);
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
       _refreshPage();
@@ -69,7 +69,7 @@ class ProductNotifier extends Notifier<ProductListState> {
       error: null,
     );
     try {
-      final updated = await _repo.update(item);
+      final updated = await (await _repo).update(item);
       final index = _allItems.indexWhere((e) => e.id == item.id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
@@ -95,7 +95,7 @@ class ProductNotifier extends Notifier<ProductListState> {
     _refreshPage();
 
     try {
-      await _repo.delete(id);
+      await (await _repo).delete(id);
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
@@ -116,7 +116,7 @@ class ProductNotifier extends Notifier<ProductListState> {
       error: null,
     );
     try {
-      final updated = await _repo.sell(id);
+      final updated = await (await _repo).sell(id);
       final index = _allItems.indexWhere((e) => e.id == id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
@@ -140,7 +140,7 @@ class ProductNotifier extends Notifier<ProductListState> {
       error: null,
     );
     try {
-      final updated = await _repo.restock(id, quantity);
+      final updated = await (await _repo).restock(id, quantity);
       final index = _allItems.indexWhere((e) => e.id == id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
@@ -173,6 +173,6 @@ class ProductNotifier extends Notifier<ProductListState> {
 
 final productSalesProvider =
     FutureProvider.family<List<Transaction>, String>((ref, productId) async {
-  final repo = ref.read(productRepositoryProvider);
+  final repo = await ref.read(productRepositoryProvider.future);
   return repo.getSales(productId);
 });

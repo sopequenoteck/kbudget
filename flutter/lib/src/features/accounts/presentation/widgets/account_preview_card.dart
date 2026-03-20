@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -9,12 +10,14 @@ class AccountPreviewCard extends StatelessWidget {
   final String? emoji;
   final String? name;
   final String? colorHex;
+  final String? bankCode;
 
   const AccountPreviewCard({
     super.key,
     this.emoji,
     this.name,
     this.colorHex,
+    this.bankCode,
   });
 
   @override
@@ -44,7 +47,13 @@ class AccountPreviewCard extends StatelessWidget {
       child: Row(
         spacing: AppSpacing.space3,
         children: [
-          if (emoji != null && emoji!.isNotEmpty)
+          if (bankCode != null && bankCode!.isNotEmpty && bankCode != 'OTHER')
+            SvgPicture.asset(
+              'assets/banks/${bankCode!.toLowerCase()}.svg',
+              width: 32,
+              height: 32,
+            )
+          else if (emoji != null && emoji!.isNotEmpty)
             Text(emoji!, style: const TextStyle(fontSize: 28)),
           Expanded(
             child: Text(

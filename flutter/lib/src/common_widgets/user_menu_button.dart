@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
@@ -29,7 +30,7 @@ class UserMenuButton extends ConsumerWidget {
           value: 'settings',
           child: Row(
             children: [
-              Icon(Icons.settings_outlined, size: 20),
+              PhosphorIcon(PhosphorIconsRegular.gear, size: 20),
               SizedBox(width: 12),
               Text('Paramètres'),
             ],
@@ -41,7 +42,7 @@ class UserMenuButton extends ConsumerWidget {
             value: 'logout',
             child: Row(
               children: [
-                Icon(Icons.logout, size: 20),
+                PhosphorIcon(PhosphorIconsRegular.signOut, size: 20),
                 SizedBox(width: 12),
                 Text('Déconnexion'),
               ],
@@ -52,8 +53,8 @@ class UserMenuButton extends ConsumerWidget {
       child: CircleAvatar(
         radius: 16,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Icon(
-          Icons.person,
+        child: PhosphorIcon(
+          PhosphorIconsRegular.user,
           size: 18,
           color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),

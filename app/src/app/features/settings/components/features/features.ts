@@ -2,6 +2,16 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorHouse,
+  phosphorCurrencyDollar,
+  phosphorDotsSixVertical,
+  phosphorLock,
+  phosphorArrowsClockwise,
+  phosphorHandshake,
+  phosphorStorefront,
+} from '@ng-icons/phosphor-icons/regular';
 
 import { PreferenceService } from '../../../../core/services/preference';
 import { SubscriptionService } from '../../../../core/services/subscription';
@@ -10,7 +20,18 @@ import { FEATURES, type Feature } from '../../../../core/models/preference.model
 
 @Component({
   selector: 'app-features',
-  imports: [RouterLink, CdkDropList, CdkDrag],
+  imports: [RouterLink, CdkDropList, CdkDrag, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorHouse,
+      phosphorCurrencyDollar,
+      phosphorDotsSixVertical,
+      phosphorLock,
+      phosphorArrowsClockwise,
+      phosphorHandshake,
+      phosphorStorefront,
+    }),
+  ],
   templateUrl: './features.html',
   styleUrl: './features.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

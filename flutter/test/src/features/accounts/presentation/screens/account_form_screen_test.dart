@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/domain/models/bank.dart';
+import 'package:k_budget/src/features/accounts/application/bank_provider.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
@@ -53,6 +57,7 @@ void main() {
     return ProviderScope(
       overrides: [
         accountRepositoryProvider.overrideWithValue(mockRepo),
+        banksProvider.overrideWith((_) async => const <Bank>[]),
       ],
       child: MaterialApp.router(
         theme: theme.AppTheme.light,
@@ -63,7 +68,7 @@ void main() {
     );
   }
 
-  Finder findAppBarAction(IconData icon) {
+  Finder findAppBarAction(PhosphorIconData icon) {
     return find.descendant(
       of: find.byType(AppBar),
       matching: find.byIcon(icon),
@@ -76,7 +81,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nouveau compte'), findsOneWidget);
-      expect(find.text('Solde initial'), findsOneWidget);
+      // Bank picker present — default is "OTHER" showing "Autre / Personnalisé"
+      expect(find.text('Autre / Personnalisé'), findsOneWidget);
     });
 
     testWidgets('should_showEditMode_when_accountProvided', (tester) async {
@@ -84,6 +90,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Modifier le compte'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Solde actuel'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Solde actuel'), findsOneWidget);
     });
 
@@ -99,13 +110,23 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
+      // Scroll to name field (it may be below bank picker + custom fields)
+      await tester.scrollUntilVisible(
+        find.text('Nom du compte'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
       // Clear name field and submit
-      final nameField = find.byType(TextField).first;
+      final nameField = find.descendant(
+        of: find.ancestor(of: find.text('Nom du compte'), matching: find.byType(AppFormField)),
+        matching: find.byType(TextField),
+      );
       await tester.enterText(nameField, '');
       await tester.pumpAndSettle();
 
       // Tap save button in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       expect(find.text('Champ requis'), findsWidgets);
@@ -117,13 +138,23 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
+      // Scroll to name field
+      await tester.scrollUntilVisible(
+        find.text('Nom du compte'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
       // Fill name field
-      final nameField = find.byType(TextField).first;
+      final nameField = find.descendant(
+        of: find.ancestor(of: find.text('Nom du compte'), matching: find.byType(AppFormField)),
+        matching: find.byType(TextField),
+      );
       await tester.enterText(nameField, 'Mon Compte');
       await tester.pumpAndSettle();
 
       // Tap save in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       verify(mockRepo.create(any)).called(1);
@@ -138,7 +169,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save in AppBar
-      await tester.tap(findAppBarAction(Icons.check));
+      await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
       verify(mockRepo.update(any)).called(1);
@@ -149,12 +180,12 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.byIcon(Icons.delete_outline),
+        find.byIcon(PhosphorIconsRegular.trash),
         200,
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsOneWidget);
     });
 
     testWidgets('should_showActiveSwitch_when_editMode', (tester) async {

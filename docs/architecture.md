@@ -48,6 +48,10 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | couleur | String | Couleur hexadecimale (#RRGGBB) |
 | isDefault | Boolean | Compte par defaut |
 | actif | Boolean | Compte actif ou non |
+| currency | Currency | Devise du compte (default EUR) |
+| bankCode | String | Code de la banque associee (default "OTHER") |
+| bankCustomName | String | Nom personnalise si bankCode="OTHER" (nullable) |
+| bankCustomLogo | String | Logo personnalise en base64 data URI (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -64,6 +68,13 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | note | String | Note libre (nullable) |
 | account | Account | FK → Account |
 | transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
+| debt | Debt | FK → Debt (nullable, lie la transaction a un remboursement de dette) |
+| product | Product | FK → Product (nullable, lie la transaction a un produit) |
+| subscription | Subscription | FK → Subscription (nullable, paiement d'abonnement) |
+| isRecurring | Boolean | Transaction recurrente (default false) |
+| frequency | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL (nullable, si isRecurring) |
+| nextOccurrence | LocalDate | Prochaine occurrence (nullable, si isRecurring) |
+| recurringActive | Boolean | Recurrence active (default true, si isRecurring) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -91,10 +102,18 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | montant | BigDecimal | Montant |
 | sens | Enum | EMPRUNT / PRET |
 | date | LocalDate | Date |
+| currency | Currency | Devise (default EUR) |
 | rembourse | Boolean | Rembourse ou non |
+| dueDate | LocalDate | Date d'echeance (nullable) |
+| account | Account | FK → Account (nullable) |
+| includeInBalance | Boolean | Inclure dans le solde total (default false) |
+| reminderDate | LocalDate | Date du rappel (nullable) |
+| reminderTime | LocalTime | Heure du rappel (nullable) |
 | category | Category | FK → Category (nullable) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+
+> Remboursements : les transactions de remboursement sont liees a la dette via le champ `debt` (FK `debt_id`) sur l'entite `Transaction`. `DebtPaymentResponse` est un DTO de projection (pas une entite JPA).
 
 ### Category
 
@@ -116,7 +135,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | nom | String | Nom du produit (max 100) |
 | description | String | Description (nullable, max 500) |
 | icone | String | Emoji (nullable) |
-| imageUrl | String | URL image (nullable, max 500) |
+| imageUrl | String | Image en base64 data URI (nullable) — format partage Flutter/Angular |
 | prixAchat | BigDecimal | Prix d'achat |
 | prixVente | BigDecimal | Prix de vente |
 | stock | Integer | Stock disponible (>= 0) |
@@ -142,12 +161,46 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| enabledFeatures | List\<Feature\> | Features optionnelles activees (stocke en VARCHAR via converter) |
-| navOrder | List\<Feature\> | Ordre des onglets de navigation (stocke en VARCHAR via converter) |
+| enabledFeatures | List\<Feature\> | Features optionnelles activees (VARCHAR via converter) |
+| navOrder | List\<Feature\> | Ordre des onglets de navigation (VARCHAR via converter) |
+| shopAccountId | UUID | Compte associe a la boutique (nullable) |
+| includeShopInBalance | Boolean | Inclure le stock boutique dans le solde total (default false) |
+| currencies | List\<Currency\> | Ordre des devises — [0] = devise principale (VARCHAR via converter) |
+| enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
+| timezone | String | Fuseau horaire (default "Europe/Paris") |
+| textScale | TextScale | Taille de texte (SMALL/MEDIUM/LARGE, default MEDIUM) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enum `Feature` : `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. Converter JPA `FeatureListConverter` pour la serialisation CSV en base.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
+
+### ExchangeRate
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| baseCurrency | Currency | Devise de base (enum) |
+| targetCurrency | Currency | Devise cible (enum) |
+| rate | BigDecimal | Taux de conversion (precision 20, scale 6, > 0) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+
+Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatique des taux lors du changement de devise principale via `rebaseRates()`.
+
+### Notification
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED |
+| entityType | EntityType | SUBSCRIPTION / DEBT |
+| entityId | UUID | ID de l'entite liee |
+| title | String | Titre de la notification |
+| body | String | Corps du message |
+| read | Boolean | Lue ou non (default false) |
+| readAt | LocalDateTime | Date de lecture (nullable) |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
 
 ## Architecture frontend
 
@@ -165,8 +218,13 @@ app/src/app/
     ├── transactions/  # CRUD transactions
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
+    ├── budgets/       # Module Budgets (liste mensuelle, historique camembert, formulaire)
     ├── settings/      # Parametres (categories, comptes, fonctionnalites)
-    └── shop/          # Module Boutique (placeholder)
+    └── shop/          # Module Boutique (liste, detail, formulaire, sell/restock)
+        ├── shop-list/         # Grille produits + filtres actifs/inactifs
+        ├── shop-detail/       # Detail produit + historique ventes
+        ├── components/        # ProductForm, SellDialog, RestockDialog
+        └── shop.routes.ts     # Routing lazy-loaded
 ```
 
 ### Principes
@@ -187,16 +245,20 @@ app/src/app/
 | Ecran | Route | Role |
 |-------|-------|------|
 | Auth | `/auth` | Inscription et connexion (toggle login/register) |
-| Dashboard | `/dashboard` | Soldes par compte, solde total, KPI mensuels, resume abonnements, etat dettes |
+| Dashboard | `/dashboard` | Patrimoine total (variation mensuelle), revenus/depenses du mois, budgets (conditionnel), dernieres operations |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
-| Dettes/Prets | `/debts` | Suivi dans les deux sens |
+| Dettes/Prets | `/debts` | Liste, resume, filtres |
+| Detail dette | `/debts/:id` | Montant restant, historique paiements, rembourser, snooze |
 | Parametres | `/settings` | Parametres utilisateur |
+| Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
+| Detail produit | `/shop/:id` | Infos, vente, restock, historique |
+| Budgets | `/budgets` | Vue mensuelle, historique camembert, CRUD budgets (guard BUDGETS) |
 
 ### Bouton flottant (FAB speed-dial)
 
 - Visible sur tous les ecrans (sauf login)
-- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs)
+- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs), Budget (si BUDGETS actif). Sur `/shop` : Nouveau produit + Vente rapide (si SHOP actif)
 - Saisie en 2-3 taps
 
 ## Flux d'authentification

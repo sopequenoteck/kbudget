@@ -1,4 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="debt-form">
+  @if (errorMessage()) {
+    <div class="form-error-banner">{{ errorMessage() }}</div>
+  }
   <div class="form-row form-row--person-amount">
     <app-form-field
       label="Personne"
@@ -25,13 +28,23 @@
   </div>
 
   <div class="form-row">
-    <app-form-field label="Devise" fieldId="currency">
+    <app-form-field label="Compte bancaire" fieldId="accountId">
       <app-select-picker
-        formControlName="currency"
-        [items]="currencyItems()"
-        placeholder="Devise par defaut"
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Aucun compte"
       />
     </app-form-field>
+
+    @if (!hasAccount()) {
+      <app-form-field label="Devise" fieldId="currency">
+        <app-select-picker
+          formControlName="currency"
+          [items]="currencyItems()"
+          placeholder="Devise par defaut"
+        />
+      </app-form-field>
+    }
 
     <app-form-field label="Categorie" fieldId="categoryId">
       <app-category-picker formControlName="categoryId" />
@@ -47,18 +60,39 @@
     </app-form-field>
   </div>
 
-  <label class="checkbox-field">
-    <input type="checkbox" formControlName="rembourse" />
-    Rembourse
-  </label>
+  <div class="form-row form-row--reminder">
+    <app-form-field label="Date de rappel" fieldId="reminderDate">
+      <input id="reminderDate" type="date" formControlName="reminderDate" />
+    </app-form-field>
+
+    @if (hasReminderDate()) {
+      <app-form-field label="Heure de rappel" fieldId="reminderTime">
+        <input id="reminderTime" type="time" formControlName="reminderTime" />
+      </app-form-field>
+    }
+  </div>
+
+  <div class="checkboxes">
+    <label class="checkbox-field">
+      <input type="checkbox" formControlName="rembourse" />
+      Rembourse
+    </label>
+
+    @if (!hasAccount()) {
+      <label class="checkbox-field">
+        <input type="checkbox" formControlName="includeInBalance" />
+        Inclure dans le patrimoine
+      </label>
+    }
+  </div>
 
   <div class="form-actions">
     @if (isEditMode()) {
       <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
     }
     <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary">
-      {{ isEditMode() ? 'Modifier' : 'Enregistrer' }}
+    <button type="submit" class="btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

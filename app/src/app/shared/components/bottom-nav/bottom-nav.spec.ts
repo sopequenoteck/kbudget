@@ -9,9 +9,9 @@ if (!getTestBed().platform) {
 }
 
 const items = [
-  { label: 'Accueil', route: '/dashboard', icon: '🏠' },
-  { label: 'Transactions', route: '/transactions', icon: '💰' },
-  { label: 'Abonnements', route: '/subscriptions', icon: '🔄' },
+  { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
+  { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
+  { label: 'Abonnements', route: '/subscriptions', icon: 'phosphorArrowsClockwise', filledIcon: 'phosphorArrowsClockwiseFill' },
 ];
 
 describe('BottomNav', () => {
@@ -31,13 +31,13 @@ describe('BottomNav', () => {
     const navItems = fixture.nativeElement.querySelectorAll('.bottom-nav-item');
     expect(navItems.length).toBe(3);
 
-    expect(navItems[0].querySelector('.bottom-nav-icon').textContent).toBe('🏠');
+    expect(navItems[0].querySelector('.bottom-nav-icon ng-icon')).toBeTruthy();
     expect(navItems[0].querySelector('.bottom-nav-label').textContent).toBe('Accueil');
 
-    expect(navItems[1].querySelector('.bottom-nav-icon').textContent).toBe('💰');
+    expect(navItems[1].querySelector('.bottom-nav-icon ng-icon')).toBeTruthy();
     expect(navItems[1].querySelector('.bottom-nav-label').textContent).toBe('Transactions');
 
-    expect(navItems[2].querySelector('.bottom-nav-icon').textContent).toBe('🔄');
+    expect(navItems[2].querySelector('.bottom-nav-icon ng-icon')).toBeTruthy();
     expect(navItems[2].querySelector('.bottom-nav-label').textContent).toBe('Abonnements');
   });
 

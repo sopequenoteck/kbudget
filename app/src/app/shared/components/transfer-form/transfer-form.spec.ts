@@ -1,9 +1,11 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
-import { of } from 'rxjs';
+import { of, signal } from 'rxjs';
 
 import { TransferForm } from './transfer-form';
 import { AccountService } from '../../../core/services/account';
+import { TransactionService } from '../../../core/services/transaction';
+import { ModalService } from '../../../core/services/modal.service';
 import { Account, AccountType } from '../../../core/models/account.model';
 
 if (!getTestBed().platform) {
@@ -44,6 +46,16 @@ describe('TransferForm', () => {
     refreshTrigger: ReturnType<typeof vi.fn>;
   };
 
+  let transactionServiceMock: {
+    refreshTrigger: { update: ReturnType<typeof vi.fn> };
+  };
+
+  let modalServiceMock: {
+    closeModal: ReturnType<typeof vi.fn>;
+    editingEntity: ReturnType<typeof vi.fn>;
+    activeModal: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     accountServiceMock = {
       getAll: vi.fn().mockReturnValue(of(mockAccounts)),
@@ -51,9 +63,23 @@ describe('TransferForm', () => {
       refreshTrigger: vi.fn().mockReturnValue(0),
     };
 
+    transactionServiceMock = {
+      refreshTrigger: { update: vi.fn() },
+    };
+
+    modalServiceMock = {
+      closeModal: vi.fn(),
+      editingEntity: vi.fn().mockReturnValue(null),
+      activeModal: vi.fn().mockReturnValue(null),
+    };
+
     TestBed.configureTestingModule({
       imports: [TransferForm],
-      providers: [{ provide: AccountService, useValue: accountServiceMock }],
+      providers: [
+        { provide: AccountService, useValue: accountServiceMock },
+        { provide: TransactionService, useValue: transactionServiceMock },
+        { provide: ModalService, useValue: modalServiceMock },
+      ],
     });
   });
 

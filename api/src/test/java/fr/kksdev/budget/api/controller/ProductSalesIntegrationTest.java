@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -77,7 +77,7 @@ class ProductSalesIntegrationTest {
 
     @Test
     void should_sell_product_when_stock_available() throws Exception {
-        when(productService.sell(productId, userId)).thenReturn(buildProductResponse(4, 6));
+        when(productService.sell(eq(productId), eq(userId), anyInt())).thenReturn(buildProductResponse(4, 6));
 
         mockMvc.perform(post("/products/{id}/sell", productId)
                         .header("Authorization", BEARER_TOKEN))
@@ -88,7 +88,7 @@ class ProductSalesIntegrationTest {
 
     @Test
     void should_return_409_when_stock_is_zero() throws Exception {
-        when(productService.sell(productId, userId))
+        when(productService.sell(eq(productId), eq(userId), anyInt()))
                 .thenThrow(new ConflictException("Stock insuffisant pour le produit Bracelet"));
 
         mockMvc.perform(post("/products/{id}/sell", productId)
@@ -99,7 +99,7 @@ class ProductSalesIntegrationTest {
 
     @Test
     void should_return_409_when_product_inactive_sell() throws Exception {
-        when(productService.sell(productId, userId))
+        when(productService.sell(eq(productId), eq(userId), anyInt()))
                 .thenThrow(new ConflictException("Le produit Bracelet est inactif"));
 
         mockMvc.perform(post("/products/{id}/sell", productId)
@@ -111,7 +111,7 @@ class ProductSalesIntegrationTest {
     @Test
     void should_return_404_when_product_not_found_on_sell() throws Exception {
         var randomId = UUID.randomUUID();
-        when(productService.sell(randomId, userId))
+        when(productService.sell(eq(randomId), eq(userId), anyInt()))
                 .thenThrow(new EntityNotFoundException("Produit non trouvé"));
 
         mockMvc.perform(post("/products/{id}/sell", randomId)
@@ -122,7 +122,7 @@ class ProductSalesIntegrationTest {
 
     @Test
     void should_return_403_when_shop_feature_disabled_on_sell() throws Exception {
-        when(productService.sell(productId, userId))
+        when(productService.sell(eq(productId), eq(userId), anyInt()))
                 .thenThrow(new FeatureDisabledException("SHOP"));
 
         mockMvc.perform(post("/products/{id}/sell", productId)
@@ -219,12 +219,12 @@ class ProductSalesIntegrationTest {
         var tx1 = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("15.00"), "Vente: Bracelet",
                 TransactionType.RECETTE, LocalDate.of(2026, 2, 28),
-                null, null, null, null, productId, "Bracelet"
+                null, null, null, null, productId, "Bracelet", null
         );
         var tx2 = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("15.00"), "Vente: Bracelet",
                 TransactionType.RECETTE, LocalDate.of(2026, 2, 27),
-                null, null, null, null, productId, "Bracelet"
+                null, null, null, null, productId, "Bracelet", null
         );
         when(productService.getSalesHistory(productId, userId)).thenReturn(List.of(tx1, tx2));
 

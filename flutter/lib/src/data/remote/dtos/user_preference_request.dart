@@ -11,6 +11,10 @@ class UserPreferenceRequest with _$UserPreferenceRequest {
     List<Feature>? navOrder,
     String? shopAccountId,
     bool? includeShopInBalance,
+    List<String>? currencies,
+    List<NotificationType>? enabledNotificationTypes,
+    String? timezone,
+    String? textScale,
   }) = _UserPreferenceRequest;
 
   factory UserPreferenceRequest.fromJson(Map<String, dynamic> json) =>

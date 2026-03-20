@@ -16,6 +16,13 @@ class Debt with _$Debt {
     @Default(false) bool rembourse,
     String? categoryId,
     DateTime? updatedAt,
+    String? accountId,
+    String? accountName,
+    @Default(false) bool includeInBalance,
+    DateTime? dueDate,
+    DateTime? reminderDate,
+    String? reminderTime,
+    double? remainingAmount,
   }) = _Debt;
 
   factory Debt.fromJson(Map<String, dynamic> json) => _$DebtFromJson(json);

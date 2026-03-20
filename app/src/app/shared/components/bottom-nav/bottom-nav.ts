@@ -1,9 +1,27 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorHouse, phosphorCurrencyDollar, phosphorArrowsClockwise, phosphorHandshake, phosphorStorefront } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseFill, phosphorHandshakeFill, phosphorStorefrontFill } from '@ng-icons/phosphor-icons/fill';
 
 @Component({
   selector: 'bottom-nav',
-  imports: [RouterLink],
+  imports: [RouterLink, NgIcon],
+  host: { '[attr.data-item-count]': 'items().length.toString()' },
+  providers: [
+    provideIcons({
+      phosphorHouse,
+      phosphorHouseFill,
+      phosphorCurrencyDollar,
+      phosphorCurrencyDollarFill,
+      phosphorArrowsClockwise,
+      phosphorArrowsClockwiseFill,
+      phosphorHandshake,
+      phosphorHandshakeFill,
+      phosphorStorefront,
+      phosphorStorefrontFill,
+    }),
+  ],
   template: `
     <nav class="bottom-nav">
       @for (item of items(); track item.route) {
@@ -12,7 +30,13 @@ import { RouterLink } from '@angular/router';
           class="bottom-nav-item"
           [class.active]="activeRoute().startsWith(item.route)"
         >
-          <span class="bottom-nav-icon">{{ item.icon }}</span>
+          <span class="bottom-nav-icon">
+            @if (activeRoute().startsWith(item.route) && item.filledIcon) {
+              <ng-icon [name]="item.filledIcon" size="24" />
+            } @else {
+              <ng-icon [name]="item.icon" size="24" />
+            }
+          </span>
           <span class="bottom-nav-label">{{ item.label }}</span>
         </a>
       }
@@ -22,6 +46,6 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BottomNav {
-  readonly items = input.required<{ label: string; route: string; icon: string }[]>();
+  readonly items = input.required<{ label: string; route: string; icon: string; filledIcon?: string }[]>();
   readonly activeRoute = input<string>('');
 }

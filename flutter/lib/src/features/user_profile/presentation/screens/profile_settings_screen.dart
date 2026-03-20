@@ -5,6 +5,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_notifier.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/profile_settings_skeleton.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ProfileSettingsScreen extends ConsumerStatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -40,7 +41,7 @@ class _ProfileSettingsScreenState
                     ),
                   )
                 : IconButton(
-                    icon: const Icon(Icons.check),
+                    icon: const PhosphorIcon(PhosphorIconsBold.check, size: 24),
                     onPressed: _save,
                   ),
         ],
@@ -209,12 +210,12 @@ class _CurrencySelector extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${selectedCurrency.symbol} — ${selectedCurrency.name}',
+                '${selectedCurrency.symbol} — ${selectedCurrency.displayName}',
                 style: theme.textTheme.bodyLarge,
               ),
             ),
-            Icon(
-              Icons.chevron_right,
+            PhosphorIcon(
+              PhosphorIconsRegular.caretRight,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ],
@@ -240,10 +241,11 @@ class _CurrencySelector extends StatelessWidget {
             ),
             ...Currency.values.map(
               (currency) => ListTile(
-                title: Text('${currency.symbol} — ${currency.name}'),
+                title: Text('${currency.symbol} — ${currency.displayName}'),
                 trailing: currency == selectedCurrency
-                    ? Icon(Icons.check,
-                        color: Theme.of(context).colorScheme.primary)
+                    ? PhosphorIcon(PhosphorIconsBold.check,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20)
                     : null,
                 onTap: () {
                   Navigator.of(context).pop(currency);
@@ -275,8 +277,8 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
+            PhosphorIcon(
+              PhosphorIconsRegular.warning,
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -296,7 +298,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: AppSpacing.space6),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
               label: const Text('Réessayer'),
             ),
           ],

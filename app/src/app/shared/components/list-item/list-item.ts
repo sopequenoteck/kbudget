@@ -14,8 +14,10 @@ export class ListItem {
   readonly value = input.required<string>();
   readonly subtitle = input<string>('');
   readonly rightSubtitle = input<string>('');
+  readonly valueSubtitle = input<string>('');
   readonly valueClass = input<string>('');
   readonly imageUrl = input<string | null>(null);
+  readonly iconColor = input<string | null>(null);
 
   readonly webImageUrl = computed(() => {
     const url = this.imageUrl();

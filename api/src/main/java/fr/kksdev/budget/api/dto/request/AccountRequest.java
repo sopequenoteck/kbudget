@@ -16,5 +16,8 @@ public record AccountRequest(
         String icone,
         @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Couleur invalide (format hex attendu)") String couleur,
         Boolean actif,
-        Currency currency
+        Currency currency,
+        String bankCode,
+        @Size(max = 100) String bankCustomName,
+        String bankCustomLogo
 ) {}

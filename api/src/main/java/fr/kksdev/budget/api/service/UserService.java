@@ -28,9 +28,11 @@ public class UserService {
     @Transactional
     public UserResponse updateProfile(UUID userId, UserUpdateRequest request) {
         User user = findById(userId);
-        user.setDefaultCurrency(request.defaultCurrency());
+        if (request.name() != null) {
+            user.setName(request.name());
+        }
         user = userRepository.save(user);
-        log.info("Profil mis à jour: userId={}, defaultCurrency={}", userId, request.defaultCurrency());
+        log.info("Profil mis à jour: userId={}", userId);
         return toResponse(user);
     }
 
@@ -45,8 +47,7 @@ public class UserService {
     private UserResponse toResponse(User user) {
         return new UserResponse(
                 user.getName(),
-                user.getEmail(),
-                user.getDefaultCurrency().name()
+                user.getEmail()
         );
     }
 }

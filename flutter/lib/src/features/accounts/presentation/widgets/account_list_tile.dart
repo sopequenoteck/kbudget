@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -7,7 +8,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
-import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AccountListTile extends ConsumerWidget {
   final Account account;
@@ -35,7 +36,6 @@ class AccountListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final iconColor = parseHexColor(account.couleur);
 
     final formattedBalance = AmountFormatter.format(
       account.solde,
@@ -56,21 +56,7 @@ class AccountListTile extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Icon circle
-              Container(
-                width: AppSpacing.space10,
-                height: AppSpacing.space10,
-                decoration: BoxDecoration(
-                  color: iconColor?.withValues(alpha: 0.15) ??
-                      colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppRadius.round),
-                ),
-                child: Center(
-                  child: Text(
-                    account.icone,
-                    style: const TextStyle(fontSize: AppTypography.sizeLg),
-                  ),
-                ),
-              ),
+              AccountBankIcon(account: account, size: AppSpacing.space10),
               // Content
               Expanded(
                 child: Column(
@@ -123,8 +109,8 @@ class AccountListTile extends ConsumerWidget {
                 ),
               ),
               PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert,
+                icon: PhosphorIcon(
+                  PhosphorIconsRegular.dotsThreeVertical,
                   color: colorScheme.onSurfaceVariant,
                   size: 20,
                 ),

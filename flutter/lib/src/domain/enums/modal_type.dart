@@ -8,6 +8,7 @@ enum ModalType {
   category,
   account,
   product,
+  budget,
 }
 
 enum ModalMode { create, edit }
@@ -21,6 +22,7 @@ const Map<ModalType, String> modalCreateTitles = {
   ModalType.category: 'Nouvelle catégorie',
   ModalType.account: 'Nouveau compte',
   ModalType.product: 'Nouveau produit',
+  ModalType.budget: 'Nouveau budget',
 };
 
 const Map<ModalType, String> modalEditTitles = {
@@ -31,6 +33,7 @@ const Map<ModalType, String> modalEditTitles = {
   ModalType.category: 'Modifier la catégorie',
   ModalType.account: 'Modifier le compte',
   ModalType.product: 'Modifier le produit',
+  ModalType.budget: 'Modifier le budget',
 };
 
 /// Sous-type par défaut en mode création (null = pas de toggle)
@@ -42,6 +45,7 @@ final Map<ModalType, dynamic> modalDefaultSubTypes = {
   ModalType.category: null,
   ModalType.account: null,
   ModalType.product: null,
+  ModalType.budget: null,
 };
 
 /// Labels du toggle par type (null = pas de toggle)
@@ -53,17 +57,19 @@ const Map<ModalType, List<String>?> modalToggleLabels = {
   ModalType.category: null,
   ModalType.account: null,
   ModalType.product: null,
+  ModalType.budget: null,
 };
 
 /// Valeurs du toggle par type (ordre aligné avec les labels)
 final Map<ModalType, List<dynamic>?> modalToggleValues = {
   ModalType.transaction: TransactionType.values,
-  ModalType.subscription: Frequency.values,
+  ModalType.subscription: [Frequency.mensuel, Frequency.annuel],
   ModalType.debt: DebtType.values,
   ModalType.transfer: null,
   ModalType.category: null,
   ModalType.account: null,
   ModalType.product: null,
+  ModalType.budget: null,
 };
 
 extension ModalTypeX on ModalType {

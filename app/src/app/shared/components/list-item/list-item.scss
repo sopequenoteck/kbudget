@@ -84,6 +84,13 @@
     white-space: nowrap;
   }
 
+  &__value-subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--color-on-surface-variant, var(--text-secondary));
+    font-style: italic;
+    white-space: nowrap;
+  }
+
   &__right-subtitle {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);

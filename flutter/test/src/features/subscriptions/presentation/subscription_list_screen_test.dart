@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
@@ -23,6 +24,7 @@ void main() {
   late MockSubscriptionRepository mockSubRepo;
   late MockCategoryRepository mockCatRepo;
   late MockAccountRepository mockAccRepo;
+  late MockExchangeRateRepository mockExchangeRateRepo;
 
   final sub1 = Subscription(
     id: '1',
@@ -68,6 +70,8 @@ void main() {
     mockSubRepo = MockSubscriptionRepository();
     mockCatRepo = MockCategoryRepository();
     mockAccRepo = MockAccountRepository();
+    mockExchangeRateRepo = MockExchangeRateRepository();
+    when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
   });
 
   Widget buildApp() {
@@ -76,6 +80,7 @@ void main() {
         subscriptionRepositoryProvider.overrideWithValue(mockSubRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
         accountRepositoryProvider.overrideWithValue(mockAccRepo),
+        exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,

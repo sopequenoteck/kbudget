@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/settings/presentation/widgets/settings_item.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
   Widget buildItem({
@@ -14,7 +15,7 @@ void main() {
       darkTheme: ThemeData.dark(useMaterial3: true),
       home: Scaffold(
         body: SettingsItem(
-          icon: Icons.person,
+          icon: PhosphorIconsRegular.user,
           iconColor: Colors.blue,
           title: 'Profil',
           description: 'Nom, email, devise',
@@ -31,7 +32,7 @@ void main() {
       await tester.pumpWidget(buildItem(onTap: () {}));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.caretRight), findsOneWidget);
       expect(find.text('À venir'), findsNothing);
     });
 
@@ -41,7 +42,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('À venir'), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      expect(find.byIcon(PhosphorIconsRegular.caretRight), findsNothing);
     });
 
     testWidgets('placeholder item should have reduced opacity',

@@ -5,13 +5,16 @@ import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
+import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.Product;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
+import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -39,6 +43,10 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
     private final ProductRepository productRepository;
+    private final PreferenceService preferenceService;
+    private final BudgetService budgetService;
+    private final DebtRepository debtRepository;
+    private final ExchangeRateService exchangeRateService;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -61,11 +69,18 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
         log.info("Transaction créée: {} pour userId {}", transaction.getId(), userId);
+        if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+            }
+        }
         return toResponse(transaction);
     }
 
     public List<TransactionResponse> getAllByUser(UUID userId) {
-        return transactionRepository.findByUserIdOrderByDateDesc(userId)
+        return transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -85,6 +100,11 @@ public class TransactionService {
             throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées");
         }
 
+        // Interdire le changement de type sur les transactions liées à une dette
+        if (transaction.getDebt() != null && request.type() != transaction.getType()) {
+            throw new IllegalArgumentException("Le type d'une transaction liée à une dette ne peut pas être modifié");
+        }
+
         // Propager le montant si c'est une transaction de virement
         if (transaction.getTransferId() != null && request.montant().compareTo(transaction.getMontant()) != 0) {
             propagateTransferAmount(transaction, request.montant());
@@ -99,6 +119,20 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
         log.info("Transaction mise à jour: {}", transaction.getId());
+        if (transaction.getDebt() != null) {
+            Debt debt = transaction.getDebt();
+            BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
+            BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
+            debt.setRembourse(remaining.compareTo(BigDecimal.ZERO) <= 0);
+            debtRepository.save(debt);
+        }
+        if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+            }
+        }
         return toResponse(transaction);
     }
 
@@ -110,6 +144,9 @@ public class TransactionService {
             log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
             throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées");
         }
+
+        TransactionType deletedType = transaction.getType();
+        UUID deletedCategoryId = transaction.getCategory() != null ? transaction.getCategory().getId() : null;
 
         // Rollback stock produit si transaction liée à un produit
         if (transaction.getProduct() != null) {
@@ -139,13 +176,33 @@ public class TransactionService {
 
         transactionRepository.delete(transaction);
         log.info("Transaction supprimée: {}", id);
+
+        // Recalculer rembourse si transaction liée à une dette (FR-023)
+        if (transaction.getDebt() != null) {
+            Debt debt = transaction.getDebt();
+            BigDecimal newPaid = transactionRepository.sumByDebtId(debt.getId());
+            BigDecimal newRemaining = debt.getMontant().subtract(newPaid != null ? newPaid : BigDecimal.ZERO);
+            if (newRemaining.compareTo(BigDecimal.ZERO) > 0 && Boolean.TRUE.equals(debt.getRembourse())) {
+                debt.setRembourse(false);
+                debtRepository.save(debt);
+                log.info("Dette réouverte après suppression remboursement: debtId={}", debt.getId());
+            }
+        }
+
+        if (deletedType == TransactionType.DEPENSE && deletedCategoryId != null) {
+            try {
+                budgetService.checkThresholdsForCategory(userId, deletedCategoryId);
+            } catch (Exception e) {
+                log.warn("Erreur vérification seuil budget après suppression: {}", e.getMessage());
+            }
+        }
     }
 
     public List<TransactionResponse> getByMonth(int month, int year, UUID userId) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
-        return transactionRepository.findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to)
+        return transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(userId, from, to)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -157,48 +214,44 @@ public class TransactionService {
         LocalDate to = yearMonth.atEndOfMonth();
 
         List<Transaction> transactions = transactionRepository
-                .findByUserIdAndDateBetweenOrderByDateDesc(userId, from, to);
+                .findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(userId, from, to);
 
-        // Group transactions by account currency
-        Map<String, List<Transaction>> byCurrency = transactions.stream()
-                .collect(Collectors.groupingBy(t -> t.getAccount().getCurrency().name()));
+        if (transactions.isEmpty()) {
+            return List.of();
+        }
 
-        // Determine user default currency for ordering
-        String defaultCurrency = userRepository.getReferenceById(userId).getDefaultCurrency().name();
+        // Determine user primary currency
+        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
 
-        List<MonthlySummaryResponse> summaries = byCurrency.entrySet().stream()
-                .map(entry -> {
-                    String currency = entry.getKey();
-                    List<Transaction> txns = entry.getValue();
+        BigDecimal totalRecettes = BigDecimal.ZERO;
+        BigDecimal totalDepenses = BigDecimal.ZERO;
+        BigDecimal totalAjustements = BigDecimal.ZERO;
 
-                    BigDecimal totalRecettes = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.RECETTE)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (Transaction t : transactions) {
+            Currency txCurrency = t.getAccount().getCurrency();
+            BigDecimal montant = t.getMontant();
 
-                    BigDecimal totalDepenses = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.DEPENSE)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (txCurrency != primaryCurrency) {
+                Optional<BigDecimal> rate = exchangeRateService.getRate(userId, txCurrency, primaryCurrency);
+                if (rate.isEmpty()) {
+                    log.warn("Taux de change manquant pour {} → {} (userId={}), transaction exclue du bilan", txCurrency, primaryCurrency, userId);
+                    continue;
+                }
+                montant = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+            }
 
-                    BigDecimal totalAjustements = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.AJUSTEMENT)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (t.getType() == TransactionType.RECETTE) {
+                totalRecettes = totalRecettes.add(montant);
+            } else if (t.getType() == TransactionType.DEPENSE) {
+                totalDepenses = totalDepenses.add(montant);
+            } else if (t.getType() == TransactionType.AJUSTEMENT) {
+                totalAjustements = totalAjustements.add(montant);
+            }
+        }
 
-                    return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
-                            totalRecettes.subtract(totalDepenses).add(totalAjustements), currency);
-                })
-                .sorted((a, b) -> {
-                    // Default currency first, then alphabetical
-                    if (a.currency().equals(defaultCurrency) && !b.currency().equals(defaultCurrency)) return -1;
-                    if (!a.currency().equals(defaultCurrency) && b.currency().equals(defaultCurrency)) return 1;
-                    return a.currency().compareTo(b.currency());
-                })
-                .toList();
-
-        log.info("Bilan mensuel {}/{} pour userId={}: {} devises", month, year, userId, summaries.size());
-        return summaries;
+        BigDecimal solde = totalRecettes.subtract(totalDepenses).add(totalAjustements);
+        log.info("Bilan mensuel {}/{} pour userId={}: agrégé en {}", month, year, userId, primaryCurrency);
+        return List.of(new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses, solde, primaryCurrency.name()));
     }
 
     private void propagateTransferAmount(Transaction transaction, BigDecimal newMontant) {
@@ -247,32 +300,6 @@ public class TransactionService {
                 });
     }
 
-    private CategoryResponse toCategoryResponse(Category category) {
-        if (category == null) {
-            return null;
-        }
-        return new CategoryResponse(
-                category.getId(),
-                category.getNom(),
-                category.getIcone(),
-                category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
-        );
-    }
-
-    private AccountSummary toAccountSummary(Account account) {
-        if (account == null) {
-            return null;
-        }
-        return new AccountSummary(
-                account.getId(),
-                account.getNom(),
-                account.getIcone(),
-                account.getCouleur(),
-                account.getCurrency().name()
-        );
-    }
-
     private TransactionResponse toResponse(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
@@ -280,12 +307,13 @@ public class TransactionService {
                 transaction.getLibelle(),
                 transaction.getType(),
                 transaction.getDate(),
-                toCategoryResponse(transaction.getCategory()),
+                CategoryResponse.from(transaction.getCategory()),
                 transaction.getNote(),
-                toAccountSummary(transaction.getAccount()),
+                AccountSummary.from(transaction.getAccount()),
                 transaction.getTransferId(),
                 transaction.getProduct() != null ? transaction.getProduct().getId() : null,
-                transaction.getProduct() != null ? transaction.getProduct().getNom() : null
+                transaction.getProduct() != null ? transaction.getProduct().getNom() : null,
+                transaction.getDebt() != null ? transaction.getDebt().getId() : null
         );
     }
 }

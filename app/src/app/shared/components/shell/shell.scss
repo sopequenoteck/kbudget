@@ -12,6 +12,15 @@
   box-shadow: var(--shadow-sm);
 }
 
+.shell-greeting {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .shell-brand {
   display: flex;
   align-items: center;
@@ -30,10 +39,17 @@
   color: var(--color-primary);
 }
 
+// -- Header actions (notification + avatar) --
+.shell-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
 // -- User menu & dropdown --
 .shell-user-menu {
   position: relative;
-  margin-left: auto;
 }
 
 .shell-user-trigger {
@@ -116,10 +132,10 @@
 }
 
 .shell-dropdown-logout {
-  color: var(--color-error);
+  color: var(--text-error);
 
   &:hover {
-    color: var(--color-error);
+    color: var(--text-error);
   }
 }
 

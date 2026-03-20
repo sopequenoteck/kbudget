@@ -11,6 +11,7 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class LockScreen extends ConsumerStatefulWidget {
   const LockScreen({super.key});
@@ -189,8 +190,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.lock_outlined,
+                  PhosphorIcon(
+                    PhosphorIconsRegular.lock,
                     size: 64,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -258,7 +259,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                       TextButton.icon(
                         onPressed:
                             _isAuthenticating ? null : _attemptBiometric,
-                        icon: const Icon(Icons.fingerprint),
+                        icon: const PhosphorIcon(PhosphorIconsRegular.fingerprint, size: 20),
                         label: const Text('Biometrie'),
                       ),
                     ],

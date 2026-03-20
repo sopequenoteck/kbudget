@@ -1,10 +1,10 @@
-<!-- Section Comptes -->
+<!-- Zone solde total -->
 <section class="accounts-zone">
-  @if (accountsLoading()) {
+  @if (totalBalanceLoading()) {
     <div class="state-loading state-loading--accounts">
       <div class="spinner"></div>
     </div>
-  } @else if (accountsError()) {
+  } @else if (totalBalanceError()) {
     <div class="state-error">
       <p>Erreur de chargement des comptes</p>
       <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
@@ -15,53 +15,64 @@
       <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
     </div>
   } @else {
+    @if (isOnDashboard()) {
+      <span class="shell-greeting">Bonjour{{ userName()?.name ? ' ' + userName()!.name : '' }}</span>
+    }
+    @if (currencies().length > 1) {
+      <app-currency-pill-selector
+        [currencies]="currencies()"
+        [activeCurrency]="activeCurrency()"
+        (currencyChange)="onCurrencyChange($event)"
+      />
+    }
     <div class="accounts-zone__totals">
-      @for (ct of accountTotalsByCurrency(); track ct.currency) {
-        <div class="accounts-zone__total">
-          @if (accountTotalsByCurrency().length > 1) {
-            <span class="accounts-zone__total-currency">{{ ct.currency }}</span>
-          }
-          <span class="accounts-zone__total-label">Solde total</span>
+      <div class="accounts-zone__total">
+        <span class="accounts-zone__total-label">Patrimoine total</span>
+        <span class="accounts-zone__total-value-row">
           <span
             class="accounts-zone__total-value"
-            [ngClass]="ct.total >= 0 ? 'amount-income' : 'amount-expense'"
+            [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
           >
-            {{ ct.total | amount: null : ct.currency }}
+            {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
           </span>
-        </div>
-      }
-    </div>
-    <div class="accounts-zone__list">
-      @for (account of accounts(); track account.id) {
-        <div class="account-card" [style.border-color]="account.couleur">
-          <span class="account-card__icon">{{ account.icone }}</span>
-          <span class="account-card__name">{{ account.nom }}</span>
-          <span
-            class="account-card__solde"
-            [ngClass]="account.solde >= 0 ? 'amount-income' : 'amount-expense'"
+          @if (convertedTotalBalance().hasMissingRate) {
+            <ng-icon
+              name="phosphorWarningCircle"
+              size="18"
+              class="missing-rate-icon"
+              title="Certains montants n'ont pas pu être convertis"
+            />
+          }
+        </span>
+        @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
+          <span class="variation-badge"
+            [ngClass]="{
+              'variation-badge--positive': netDuMois() > 0,
+              'variation-badge--negative': netDuMois() < 0,
+              'variation-badge--neutral': netDuMois() === 0
+            }"
           >
-            {{ account.solde | amount: null : account.currency }}
+            {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
+            @if (variationPatrimoinePct() !== null) {
+              ({{ variationPatrimoinePct()! >= 0 ? '+' : '' }}{{ variationPatrimoinePct()! | number:'1.1-1' }}%)
+            }
           </span>
-        </div>
-      }
+        }
+        @if (secondaryCurrency() !== null) {
+          @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
+          @if (converted !== null) {
+            <span class="patrimoine-converted">
+              ≈ {{ converted | amount: null : secondaryCurrency()! }}
+            </span>
+          }
+        }
+      </div>
     </div>
   }
 </section>
 
-<!-- Zone KPI -->
-<section class="kpi-zone">
-  <!-- Sélecteur de mois -->
-  <div class="month-selector">
-    <button class="month-selector__btn" (click)="prevMonth()" aria-label="Mois précédent">
-      &#9664;
-    </button>
-    <span class="month-selector__label">{{ selectedMonthLabel() }}</span>
-    <button class="month-selector__btn" (click)="nextMonth()" aria-label="Mois suivant">
-      &#9654;
-    </button>
-  </div>
-
-  <!-- Rang 1 : Recettes / Dépenses / Solde -->
+<!-- Cartes Revenus / Depenses -->
+<section class="summary-section">
   @if (summaryLoading()) {
     <div class="state-loading state-loading--summary">
       <div class="spinner"></div>
@@ -69,95 +80,69 @@
   } @else if (summaryError()) {
     <div class="state-error">
       <p>Erreur de chargement du bilan</p>
-      <button class="btn-outline" (click)="loadSummary()">Réessayer</button>
+      <button class="btn-outline" (click)="loadSummaries()">Réessayer</button>
     </div>
   } @else {
-    @for (s of summaries(); track s.currency) {
-      @if (summaries().length > 1) {
-        <span class="kpi-zone__currency-label">{{ s.currency }}</span>
-      }
-      <div class="kpi-zone__row">
-        <div class="summary__card summary__card--income">
-          <span class="summary__label">Recettes</span>
-          <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
-        </div>
-        <div class="summary__card summary__card--expense">
-          <span class="summary__label">Dépenses</span>
-          <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
-        </div>
-        <div class="summary__card summary__card--balance">
-          <span class="summary__label">Solde</span>
-          <span
-            class="summary__value"
-            [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'"
-          >
-            {{ s.solde | amount: null : s.currency }}
-          </span>
-        </div>
+    <div class="summary-cards">
+      <div class="summary-card summary-card--income">
+        <div class="summary-card__dot summary-card__dot--income"></div>
+        <span class="summary-card__label">Revenus</span>
+        <span class="summary-card__value">
+          {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
+        </span>
+        <span class="variation-badge"
+          [ngClass]="variationRevenus() >= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+        >
+          {{ variationRevenus() >= 0 ? '↑' : '↓' }} {{ variationRevenus() >= 0 ? '+' : '' }}{{ variationRevenus() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
+        </span>
+        @if (secondaryCurrency() !== null) {
+          @let convertedRecettes = conversionService.convert(currentSummary()?.totalRecettes ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
+          @if (convertedRecettes !== null) {
+            <span class="summary-card__converted">≈ {{ convertedRecettes | amount: null : secondaryCurrency()! }}</span>
+          }
+        }
       </div>
-    }
-    @if (summaries().length === 0) {
-      <div class="kpi-zone__row">
-        <div class="summary__card summary__card--income">
-          <span class="summary__label">Recettes</span>
-          <span class="summary__value">{{ 0 | amount: 'RECETTE' }}</span>
-        </div>
-        <div class="summary__card summary__card--expense">
-          <span class="summary__label">Dépenses</span>
-          <span class="summary__value">{{ 0 | amount: 'DEPENSE' }}</span>
-        </div>
-        <div class="summary__card summary__card--balance">
-          <span class="summary__label">Solde</span>
-          <span class="summary__value amount-income">{{ 0 | amount }}</span>
-        </div>
+      <div class="summary-card summary-card--expense">
+        <div class="summary-card__dot summary-card__dot--expense"></div>
+        <span class="summary-card__label">Dépenses</span>
+        <span class="summary-card__value">
+          {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
+        </span>
+        <span class="variation-badge"
+          [ngClass]="variationDepenses() <= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+        >
+          {{ variationDepenses() > 0 ? '↑' : '↓' }} {{ variationDepenses() >= 0 ? '+' : '' }}{{ variationDepenses() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
+        </span>
+        @if (secondaryCurrency() !== null) {
+          @let convertedDepenses = conversionService.convert(currentSummary()?.totalDepenses ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
+          @if (convertedDepenses !== null) {
+            <span class="summary-card__converted">≈ {{ convertedDepenses | amount: null : secondaryCurrency()! }}</span>
+          }
+        }
       </div>
-    }
-  }
-
-  <!-- Rang 2 : Abos / Je dois / On me doit -->
-  @if (miniCardsLoading()) {
-    <div class="state-loading state-loading--mini">
-      <div class="spinner spinner--sm"></div>
-    </div>
-  } @else {
-    <div class="kpi-zone__row">
-      <a class="mini-card mini-card--subscription" routerLink="/subscriptions">
-        <span class="mini-card__label">Abos</span>
-        @for (ct of monthlySubTotalsByCurrency(); track ct.currency) {
-          <span class="mini-card__value">{{ ct.total | amount: null : ct.currency }}</span>
-        }
-        @if (monthlySubTotalsByCurrency().length === 0) {
-          <span class="mini-card__value">{{ 0 | amount }}</span>
-        }
-      </a>
-      <a class="mini-card mini-card--debt-owe" routerLink="/debts">
-        <span class="mini-card__label">Je dois</span>
-        @for (ct of totalJeDoisByCurrency(); track ct.currency) {
-          <span class="mini-card__value">{{ ct.total | amount: null : ct.currency }}</span>
-        }
-        @if (totalJeDoisByCurrency().length === 0) {
-          <span class="mini-card__value">{{ 0 | amount }}</span>
-        }
-      </a>
-      <a class="mini-card mini-card--debt-owed" routerLink="/debts">
-        <span class="mini-card__label">On me doit</span>
-        @for (ct of totalOnMeDoitByCurrency(); track ct.currency) {
-          <span class="mini-card__value">{{ ct.total | amount: null : ct.currency }}</span>
-        }
-        @if (totalOnMeDoitByCurrency().length === 0) {
-          <span class="mini-card__value">{{ 0 | amount }}</span>
-        }
-      </a>
     </div>
   }
-
-  <hr class="kpi-separator" />
 </section>
 
-<!-- Dernieres transactions (US2) -->
+<!-- Section Budgets -->
+@if (preferenceService.isEnabled('BUDGETS') && (sortedBudgetItems().length > 0 || budgetLoading())) {
+  <section class="dashboard-section">
+    <div class="dashboard-section__header">
+      <h2 class="dashboard-section__title">Budgets · {{ budgetCurrentMonth() }}</h2>
+      <a class="dashboard-section__link" routerLink="/budgets">Voir tout</a>
+    </div>
+    <app-budget-summary
+      [items]="sortedBudgetItems()"
+      [overview]="budgetOverview()"
+      [isLoading]="budgetLoading()"
+    />
+  </section>
+}
+
+<!-- Dernieres operations -->
 <section class="dashboard-section">
   <div class="dashboard-section__header">
-    <h2 class="dashboard-section__title">Dernières transactions</h2>
+    <h2 class="dashboard-section__title">Dernières opérations</h2>
     <a class="dashboard-section__link" routerLink="/transactions">Voir tout</a>
   </div>
 
@@ -180,88 +165,12 @@
         <li>
           <app-list-item
             [icon]="getTransactionIcon(transaction)"
+            [iconColor]="transaction.category?.couleur ?? null"
             [title]="transaction.libelle"
-            [subtitle]="transaction.category?.nom ?? ''"
+            [subtitle]="(transaction.date | relativeDate) + (transaction.account?.nom ? ' · ' + transaction.account!.nom : '')"
             [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
-            [rightSubtitle]="transaction.date | relativeDate"
             [valueClass]="getTransactionValueClass(transaction)"
-            (pressed)="onTransactionClick(transaction)"
-          />
-        </li>
-      }
-    </ul>
-  }
-</section>
-
-<!-- Abonnements actifs (US3) -->
-<section class="dashboard-section">
-  <div class="dashboard-section__header">
-    <h2 class="dashboard-section__title">Abonnements actifs</h2>
-    <a class="dashboard-section__link" routerLink="/subscriptions">Voir tout</a>
-  </div>
-
-  @if (subscriptionsLoading()) {
-    <div class="state-loading">
-      <div class="spinner"></div>
-    </div>
-  } @else if (subscriptionsError()) {
-    <div class="state-error">
-      <p>Erreur de chargement</p>
-      <button class="btn-outline" (click)="loadSubscriptions()">Réessayer</button>
-    </div>
-  } @else if (activeSubscriptions().length === 0) {
-    <div class="state-empty">
-      <p>Aucun abonnement actif</p>
-    </div>
-  } @else {
-    <ul class="dashboard-list">
-      @for (sub of activeSubscriptions(); track sub.id) {
-        <li>
-          <app-list-item
-            [icon]="sub.category?.icone ?? '🔄'"
-            [title]="sub.nom"
-            [value]="sub.montant | amount: null : sub.currency"
-            [subtitle]="sub.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel'"
-            (pressed)="onSubscriptionClick(sub)"
-          />
-        </li>
-      }
-    </ul>
-  }
-</section>
-
-<!-- Dettes en cours (US4) -->
-<section class="dashboard-section">
-  <div class="dashboard-section__header">
-    <h2 class="dashboard-section__title">Dettes en cours</h2>
-    <a class="dashboard-section__link" routerLink="/debts">Voir tout</a>
-  </div>
-
-  @if (debtsLoading()) {
-    <div class="state-loading">
-      <div class="spinner"></div>
-    </div>
-  } @else if (debtsError()) {
-    <div class="state-error">
-      <p>Erreur de chargement</p>
-      <button class="btn-outline" (click)="loadDebts()">Réessayer</button>
-    </div>
-  } @else if (activeDebts().length === 0) {
-    <div class="state-empty">
-      <p>Aucune dette en cours</p>
-    </div>
-  } @else {
-    <ul class="dashboard-list">
-      @for (debt of activeDebts(); track debt.id) {
-        <li>
-          <app-list-item
-            [icon]="getDebtIcon(debt)"
-            [title]="debt.personne"
-            [value]="debt.montant | amount: null : debt.currency"
-            [subtitle]="debt.sens === 'EMPRUNT' ? 'Emprunt' : 'Prêt'"
-            [rightSubtitle]="debt.date | relativeDate"
-            [valueClass]="getDebtValueClass(debt)"
-            (pressed)="onDebtClick(debt)"
+            [valueSubtitle]="getTransactionConvertedValue(transaction)"
           />
         </li>
       }

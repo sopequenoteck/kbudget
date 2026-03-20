@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 enum SettingsGroup {
   general('Général'),
@@ -10,7 +11,7 @@ enum SettingsGroup {
 }
 
 class SettingsSection {
-  final IconData icon;
+  final PhosphorIconData icon;
   final Color iconColor;
   final String title;
   final String description;
@@ -32,7 +33,7 @@ class SettingsSection {
 const settingsSections = <SettingsSection>[
   // Général
   SettingsSection(
-    icon: Icons.person,
+    icon: PhosphorIconsRegular.user,
     iconColor: Colors.blue,
     title: 'Profil',
     description: 'Nom, email, devise',
@@ -40,7 +41,7 @@ const settingsSections = <SettingsSection>[
     route: '/settings/profile',
   ),
   SettingsSection(
-    icon: Icons.toggle_on,
+    icon: PhosphorIconsRegular.toggleRight,
     iconColor: Colors.green,
     title: 'Fonctionnalités & Navigation',
     description: 'Modules et ordre de navigation',
@@ -48,16 +49,24 @@ const settingsSections = <SettingsSection>[
     route: '/settings/features',
   ),
   SettingsSection(
-    icon: Icons.palette,
+    icon: PhosphorIconsRegular.palette,
     iconColor: Colors.purple,
     title: 'Apparence',
     description: 'Thème, taille texte',
     group: SettingsGroup.general,
     route: '/settings/appearance',
   ),
+  SettingsSection(
+    icon: PhosphorIconsRegular.bell,
+    iconColor: Colors.amber,
+    title: 'Notifications',
+    description: 'Types d\'alertes et fuseau horaire',
+    group: SettingsGroup.general,
+    route: '/settings/notifications',
+  ),
   // Gestion
   SettingsSection(
-    icon: Icons.account_balance,
+    icon: PhosphorIconsRegular.bank,
     iconColor: Colors.teal,
     title: 'Comptes',
     description: 'Gérer les comptes',
@@ -65,7 +74,7 @@ const settingsSections = <SettingsSection>[
     route: '/settings/accounts',
   ),
   SettingsSection(
-    icon: Icons.label,
+    icon: PhosphorIconsRegular.tag,
     iconColor: Colors.orange,
     title: 'Catégories',
     description: 'Gérer les catégories',
@@ -73,7 +82,15 @@ const settingsSections = <SettingsSection>[
     route: '/settings/categories',
   ),
   SettingsSection(
-    icon: Icons.storage,
+    icon: PhosphorIconsRegular.currencyCircleDollar,
+    iconColor: Colors.amber,
+    title: 'Devises & Taux',
+    description: 'Devises et taux de conversion',
+    group: SettingsGroup.management,
+    route: '/settings/currencies',
+  ),
+  SettingsSection(
+    icon: PhosphorIconsRegular.database,
     iconColor: Colors.indigo,
     title: 'Données',
     description: 'Source locale / serveur',
@@ -82,7 +99,7 @@ const settingsSections = <SettingsSection>[
   ),
   // Autre
   SettingsSection(
-    icon: Icons.lock,
+    icon: PhosphorIconsRegular.lock,
     iconColor: Colors.red,
     title: 'Sécurité',
     description: 'Verrouillage, biométrie',
@@ -90,7 +107,7 @@ const settingsSections = <SettingsSection>[
     isPlaceholder: true,
   ),
   SettingsSection(
-    icon: Icons.info,
+    icon: PhosphorIconsRegular.info,
     iconColor: Colors.grey,
     title: 'À propos',
     description: 'Version, licences',

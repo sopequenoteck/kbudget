@@ -6,15 +6,23 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
+import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { CurrencyService } from '../../../../core/services/currency';
+import { DebtService } from '../../../../core/services/debt';
+import { ModalService } from '../../../../core/services/modal.service';
+import { AccountService } from '../../../../core/services/account';
+import { Account } from '../../../../core/models/account.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
+import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-debt-form',
@@ -26,16 +34,33 @@ import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model'
 export class DebtForm {
   private readonly fb = inject(FormBuilder);
   private readonly currencyService = inject(CurrencyService);
+  private readonly debtService = inject(DebtService);
+  private readonly modalService = inject(ModalService);
+  private readonly accountService = inject(AccountService);
 
-  readonly debt = input<Debt | null>(null);
+  readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
-  readonly saved = output<DebtRequest>();
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
-  readonly deleted = output<string>();
 
   readonly isEditMode = computed(() => this.debt() !== null);
+  readonly submitting = signal(false);
+  readonly errorMessage = signal('');
 
   readonly currencyItems = this.currencyService.currencyItems;
+
+  private readonly accounts = signal<Account[]>([]);
+
+  readonly accountItems = computed<SelectPickerItem[]>(() =>
+    this.accounts().map((a) => ({
+      id: a.id,
+      label: a.nom,
+      icon: a.icone,
+      secondaryText: null,
+      color: a.couleur,
+      iconUrl: a.bankLogoUrl ?? a.bankCustomLogo ?? null,
+    })),
+  );
 
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
@@ -44,12 +69,24 @@ export class DebtForm {
     rembourse: [false],
     categoryId: [''],
     currency: [''],
+    accountId: [''],
+    includeInBalance: [false],
+    reminderDate: [''],
+    reminderTime: [''],
   });
 
   readonly selectedCurrency = computed(() => this.form.get('currency')?.value || 'EUR');
 
+  readonly hasAccount = computed(() => !!this.form.get('accountId')?.value);
+
+  readonly hasReminderDate = computed(() => !!this.form.get('reminderDate')?.value);
+
   constructor() {
     this.currencyService.loadIfEmpty();
+
+    firstValueFrom(this.accountService.getAll()).then((accounts) => {
+      this.accounts.set(accounts.filter((a) => a.actif));
+    });
 
     effect(() => {
       const d = this.debt();
@@ -61,16 +98,29 @@ export class DebtForm {
           rembourse: d.rembourse,
           categoryId: d.category?.id ?? '',
           currency: d.currency || '',
+          accountId: d.account?.id ?? '',
+          includeInBalance: d.includeInBalance,
+          reminderDate: d.reminderDate ?? '',
+          reminderTime: d.reminderTime ?? '',
         });
+      }
+    });
+
+    this.form.get('accountId')?.valueChanges.subscribe((accountId) => {
+      if (accountId) {
+        const account = this.accounts().find((a) => a.id === accountId);
+        if (account) {
+          this.form.patchValue({ currency: account.currency, includeInBalance: true });
+        }
       }
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  async onSubmit(): Promise<void> {
+    if (!validateForm(this.form)) return;
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
     const request: DebtRequest = {
@@ -81,21 +131,44 @@ export class DebtForm {
       rembourse: raw.rembourse,
       categoryId: raw.categoryId || undefined,
       currency: raw.currency || undefined,
+      accountId: raw.accountId || null,
+      includeInBalance: raw.includeInBalance,
+      reminderDate: raw.reminderDate || null,
+      reminderTime: raw.reminderDate ? (raw.reminderTime || '09:00') : null,
     };
 
-    this.saved.emit(request);
+    try {
+      const d = this.debt();
+      if (d) {
+        await firstValueFrom(this.debtService.update(d.id, request));
+      } else {
+        await firstValueFrom(this.debtService.create(request));
+      }
+      this.modalService.closeModal();
+      this.saved.emit();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  async onDelete(): Promise<void> {
+    const d = this.debt();
+    if (!d) return;
+    try {
+      await firstValueFrom(this.debtService.delete(d.id));
+      this.modalService.closeModal();
+    } catch (err: unknown) {
+      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    }
   }
 
   onCancel(): void {
-    this.cancelled.emit();
-  }
-
-  onDelete(): void {
-    this.deleted.emit(this.debt()!.id);
+    this.modalService.closeModal();
   }
 
   isInvalid(controlName: string): boolean {
-    const control = this.form.get(controlName);
-    return !!control && control.touched && control.invalid;
+    return isFieldInvalid(this.form, controlName);
   }
 }

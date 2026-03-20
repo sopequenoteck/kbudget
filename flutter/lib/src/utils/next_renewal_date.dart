@@ -10,6 +10,8 @@ DateTime nextRenewalDate(
 
   while (!nextDate.isAfter(now)) {
     nextDate = switch (frequence) {
+      Frequency.hebdomadaire =>
+        nextDate.add(const Duration(days: 7)),
       Frequency.mensuel =>
         DateTime(nextDate.year, nextDate.month + 1, nextDate.day),
       Frequency.annuel =>

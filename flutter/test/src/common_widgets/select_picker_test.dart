@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 Future<void> pumpSelectPicker(
   WidgetTester tester,
@@ -243,7 +244,10 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsOneWidget,
+        );
       },
     );
 
@@ -329,8 +333,14 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.close), findsOneWidget);
-        expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+        expect(
+          find.byIcon(PhosphorIconsBold.x),
+          findsOneWidget,
+        );
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsNothing,
+        );
       },
     );
 
@@ -348,7 +358,10 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsOneWidget,
+        );
       },
     );
 
@@ -365,7 +378,10 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsOneWidget,
+        );
       },
     );
 
@@ -388,7 +404,7 @@ void main() {
         expect(find.text('Compte Courant'), findsOneWidget);
 
         // Tap clear button
-        await tester.tap(find.byIcon(Icons.close));
+        await tester.tap(find.byIcon(PhosphorIconsBold.x));
         await tester.pumpAndSettle();
 
         expect(changedId, isNull);
@@ -999,10 +1015,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Close via the X button in modal header
-        // AppModal has an IconButton with Icons.close in the header
+        // AppModal has an IconButton with PhosphorIconsBold.x in the header
         final closeButtons = find.descendant(
           of: find.byType(IconButton),
-          matching: find.byIcon(Icons.close),
+          matching: find.byIcon(PhosphorIconsBold.x),
         );
         if (closeButtons.evaluate().isNotEmpty) {
           await tester.tap(closeButtons.first);

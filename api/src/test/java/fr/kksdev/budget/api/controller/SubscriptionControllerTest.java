@@ -3,10 +3,12 @@ package fr.kksdev.budget.api.controller;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
+import fr.kksdev.budget.api.dto.response.SubscriptionPaymentResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.service.SubscriptionPaymentService;
 import fr.kksdev.budget.api.service.SubscriptionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,6 +44,9 @@ class SubscriptionControllerTest {
 
     @MockitoBean
     private SubscriptionService subscriptionService;
+
+    @MockitoBean
+    private SubscriptionPaymentService subscriptionPaymentService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -175,5 +181,76 @@ class SubscriptionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return201_when_paySubscription() throws Exception {
+        var paymentResponse = new SubscriptionPaymentResponse(
+                UUID.randomUUID(), new BigDecimal("13.99"), LocalDate.of(2026, 3, 14),
+                "Netflix", "Compte Principal");
+
+        when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class))).thenReturn(paymentResponse);
+
+        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.subscriptionName").value("Netflix"))
+                .andExpect(jsonPath("$.accountName").value("Compte Principal"))
+                .andExpect(jsonPath("$.montant").value(13.99));
+    }
+
+    @Test
+    void should_return400_when_payInactiveSubscription() throws Exception {
+        when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
+                .thenThrow(new IllegalStateException("L'abonnement est inactif"));
+
+        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return404_when_payNonexistentSubscription() throws Exception {
+        when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
+                .thenThrow(new EntityNotFoundException("Abonnement non trouvé"));
+
+        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Abonnement non trouvé"));
+    }
+
+    @Test
+    void should_return200_when_getPayments() throws Exception {
+        var paymentResponse = new SubscriptionPaymentResponse(
+                UUID.randomUUID(), new BigDecimal("13.99"), LocalDate.of(2026, 3, 14),
+                "Netflix", "Compte Principal");
+
+        when(subscriptionPaymentService.getPayments(eq(subscriptionId), any(UUID.class)))
+                .thenReturn(List.of(paymentResponse));
+
+        mockMvc.perform(get("/subscriptions/{id}/payments", subscriptionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].subscriptionName").value("Netflix"))
+                .andExpect(jsonPath("$[0].montant").value(13.99));
+    }
+
+    @Test
+    void should_return200_when_getTotalPaid() throws Exception {
+        var totalResponse = Map.<String, Object>of(
+                "subscriptionId", subscriptionId,
+                "subscriptionName", "Netflix",
+                "totalPaid", new BigDecimal("27.98"),
+                "paymentCount", 2L);
+
+        when(subscriptionPaymentService.getTotalPaid(eq(subscriptionId), any(UUID.class)))
+                .thenReturn(totalResponse);
+
+        mockMvc.perform(get("/subscriptions/{id}/payments/total", subscriptionId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscriptionName").value("Netflix"))
+                .andExpect(jsonPath("$.paymentCount").value(2));
     }
 }

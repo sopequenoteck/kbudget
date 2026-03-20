@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 enum Feature {
   @JsonValue('SUBSCRIPTIONS')
@@ -7,35 +7,42 @@ enum Feature {
   @JsonValue('DEBTS')
   debts,
   @JsonValue('SHOP')
-  shop;
+  shop,
+  @JsonValue('BUDGETS')
+  budgets;
 
   String get label => switch (this) {
     Feature.subscriptions => 'Abonnements',
     Feature.debts => 'Dettes',
     Feature.shop => 'Boutique',
+    Feature.budgets => 'Budgets',
   };
 
-  IconData get icon => switch (this) {
-    Feature.subscriptions => Icons.autorenew,
-    Feature.debts => Icons.handshake,
-    Feature.shop => Icons.storefront,
+  PhosphorIconData get icon => switch (this) {
+    Feature.subscriptions => PhosphorIconsFill.arrowsClockwise,
+    Feature.debts => PhosphorIconsFill.handshake,
+    Feature.shop => PhosphorIconsFill.storefront,
+    Feature.budgets => PhosphorIconsFill.chartPie,
   };
 
-  IconData get outlinedIcon => switch (this) {
-    Feature.subscriptions => Icons.autorenew_outlined,
-    Feature.debts => Icons.handshake_outlined,
-    Feature.shop => Icons.storefront_outlined,
+  PhosphorIconData get outlinedIcon => switch (this) {
+    Feature.subscriptions => PhosphorIconsRegular.arrowsClockwise,
+    Feature.debts => PhosphorIconsRegular.handshake,
+    Feature.shop => PhosphorIconsRegular.storefront,
+    Feature.budgets => PhosphorIconsRegular.chartPie,
   };
 
   String get description => switch (this) {
     Feature.subscriptions => 'Gérer vos abonnements récurrents',
     Feature.debts => 'Suivre vos prêts et emprunts',
     Feature.shop => 'Gérer vos ventes de produits',
+    Feature.budgets => 'Suivre vos budgets par catégorie',
   };
 
   bool get defaultEnabled => switch (this) {
     Feature.subscriptions => true,
     Feature.debts => true,
     Feature.shop => false,
+    Feature.budgets => false,
   };
 }

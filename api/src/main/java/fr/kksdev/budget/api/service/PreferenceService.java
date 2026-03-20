@@ -2,7 +2,9 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.UserPreferenceRequest;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
+import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
@@ -10,9 +12,12 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,8 @@ public class PreferenceService {
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final ExchangeRateService exchangeRateService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public UserPreferenceResponse getPreferences(UUID userId) {
         UserPreference preference = getOrCreate(userId);
@@ -58,6 +65,35 @@ public class PreferenceService {
         if (request.includeShopInBalance() != null) {
             preference.setIncludeShopInBalance(request.includeShopInBalance());
         }
+        if (request.currencies() != null) {
+            validateCurrencies(request.currencies());
+            Currency oldPrimary = preference.getCurrencies().isEmpty() ? null : preference.getCurrencies().get(0);
+            preference.setCurrencies(new ArrayList<>(request.currencies()));
+            Currency newPrimary = request.currencies().get(0);
+            if (oldPrimary != null && oldPrimary != newPrimary) {
+                exchangeRateService.rebaseRates(userId, oldPrimary, newPrimary);
+                log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
+                messagingTemplate.convertAndSendToUser(
+                        userId.toString(),
+                        "/queue/exchange-rates",
+                        Map.of("type", "EXCHANGE_RATES_UPDATED")
+                );
+            }
+        }
+        if (request.enabledNotificationTypes() != null) {
+            preference.setEnabledNotificationTypes(request.enabledNotificationTypes());
+        }
+        if (request.timezone() != null) {
+            try {
+                ZoneId.of(request.timezone());
+            } catch (DateTimeException e) {
+                throw new IllegalArgumentException("Timezone invalide: " + request.timezone());
+            }
+            preference.setTimezone(request.timezone());
+        }
+        if (request.textScale() != null) {
+            preference.setTextScale(request.textScale());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -69,7 +105,23 @@ public class PreferenceService {
         return preference.getEnabledFeatures().contains(feature);
     }
 
-    @Transactional
+    /**
+     * Vérifie si un type de notification est activé pour l'utilisateur.
+     * Par défaut (liste null ou vide), tous les types sont considérés activés (opt-out).
+     */
+    public boolean isNotificationTypeEnabled(UUID userId, NotificationType type) {
+        UserPreference preference = getOrCreate(userId);
+        if (preference.getEnabledNotificationTypes() == null || preference.getEnabledNotificationTypes().isEmpty()) {
+            return true;
+        }
+        return preference.getEnabledNotificationTypes().contains(type);
+    }
+
+    public String getUserTimezone(UUID userId) {
+        UserPreference preference = getOrCreate(userId);
+        return preference.getTimezone() != null ? preference.getTimezone() : "Europe/Paris";
+    }
+
     private UserPreference getOrCreate(UUID userId) {
         return userPreferenceRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -78,6 +130,7 @@ public class PreferenceService {
                             .user(userRepository.getReferenceById(userId))
                             .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
                             .navOrder(new ArrayList<>(DEFAULT_FEATURES))
+                            .currencies(new ArrayList<>(List.of(Currency.EUR)))
                             .includeShopInBalance(false)
                             .build();
                     return userPreferenceRepository.save(newPreference);
@@ -121,12 +174,28 @@ public class PreferenceService {
         return getOrCreate(userId);
     }
 
+    private void validateCurrencies(List<Currency> currencies) {
+        if (currencies.isEmpty()) {
+            throw new IllegalArgumentException("Au moins une devise requise");
+        }
+        Set<Currency> seen = new HashSet<>();
+        for (Currency currency : currencies) {
+            if (!seen.add(currency)) {
+                throw new IllegalArgumentException("La liste de devises ne doit pas contenir de doublons");
+            }
+        }
+    }
+
     private UserPreferenceResponse toResponse(UserPreference preference) {
         return new UserPreferenceResponse(
                 preference.getEnabledFeatures(),
                 preference.getNavOrder(),
                 preference.getShopAccountId(),
-                preference.getIncludeShopInBalance()
+                preference.getIncludeShopInBalance(),
+                preference.getCurrencies(),
+                preference.getEnabledNotificationTypes(),
+                preference.getTimezone(),
+                preference.getTextScale()
         );
     }
 }

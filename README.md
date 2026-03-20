@@ -129,6 +129,19 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | GET | `/api/subscriptions/{id}` | Detail |
 | PUT | `/api/subscriptions/{id}` | Modifier |
 | DELETE | `/api/subscriptions/{id}` | Supprimer |
+| POST | `/api/subscriptions/{id}/pay` | Payer un abonnement (cree une transaction) |
+| GET | `/api/subscriptions/{id}/payments` | Historique des paiements |
+| GET | `/api/subscriptions/{id}/payments/total` | Cumul des paiements |
+
+### Transactions recurrentes
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| POST | `/api/transactions/recurring` | Creer une transaction recurrente |
+| GET | `/api/transactions/recurring` | Lister les recurrences actives |
+| POST | `/api/transactions/recurring/{id}/validate` | Valider une occurrence (cree une transaction) |
+| PATCH | `/api/transactions/recurring/{id}/skip` | Passer une occurrence |
+| PATCH | `/api/transactions/recurring/{id}/deactivate` | Desactiver une recurrence |
 
 ### Dettes
 
@@ -139,6 +152,9 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | GET | `/api/debts/{id}` | Detail |
 | PUT | `/api/debts/{id}` | Modifier |
 | DELETE | `/api/debts/{id}` | Supprimer |
+| POST | `/api/debts/{id}/repay` | Rembourser (partiel ou total) |
+| GET | `/api/debts/{id}/payments` | Historique des remboursements |
+| POST | `/api/debts/{id}/snooze` | Reporter le rappel |
 
 ### Comptes
 
@@ -151,6 +167,13 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | DELETE | `/api/accounts/{id}` | Supprimer |
 | POST | `/api/accounts/transfer` | Virement entre deux comptes |
 | PUT | `/api/accounts/{id}/default` | Definir comme compte par defaut |
+| GET | `/api/accounts/total-balance` | Solde total (comptes + dettes) par devise |
+
+### Banques
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/banks` | Lister les 29 banques supportees (public, sans auth) |
 
 ### Categories
 
@@ -167,11 +190,11 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 | Methode | Route | Description |
 |---------|-------|-------------|
 | POST | `/api/products` | Creer un produit |
-| GET | `/api/products` | Lister les produits actifs |
+| GET | `/api/products` | Lister les produits (`?includeInactive=true` pour inclure les inactifs) |
 | GET | `/api/products/{id}` | Detail d'un produit |
 | PUT | `/api/products/{id}` | Modifier un produit |
 | DELETE | `/api/products/{id}` | Supprimer un produit |
-| POST | `/api/products/{id}/sell` | Vendre 1 unité (stock -1, transaction RECETTE) |
+| POST | `/api/products/{id}/sell` | Vendre N unites (body `{"quantity": N}` optionnel, defaut 1) |
 | POST | `/api/products/{id}/restock` | Réapprovisionner (stock +qty, transaction DEPENSE) |
 | GET | `/api/products/{id}/sales` | Historique des transactions liées au produit |
 
@@ -181,6 +204,14 @@ Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <toke
 |---------|-------|-------------|
 | GET | `/api/users/me/preferences` | Consulter les preferences (features activees + ordre nav) |
 | PUT | `/api/users/me/preferences` | Mettre a jour les preferences |
+
+### Taux de conversion
+
+| Methode | Route | Description |
+|---------|-------|-------------|
+| GET | `/api/exchange-rates` | Lister les taux de l'utilisateur |
+| PUT | `/api/exchange-rates` | Creer ou mettre a jour un taux (upsert) |
+| DELETE | `/api/exchange-rates/{base}/{target}` | Supprimer un taux |
 
 Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
 
@@ -202,15 +233,15 @@ budget/
 
 ```
 api/src/main/java/fr/kksdev/budget/api/
-├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler
-├── controller/    # REST endpoints (Auth, Transaction, Subscription, Debt, Category, Account, Product, Preference)
+├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, UserPreference)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType
 ```
 
 ### Frontend (app/)
@@ -230,7 +261,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 ## Securite
 
 - JWT stateless, access token valide 15 minutes, refresh token valide 30 jours
-- Toutes les routes protegees sauf `/api/auth/**` et `/api/actuator/health`
+- Toutes les routes protegees sauf `/api/auth/**`, `/api/actuator/health`, `/api/banks` et `/api/bank-logos/**`
 - Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
 - Mots de passe hashes en BCrypt
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
@@ -249,7 +280,7 @@ Architecture en couches : Controller -> Service -> Repository. Les entites JPA n
 cd api && mvn test
 ```
 
-211 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
+442 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
 
 ## Documentation complementaire
 

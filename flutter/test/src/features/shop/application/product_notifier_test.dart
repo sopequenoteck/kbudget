@@ -33,7 +33,7 @@ void main() {
     mockRepo = MockProductRepository();
     container = ProviderContainer(
       overrides: [
-        productRepositoryProvider.overrideWithValue(mockRepo),
+        productRepositoryProvider.overrideWith((_) async => mockRepo),
       ],
     );
   });

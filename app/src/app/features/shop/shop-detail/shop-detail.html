@@ -17,12 +17,12 @@
 } @else if (product(); as p) {
   <header class="detail-header">
     <div class="detail-header__top">
-      <button class="btn-icon" (click)="onBack()" aria-label="Retour">←</button>
+      <button class="btn-icon" (click)="onBack()" aria-label="Retour"><ng-icon name="phosphorArrowLeft" size="24" /></button>
       <h1>{{ p.nom }}</h1>
       @if (!p.actif) {
         <span class="badge-inactive">Inactif</span>
       }
-      <button class="btn-icon" (click)="onEdit()" aria-label="Modifier">✏️</button>
+      <button class="btn-icon" (click)="onEdit()" aria-label="Modifier"><ng-icon name="phosphorPencilSimple" size="24" /></button>
     </div>
 
     @if (isWebUrl(p.imageUrl)) {
@@ -81,10 +81,10 @@
 
   <section class="detail-actions">
     <button class="btn-sell" (click)="onSell()" [disabled]="p.stock === 0 || !p.actif">
-      <span class="btn-sell__icon">🏷️</span> Vendre
+      <span class="btn-sell__icon"><ng-icon name="phosphorTag" size="20" /></span> Vendre
     </button>
     <button class="btn-restock" (click)="showRestockDialog.set(true)" [disabled]="!p.actif">
-      <span class="btn-restock__icon">🛒</span> Ajouter du stock
+      <span class="btn-restock__icon"><ng-icon name="phosphorShoppingCart" size="20" /></span> Ajouter du stock
     </button>
   </section>
 
@@ -118,7 +118,11 @@
               [class.history-icon--income]="tx.type === 'RECETTE'"
               [class.history-icon--expense]="tx.type === 'DEPENSE'"
             >
-              {{ tx.type === 'RECETTE' ? '↗' : '↘' }}
+              @if (tx.type === 'RECETTE') {
+                <ng-icon name="phosphorTrendUp" size="20" />
+              } @else {
+                <ng-icon name="phosphorTrendDown" size="20" />
+              }
             </div>
             <div class="history-info">
               <span class="history-label">{{ tx.libelle }}</span>

@@ -13,6 +13,10 @@
   &--person-amount {
     grid-template-columns: 7fr 3fr;
   }
+
+  &--reminder {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 // -- Montant avec suffixe devise --
@@ -36,7 +40,14 @@
   }
 }
 
-// -- Checkbox rembourse --
+// -- Checkboxes groupees --
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+// -- Checkbox individuelle --
 .checkbox-field {
   display: flex;
   align-items: center;
@@ -61,7 +72,8 @@
 // -- Responsive petit ecran --
 @media (max-width: 400px) {
   .form-row,
-  .form-row--person-amount {
+  .form-row--person-amount,
+  .form-row--reminder {
     grid-template-columns: 1fr;
   }
 }

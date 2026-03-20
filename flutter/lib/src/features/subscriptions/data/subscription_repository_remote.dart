@@ -1,8 +1,11 @@
 import 'package:k_budget/src/data/remote/data_sources/subscription_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/subscription_dtos.dart';
+import 'package:k_budget/src/data/remote/dtos/subscription_payment_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
+import 'package:k_budget/src/domain/models/subscription_payment.dart';
+import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 
 class SubscriptionRepositoryRemote implements SubscriptionRepository {
@@ -43,6 +46,24 @@ class SubscriptionRepositoryRemote implements SubscriptionRepository {
 
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
+
+  @override
+  Future<SubscriptionPayment> pay(String id) async {
+    final response = await _dataSource.pay(id);
+    return response.toDomain();
+  }
+
+  @override
+  Future<List<SubscriptionPayment>> getPayments(String id) async {
+    final responses = await _dataSource.getPayments(id);
+    return responses.map((r) => r.toDomain()).toList();
+  }
+
+  @override
+  Future<SubscriptionTotalPaid> getTotalPaid(String id) async {
+    final response = await _dataSource.getTotalPaid(id);
+    return response.toDomain();
+  }
 
   Subscription _toDomain(SubscriptionResponse r) => Subscription(
         id: r.id,

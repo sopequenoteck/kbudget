@@ -1,0 +1,19 @@
+.account-bank-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.account-bank-icon__img {
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.account-bank-icon__emoji,
+.account-bank-icon__emoji-fallback {
+  line-height: 1;
+  text-align: center;
+}

@@ -41,7 +41,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/error",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/actuator/health").permitAll()
+                                "/actuator/health", "/banks", "/bank-logos/**").permitAll()
+                        // WebSocket: auth déléguée au StompAuthInterceptor (CONNECT frame)
+                        // car le handshake HTTP ne supporte pas le header Authorization
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

@@ -12,7 +12,9 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/decimal_input_formatter.dart';
+import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ProductForm extends ConsumerStatefulWidget {
   const ProductForm({
@@ -38,6 +40,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
   late final TextEditingController _stockController;
 
   String? _localImagePath;
+  String? _imageDataUri; // base64 data URI pour l'API
   bool _showErrors = false;
   bool _isSubmitting = false;
   bool _initialized = false;
@@ -76,9 +79,14 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       _prixVenteController.text = product.prixVente.toString();
       _stockController.text = product.stock.toString();
       if (product.imageUrl != null) {
-        final file = File(product.imageUrl!);
-        if (file.existsSync()) {
-          _localImagePath = product.imageUrl;
+        if (ImageUtils.isBase64DataUri(product.imageUrl)) {
+          _imageDataUri = product.imageUrl;
+        } else {
+          final file = File(product.imageUrl!);
+          if (file.existsSync()) {
+            _localImagePath = product.imageUrl;
+            _imageDataUri = ImageUtils.fileToBase64DataUri(file);
+          }
         }
       }
     }
@@ -153,7 +161,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
           ? null
           : _descriptionController.text.trim(),
       icone: widget.product?.icone,
-      imageUrl: _localImagePath,
+      imageUrl: _imageDataUri,
       prixAchat: double.parse(_prixAchatController.text.trim()),
       prixVente: double.parse(_prixVenteController.text.trim()),
       stock: _isEditMode
@@ -182,7 +190,7 @@ class _ProductFormState extends ConsumerState<ProductForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const PhosphorIcon(PhosphorIconsRegular.camera, size: 20),
               title: const Text('Caméra'),
               onTap: () {
                 Navigator.pop(context);
@@ -190,16 +198,16 @@ class _ProductFormState extends ConsumerState<ProductForm> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const PhosphorIcon(PhosphorIconsRegular.image, size: 20),
               title: const Text('Galerie'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
               },
             ),
-            if (_localImagePath != null)
+            if (_localImagePath != null || _imageDataUri != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline),
+                leading: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 title: const Text('Supprimer'),
                 onTap: () {
                   Navigator.pop(context);
@@ -234,7 +242,8 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}$ext';
       final destPath = '${productsDir.path}/$fileName';
 
-      await File(picked.path).copy(destPath);
+      final destFile = await File(picked.path).copy(destPath);
+      _imageDataUri = ImageUtils.fileToBase64DataUri(destFile);
 
       // Delete old file if replacing
       if (_localImagePath != null) {
@@ -256,8 +265,11 @@ class _ProductFormState extends ConsumerState<ProductForm> {
       if (file.existsSync()) {
         file.deleteSync();
       }
-      setState(() => _localImagePath = null);
     }
+    setState(() {
+      _localImagePath = null;
+      _imageDataUri = null;
+    });
   }
 
   // --- Widgets ---
@@ -331,10 +343,20 @@ class _ProductFormState extends ConsumerState<ProductForm> {
                         fit: BoxFit.cover,
                       ),
                     )
-                  : Icon(
-                      Icons.add_a_photo,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                  : _imageDataUri != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          child: Image.memory(
+                            ImageUtils.base64DataUriToBytes(_imageDataUri!),
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : PhosphorIcon(
+                          PhosphorIconsRegular.camera,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
             ),
           ),
         ),

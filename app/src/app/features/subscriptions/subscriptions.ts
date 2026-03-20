@@ -7,18 +7,21 @@ import {
   isDevMode,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { SubscriptionService } from '../../core/services/subscription';
+import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
 import { Subscription, Frequency } from '../../core/models/subscription.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
+import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 
 type StatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
 @Component({
   selector: 'app-subscriptions',
-  imports: [ListItem, AmountPipe],
+  imports: [ListItem, AmountPipe, ConvertAmountPipe],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +29,8 @@ type StatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 export class Subscriptions {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly modalService = inject(ModalService);
+  private readonly router = inject(Router);
+  readonly preferenceService = inject(PreferenceService);
 
   readonly statusFilter = signal<StatusFilter>('ALL');
   readonly loading = signal(true);
@@ -115,6 +120,6 @@ export class Subscriptions {
   }
 
   onSubscriptionPressed(subscription: Subscription): void {
-    this.modalService.openModal('subscription', subscription);
+    this.router.navigate(['/subscriptions', subscription.id]);
   }
 }

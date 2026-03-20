@@ -1,0 +1,41 @@
+<div class="dialog-overlay" (click)="onCancel()" role="presentation"></div>
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+<div
+  class="dialog-panel"
+  (click)="$event.stopPropagation()"
+  role="dialog"
+  aria-label="Reporter le rappel"
+>
+  <h3>Reporter le rappel</h3>
+
+  @if (errorMessage()) {
+    <div class="form-error-banner">{{ errorMessage() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-form-field
+      label="Date du rappel"
+      fieldId="reminderDate"
+      [showError]="isInvalid('reminderDate')"
+      [errorMessage]="getDateError()"
+    >
+      <input id="reminderDate" type="date" formControlName="reminderDate" />
+    </app-form-field>
+
+    <app-form-field
+      label="Heure du rappel"
+      fieldId="reminderTime"
+      [showError]="isInvalid('reminderTime')"
+      [errorMessage]="'L\'heure est requise'"
+    >
+      <input id="reminderTime" type="time" formControlName="reminderTime" />
+    </app-form-field>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="submitting() || form.invalid">
+        {{ submitting() ? 'Report...' : 'Reporter' }}
+      </button>
+    </div>
+  </form>
+</div>

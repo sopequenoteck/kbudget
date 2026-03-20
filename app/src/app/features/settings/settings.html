@@ -3,7 +3,7 @@
 <nav class="settings-grid">
   @for (section of sections; track section.id) {
     <a class="settings-card" [routerLink]="section.route">
-      <span class="settings-card__icon">{{ section.icon }}</span>
+      <span class="settings-card__icon"><ng-icon [name]="section.icon" size="24" /></span>
       <div class="settings-card__content">
         <span class="settings-card__title">{{ section.title }}</span>
         <span class="settings-card__description">{{ section.description }}</span>

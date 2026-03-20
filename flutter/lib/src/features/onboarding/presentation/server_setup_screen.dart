@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ServerSetupScreen extends ConsumerStatefulWidget {
   const ServerSetupScreen({super.key});
@@ -46,7 +47,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                 decoration: const InputDecoration(
                   labelText: 'URL du serveur',
                   hintText: 'https://budget.example.com/api',
-                  prefixIcon: Icon(Icons.link),
+                  prefixIcon: PhosphorIcon(PhosphorIconsRegular.link, size: 20),
                 ),
                 keyboardType: TextInputType.url,
                 autocorrect: false,
@@ -71,8 +72,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.check_circle,
+                      PhosphorIcon(
+                        PhosphorIconsFill.checkCircle,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: AppSpacing.space2),
@@ -92,9 +93,10 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error_outline,
+                      PhosphorIcon(
+                        PhosphorIconsRegular.warning,
                         color: theme.colorScheme.error,
+                        size: 20,
                       ),
                       const SizedBox(width: AppSpacing.space2),
                       Expanded(
@@ -117,7 +119,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                         width: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.wifi_find),
+                    : const PhosphorIcon(PhosphorIconsRegular.wifiHigh, size: 20),
                 label: Text(
                   state.isCheckingServer
                       ? 'Connexion en cours...'

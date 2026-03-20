@@ -23,7 +23,9 @@
             [style.background-color]="selectedItem()!.color"
           ></span>
         }
-        @if (selectedItem()!.icon) {
+        @if (selectedItem()!.iconUrl) {
+          <img class="select-picker__icon-img" [src]="selectedItem()!.iconUrl" [alt]="selectedItem()!.label" width="20" height="20" />
+        } @else if (selectedItem()!.icon) {
           <span class="select-picker__icon">{{ selectedItem()!.icon }}</span>
         }
         <span class="select-picker__label">{{ selectedItem()!.label }}</span>
@@ -82,7 +84,9 @@
             @if (item.color) {
               <span class="select-picker__item-color" [style.background-color]="item.color"></span>
             }
-            @if (item.icon) {
+            @if (item.iconUrl) {
+              <img class="select-picker__item-icon-img" [src]="item.iconUrl" [alt]="item.label" width="20" height="20" />
+            } @else if (item.icon) {
               <span class="select-picker__item-icon">{{ item.icon }}</span>
             }
             <span class="select-picker__item-label">{{ item.label }}</span>
@@ -158,7 +162,9 @@
                   [style.background-color]="item.color"
                 ></span>
               }
-              @if (item.icon) {
+              @if (item.iconUrl) {
+                <img class="select-picker__item-icon-img" [src]="item.iconUrl" [alt]="item.label" width="20" height="20" />
+              } @else if (item.icon) {
                 <span class="select-picker__item-icon">{{ item.icon }}</span>
               }
               <span class="select-picker__item-label">{{ item.label }}</span>

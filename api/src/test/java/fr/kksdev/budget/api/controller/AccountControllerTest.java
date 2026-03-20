@@ -4,8 +4,11 @@ import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
 import fr.kksdev.budget.api.dto.response.AccountResponse;
+import fr.kksdev.budget.api.dto.response.CurrencyBalance;
+import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -27,6 +30,7 @@ import java.util.UUID;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -68,7 +72,8 @@ class AccountControllerTest {
         return new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
     }
 
     @Test
@@ -87,7 +92,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Livret A", AccountType.EPARGNE,
                 new BigDecimal("5000.00"), new BigDecimal("5000.00"),
-                "🐷", "#22c55e", false, true, "EUR", false);
+                "🐷", "#22c55e", false, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
@@ -130,7 +136,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Nouveau Nom", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.updateAccount(eq(accountId), any(AccountRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -173,7 +180,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Livret A", AccountType.EPARGNE,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🐷", "#22c55e", true, true, "EUR", false);
+                "🐷", "#22c55e", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.setDefault(accountId, userId)).thenReturn(response);
 
@@ -284,7 +292,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("750.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
                 .thenReturn(response);
@@ -304,7 +313,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("300.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
                 .thenReturn(response);
@@ -324,7 +334,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("500.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
                 .thenReturn(response);
@@ -374,7 +385,8 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("-100.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false);
+                "🏦", "#3b82f6", true, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
                 .thenReturn(response);
@@ -387,5 +399,227 @@ class AccountControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.solde").value(-100.00));
+    }
+
+    // --- T027 — Total Balance ---
+
+    @Test
+    void should_return_200_when_get_total_balance() throws Exception {
+        var response = new TotalBalanceResponse(List.of(
+                new CurrencyBalance(Currency.EUR, new BigDecimal("1500.00"))));
+
+        when(accountService.getTotalBalance(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/total-balance")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balances[0].currency").value("EUR"))
+                .andExpect(jsonPath("$.balances[0].amount").value(1500.00));
+    }
+
+    @Test
+    void should_return_200_when_get_total_balance_multi_currency() throws Exception {
+        var response = new TotalBalanceResponse(List.of(
+                new CurrencyBalance(Currency.EUR, new BigDecimal("1500.00")),
+                new CurrencyBalance(Currency.USD, new BigDecimal("500.00"))));
+
+        when(accountService.getTotalBalance(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/total-balance")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balances").isArray())
+                .andExpect(jsonPath("$.balances.length()").value(2));
+    }
+
+    // --- Bank info tests (T012) ---
+
+    @Test
+    void should_createAccountWithBankCode_when_validBankCode() throws Exception {
+        var response = new AccountResponse(
+                UUID.randomUUID(), "Compte SG", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#e2001a", false, true, "EUR", false,
+                "SG", "Société Générale", "FR", "#e2001a", "/api/bank-logos/sg.svg", null, null);
+
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Compte SG",
+                                    "type": "COURANT",
+                                    "bankCode": "SG"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bankCode").value("SG"))
+                .andExpect(jsonPath("$.bankName").value("Société Générale"));
+    }
+
+    @Test
+    void should_createAccountWithDefaultBank_when_noBankCode() throws Exception {
+        var response = new AccountResponse(
+                UUID.randomUUID(), "Compte Sans Banque", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#3b82f6", false, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
+
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Compte Sans Banque",
+                                    "type": "COURANT"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bankCode").value("OTHER"));
+    }
+
+    @Test
+    void should_return400_when_invalidBankCode() throws Exception {
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
+                .thenThrow(new IllegalArgumentException("Invalid bank code: INEXISTANT"));
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Compte Invalide",
+                                    "type": "COURANT",
+                                    "bankCode": "INEXISTANT"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid bank code: INEXISTANT"));
+    }
+
+    @Test
+    void should_returnBankInfo_when_getAccount() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte BNP", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#00915a", true, true, "EUR", false,
+                "BNP", "BNP Paribas", "FR", "#00915a", "/api/bank-logos/bnp.svg", null, null);
+
+        when(accountService.getAccountById(accountId, userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/{id}", accountId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bankCode").value("BNP"))
+                .andExpect(jsonPath("$.bankName").value("BNP Paribas"))
+                .andExpect(jsonPath("$.bankCountry").value("FR"))
+                .andExpect(jsonPath("$.bankBrandColor").value("#00915a"))
+                .andExpect(jsonPath("$.bankLogoUrl").value("/api/bank-logos/bnp.svg"));
+    }
+
+    // --- US3: Custom bank (OTHER) tests (T019) ---
+
+    @Test
+    void should_createAccountWithOtherAndCustomName_when_otherBankCode() throws Exception {
+        var response = new AccountResponse(
+                UUID.randomUUID(), "Ma Banque Perso", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#6b7280", false, true, "EUR", false,
+                "OTHER", "Ma Banque", null, "#6b7280", "/api/bank-logos/other.svg",
+                "Ma Banque", null);
+
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Ma Banque Perso",
+                                    "type": "COURANT",
+                                    "bankCode": "OTHER",
+                                    "bankCustomName": "Ma Banque"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bankCode").value("OTHER"))
+                .andExpect(jsonPath("$.bankCustomName").value("Ma Banque"));
+    }
+
+    @Test
+    void should_createAccountWithOtherAndCustomLogo_when_otherBankCode() throws Exception {
+        var response = new AccountResponse(
+                UUID.randomUUID(), "Ma Banque Logo", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#6b7280", false, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg",
+                null, "data:image/png;base64,abc");
+
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Ma Banque Logo",
+                                    "type": "COURANT",
+                                    "bankCode": "OTHER",
+                                    "bankCustomLogo": "data:image/png;base64,abc"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bankCode").value("OTHER"))
+                .andExpect(jsonPath("$.bankCustomLogo").value("data:image/png;base64,abc"));
+    }
+
+    @Test
+    void should_ignoreCustomFieldsForKnownBank_when_bankCodeIsKnown() throws Exception {
+        var response = new AccountResponse(
+                UUID.randomUUID(), "Compte SG Custom", AccountType.COURANT,
+                BigDecimal.ZERO, BigDecimal.ZERO,
+                "🏦", "#e2001a", false, true, "EUR", false,
+                "SG", "Société Générale", "FR", "#e2001a", "/api/bank-logos/sg.svg", null, null);
+
+        when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/accounts")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nom": "Compte SG Custom",
+                                    "type": "COURANT",
+                                    "bankCode": "SG",
+                                    "bankCustomName": "ignored"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bankCode").value("SG"))
+                .andExpect(jsonPath("$.bankCustomName").value(nullValue()));
+    }
+
+    // --- US4: Retrocompatibility tests (T022) ---
+
+    @Test
+    void should_returnDefaultOtherBank_when_existingAccountHasNoBankCode() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Ancien Compte", AccountType.COURANT,
+                new BigDecimal("200.00"), new BigDecimal("200.00"),
+                "💰", "#22c55e", false, true, "EUR", false,
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
+
+        when(accountService.getAccountById(accountId, userId)).thenReturn(response);
+
+        mockMvc.perform(get("/accounts/{id}", accountId)
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bankCode").value("OTHER"))
+                .andExpect(jsonPath("$.icone").value("💰"))
+                .andExpect(jsonPath("$.couleur").value("#22c55e"));
     }
 }

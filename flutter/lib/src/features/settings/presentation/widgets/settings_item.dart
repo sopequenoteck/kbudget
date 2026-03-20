@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SettingsItem extends StatelessWidget {
-  final IconData icon;
+  final PhosphorIconData icon;
   final Color iconColor;
   final String title;
   final String description;
@@ -41,7 +42,7 @@ class SettingsItem extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(AppRadius.round),
               ),
-              child: Icon(icon, color: iconColor, size: 22),
+              child: PhosphorIcon(icon, color: iconColor, size: 22),
             ),
           ),
           const SizedBox(width: AppSpacing.space3),
@@ -88,8 +89,8 @@ class SettingsItem extends StatelessWidget {
               ),
             )
           else
-            Icon(
-              Icons.chevron_right,
+            PhosphorIcon(
+              PhosphorIconsRegular.caretRight,
               color: colorScheme.onSurfaceVariant,
             ),
         ],

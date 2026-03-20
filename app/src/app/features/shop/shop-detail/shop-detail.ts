@@ -11,6 +11,15 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorArrowLeft,
+  phosphorPencilSimple,
+  phosphorTag,
+  phosphorShoppingCart,
+  phosphorTrendUp,
+  phosphorTrendDown,
+} from '@ng-icons/phosphor-icons/regular';
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
 import { Product, RestockRequest } from '../../../core/models/product.model';
@@ -19,7 +28,17 @@ import { RestockDialog } from '../components/restock-dialog/restock-dialog';
 
 @Component({
   selector: 'app-shop-detail',
-  imports: [DatePipe, DecimalPipe, RestockDialog],
+  imports: [DatePipe, DecimalPipe, RestockDialog, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorArrowLeft,
+      phosphorPencilSimple,
+      phosphorTag,
+      phosphorShoppingCart,
+      phosphorTrendUp,
+      phosphorTrendDown,
+    }),
+  ],
   templateUrl: './shop-detail.html',
   styleUrl: './shop-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

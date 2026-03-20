@@ -5,6 +5,102 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-03-20
+
+### Added
+
+**Backend (api/)**
+- Preferences utilisateur et feature toggles — Flyway V15, UserPreference entity, endpoints GET/PUT /users/me/preferences (KKS-117)
+- Product CRUD — entity, controller, service, repository, Flyway V16 (KKS-118)
+- Product sales et restock — endpoints sell/restock/getSales, shop account preference (KKS-119)
+- Notification system — WebSocket/STOMP, NotificationScheduler, table notifications, preferences, Flyway V16 (KKS-072)
+- Currency management — exchange rates, rebase logic, ExchangeRate entity, Flyway V14 (KKS-156)
+- Budget categories — CRUD, overview mensuel, history avec snapshots, normalisation frequence, multi-devises, Flyway V17 (KKS-073)
+- Unbudgeted spending tracking dans budget overview et history (KKS-076)
+- Debt enhancements — repayment tracking, account association, total balance, snooze reminders, NotificationScheduler DEBT_REMINDER, Flyway V18 (KKS-077)
+- Associer une banque a un compte — BankRegistry 29 banques statiques (FR/TG/International), endpoint GET /banks, Flyway V19, AccountRequest/Response enrichis (KKS-081)
+- Transactions recurrentes — RecurringTransactionController (5 endpoints), SubscriptionPaymentService (payer/historique/cumul), Flyway V20, Transaction enrichie (+isRecurring, frequency, nextOccurrence, recurringActive, subscription FK, product FK) (KKS-085)
+- TextScale enum et sync API — Flyway V21, PreferenceService enrichi (KKS-094)
+- Propagation automatique rebase taux de change lors du changement de devise principale (KKS-095)
+
+**Frontend Angular (app/)**
+- Feature toggles — settings, DnD navOrder, sidebar dynamique, featureGuard (KKS-150)
+- Data settings — statut serveur (health check), reload avec confirmation (KKS-151)
+- Transfer form entre comptes avec validation cross-field (KKS-152)
+- Responsive bottom nav mobile < 768px (KKS-153)
+- Shop module — product CRUD, sell, restock, sales history, images base64 (KKS-154)
+- Notification system — STOMP, badge, panel, settings (KKS-072)
+- Currency dashboard — selector, conversion, settings (KKS-156)
+- Budget categories CRUD + charts ng2-charts (KKS-074)
+- Unbudgeted spending display (KKS-076)
+- Debt enhancements — detail view, repayment dialog, snooze, historique paiements, barre progression (KKS-078)
+- Associer une banque a un compte — BankSelect, AccountBankIcon, AccountForm enrichi, image.utils.ts (KKS-082)
+- Transactions recurrentes & paiements abonnements — RecurringList (validate/skip/deactivate), SubscriptionDetail (historique + total cumule), NotificationPanel etendu (KKS-086)
+- Creation et conversion de transactions recurrentes — toggle recurrente dans TransactionForm, action "Rendre recurrente" (KKS-087)
+- Finance dashboard refactor — layout, currency conversion, shell header (KKS-090)
+- Text scale setting — Petit/Normal/Grand dans Appearance (KKS-093)
+- Emoji picker — remplacement input texte par emoji-mart picker (categories, recents, recherche, theme dark/light, lazy-loading) (KKS-163)
+
+**Mobile Flutter (flutter/)**
+- CRUD Notifiers Riverpod pour 5 entites + CrudNotifier/CrudRepository base classes (KKS-115)
+- Common widgets — AppFormField, ListItem, MonthSelector, SegmentedFilter, SelectPicker, CategoryPicker, ModalService, AdaptiveScaffold, AmountFormatter, RelativeDateFormatter
+- Dashboard screen — account hero, monthly summary, mini-cards, recent transactions (KKS-042)
+- Transaction list + form avec navigation mensuelle, filtrage et i18n (KKS-103)
+- Subscription list + form avec frequence toggle, summary et renewal dates (KKS-105, KKS-106)
+- Debt list + form avec filter, summary, sections et repaid toggle (KKS-107)
+- Transfer form avec validation et FAB conditionnel (KKS-109)
+- Settings profile avec currency editing (KKS-111)
+- Settings appearance — theme, text scale (KKS-112)
+- Settings accounts management (KKS-113)
+- Settings categories management (KKS-114)
+- EmojiInput widget avec FormField integration (KKS-98)
+- Feature toggles settings (KKS-120)
+- Bottom nav config — DnD reordering, preview (KKS-121, KKS-122)
+- Shop products list avec CRUD notifier (KKS-123)
+- Product form — image picker, margin indicator (KKS-124)
+- Product detail — sell, restock, sales history (KKS-125)
+- Notification system — STOMP, local notifications, settings (KKS-072)
+- Currency dashboard — selector, conversion, settings (KKS-156)
+- Budget categories — CRUD, dashboard, charts fl_chart, local Drift + remote Dio (KKS-075)
+- Unbudgeted spending display + MonthSelector fix (KKS-076)
+- Debt enhancements — detail view, repayment bottom sheet, snooze dialog, notifications (KKS-079)
+- Associer une banque a un compte — BankSelectPicker, AccountBankIcon, 29 logos SVG, Drift migration v3 (KKS-083)
+- Transactions recurrentes & paiements abonnements — RecurringListScreen, SubscriptionDetailScreen, NotificationPanel etendu (KKS-088)
+- Refonte dashboard — PatrimoineCard (gradient amber-indigo, variation %), IncomeExpenseCards (delta mois precedent), badges devise, section Budgets, CustomScrollView (KKS-201)
+
+**Cross-plateforme**
+- Phosphor Icons migration — ~60 icones Flutter, ~20 icones Angular (KKS-162)
+- Design tokens partages — docs/design-tokens.md source de verite unique, 7 categories (KKS-126)
+- Product images sync Flutter-Angular via base64 data URI (KKS-154)
+- TextScale sync via API — localStorage cache + API source de verite (KKS-094)
+- Currency rebase propagation — WebSocket STOMP push, indicateur hasMissingRate (KKS-095)
+
+### Changed
+- Dashboard Angular refonte visuelle iOS-like — hero card gradient, glassmorphism, badges variation, barres budget animees, micro-interactions (KKS-091)
+- Bottom nav Angular refonte visuelle — pill indicator, glassmorphism dark mode, bordure subtile light mode (KKS-092)
+- Icones du dashboard teintees avec la couleur de la categorie
+- Icones systeme migrees vers Phosphor Icons (Flutter + Angular) (KKS-162)
+- Budget : agregation multi-devises corrigee — transactions converties en devise principale avant sommation, templates recurrents exclus des calculs (KKS-095)
+- ExchangeRateService.getRate() centralise la resolution taux direct/inverse, supprime la duplication BudgetService/TransactionService (KKS-095)
+- CategoryResponse.from() et AccountSummary.from() static factories remplacent les methodes privees dupliquees dans 5 services (KKS-085)
+- SubscriptionPaymentService.getTotalPaid() utilise une COUNT query au lieu de charger toutes les transactions (KKS-085)
+- AbstractEnumListConverter extrait pour reduire la duplication des converters JPA (KKS-072)
+- ConvertAmountPipe rendu pure pour meilleure performance change detection (KKS-074)
+- Currency column elargie a 10 caracteres (KKS-074)
+- Settings refonte en hub navigable avec sous-pages (Flutter)
+- FAB speed dial corrige — RenderBox.localToGlobal() remplace CompositedTransformFollower (Flutter)
+
+### Fixed
+- JWT refresh race condition et cold start auth flow (Flutter)
+- FAB speed dial menu et positionnement wide screen (Flutter)
+- Filtrage des transactions par mois dans GET /transactions (KKS-103)
+- hasValidToken() verifie l'expiration du JWT (Flutter)
+- authRemoteDataSourceProvider non initialise dans ProviderScope (Flutter)
+- Retourner 401 au lieu de 403 pour les requetes non authentifiees
+- Currency.name renomme en displayName pour eviter conflit Dart (Flutter)
+- Debt DTOs alignes avec les noms de champs JSON backend (Flutter)
+- Base64 images autorisees et filtrage paths locaux Flutter (Shop)
+
 ## [2.1.1] - 2026-02-20
 
 ### Added
@@ -129,7 +225,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0
+[3.0.0]: https://github.com/sopequenoteck/budget/compare/v2.1.1...v3.0.0
+[2.1.1]: https://github.com/sopequenoteck/budget/compare/v2.0.0...v2.1.1
+[2.0.0]: https://github.com/sopequenoteck/budget/compare/v1.4.0...v2.0.0
 [1.4.0]: https://github.com/sopequenoteck/budget/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/sopequenoteck/budget/compare/v1.2.0...v1.3.0
 [1.0.0]: https://github.com/sopequenoteck/budget/compare/v0.1.0...v1.0.0

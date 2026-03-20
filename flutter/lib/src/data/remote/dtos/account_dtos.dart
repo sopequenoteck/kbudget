@@ -14,6 +14,9 @@ class AccountRequest with _$AccountRequest {
     required bool isDefault,
     required String currency,
     required bool actif,
+    String? bankCode,
+    String? bankCustomName,
+    String? bankCustomLogo,
   }) = _AccountRequest;
 
   factory AccountRequest.fromJson(Map<String, dynamic> json) =>
@@ -34,6 +37,13 @@ class AccountResponse with _$AccountResponse {
     required bool actif,
     @Default(0) double solde,
     String? updatedAt,
+    String? bankCode,
+    String? bankName,
+    String? bankCountry,
+    String? bankBrandColor,
+    String? bankLogoUrl,
+    String? bankCustomName,
+    String? bankCustomLogo,
   }) = _AccountResponse;
 
   factory AccountResponse.fromJson(Map<String, dynamic> json) =>

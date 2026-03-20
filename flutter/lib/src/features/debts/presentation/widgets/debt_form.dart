@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
+import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DebtForm extends ConsumerStatefulWidget {
   const DebtForm({
@@ -41,6 +45,14 @@ class _DebtFormState extends ConsumerState<DebtForm> {
   bool _isSubmitting = false;
   bool _initialized = false;
 
+  // Nouveaux champs
+  String? _selectedAccountId;
+  Currency? _forcedCurrency;
+  DateTime? _reminderDate;
+  TimeOfDay? _reminderTime;
+  bool _includeInBalance = false;
+  DateTime? _dueDate;
+
   static final _dateFormat = DateFormat('dd/MM/yyyy');
 
   bool get _isEditMode => widget.debt != null;
@@ -71,6 +83,23 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       _selectedDate = debt.date;
       _selectedCategoryId = debt.categoryId;
       _rembourse = debt.rembourse;
+      // Nouveaux champs
+      _selectedAccountId = debt.accountId;
+      if (debt.accountId != null) {
+        _forcedCurrency = debt.currency;
+      }
+      _includeInBalance = debt.includeInBalance;
+      _dueDate = debt.dueDate;
+      _reminderDate = debt.reminderDate;
+      if (debt.reminderTime != null) {
+        final parts = debt.reminderTime!.split(':');
+        if (parts.length == 2) {
+          _reminderTime = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        }
+      }
     }
   }
 
@@ -113,8 +142,16 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       montant: double.parse(_montantController.text.trim()),
       sens: widget.debtType,
       date: _selectedDate,
+      currency: _forcedCurrency ?? Currency.eur,
       rembourse: _rembourse,
       categoryId: _selectedCategoryId,
+      accountId: _selectedAccountId,
+      includeInBalance: _selectedAccountId != null ? true : _includeInBalance,
+      dueDate: _dueDate,
+      reminderDate: _reminderDate,
+      reminderTime: _reminderTime != null
+          ? '${_reminderTime!.hour.toString().padLeft(2, '0')}:${_reminderTime!.minute.toString().padLeft(2, '0')}'
+          : (_reminderDate != null ? '09:00' : null),
     );
 
     try {
@@ -163,6 +200,45 @@ class _DebtFormState extends ConsumerState<DebtForm> {
     }
   }
 
+  Future<void> _pickReminderDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _reminderDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      locale: const Locale('fr'),
+    );
+    if (picked != null) {
+      setState(() {
+        _reminderDate = picked;
+        _reminderTime ??= const TimeOfDay(hour: 9, minute: 0);
+      });
+    }
+  }
+
+  Future<void> _pickReminderTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _reminderTime ?? const TimeOfDay(hour: 9, minute: 0),
+    );
+    if (picked != null) {
+      setState(() => _reminderTime = picked);
+    }
+  }
+
+  Future<void> _pickDueDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      locale: const Locale('fr'),
+    );
+    if (picked != null) {
+      setState(() => _dueDate = picked);
+    }
+  }
+
   // --- Build ---
 
   @override
@@ -172,6 +248,8 @@ class _DebtFormState extends ConsumerState<DebtForm> {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final catState = ref.watch(categoryNotifierProvider);
+    final accountState = ref.watch(accountNotifierProvider);
+    final activeAccounts = accountState.items.where((a) => a.actif).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -238,14 +316,43 @@ class _DebtFormState extends ConsumerState<DebtForm> {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
+                PhosphorIcon(
+                  PhosphorIconsRegular.calendarBlank,
                   size: 18,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
           ),
+        ),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Compte bancaire
+        SelectPicker(
+          items: activeAccounts
+              .map((a) => SelectPickerItem(
+                    id: a.id,
+                    label: a.nom,
+                    icon: a.icone,
+                    imageUrl: resolveBankAssetPath(a),
+                  ))
+              .toList(),
+          selectedId: _selectedAccountId,
+          onChanged: (id) {
+            setState(() {
+              _selectedAccountId = id;
+              if (id != null) {
+                final account = activeAccounts.firstWhere((a) => a.id == id);
+                _forcedCurrency = account.currency;
+                _includeInBalance = true;
+              } else {
+                _forcedCurrency = null;
+              }
+            });
+          },
+          label: l10n.debtFormAccountPicker,
+          placeholder: l10n.debtFormAccountPlaceholder,
+          clearable: true,
         ),
         const SizedBox(height: AppSpacing.space4),
 
@@ -262,6 +369,148 @@ class _DebtFormState extends ConsumerState<DebtForm> {
             label: l10n.debtFormCategoryPicker,
           ),
         const SizedBox(height: AppSpacing.space4),
+
+        // Date d'échéance
+        AppFormField(
+          label: l10n.debtFormDueDateField,
+          child: GestureDetector(
+            onTap: _pickDueDate,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _dueDate != null
+                        ? _dateFormat.format(_dueDate!)
+                        : l10n.debtFormDueDatePlaceholder,
+                    style: TextStyle(
+                      fontSize: AppTypography.sizeMd,
+                      color: _dueDate != null
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (_dueDate != null)
+                  GestureDetector(
+                    onTap: () => setState(() => _dueDate = null),
+                    child: PhosphorIcon(
+                      PhosphorIconsRegular.x,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  PhosphorIcon(
+                    PhosphorIconsRegular.calendarCheck,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Rappel (date)
+        AppFormField(
+          label: l10n.debtFormReminderField,
+          child: GestureDetector(
+            onTap: _pickReminderDate,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _reminderDate != null
+                        ? _dateFormat.format(_reminderDate!)
+                        : l10n.debtFormReminderPlaceholder,
+                    style: TextStyle(
+                      fontSize: AppTypography.sizeMd,
+                      color: _reminderDate != null
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (_reminderDate != null)
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      _reminderDate = null;
+                      _reminderTime = null;
+                    }),
+                    child: PhosphorIcon(
+                      PhosphorIconsRegular.x,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  PhosphorIcon(
+                    PhosphorIconsRegular.bell,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.space4),
+
+        // Heure de rappel (visible si date sélectionnée)
+        if (_reminderDate != null) ...[
+          AppFormField(
+            label: l10n.debtFormReminderTimeField,
+            child: GestureDetector(
+              onTap: _pickReminderTime,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _reminderTime != null
+                          ? '${_reminderTime!.hour.toString().padLeft(2, '0')}:${_reminderTime!.minute.toString().padLeft(2, '0')}'
+                          : '09:00',
+                      style: TextStyle(
+                        fontSize: AppTypography.sizeMd,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  PhosphorIcon(
+                    PhosphorIconsRegular.clock,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space4),
+        ],
+
+        // Inclure dans le patrimoine (visible si pas de compte sélectionné)
+        if (_selectedAccountId == null)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.debtFormIncludeInBalance,
+                style: TextStyle(
+                  fontSize: AppTypography.sizeMd,
+                  fontWeight: AppTypography.medium,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              Switch(
+                value: _includeInBalance,
+                onChanged: (value) {
+                  setState(() => _includeInBalance = value);
+                },
+              ),
+            ],
+          ),
+        if (_selectedAccountId == null) const SizedBox(height: AppSpacing.space4),
 
         // Switch Remboursé (edit mode only)
         if (_isEditMode)
@@ -294,7 +543,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
             if (_isEditMode && widget.onDeleted != null)
               IconButton(
                 onPressed: _isSubmitting ? null : _onDelete,
-                icon: const Icon(Icons.delete_outline),
+                icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
                 tooltip: l10n.debtFormDeleteButton,
               ),
@@ -334,8 +583,8 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.space3),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
+          PhosphorIcon(
+            PhosphorIconsRegular.info,
             size: 18,
             color: colorScheme.onSurfaceVariant,
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_shadows.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -7,8 +8,9 @@ import 'package:k_budget/src/constants/app_typography.dart';
 
 /// Sélecteur de mois avec boutons précédent/suivant et label formaté en français.
 ///
-/// Widget uncontrolled : gère son propre état interne (mois/année) après
-/// initialisation et notifie le parent via [onChanged].
+/// Gère son propre état interne (mois/année) après initialisation et notifie
+/// le parent via [onChanged]. Synchronise l'état si le parent change
+/// [initialMonth] ou [initialYear] via rebuild.
 class MonthSelector extends StatefulWidget {
   const MonthSelector({
     super.key,
@@ -50,6 +52,21 @@ class _MonthSelectorState extends State<MonthSelector> {
     }
   }
 
+  @override
+  void didUpdateWidget(MonthSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialMonth != oldWidget.initialMonth ||
+        widget.initialYear != oldWidget.initialYear) {
+      final newMonth = widget.initialMonth;
+      if (newMonth != null && newMonth >= 1 && newMonth <= 12) {
+        setState(() {
+          _month = newMonth;
+          _year = widget.initialYear ?? _year;
+        });
+      }
+    }
+  }
+
   String get _formattedLabel {
     final raw = _dateFormat.format(DateTime(_year, _month));
     return raw[0].toUpperCase() + raw.substring(1);
@@ -80,7 +97,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   }
 
   Widget _buildNavButton({
-    required IconData icon,
+    required PhosphorIconData icon,
     required VoidCallback onPressed,
     required String semanticsLabel,
   }) {
@@ -99,7 +116,7 @@ class _MonthSelectorState extends State<MonthSelector> {
             boxShadow: AppShadows.sm,
           ),
           child: IconButton(
-            icon: Icon(icon),
+            icon: PhosphorIcon(icon),
             onPressed: onPressed,
             color: colorScheme.onSurface,
           ),
@@ -116,16 +133,16 @@ class _MonthSelectorState extends State<MonthSelector> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildNavButton(
-          icon: Icons.chevron_left,
+          icon: PhosphorIconsRegular.caretLeft,
           onPressed: _prevMonth,
           semanticsLabel: 'Mois précédent',
         ),
         const SizedBox(width: AppSpacing.space4),
-        SizedBox(
-          width: 160,
+        Flexible(
           child: Text(
             _formattedLabel,
             textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: AppTypography.sizeLg,
               fontWeight: AppTypography.semiBold,
@@ -135,7 +152,7 @@ class _MonthSelectorState extends State<MonthSelector> {
         ),
         const SizedBox(width: AppSpacing.space4),
         _buildNavButton(
-          icon: Icons.chevron_right,
+          icon: PhosphorIconsRegular.caretRight,
           onPressed: _nextMonth,
           semanticsLabel: 'Mois suivant',
         ),

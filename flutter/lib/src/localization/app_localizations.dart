@@ -178,6 +178,12 @@ abstract class AppLocalizations {
   /// **'Ajouter'**
   String get add;
 
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
   /// No description provided for @loading.
   ///
   /// In fr, this message translates to:
@@ -201,6 +207,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur serveur'**
   String get errorServer;
+
+  /// No description provided for @errorLoadingData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les données'**
+  String get errorLoadingData;
+
+  /// No description provided for @amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get amount;
+
+  /// No description provided for @currency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get currency;
+
+  /// No description provided for @frequency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fréquence'**
+  String get frequency;
+
+  /// No description provided for @category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get category;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner une catégorie'**
+  String get selectCategory;
+
+  /// No description provided for @alertThreshold.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil d\'alerte'**
+  String get alertThreshold;
 
   /// No description provided for @onboardingTitle.
   ///
@@ -640,6 +688,36 @@ abstract class AppLocalizations {
   /// **'Inactif'**
   String get subscriptionBadgeInactif;
 
+  /// No description provided for @subscriptionPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer'**
+  String get subscriptionPay;
+
+  /// No description provided for @subscriptionPaySuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement enregistré'**
+  String get subscriptionPaySuccess;
+
+  /// No description provided for @subscriptionPaymentHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des paiements'**
+  String get subscriptionPaymentHistory;
+
+  /// No description provided for @subscriptionNoPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement'**
+  String get subscriptionNoPayments;
+
+  /// No description provided for @subscriptionPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} paiements'**
+  String subscriptionPayments(int count);
+
   /// No description provided for @debtFormPersonField.
   ///
   /// In fr, this message translates to:
@@ -705,6 +783,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Créez une catégorie d\'abord'**
   String get debtFormNoCategories;
+
+  /// No description provided for @debtFormAccountPicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte bancaire'**
+  String get debtFormAccountPicker;
+
+  /// No description provided for @debtFormAccountPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte'**
+  String get debtFormAccountPlaceholder;
+
+  /// No description provided for @debtFormDueDateField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d\'échéance'**
+  String get debtFormDueDateField;
+
+  /// No description provided for @debtFormDueDatePlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune échéance'**
+  String get debtFormDueDatePlaceholder;
+
+  /// No description provided for @debtFormReminderField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel'**
+  String get debtFormReminderField;
+
+  /// No description provided for @debtFormReminderPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun rappel'**
+  String get debtFormReminderPlaceholder;
+
+  /// No description provided for @debtFormReminderTimeField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure de rappel'**
+  String get debtFormReminderTimeField;
+
+  /// No description provided for @debtFormIncludeInBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclure dans le patrimoine'**
+  String get debtFormIncludeInBalance;
 
   /// No description provided for @debtsTitle.
   ///
@@ -783,6 +909,246 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Remboursé'**
   String get debtBadgeRembourse;
+
+  /// No description provided for @debtDetailInitialAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant initial'**
+  String get debtDetailInitialAmount;
+
+  /// No description provided for @debtDetailRemainingAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant restant'**
+  String get debtDetailRemainingAmount;
+
+  /// No description provided for @debtDetailRepayButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser'**
+  String get debtDetailRepayButton;
+
+  /// No description provided for @debtDetailSnoozeButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reporter le rappel'**
+  String get debtDetailSnoozeButton;
+
+  /// No description provided for @debtDetailProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Progression'**
+  String get debtDetailProgress;
+
+  /// No description provided for @debtDetailDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get debtDetailDate;
+
+  /// No description provided for @debtDetailCurrency.
+  ///
+  /// In fr, this message translates to:
+  /// **'Devise'**
+  String get debtDetailCurrency;
+
+  /// No description provided for @debtDetailAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get debtDetailAccount;
+
+  /// No description provided for @debtDetailAccountDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte supprimé'**
+  String get debtDetailAccountDeleted;
+
+  /// No description provided for @debtDetailDueDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance'**
+  String get debtDetailDueDate;
+
+  /// No description provided for @debtDetailCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get debtDetailCategory;
+
+  /// No description provided for @debtDetailIncludedInBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclus dans le solde'**
+  String get debtDetailIncludedInBalance;
+
+  /// No description provided for @debtDetailReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel'**
+  String get debtDetailReminder;
+
+  /// No description provided for @debtDetailPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiements'**
+  String get debtDetailPayments;
+
+  /// No description provided for @debtDetailTotalRepaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total remboursé'**
+  String get debtDetailTotalRepaid;
+
+  /// No description provided for @debtDetailNoPayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun paiement enregistré'**
+  String get debtDetailNoPayments;
+
+  /// No description provided for @debtDetailPaymentsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du chargement des paiements'**
+  String get debtDetailPaymentsError;
+
+  /// No description provided for @debtDetailBadgeEmprunt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Emprunt'**
+  String get debtDetailBadgeEmprunt;
+
+  /// No description provided for @debtDetailBadgePret.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prêt'**
+  String get debtDetailBadgePret;
+
+  /// No description provided for @debtDetailBadgeRepaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursé'**
+  String get debtDetailBadgeRepaid;
+
+  /// No description provided for @repayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser'**
+  String get repayTitle;
+
+  /// No description provided for @repayAccountLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte source'**
+  String get repayAccountLabel;
+
+  /// No description provided for @repayAccountPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner un compte'**
+  String get repayAccountPlaceholder;
+
+  /// No description provided for @repayAccountRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte requis'**
+  String get repayAccountRequired;
+
+  /// No description provided for @repayAmountLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get repayAmountLabel;
+
+  /// No description provided for @repayAmountRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant requis'**
+  String get repayAmountRequired;
+
+  /// No description provided for @repayAmountInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant invalide'**
+  String get repayAmountInvalid;
+
+  /// No description provided for @repayAmountMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maximum: {amount}'**
+  String repayAmountMax(String amount);
+
+  /// No description provided for @repayNoAccounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte actif. Créez un compte dans les paramètres.'**
+  String get repayNoAccounts;
+
+  /// No description provided for @repaySuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remboursement enregistré'**
+  String get repaySuccess;
+
+  /// No description provided for @repayError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du remboursement'**
+  String get repayError;
+
+  /// No description provided for @snoozeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reporter le rappel'**
+  String get snoozeTitle;
+
+  /// No description provided for @snoozeDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle date'**
+  String get snoozeDateLabel;
+
+  /// No description provided for @snoozeTimeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure'**
+  String get snoozeTimeLabel;
+
+  /// No description provided for @snoozeDateFutureRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date doit être dans le futur'**
+  String get snoozeDateFutureRequired;
+
+  /// No description provided for @snoozeSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappel reporté'**
+  String get snoozeSuccess;
+
+  /// No description provided for @snoozeError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors du report'**
+  String get snoozeError;
+
+  /// No description provided for @snoozeSubmitButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reporter'**
+  String get snoozeSubmitButton;
+
+  /// No description provided for @yes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non'**
+  String get no;
 
   /// No description provided for @transferFormSourcePicker.
   ///
@@ -1131,6 +1497,252 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur lors de la suppression de la catégorie'**
   String get categoryErrorDelete;
+
+  /// No description provided for @budgetViewCharts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les graphiques'**
+  String get budgetViewCharts;
+
+  /// No description provided for @emptyBudgetList.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun budget'**
+  String get emptyBudgetList;
+
+  /// No description provided for @emptyBudgetCreateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appuyez sur + pour créer un budget'**
+  String get emptyBudgetCreateHint;
+
+  /// No description provided for @budgetDetails.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails budget'**
+  String get budgetDetails;
+
+  /// No description provided for @emptyBudgetData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune donnée pour ce mois'**
+  String get emptyBudgetData;
+
+  /// No description provided for @deleteBudgetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le budget'**
+  String get deleteBudgetTitle;
+
+  /// No description provided for @deleteBudgetMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.'**
+  String get deleteBudgetMessage;
+
+  /// No description provided for @allCategoriesHaveBudgets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les catégories ont déjà un budget'**
+  String get allCategoriesHaveBudgets;
+
+  /// No description provided for @spent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépensé'**
+  String get spent;
+
+  /// No description provided for @budget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Budget'**
+  String get budget;
+
+  /// No description provided for @total.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @budgetOtherCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get budgetOtherCategory;
+
+  /// No description provided for @budgetOtherCategoryDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses non budgétées'**
+  String get budgetOtherCategoryDetail;
+
+  /// No description provided for @budgetActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Budget actif'**
+  String get budgetActive;
+
+  /// No description provided for @budgetShowInactive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les inactifs'**
+  String get budgetShowInactive;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications'**
+  String get notificationTitle;
+
+  /// No description provided for @notificationMarkAllRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout marquer lu'**
+  String get notificationMarkAllRead;
+
+  /// No description provided for @notificationClearHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider l\'historique'**
+  String get notificationClearHistory;
+
+  /// No description provided for @notificationEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune notification'**
+  String get notificationEmpty;
+
+  /// No description provided for @notificationClearConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider l\'historique'**
+  String get notificationClearConfirmTitle;
+
+  /// No description provided for @notificationClearConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer toutes les notifications ? Cette action est irréversible.'**
+  String get notificationClearConfirmMessage;
+
+  /// No description provided for @notificationRepayTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rembourser'**
+  String get notificationRepayTooltip;
+
+  /// No description provided for @notificationSnoozeTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reporter'**
+  String get notificationSnoozeTooltip;
+
+  /// No description provided for @notificationLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger la dette'**
+  String get notificationLoadError;
+
+  /// No description provided for @notificationGroupToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get notificationGroupToday;
+
+  /// No description provided for @notificationGroupYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get notificationGroupYesterday;
+
+  /// No description provided for @recurringTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récurrences'**
+  String get recurringTitle;
+
+  /// No description provided for @recurringOverdue.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get recurringOverdue;
+
+  /// No description provided for @recurringToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get recurringToday;
+
+  /// No description provided for @recurringUpcoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'À venir'**
+  String get recurringUpcoming;
+
+  /// No description provided for @recurringValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get recurringValidate;
+
+  /// No description provided for @recurringSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get recurringSkip;
+
+  /// No description provided for @recurringDeactivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver'**
+  String get recurringDeactivate;
+
+  /// No description provided for @recurringEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune récurrence active'**
+  String get recurringEmpty;
+
+  /// No description provided for @recurringDeactivateConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver cette récurrence ?'**
+  String get recurringDeactivateConfirm;
+
+  /// No description provided for @recurringValidateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transaction créée'**
+  String get recurringValidateSuccess;
+
+  /// No description provided for @recurringSkipSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échéance avancée'**
+  String get recurringSkipSuccess;
+
+  /// No description provided for @recurringDeactivateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Récurrence désactivée'**
+  String get recurringDeactivateSuccess;
+
+  /// No description provided for @frequencyHebdomadaire.
+  ///
+  /// In fr, this message translates to:
+  /// **'/semaine'**
+  String get frequencyHebdomadaire;
+
+  /// No description provided for @frequencyMensuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/mois'**
+  String get frequencyMensuel;
+
+  /// No description provided for @frequencyAnnuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'/an'**
+  String get frequencyAnnuel;
 }
 
 class _AppLocalizationsDelegate

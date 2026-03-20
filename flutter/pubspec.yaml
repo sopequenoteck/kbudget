@@ -16,6 +16,9 @@ dependencies:
   # State management
   flutter_riverpod: ^2.6.1
 
+  # Icons
+  phosphor_flutter: ^2.1.0
+
   # Routing
   go_router: ^14.8.1
 
@@ -41,6 +44,9 @@ dependencies:
   # Shimmer (skeleton loading)
   shimmer: ^3.0.0
 
+  # Charts
+  fl_chart: ^0.70.2
+
   # Emoji picker
   emoji_picker_flutter: ^4.4.0
 
@@ -52,6 +58,8 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   collection: ^1.19.1
+  stomp_dart_client: ^3.0.1
+  flutter_local_notifications: ^21.0.0
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +86,7 @@ flutter:
   assets:
     - assets/fonts/Inter/
     - assets/budget-icon-no-background.svg
+    - assets/banks/
 
   fonts:
     - family: Inter

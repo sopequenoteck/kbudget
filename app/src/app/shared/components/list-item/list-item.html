@@ -2,7 +2,7 @@
   @if (webImageUrl()) {
     <img class="list-item__image" [src]="webImageUrl()" [alt]="title()" />
   } @else {
-    <span class="list-item__icon">{{ icon() }}</span>
+    <span class="list-item__icon" [style.backgroundColor]="iconColor() ? iconColor()! + '26' : null">{{ icon() }}</span>
   }
 
   <div class="list-item__content">
@@ -14,6 +14,9 @@
 
   <div class="list-item__right">
     <span class="list-item__value" [ngClass]="valueClass()">{{ value() }}</span>
+    @if (valueSubtitle()) {
+      <span class="list-item__value-subtitle">{{ valueSubtitle() }}</span>
+    }
     @if (rightSubtitle()) {
       <span class="list-item__right-subtitle">{{ rightSubtitle() }}</span>
     }

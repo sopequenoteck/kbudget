@@ -10,7 +10,7 @@
           role="menuitem"
           (click)="onAction(item.type)"
         >
-          <span class="speed-dial-icon">{{ item.icon }}</span>
+          <span class="speed-dial-icon"><ng-icon [name]="item.icon" size="24" /></span>
           <span class="speed-dial-label">{{ item.label }}</span>
         </button>
       }
@@ -26,6 +26,6 @@
     aria-label="Actions rapides"
     (click)="onToggle()"
   >
-    <span class="fab-icon">+</span>
+    <span class="fab-icon"><ng-icon name="phosphorPlusBold" size="24" /></span>
   </button>
 }

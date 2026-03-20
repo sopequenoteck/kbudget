@@ -10,16 +10,22 @@ import {
 import { Subscription } from 'rxjs';
 import { forkJoin } from 'rxjs';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorRepeat } from '@ng-icons/phosphor-icons/regular';
 import { TransactionService } from '../../core/services/transaction';
+import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
 import { Transaction, TransactionType, MonthlySummary } from '../../core/models/transaction.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
+import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 
 @Component({
   selector: 'app-transactions',
-  imports: [NgClass, ListItem, AmountPipe, RelativeDatePipe],
+  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, ConvertAmountPipe],
+  providers: [provideIcons({ phosphorRepeat })],
   templateUrl: './transactions.html',
   styleUrl: './transactions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +33,7 @@ import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 export class Transactions {
   private readonly transactionService = inject(TransactionService);
   private readonly modalService = inject(ModalService);
+  readonly preferenceService = inject(PreferenceService);
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
   readonly selectedYear = signal(new Date().getFullYear());
@@ -125,5 +132,10 @@ export class Transactions {
   onTransactionPressed(transaction: Transaction): void {
     if (transaction.type === TransactionType.AJUSTEMENT) return;
     this.modalService.openModal('transaction', transaction);
+  }
+
+  onMakeRecurring(event: Event, transaction: Transaction): void {
+    event.stopPropagation();
+    this.modalService.openModal('transaction', transaction, { asRecurring: true });
   }
 }

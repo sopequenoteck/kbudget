@@ -210,6 +210,102 @@
   color: var(--text-primary);
 }
 
+// Rate proposal overlay
+.rate-proposal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.rate-proposal-dialog {
+  background: var(--surface-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-lg);
+
+  &__title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  &__description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  &__field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__currency {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+}
+
+// Bank logo preview in the preview card
+.account-form__preview-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+// Custom bank logo preview
+.bank-logo-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bank-logo-preview__img {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  border: 1px solid var(--border-default);
+}
+
+.bank-logo-upload {
+  display: inline-flex;
+  cursor: pointer;
+}
+
 // Section 5 : Actions
 .form-actions {
   display: flex;

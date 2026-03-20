@@ -20,16 +20,27 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/category_repository.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
+import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
 import 'package:k_budget/src/domain/repositories/product_repository.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_local.dart';
 import 'package:k_budget/src/features/accounts/data/account_repository_remote.dart';
+import 'package:k_budget/src/data/remote/data_sources/notification_remote_data_source.dart';
+import 'package:k_budget/src/domain/repositories/notification_repository.dart';
+import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_remote_data_source.dart';
+import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_repository_impl.dart';
+import 'package:k_budget/src/features/notifications/data/notification_repository_remote.dart';
 import 'package:k_budget/src/features/shop/data/product_repository_remote.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_local.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_remote.dart';
+import 'package:k_budget/src/data/local/daos/budget_dao.dart';
+import 'package:k_budget/src/data/remote/data_sources/budget_remote_data_source.dart';
+import 'package:k_budget/src/domain/repositories/budget_repository.dart';
+import 'package:k_budget/src/features/budgets/data/budget_repository_local.dart';
+import 'package:k_budget/src/features/budgets/data/budget_repository_remote.dart';
 import 'package:k_budget/src/features/debts/data/debt_repository_local.dart';
 import 'package:k_budget/src/features/debts/data/debt_repository_remote.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -210,6 +221,32 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   );
 });
 
+final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
+  final modeAsync = ref.watch(dataModeProvider);
+  return modeAsync.when(
+    data: (mode) {
+      if (mode == DataMode.server) {
+        final dioAsync = ref.watch(authenticatedDioProvider);
+        return dioAsync.when(
+          data: (dio) => BudgetRepositoryRemote(BudgetRemoteDataSource(dio)),
+          loading: () => BudgetRepositoryLocal(BudgetDao(ref.watch(databaseProvider))),
+          error: (_, _) => BudgetRepositoryLocal(BudgetDao(ref.watch(databaseProvider))),
+        );
+      }
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
+    },
+    loading: () {
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
+    },
+    error: (_, _) {
+      final db = ref.watch(databaseProvider);
+      return BudgetRepositoryLocal(BudgetDao(db));
+    },
+  );
+});
+
 // AccountRemoteDataSource provider (server-only, used for transfer)
 final accountRemoteDataSourceProvider =
     FutureProvider<AccountRemoteDataSource>((ref) async {
@@ -218,11 +255,19 @@ final accountRemoteDataSourceProvider =
 });
 
 // Product repository provider (server-only, no local fallback)
-final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  final dioAsync = ref.watch(authenticatedDioProvider);
-  return dioAsync.when(
-    data: (dio) => ProductRepositoryRemote(ProductRemoteDataSource(dio)),
-    loading: () => throw StateError('Dio not ready'),
-    error: (e, _) => throw StateError('Dio error: $e'),
-  );
+final productRepositoryProvider = FutureProvider<ProductRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return ProductRepositoryRemote(ProductRemoteDataSource(dio));
+});
+
+// Exchange rate repository provider (server-only, no local fallback)
+final exchangeRateRepositoryProvider = FutureProvider<ExchangeRateRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return ExchangeRateRepositoryImpl(ExchangeRateRemoteDataSource(dio));
+});
+
+// Notification repository provider (server-only, no local fallback)
+final notificationRepositoryProvider = FutureProvider<NotificationRepository>((ref) async {
+  final dio = await ref.watch(authenticatedDioProvider.future);
+  return NotificationRepositoryRemote(NotificationRemoteDataSource(dio));
 });

@@ -1,0 +1,81 @@
+<div class="bank-select" [class.open]="isOpen()" [class.disabled]="disabled()">
+  <!-- Trigger -->
+  <div class="bank-select__trigger" (click)="toggleDropdown()" (keydown.enter)="toggleDropdown()" tabindex="0">
+    @if (selectedBank(); as bank) {
+      <span class="bank-select__selected">
+        @if (bank.logoUrl) {
+          <img class="bank-select__logo" [src]="bank.logoUrl" [alt]="bank.name" width="24" height="24" />
+        }
+        <span class="bank-select__name">{{ bank.name }}</span>
+        @if (bank.brandColor) {
+          <span class="bank-select__dot" [style.background-color]="bank.brandColor"></span>
+        }
+      </span>
+    } @else {
+      <span class="bank-select__selected">
+        <span class="bank-select__name">Autre</span>
+      </span>
+    }
+    <span class="bank-select__chevron">&#9662;</span>
+  </div>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div class="bank-select__dropdown">
+      <div class="bank-select__search">
+        <input
+          type="text"
+          class="bank-select__search-input"
+          placeholder="Rechercher une banque..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+          autocomplete="off"
+        />
+      </div>
+      <div class="bank-select__list">
+        @for (group of filteredGroups(); track group.label) {
+          <div class="bank-select__group">
+            <div class="bank-select__group-label">{{ group.label }}</div>
+            @for (bank of group.banks; track bank.code) {
+              <div
+                class="bank-select__item"
+                [class.selected]="selectedCode() === bank.code"
+                (click)="selectBank(bank.code)"
+                (keydown.enter)="selectBank(bank.code)"
+                tabindex="0"
+                role="option"
+                [attr.aria-selected]="selectedCode() === bank.code"
+              >
+                @if (bank.logoUrl) {
+                  <img class="bank-select__item-logo" [src]="bank.logoUrl" [alt]="bank.name" width="24" height="24" />
+                }
+                <span class="bank-select__item-name">{{ bank.name }}</span>
+                @if (bank.brandColor) {
+                  <span class="bank-select__item-dot" [style.background-color]="bank.brandColor"></span>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (filteredGroups().length === 0) {
+          <div class="bank-select__empty">Aucune banque trouvée</div>
+        }
+        <!-- OTHER always visible -->
+        <div class="bank-select__group">
+          <div class="bank-select__group-label">Autre</div>
+          <div
+            class="bank-select__item"
+            [class.selected]="selectedCode() === 'OTHER'"
+            (click)="selectBank('OTHER')"
+            (keydown.enter)="selectBank('OTHER')"
+            tabindex="0"
+            role="option"
+            [attr.aria-selected]="selectedCode() === 'OTHER'"
+          >
+            <span class="bank-select__item-name">Autre / Personnalisé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
