@@ -7,11 +7,10 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
-import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
-import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 
@@ -31,11 +30,7 @@ final dashboardNotifierProvider =
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() {
-    final now = DateTime.now();
-    return DashboardState(
-      selectedMonth: now.month,
-      selectedYear: now.year,
-    );
+    return const DashboardState();
   }
 
   Future<void> loadDashboard() async {
@@ -56,17 +51,14 @@ class DashboardNotifier extends Notifier<DashboardState> {
       await Future.wait([
         ref.read(accountNotifierProvider.notifier).loadItems(),
         ref.read(transactionNotifierProvider.notifier).loadItems(),
-        ref.read(subscriptionNotifierProvider.notifier).loadItems(),
-        ref.read(debtNotifierProvider.notifier).loadItems(),
         ref.read(categoryNotifierProvider.notifier).loadItems(),
         ref.read(exchangeRateListProvider.notifier).loadItems(),
+        ref.read(budgetNotifierProvider.notifier).loadOverview(),
       ]);
 
       // Lire les donnees chargees
       final accountState = ref.read(accountNotifierProvider);
       final transactionState = ref.read(transactionNotifierProvider);
-      final subscriptionState = ref.read(subscriptionNotifierProvider);
-      final debtState = ref.read(debtNotifierProvider);
       final exchangeRateState = ref.read(exchangeRateListProvider);
 
       // Charger les devises depuis les preferences (mode server uniquement)
@@ -96,36 +88,39 @@ class DashboardNotifier extends Notifier<DashboardState> {
                 orElse: () => activeAccounts.first,
               );
 
-      // Resume mensuel
-      List<MonthlySummary> summaries = [];
+      // Resume mensuel mois courant
+      final now = DateTime.now();
+      final prevMonth = now.month == 1 ? 12 : now.month - 1;
+      final prevYear = now.month == 1 ? now.year - 1 : now.year;
+
+      MonthlySummary? currentSummary;
+      MonthlySummary? previousSummary;
+
       try {
-        summaries = await ref.read(
+        final currentSummaries = await ref.read(
           monthlySummaryProvider(
-            (month: state.selectedMonth, year: state.selectedYear),
+            (month: now.month, year: now.year),
           ).future,
         );
+        if (currentSummaries.isNotEmpty) {
+          currentSummary = currentSummaries.first;
+        }
       } on Exception {
         // Erreur summary non-bloquante pour le reste du dashboard
       }
 
-      // Calcul montant mensuel abonnements (actifs uniquement)
-      final activeSubscriptions =
-          subscriptionState.items.where((s) => s.actif).toList();
-      final subscriptionMonthlyTotal = activeSubscriptions.fold<double>(
-        0,
-        (sum, s) =>
-            sum +
-            (s.frequence == Frequency.mensuel ? s.montant : s.montant / 12),
-      );
-
-      // Calcul solde net dettes (non remboursees)
-      final activDebts =
-          debtState.items.where((d) => !d.rembourse).toList();
-      final debtNetBalance = activDebts.fold<double>(
-        0,
-        (sum, d) =>
-            sum + (d.sens == DebtType.pret ? d.montant : -d.montant),
-      );
+      try {
+        final previousSummaries = await ref.read(
+          monthlySummaryProvider(
+            (month: prevMonth, year: prevYear),
+          ).future,
+        );
+        if (previousSummaries.isNotEmpty) {
+          previousSummary = previousSummaries.first;
+        }
+      } on Exception {
+        // Erreur summary non-bloquante pour le reste du dashboard
+      }
 
       // 5 dernieres transactions triees par date desc
       final allTransactions = transactionState.items;
@@ -136,11 +131,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
       state = state.copyWith(
         accounts: activeAccounts,
         defaultAccount: defaultAccount,
-        monthlySummaries: summaries,
-        subscriptionMonthlyTotal: subscriptionMonthlyTotal,
-        activeSubscriptionCount: activeSubscriptions.length,
-        debtNetBalance: debtNetBalance,
-        activeDebtCount: activDebts.length,
+        currentSummary: currentSummary,
+        previousSummary: previousSummary,
         recentTransactions: recentTransactions,
         userName: userName,
         exchangeRates: exchangeRateState.items,
@@ -162,9 +154,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
     // Recharger les notifiers sous-jacents
     ref.invalidate(accountNotifierProvider);
     ref.invalidate(transactionNotifierProvider);
-    ref.invalidate(subscriptionNotifierProvider);
-    ref.invalidate(debtNotifierProvider);
     ref.invalidate(categoryNotifierProvider);
+    ref.invalidate(budgetNotifierProvider);
     ref.invalidate(currentUserNameProvider);
 
     await loadDashboard();
@@ -184,29 +175,5 @@ class DashboardNotifier extends Notifier<DashboardState> {
 
   void updateExchangeRates(List<ExchangeRate> rates) {
     state = state.copyWith(exchangeRates: rates);
-  }
-
-  Future<void> changeMonth(int month, int year) async {
-    state = state.copyWith(
-      selectedMonth: month,
-      selectedYear: year,
-      isSummaryLoading: true,
-    );
-
-    try {
-      final summaries = await ref.read(
-        monthlySummaryProvider((month: month, year: year)).future,
-      );
-      state = state.copyWith(
-        monthlySummaries: summaries,
-        isSummaryLoading: false,
-      );
-    } on Exception catch (e) {
-      state = state.copyWith(
-        monthlySummaries: [],
-        isSummaryLoading: false,
-        error: 'Erreur chargement résumé: $e',
-      );
-    }
   }
 }

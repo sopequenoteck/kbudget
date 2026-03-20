@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -12,28 +13,11 @@ import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:shimmer/shimmer.dart';
 
-class BudgetSummarySection extends ConsumerStatefulWidget {
+class BudgetSummarySection extends ConsumerWidget {
   const BudgetSummarySection({super.key});
 
   @override
-  ConsumerState<BudgetSummarySection> createState() =>
-      _BudgetSummarySectionState();
-}
-
-class _BudgetSummarySectionState extends ConsumerState<BudgetSummarySection> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = ref.read(budgetNotifierProvider);
-      if (state.overview == null && !state.isLoading) {
-        ref.read(budgetNotifierProvider.notifier).loadOverview();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final featureConfig = ref.watch(featureConfigNotifierProvider);
 
     if (!featureConfig.enabledFeatures.contains(Feature.budgets)) {
@@ -54,10 +38,10 @@ class _BudgetSummarySectionState extends ConsumerState<BudgetSummarySection> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Top 5 items triés par pourcentage décroissant
+    // Top 4 items tries par pourcentage decroissant (depasses en premier)
     final topItems = [...overview.items]
       ..sort((a, b) => b.percentage.compareTo(a.percentage));
-    final displayItems = topItems.take(5).toList();
+    final displayItems = topItems.take(4).toList();
 
     final currencyEnum = Currency.values.firstWhere(
       (c) => c.name == overview.currency || c.name == overview.currency.toLowerCase(),
@@ -72,7 +56,7 @@ class _BudgetSummarySectionState extends ConsumerState<BudgetSummarySection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Budgets',
+              'Budgets \u00b7 ${DateFormat('MMMM yyyy', 'fr_FR').format(DateTime.now())}',
               style: TextStyle(
                 fontSize: AppTypography.sizeLg,
                 fontWeight: AppTypography.semiBold,
@@ -108,14 +92,14 @@ class _BudgetSummarySectionState extends ConsumerState<BudgetSummarySection> {
                 ),
               ),
 
-              // Séparateur
+              // Separateur
               Divider(
                 height: 1,
                 thickness: 1,
                 color: colorScheme.outlineVariant,
               ),
 
-              // Footer : total dépensé / total budget
+              // Footer : total depense / total budget
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.space4,

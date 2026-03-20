@@ -9,9 +9,9 @@ import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/currency_pill_selector.dart';
-import 'package:k_budget/src/features/dashboard/presentation/widgets/hero_account_section.dart';
-import 'package:k_budget/src/features/dashboard/presentation/widgets/mini_cards_section.dart';
-import 'package:k_budget/src/features/dashboard/presentation/widgets/monthly_summary_section.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/dashboard_header.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/patrimoine_card.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/income_expense_cards.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/budget_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
@@ -98,8 +98,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dashboardNotifierProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Etat vide global : aucun compte et pas en chargement
     if (!state.isLoading && state.accounts.isEmpty) {
@@ -108,63 +107,60 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      child: SingleChildScrollView(
+      child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSpacing.space4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Message de bienvenue
-            Text(
-              state.userName != null
-                  ? 'Bonjour ${state.userName}'
-                  : 'Bonjour',
-              style: TextStyle(
-                fontSize: AppTypography.sizeXl,
-                fontWeight: AppTypography.semiBold,
-                color: colorScheme.onSurface,
-              ),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(AppSpacing.space4),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Header (salutation + cloche + avatar)
+                DashboardHeader(userName: state.userName),
+                const SizedBox(height: AppSpacing.space3),
+
+                // Pill selector multi-devises
+                if (state.currencies.length > 1) ...[
+                  CurrencyPillSelector(
+                    currencies: state.currencies,
+                    activeCurrency: state.activeCurrency,
+                    onCurrencyChanged: (c) {
+                      _onCurrencyPillTapped(c);
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                ],
+
+                // Carte patrimoine total
+                PatrimoineCard(
+                  accounts: state.accounts,
+                  activeCurrency: state.activeCurrency,
+                  exchangeRates: state.exchangeRates,
+                  currencies: state.currencies,
+                  currentSummary: state.currentSummary,
+                ),
+                const SizedBox(height: AppSpacing.space4),
+
+                // Cards revenus / dépenses
+                IncomeExpenseCards(
+                  currentSummary: state.currentSummary,
+                  previousSummary: state.previousSummary,
+                  currencies: state.currencies,
+                  exchangeRates: state.exchangeRates,
+                  activeCurrency: state.activeCurrency,
+                ),
+                const SizedBox(height: AppSpacing.space5),
+
+                // Resume budgets (gère sa propre visibilité)
+                const BudgetSummarySection(),
+                const SizedBox(height: AppSpacing.space5),
+
+                // Dernieres operations
+                const RecentTransactionsSection(),
+                const SizedBox(height: AppSpacing.space4),
+              ]),
             ),
-            // Pill selector multi-devises
-            if (state.currencies.length > 1) ...[
-              const SizedBox(height: AppSpacing.space3),
-              CurrencyPillSelector(
-                currencies: state.currencies,
-                activeCurrency: state.activeCurrency,
-                onCurrencyChanged: (c) {
-                  _onCurrencyPillTapped(c);
-                },
-              ),
-            ],
-            const SizedBox(height: AppSpacing.space4),
-
-            // US1 — Hero compte + liste comptes
-            HeroAccountSection(
-              activeCurrency: state.activeCurrency,
-              exchangeRates: state.exchangeRates,
-            ),
-            const SizedBox(height: AppSpacing.space5),
-
-            // US2 — Resume mensuel
-            const MonthlySummarySection(),
-            const SizedBox(height: AppSpacing.space5),
-
-            // US4 — Mini-cards (avant les transactions pour le layout)
-            MiniCardsSection(
-              activeCurrency: state.activeCurrency,
-              exchangeRates: state.exchangeRates,
-            ),
-            const SizedBox(height: AppSpacing.space5),
-
-            // US3 — Dernieres operations
-            const RecentTransactionsSection(),
-            const SizedBox(height: AppSpacing.space5),
-
-            // US5 — Resume budgets
-            const BudgetSummarySection(),
-            const SizedBox(height: AppSpacing.space4),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

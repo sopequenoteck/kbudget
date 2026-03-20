@@ -311,6 +311,7 @@ Approche **signals-first** obligatoire :
 - PostgreSQL 15+ (Flyway V21) (094-sync-text-scale-api)
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Dio (095-currency-rebase-propagation)
 - PostgreSQL 15+ (table `exchange_rates`, table `user_preferences`) (095-currency-rebase-propagation)
+- API REST (mode serveur) via Dio. Pas de Drift/SQLite pour cette feature (donnees toujours fraiches depuis l'API) (096-flutter-dashboard-refonte)
 
 ### Backend (api/)
 

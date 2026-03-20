@@ -14,16 +14,9 @@ class DashboardState with _$DashboardState {
     @Default([]) List<Account> accounts,
     Account? defaultAccount,
 
-    // Resume mensuel
-    @Default([]) List<MonthlySummary> monthlySummaries,
-    @Default(0) int selectedMonth,
-    @Default(0) int selectedYear,
-
-    // Mini-cards
-    @Default(0.0) double subscriptionMonthlyTotal,
-    @Default(0) int activeSubscriptionCount,
-    @Default(0.0) double debtNetBalance,
-    @Default(0) int activeDebtCount,
+    // Resumes mensuels
+    MonthlySummary? currentSummary,
+    MonthlySummary? previousSummary,
 
     // Dernieres transactions
     @Default([]) List<Transaction> recentTransactions,
@@ -38,7 +31,6 @@ class DashboardState with _$DashboardState {
 
     // Loading / Error
     @Default(true) bool isLoading,
-    @Default(false) bool isSummaryLoading,
     String? error,
   }) = _DashboardState;
 }
