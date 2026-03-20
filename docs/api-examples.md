@@ -1024,6 +1024,7 @@ Response `200` :
 | `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS` |
 | `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
+
 ## Import CSV
 
 ### Upload CSV `POST /api/imports/upload`
