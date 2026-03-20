@@ -6,6 +6,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Unreleased]
 
 ### Added
+- Settings Angular alignement sur Flutter — hub 3 groupes (General, Gestion, Autre) avec headers et couleurs d'icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; page A propos enrichie (statut serveur, grille stats 2x2, contact mailto, glassmorphism dark mode) (KKS-098)
 - Emoji picker Angular — remplacement de l'input texte brut par un picker emoji-mart (catégories, récents, recherche, thème dark/light DS, text scale, lazy-loading) (KKS-163)
 - Refonte dashboard Flutter — PatrimoineCard (gradient amber→indigo, variation %, conversion devise secondaire), IncomeExpenseCards (montants signes, delta vs mois precedent, pill badge), badges devise et conversion sur transactions recentes, section Budgets chargee en parallele, CustomScrollView (KKS-201)
 - Propagation automatique rebase taux de change lors du changement de devise principale — WebSocket STOMP `/user/queue/exchange-rates`, indicateur hasMissingRate sur le dashboard (Angular + Flutter) (KKS-095)
