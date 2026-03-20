@@ -316,6 +316,8 @@ Approche **signals-first** obligatoire :
 - localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
 - TypeScript 5.9 + Angular 21, @ng-icons/phosphor-icons, Angular Signals (098-angular-settings-alignment)
 - N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
+- Java 21 (backend), TypeScript 5.9 (frontend Angular) + Spring Boot 4.0.2, Spring Data JPA, Apache Commons CSV 1.11.0 (nouveau), Apache Commons Text 1.12.0 (nouveau), Angular 21 (099-csv-import)
+- PostgreSQL 15+ (Flyway V22 — 5 nouvelles tables) (099-csv-import)
 
 ### Backend (api/)
 

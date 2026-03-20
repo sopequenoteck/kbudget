@@ -12,6 +12,7 @@ import {
   phosphorInfo,
   phosphorCurrencyCircleDollar,
   phosphorLock,
+  phosphorUploadSimple,
 } from '@ng-icons/phosphor-icons/regular';
 
 export type SettingsGroup = 'general' | 'management' | 'other';
@@ -115,6 +116,16 @@ const SECTIONS: SettingsSection[] = [
     group: 'management',
   },
   {
+    id: 'import',
+    title: 'Import',
+    description: 'Importer des relevés CSV',
+    icon: 'phosphorUploadSimple',
+    iconColor: '#10b981',
+    route: 'import',
+    status: 'active',
+    group: 'management',
+  },
+  {
     id: 'security',
     title: 'Sécurité',
     description: 'Verrouillage, biométrie',
@@ -151,6 +162,7 @@ const SECTIONS: SettingsSection[] = [
       phosphorInfo,
       phosphorCurrencyCircleDollar,
       phosphorLock,
+      phosphorUploadSimple,
     }),
   ],
   templateUrl: './settings.html',

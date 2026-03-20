@@ -1,0 +1,311 @@
+<a class="section-back" routerLink="/settings/accounts">
+  <span class="section-back__arrow">&#9664;</span>
+  <span>Comptes</span>
+</a>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement du brouillon</p>
+    <a class="btn-outline" routerLink="/settings/accounts">Retour</a>
+  </div>
+} @else if (confirmSuccess()) {
+  <div class="state-success">
+    <ng-icon name="phosphorCheckCircle" size="40" />
+    <p>Import confirmé avec succès !</p>
+    <p class="state-success__hint">Redirection vers les comptes...</p>
+  </div>
+} @else if (draft()) {
+  <div class="review-header">
+    <h2 class="review-title">Revue d'import</h2>
+    <div class="review-meta">
+      @if (draft()!.fileName) {
+        <span class="review-meta__item">
+          <strong>Fichier :</strong> {{ draft()!.fileName }}
+        </span>
+      }
+      <span class="review-meta__item">
+        <strong>Compte :</strong> {{ draft()!.accountName }}
+      </span>
+      @if (draft()!.profileName) {
+        <span class="review-meta__item">
+          <strong>Profil :</strong> {{ draft()!.profileName }}
+          @if (draft()!.profileSource) {
+            ({{ draft()!.profileSource }})
+          }
+        </span>
+      }
+      <span class="review-meta__item">
+        <strong>Date :</strong> {{ formatDate(draft()!.createdAt) }}
+      </span>
+    </div>
+  </div>
+
+  <div class="review-progress">
+    <div class="progress-item progress-item--ready">
+      <span class="progress-item__count">{{ draft()!.readyCount }}</span>
+      <span class="progress-item__label">prêtes</span>
+    </div>
+    <div class="progress-item progress-item--review">
+      <span class="progress-item__count">{{ draft()!.reviewCount }}</span>
+      <span class="progress-item__label">à vérifier</span>
+    </div>
+    <div class="progress-item progress-item--duplicate">
+      <span class="progress-item__count">{{ draft()!.duplicateCount }}</span>
+      <span class="progress-item__label">doublons</span>
+    </div>
+    <div class="progress-item progress-item--skipped">
+      <span class="progress-item__count">{{ draft()!.skippedCount }}</span>
+      <span class="progress-item__label">ignorées</span>
+    </div>
+  </div>
+
+  @if (hasSelection()) {
+    <div class="batch-bar">
+      <span class="batch-bar__count">{{ selectedLineIds().size }} ligne(s) sélectionnée(s)</span>
+      <div class="batch-bar__actions">
+        <div class="batch-bar__category-group">
+          <select
+            class="batch-bar__category-select"
+            [ngModel]="batchCategoryId()"
+            (ngModelChange)="batchCategoryId.set($event)"
+          >
+            <option value="">-- Catégorie --</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            class="batch-bar__btn batch-bar__btn--primary"
+            [disabled]="!batchCategoryId() || batchLoading()"
+            (click)="onBatchAssignCategory()"
+          >
+            Assigner
+          </button>
+        </div>
+        <button
+          type="button"
+          class="batch-bar__btn batch-bar__btn--validate"
+          [disabled]="batchLoading()"
+          (click)="onBatchValidate()"
+        >
+          Valider
+        </button>
+        <button
+          type="button"
+          class="batch-bar__btn batch-bar__btn--skip"
+          [disabled]="batchLoading()"
+          (click)="onBatchSkip()"
+        >
+          Ignorer
+        </button>
+        <button
+          type="button"
+          class="batch-bar__btn batch-bar__btn--cancel"
+          [disabled]="batchLoading()"
+          (click)="clearSelection()"
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="line-list-header">
+    <label class="line-select-all">
+      <input
+        type="checkbox"
+        [checked]="allSelected()"
+        (change)="toggleSelectAll()"
+      />
+      <span>Tout sélectionner</span>
+    </label>
+  </div>
+
+  <ul class="line-list">
+    @for (line of draft()!.lines; track line.id) {
+      <li
+        class="line-item"
+        [class.line-item--review]="line.status === 'NEEDS_REVIEW'"
+        [class.line-item--duplicate]="line.status === 'DUPLICATE'"
+        [class.line-item--skipped]="line.status === 'SKIPPED'"
+        [class.line-item--selected]="selectedLineIds().has(line.id)"
+      >
+        <div class="line-item__header">
+          <label class="line-item__checkbox">
+            <input
+              type="checkbox"
+              [checked]="selectedLineIds().has(line.id)"
+              (change)="toggleLineSelection(line.id)"
+            />
+          </label>
+          <span class="line-item__number">#{{ line.lineNumber }}</span>
+          <span class="line-item__date">{{ formatDate(line.date) }}</span>
+          <span
+            class="line-item__type-icon"
+            [class.line-item__type-icon--income]="line.transactionType === 'RECETTE'"
+            [class.line-item__type-icon--expense]="line.transactionType === 'DEPENSE'"
+          >
+            @if (line.transactionType === 'RECETTE') {
+              <ng-icon name="phosphorArrowUp" size="14" />
+            } @else {
+              <ng-icon name="phosphorArrowDown" size="14" />
+            }
+          </span>
+          <span
+            class="line-item__amount"
+            [class.amount-income]="line.transactionType === 'RECETTE'"
+            [class.amount-expense]="line.transactionType === 'DEPENSE'"
+          >
+            {{ line.amount | amount: line.transactionType }}
+          </span>
+          <span
+            class="line-item__status"
+            [class.line-item__status--ready]="line.status === 'READY'"
+            [class.line-item__status--review]="line.status === 'NEEDS_REVIEW'"
+            [class.line-item__status--duplicate]="line.status === 'DUPLICATE'"
+            [class.line-item__status--skipped]="line.status === 'SKIPPED'"
+          >
+            <ng-icon [name]="statusIcon(line.status)" size="14" />
+            {{ statusLabel(line.status) }}
+          </span>
+        </div>
+
+        <div class="line-item__label">{{ line.cleanLabel }}</div>
+
+        @if (line.statusMessage) {
+          <div class="line-item__message">{{ line.statusMessage }}</div>
+        }
+
+        @if (line.status === 'NEEDS_REVIEW' || line.status === 'READY') {
+          <div class="line-item__category">
+            <label class="line-item__category-label" [for]="'cat-' + line.id">
+              Catégorie
+            </label>
+            <div class="line-item__category-row">
+              <select
+                [id]="'cat-' + line.id"
+                class="line-item__category-select"
+                [value]="line.categoryId ?? ''"
+                (change)="onCategoryChange(line, $any($event.target).value)"
+              >
+                <option value="">-- Aucune catégorie --</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+                }
+              </select>
+              @if (line.status === 'NEEDS_REVIEW') {
+                <button
+                  type="button"
+                  class="btn-skip"
+                  (click)="onSkipLine(line)"
+                  title="Ignorer cette ligne"
+                >
+                  Ignorer
+                </button>
+              }
+            </div>
+            @if (suggestRuleBanner() && suggestRuleBanner()!.lineId === line.id) {
+              <div class="suggest-rule-banner">
+                <span class="suggest-rule-banner__text">
+                  Créer une règle pour catégoriser automatiquement les libellés contenant
+                  <strong>{{ suggestRuleBanner()!.cleanLabel }}</strong>
+                  en <strong>{{ suggestRuleBanner()!.categoryName }}</strong> ?
+                </span>
+                <div class="suggest-rule-banner__actions">
+                  <button type="button" class="btn-rule-yes" (click)="acceptSuggestRule()">
+                    Oui
+                  </button>
+                  <button type="button" class="btn-rule-no" (click)="dismissSuggestRule()">
+                    Non merci
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (line.status === 'DUPLICATE') {
+          <div class="line-item__duplicate-hint">
+            <ng-icon name="phosphorMinusCircle" size="12" />
+            <span>Doublon détecté — ID transaction existante : <code>{{ line.duplicateTransactionId }}</code></span>
+          </div>
+          <div class="line-item__actions">
+            <button
+              type="button"
+              class="btn-import-anyway"
+              (click)="onForceImportLine(line)"
+              title="Importer quand même"
+            >
+              Importer quand même
+            </button>
+            <button
+              type="button"
+              class="btn-skip"
+              (click)="onSkipLine(line)"
+              title="Ignorer cette ligne"
+            >
+              Ignorer
+            </button>
+          </div>
+        }
+
+        @if (line.status === 'SKIPPED') {
+          <div class="line-item__actions">
+            <button
+              type="button"
+              class="btn-skip"
+              (click)="onSkipLine(line)"
+              title="Marquer comme ignorée"
+            >
+              Ignorer
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  <div class="review-actions">
+    @if (confirmError()) {
+      <p class="review-actions__error">{{ confirmError() }}</p>
+    }
+
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="!canConfirm() || confirming()"
+      (click)="confirmImport()"
+    >
+      @if (confirming()) {
+        <span class="spinner spinner--sm"></span>
+      }
+      @if (!canConfirm()) {
+        Résoudre {{ draft()!.reviewCount + draft()!.duplicateCount }} ligne(s) d'abord
+      } @else {
+        Confirmer l'import ({{ draft()!.readyCount }} transactions)
+      }
+    </button>
+
+    @if (!deleteConfirm()) {
+      <button type="button" class="btn-delete" (click)="requestDelete()">
+        <ng-icon name="phosphorTrash" size="16" />
+        Supprimer le brouillon
+      </button>
+    }
+
+    @if (deleteConfirm()) {
+      <div class="delete-confirm">
+        <p>Supprimer ce brouillon d'import ?</p>
+        <div class="delete-confirm__actions">
+          <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
+          <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
+        </div>
+      </div>
+    }
+  </div>
+}

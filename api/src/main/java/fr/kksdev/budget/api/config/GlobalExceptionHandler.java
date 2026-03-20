@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.ConflictException;
+import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
 import fr.kksdev.budget.api.exception.TokenInvalidException;
@@ -56,6 +57,15 @@ public class GlobalExceptionHandler {
         log.warn("Feature disabled: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
                 HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(CsvProfileNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCsvProfileNotFound(CsvProfileNotFoundException ex) {
+        log.warn("CSV profile not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorBody(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 ex.getMessage()
         ));
     }

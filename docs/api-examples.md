@@ -1024,6 +1024,151 @@ Response `200` :
 | `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS` |
 | `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
+## Import CSV
+
+### Upload CSV `POST /api/imports/upload`
+
+Request (multipart/form-data) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `file` | File | Fichier CSV (max 5 Mo) |
+| `accountId` | UUID | Compte cible |
+
+Response `201` :
+
+```json
+{
+  "id": "91afe691-...",
+  "accountId": "36eace5f-...",
+  "accountName": "Compte Principal",
+  "status": "PENDING",
+  "fileName": "releve_mars.csv",
+  "totalLines": 160,
+  "readyCount": 153,
+  "reviewCount": 0,
+  "duplicateCount": 7,
+  "skippedCount": 0,
+  "profileName": "Societe Generale",
+  "profileSource": "REGISTRY",
+  "createdAt": "2026-03-20T14:30:00",
+  "expiresAt": "2026-03-27T14:30:00",
+  "lines": [
+    {
+      "id": "uuid",
+      "lineNumber": 1,
+      "rawLabel": "CARTE X3855 16/03 UEP*SUPER U 101607535098170IOPD",
+      "cleanLabel": "SUPER U",
+      "amount": 17.32,
+      "date": "2026-03-16",
+      "transactionType": "DEPENSE",
+      "status": "READY",
+      "statusMessage": null,
+      "categoryId": null,
+      "categoryName": null,
+      "duplicateTransactionId": null,
+      "suggestRule": false
+    }
+  ]
+}
+```
+
+Erreur `409` : brouillon actif existant pour ce compte.
+Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
+
+### Confirmer import `POST /api/imports/drafts/{draftId}/confirm`
+
+Response `200` :
+
+```json
+{
+  "importedCount": 153,
+  "skippedCount": 7,
+  "historyId": "uuid"
+}
+```
+
+Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues.
+
+### Mettre a jour une ligne `PUT /api/imports/drafts/{draftId}/lines/{lineId}`
+
+Request :
+
+```json
+{
+  "categoryId": "uuid-categorie",
+  "status": "READY"
+}
+```
+
+### Actions groupees `PUT /api/imports/drafts/{draftId}/lines/batch`
+
+Request :
+
+```json
+{
+  "lineIds": ["uuid1", "uuid2", "uuid3"],
+  "categoryId": "uuid-categorie",
+  "status": "READY"
+}
+```
+
+### Regles de categorisation `POST /api/imports/rules`
+
+Request :
+
+```json
+{
+  "pattern": "CARREFOUR",
+  "categoryId": "uuid-categorie"
+}
+```
+
+Response `201` :
+
+```json
+{
+  "id": "uuid",
+  "pattern": "CARREFOUR",
+  "categoryId": "uuid-categorie",
+  "categoryName": "Courses",
+  "categoryIcon": "shopping-cart",
+  "createdAt": "2026-03-20T14:30:00"
+}
+```
+
+### Lister les regles `GET /api/imports/rules`
+
+### Supprimer une regle `DELETE /api/imports/rules/{ruleId}` — `204`
+
+### Preview CSV `POST /api/imports/preview`
+
+Request (multipart/form-data) : `file` + optionnel `separator`, `encoding`, `skipHeaderLines`
+
+Response `200` :
+
+```json
+{
+  "headers": ["Date de l'operation", "Libelle", "Detail de l'ecriture", "Montant de l'operation", "Devise"],
+  "rows": [["17/03/2026", "COTISATION MENSUEL", "COTISATION MENSUELLE SOBRIO", "-15,90", "EUR"]],
+  "detectedSeparator": ";",
+  "detectedEncoding": "ISO-8859-1",
+  "totalRows": 160
+}
+```
+
+### Upload avec mapping `POST /api/imports/upload-with-mapping`
+
+Request (multipart/form-data) : `file`, `accountId`, `mapping` (JSON string)
+
+### Lister brouillons `GET /api/imports/drafts` — liste des brouillons PENDING
+
+### Historique `GET /api/imports/history?page=0&size=20` — imports finalises pagines
+
+### Profils `GET /api/imports/profiles` — profils pre-configures + personnalises
+
+### Supprimer profil `DELETE /api/imports/profiles/{profileId}` — `204`
+
 ## Voir aussi
 
 - [`api-errors.md`](api-errors.md) — Contrat d'erreurs HTTP et format des reponses d'erreur

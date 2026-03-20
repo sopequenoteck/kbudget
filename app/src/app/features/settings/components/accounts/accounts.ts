@@ -8,9 +8,14 @@ import {
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorStar, phosphorPencilSimple, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorStar,
+  phosphorPencilSimple,
+  phosphorTrash,
+  phosphorUploadSimple,
+} from '@ng-icons/phosphor-icons/regular';
 import { AccountService } from '../../../../core/services/account';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
@@ -25,6 +30,7 @@ import { AccountBankIcon } from '../../../../shared/components/account-bank-icon
       phosphorStar,
       phosphorPencilSimple,
       phosphorTrash,
+      phosphorUploadSimple,
     }),
   ],
   templateUrl: './accounts.html',
@@ -34,6 +40,7 @@ import { AccountBankIcon } from '../../../../shared/components/account-bank-icon
 export class Accounts {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
+  private readonly router = inject(Router);
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(true);
@@ -109,5 +116,9 @@ export class Accounts {
         console.error('Failed to delete account', err);
       }
     }
+  }
+
+  triggerImport(accountId: string): void {
+    this.router.navigate(['/settings/import'], { queryParams: { accountId } });
   }
 }
