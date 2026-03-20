@@ -388,7 +388,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void should_useRawAmount_when_exchangeRateMissing() {
+    void should_excludeTransaction_when_exchangeRateMissing() {
         var user = buildUser();
         var accountEur = Account.builder()
                 .id(UUID.randomUUID()).nom("Compte EUR").type(AccountType.COURANT)
