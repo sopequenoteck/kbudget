@@ -6,6 +6,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Unreleased]
 
 ### Added
+- Refonte dashboard Flutter — PatrimoineCard (gradient amber→indigo, variation %, conversion devise secondaire), IncomeExpenseCards (montants signes, delta vs mois precedent, pill badge), badges devise et conversion sur transactions recentes, section Budgets chargee en parallele, CustomScrollView (KKS-201)
 - Propagation automatique rebase taux de change lors du changement de devise principale — WebSocket STOMP `/user/queue/exchange-rates`, indicateur hasMissingRate sur le dashboard (Angular + Flutter) (KKS-095)
 - Associer une banque à un compte — BankRegistry 29 banques statiques (FR/TG/International), endpoint GET /banks, Flyway V19, AccountRequest/Response enrichis (KKS-081)
 - Associer une banque à un compte (Angular) — BankSelect, AccountBankIcon, AccountForm enrichi, image.utils.ts (KKS-082)

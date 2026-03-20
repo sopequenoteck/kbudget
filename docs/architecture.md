@@ -245,7 +245,7 @@ app/src/app/
 | Ecran | Route | Role |
 |-------|-------|------|
 | Auth | `/auth` | Inscription et connexion (toggle login/register) |
-| Dashboard | `/dashboard` | Soldes par compte, solde total, KPI mensuels, resume abonnements, etat dettes |
+| Dashboard | `/dashboard` | Patrimoine total (variation mensuelle), revenus/depenses du mois, budgets (conditionnel), dernieres operations |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
 | Dettes/Prets | `/debts` | Liste, resume, filtres |
