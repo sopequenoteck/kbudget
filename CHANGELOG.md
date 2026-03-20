@@ -5,6 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-03-20
+
+### Fixed
+- SCSS budget depassement — import-review.scss (12kB → 8kB) et import-settings.scss (9kB → 8kB), styles communs extraits dans _utilities.scss
+
 ## [4.2.0] - 2026-03-20
 
 ### Added
