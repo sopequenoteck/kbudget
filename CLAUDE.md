@@ -314,6 +314,8 @@ Approche **signals-first** obligatoire :
 - API REST (mode serveur) via Dio. Pas de Drift/SQLite pour cette feature (donnees toujours fraiches depuis l'API) (096-flutter-dashboard-refonte)
 - TypeScript 5.9, Angular 21 + `emoji-mart` + `@emoji-mart/data` (nouveau), `@angular/cdk/overlay` (existant) (097-angular-emoji-picker)
 - localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
+- TypeScript 5.9 + Angular 21, @ng-icons/phosphor-icons, Angular Signals (098-angular-settings-alignment)
+- N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
 
 ### Backend (api/)
 
