@@ -1,17 +1,35 @@
 <h2 class="settings-title">Paramètres</h2>
 
-<nav class="settings-grid">
-  @for (section of sections; track section.id) {
-    <a class="settings-card" [routerLink]="section.route">
-      <span class="settings-card__icon"><ng-icon [name]="section.icon" size="24" /></span>
-      <div class="settings-card__content">
-        <span class="settings-card__title">{{ section.title }}</span>
-        <span class="settings-card__description">{{ section.description }}</span>
-      </div>
-      @if (section.status === 'placeholder') {
-        <span class="settings-card__badge">À venir</span>
+@for (group of groups; track group) {
+  <section class="settings-group">
+    <h3 class="settings-group__title">{{ groupLabels[group] }}</h3>
+    <nav class="settings-group__list">
+      @for (section of groupedSections()[group]; track section.id) {
+        @if (section.status === 'active') {
+          <a class="settings-card" [routerLink]="section.route">
+            <span class="settings-card__icon" [style.background]="section.iconColor + '1a'">
+              <ng-icon [name]="section.icon" size="24" [style.color]="section.iconColor" />
+            </span>
+            <div class="settings-card__content">
+              <span class="settings-card__title">{{ section.title }}</span>
+              <span class="settings-card__description">{{ section.description }}</span>
+            </div>
+            <span class="settings-card__arrow">&#9654;</span>
+          </a>
+        } @else {
+          <a class="settings-card settings-card--placeholder" [routerLink]="section.route">
+            <span class="settings-card__icon" [style.background]="section.iconColor + '1a'">
+              <ng-icon [name]="section.icon" size="24" [style.color]="section.iconColor" />
+            </span>
+            <div class="settings-card__content">
+              <span class="settings-card__title">{{ section.title }}</span>
+              <span class="settings-card__description">{{ section.description }}</span>
+            </div>
+            <span class="settings-card__badge">À venir</span>
+            <span class="settings-card__arrow">&#9654;</span>
+          </a>
+        }
       }
-      <span class="settings-card__arrow">&#9654;</span>
-    </a>
-  }
-</nav>
+    </nav>
+  </section>
+}

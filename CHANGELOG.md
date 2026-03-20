@@ -5,6 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-03-20
+
+### Added
+- Settings Angular alignement sur Flutter — hub 3 groupes (General, Gestion, Autre) avec headers et couleurs d'icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; page A propos enrichie (statut serveur, grille stats 2x2, contact mailto, glassmorphism dark mode) (KKS-098)
+
 ## [4.0.0] - 2026-03-20
 
 ### Added
@@ -225,7 +230,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0
 [3.0.0]: https://github.com/sopequenoteck/budget/compare/v2.1.1...v3.0.0
 [2.1.1]: https://github.com/sopequenoteck/budget/compare/v2.0.0...v2.1.1

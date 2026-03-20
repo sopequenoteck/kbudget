@@ -5,19 +5,65 @@
 
 <h2 class="about-title">À propos</h2>
 
+<!-- Card Application -->
 <div class="about-card">
-  <div class="about-field">
-    <span class="about-field__label">Application</span>
-    <span class="about-field__value">{{ appName }}</span>
+  <div class="about-card__header">Application</div>
+  <div class="about-card__row">
+    <div class="about-card__left">
+      <span class="about-card__app-icon">💰</span>
+      <div>
+        <div class="about-card__value">{{ appName }}</div>
+        <div class="about-card__label">v{{ version }}</div>
+      </div>
+    </div>
+    @if (healthResult().status === 'checking') {
+      <span class="about-pill about-pill--checking">Vérification...</span>
+    } @else if (healthResult().status === 'online') {
+      <span class="about-pill about-pill--online">En ligne</span>
+    } @else {
+      <span class="about-pill about-pill--offline">Hors ligne</span>
+    }
   </div>
-  <div class="about-field">
-    <span class="about-field__label">Version</span>
-    <span class="about-field__value">{{ version }}</span>
+  <div class="about-card__row">
+    <span class="about-card__label">Environnement</span>
+    <span class="about-badge about-badge--env">{{ serverInfo.environment === 'production' ? 'Production' : 'Dev' }}</span>
   </div>
-  <div class="about-field">
-    <span class="about-field__label">Auteur</span>
-    <a class="about-field__value about-field__link" href="mailto:kelly.sossoe@kksdev.fr">{{
-      author
-    }}</a>
+</div>
+
+<!-- Card Mes données -->
+<div class="about-card">
+  <div class="about-card__header">Mes données</div>
+  <div class="about-stats">
+    <div class="about-stats__cell">
+      <div class="about-stats__value">{{ stats().transactions !== null ? stats().transactions : '—' }}</div>
+      <div class="about-stats__label">Transactions</div>
+    </div>
+    <div class="about-stats__cell">
+      <div class="about-stats__value">{{ stats().accounts !== null ? stats().accounts : '—' }}</div>
+      <div class="about-stats__label">Comptes</div>
+    </div>
+    <div class="about-stats__cell">
+      <div class="about-stats__value">{{ stats().subscriptions !== null ? stats().subscriptions : '—' }}</div>
+      <div class="about-stats__label">Abonnements</div>
+    </div>
+    <div class="about-stats__cell">
+      <div class="about-stats__value">{{ stats().debts !== null ? stats().debts : '—' }}</div>
+      <div class="about-stats__label">Dettes</div>
+    </div>
   </div>
+</div>
+
+<!-- Card Contact -->
+<div class="about-card">
+  <div class="about-card__header">Contact</div>
+  <a class="about-contact" href="mailto:{{ authorEmail }}">
+    <span class="about-contact__icon">
+      <ng-icon name="phosphorEnvelope" size="18" />
+    </span>
+    <div>
+      <div class="about-card__value">{{ author }}</div>
+      <div class="about-card__label">{{ authorEmail }}</div>
+    </div>
+    <span class="about-contact__arrow">&#9654;</span>
+  </a>
 </div>

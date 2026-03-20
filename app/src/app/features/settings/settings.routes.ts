@@ -28,9 +28,9 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () => import('./components/about/about').then((m) => m.About),
   },
   {
-    path: 'budget',
+    path: 'security',
     loadComponent: () => import('./components/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: 'Budget', icon: 'phosphorChartBar' },
+    data: { title: 'Sécurité', icon: 'phosphorLock' },
   },
   {
     path: 'notifications',

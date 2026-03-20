@@ -16,18 +16,6 @@ class NavDestination {
   });
 }
 
-class NavDestination {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-
-  const NavDestination({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-  });
-}
-
 class AdaptiveScaffold extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;

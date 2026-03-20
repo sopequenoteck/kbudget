@@ -314,6 +314,8 @@ Approche **signals-first** obligatoire :
 - API REST (mode serveur) via Dio. Pas de Drift/SQLite pour cette feature (donnees toujours fraiches depuis l'API) (096-flutter-dashboard-refonte)
 - TypeScript 5.9, Angular 21 + `emoji-mart` + `@emoji-mart/data` (nouveau), `@angular/cdk/overlay` (existant) (097-angular-emoji-picker)
 - localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
+- TypeScript 5.9 + Angular 21, @ng-icons/phosphor-icons, Angular Signals (098-angular-settings-alignment)
+- N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
 
 ### Backend (api/)
 
@@ -335,6 +337,7 @@ Approche **signals-first** obligatoire :
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
+- 098-angular-settings-alignment: Settings Angular alignement Flutter — hub 3 groupes headers (General, Gestion, Autre), couleurs icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; About enrichi (HealthService, forkJoin stats, glassmorphism); 389 tests passent
 - 097-angular-emoji-picker: EmojiInput Angular refonte — emoji-mart picker (lazy-loaded) avec categories, recents, recherche; theme dark/light via tokens DS (setProperty sur host); position fixed; locale fr (recherche EN limitation dataset); text scale rem; API publique inchangee (value/valueChange); 10 tests (389 total)
 - 096-flutter-dashboard-refonte: DashboardScreen refonte complete (CustomScrollView + SliverList); PatrimoineCard (gradient amber→indigo, variation mensuelle pill, conversion ≈); IncomeExpenseCards (REVENUS/DEPENSES, +/- colores, delta mois precedent pill, conversion ≈); DashboardHeader (salutation); RecentTransactionsSection (badges devise, conversion ≈, nom compte); BudgetSummarySection (tri % decroissant, max 4 items, chargement integre au notifier); suppression HeroAccountSection/MonthlySummarySection/MiniCardsSection; 55 tests dashboard passent
 - 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
