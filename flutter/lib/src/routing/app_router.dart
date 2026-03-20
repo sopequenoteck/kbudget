@@ -64,6 +64,7 @@ import 'package:k_budget/src/features/transactions/presentation/widgets/transact
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/services/local_notification_service.dart';
@@ -437,8 +438,9 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     final enabledFeatures = featureState.enabledFeatures;
     final navOrder = featureState.navOrder;
 
-    // Garder le listener STOMP vivant tant que le Shell est monté
+    // Garder les listeners STOMP vivants tant que le Shell est monté
     ref.watch(notificationStompListenerProvider);
+    ref.watch(exchangeRateStompListenerProvider);
 
     // Build dynamic paths and destinations
     final paths = <String>[

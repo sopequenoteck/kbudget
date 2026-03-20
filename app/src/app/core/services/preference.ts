@@ -2,6 +2,7 @@ import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
+import { ExchangeRateService } from './exchange-rate';
 import { type NotificationType } from '../models/notification.model';
 import {
   type Feature,
@@ -14,6 +15,7 @@ import {
 })
 export class PreferenceService {
   private readonly apiService = inject(ApiService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
 
   readonly enabledFeatures = signal<Feature[]>([]);
   readonly navOrder = signal<Feature[]>([]);
@@ -76,6 +78,7 @@ export class PreferenceService {
   }
 
   update(request: Partial<UserPreferenceRequest>): void {
+    const oldPrimary = this.currencies()[0];
     const merged: UserPreferenceRequest = {
       enabledFeatures: this.enabledFeatures(),
       navOrder: this.navOrder(),
@@ -85,12 +88,19 @@ export class PreferenceService {
       textScale: this.textScale(),
       ...request,
     };
-    firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged)).catch(
-      (e) => {
+    firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged))
+      .then(() => {
+        const newPrimary = merged.currencies?.[0];
+        if (newPrimary && newPrimary !== oldPrimary) {
+          this.exchangeRateService.loadRates().catch(() => {
+            this.error.set('Taux de change périmés — rechargez la page');
+          });
+        }
+      })
+      .catch((e) => {
         if (isDevMode()) console.error('Failed to update preferences:', e);
         this.error.set('Impossible de sauvegarder les préférences');
-      },
-    );
+      });
   }
 
   setCurrencies(currencies: string[]): void {

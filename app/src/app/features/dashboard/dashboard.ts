@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { DecimalPipe, NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorWarningCircle } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
@@ -35,7 +37,8 @@ import {AuthService} from '../../core/services/auth';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DecimalPipe, NgClass, RouterLink, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
+  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
+  providers: [provideIcons({ phosphorWarningCircle })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

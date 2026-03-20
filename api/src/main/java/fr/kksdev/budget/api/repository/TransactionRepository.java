@@ -41,7 +41,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     @Query(value = "SELECT COALESCE(SUM(t.montant), 0) FROM transactions t " +
             "WHERE t.user_id = :userId AND t.category_id = :categoryId " +
-            "AND t.type = 'DEPENSE' AND t.date >= :from AND t.date <= :to",
+            "AND t.type = 'DEPENSE' AND t.is_recurring = false AND t.date >= :from AND t.date <= :to",
             nativeQuery = true)
     BigDecimal sumDepenseByUserIdAndCategoryIdAndDateBetween(
             @Param("userId") UUID userId,
@@ -49,10 +49,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
-    @Query(value = "SELECT t.category_id, COALESCE(SUM(t.montant), 0) FROM transactions t " +
+    @Query(value = "SELECT t.category_id, COALESCE(SUM(t.montant), 0), a.currency FROM transactions t " +
+            "JOIN accounts a ON t.account_id = a.id " +
             "WHERE t.user_id = :userId AND t.category_id IN :categoryIds " +
-            "AND t.type = 'DEPENSE' AND t.date >= :from AND t.date <= :to " +
-            "GROUP BY t.category_id",
+            "AND t.type = 'DEPENSE' AND t.is_recurring = false AND t.date >= :from AND t.date <= :to " +
+            "GROUP BY t.category_id, a.currency",
             nativeQuery = true)
     List<Object[]> sumDepenseByUserIdAndCategoryIdsAndDateBetween(
             @Param("userId") UUID userId,
@@ -71,7 +72,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +
-            "WHERE t.user_id = :userId AND t.type = 'DEPENSE' " +
+            "WHERE t.user_id = :userId AND t.type = 'DEPENSE' AND t.is_recurring = false " +
             "AND t.date >= :startDate AND t.date <= :endDate " +
             "AND t.category_id IS NOT NULL " +
             "AND t.category_id NOT IN (SELECT b.category_id FROM budgets b WHERE b.user_id = :userId AND b.actif = true) " +

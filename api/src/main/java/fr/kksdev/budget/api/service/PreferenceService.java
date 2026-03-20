@@ -12,6 +12,7 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class PreferenceService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final ExchangeRateService exchangeRateService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public UserPreferenceResponse getPreferences(UUID userId) {
         UserPreference preference = getOrCreate(userId);
@@ -71,6 +73,11 @@ public class PreferenceService {
             if (oldPrimary != null && oldPrimary != newPrimary) {
                 exchangeRateService.rebaseRates(userId, oldPrimary, newPrimary);
                 log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
+                messagingTemplate.convertAndSendToUser(
+                        userId.toString(),
+                        "/queue/exchange-rates",
+                        Map.of("type", "EXCHANGE_RATES_UPDATED")
+                );
             }
         }
         if (request.enabledNotificationTypes() != null) {

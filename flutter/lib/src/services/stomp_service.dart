@@ -15,12 +15,14 @@ final stompServiceProvider = Provider<StompService>((ref) {
 class StompService with WidgetsBindingObserver {
   StompClient? _client;
   final _notificationController = StreamController<NotificationModel>.broadcast();
+  final _exchangeRatesUpdatedController = StreamController<void>.broadcast();
   VoidCallback? _onReconnect;
   AppLifecycleState _appState = AppLifecycleState.resumed;
   LocalNotificationService? _localNotificationService;
   bool _observing = false;
 
   Stream<NotificationModel> get notifications => _notificationController.stream;
+  Stream<void> get exchangeRatesUpdated => _exchangeRatesUpdatedController.stream;
 
   void connect({
     required String token,
@@ -79,6 +81,17 @@ class StompService with WidgetsBindingObserver {
         }
       },
     );
+    _client?.subscribe(
+      destination: '/user/queue/exchange-rates',
+      callback: (frame) {
+        if (frame.body != null) {
+          final data = jsonDecode(frame.body!) as Map<String, dynamic>;
+          if (data['type'] == 'EXCHANGE_RATES_UPDATED') {
+            _exchangeRatesUpdatedController.add(null);
+          }
+        }
+      },
+    );
     _onReconnect?.call();
   }
 
@@ -94,5 +107,6 @@ class StompService with WidgetsBindingObserver {
     }
     disconnect();
     _notificationController.close();
+    _exchangeRatesUpdatedController.close();
   }
 }

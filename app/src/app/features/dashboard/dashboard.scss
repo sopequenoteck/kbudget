@@ -62,11 +62,23 @@
     letter-spacing: 0.05em;
   }
 
+  &__total-value-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
   &__total-value {
     font-size: var(--font-size-hero);
     font-weight: var(--font-weight-bold);
     text-shadow: var(--shadow-hero-text);
   }
+}
+
+.missing-rate-icon {
+  color: var(--text-warning);
+  flex-shrink: 0;
+  cursor: default;
 }
 
 // -- Badges variation --

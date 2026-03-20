@@ -12,11 +12,9 @@ import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
 import fr.kksdev.budget.api.model.BudgetSnapshot;
 import fr.kksdev.budget.api.model.Category;
-import fr.kksdev.budget.api.model.ExchangeRate;
 import fr.kksdev.budget.api.repository.BudgetRepository;
 import fr.kksdev.budget.api.repository.BudgetSnapshotRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
-import fr.kksdev.budget.api.repository.ExchangeRateRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -53,7 +51,7 @@ public class BudgetService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final PreferenceService preferenceService;
-    private final ExchangeRateRepository exchangeRateRepository;
+    private final ExchangeRateService exchangeRateService;
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
 
@@ -160,12 +158,11 @@ public class BudgetService {
             BigDecimal spent = spentMap.getOrDefault(budget.getCategory().getId(), BigDecimal.ZERO);
 
             BigDecimal normalisedConverted = normalised;
-            BigDecimal spentConverted = spent;
+            BigDecimal spentConverted = spent; // already in primary currency from getSpentByCategory
             if (budget.getCurrency() != primaryCurrency) {
-                Optional<BigDecimal> rate = getExchangeRate(userId, budget.getCurrency(), primaryCurrency);
+                Optional<BigDecimal> rate = exchangeRateService.getRate(userId, budget.getCurrency(), primaryCurrency);
                 if (rate.isPresent()) {
                     normalisedConverted = normalised.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
-                    spentConverted = spent.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
                 }
             }
 
@@ -181,7 +178,7 @@ public class BudgetService {
                     budget.getCategory().getCouleur(),
                     budget.getMontant(),
                     normalisedConverted,
-                    budget.getCurrency().name(),
+                    primaryCurrency.name(),
                     spentConverted,
                     percentage,
                     budget.getFrequence().name()
@@ -234,11 +231,9 @@ public class BudgetService {
 
         for (BudgetSnapshot snapshot : snapshots) {
             BigDecimal convertedBudget = snapshot.getMontantBudget();
-            BigDecimal spentConverted = snapshot.getMontantDepense();
+            BigDecimal spentConverted = snapshot.getMontantDepense(); // already in primary currency
             if (snapshot.getTauxChange() != null) {
                 convertedBudget = snapshot.getMontantBudget().multiply(snapshot.getTauxChange())
-                        .setScale(2, RoundingMode.HALF_UP);
-                spentConverted = snapshot.getMontantDepense().multiply(snapshot.getTauxChange())
                         .setScale(2, RoundingMode.HALF_UP);
             }
 
@@ -253,7 +248,7 @@ public class BudgetService {
                     snapshot.getCategory().getIcone(),
                     snapshot.getCategory().getCouleur(),
                     snapshot.getMontantBudget(),
-                    snapshot.getCurrency().name(),
+                    primaryCurrency.name(),
                     snapshot.getTauxChange(),
                     spentConverted,
                     percentage,
@@ -289,9 +284,11 @@ public class BudgetService {
             Currency rowCurrency = Currency.valueOf(currencyCode);
             BigDecimal montantConverti = montant;
             if (rowCurrency != primaryCurrency) {
-                Optional<BigDecimal> rate = getExchangeRate(userId, rowCurrency, primaryCurrency);
+                Optional<BigDecimal> rate = exchangeRateService.getRate(userId, rowCurrency, primaryCurrency);
                 if (rate.isPresent()) {
                     montantConverti = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+                } else {
+                    log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", rowCurrency, primaryCurrency, userId);
                 }
             }
             if (merged.containsKey(catId)) {
@@ -406,11 +403,25 @@ public class BudgetService {
                 .map(b -> b.getCategory().getId())
                 .toList();
         if (categoryIds.isEmpty()) return Map.of();
+        Currency primaryCurrency = getPrimaryCurrency(userId);
         List<Object[]> results = transactionRepository
                 .sumDepenseByUserIdAndCategoryIdsAndDateBetween(userId, categoryIds, firstDay, lastDay);
         Map<UUID, BigDecimal> map = new HashMap<>();
         for (Object[] row : results) {
-            map.put((UUID) row[0], (BigDecimal) row[1]);
+            UUID catId = (UUID) row[0];
+            BigDecimal montant = (BigDecimal) row[1];
+            String currencyCode = (String) row[2];
+            Currency rowCurrency = Currency.valueOf(currencyCode);
+            BigDecimal montantConverti = montant;
+            if (rowCurrency != primaryCurrency) {
+                Optional<BigDecimal> rate = exchangeRateService.getRate(userId, rowCurrency, primaryCurrency);
+                if (rate.isPresent()) {
+                    montantConverti = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+                } else {
+                    log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", rowCurrency, primaryCurrency, userId);
+                }
+            }
+            map.merge(catId, montantConverti, BigDecimal::add);
         }
         return map;
     }
@@ -451,21 +462,6 @@ public class BudgetService {
         return (currencies != null && !currencies.isEmpty()) ? currencies.get(0) : Currency.EUR;
     }
 
-    private Optional<BigDecimal> getExchangeRate(UUID userId, Currency from, Currency to) {
-        Optional<BigDecimal> rate = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, from, to)
-                .map(ExchangeRate::getRate);
-        if (rate.isPresent()) {
-            return rate;
-        }
-        Optional<BigDecimal> inverse = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, to, from)
-                .map(ExchangeRate::getRate);
-        if (inverse.isPresent()) {
-            return Optional.of(BigDecimal.ONE.divide(inverse.get(), 6, RoundingMode.HALF_UP));
-        }
-        log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", from, to, userId);
-        return Optional.empty();
-    }
-
     private List<BudgetSnapshot> createSnapshotsLazily(String month, YearMonth targetMonth, UUID userId, Currency primaryCurrency) {
         List<Budget> budgets = budgetRepository.findByUserId(userId);
         LocalDate firstDay = targetMonth.atDay(1);
@@ -481,7 +477,7 @@ public class BudgetService {
 
             BigDecimal tauxChange = null;
             if (budget.getCurrency() != primaryCurrency) {
-                tauxChange = getExchangeRate(userId, budget.getCurrency(), primaryCurrency).orElse(null);
+                tauxChange = exchangeRateService.getRate(userId, budget.getCurrency(), primaryCurrency).orElse(null);
             }
 
             BudgetSnapshot snapshot = BudgetSnapshot.builder()

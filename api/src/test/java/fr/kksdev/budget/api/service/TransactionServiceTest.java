@@ -64,6 +64,9 @@ class TransactionServiceTest {
     @Mock
     private DebtRepository debtRepository;
 
+    @Mock
+    private ExchangeRateService exchangeRateService;
+
     @InjectMocks
     private TransactionService transactionService;
 
@@ -275,11 +278,9 @@ class TransactionServiceTest {
 
     @Test
     void should_return_empty_list_when_no_transactions() {
-        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
                 userId, LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)))
                 .thenReturn(List.of());
-        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
 
         List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(3, 2026, userId);
 
@@ -343,5 +344,87 @@ class TransactionServiceTest {
 
         assertThatThrownBy(() -> transactionService.create(request, userId))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void should_aggregateAllCurrencies_when_multipleCurrencyAccountsExist() {
+        var user = buildUser();
+        var accountEur = Account.builder()
+                .id(UUID.randomUUID()).nom("Compte EUR").type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO).icone("🏦").couleur("#3b82f6")
+                .isDefault(true).actif(true).currency(Currency.EUR).user(user).build();
+        var accountXof = Account.builder()
+                .id(UUID.randomUUID()).nom("Compte XOF").type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO).icone("💰").couleur("#f59e0b")
+                .isDefault(false).actif(true).currency(Currency.XOF).user(user).build();
+
+        var recetteEur = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("1000.00"))
+                .type(TransactionType.RECETTE).date(LocalDate.of(2026, 2, 1))
+                .libelle("Salaire EUR").account(accountEur).user(user).build();
+        var depenseXof = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("65500.00"))
+                .type(TransactionType.DEPENSE).date(LocalDate.of(2026, 2, 10))
+                .libelle("Marché XOF").account(accountXof).user(user).build();
+
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+        when(transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
+                userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
+                .thenReturn(List.of(recetteEur, depenseXof));
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
+        // 1 EUR = 655 XOF → taux XOF→EUR = 1/655 ≈ 0.001527
+        when(exchangeRateService.getRate(userId, Currency.XOF, Currency.EUR))
+                .thenReturn(Optional.of(new BigDecimal("0.001527")));
+
+        List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(2, 2026, userId);
+
+        assertThat(summaries).hasSize(1);
+        var summary = summaries.getFirst();
+        assertThat(summary.currency()).isEqualTo("EUR");
+        assertThat(summary.totalRecettes()).isEqualByComparingTo("1000.00");
+        // 65500 XOF / 655 = ~100 EUR (taux inverse 1/655 avec 6 décimales → léger arrondi attendu)
+        assertThat(summary.totalDepenses()).isBetween(new BigDecimal("99.90"), new BigDecimal("100.10"));
+        assertThat(summary.solde()).isBetween(new BigDecimal("899.90"), new BigDecimal("900.10"));
+    }
+
+    @Test
+    void should_useRawAmount_when_exchangeRateMissing() {
+        var user = buildUser();
+        var accountEur = Account.builder()
+                .id(UUID.randomUUID()).nom("Compte EUR").type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO).icone("🏦").couleur("#3b82f6")
+                .isDefault(true).actif(true).currency(Currency.EUR).user(user).build();
+        var accountXof = Account.builder()
+                .id(UUID.randomUUID()).nom("Compte XOF").type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO).icone("💰").couleur("#f59e0b")
+                .isDefault(false).actif(true).currency(Currency.XOF).user(user).build();
+
+        var recetteEur = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("500.00"))
+                .type(TransactionType.RECETTE).date(LocalDate.of(2026, 2, 1))
+                .libelle("Salaire EUR").account(accountEur).user(user).build();
+        var depenseXof = Transaction.builder()
+                .id(UUID.randomUUID()).montant(new BigDecimal("10000.00"))
+                .type(TransactionType.DEPENSE).date(LocalDate.of(2026, 2, 5))
+                .libelle("Achat XOF").account(accountXof).user(user).build();
+
+        var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
+        when(transactionRepository.findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(
+                userId, LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28)))
+                .thenReturn(List.of(recetteEur, depenseXof));
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
+        // Aucun taux disponible → transaction XOF exclue du bilan
+        when(exchangeRateService.getRate(any(), any(), any()))
+                .thenReturn(Optional.empty());
+
+        List<MonthlySummaryResponse> summaries = transactionService.getMonthlySummary(2, 2026, userId);
+
+        assertThat(summaries).hasSize(1);
+        var summary = summaries.getFirst();
+        assertThat(summary.currency()).isEqualTo("EUR");
+        // Seule la recette EUR est comptée, la dépense XOF sans taux est exclue
+        assertThat(summary.totalRecettes()).isEqualByComparingTo("500.00");
+        assertThat(summary.totalDepenses()).isEqualByComparingTo("0.00");
+        assertThat(summary.solde()).isEqualByComparingTo("500.00");
     }
 }

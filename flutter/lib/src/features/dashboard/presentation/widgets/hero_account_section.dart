@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -11,6 +12,7 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HeroAccountSection extends ConsumerWidget {
@@ -38,7 +40,8 @@ class HeroAccountSection extends ConsumerWidget {
         state.accounts.where((a) => a.id != defaultAccount.id).toList();
     final showSeeAll = state.accounts.length >= 5;
 
-    // Total patrimoine dans activeCurrency
+    // Total patrimoine dans activeCurrency + detection taux manquants
+    bool hasMissingRate = false;
     final totalBalance = state.accounts.fold<double>(0, (sum, a) {
       if (a.currency == activeCurrency) return sum + a.solde;
       final converted = CurrencyConverter.convert(
@@ -47,6 +50,7 @@ class HeroAccountSection extends ConsumerWidget {
         toCurrency: activeCurrency,
         rates: exchangeRates,
       );
+      if (converted == null) hasMissingRate = true;
       return sum + (converted ?? 0);
     });
 
@@ -58,6 +62,7 @@ class HeroAccountSection extends ConsumerWidget {
           activeCurrency: activeCurrency,
           exchangeRates: exchangeRates,
           totalBalance: state.accounts.length > 1 ? totalBalance : null,
+          hasMissingRate: state.accounts.length > 1 && hasMissingRate,
         ),
         if (otherAccounts.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.space3),
@@ -90,12 +95,14 @@ class _HeroCard extends StatelessWidget {
     required this.activeCurrency,
     required this.exchangeRates,
     this.totalBalance,
+    this.hasMissingRate = false,
   });
 
   final Account account;
   final Currency activeCurrency;
   final List<ExchangeRate> exchangeRates;
   final double? totalBalance;
+  final bool hasMissingRate;
 
   @override
   Widget build(BuildContext context) {
@@ -161,13 +168,28 @@ class _HeroCard extends StatelessWidget {
           ],
           if (totalBalance != null) ...[
             const SizedBox(height: AppSpacing.space2),
-            Text(
-              'Total : ${AmountFormatter.format(totalBalance!, currency: activeCurrency)}',
-              style: TextStyle(
-                fontSize: AppTypography.sizeSm,
-                fontWeight: AppTypography.medium,
-                color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
-              ),
+            Row(
+              children: [
+                Text(
+                  'Total : ${AmountFormatter.format(totalBalance!, currency: activeCurrency)}',
+                  style: TextStyle(
+                    fontSize: AppTypography.sizeSm,
+                    fontWeight: AppTypography.medium,
+                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
+                  ),
+                ),
+                if (hasMissingRate) ...[
+                  const SizedBox(width: AppSpacing.space1),
+                  const Tooltip(
+                    message: 'Certains montants n\'ont pas pu être convertis',
+                    child: Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      size: 16,
+                      color: AppColors.warning,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ],

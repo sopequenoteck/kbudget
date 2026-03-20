@@ -2,6 +2,7 @@ import { Injectable, inject, isDevMode, DestroyRef } from '@angular/core';
 import { Client } from '@stomp/stompjs';
 import { NotificationService } from './notification';
 import { AuthService } from './auth';
+import { ExchangeRateService } from './exchange-rate';
 import { type NotificationModel } from '../models/notification.model';
 
 @Injectable({
@@ -10,6 +11,7 @@ import { type NotificationModel } from '../models/notification.model';
 export class StompService {
   private readonly notificationService = inject(NotificationService);
   private readonly authService = inject(AuthService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly destroyRef = inject(DestroyRef);
 
   private client: Client | null = null;
@@ -44,6 +46,13 @@ export class StompService {
         this.client!.subscribe('/user/queue/notifications', (message) => {
           const notification: NotificationModel = JSON.parse(message.body);
           this.notificationService.addNotification(notification);
+        });
+
+        this.client!.subscribe('/user/queue/exchange-rates', (message) => {
+          const event = JSON.parse(message.body);
+          if (event?.type === 'EXCHANGE_RATES_UPDATED') {
+            this.exchangeRateService.loadRates();
+          }
         });
       },
       onDisconnect: () => {

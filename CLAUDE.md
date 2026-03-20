@@ -309,6 +309,8 @@ Approche **signals-first** obligatoire :
 - localStorage (clé `budget_text_scale`) (093-angular-text-scale)
 - Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Angular 21 (094-sync-text-scale-api)
 - PostgreSQL 15+ (Flyway V21) (094-sync-text-scale-api)
+- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Dio (095-currency-rebase-propagation)
+- PostgreSQL 15+ (table `exchange_rates`, table `user_preferences`) (095-currency-rebase-propagation)
 
 ### Backend (api/)
 
@@ -361,3 +363,4 @@ Approche **signals-first** obligatoire :
 - 091-dashboard-visual-revamp: Dashboard Angular refonte visuelle iOS-like — hero card gradient amber→indigo, glassmorphism cards (dark mode), badges variation, barres budget vertes + animation, transactions en cards individuelles, gradient radial page, micro-interactions tap; transaction subtitle affiche nom du compte; 379 tests inchangés
 - 092-bottom-nav-revamp: Bottom nav Angular refonte visuelle iOS-like — pill indicator (pseudo-élément ::before sur onglet actif), glassmorphism (dark mode, tokens 091 réutilisés), bordure supérieure subtile (light mode), police réduite via data-item-count pour 6+ items; 379 tests inchangés
 - 094-sync-text-scale-api: TextScale enum (SMALL/MEDIUM/LARGE); Flyway V21 (ALTER TABLE user_preferences); PreferenceService + DTOs enrichis (+textScale); Angular TextScaleService bridgé vers PreferenceService via effect() (API source de vérité, localStorage comme cache); Flutter TextScaleNotifier sync API (local-first, server override, fire-and-forget write)
+- 095-currency-rebase-propagation: Rebase automatique des taux de change quand la devise principale change (PreferenceService appelle rebaseRates() transactionnellement); Angular PreferenceService.update() recharge les taux via ExchangeRateService.loadRates(); Flutter CurrencyConfigNotifier.reorderCurrencies() recharge via exchangeRateNotifier.loadItems(); WebSocket STOMP push EXCHANGE_RATES_UPDATED pour multi-device; indicateur visuel hasMissingRate sur le dashboard (Angular ph-warning-circle + Flutter PhosphorIcons.warningCircle); fix budget double-comptage (AND t.is_recurring = false sur les 3 requêtes SUM budget); fix agrégation multi-devises dans getSpentByCategory() avec conversion par devise du compte; ExchangeRateService.getRate() méthode partagée (supprime duplication BudgetService/TransactionService); 493 tests passent

@@ -6,6 +6,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 ## [Unreleased]
 
 ### Added
+- Propagation automatique rebase taux de change lors du changement de devise principale — WebSocket STOMP `/user/queue/exchange-rates`, indicateur hasMissingRate sur le dashboard (Angular + Flutter) (KKS-095)
 - Associer une banque à un compte — BankRegistry 29 banques statiques (FR/TG/International), endpoint GET /banks, Flyway V19, AccountRequest/Response enrichis (KKS-081)
 - Associer une banque à un compte (Angular) — BankSelect, AccountBankIcon, AccountForm enrichi, image.utils.ts (KKS-082)
 - Associer une banque à un compte (Flutter) — BankSelectPicker, AccountBankIcon, 29 logos SVG, Drift migration v3 (KKS-083)
@@ -15,6 +16,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Transactions récurrentes & paiements abonnements (Flutter) — RecurringListScreen (validate/skip/deactivate), SubscriptionDetailScreen (historique paiements + total cumulé), NotificationPanel étendu (RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE + deep links budget), EntityType aligné avec backend (+BUDGET +TRANSACTION) (KKS-088)
 
 ### Changed
+- Budget : agrégation multi-devises corrigée — transactions converties en devise principale avant sommation, templates récurrents exclus des calculs (KKS-095)
+- ExchangeRateService.getRate() centralise la résolution taux direct/inverse, supprime la duplication BudgetService/TransactionService (KKS-095)
 - CategoryResponse.from() et AccountSummary.from() static factories remplacent les méthodes privées dupliquées dans 5 services (KKS-085)
 - SubscriptionPaymentService.getTotalPaid() utilise une COUNT query au lieu de charger toutes les transactions (KKS-085)
 

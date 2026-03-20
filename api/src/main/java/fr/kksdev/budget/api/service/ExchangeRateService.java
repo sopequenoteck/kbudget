@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -99,6 +100,19 @@ public class ExchangeRateService {
             exchangeRateRepository.save(rate);
             log.info("Taux rebasé: {}/{} = {} pour userId={}", rate.getBaseCurrency(), rate.getTargetCurrency(), rate.getRate(), userId);
         }
+    }
+
+    public Optional<BigDecimal> getRate(UUID userId, Currency from, Currency to) {
+        if (from == to) return Optional.of(BigDecimal.ONE);
+        Optional<BigDecimal> rate = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, from, to)
+                .map(ExchangeRate::getRate);
+        if (rate.isPresent()) return rate;
+        Optional<BigDecimal> inverse = exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, to, from)
+                .map(ExchangeRate::getRate);
+        if (inverse.isPresent()) {
+            return Optional.of(BigDecimal.ONE.divide(inverse.get(), 6, RoundingMode.HALF_UP));
+        }
+        return Optional.empty();
     }
 
     private BigDecimal findPivotRate(List<ExchangeRate> rates, Currency from, Currency to) {

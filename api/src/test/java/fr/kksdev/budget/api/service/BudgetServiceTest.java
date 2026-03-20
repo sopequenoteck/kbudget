@@ -14,13 +14,11 @@ import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
 import fr.kksdev.budget.api.model.BudgetSnapshot;
 import fr.kksdev.budget.api.model.Category;
-import fr.kksdev.budget.api.model.ExchangeRate;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.BudgetRepository;
 import fr.kksdev.budget.api.repository.BudgetSnapshotRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
-import fr.kksdev.budget.api.repository.ExchangeRateRepository;
 import fr.kksdev.budget.api.repository.NotificationRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -77,7 +75,7 @@ class BudgetServiceTest {
     private PreferenceService preferenceService;
 
     @Mock
-    private ExchangeRateRepository exchangeRateRepository;
+    private ExchangeRateService exchangeRateService;
 
     @Mock
     private NotificationService notificationService;
@@ -316,7 +314,7 @@ class BudgetServiceTest {
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(batchResult(new Object[]{categoryId, expectedSpent}));
+                .thenReturn(batchResult(new Object[]{categoryId, expectedSpent, "EUR"}));
 
         List<BudgetResponse> result = budgetService.getAll(userId, false);
 
@@ -326,6 +324,42 @@ class BudgetServiceTest {
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class));
         verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
                 any(), any(), any(), any());
+    }
+
+    @Test
+    void should_convertTransactionAmounts_when_budgetAndAccountCurrenciesDiffer() {
+        // Budget EUR 800€ MENSUEL, catégorie "Maison"
+        // Transactions : 650€ EUR + 20 000 XOF
+        // Taux XOF→EUR direct : 0.001524 (≈ 1/655.957)
+        // Spent attendu : 650 + 20000 * 0.001524 = 650 + 30.48 = 680.48 EUR
+        var category = buildCategory(categoryId);
+        var budget = Budget.builder()
+                .id(budgetId)
+                .montant(new BigDecimal("800.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(true)
+                .category(category)
+                .user(buildUser(userId))
+                .build();
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult(
+                        new Object[]{categoryId, new BigDecimal("650.00"), "EUR"},
+                        new Object[]{categoryId, new BigDecimal("20000.00"), "XOF"}
+                ));
+        when(exchangeRateService.getRate(userId, Currency.XOF, Currency.EUR))
+                .thenReturn(Optional.of(new BigDecimal("0.001524")));
+
+        List<BudgetResponse> result = budgetService.getAll(userId, false);
+
+        assertThat(result).hasSize(1);
+        // 650.00 + 20000 * 0.001524 = 650.00 + 30.48 = 680.48
+        assertThat(result.getFirst().spent())
+                .isCloseTo(new BigDecimal("680.48"), org.assertj.core.data.Offset.offset(new BigDecimal("0.01")));
     }
 
     // -------------------------------------------------------------------------
@@ -417,8 +451,8 @@ class BudgetServiceTest {
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(batchResult(
-                        new Object[]{catId1, new BigDecimal("100.00")},
-                        new Object[]{catId2, new BigDecimal("200.00")}
+                        new Object[]{catId1, new BigDecimal("100.00"), "EUR"},
+                        new Object[]{catId2, new BigDecimal("200.00"), "EUR"}
                 ));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
@@ -442,18 +476,12 @@ class BudgetServiceTest {
                 .user(buildUser(userId))
                 .build();
 
-        var exchangeRate = ExchangeRate.builder()
-                .baseCurrency(Currency.USD)
-                .targetCurrency(Currency.EUR)
-                .rate(new BigDecimal("0.920000"))
-                .build();
-
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(usdBudget));
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00")}));
-        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.USD, Currency.EUR))
-                .thenReturn(Optional.of(exchangeRate));
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00"), "USD"}));
+        when(exchangeRateService.getRate(userId, Currency.USD, Currency.EUR))
+                .thenReturn(Optional.of(new BigDecimal("0.920000")));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -483,9 +511,7 @@ class BudgetServiceTest {
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(List.of());
-        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.USD, Currency.EUR))
-                .thenReturn(Optional.empty());
-        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.USD))
+        when(exchangeRateService.getRate(userId, Currency.USD, Currency.EUR))
                 .thenReturn(Optional.empty());
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
@@ -510,23 +536,13 @@ class BudgetServiceTest {
                 .user(buildUser(userId))
                 .build();
 
-        var inverseRate = ExchangeRate.builder()
-                .baseCurrency(Currency.EUR)
-                .targetCurrency(Currency.XOF)
-                .rate(new BigDecimal("655.957"))
-                .user(buildUser(userId))
-                .build();
-
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(xofBudget));
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("32500.00")}));
-        // Direct XOF→EUR absent
-        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.XOF, Currency.EUR))
-                .thenReturn(Optional.empty());
-        // Inverse EUR→XOF présent
-        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.XOF))
-                .thenReturn(Optional.of(inverseRate));
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("32500.00"), "XOF"}));
+        // getRate gère le lookup inverse en interne — retourne 1/655.957
+        when(exchangeRateService.getRate(userId, Currency.XOF, Currency.EUR))
+                .thenReturn(Optional.of(new BigDecimal("0.001524")));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -567,7 +583,7 @@ class BudgetServiceTest {
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(zeroBudget));
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00")}));
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("50.00"), "EUR"}));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -592,7 +608,7 @@ class BudgetServiceTest {
         when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(weeklyBudget));
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("87.50")}));
+                .thenReturn(batchResult(new Object[]{categoryId, new BigDecimal("87.50"), "EUR"}));
 
         BudgetOverviewResponse response = budgetService.getOverview(userId);
 
@@ -633,8 +649,8 @@ class BudgetServiceTest {
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(batchResult(
-                        new Object[]{catId1, new BigDecimal("75.00")},
-                        new Object[]{catId2, new BigDecimal("250.00")}
+                        new Object[]{catId1, new BigDecimal("75.00"), "EUR"},
+                        new Object[]{catId2, new BigDecimal("250.00"), "EUR"}
                 ));
 
         List<BudgetResponse> result = budgetService.getAll(userId, false);
@@ -653,6 +669,43 @@ class BudgetServiceTest {
                 any(), any(), any(), any());
     }
 
+    @Test
+    void should_returnPrimaryCurrencyInOverviewItems_when_budgetCurrencyDiffers() {
+        // Budget en EUR, devise principale XOF, taux EUR→XOF configuré
+        var category = buildCategory(categoryId);
+        var eurBudget = Budget.builder()
+                .id(budgetId)
+                .montant(new BigDecimal("100.00"))
+                .currency(Currency.EUR)
+                .frequence(Frequency.MENSUEL)
+                .seuilNotification(80)
+                .actif(true)
+                .category(category)
+                .user(buildUser(userId))
+                .build();
+
+        // Devise principale = XOF
+        var prefs = UserPreference.builder()
+                .currencies(List.of(Currency.XOF))
+                .build();
+        when(preferenceService.getOrCreatePreference(userId)).thenReturn(prefs);
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of(eurBudget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
+                eq(userId), any(List.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of());
+        when(exchangeRateService.getRate(userId, Currency.EUR, Currency.XOF))
+                .thenReturn(Optional.of(new BigDecimal("655.957000")));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        assertThat(response.items()).hasSize(1);
+        // La devise de l'item doit être la devise principale (XOF), pas celle du budget (EUR)
+        assertThat(response.items().getFirst().currency()).isEqualTo("XOF");
+        // Le montant converti : 100 EUR * 655.957 = 65595.70 XOF
+        assertThat(response.items().getFirst().montantBudgetNormalise()).isEqualByComparingTo("65595.70");
+    }
+
     // -------------------------------------------------------------------------
     // US3 — History tests (T029)
     // -------------------------------------------------------------------------
@@ -665,7 +718,7 @@ class BudgetServiceTest {
 
         when(budgetSnapshotRepository.findByUserIdAndMois(userId, pastMonth)).thenReturn(List.of());
         when(budgetRepository.findByUserId(userId)).thenReturn(List.of(budget));
-        List<Object[]> batchResult = Collections.singletonList(new Object[]{categoryId, new BigDecimal("150.00")});
+        List<Object[]> batchResult = Collections.singletonList(new Object[]{categoryId, new BigDecimal("150.00"), "EUR"});
         when(transactionRepository.sumDepenseByUserIdAndCategoryIdsAndDateBetween(
                 eq(userId), eq(List.of(categoryId)), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(batchResult);
@@ -774,12 +827,13 @@ class BudgetServiceTest {
         assertThat(response.items()).hasSize(1);
         var item = response.items().getFirst();
         assertThat(item.tauxChange()).isEqualByComparingTo("0.920000");
-        assertThat(item.currency()).isEqualTo("USD");
+        // La devise retournée est la devise principale (EUR), pas celle du snapshot (USD)
+        assertThat(item.currency()).isEqualTo("EUR");
         // Budget converted: 100 * 0.92 = 92.00
         assertThat(response.totalBudget()).isEqualByComparingTo("92.00");
-        // Spent converted: 50 * 0.92 = 46.00
-        assertThat(response.totalSpent()).isEqualByComparingTo("46.00");
-        assertThat(item.montantDepense()).isEqualByComparingTo("46.00");
+        // Spent stored in primary currency (no re-conversion by tauxChange)
+        assertThat(response.totalSpent()).isEqualByComparingTo("50.00");
+        assertThat(item.montantDepense()).isEqualByComparingTo("50.00");
     }
 
     // -------------------------------------------------------------------------

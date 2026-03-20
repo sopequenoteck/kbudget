@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +44,9 @@ class PreferenceServiceTest {
 
     @Mock
     private ExchangeRateService exchangeRateService;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private PreferenceService preferenceService;
@@ -254,11 +260,11 @@ class PreferenceServiceTest {
     // === US4: updatePreferences — currencies & rebaseRates ===
 
     @Test
-    void should_callRebaseRates_when_primaryCurrencyChanges() {
+    void should_rebaseRates_when_primaryCurrencyChanges() {
         var preference = buildPreference(
                 List.of(Feature.SUBSCRIPTIONS),
                 List.of(Feature.SUBSCRIPTIONS),
-                List.of(Currency.EUR, Currency.XOF)
+                List.of(Currency.EUR)
         );
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
@@ -267,10 +273,15 @@ class PreferenceServiceTest {
         preferenceService.updatePreferences(request, userId);
 
         verify(exchangeRateService).rebaseRates(userId, Currency.EUR, Currency.XOF);
+        verify(messagingTemplate).convertAndSendToUser(
+                eq(userId.toString()),
+                eq("/queue/exchange-rates"),
+                any()
+        );
     }
 
     @Test
-    void should_notCallRebaseRates_when_primaryCurrencyUnchanged() {
+    void should_notRebaseRates_when_primaryCurrencyUnchanged() {
         var preference = buildPreference(
                 List.of(Feature.SUBSCRIPTIONS),
                 List.of(Feature.SUBSCRIPTIONS),
@@ -283,6 +294,24 @@ class PreferenceServiceTest {
         preferenceService.updatePreferences(request, userId);
 
         verify(exchangeRateService, never()).rebaseRates(any(), any(), any());
+        verify(messagingTemplate, never()).convertAndSendToUser(any(), any(), any());
+    }
+
+    @Test
+    void should_rollbackPreferences_when_rebaseFails() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        doThrow(new RuntimeException("Rebase failed")).when(exchangeRateService).rebaseRates(any(), any(), any());
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, List.of(Currency.XOF), null, null, null);
+
+        assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Rebase failed");
     }
 
     @Test

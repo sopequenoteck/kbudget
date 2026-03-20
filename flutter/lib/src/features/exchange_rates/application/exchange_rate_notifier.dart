@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
+import 'package:k_budget/src/services/stomp_service.dart';
 
 final exchangeRateListProvider =
     NotifierProvider<ExchangeRateNotifier, ListState<ExchangeRate>>(
@@ -78,3 +81,15 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
     }
   }
 }
+
+final exchangeRateStompListenerProvider = Provider<void>((ref) {
+  final stompService = ref.watch(stompServiceProvider);
+  final notifier = ref.watch(exchangeRateListProvider.notifier);
+
+  final StreamSubscription<void> subscription =
+      stompService.exchangeRatesUpdated.listen((_) {
+    notifier.loadItems();
+  });
+
+  ref.onDispose(() => subscription.cancel());
+});

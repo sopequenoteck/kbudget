@@ -28,11 +28,21 @@
     <div class="accounts-zone__totals">
       <div class="accounts-zone__total">
         <span class="accounts-zone__total-label">Patrimoine total</span>
-        <span
-          class="accounts-zone__total-value"
-          [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
-        >
-          {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
+        <span class="accounts-zone__total-value-row">
+          <span
+            class="accounts-zone__total-value"
+            [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
+          >
+            {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
+          </span>
+          @if (convertedTotalBalance().hasMissingRate) {
+            <ng-icon
+              name="phosphorWarningCircle"
+              size="18"
+              class="missing-rate-icon"
+              title="Certains montants n'ont pas pu être convertis"
+            />
+          }
         </span>
         @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
           <span class="variation-badge"

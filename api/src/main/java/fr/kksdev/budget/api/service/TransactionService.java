@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -44,6 +46,7 @@ public class TransactionService {
     private final PreferenceService preferenceService;
     private final BudgetService budgetService;
     private final DebtRepository debtRepository;
+    private final ExchangeRateService exchangeRateService;
 
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
@@ -213,46 +216,42 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository
                 .findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(userId, from, to);
 
-        // Group transactions by account currency
-        Map<String, List<Transaction>> byCurrency = transactions.stream()
-                .collect(Collectors.groupingBy(t -> t.getAccount().getCurrency().name()));
+        if (transactions.isEmpty()) {
+            return List.of();
+        }
 
-        // Determine user primary currency for ordering
-        String defaultCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0).name();
+        // Determine user primary currency
+        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
 
-        List<MonthlySummaryResponse> summaries = byCurrency.entrySet().stream()
-                .map(entry -> {
-                    String currency = entry.getKey();
-                    List<Transaction> txns = entry.getValue();
+        BigDecimal totalRecettes = BigDecimal.ZERO;
+        BigDecimal totalDepenses = BigDecimal.ZERO;
+        BigDecimal totalAjustements = BigDecimal.ZERO;
 
-                    BigDecimal totalRecettes = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.RECETTE)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (Transaction t : transactions) {
+            Currency txCurrency = t.getAccount().getCurrency();
+            BigDecimal montant = t.getMontant();
 
-                    BigDecimal totalDepenses = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.DEPENSE)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (txCurrency != primaryCurrency) {
+                Optional<BigDecimal> rate = exchangeRateService.getRate(userId, txCurrency, primaryCurrency);
+                if (rate.isEmpty()) {
+                    log.warn("Taux de change manquant pour {} → {} (userId={}), transaction exclue du bilan", txCurrency, primaryCurrency, userId);
+                    continue;
+                }
+                montant = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
+            }
 
-                    BigDecimal totalAjustements = txns.stream()
-                            .filter(t -> t.getType() == TransactionType.AJUSTEMENT)
-                            .map(Transaction::getMontant)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (t.getType() == TransactionType.RECETTE) {
+                totalRecettes = totalRecettes.add(montant);
+            } else if (t.getType() == TransactionType.DEPENSE) {
+                totalDepenses = totalDepenses.add(montant);
+            } else if (t.getType() == TransactionType.AJUSTEMENT) {
+                totalAjustements = totalAjustements.add(montant);
+            }
+        }
 
-                    return new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses,
-                            totalRecettes.subtract(totalDepenses).add(totalAjustements), currency);
-                })
-                .sorted((a, b) -> {
-                    // Default currency first, then alphabetical
-                    if (a.currency().equals(defaultCurrency) && !b.currency().equals(defaultCurrency)) return -1;
-                    if (!a.currency().equals(defaultCurrency) && b.currency().equals(defaultCurrency)) return 1;
-                    return a.currency().compareTo(b.currency());
-                })
-                .toList();
-
-        log.info("Bilan mensuel {}/{} pour userId={}: {} devises", month, year, userId, summaries.size());
-        return summaries;
+        BigDecimal solde = totalRecettes.subtract(totalDepenses).add(totalAjustements);
+        log.info("Bilan mensuel {}/{} pour userId={}: agrégé en {}", month, year, userId, primaryCurrency);
+        return List.of(new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses, solde, primaryCurrency.name()));
     }
 
     private void propagateTransferAmount(Transaction transaction, BigDecimal newMontant) {
