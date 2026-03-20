@@ -312,6 +312,8 @@ Approche **signals-first** obligatoire :
 - Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Dio (095-currency-rebase-propagation)
 - PostgreSQL 15+ (table `exchange_rates`, table `user_preferences`) (095-currency-rebase-propagation)
 - API REST (mode serveur) via Dio. Pas de Drift/SQLite pour cette feature (donnees toujours fraiches depuis l'API) (096-flutter-dashboard-refonte)
+- TypeScript 5.9, Angular 21 + `emoji-mart` + `@emoji-mart/data` (nouveau), `@angular/cdk/overlay` (existant) (097-angular-emoji-picker)
+- localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
 
 ### Backend (api/)
 

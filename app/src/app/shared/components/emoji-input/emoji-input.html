@@ -1,9 +1,18 @@
 <div class="emoji-input">
-  <input
-    type="text"
-    [value]="value()"
-    (input)="onInput($event)"
-    placeholder="..."
-    autocomplete="off"
-  />
+  <div
+    class="emoji-trigger"
+    (click)="open()"
+    (keydown.enter)="open()"
+    (keydown.space)="open()"
+    role="button"
+    tabindex="0"
+    aria-label="Choisir un emoji"
+  >
+    {{ value() || '...' }}
+  </div>
+
+  @if (isOpen()) {
+    <div class="picker-backdrop" (click)="onBackdropClick($event)"></div>
+    <div class="picker-popover" (click)="$event.stopPropagation()"></div>
+  }
 </div>
