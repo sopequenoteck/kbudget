@@ -5,6 +5,9 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+- Devise et fuseau horaire a l'inscription — selecteur devise dans le formulaire (Angular + Flutter), timezone auto-detecte par le client (Intl API / DateTime), compte par defaut et preferences initialises avec la devise choisie et le timezone detecte; suppression du selecteur devise fantome dans le profil Angular; fix Africa/Togo → Africa/Lome (identifiant IANA valide) (KKS-100)
+
 ## [4.2.1] - 2026-03-20
 
 ### Fixed
