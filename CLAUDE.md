@@ -323,6 +323,7 @@ Approche **signals-first** obligatoire :
 - N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
 - Java 21 (backend), TypeScript 5.9 (frontend Angular) + Spring Boot 4.0.2, Spring Data JPA, Apache Commons CSV 1.11.0 (nouveau), Apache Commons Text 1.12.0 (nouveau), Angular 21 (099-csv-import)
 - PostgreSQL 15+ (Flyway V22-V23 — 5 nouvelles tables + colonne updatedAt) (099-csv-import)
+- PostgreSQL 15+ (tables existantes `users`, `accounts`, `user_preferences`) (100-register-currency-timezone)
 
 ### Backend (api/)
 

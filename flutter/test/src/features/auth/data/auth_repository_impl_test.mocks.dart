@@ -93,12 +93,18 @@ class MockAuthRemoteDataSource extends _i1.Mock
     String? password,
     String? name, {
     String? invitationToken,
+    String? currency,
+    String? timezone,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #register,
               [email, password, name],
-              {#invitationToken: invitationToken},
+              {
+                #invitationToken: invitationToken,
+                #currency: currency,
+                #timezone: timezone,
+              },
             ),
             returnValue: _i5.Future<_i2.AuthResponse>.value(
               _FakeAuthResponse_0(
@@ -106,7 +112,11 @@ class MockAuthRemoteDataSource extends _i1.Mock
                 Invocation.method(
                   #register,
                   [email, password, name],
-                  {#invitationToken: invitationToken},
+                  {
+                    #invitationToken: invitationToken,
+                    #currency: currency,
+                    #timezone: timezone,
+                  },
                 ),
               ),
             ),
@@ -116,7 +126,11 @@ class MockAuthRemoteDataSource extends _i1.Mock
                 Invocation.method(
                   #register,
                   [email, password, name],
-                  {#invitationToken: invitationToken},
+                  {
+                    #invitationToken: invitationToken,
+                    #currency: currency,
+                    #timezone: timezone,
+                  },
                 ),
               ),
             ),

@@ -248,9 +248,19 @@ class AccountServiceTest {
         var user = buildUser();
         when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        accountService.createDefaultAccount(user);
+        accountService.createDefaultAccount(user, Currency.EUR);
 
         verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void should_createDefaultAccountWithCurrency_when_currencyProvided() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.createDefaultAccount(user, Currency.XOF);
+
+        verify(accountRepository).save(argThat(account -> Currency.XOF.equals(account.getCurrency())));
     }
 
     @Test

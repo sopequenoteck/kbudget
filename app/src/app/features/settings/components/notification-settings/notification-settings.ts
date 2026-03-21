@@ -205,7 +205,7 @@ export class NotificationSettings {
   readonly timezone = this.preferenceService.timezone;
   readonly timezones = [
     'Europe/Paris', 'Europe/London', 'Europe/Berlin', 'Europe/Madrid',
-    'Europe/Rome', 'Europe/Brussels', 'Africa/Casablanca', 'Africa/Togo', 'Africa/Tunis',
+    'Europe/Rome', 'Europe/Brussels', 'Africa/Casablanca', 'Africa/Lome', 'Africa/Tunis',
     'Africa/Lagos', 'Africa/Abidjan', 'America/New_York', 'America/Chicago',
     'America/Los_Angeles', 'Asia/Tokyo', 'Asia/Shanghai',
   ];

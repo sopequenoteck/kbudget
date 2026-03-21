@@ -46,7 +46,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_201_when_register_success() throws Exception {
-        var request = new RegisterRequest("test@mail.com", "password123", "Test User");
+        var request = new RegisterRequest("test@mail.com", "password123", "Test User", null, null);
         var response = new AuthResponse("jwt-token", "refresh-token", "test@mail.com", "Test User");
 
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
@@ -77,7 +77,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_400_when_register_email_invalid() throws Exception {
-        var request = new RegisterRequest("not-an-email", "password123", "Test User");
+        var request = new RegisterRequest("not-an-email", "password123", "Test User", null, null);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_400_when_register_password_too_short() throws Exception {
-        var request = new RegisterRequest("test@mail.com", "short", "Test User");
+        var request = new RegisterRequest("test@mail.com", "short", "Test User", null, null);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +107,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_400_when_email_already_exists() throws Exception {
-        var request = new RegisterRequest("existing@mail.com", "password123", "User");
+        var request = new RegisterRequest("existing@mail.com", "password123", "User", null, null);
 
         when(authService.register(any(RegisterRequest.class)))
                 .thenThrow(new IllegalArgumentException("Email déjà utilisé"));
@@ -131,5 +131,39 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Email ou mot de passe incorrect"));
+    }
+
+    // --- T008 : currency + timezone dans le register ---
+
+    @Test
+    void should_registerWithCurrency_when_currencyProvided() throws Exception {
+        var response = new AuthResponse("jwt-token", "refresh-token", "test@x.com", "Test");
+
+        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"test@x.com\",\"password\":\"test123\",\"currency\":\"XOF\"}"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void should_registerWithDefaults_when_noCurrencyOrTimezone() throws Exception {
+        var response = new AuthResponse("jwt-token", "refresh-token", "test2@x.com", "Test");
+
+        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"test2@x.com\",\"password\":\"test123\"}"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void should_rejectRegistration_when_invalidCurrency() throws Exception {
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"test3@x.com\",\"password\":\"test123\",\"currency\":\"BTC\"}"))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -19,6 +19,8 @@ class AuthRemoteDataSource {
     String password,
     String? name, {
     String? invitationToken,
+    String? currency,
+    String? timezone,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/auth/register',
@@ -27,6 +29,8 @@ class AuthRemoteDataSource {
         password: password,
         name: name,
         invitationToken: invitationToken,
+        currency: currency,
+        timezone: timezone,
       ).toJson(),
     );
     return AuthResponse.fromJson(response.data!);

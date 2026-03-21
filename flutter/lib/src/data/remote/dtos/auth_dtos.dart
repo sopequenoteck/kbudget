@@ -21,6 +21,8 @@ class RegisterRequest with _$RegisterRequest {
     required String password,
     String? name,
     String? invitationToken,
+    String? currency,
+    String? timezone,
   }) = _RegisterRequest;
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) =>

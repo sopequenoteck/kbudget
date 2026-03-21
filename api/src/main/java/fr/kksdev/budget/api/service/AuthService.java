@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.request.LoginRequest;
 import fr.kksdev.budget.api.dto.request.RegisterRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class AuthService {
     private final CategoryService categoryService;
     private final AccountService accountService;
     private final RefreshTokenService refreshTokenService;
+    private final PreferenceService preferenceService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -39,7 +41,9 @@ public class AuthService {
 
         userRepository.save(user);
         categoryService.seedSystemCategories(user);
-        accountService.createDefaultAccount(user);
+        Currency currency = request.currency() != null ? request.currency() : Currency.EUR;
+        accountService.createDefaultAccount(user, currency);
+        preferenceService.createInitialPreference(user, currency, request.timezone());
         log.info("User registered: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());

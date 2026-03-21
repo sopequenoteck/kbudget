@@ -71,11 +71,13 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
   }
 
   Future<void> register(
-      String email, String password, String? name) async {
+      String email, String password, String? name,
+      {String? currency, String? timezone}) async {
     state = const AuthState.authenticating();
     try {
       final repo = await _repo;
-      await repo.register(email, password, name);
+      await repo.register(email, password, name,
+          currency: currency, timezone: timezone);
       state = const AuthState.authenticated();
     } on DioException catch (e) {
       final message = e.response?.statusCode == 409

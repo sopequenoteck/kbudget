@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.request.LoginRequest;
 import fr.kksdev.budget.api.dto.request.RegisterRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,12 +49,15 @@ class AuthServiceTest {
     @Mock
     private RefreshTokenService refreshTokenService;
 
+    @Mock
+    private PreferenceService preferenceService;
+
     @InjectMocks
     private AuthService authService;
 
     @Test
     void should_register_when_email_not_exists() {
-        var request = new RegisterRequest("test@mail.com", "password123", "Test User");
+        var request = new RegisterRequest("test@mail.com", "password123", "Test User", null, null);
         var savedUser = User.builder()
                 .id(UUID.randomUUID())
                 .email("test@mail.com")
@@ -76,7 +82,7 @@ class AuthServiceTest {
 
     @Test
     void should_throw_when_email_already_exists() {
-        var request = new RegisterRequest("existing@mail.com", "password123", "User");
+        var request = new RegisterRequest("existing@mail.com", "password123", "User", null, null);
 
         when(userRepository.existsByEmail("existing@mail.com")).thenReturn(true);
 
@@ -138,5 +144,72 @@ class AuthServiceTest {
                 .hasMessage("Email ou mot de passe incorrect");
 
         verify(jwtUtil, never()).generateToken(anyString());
+    }
+
+    // --- T005 : currency + timezone propagation lors du register ---
+
+    @Test
+    void should_createAccountWithXOF_when_currencyProvided() {
+        var savedUser = User.builder()
+                .id(UUID.randomUUID())
+                .email("xof@mail.com")
+                .password("encoded")
+                .build();
+        var request = new RegisterRequest("xof@mail.com", "password123", "XOF User", Currency.XOF, null);
+
+        when(userRepository.existsByEmail("xof@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtUtil.generateToken("xof@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        authService.register(request);
+
+        verify(accountService).createDefaultAccount(any(User.class), eq(Currency.XOF));
+    }
+
+    @Test
+    void should_createAccountWithEUR_when_currencyNull() {
+        var request = new RegisterRequest("eur@mail.com", "password123", "EUR User", null, null);
+
+        when(userRepository.existsByEmail("eur@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(jwtUtil.generateToken("eur@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        authService.register(request);
+
+        verify(accountService).createDefaultAccount(any(User.class), eq(Currency.EUR));
+    }
+
+    @Test
+    void should_createPreferenceWithTimezone_when_timezoneProvided() {
+        var request = new RegisterRequest("tz@mail.com", "password123", "TZ User", null, "Africa/Lome");
+
+        when(userRepository.existsByEmail("tz@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(jwtUtil.generateToken("tz@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        authService.register(request);
+
+        verify(preferenceService).createInitialPreference(any(User.class), eq(Currency.EUR), eq("Africa/Lome"));
+    }
+
+    @Test
+    void should_useDefaultTimezone_when_timezoneNull() {
+        var request = new RegisterRequest("notz@mail.com", "password123", "No TZ User", null, null);
+
+        when(userRepository.existsByEmail("notz@mail.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(jwtUtil.generateToken("notz@mail.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        authService.register(request);
+
+        verify(preferenceService).createInitialPreference(any(User.class), eq(Currency.EUR), isNull());
     }
 }
