@@ -100,6 +100,7 @@ export interface CsvPreview {
   rows: string[][];
   detectedSeparator: string;
   detectedEncoding: string;
+  detectedSkipHeaderLines: number;
   totalRows: number;
 }
 
