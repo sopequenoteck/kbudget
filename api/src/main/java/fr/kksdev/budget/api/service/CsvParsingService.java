@@ -221,7 +221,7 @@ public class CsvParsingService {
     public CsvPreviewResponse preview(InputStream inputStream, String separator, String encoding, int skipHeaderLines) throws IOException {
         byte[] fileBytes = inputStream.readAllBytes();
 
-        String detectedEncoding = (encoding != null && !encoding.isBlank()) ? encoding : detectEncoding(fileBytes);
+        String detectedEncoding = detectEncoding(fileBytes);
         Charset charset = Charset.forName(detectedEncoding);
 
         // Read all lines as raw strings first for separator detection and counting
@@ -234,25 +234,55 @@ public class CsvParsingService {
             }
         }
 
+        List<String> nonBlankLines = allRawLines.stream().filter(l -> !l.isBlank()).toList();
+
+        if (nonBlankLines.isEmpty()) {
+            return new CsvPreviewResponse(List.of(), List.of(), separator != null ? separator : ";", detectedEncoding, 0, 0);
+        }
+
+        // Auto-detect separator from the line with the most separators (likely the header row)
+        String detectedSeparator = (separator != null && !separator.isBlank())
+                ? separator
+                : detectSeparator(nonBlankLines.size() > 1 ? nonBlankLines.get(1) : nonBlankLines.get(0));
+
+        // Auto-detect skipHeaderLines if not explicitly set
+        int effectiveSkip = skipHeaderLines;
+        if (effectiveSkip == 0 && nonBlankLines.size() >= 3) {
+            char sep = detectedSeparator.charAt(0);
+            // Count columns for each of the first few lines
+            long majorityColCount = nonBlankLines.stream()
+                    .skip(1).limit(5)
+                    .mapToLong(l -> l.chars().filter(c -> c == sep).count() + 1)
+                    .sorted().skip(2).findFirst()
+                    .orElse(0);
+            // Skip leading lines with a different column count
+            for (int i = 0; i < Math.min(5, nonBlankLines.size() - 1); i++) {
+                long colCount = nonBlankLines.get(i).chars().filter(c -> c == sep).count() + 1;
+                if (colCount != majorityColCount) {
+                    effectiveSkip = i + 1;
+                } else {
+                    break;
+                }
+            }
+            if (effectiveSkip > 0) {
+                log.info("Auto-détection skipHeaderLines={} (lignes d'info bancaire détectées)", effectiveSkip);
+            }
+        }
+
         // Skip header lines
         List<String> dataLines = allRawLines.stream()
-                .skip(skipHeaderLines)
+                .skip(effectiveSkip)
                 .filter(l -> !l.isBlank())
                 .toList();
 
         if (dataLines.isEmpty()) {
-            return new CsvPreviewResponse(List.of(), List.of(), separator != null ? separator : ";", detectedEncoding, 0);
+            return new CsvPreviewResponse(List.of(), List.of(), detectedSeparator, detectedEncoding, effectiveSkip, 0);
         }
 
-        // Auto-detect separator from the first data line
-        String detectedSeparator = (separator != null && !separator.isBlank())
-                ? separator
-                : detectSeparator(dataLines.get(0));
-
-        // Parse header and preview rows using CSVFormat
-        final String finalSeparator = detectedSeparator;
+        // Rebuild input from skipped lines for CSVParser
+        String dataContent = String.join("\n", dataLines);
         CSVFormat format = CSVFormat.Builder.create()
-                .setDelimiter(finalSeparator.charAt(0))
+                .setDelimiter(detectedSeparator.charAt(0))
                 .setHeader()
                 .setSkipHeaderRecord(true)
                 .setIgnoreEmptyLines(true)
@@ -263,10 +293,7 @@ public class CsvParsingService {
         List<List<String>> previewRows = new ArrayList<>();
         int totalRows = 0;
 
-        try (InputStreamReader reader = new InputStreamReader(
-                new java.io.ByteArrayInputStream(fileBytes), charset);
-             CSVParser parser = new CSVParser(reader, format)) {
-
+        try (CSVParser parser = CSVParser.parse(dataContent, format)) {
             headers.addAll(parser.getHeaderNames());
             for (CSVRecord record : parser) {
                 totalRows++;
@@ -284,7 +311,7 @@ public class CsvParsingService {
             }
         }
 
-        return new CsvPreviewResponse(headers, previewRows, detectedSeparator, detectedEncoding, totalRows);
+        return new CsvPreviewResponse(headers, previewRows, detectedSeparator, detectedEncoding, effectiveSkip, totalRows);
     }
 
     private String detectSeparator(String firstLine) {

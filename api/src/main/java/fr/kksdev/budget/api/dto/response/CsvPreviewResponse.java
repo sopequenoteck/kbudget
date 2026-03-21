@@ -7,5 +7,6 @@ public record CsvPreviewResponse(
         List<List<String>> rows,
         String detectedSeparator,
         String detectedEncoding,
+        int detectedSkipHeaderLines,
         int totalRows
 ) {}
