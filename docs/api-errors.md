@@ -142,6 +142,8 @@ Declenchee par le handler generique `Exception`. Le message est toujours le meme
 | `email` | `@NotBlank`, `@Email` | oui |
 | `password` | `@NotBlank`, `@Size(min=6)` | oui |
 | `name` | `@Size(max=100)` | non |
+| `currency` | Enum `Currency` (EUR, XOF, USD, GBP, CHF, CAD, MAD). Defaut: EUR | non |
+| `timezone` | Identifiant IANA valide. Defaut: Europe/Paris | non |
 
 ### POST /api/auth/login — `LoginRequest`
 

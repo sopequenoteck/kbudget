@@ -79,7 +79,8 @@
 | A-8 | Register mdp trop court | Mdp < 6 caracteres | "Le mot de passe doit contenir au moins 6 caracteres" | -- |
 | A-9 | Register confirmation ≠ mdp | Confirmation differente du mdp | "Les mots de passe ne correspondent pas" | -- |
 | A-10 | Register email deja utilise | Email existant en BDD | Erreur serveur affichee | -- |
-| A-11 | Register succes | Donnees valides | Redirect `/dashboard` + connecte | -- |
+| A-11 | Register succes (EUR defaut) | Donnees valides, devise non modifiee | Redirect `/dashboard` + Compte Principal en EUR | -- |
+| A-11b | Register succes (XOF) | Donnees valides, devise XOF selectionnee | Redirect `/dashboard` + Compte Principal en XOF, preferences currencies=[XOF] | -- |
 | A-12 | Invitation token | Ouvrir `/invite/TOKEN` | Banner "Invitation valide" dans RegisterScreen | -- |
 | A-13 | Logout | Menu utilisateur → Logout | Retour `/login`, tokens invalides | -- |
 
