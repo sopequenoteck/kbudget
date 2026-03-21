@@ -354,7 +354,7 @@ public class AccountService {
     }
 
     @Transactional
-    public void createDefaultAccount(User user) {
+    public void createDefaultAccount(User user, Currency currency) {
         try {
             Account defaultAccount = Account.builder()
                     .nom("Compte Principal")
@@ -363,6 +363,7 @@ public class AccountService {
                     .icone(AccountType.COURANT.getDefaultIcone())
                     .couleur(AccountType.COURANT.getDefaultCouleur())
                     .isDefault(true)
+                    .currency(currency)
                     .user(user)
                     .build();
             accountRepository.save(defaultAccount);

@@ -104,6 +104,14 @@
           />
         </app-form-field>
 
+        <app-form-field label="Devise" fieldId="register-currency" [showError]="false">
+          <select id="register-currency" formControlName="currency">
+            @for (curr of currencies; track curr.code) {
+              <option [value]="curr.code">{{ curr.label }}</option>
+            }
+          </select>
+        </app-form-field>
+
         <app-form-field
           label="Email"
           fieldId="register-email"

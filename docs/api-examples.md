@@ -12,9 +12,13 @@ Request :
 {
   "email": "user@example.com",
   "password": "secret123",
-  "name": "Kelly"
+  "name": "Kelly",
+  "currency": "XOF",
+  "timezone": "Africa/Lome"
 }
 ```
+
+> `currency` et `timezone` sont optionnels. Defauts : `EUR` et `Europe/Paris`.
 
 Response `200` :
 

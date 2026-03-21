@@ -429,7 +429,7 @@ class DebtControllerTest {
                 DebtType.EMPRUNT, LocalDate.of(2026, 2, 1),
                 null, "EUR", false, new BigDecimal("100.00"),
                 null, null, false,
-                LocalDate.of(2026, 3, 20), LocalTime.of(10, 0));
+                LocalDate.of(2027, 3, 20), LocalTime.of(10, 0));
 
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -438,10 +438,10 @@ class DebtControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"reminderDate": "2026-03-20", "reminderTime": "10:00"}
+                                {"reminderDate": "2027-03-20", "reminderTime": "10:00"}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reminderDate").value("2026-03-20"));
+                .andExpect(jsonPath("$.reminderDate").value("2027-03-20"));
     }
 
     @Test
@@ -453,7 +453,7 @@ class DebtControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"reminderDate": "2026-03-20", "reminderTime": "10:00"}
+                                {"reminderDate": "2027-03-20", "reminderTime": "10:00"}
                                 """))
                 .andExpect(status().isBadRequest());
     }
@@ -467,7 +467,7 @@ class DebtControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"reminderDate": "2026-03-20", "reminderTime": "10:00"}
+                                {"reminderDate": "2027-03-20", "reminderTime": "10:00"}
                                 """))
                 .andExpect(status().isNotFound());
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/routing/route_names.dart';
@@ -24,6 +25,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  String _selectedCurrency = 'EUR';
 
   @override
   void dispose() {
@@ -37,12 +39,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final timezone = DateTime.now().timeZoneName;
+
     await ref.read(authNotifierProvider.notifier).register(
           _emailController.text.trim(),
           _passwordController.text,
           _nameController.text.trim().isEmpty
               ? null
               : _nameController.text.trim(),
+          currency: _selectedCurrency,
+          timezone: timezone,
         );
   }
 
@@ -111,6 +117,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: 'Nom (optionnel)',
                         prefixIcon: PhosphorIcon(PhosphorIconsRegular.user, size: 20),
                       ),
+                    ),
+                    const SizedBox(height: AppSpacing.space4),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedCurrency,
+                      decoration: const InputDecoration(
+                        labelText: 'Devise principale',
+                        prefixIcon: PhosphorIcon(
+                          PhosphorIconsRegular.currencyCircleDollar,
+                          size: 20,
+                        ),
+                      ),
+                      items: Currency.values.map((currency) {
+                        return DropdownMenuItem<String>(
+                          value: currency.name.toUpperCase(),
+                          child: Text(
+                            '${currency.symbol} - ${currency.displayName}',
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedCurrency = value;
+                          });
+                        }
+                      },
                     ),
                     const SizedBox(height: AppSpacing.space4),
                     TextFormField(

@@ -36,7 +36,7 @@ const settingsSections = <SettingsSection>[
     icon: PhosphorIconsRegular.user,
     iconColor: Colors.blue,
     title: 'Profil',
-    description: 'Nom, email, devise',
+    description: 'Nom, email',
     group: SettingsGroup.general,
     route: '/settings/profile',
   ),

@@ -11,6 +11,7 @@ import fr.kksdev.budget.api.repository.UserPreferenceRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -373,5 +374,35 @@ class PreferenceServiceTest {
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.currencies()).containsExactly(Currency.EUR, Currency.XOF, Currency.USD);
+    }
+
+    // --- T007 : createInitialPreference ---
+
+    @Test
+    void should_createInitialPreference_when_called() {
+        var user = User.builder().id(userId).email("init@mail.com").build();
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        preferenceService.createInitialPreference(user, Currency.XOF, "Africa/Lome");
+
+        ArgumentCaptor<UserPreference> captor = ArgumentCaptor.forClass(UserPreference.class);
+        verify(userPreferenceRepository).save(captor.capture());
+        UserPreference saved = captor.getValue();
+        assertThat(saved.getCurrencies()).containsExactly(Currency.XOF);
+        assertThat(saved.getTimezone()).isEqualTo("Africa/Lome");
+        assertThat(saved.getUser()).isEqualTo(user);
+    }
+
+    @Test
+    void should_fallbackTimezone_when_invalidTimezone() {
+        var user = User.builder().id(userId).email("invalid@mail.com").build();
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        preferenceService.createInitialPreference(user, Currency.EUR, "Mars/Olympus");
+
+        ArgumentCaptor<UserPreference> captor = ArgumentCaptor.forClass(UserPreference.class);
+        verify(userPreferenceRepository).save(captor.capture());
+        UserPreference saved = captor.getValue();
+        assertThat(saved.getTimezone()).isEqualTo("Europe/Paris");
     }
 }

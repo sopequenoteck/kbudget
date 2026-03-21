@@ -65,7 +65,7 @@ class RecurringTransactionControllerTest {
         var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR");
         return new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
-                Frequency.MENSUEL, LocalDate.of(2026, 3, 15), true, null, account);
+                Frequency.MENSUEL, LocalDate.of(2027, 3, 15), true, null, account);
     }
 
     private String recurringRequestJson(String montant, String libelle, String type, String frequency, String nextOccurrence) {
@@ -89,7 +89,7 @@ class RecurringTransactionControllerTest {
         mockMvc.perform(post("/transactions/recurring")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(recurringRequestJson("50.00", "Loyer", "DEPENSE", "MENSUEL", "2026-03-15")))
+                        .content(recurringRequestJson("50.00", "Loyer", "DEPENSE", "MENSUEL", "2027-03-15")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.libelle").value("Loyer"))
                 .andExpect(jsonPath("$.frequency").value("MENSUEL"))
@@ -106,7 +106,7 @@ class RecurringTransactionControllerTest {
                                     "montant": 50.00,
                                     "libelle": "Loyer",
                                     "type": "DEPENSE",
-                                    "nextOccurrence": "2026-03-15"
+                                    "nextOccurrence": "2027-03-15"
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
@@ -201,7 +201,7 @@ class RecurringTransactionControllerTest {
     void should_return200_when_deactivateRecurrence() throws Exception {
         var deactivatedResponse = new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
-                Frequency.MENSUEL, LocalDate.of(2026, 3, 15), false, null,
+                Frequency.MENSUEL, LocalDate.of(2027, 3, 15), false, null,
                 new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR"));
 
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class))).thenReturn(deactivatedResponse);

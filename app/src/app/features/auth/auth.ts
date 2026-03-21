@@ -34,9 +34,20 @@ export class Auth {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
+  readonly currencies = [
+    { code: 'EUR', label: '€ - Euro' },
+    { code: 'XOF', label: 'CFA - Franc CFA (BCEAO)' },
+    { code: 'USD', label: '$ - Dollar américain' },
+    { code: 'GBP', label: '£ - Livre sterling' },
+    { code: 'CHF', label: 'CHF - Franc suisse' },
+    { code: 'CAD', label: 'CA$ - Dollar canadien' },
+    { code: 'MAD', label: 'MAD - Dirham marocain' },
+  ];
+
   readonly registerForm = this.fb.nonNullable.group(
     {
       name: [''],
+      currency: ['EUR'],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
@@ -81,10 +92,17 @@ export class Auth {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    const { name, email, password } = this.registerForm.getRawValue();
+    const { name, currency, email, password } = this.registerForm.getRawValue();
+
+    let timezone = 'Europe/Paris';
+    try {
+      timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Paris';
+    } catch {
+      timezone = 'Europe/Paris';
+    }
 
     try {
-      await firstValueFrom(this.authService.register({ name: name || undefined, email, password }));
+      await firstValueFrom(this.authService.register({ name: name || undefined, currency, email, password, timezone }));
       this.router.navigateByUrl('/');
     } catch (message) {
       this.errorMessage.set(message as string);

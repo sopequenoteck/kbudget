@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
@@ -167,6 +168,29 @@ public class PreferenceService {
         }
 
         return newNavOrder;
+    }
+
+    @Transactional
+    public void createInitialPreference(User user, Currency currency, String timezone) {
+        String validTimezone = "Europe/Paris";
+        if (timezone != null && !timezone.isBlank()) {
+            try {
+                ZoneId.of(timezone);
+                validTimezone = timezone;
+            } catch (DateTimeException e) {
+                log.warn("Timezone invalide à l'inscription: '{}', utilisation du fallback Europe/Paris", timezone);
+            }
+        }
+        UserPreference preference = UserPreference.builder()
+                .user(user)
+                .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
+                .navOrder(new ArrayList<>(DEFAULT_FEATURES))
+                .currencies(new ArrayList<>(List.of(currency)))
+                .includeShopInBalance(false)
+                .build();
+        preference.setTimezone(validTimezone);
+        userPreferenceRepository.save(preference);
+        log.info("Préférences initiales créées pour userId={}, currency={}, timezone={}", user.getId(), currency, validTimezone);
     }
 
     @Transactional

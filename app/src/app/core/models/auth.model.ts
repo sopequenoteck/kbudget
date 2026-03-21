@@ -7,6 +7,8 @@ export interface RegisterRequest {
   name?: string;
   email: string;
   password: string;
+  currency?: string;
+  timezone?: string;
 }
 
 export interface AuthResponse {

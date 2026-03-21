@@ -362,20 +362,34 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
   _i18.Future<_i3.AuthResult> register(
     String? email,
     String? password,
-    String? name,
-  ) =>
+    String? name, {
+    String? currency,
+    String? timezone,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#register, [email, password, name]),
+            Invocation.method(
+              #register,
+              [email, password, name],
+              {#currency: currency, #timezone: timezone},
+            ),
             returnValue: _i18.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
-                Invocation.method(#register, [email, password, name]),
+                Invocation.method(
+                  #register,
+                  [email, password, name],
+                  {#currency: currency, #timezone: timezone},
+                ),
               ),
             ),
             returnValueForMissingStub: _i18.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
-                Invocation.method(#register, [email, password, name]),
+                Invocation.method(
+                  #register,
+                  [email, password, name],
+                  {#currency: currency, #timezone: timezone},
+                ),
               ),
             ),
           )
