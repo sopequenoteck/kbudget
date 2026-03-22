@@ -35,9 +35,9 @@
 
 ## Composants de référence
 
-### Cards (Summary)
+### Cards (Summary) — pages interieures
 
-Les cards de résumé (Recettes/Dépenses/Solde) sont les éléments les plus visibles.
+Cards de resume pour les pages interieures (hors dashboard). Pour le dashboard, voir "Glassmorphism Summary Cards".
 
 - Border-radius : `--radius-xl` (16px)
 - Shadow : `--shadow-md` — ombre douce multicouche
@@ -137,6 +137,84 @@ Style iOS segmented control — pas des boutons plats.
 - **Pas de bordure** sur les boutons — ombre seule
 - Mois : `font-size-xl` + `font-weight-bold`
 
+### Hero Card (Patrimoine)
+
+Card principale du dashboard affichant le patrimoine total. Gradient colore, typographie hero.
+
+- Background : `var(--hero-gradient)` (gradient 135deg amber → indigo)
+- Border-radius : `var(--radius-xl)` (16px)
+- Shadow : `var(--shadow-lg)`
+- Padding : `var(--space-4)` (16px)
+- Label : `font-size-xs` + `font-weight-medium` + `text-secondary` + uppercase + `letter-spacing: 0.05em`
+- Montant : `var(--font-size-hero)` (2.25rem / 36px) + `font-weight-bold` + `var(--shadow-hero-text)`
+- Press feedback : `transform: scale(0.97)` sur `:active` avec transition `var(--duration-fast)`
+- **Usage** : dashboard uniquement — affichage patrimoine total
+- **Dark/Light** : en light le gradient est subtil (amber-50 → indigo-50), en dark il est profond (amber-900 → indigo-900) avec ombre texte active
+
+### Glassmorphism Summary Cards
+
+Cards revenus/depenses du dashboard. Effet glass en dark, surface opaque en light.
+
+- Background : `var(--glass-bg)`
+- Border : `1px solid var(--glass-border)`
+- Backdrop-filter : `blur(var(--glass-blur))` (avec `@supports`)
+- Border-radius : `var(--radius-xl)` (16px)
+- Shadow : `none` — le glass et la bordure suffisent
+- Padding : `var(--space-4)` (16px)
+- Label : `font-size-xs` + `font-weight-semibold` + `text-secondary` + uppercase
+- Montant : `font-size-xl` + `font-weight-bold`
+- Dot colore : 8x8px cercle (`--color-income` vert ou `--color-expense` rouge)
+- Press feedback : `transform: scale(0.97)` sur `:active`
+- **Usage** : dashboard uniquement — cartes recettes/depenses
+- **Dark/Light** : en light le glass est opaque (`--glass-blur: 0px`, `--glass-bg: var(--surface-raised)`), en dark le glassmorphism est actif (`--glass-blur: 20px`, bg translucide `rgba(31,41,55,0.6)`, bordure `rgba(255,255,255,0.08)`)
+
+### Variation Badges (Pills)
+
+Badges de variation temporelle (ex: +12% vs mois precedent). Format pill colore.
+
+- Display : `inline-flex`, `align-items: center`, `gap: var(--space-1)`
+- Padding : `var(--space-1)` vertical, `var(--space-2)` horizontal
+- Border-radius : `var(--radius-round)` (pill)
+- Font : `font-size-xs` + `font-weight-medium`
+- Variantes :
+  - **Positive** : `background: var(--bg-success)`, `color: var(--text-success)`
+  - **Negative** : `background: var(--bg-error)`, `color: var(--text-error)`
+  - **Neutral** : `background: var(--bg-tertiary)`, `color: var(--text-secondary)`
+- **Usage** : donnees avec comparaison temporelle uniquement (ex: delta mois precedent)
+
+### Radial Gradient (Fond de page)
+
+Ambiance lumineuse subtile en haut de chaque page. Gradient radial amber.
+
+- Implementation : pseudo-element `::before` sur `:host`
+- Position : `fixed`, `top: 0`, pleine largeur, `height: 40vh`
+- Gradient : `radial-gradient(ellipse at top center, var(--page-gradient-color) 0%, transparent 70%)`
+- `pointer-events: none`, `z-index: -1`
+- **Usage** : toutes les pages — ambiance subtile et coherente
+
+### Section Headers (Titre + Lien)
+
+En-tete de section avec titre a gauche et lien "Voir tout" a droite.
+
+- Layout : `display: flex`, `justify-content: space-between`, `align-items: center`
+- Titre : `font-size-lg` + `font-weight-semibold` + `text-primary`
+- Lien : `font-size-sm` + `font-weight-medium` + `color-primary`, underline on hover
+- **Usage** : en-tete de chaque section du dashboard et des pages interieures
+
+## Regles de design
+
+Guide de decision pour choisir le bon pattern visuel selon le contexte.
+
+| Pattern | Usage | Critere |
+|---------|-------|---------|
+| Glassmorphism cards | Dashboard (apercu court) | Ecran d'apercu avec peu d'items |
+| Surface solide + dots colores | Pages interieures (listes longues) | Listes de travail, ecrans principaux |
+| Items separes (radius + shadow) | Listes courtes (<=7 items) | Dashboard, apercu |
+| Bloc unique + dividers | Listes longues (transactions, abonnements) | Plus de 7 items, scroll attendu |
+| Radial gradient fond | Toutes les pages | Ambiance, coherence atmospherique |
+| Variation badges | Comparaison temporelle | Donnees avec delta mois precedent |
+| Press feedback `scale(0.97)` | Toutes cards interactives | Cards cliquables/navigables |
+
 ## Spacing
 
 - Unité de base : 4px (existant)
@@ -169,19 +247,42 @@ Ne JAMAIS hardcoder de valeurs. Utiliser exclusivement ces tokens :
 `--border-default`, `--border-strong`
 `--hover-bg`, `--focus-ring`
 `--color-income`, `--color-expense`, `--color-debt-owe`, `--color-debt-owed`
+`--bg-success`, `--text-success` — feedback positif, variation badges positives
+`--bg-error`, `--text-error` — feedback negatif, variation badges negatives
 
 ### Spacing
-`--space-0` à `--space-12`
+`--space-0` a `--space-12`
 
 ### Radius
 `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`, `--radius-round`
 
 ### Shadows
 `--shadow-sm`, `--shadow-md`, `--shadow-lg`
+`--shadow-hero-text` — ombre texte sur montant hero (active en dark, `none` en light)
 
 ### Typography
-`--font-size-xs` à `--font-size-3xl`
+`--font-size-xs` a `--font-size-3xl`
+`--font-size-hero` — montant patrimoine (2.25rem / 36px)
 `--font-weight-normal`, `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold`
+
+### Glass / Effects
+
+Tokens du dashboard visual revamp. Comportement different selon le theme.
+
+`--hero-gradient` — gradient fond Hero Card (amber → indigo)
+`--glass-bg` — background glassmorphism cards
+`--glass-border` — bordure glassmorphism cards
+`--glass-blur` — intensite backdrop-filter blur
+`--page-gradient-color` — couleur du radial gradient fond de page
+
+| Token | Light | Dark |
+|-------|-------|------|
+| `--glass-bg` | `var(--surface-raised)` (opaque) | `rgba(31, 41, 55, 0.6)` (translucide) |
+| `--glass-border` | `var(--border-default)` | `rgba(255, 255, 255, 0.08)` |
+| `--glass-blur` | `0px` (desactive) | `20px` (actif) |
+| `--shadow-hero-text` | `none` | `0 2px 8px rgba(0, 0, 0, 0.3)` |
+| `--hero-gradient` | amber-50 → indigo-50 | amber-900 → indigo-900 |
+| `--page-gradient-color` | `rgba(245, 158, 11, 0.05)` | `rgba(251, 191, 36, 0.08)` |
 
 ### Animations
 `--duration-fast`, `--duration-normal`, `--duration-slow`
