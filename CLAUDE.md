@@ -233,97 +233,6 @@ Approche **signals-first** obligatoire :
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
 
 ## Active Technologies
-- Dart >= 3.6, Flutter >= 3.27 + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
-- Drift (SQLite local) / Dio (API REST) via strategy pattern `dataModeProvider` (043-flutter-transactions-list)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, shimmer, intl (043-flutter-transactions-list)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl (044-flutter-transaction-form)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, intl (045-flutter-subscription-form)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, intl, shimmer (046-flutter-subscriptions-list)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, go_router, shimmer, intl (048-flutter-debts-list)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, freezed, json_serializable, go_router, dio, shimmer (049-flutter-settings-profile)
-- Serveur uniquement (pas de Drift/SQLite pour le profil — données toujours fraîches depuis l'API) (049-flutter-settings-profile)
-- Serveur uniquement (opération atomique, pas de stockage local) (050-flutter-transfer-form)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, build_runner (051-flutter-settings-appearance)
-- FlutterSecureStorage (AppConfig JSON sérialisé) (051-flutter-settings-appearance)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + `emoji_picker_flutter: ^4.4.0` (déjà ajouté au pubspec.yaml) (052-flutter-emoji-input)
-- N/A (widget UI pur, pas de persistance) (052-flutter-emoji-input)
-- Dart >= 3.6 + Flutter >= 3.27, flutter_riverpod, go_router, freezed, dio, emoji_picker_flutter, shimmer, intl (053-flutter-settings-accounts)
-- API REST uniquement (pas de Drift pour cette feature) (053-flutter-settings-accounts)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, emoji_picker_flutter, shimmer, intl (054-flutter-settings-categories)
-- API REST uniquement (pas de Drift pour cette feature — données toujours fraîches depuis l'API) (054-flutter-settings-categories)
-- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, jjwt 0.12.6 (055-backend-feature-toggles)
-- PostgreSQL 15+ (nouvelle table `user_preferences`) (055-backend-feature-toggles)
-- PostgreSQL 15+ (Flyway V10) (056-backend-product-crud)
-- Java 21 + Spring Boot 4.0.2, Spring Data JPA, Spring Security, Lombok, Flyway, jjwt 0.12.6 (057-backend-product-sales)
-- PostgreSQL 15+ (Flyway V11) (057-backend-product-sales)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_secure_storage (058-flutter-settings-features)
-- FlutterSecureStorage (AppConfig JSON) + API REST (mode serveur) (058-flutter-settings-features)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, flutter_secure_storage (059-flutter-settings-bottom-nav)
-- FlutterSecureStorage (AppConfig JSON sérialisé) + API REST (mode serveur) (059-flutter-settings-bottom-nav)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl (060-flutter-shop-products)
-- API REST uniquement (pas de Drift/SQLite pour cette feature) (060-flutter-shop-products)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, image_picker, path_provider (061-flutter-product-form)
-- API REST uniquement (pas de Drift/SQLite — remote only). Images envoyees en base64 data URI ; fichier local conserve uniquement pour le preview rapide. (061-flutter-product-form)
-- TypeScript 5.9 (Angular SCSS), Dart >= 3.6 (Flutter) + Angular 21 (SCSS tokens), Flutter >= 3.27 (Dart constants + ThemeData) (063-shared-design-tokens)
-- N/A (fichiers statiques de configuration) (063-shared-design-tokens)
-- TypeScript 5.9, Angular 21 + Angular CDK (`@angular/cdk/drag-drop` pour le DnD), Angular Signals, Angular Router (064-angular-feature-toggles)
-- Server-only (API REST `GET/PUT /users/me/preferences`) — pas de stockage local (064-angular-feature-toggles)
-- TypeScript 5.9, Angular 21 + Angular HttpClient, Angular Router, Angular Signals (065-angular-data-settings)
-- N/A (pas de persistance locale, lecture seule depuis le serveur) (065-angular-data-settings)
-- TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals (066-angular-transfer-form)
-- N/A (server-only, pas de stockage local) (066-angular-transfer-form)
-- TypeScript 5.9, Angular 21 + Angular Router, Angular Signals, Angular CDK (deja present) (067-angular-responsive-nav)
-- N/A (pas de persistance, reutilise PreferenceService existant) (067-angular-responsive-nav)
-- TypeScript 5.9 (Angular), Java 21 (backend modification mineure) + Angular 21, Angular Reactive Forms, Angular Router, Angular Signals (068-angular-shop-module)
-- Server-only (API REST, pas de stockage local) (068-angular-shop-module)
-- TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + `@ng-icons/core` + `@ng-icons/phosphor-icons` v33.1.0 (Angular), `phosphor_flutter` v2.1.0 (Flutter) (069-phosphor-icons-migration)
-- N/A (aucun changement de modele de donnees) (069-phosphor-icons-migration)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio (070-currency-dashboard)
-- PostgreSQL 15+ (nouvelle table `exchange_rates`, enrichissement `user_preferences`), SQLite/Drift non utilise (taux serveur uniquement) (070-currency-dashboard)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Spring WebSocket + STOMP, Angular 21 + @stomp/stompjs, Flutter >= 3.27 + stomp_dart_client + flutter_local_notifications (072-notification-system)
-- PostgreSQL 15+ (table `notifications`, enrichissement `user_preferences`) (072-notification-system)
-- PostgreSQL 15+ (Flyway V17) (073-backend-budget-categories)
-- TypeScript 5.9 + Angular 21, Angular Reactive Forms, ng2-charts (Chart.js), @ng-icons/phosphor-icons (074-angular-budget-categories)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, drift, dio, fl_chart (nouveau), shimmer, intl, phosphor_flutter (075-flutter-budget-categories)
-- SQLite/Drift (local) + API REST/Dio (remote) via strategy pattern `dataModeProvider` (075-flutter-budget-categories)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, ng2-charts, fl_chart (076-budget-category-tracking)
-- PostgreSQL 15+ (Flyway V18) (077-backend-debt-enhancements)
-- TypeScript 5.9, Angular 21 + Angular Reactive Forms, Angular Signals, Angular Router, @ng-icons/phosphor-icons (078-angular-debt-enhancements)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, shimmer, intl, phosphor_flutter (079-flutter-debt-enhancements)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, Phosphor Icons (080-debt-enhancements)
-- PostgreSQL 15+ (Flyway V18), SQLite/Drift non utilisé (server-only pour les opérations de dette) (080-debt-enhancements)
-- PostgreSQL 15+ (Flyway V19) (081-backend-bank-accounts)
-- TypeScript 5.9 + Angular 21, Angular Reactive Forms, Angular Signals, @ng-icons/phosphor-icons (082-angular-bank-accounts)
-- Server-only (API REST GET /banks + GET/PATCH /accounts) — pas de stockage local, cache signal dans BankService (082-angular-bank-accounts)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, json_serializable, dio, flutter_svg (nouveau), image_picker, shimmer, phosphor_flutter (083-flutter-bank-accounts)
-- SQLite/Drift (table Accounts enrichie +3 colonnes) + API REST/Dio (GET /api/banks, GET/POST/PUT /api/accounts) (083-flutter-bank-accounts)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Freezed, Dio, flutter_svg (084-bank-accounts)
-- PostgreSQL 15+ (Flyway V19), SQLite/Drift (migration v3, +3 colonnes) (084-bank-accounts)
-- PostgreSQL 15+ (Flyway V20) (085-recurring-transactions-backend)
-- TypeScript 5.9 + Angular 21, Angular Router, Angular Signals, @ng-icons/phosphor-icons (086-angular-recurring-transactions)
-- N/A (server-only, consomme API REST) (086-angular-recurring-transactions)
-- N/A (server-only, consomme API REST POST /transactions/recurring) (087-angular-recurring-form)
-- Dart >= 3.6, Flutter >= 3.27 (stable) + flutter_riverpod, go_router, freezed, dio, intl, shimmer, phosphor_flutter (088-flutter-recurring-transactions)
-- Server-only (API REST — recurring transactions et subscription payments; pas de Drift pour cette feature) (088-flutter-recurring-transactions)
-- PostgreSQL 15+ (Flyway V20), pas de Drift/SQLite pour cette feature (server-only) (089-recurring-transactions)
-- TypeScript 5.9, Angular 21 + Angular Signals, Angular Router, Angular HttpClient, @ng-icons/phosphor-icons (090-finance-dashboard)
-- TypeScript 5.9, SCSS + Angular 21 (standalone components, OnPush, Signals) (091-dashboard-visual-revamp)
-- N/A (aucun changement de données) (091-dashboard-visual-revamp)
-- TypeScript 5.9, SCSS + Angular 21 (standalone, OnPush, Signals), Phosphor Icons (092-bottom-nav-revamp)
-- TypeScript 5.9, SCSS + Angular 21 (Signals, OnPush, standalone) (093-angular-text-scale)
-- localStorage (clé `budget_text_scale`) (093-angular-text-scale)
-- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 4.0.2, Spring Data JPA, Angular 21 (094-sync-text-scale-api)
-- PostgreSQL 15+ (Flyway V21) (094-sync-text-scale-api)
-- Java 21 (backend), TypeScript 5.9 (Angular), Dart >= 3.6 (Flutter) + Spring Boot 4.0.2, Angular 21, Flutter >= 3.27, flutter_riverpod, Dio (095-currency-rebase-propagation)
-- PostgreSQL 15+ (table `exchange_rates`, table `user_preferences`) (095-currency-rebase-propagation)
-- API REST (mode serveur) via Dio. Pas de Drift/SQLite pour cette feature (donnees toujours fraiches depuis l'API) (096-flutter-dashboard-refonte)
-- TypeScript 5.9, Angular 21 + `emoji-mart` + `@emoji-mart/data` (nouveau), `@angular/cdk/overlay` (existant) (097-angular-emoji-picker)
-- localStorage (emojis récents, géré par emoji-mart) (097-angular-emoji-picker)
-- TypeScript 5.9 + Angular 21, @ng-icons/phosphor-icons, Angular Signals (098-angular-settings-alignment)
-- N/A (pas de persistance, donnees depuis API) (098-angular-settings-alignment)
-- Java 21 (backend), TypeScript 5.9 (frontend Angular) + Spring Boot 4.0.2, Spring Data JPA, Apache Commons CSV 1.11.0 (nouveau), Apache Commons Text 1.12.0 (nouveau), Angular 21 (099-csv-import)
-- PostgreSQL 15+ (Flyway V22-V23 — 5 nouvelles tables + colonne updatedAt) (099-csv-import)
-- PostgreSQL 15+ (tables existantes `users`, `accounts`, `user_preferences`) (100-register-currency-timezone)
 
 ### Backend (api/)
 
@@ -345,40 +254,11 @@ Approche **signals-first** obligatoire :
 - flutter_test, mockito, build_runner
 
 ## Recent Changes
-- 100-register-currency-timezone: RegisterRequest enrichi (+currency optionnel Currency enum, +timezone optionnel String); AccountService.createDefaultAccount(user, currency); PreferenceService.createInitialPreference(user, currency, timezone) avec validation ZoneId + fallback Europe/Paris; AuthService.register() extrait currency/timezone et cree preferences eagerly; Angular: selecteur devise dans formulaire inscription (apres Nom, avant Email), timezone auto-detecte via Intl API, suppression selecteur devise fantome du profil (backend ignorait la valeur); Flutter: selecteur devise DropdownButtonFormField, timezone auto-detecte via DateTime.now().timeZoneName; fix Africa/Togo → Africa/Lome (identifiant IANA valide); 503 tests backend passent
-- 099-csv-import: ImportController (15 endpoints /imports/**); ImportService + CsvParsingService (Commons CSV) + LabelCleaningService (extraction structurelle PRELEVEMENT/VIR/RETRAIT DAB + regex SG) + DeduplicationService (Jaro-Winkler seuil 0.85, fenetre dates ±3j) + CategoryRuleService (CRUD regles, application auto) + ImportProfileRegistry (profil SG pre-configure) + ImportDraftCleanupJob (cron 3h); 5 entites JPA (ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile); 3 enums (ImportDraftStatus, ImportLineStatus, ImportProfileSource); CsvProfileNotFoundException 422; Flyway V22-V23; Angular: ImportSettings + ImportReview + CsvMapping; ImportService + CategoryRuleService + ApiService.postFormData(); icone import sur page comptes
-- 098-angular-settings-alignment: Settings Angular alignement Flutter — hub 3 groupes headers (General, Gestion, Autre), couleurs icones variees, ordre identique Flutter, retrait Budget, ajout Securite placeholder; About enrichi (HealthService, forkJoin stats, glassmorphism); 389 tests passent
-- 097-angular-emoji-picker: EmojiInput Angular refonte — emoji-mart picker (lazy-loaded) avec categories, recents, recherche; theme dark/light via tokens DS (setProperty sur host); position fixed; locale fr (recherche EN limitation dataset); text scale rem; API publique inchangee (value/valueChange); 10 tests (389 total)
-- 096-flutter-dashboard-refonte: DashboardScreen refonte complete (CustomScrollView + SliverList); PatrimoineCard (gradient amber→indigo, variation mensuelle pill, conversion ≈); IncomeExpenseCards (REVENUS/DEPENSES, +/- colores, delta mois precedent pill, conversion ≈); DashboardHeader (salutation); RecentTransactionsSection (badges devise, conversion ≈, nom compte); BudgetSummarySection (tri % decroissant, max 4 items, chargement integre au notifier); suppression HeroAccountSection/MonthlySummarySection/MiniCardsSection; 55 tests dashboard passent
-- 058-flutter-settings-features: Added Feature enum (Flutter), FeatureConfigNotifier, FeatureSettingsScreen, PreferenceRemoteDataSource; AppConfig extended with enabledFeatures
-- 059-flutter-settings-bottom-nav: Feature.outlinedIcon added; AppConfig extended with navOrder; AppConfigRepository/Impl extended with getNavOrder/setNavOrder; FeatureConfigNotifier extended with navOrder state + reorderNavigation(); FeatureSettingsScreen renamed to "Fonctionnalités & Navigation" + section Navigation (drag & drop ReorderableListView + _BottomNavPreview); _ShellScaffold uses navOrder for ordered bottom nav
-- 060-flutter-shop-products: ProductListScreen + ProductListNotifier (CrudNotifier pattern) + ProductRepository (remote only); fix FAB speed dial — RenderBox.localToGlobal() remplace CompositedTransformFollower/LayerLink
-- 061-flutter-product-form: ProductForm (ConsumerStatefulWidget) + DecimalTextInputFormatter; image_picker + path_provider ajoutés; ModalType.product ajouté; ProductListScreen câblé (create/edit via ModalNotifier)
-- 062-flutter-product-detail: ProductDetailScreen (ConsumerWidget) + RestockDialog; sell/restock/getSales ajoutés au data layer (DTO, data source, repository, notifier + productSalesProvider); route /shop/:id; ProductListScreen tap → navigation détail; fix ProductService.getSalesHistory() → RECETTE + DEPENSE
-- 063-shared-design-tokens: docs/design-tokens.md créé (source de vérité unique, 7 catégories). Angular: +palette Indigo, +secondary tokens (light/dark), subscription blue→violet, +space-9/11, +radius-xxl. Flutter: +Indigo palette, feedback/business colors harmonisés (green/red), +lineHeights, +fontMono, shadows harmonisées, +easeDefault+resolve() reduced-motion, +secondaryColor; AppTheme remplace valeurs hardcodées par AppRadius/AppSpacing
-- 064-angular-feature-toggles: PreferenceService (signal-based, GET/PUT /users/me/preferences) + featureGuard (CanActivateFn paramétré); Settings > Fonctionnalités (toggle, DnD navOrder, confirmation dialog); sidebar dynamique via computed() + @for; FAB filtré par features; ShopPlaceholder /shop; 11 tests unitaires
-- 065-angular-data-settings: HealthService (signal-based, GET /actuator/health); DataSettings component (statut serveur, reload avec confirmation); route /settings/data; fix tokens CSS dark mode (--bg-warning, --text-warning)
-- 066-angular-transfer-form: TransferForm (standalone, OnPush, Reactive Forms) + differentAccountsValidator (cross-field); AccountService.transfer() POST /accounts/transfer; FAB TRANSFER_ACTION conditionnel (≥ 2 comptes actifs); Shell @case('transfer') + onTransferSaved(); 7 tests unitaires
-- 067-angular-responsive-nav: BottomNav component (mobile < 768px); Shell refactorisé — sidebar desktop / bottom nav mobile; FAB repositionné au-dessus de la bottom nav; token --bottom-nav-height: 64px; icônes 24px (Phosphor standard)
-- 068-angular-shop-module: ProductService + ShopList + ProductForm + ShopDetail + SellDialog + RestockDialog; backend GET /products?includeInactive + POST sell with SellRequest; ModalType +product +sell; routes /shop, /shop/:id; filtre actifs/inactifs; sell (detail 1u + FAB Nu) / restock actions; sales history; FAB conditionnel /shop; image sync Flutter↔Angular via base64 data URI — ImageUtils (flutter) + compressImage canvas (Angular, maxWidth=1024, quality=0.85)
-- 069-phosphor-icons-migration: All system icons migrated to Phosphor Icons — phosphor_flutter v2.1.0 (Flutter, ~60 icons), @ng-icons/core + @ng-icons/phosphor-icons v33.1.0 (Angular, ~20 emojis); docs/design-tokens.md section Icons ajoutée; icon-mapping.md créé; 525 tests Flutter passent
-- 073-backend-budget-categories: Budget + BudgetSnapshot entities; Flyway V17; BudgetService (CRUD, overview mensuel, history avec snapshots lazy, normalisation HEBDO/MENSUEL/ANNUEL, multi-devise); 7 endpoints /budgets; Feature.BUDGETS; 41 tests (25 service + 16 controller)
-- 074-angular-budget-categories: BudgetService Angular + BudgetListComponent + BudgetForm + graphiques ng2-charts; 7 endpoints /budgets consommés
-- 075-flutter-budget-categories: BudgetListScreen + BudgetDetailScreen + BudgetForm (CRUD + overview mensuel + historique fl_chart); BudgetNotifier (CrudNotifier pattern); local (Drift) + remote (Dio) via dataModeProvider; 20 tests unitaires BudgetNotifier; localisation 18 clés l10n; fix Currency lookup → byNameOrDefault(); fix _hasExistingData shop
-- 076-budget-category-tracking: Unbudgeted spending tracking (backend currency field + multi-currency aggregation, Angular budget-list section, Flutter UnbudgetedDetailSheet + AppColors.unbudgetedGray + UnbudgetedItemDto); MonthSelector.didUpdateWidget(); snapshot cleanup on budget delete; null guard checkThresholdsForCategory; JavaDoc getHistory() @Transactional
-- 077-backend-debt-enhancements: DebtService — repayment tracking (POST /debts/{id}/repay, GET /debts/{id}/payments), account association with currency forcing/conversion, snooze reminders (POST /debts/{id}/snooze); NotificationScheduler — DEBT_REMINDER type + checkDebtReminders() minutely job; AccountService — GET /accounts/total-balance aggregating accounts + debts by currency; Flyway V18; guard: debt transaction type immutable; ~55 tests (418 total)
-- 078-angular-debt-enhancements: DebtService Angular (repay, payments, snooze, totalBalance); DebtDetailComponent (montant restant, barre progression, historique paiements, badge remboursé); RepayDialog + SnoozeDialog; DebtListComponent câblé; toast feedback; 9 tests unitaires
-- 079-flutter-debt-enhancements: DebtDetailScreen (montant restant, barre progression, historique paiements, badge remboursé); RepayBottomSheet (compte + montant); SnoozeDialog; DebtForm enrichi (compte, rappel, includeInBalance); NotificationPanel — actions Rembourser/Reporter; routes /debts/:id; DebtPayment model; 37 tests passent
-- 080-debt-enhancements: Spec consolidée cross-plateforme (KKS-194/195/196) — 76 tâches documentées, 423 tests backend + 37 tests Flutter validés. Spec rétroactive couvrant KKS-077/078/079.
-- 081-backend-bank-accounts: Bank record + BankRegistry (29 banques statiques FR/TG/International); BankService (getAllBanks trié, resolveBank); BankController GET /banks (public); Account enrichi (+bankCode, bankCustomName, bankCustomLogo); AccountRequest/Response enrichis (+7 champs bank résolus); Flyway V19; 29 logos SVG dans static/bank-logos/; 442 tests (27 nouveaux)
-- 082-angular-bank-accounts: BankService Angular (GET /banks, cache signal); BankSelect composant (groupement FR/TG/International, recherche temps réel); AccountBankIcon composant (résolution logo : SVG banque / data URI custom / emoji fallback); AccountForm enrichi (sélecteur banque, masquage conditionnel icône/couleur, upload logo custom compressé); image.utils.ts (compressImage partagé entre AccountForm et ProductForm); SelectPicker étendu (+imageUrl sur SelectPickerItem); AccountModel enrichi (+7 champs bank); 347 tests passent
-- 083-flutter-bank-accounts: Bank model (Freezed) + BankResponse DTO; BankRemoteDataSource (GET /api/banks); BankRepository (interface + remote); banksProvider (FutureProvider); Account enrichi +7 champs bank; Drift migration v3 (+3 colonnes); BankSelectPicker (bottom sheet groupée FR/TG/International, recherche temps réel); AccountBankIcon (cascade SVG/base64/emoji); AccountFormScreen enrichi (sélecteur banque, masquage conditionnel, upload logo custom 512px); SelectPickerItem +imageUrl; AccountListTile + HeroAccountSection + 5 formulaires mis à jour; 29 logos SVG embarqués; 9 tests widget; 604 tests passent
-- 085-recurring-transactions-backend: RecurringTransactionController (5 endpoints /transactions/recurring); RecurringTransactionService (create, listActive, validate, skip, deactivate); SubscriptionPaymentService (pay, getPayments, getTotalPaid); SubscriptionController +3 endpoints (pay/payments/total); Flyway V20 (+isRecurring, frequency, nextOccurrence, recurringActive, subscription_id sur transactions); Transaction enrichie (+product FK, +debt FK ManyToOne, +subscription FK); CategoryResponse.from() + AccountSummary.from() static factories (dédupliquent 5 services); count query countBySubscriptionIdAndUserId; EntityType +RECURRING_TRANSACTION; NotificationType +RECURRING_TRANSACTION_DUE; NotificationScheduler +checkRecurringTransactions(); 488 tests passent
-- 086-angular-recurring-transactions: RecurringTransactionService (signal-based, loadActive/validate/skip/deactivate); SubscriptionService enrichi (pay, getPayments, getTotalPaid); RecurringList component (liste triée overdue/today/upcoming, 3 actions); SubscriptionDetail component (infos, payer, historique paiements + total cumulé); NotificationPanel gère RECURRING_TRANSACTION_DUE (Valider/Passer) et SUBSCRIPTION_DUE (Payer); 375 tests passent
-- 087-angular-recurring-form: TransactionForm enrichi avec toggle récurrente (isRecurring, frequency, nextOccurrence) ; RecurringTransactionService.create() + RecurringTransactionRequest ; ModalService.asRecurring signal ; action "Rendre récurrente" (phosphorRepeat) dans la liste des transactions avec pré-remplissage du formulaire ; 4 nouveaux tests (379 total)
-- 088-flutter-recurring-transactions: RecurringListScreen (validate/skip/deactivate via swipe); SubscriptionDetailScreen (historique paiements + total cumulé); NotificationPanel étendu (RECURRING_TRANSACTION_DUE + SUBSCRIPTION_DUE + navigation /budgets); EntityType +BUDGET +TRANSACTION; NotificationType +budgetThreshold +budgetExceeded; 626 tests passent
-- 089-recurring-transactions: Spec consolidée rétroactive cross-plateforme KKS-159 — 67 tâches documentées, 1493 tests validés (488 backend + 379 Angular + 626 Flutter)
-- 091-dashboard-visual-revamp: Dashboard Angular refonte visuelle iOS-like — hero card gradient amber→indigo, glassmorphism cards (dark mode), badges variation, barres budget vertes + animation, transactions en cards individuelles, gradient radial page, micro-interactions tap; transaction subtitle affiche nom du compte; 379 tests inchangés
-- 092-bottom-nav-revamp: Bottom nav Angular refonte visuelle iOS-like — pill indicator (pseudo-élément ::before sur onglet actif), glassmorphism (dark mode, tokens 091 réutilisés), bordure supérieure subtile (light mode), police réduite via data-item-count pour 6+ items; 379 tests inchangés
-- 094-sync-text-scale-api: TextScale enum (SMALL/MEDIUM/LARGE); Flyway V21 (ALTER TABLE user_preferences); PreferenceService + DTOs enrichis (+textScale); Angular TextScaleService bridgé vers PreferenceService via effect() (API source de vérité, localStorage comme cache); Flutter TextScaleNotifier sync API (local-first, server override, fire-and-forget write)
-- 095-currency-rebase-propagation: Rebase automatique des taux de change quand la devise principale change (PreferenceService appelle rebaseRates() transactionnellement); Angular PreferenceService.update() recharge les taux via ExchangeRateService.loadRates(); Flutter CurrencyConfigNotifier.reorderCurrencies() recharge via exchangeRateNotifier.loadItems(); WebSocket STOMP push EXCHANGE_RATES_UPDATED pour multi-device; indicateur visuel hasMissingRate sur le dashboard (Angular ph-warning-circle + Flutter PhosphorIcons.warningCircle); fix budget double-comptage (AND t.is_recurring = false sur les 3 requêtes SUM budget); fix agrégation multi-devises dans getSpentByCategory() avec conversion par devise du compte; ExchangeRateService.getRate() méthode partagée (supprime duplication BudgetService/TransactionService); 493 tests passent
+
+> Historique complet : `git log --oneline`. Seules les 5 dernières features sont listées ici.
+
+- **100-register-currency-timezone** : RegisterRequest +currency/timezone ; compte/préférences créés eagerly à l'inscription ; Angular/Flutter : sélecteur devise + timezone auto-détecté
+- **099-csv-import** : Import CSV complet (15 endpoints, Commons CSV, Jaro-Winkler dedup, category rules, profil SG) ; Flyway V22-V23 ; Angular: ImportSettings + ImportReview + CsvMapping
+- **098-angular-settings-alignment** : Settings Angular aligné Flutter (3 groupes, About enrichi glassmorphism)
+- **097-angular-emoji-picker** : EmojiInput refonte emoji-mart (lazy, dark/light, recherche, récents)
+- **096-flutter-dashboard-refonte** : Dashboard Flutter refonte (CustomScrollView, PatrimoineCard gradient, multi-devise)
