@@ -119,6 +119,9 @@ export class CsvMapping {
       if (result.detectedEncoding) {
         this.encoding.set(result.detectedEncoding);
       }
+      if (result.detectedSkipHeaderLines > 0) {
+        this.skipHeaderLines.set(result.detectedSkipHeaderLines);
+      }
 
       // Auto-select first matching columns by common names
       this.autoSelectColumns(result.headers);
