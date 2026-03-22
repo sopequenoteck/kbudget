@@ -324,8 +324,13 @@ app/src/app/
 
 ### Bouton flottant (FAB speed-dial)
 
-- Visible sur tous les ecrans (sauf login)
-- Speed-dial avec actions conditionnelles : Transaction (toujours), Abonnement (si SUBSCRIPTIONS actif), Dette (si DEBTS actif), Virement (si ≥ 2 comptes actifs), Budget (si BUDGETS actif). Sur `/shop` : Nouveau produit + Vente rapide (si SHOP actif)
+- Masque sur `/settings/**` et ecran login
+- Actions contextuelles par page :
+  - `/dashboard` : Transaction, Abonnement*, Dette*, Virement**
+  - `/transactions`, `/subscriptions`, `/debts` (+ pages detail) : Transaction, Abonnement*, Dette*
+  - `/budgets` : Budget (tap direct)
+  - `/shop`, `/shop/:id` : Nouveau produit, Vente rapide (si SHOP actif)
+- *si feature activee | **si ≥ 2 comptes actifs
 - Saisie en 2-3 taps
 
 ## Flux d'authentification

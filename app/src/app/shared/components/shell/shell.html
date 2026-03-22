@@ -76,7 +76,7 @@
 
 <app-fab
   [isOpen]="speedDialOpen()"
-  [isHidden]="modalService.modalOpen()"
+  [isHidden]="modalService.modalOpen() || isOnSettingsRoute()"
   [currentRoute]="currentRoute()"
   (toggled)="onFabToggle()"
   (actionSelected)="onSpeedDialAction($event)"

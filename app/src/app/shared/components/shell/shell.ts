@@ -155,6 +155,7 @@ export class Shell {
     const e = this.navigationEnd();
     return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
+  readonly isOnSettingsRoute = computed(() => this.currentRoute().startsWith('/settings'));
 
   constructor() {
     effect(() => {

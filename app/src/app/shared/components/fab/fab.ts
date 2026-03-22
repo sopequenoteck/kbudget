@@ -85,6 +85,9 @@ export class Fab {
     () => this.allAccounts().filter((a) => a.actif).length >= 2,
   );
 
+  readonly isOnDashboardRoute = computed(
+    () => this.currentRoute() === '/dashboard' || this.currentRoute() === '/',
+  );
   readonly isOnBudgetsRoute = computed(() => this.currentRoute().startsWith('/budgets'));
   readonly isOnShopRoute = computed(() => this.currentRoute().startsWith('/shop'));
 
@@ -102,7 +105,7 @@ export class Fab {
       return true;
     });
     const result = [...base];
-    if (this.hasEnoughAccounts()) {
+    if (this.isOnDashboardRoute() && this.hasEnoughAccounts()) {
       result.push(TRANSFER_ACTION);
     }
     return result;
