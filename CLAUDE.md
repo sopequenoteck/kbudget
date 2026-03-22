@@ -257,8 +257,8 @@ Approche **signals-first** obligatoire :
 
 > Historique complet : `git log --oneline`. Seules les 5 dernières features sont listées ici.
 
-- **100-register-currency-timezone** : RegisterRequest +currency/timezone ; compte/préférences créés eagerly à l'inscription ; Angular/Flutter : sélecteur devise + timezone auto-détecté
-- **099-csv-import** : Import CSV complet (15 endpoints, Commons CSV, Jaro-Winkler dedup, category rules, profil SG) ; Flyway V22-V23 ; Angular: ImportSettings + ImportReview + CsvMapping
-- **098-angular-settings-alignment** : Settings Angular aligné Flutter (3 groupes, About enrichi glassmorphism)
-- **097-angular-emoji-picker** : EmojiInput refonte emoji-mart (lazy, dark/light, recherche, récents)
-- **096-flutter-dashboard-refonte** : Dashboard Flutter refonte (CustomScrollView, PatrimoineCard gradient, multi-devise)
+- **KKS-225-alignement-design-pages** : Summary cards harmonisees (typo xl, dots colores, press feedback, gradient), directive AutoFitText, conversion devise secondaire
+- **KKS-224-design-md-update** : DESIGN.md mis a jour (Hero Card, Glassmorphism, Variation Badges, Radial Gradient, Section Headers, regles de design, 11 tokens)
+- **100-register-currency-timezone** : RegisterRequest +currency/timezone ; compte/preferences crees eagerly
+- **099-csv-import** : Import CSV complet (15 endpoints, Commons CSV, Jaro-Winkler dedup, category rules)
+- **098-angular-settings-alignment** : Settings Angular aligne Flutter (3 groupes, About enrichi glassmorphism)
