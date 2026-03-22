@@ -249,8 +249,11 @@
 | FAB-3 | Item Transaction | Tap "Transaction" | Menu ferme + modal transaction | -- |
 | FAB-4 | Item Abonnement | Tap "Abonnement" | Menu ferme + modal abonnement | -- |
 | FAB-5 | Item Dette | Tap "Dette" | Menu ferme + modal dette | -- |
-| FAB-6 | Item Virement | ≥2 comptes actifs → Tap "Virement" | Menu ferme + modal virement | -- |
-| FAB-7 | Virement cache | 0-1 compte actif | "Virement" absent du menu | -- |
+| FAB-6 | Virement dashboard | Dashboard + ≥2 comptes → Tap "Virement" | Menu ferme + modal virement | -- |
+| FAB-7 | Virement hors dashboard | Page /transactions + ≥2 comptes | "Virement" absent du menu | -- |
+| FAB-8 | Virement cache | Dashboard + 0-1 compte actif | "Virement" absent du menu | -- |
+| FAB-9 | FAB masque settings | Naviguer vers /settings | FAB invisible | -- |
+| FAB-10 | FAB masque sous-settings | Naviguer vers /settings/features | FAB invisible | -- |
 
 ---
 

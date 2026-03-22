@@ -5,6 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [4.2.4] - 2026-03-22
+
+### Changed
+- FAB contextuel par page — virement restreint au dashboard uniquement, FAB masque sur /settings/**; docs architecture et plan de test mis a jour
+
 ## [4.2.2] - 2026-03-21
 
 ### Added
