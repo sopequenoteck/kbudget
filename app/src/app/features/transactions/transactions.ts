@@ -21,10 +21,12 @@ import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
+import { AutoFitTextDirective } from '../../shared/directives/auto-fit-text.directive';
+import { ConversionService } from '../../core/services/conversion';
 
 @Component({
   selector: 'app-transactions',
-  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, ConvertAmountPipe],
+  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, ConvertAmountPipe, AutoFitTextDirective],
   providers: [provideIcons({ phosphorRepeat })],
   templateUrl: './transactions.html',
   styleUrl: './transactions.scss',
@@ -34,6 +36,13 @@ export class Transactions {
   private readonly transactionService = inject(TransactionService);
   private readonly modalService = inject(ModalService);
   readonly preferenceService = inject(PreferenceService);
+  readonly conversionService = inject(ConversionService);
+
+  secondaryCurrencyFor(currency: string): string | null {
+    const all = this.preferenceService.currencies();
+    if (all.length < 2) return null;
+    return all.find(c => c !== currency) ?? null;
+  }
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
   readonly selectedYear = signal(new Date().getFullYear());

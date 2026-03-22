@@ -41,12 +41,13 @@ Cards de resume pour les pages interieures (hors dashboard). Pour le dashboard, 
 
 - Border-radius : `--radius-xl` (16px)
 - Shadow : `--shadow-md` — ombre douce multicouche
-- Padding : `--space-5` (20px) vertical, `--space-5` horizontal
-- Background : `--surface-raised` (blanc)
-- **Pas de bordure** — l'ombre seule crée l'élévation
-- Les montants sont en `font-size-2xl` + `font-weight-bold`
-- Les labels sont en `font-size-xs` + `text-secondary`, au-dessus du montant
-- Icône ou indicateur coloré optionnel (petit dot ou barre latérale)
+- Padding : `--space-4` a `--space-5` selon la page
+- Background : `--surface-default`
+- **Pas de bordure** — l'ombre seule cree l'elevation
+- Montants : `font-size-xl` + `font-weight-bold` (auto-reduit par directive `appAutoFitText` si debordement)
+- Labels : `font-size-xs` + `font-weight-semibold` + `text-secondary` + uppercase
+- Dot colore 8px (`border-radius: 50%`) en haut de chaque card sur Transactions et Dettes (pas sur Abonnements)
+- Press feedback : `transform: scale(0.97)` sur `:active` avec transition `duration-fast`
 
 ### Cards (Content)
 

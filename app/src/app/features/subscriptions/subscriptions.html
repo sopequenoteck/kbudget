@@ -5,7 +5,13 @@
         <span class="summary__label"
           >Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span
         >
-        <span class="summary__value">{{ ct.total | amount: null : ct.currency }}</span>
+        <span class="summary__value" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
+        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
+          @let converted = conversionService.convert(ct.total, ct.currency, targetCurrency);
+          @if (converted !== null) {
+            <span class="summary__converted">≈ {{ converted | amount: null : targetCurrency }}</span>
+          }
+        }
       </div>
     }
   </section>

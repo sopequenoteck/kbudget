@@ -16,12 +16,14 @@ import { Subscription, Frequency } from '../../core/models/subscription.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
+import { AutoFitTextDirective } from '../../shared/directives/auto-fit-text.directive';
+import { ConversionService } from '../../core/services/conversion';
 
 type StatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
 @Component({
   selector: 'app-subscriptions',
-  imports: [ListItem, AmountPipe, ConvertAmountPipe],
+  imports: [ListItem, AmountPipe, ConvertAmountPipe, AutoFitTextDirective],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +33,13 @@ export class Subscriptions {
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
   readonly preferenceService = inject(PreferenceService);
+  readonly conversionService = inject(ConversionService);
+
+  secondaryCurrencyFor(currency: string): string | null {
+    const all = this.preferenceService.currencies();
+    if (all.length < 2) return null;
+    return all.find(c => c !== currency) ?? null;
+  }
 
   readonly statusFilter = signal<StatusFilter>('ALL');
   readonly loading = signal(true);

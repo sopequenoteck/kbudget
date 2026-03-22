@@ -3,38 +3,70 @@
   flex-direction: column;
   gap: var(--space-5);
   padding: var(--space-4);
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40vh;
+    background: radial-gradient(ellipse at top center, var(--page-gradient-color) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
 }
 
 // -- Résumé --
 .summary {
   display: flex;
   gap: var(--space-3);
+  align-items: stretch;
 
   &__card {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: var(--space-2);
-    padding: var(--space-4) var(--space-2);
+    padding: var(--space-4);
     border-radius: var(--radius-xl);
     background-color: var(--surface-default);
     box-shadow: var(--shadow-md);
+    transition: transform var(--duration-fast) var(--easing-default);
+
+    &:active {
+      transform: scale(0.97);
+    }
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    &--owe { background-color: var(--color-debt-owe); }
+    &--owed { background-color: var(--color-debt-owed); }
+    &--neutral { background-color: var(--text-secondary); }
   }
 
   &__label {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   &__value {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
     white-space: nowrap;
+  }
+
+  &__converted {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
   }
 }
 

@@ -17,18 +17,39 @@
       <span class="summary__currency-label">{{ s.currency }}</span>
     }
     <div class="summary__card summary__card--income">
+      <span class="summary__dot summary__dot--income"></span>
       <span class="summary__label">Recettes</span>
-      <span class="summary__value">{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
+      <span class="summary__value" appAutoFitText>{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
+      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
+        @let convertedR = conversionService.convert(s.totalRecettes, s.currency, targetCurrency);
+        @if (convertedR !== null) {
+          <span class="summary__converted">≈ {{ convertedR | amount: null : targetCurrency }}</span>
+        }
+      }
     </div>
     <div class="summary__card summary__card--expense">
+      <span class="summary__dot summary__dot--expense"></span>
       <span class="summary__label">Dépenses</span>
-      <span class="summary__value">{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
+      <span class="summary__value" appAutoFitText>{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
+      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
+        @let convertedD = conversionService.convert(s.totalDepenses, s.currency, targetCurrency);
+        @if (convertedD !== null) {
+          <span class="summary__converted">≈ {{ convertedD | amount: null : targetCurrency }}</span>
+        }
+      }
     </div>
     <div class="summary__card summary__card--balance">
+      <span class="summary__dot" [ngClass]="s.solde > 0 ? 'summary__dot--income' : s.solde < 0 ? 'summary__dot--expense' : 'summary__dot--neutral'"></span>
       <span class="summary__label">Solde</span>
-      <span class="summary__value" [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
+      <span class="summary__value" appAutoFitText [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
         {{ s.solde | amount: null : s.currency }}
       </span>
+      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
+        @let convertedS = conversionService.convert(s.solde, s.currency, targetCurrency);
+        @if (convertedS !== null) {
+          <span class="summary__converted">≈ {{ convertedS | amount: null : targetCurrency }}</span>
+        }
+      }
     </div>
   </section>
 }

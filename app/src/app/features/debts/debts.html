@@ -1,32 +1,53 @@
 @if (hasDebts()) {
   <section class="summary">
     <div class="summary__card">
+      <span class="summary__dot summary__dot--owe"></span>
       <span class="summary__label">Emprunts</span>
       @for (ct of totalJeDoisByCurrency(); track ct.currency) {
-        <span class="summary__value debt-owe">{{ ct.total | amount: null : ct.currency }}</span>
+        <span class="summary__value debt-owe" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
+        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
+          @let convertedOwe = conversionService.convert(ct.total, ct.currency, targetCurrency);
+          @if (convertedOwe !== null) {
+            <span class="summary__converted">≈ {{ convertedOwe | amount: null : targetCurrency }}</span>
+          }
+        }
       }
       @if (totalJeDoisByCurrency().length === 0) {
-        <span class="summary__value debt-owe">{{ 0 | amount }}</span>
+        <span class="summary__value debt-owe" appAutoFitText>{{ 0 | amount }}</span>
       }
     </div>
     <div class="summary__card">
+      <span class="summary__dot summary__dot--owed"></span>
       <span class="summary__label">Prêts</span>
       @for (ct of totalOnMeDoitByCurrency(); track ct.currency) {
-        <span class="summary__value debt-owed">{{ ct.total | amount: null : ct.currency }}</span>
+        <span class="summary__value debt-owed" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
+        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
+          @let convertedOwed = conversionService.convert(ct.total, ct.currency, targetCurrency);
+          @if (convertedOwed !== null) {
+            <span class="summary__converted">≈ {{ convertedOwed | amount: null : targetCurrency }}</span>
+          }
+        }
       }
       @if (totalOnMeDoitByCurrency().length === 0) {
-        <span class="summary__value debt-owed">{{ 0 | amount }}</span>
+        <span class="summary__value debt-owed" appAutoFitText>{{ 0 | amount }}</span>
       }
     </div>
     <div class="summary__card">
+      <span class="summary__dot" [ngClass]="(netBalanceByCurrency()[0]?.total ?? 0) > 0 ? 'summary__dot--owed' : (netBalanceByCurrency()[0]?.total ?? 0) < 0 ? 'summary__dot--owe' : 'summary__dot--neutral'"></span>
       <span class="summary__label">Solde net</span>
       @for (ct of netBalanceByCurrency(); track ct.currency) {
-        <span class="summary__value" [ngClass]="ct.total >= 0 ? 'debt-owed' : 'debt-owe'">
+        <span class="summary__value" appAutoFitText [ngClass]="ct.total >= 0 ? 'debt-owed' : 'debt-owe'">
           {{ ct.total | amount: null : ct.currency }}
         </span>
+        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
+          @let convertedNet = conversionService.convert(ct.total, ct.currency, targetCurrency);
+          @if (convertedNet !== null) {
+            <span class="summary__converted">≈ {{ convertedNet | amount: null : targetCurrency }}</span>
+          }
+        }
       }
       @if (netBalanceByCurrency().length === 0) {
-        <span class="summary__value debt-owed">{{ 0 | amount }}</span>
+        <span class="summary__value debt-owed" appAutoFitText>{{ 0 | amount }}</span>
       }
     </div>
   </section>
