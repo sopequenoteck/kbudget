@@ -1,5 +1,5 @@
-<!-- Zone solde total -->
-<section class="accounts-zone">
+<!-- Hero: patrimoine + résumé mensuel (une seule section) -->
+<section class="hero">
   @if (totalBalanceLoading()) {
     <div class="state-loading state-loading--accounts">
       <div class="spinner"></div>
@@ -15,112 +15,84 @@
       <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
     </div>
   } @else {
-    @if (isOnDashboard()) {
-      <span class="shell-greeting">Bonjour{{ userName()?.name ? ' ' + userName()!.name : '' }}</span>
-    }
-    @if (currencies().length > 1) {
-      <app-currency-pill-selector
-        [currencies]="currencies()"
-        [activeCurrency]="activeCurrency()"
-        (currencyChange)="onCurrencyChange($event)"
-      />
-    }
-    <div class="accounts-zone__totals">
-      <div class="accounts-zone__total">
-        <span class="accounts-zone__total-label">Patrimoine total</span>
-        <span class="accounts-zone__total-value-row">
-          <span
-            class="accounts-zone__total-value"
-            [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
-          >
-            {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
-          </span>
-          @if (convertedTotalBalance().hasMissingRate) {
-            <ng-icon
-              name="phosphorWarningCircle"
-              size="18"
-              class="missing-rate-icon"
-              title="Certains montants n'ont pas pu être convertis"
-            />
-          }
-        </span>
-        @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
-          <span class="variation-badge"
-            [ngClass]="{
-              'variation-badge--positive': netDuMois() > 0,
-              'variation-badge--negative': netDuMois() < 0,
-              'variation-badge--neutral': netDuMois() === 0
-            }"
-          >
-            {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
-            @if (variationPatrimoinePct() !== null) {
-              ({{ variationPatrimoinePct()! >= 0 ? '+' : '' }}{{ variationPatrimoinePct()! | number:'1.1-1' }}%)
-            }
-          </span>
-        }
-        @if (secondaryCurrency() !== null) {
-          @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
-          @if (converted !== null) {
-            <span class="patrimoine-converted">
-              ≈ {{ converted | amount: null : secondaryCurrency()! }}
-            </span>
-          }
-        }
-      </div>
+    <div class="hero__top-row">
+      @if (isOnDashboard()) {
+        <span class="hero__greeting">Bonjour{{ userName()?.name ? ' ' + userName()!.name : '' }}</span>
+      }
+      @if (currencies().length > 1) {
+        <app-currency-pill-selector
+          [currencies]="currencies()"
+          [activeCurrency]="activeCurrency()"
+          (currencyChange)="onCurrencyChange($event)"
+        />
+      }
     </div>
-  }
-</section>
 
-<!-- Cartes Revenus / Depenses -->
-<section class="summary-section">
-  @if (summaryLoading()) {
-    <div class="state-loading state-loading--summary">
-      <div class="spinner"></div>
-    </div>
-  } @else if (summaryError()) {
-    <div class="state-error">
-      <p>Erreur de chargement du bilan</p>
-      <button class="btn-outline" (click)="loadSummaries()">Réessayer</button>
-    </div>
-  } @else {
-    <div class="summary-cards">
-      <div class="summary-card summary-card--income">
-        <div class="summary-card__dot summary-card__dot--income"></div>
-        <span class="summary-card__label">Revenus</span>
-        <span class="summary-card__value">
-          {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
-        </span>
-        <span class="variation-badge"
-          [ngClass]="variationRevenus() >= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+    <!-- Montant principal -->
+    <div class="hero__amount">
+      <span class="hero__amount-label">Patrimoine total</span>
+      <span class="hero__amount-value-row">
+        <span
+          class="hero__amount-value"
+          [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
         >
-          {{ variationRevenus() >= 0 ? '↑' : '↓' }} {{ variationRevenus() >= 0 ? '+' : '' }}{{ variationRevenus() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
+          {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
         </span>
-        @if (secondaryCurrency() !== null) {
-          @let convertedRecettes = conversionService.convert(currentSummary()?.totalRecettes ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
-          @if (convertedRecettes !== null) {
-            <span class="summary-card__converted">≈ {{ convertedRecettes | amount: null : secondaryCurrency()! }}</span>
-          }
+        @if (convertedTotalBalance().hasMissingRate) {
+          <ng-icon
+            name="phosphorWarningCircle"
+            size="18"
+            class="missing-rate-icon"
+            title="Certains montants n'ont pas pu être convertis"
+          />
         }
-      </div>
-      <div class="summary-card summary-card--expense">
-        <div class="summary-card__dot summary-card__dot--expense"></div>
-        <span class="summary-card__label">Dépenses</span>
-        <span class="summary-card__value">
-          {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
-        </span>
+      </span>
+      @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
         <span class="variation-badge"
-          [ngClass]="variationDepenses() <= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+          [ngClass]="{
+            'variation-badge--positive': netDuMois() > 0,
+            'variation-badge--negative': netDuMois() < 0,
+            'variation-badge--neutral': netDuMois() === 0
+          }"
         >
-          {{ variationDepenses() > 0 ? '↑' : '↓' }} {{ variationDepenses() >= 0 ? '+' : '' }}{{ variationDepenses() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
-        </span>
-        @if (secondaryCurrency() !== null) {
-          @let convertedDepenses = conversionService.convert(currentSummary()?.totalDepenses ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
-          @if (convertedDepenses !== null) {
-            <span class="summary-card__converted">≈ {{ convertedDepenses | amount: null : secondaryCurrency()! }}</span>
+          {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
+          @if (variationPatrimoinePct() !== null) {
+            ({{ variationPatrimoinePct()! >= 0 ? '+' : '' }}{{ variationPatrimoinePct()! | number:'1.1-1' }}%)
           }
+        </span>
+      }
+      @if (secondaryCurrency() !== null) {
+        @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
+        @if (converted !== null) {
+          <span class="hero__converted">
+            ≈ {{ converted | amount: null : secondaryCurrency()! }}
+          </span>
         }
-      </div>
+      }
     </div>
+
+    <!-- Revenus / Dépenses — inline, pas de cards -->
+    @if (!summaryLoading() && !summaryError()) {
+      <div class="hero__summary-row">
+        <div class="hero__summary-item">
+          <span class="hero__summary-label">Revenus</span>
+          <span class="hero__summary-value hero__summary-value--income">
+            {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
+          </span>
+        </div>
+        <div class="hero__summary-divider"></div>
+        <div class="hero__summary-item">
+          <span class="hero__summary-label">Dépenses</span>
+          <span class="hero__summary-value hero__summary-value--expense">
+            {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
+          </span>
+        </div>
+      </div>
+    } @else if (summaryLoading()) {
+      <div class="state-loading state-loading--summary">
+        <div class="spinner"></div>
+      </div>
+    }
   }
 </section>
 

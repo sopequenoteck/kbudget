@@ -5,16 +5,10 @@
   left: 0;
   right: 0;
   height: var(--bottom-nav-height);
-  background-color: var(--glass-bg);
-  border-top: var(--nav-border-top);
-  box-shadow: none;
+  background-color: var(--surface-raised);
+  border-top: 1px solid var(--border-default);
   z-index: var(--z-sticky);
   padding-bottom: env(safe-area-inset-bottom);
-
-  @supports (backdrop-filter: blur(1px)) {
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-  }
 }
 
 .bottom-nav {
@@ -29,7 +23,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
+  gap: 6px;
   padding: var(--space-2) var(--space-1);
   text-decoration: none;
   color: var(--text-secondary);
@@ -57,7 +51,7 @@
 }
 
 .bottom-nav-icon {
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   line-height: 1;
   position: relative;
   z-index: 1;

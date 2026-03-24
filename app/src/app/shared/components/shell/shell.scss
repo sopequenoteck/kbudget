@@ -7,9 +7,9 @@
   align-items: center;
   gap: var(--space-3);
   height: var(--header-height);
-  padding: 0 var(--space-4);
-  background-color: var(--surface-default);
-  box-shadow: var(--shadow-sm);
+  padding: 0 var(--space-5);
+  background-color: var(--surface-raised);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .shell-greeting {
@@ -29,12 +29,12 @@
 }
 
 .shell-brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
 }
 
 .shell-brand-name {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
 }

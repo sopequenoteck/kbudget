@@ -100,17 +100,21 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      background-color: var(--surface-default);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
     }
 
     .budget-item {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
-      padding: var(--space-3);
-      background-color: var(--surface-default);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-default);
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
 
     .budget-item__header {
@@ -123,13 +127,11 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: var(--space-8);
-      height: var(--space-8);
+      width: var(--space-6);
+      height: var(--space-6);
       font-size: var(--font-size-base);
       line-height: 1;
       flex-shrink: 0;
-      background-color: var(--color-primary-light);
-      border-radius: var(--radius-round);
     }
 
     .budget-item__name {
@@ -157,7 +159,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     .budget-bar {
       position: relative;
       width: 100%;
-      height: 10px;
+      height: 4px;
       background-color: var(--border-default);
       border-radius: var(--radius-round);
       overflow: hidden;
@@ -167,6 +169,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       height: 100%;
       border-radius: var(--radius-round);
       background-color: var(--color-income);
+      opacity: 0.7;
       transition: width var(--duration-slow) var(--easing-out);
       min-width: 0;
 

@@ -91,3 +91,15 @@ Aucun.
 **Verdict** : PASS
 
 **Justification** : 8 FR couverts, ordonnancement coherent, granularite adaptee. Les warnings portent sur l'ambiguite des marqueurs [P] pour fichiers partages intra-page — non bloquant en execution sequentielle par page.
+
+---
+
+## Review impl (iteration 2) — 2026-03-23
+
+**Verdict** : PASS
+
+Bloquants iteration 1 corriges :
+- `font-size: var(--font-size-xl)` restaure dans les 3 SCSS
+- DESIGN.md corrige (`font-size-xl` + mention `appAutoFitText`)
+
+8/8 FR implementes. 14/14 taches cochees. Aucun bloquant ni warning.
