@@ -1,45 +1,38 @@
-@if (hasActiveSubscriptions()) {
-  <section class="summary">
-    @for (ct of monthlyTotalsByCurrency(); track ct.currency) {
-      <div class="summary__card">
-        <span class="summary__label"
-          >Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span
-        >
-        <span class="summary__value" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
-        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
-          @let converted = conversionService.convert(ct.total, ct.currency, targetCurrency);
-          @if (converted !== null) {
-            <span class="summary__converted">≈ {{ converted | amount: null : targetCurrency }}</span>
-          }
+<div class="hero">
+  @if (preferenceService.currencies().length > 1) {
+    <div class="hero__top-row">
+      <div class="currency-toggle">
+        @for (currency of preferenceService.currencies(); track currency) {
+          <button
+            class="currency-toggle__btn"
+            [class.active]="currency === activeCurrency()"
+            (click)="setActiveCurrency(currency)"
+          >
+            {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+          </button>
         }
       </div>
-    }
-  </section>
-}
+    </div>
+  }
+  @if (hasActiveSubscriptions()) {
+    <div class="hero__amount">
+      <span class="hero__amount-label">Total mensuel</span>
+      <span class="hero__amount-value">
+        {{ activeCurrencyTotal() | amount: null : activeCurrency() }}
+      </span>
+      @if (heroConverted(); as converted) {
+        <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
+      }
+      <span class="hero__secondary">{{ activeCurrencyAnnual() | amount: null : activeCurrency() }}/an · {{ activeCount() }} abonnements</span>
+    </div>
+  }
+</div>
 
-<section class="status-filter" role="group" aria-label="Filtrer par statut">
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'ALL'"
-    (click)="setStatusFilter('ALL')"
-  >
-    Tous
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'ACTIF'"
-    (click)="setStatusFilter('ACTIF')"
-  >
-    Actifs
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'INACTIF'"
-    (click)="setStatusFilter('INACTIF')"
-  >
-    Inactifs
-  </button>
-</section>
+<div class="sticky-sentinel" #stickySentinel></div>
+<div class="section-header" [class.stuck]="isStuck()">
+  <h2 class="section-header__title">Abonnements</h2>
+  <span class="section-header__count">{{ activeCount() }} actifs</span>
+</div>
 
 @if (loading()) {
   <div class="state-loading">
@@ -50,26 +43,37 @@
     <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
-} @else if (sortedSubscriptions().length === 0) {
+} @else if (groupedSubscriptions().length === 0) {
   <div class="state-empty">
     <p>Aucun abonnement</p>
   </div>
 } @else {
-  <ul class="subscription-list">
-    @for (subscription of sortedSubscriptions(); track subscription.id) {
-      <li class="subscription-item">
-        @if (!subscription.actif) {
-          <span class="badge-inactive">Inactif</span>
-        }
-        <app-list-item
-          [icon]="subscription.category?.icone ?? '🔄'"
-          [title]="subscription.nom"
-          [value]="formatAmount(subscription)"
-          [valueSubtitle]="subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency()"
-          [subtitle]="getNextRenewalDate(subscription)"
-          (pressed)="onSubscriptionPressed(subscription)"
-        />
-      </li>
-    }
-  </ul>
+  @for (group of groupedSubscriptions(); track group.label) {
+    <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
+    <div class="subscription-group">
+      @for (subscription of group.items; track subscription.id) {
+        <div class="subscription-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
+          <span
+            class="subscription-row__icon"
+            [style.background-color]="subscription.category?.couleur ? subscription.category!.couleur + '26' : null"
+          >{{ subscription.category?.icone ?? '🔄' }}</span>
+          <div class="subscription-row__content">
+            <span class="subscription-row__title">{{ subscription.nom }}</span>
+            <span class="subscription-row__subtitle">
+              {{ getRelativeDate(subscription) }}
+              · {{ subscription.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel' }}
+            </span>
+          </div>
+          <div class="subscription-row__right">
+            <span class="subscription-row__amount amount-expense">{{ formatAmount(subscription) }}</span>
+            @if (subscription.actif && (subscription.currency || 'EUR') !== preferenceService.primaryCurrency()) {
+              <span class="subscription-row__converted">
+                {{ subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency() }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 }

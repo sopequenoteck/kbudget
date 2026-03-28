@@ -115,12 +115,58 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Depenses : text-secondary neutre (plus de rouge) — seules les recettes gardent le vert
 - Couleurs de categorie en fond d'icone (hex + 26 = 15% opacite)
 
+## Ce qui a ete fait (session 4)
+
+### Page Transactions recurrentes — refonte complete
+- Supprime : header custom (double header), cards individuelles par item, boutons d'action inline (Valider/Passer/Desactiver), badges de statut, emoji brut comme icone
+- Alignement sur le vocabulaire visuel du reste : conteneur groupe avec dividers, icones cercle colorees, rows plates
+- Titre "Recurrences" aligne a droite, separe de la fleche retour, visible (lg/bold/primary)
+- Groupement par statut : En retard (label rouge), Aujourd'hui (label amber), A venir (label neutre)
+- Dates relatives : "aujourd'hui", "dans 4 j.", "dans 18 j." (seuil 30j, au-dela date absolue)
+- Montants : amount-expense (text-secondary) pour depenses, amount-income (vert) pour recettes uniquement
+- Bottom sheet actions au tap sur un item (progressive disclosure) : Marquer comme payee, Passer, Desactiver
+- Bouton "Tout paye" sur le groupe En retard (action groupee)
+
+### Resume mensuel (2 lignes)
+- Ligne 1 : "BILAN MENSUEL" + net (recettes - charges) en vert/rouge selon signe
+- Ligne 2 : "X CHARGES" + total mensuel depenses uniquement
+- Distinction conceptuelle : recurrences = obligations (loyer, electricite), abonnements = optionnels (Netflix)
+- Le bilan repond a "mes revenus recurrents couvrent-ils mes charges fixes ?"
+
+### Conversion multi-devise
+- Montants en devise etrangere affichent la conversion en italique (~ XX €)
+- Bilan mensuel convertit tous les montants en devise primaire avant calcul
+- Chargement des taux de change (ExchangeRateService.loadRates) a l'ouverture de la page
+- Normalisation frequence : hebdo x4.33, annuel /12 pour calcul mensuel
+
+## Ce qui a ete fait (session 5)
+
+### Page Abonnements — refonte complete
+- Supprime : summary cards (box-shadow, style ancien), segmented control filtre (Tous/Actifs/Inactifs), badge "Inactif" rouge positionne en absolu, composant ListItem (remplace par rows custom)
+- Hero : total mensuel dominant (3xl bold, color-expense) + "≈ XX CFA" conversion + "1 395 €/an · 8 abonnements" en sous-ligne expense color
+- Section header sticky : "Abonnements" + "8 actifs" (meme pattern que Transactions)
+- Groupement par periode de renouvellement : Cette semaine, Mois prochain, Plus tard, Inactifs (meme vocabulaire que Transactions/Recurrences)
+- Dates relatives dans le subtitle : "dans 4 j.", "dans 12 j.", "20 sept." (seuil 30j)
+- Rows custom : icone cercle avec couleur categorie (15% opacite), titre text-secondary, subtitle text-tertiary, montant amount-expense
+- Conversion multi-devise : chargement ExchangeRateService.loadRates(), affichage "~ 22,86 €" en italique sous les montants XOF
+- Inactifs : opacity 50%, groupes en bas sous label "Inactifs"
+- Signal financier : hero en color-expense (rouge attenue) pour communiquer "ca coute de l'argent" — les rows restent neutres (text-secondary)
+
+### Decisions de design (session 5)
+- Pas de summary row redondante (le hero dit deja le total mensuel, pas besoin de le repeter)
+- Le cout annuel est derive mais utile — affiche en sous-ligne, pas dans une carte separee
+- Les compteurs (nombre d'abonnements) sont secondaires par rapport aux montants
+- Sur une page 100% depenses, le hero DOIT porter la couleur expense sinon la page parait neutre/sans consequence
+- Filtre Tous/Actifs/Inactifs supprime : le groupement par periode + section Inactifs en bas suffit
+
 ## Ce qui reste a faire
 
 ### Priorite haute
-- [ ] Propager le style aux pages Abonnements, Dettes, Budgets
+- [x] Propager le style aux pages Abonnements (session 5)
+- [ ] Propager le style aux pages Dettes, Budgets
 - [ ] Page Settings
-- [ ] Modales et formulaires (bottom sheets) — progressive disclosure
+- [x] Page Transactions recurrentes (session 4)
+- [ ] Modales et formulaires (bottom sheets) — progressive disclosure (debut : bottom sheet actions recurrences)
 
 ### Priorite moyenne
 - [ ] Micro-interactions (transitions de page, feedback tactile)
