@@ -1,49 +1,34 @@
 <header class="shell-header">
-  <button class="shell-hamburger" (click)="toggleSidebar()" aria-label="Menu">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-  </button>
   <a routerLink="/dashboard" class="shell-brand">
     <img src="icons/budget-icon-no-background.svg" alt="" class="shell-brand-logo" />
     <span class="shell-brand-name">K-Budget</span>
   </a>
-
   <div class="shell-header__actions">
     <app-notification-badge (clicked)="toggleNotificationPanel()" />
     <div class="shell-user-menu">
-    <button
-      class="shell-user-trigger"
-      (click)="toggleDropdown()"
-      [attr.aria-expanded]="dropdownOpen()"
-      aria-haspopup="true"
-      aria-label="Menu utilisateur"
-    >
-      <span class="shell-user-avatar">{{ userInitials() }}</span>
-    </button>
-    @if (dropdownOpen()) {
-      <div class="shell-dropdown" role="menu">
-        @if (userName(); as user) {
-          <div class="shell-dropdown-name">{{ user.name }}</div>
-        }
-        <a
-          class="shell-dropdown-item"
-          routerLink="/settings"
-          role="menuitem"
-          (click)="closeDropdown()"
-        >
-          <ng-icon name="phosphorGear" size="20" /> Paramètres
-        </a>
-        <button
-          class="shell-dropdown-item shell-dropdown-logout"
-          role="menuitem"
-          (click)="onLogout()"
-        >
-          <ng-icon name="phosphorSignOut" size="20" /> Déconnexion
-        </button>
-      </div>
-    }
-  </div>
+      <button
+        class="shell-user-trigger"
+        (click)="toggleDropdown()"
+        [attr.aria-expanded]="dropdownOpen()"
+        aria-haspopup="true"
+        aria-label="Menu utilisateur"
+      >
+        <span class="shell-user-avatar">{{ userInitials() }}</span>
+      </button>
+      @if (dropdownOpen()) {
+        <div class="shell-dropdown" role="menu">
+          @if (userName(); as user) {
+            <div class="shell-dropdown-name">{{ user.name }}</div>
+          }
+          <a class="shell-dropdown-item" routerLink="/settings" role="menuitem" (click)="closeDropdown()">
+            <ng-icon name="phosphorGear" size="20" /> Paramètres
+          </a>
+          <button class="shell-dropdown-item shell-dropdown-logout" role="menuitem" (click)="onLogout()">
+            <ng-icon name="phosphorSignOut" size="20" /> Déconnexion
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
 

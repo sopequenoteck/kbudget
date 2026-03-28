@@ -5,20 +5,11 @@
   z-index: var(--z-sticky);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: space-between;
   height: var(--header-height);
-  padding: 0 var(--space-5);
+  padding: 0 var(--space-4);
   background-color: var(--surface-raised);
   border-bottom: 1px solid var(--border-default);
-}
-
-.shell-greeting {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .shell-brand {
@@ -39,12 +30,11 @@
   color: var(--color-primary);
 }
 
-// -- Header actions (notification + avatar) --
+// -- Header actions (contextual per page) --
 .shell-header__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-left: auto;
+  gap: var(--space-4);
 }
 
 // -- User menu & dropdown --
@@ -137,26 +127,6 @@
   &:hover {
     color: var(--text-error);
   }
-}
-
-.shell-hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  padding: var(--space-2);
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-left: var(--space-2);
-}
-
-.hamburger-line {
-  display: block;
-  width: 20px;
-  height: 2px;
-  background-color: var(--text-primary);
-  border-radius: 1px;
 }
 
 // -- Mobile defaults (< 768px) --

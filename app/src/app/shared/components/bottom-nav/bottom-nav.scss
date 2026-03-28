@@ -33,20 +33,6 @@
   &.active {
     color: var(--color-primary);
     font-weight: var(--font-weight-semibold);
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 56px;
-      height: 32px;
-      border-radius: var(--radius-round);
-      background-color: var(--color-primary-light);
-      z-index: 0;
-      transition: opacity var(--duration-normal) var(--easing-default);
-    }
   }
 }
 

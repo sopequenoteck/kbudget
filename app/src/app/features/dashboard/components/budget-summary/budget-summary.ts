@@ -25,7 +25,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
         @for (item of items(); track item.budgetId) {
           <li class="budget-item">
             <div class="budget-item__header">
-              <span class="budget-item__icon" [style.backgroundColor]="item.categoryCouleur + '26'">{{ item.categoryIcone }}</span>
+              <span class="budget-item__icon">{{ item.categoryIcone }}</span>
               <span class="budget-item__name">{{ item.categoryNom }}</span>
               <span
                 class="budget-item__amounts"
@@ -110,11 +110,6 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       flex-direction: column;
       gap: var(--space-2);
       padding: var(--space-3) var(--space-4);
-      border-bottom: 1px solid var(--border-default);
-
-      &:last-child {
-        border-bottom: none;
-      }
     }
 
     .budget-item__header {
@@ -127,9 +122,11 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: var(--space-6);
-      height: var(--space-6);
-      font-size: var(--font-size-base);
+      width: var(--space-8);
+      height: var(--space-8);
+      font-size: var(--font-size-lg);
+      background-color: rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-round);
       line-height: 1;
       flex-shrink: 0;
     }
@@ -145,8 +142,8 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     }
 
     .budget-item__amounts {
-      font-size: var(--font-size-sm);
-      color: var(--text-secondary);
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
       white-space: nowrap;
       flex-shrink: 0;
 

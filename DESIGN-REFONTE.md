@@ -64,13 +64,63 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Titres : sm au lieu de base
 - Sous-titres : xs, text-tertiary
 
+## Ce qui a ete fait (session 2)
+
+### Dashboard — polish
+- Icones budgets : uniformisees en cercles (comme operations)
+- Bordures entre budget items : supprimees (progress bar suffit)
+- Montants budgets : reduits en xs + text-tertiary
+- Bottom nav active : juste couleur amber, plus de pill M3
+
+### Header dynamique (shell)
+- Dashboard : logo K-Budget + cloche + avatar (inchange)
+- Autres pages : avatar + titre page + icones contextuelles a droite
+- Icones changent selon la route (recherche/filtre/recurrences sur Transactions)
+
+### Page Transactions — redesign complet
+- Hero centre : solde dominant (3xl bold), revenus/depenses inline, toggle devise
+- Transactions groupees par periode (Aujourd'hui, Hier, Cette semaine, etc.)
+- Conteneurs arrondis par groupe avec dividers (coherent dashboard)
+- Labels date discrets, rows plates (icone cercle + titre + categorie + montant)
+- Conversion devise secondaire affichee sous le montant
+- Supprime : 3 summary cards, tabs filtre, bouton recurrences emoji
+
+## Ce qui a ete fait (session 3)
+
+### Header uniforme (shell)
+- Header identique sur toutes les pages : logo + "K-Budget" + cloche + avatar
+- Plus de header dynamique (avatar a gauche + titre + actions contextuelles)
+- Padding header aligne sur le contenu (space-4)
+- Supprime : shell-header__left, shell-page-title, pageActions pour transactions
+
+### Page Transactions — hero + section header
+- Hero aligne a gauche (plus centre)
+- Selecteur mois : "Mars 2026 (◀)(▶)" label a gauche, fleches apres, toggle devise a droite
+- Fleches avec border-radius round + border (coherent avec toggle devise)
+- Labels "SOLDE", "Recettes", "Depenses" avec style dashboard (uppercase, letter-spacing, text-secondary)
+- Conteneur arrondi surface-default autour Recettes/Depenses (comme dashboard)
+- Conversion devise secondaire (CFA) sous recettes et depenses via computed signals
+- ExchangeRateService.loadRates() ajoute pour charger les taux
+
+### Section header "Transactions" (sticky)
+- Titre "Transactions" + icones recherche/filtre/recurrences
+- Separateur visuel (pipe) avant l'icone recurrences (navigation)
+- Sticky sous le header app (top: header-height)
+- Fond dynamique : surface-background normal → surface-raised + pleine largeur quand colle
+- Detection via IntersectionObserver sur un sentinel element
+
+### Hierarchie visuelle (global)
+- Montants rows : xs (12px) + medium (etait sm + semibold)
+- Titres rows : text-secondary (etait text-primary)
+- Depenses : text-secondary neutre (plus de rouge) — seules les recettes gardent le vert
+- Couleurs de categorie en fond d'icone (hex + 26 = 15% opacite)
+
 ## Ce qui reste a faire
 
 ### Priorite haute
-- [ ] Propager le style aux autres pages (Transactions, Abonnements, Dettes, Budgets) — memes principes de conteneurs, typographie, spacing
-- [ ] Revoir la page Budgets complete (progress bars, chart donut)
-- [ ] Page Settings (pas encore vue)
-- [ ] Modales et formulaires (bottom sheets)
+- [ ] Propager le style aux pages Abonnements, Dettes, Budgets
+- [ ] Page Settings
+- [ ] Modales et formulaires (bottom sheets) — progressive disclosure
 
 ### Priorite moyenne
 - [ ] Micro-interactions (transitions de page, feedback tactile)

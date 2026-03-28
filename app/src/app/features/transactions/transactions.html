@@ -1,82 +1,73 @@
-<div class="recurring-shortcut">
-  <a class="recurring-shortcut__link" routerLink="/transactions/recurring">
-    <span class="recurring-shortcut__icon">🔁</span>
-    Récurrences
-  </a>
+<div class="hero">
+  <div class="hero__top-row">
+    <div class="hero__nav">
+      <span class="hero__nav-label">{{ selectedMonthLabel() }}</span>
+      <button class="hero__nav-btn" (click)="prevMonth()" aria-label="Mois précédent">◀</button>
+      <button class="hero__nav-btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
+    </div>
+    <div class="currency-toggle">
+      @for (currency of preferenceService.currencies(); track currency) {
+        <button
+          class="currency-toggle__btn"
+          [class.active]="currency === activeCurrency()"
+          (click)="setActiveCurrency(currency)"
+        >
+          {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+        </button>
+      }
+    </div>
+  </div>
+  @if (activeSummary(); as summary) {
+    <div class="hero__amount">
+      <span class="hero__amount-label">Solde</span>
+      <span class="hero__amount-value" [class.negative]="summary.solde < 0">
+        {{ summary.solde | amount: null : summary.currency }}
+      </span>
+    </div>
+    <div class="hero__summary-row">
+      <div class="hero__summary-item">
+        <span class="hero__summary-label">Recettes</span>
+        <span class="hero__summary-value hero__summary-value--income">
+          {{ summary.totalRecettes | amount: 'RECETTE' : summary.currency }}
+        </span>
+        @if (convertedRecettes() !== null && secondaryCurrency(); as sec) {
+          <span class="hero__summary-converted">
+            ≈ {{ convertedRecettes()! | amount: 'RECETTE' : sec }}
+          </span>
+        }
+      </div>
+      <div class="hero__summary-divider"></div>
+      <div class="hero__summary-item">
+        <span class="hero__summary-label">Dépenses</span>
+        <span class="hero__summary-value hero__summary-value--expense">
+          {{ summary.totalDepenses | amount: 'DEPENSE' : summary.currency }}
+        </span>
+        @if (convertedDepenses() !== null && secondaryCurrency(); as sec) {
+          <span class="hero__summary-converted">
+            ≈ {{ convertedDepenses()! | amount: 'DEPENSE' : sec }}
+          </span>
+        }
+      </div>
+    </div>
+  }
 </div>
 
-<section class="month-selector">
-  <button class="month-selector__btn" (click)="prevMonth()" aria-label="Mois précédent">◀</button>
-  <span class="month-selector__label">{{ selectedMonthLabel() }}</span>
-  <button class="month-selector__btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
-</section>
-
-@for (s of summaries(); track s.currency) {
-  <section class="summary">
-    @if (summaries().length > 1) {
-      <span class="summary__currency-label">{{ s.currency }}</span>
-    }
-    <div class="summary__card summary__card--income">
-      <span class="summary__dot summary__dot--income"></span>
-      <span class="summary__label">Recettes</span>
-      <span class="summary__value" appAutoFitText>{{ s.totalRecettes | amount: 'RECETTE' : s.currency }}</span>
-      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
-        @let convertedR = conversionService.convert(s.totalRecettes, s.currency, targetCurrency);
-        @if (convertedR !== null) {
-          <span class="summary__converted">≈ {{ convertedR | amount: null : targetCurrency }}</span>
-        }
-      }
-    </div>
-    <div class="summary__card summary__card--expense">
-      <span class="summary__dot summary__dot--expense"></span>
-      <span class="summary__label">Dépenses</span>
-      <span class="summary__value" appAutoFitText>{{ s.totalDepenses | amount: 'DEPENSE' : s.currency }}</span>
-      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
-        @let convertedD = conversionService.convert(s.totalDepenses, s.currency, targetCurrency);
-        @if (convertedD !== null) {
-          <span class="summary__converted">≈ {{ convertedD | amount: null : targetCurrency }}</span>
-        }
-      }
-    </div>
-    <div class="summary__card summary__card--balance">
-      <span class="summary__dot" [ngClass]="s.solde > 0 ? 'summary__dot--income' : s.solde < 0 ? 'summary__dot--expense' : 'summary__dot--neutral'"></span>
-      <span class="summary__label">Solde</span>
-      <span class="summary__value" appAutoFitText [ngClass]="s.solde >= 0 ? 'amount-income' : 'amount-expense'">
-        {{ s.solde | amount: null : s.currency }}
-      </span>
-      @if (secondaryCurrencyFor(s.currency); as targetCurrency) {
-        @let convertedS = conversionService.convert(s.solde, s.currency, targetCurrency);
-        @if (convertedS !== null) {
-          <span class="summary__converted">≈ {{ convertedS | amount: null : targetCurrency }}</span>
-        }
-      }
-    </div>
-  </section>
-}
-
-<section class="type-filter" role="group" aria-label="Filtrer par type">
-  <button
-    class="type-filter__btn"
-    [class.active]="typeFilter() === 'ALL'"
-    (click)="setTypeFilter('ALL')"
-  >
-    Tous
-  </button>
-  <button
-    class="type-filter__btn"
-    [class.active]="typeFilter() === 'DEPENSE'"
-    (click)="setTypeFilter('DEPENSE')"
-  >
-    Dépenses
-  </button>
-  <button
-    class="type-filter__btn"
-    [class.active]="typeFilter() === 'RECETTE'"
-    (click)="setTypeFilter('RECETTE')"
-  >
-    Recettes
-  </button>
-</section>
+<div class="sticky-sentinel" #stickySentinel></div>
+<div class="section-header" [class.stuck]="isStuck()">
+  <h2 class="section-header__title">Transactions</h2>
+  <div class="section-header__actions">
+    <button class="section-header__action-btn" aria-label="Rechercher">
+      <ng-icon name="phosphorMagnifyingGlass" size="20" />
+    </button>
+    <button class="section-header__action-btn" aria-label="Filtrer">
+      <ng-icon name="phosphorFunnel" size="20" />
+    </button>
+    <span class="section-header__separator"></span>
+    <a class="section-header__action-btn section-header__action-btn--nav" routerLink="/transactions/recurring" aria-label="Récurrences">
+      <ng-icon name="phosphorArrowsClockwise" size="20" />
+    </a>
+  </div>
+</div>
 
 @if (loading()) {
   <div class="state-loading">
@@ -87,36 +78,36 @@
     <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
-} @else if (filteredTransactions().length === 0) {
+} @else if (groupedTransactions().length === 0) {
   <div class="state-empty">
     <p>Aucune transaction</p>
   </div>
 } @else {
-  <ul class="transaction-list">
-    @for (transaction of filteredTransactions(); track transaction.id) {
-      <li class="transaction-item">
-        <app-list-item
-          [icon]="getIcon(transaction)"
-          [title]="transaction.libelle"
-          [subtitle]="transaction.category?.nom ?? ''"
-          [value]="transaction.montant | amount: transaction.type : transaction.account?.currency"
-          [valueSubtitle]="transaction.account?.currency ? (transaction.montant | convertAmount: transaction.account!.currency : preferenceService.primaryCurrency()) : ''"
-          [rightSubtitle]="transaction.date | relativeDate"
-          [valueClass]="getValueClass(transaction)"
-          (pressed)="onTransactionPressed(transaction)"
-        />
-        @if (transaction.type !== 'AJUSTEMENT') {
-          <button
-            class="btn-recurring"
-            type="button"
-            (click)="onMakeRecurring($event, transaction)"
-            title="Rendre récurrente"
-            aria-label="Rendre cette transaction récurrente"
-          >
-            <ng-icon name="phosphorRepeat" size="16" />
-          </button>
-        }
-      </li>
-    }
-  </ul>
+  @for (group of groupedTransactions(); track group.label) {
+    <div class="date-label">{{ group.label }}</div>
+    <div class="transaction-group">
+      @for (transaction of group.transactions; track transaction.id) {
+        <div class="transaction-row" (click)="onTransactionPressed(transaction)">
+          <span
+            class="transaction-row__icon"
+            [style.background-color]="transaction.category?.couleur ? transaction.category!.couleur + '26' : null"
+          >{{ getIcon(transaction) }}</span>
+          <div class="transaction-row__content">
+            <span class="transaction-row__title">{{ transaction.libelle }}</span>
+            <span class="transaction-row__subtitle">{{ transaction.category?.nom ?? '' }}</span>
+          </div>
+          <div class="transaction-row__right">
+            <span class="transaction-row__amount" [class]="getValueClass(transaction)">
+              {{ transaction.montant | amount: transaction.type : transaction.account?.currency }}
+            </span>
+            @if (transaction.account?.currency && transaction.account!.currency !== preferenceService.primaryCurrency()) {
+              <span class="transaction-row__converted">
+                {{ transaction.montant | convertAmount: transaction.account!.currency! : preferenceService.primaryCurrency() }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 }
