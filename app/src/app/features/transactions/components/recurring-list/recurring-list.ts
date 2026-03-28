@@ -5,7 +5,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -22,8 +21,21 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { TransactionType } from '../../../../core/models/transaction.model';
+import { Modal } from '../../../../shared/components/modal/modal';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
+
+interface RecurringGroup {
+  label: string;
+  status: RecurringStatus;
+  items: RecurringTransactionResponse[];
+}
+
+interface MonthlySummary {
+  totalExpenses: number;
+  expenseCount: number;
+}
 
 const STATUS_ORDER: Record<RecurringStatus, number> = {
   overdue: 0,
@@ -31,9 +43,15 @@ const STATUS_ORDER: Record<RecurringStatus, number> = {
   upcoming: 2,
 };
 
+const STATUS_LABELS: Record<RecurringStatus, string> = {
+  overdue: 'En retard',
+  today: "Aujourd'hui",
+  upcoming: 'À venir',
+};
+
 @Component({
   selector: 'app-recurring-list',
-  imports: [DatePipe, NgIcon, AmountPipe],
+  imports: [NgIcon, AmountPipe, Modal],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -57,6 +75,7 @@ export class RecurringList {
   readonly recurringTransactions = this.service.recurringTransactions;
 
   readonly actionInProgress = signal<string | null>(null);
+  readonly selectedItem = signal<RecurringTransactionResponse | null>(null);
 
   readonly sortedRecurringTransactions = computed(() => {
     return [...this.recurringTransactions()].sort((a, b) => {
@@ -65,6 +84,32 @@ export class RecurringList {
       if (statusA !== statusB) return statusA - statusB;
       return new Date(a.nextOccurrence).getTime() - new Date(b.nextOccurrence).getTime();
     });
+  });
+
+  readonly groupedByStatus = computed(() => {
+    const sorted = this.sortedRecurringTransactions();
+    const groups = new Map<RecurringStatus, RecurringTransactionResponse[]>();
+
+    for (const item of sorted) {
+      const status = this.getStatus(item.nextOccurrence);
+      if (!groups.has(status)) groups.set(status, []);
+      groups.get(status)!.push(item);
+    }
+
+    const result: RecurringGroup[] = [];
+    for (const [status, items] of groups) {
+      result.push({ label: STATUS_LABELS[status], status, items });
+    }
+    return result;
+  });
+
+  readonly monthlySummary = computed<MonthlySummary>(() => {
+    const items = this.recurringTransactions();
+    const expenses = items.filter(i => i.type === TransactionType.DEPENSE);
+    const totalExpenses = expenses.reduce(
+      (sum, i) => sum + this.toMonthlyAmount(i.montant, i.frequency), 0
+    );
+    return { totalExpenses, expenseCount: expenses.length };
   });
 
   constructor() {
@@ -93,10 +138,51 @@ export class RecurringList {
     }
   }
 
+  getRelativeDate(nextOccurrence: string): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const next = new Date(nextOccurrence);
+    next.setHours(0, 0, 0, 0);
+    const diffMs = next.getTime() - today.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      const absDays = Math.abs(diffDays);
+      return absDays === 1 ? 'hier' : `il y a ${absDays} j.`;
+    }
+    if (diffDays === 0) return "aujourd'hui";
+    if (diffDays === 1) return 'demain';
+    if (diffDays <= 30) return `dans ${diffDays} j.`;
+    return next.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  }
+
+  getValueClass(item: RecurringTransactionResponse): string {
+    return item.type === TransactionType.RECETTE ? 'amount-income' : 'amount-expense';
+  }
+
+  onItemPressed(item: RecurringTransactionResponse): void {
+    this.selectedItem.set(item);
+  }
+
+  async onValidateAll(items: RecurringTransactionResponse[]): Promise<void> {
+    this.actionInProgress.set('all');
+    try {
+      for (const item of items) {
+        await firstValueFrom(this.service.validate(item.id));
+      }
+      this.toastService.success(`${items.length} transaction${items.length > 1 ? 's' : ''} validée${items.length > 1 ? 's' : ''}`);
+    } catch {
+      this.toastService.error('Erreur lors de la validation');
+    } finally {
+      this.actionInProgress.set(null);
+    }
+  }
+
   async onValidate(item: RecurringTransactionResponse): Promise<void> {
     this.actionInProgress.set(item.id);
     try {
       await firstValueFrom(this.service.validate(item.id));
+      this.selectedItem.set(null);
       this.toastService.success('Transaction validée');
     } catch {
       this.toastService.error('Erreur lors de la validation');
@@ -109,6 +195,7 @@ export class RecurringList {
     this.actionInProgress.set(item.id);
     try {
       await firstValueFrom(this.service.skip(item.id));
+      this.selectedItem.set(null);
       this.toastService.success('Occurrence passée');
     } catch {
       this.toastService.error('Erreur lors du passage');
@@ -118,10 +205,10 @@ export class RecurringList {
   }
 
   async onDeactivate(item: RecurringTransactionResponse): Promise<void> {
-    if (!window.confirm(`Désactiver la récurrence "${item.libelle}" ?`)) return;
     this.actionInProgress.set(item.id);
     try {
       await firstValueFrom(this.service.deactivate(item.id));
+      this.selectedItem.set(null);
       this.toastService.success('Récurrence désactivée');
     } catch {
       this.toastService.error('Erreur lors de la désactivation');
@@ -136,5 +223,17 @@ export class RecurringList {
 
   goBack(): void {
     this.router.navigate(['/transactions']);
+  }
+
+  private toMonthlyAmount(amount: number, frequency: Frequency): number {
+    switch (frequency) {
+      case Frequency.HEBDOMADAIRE:
+        return amount * 4.33;
+      case Frequency.ANNUEL:
+        return amount / 12;
+      case Frequency.MENSUEL:
+      default:
+        return amount;
+    }
   }
 }

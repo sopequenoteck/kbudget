@@ -1,9 +1,47 @@
-<header class="recurring-header">
-  <button class="btn-icon" (click)="goBack()" aria-label="Retour">
-    <ng-icon name="phosphorArrowLeft" size="24" />
+<div class="page-header">
+  <button class="page-header__back" (click)="goBack()" aria-label="Retour">
+    <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="recurring-header__title">Transactions récurrentes</h1>
-</header>
+  <h1 class="page-header__title">Récurrences</h1>
+</div>
+
+<app-modal [isOpen]="selectedItem() !== null" [title]="selectedItem()?.libelle ?? ''" (closed)="selectedItem.set(null)">
+  @if (selectedItem(); as item) {
+    <div class="action-sheet">
+      <div class="action-sheet__summary">
+        <span class="action-sheet__frequency">{{ getFrequencyLabel(item.frequency) }}</span>
+        <span class="action-sheet__amount">{{ item.montant | amount: item.type }}</span>
+        <span class="action-sheet__date">Prochaine : {{ getRelativeDate(item.nextOccurrence) }}</span>
+      </div>
+      <div class="action-sheet__actions">
+        <button
+          class="action-sheet__btn action-sheet__btn--primary"
+          [disabled]="actionInProgress() !== null"
+          (click)="onValidate(item)"
+        >
+          <ng-icon name="phosphorCheck" size="20" />
+          Marquer comme payée
+        </button>
+        <button
+          class="action-sheet__btn"
+          [disabled]="actionInProgress() !== null"
+          (click)="onSkip(item)"
+        >
+          <ng-icon name="phosphorSkipForward" size="20" />
+          Passer cette occurrence
+        </button>
+        <button
+          class="action-sheet__btn action-sheet__btn--danger"
+          [disabled]="actionInProgress() !== null"
+          (click)="onDeactivate(item)"
+        >
+          <ng-icon name="phosphorPause" size="20" />
+          Désactiver la récurrence
+        </button>
+      </div>
+    </div>
+  }
+</app-modal>
 
 @if (loading()) {
   <div class="state-loading">
@@ -11,7 +49,7 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>{{ error() }}</p>
+    <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="reload()">Réessayer</button>
   </div>
 } @else if (sortedRecurringTransactions().length === 0) {
@@ -20,67 +58,46 @@
     <p>Aucune transaction récurrente</p>
   </div>
 } @else {
-  <ul class="recurring-list">
-    @for (item of sortedRecurringTransactions(); track item.id) {
-      <li class="recurring-item">
-        <div class="recurring-item__main">
-          <span class="recurring-item__icon">{{ item.category.icone }}</span>
-          <div class="recurring-item__info">
-            <span class="recurring-item__label">{{ item.libelle }}</span>
-            <span class="recurring-item__meta">
-              {{ item.account.nom }} &middot; {{ getFrequencyLabel(item.frequency) }}
+  @if (monthlySummary(); as summary) {
+    <div class="monthly-summary">
+      <span>MENSUEL · {{ summary.expenseCount }} charges</span>
+      <span>~{{ summary.totalExpenses | amount }} /mois</span>
+    </div>
+  }
+
+  @for (group of groupedByStatus(); track group.label) {
+    <div class="date-label" [class]="'date-label--' + group.status">
+      <span>{{ group.label }}</span>
+      @if (group.status === 'overdue') {
+        <button
+          class="date-label__action"
+          [disabled]="actionInProgress() !== null"
+          (click)="onValidateAll(group.items)"
+        >
+          Tout payé
+        </button>
+      }
+    </div>
+    <div class="recurring-group">
+      @for (item of group.items; track item.id) {
+        <div class="transaction-row" (click)="onItemPressed(item)">
+          <span
+            class="transaction-row__icon"
+            [style.background-color]="item.category.couleur ? item.category.couleur + '26' : null"
+          >{{ item.category.icone }}</span>
+          <div class="transaction-row__content">
+            <span class="transaction-row__title">{{ item.libelle }}</span>
+            <span class="transaction-row__subtitle">
+              {{ getFrequencyLabel(item.frequency) }} · {{ getRelativeDate(item.nextOccurrence) }}
             </span>
           </div>
-          <div class="recurring-item__right">
-            <span class="recurring-item__amount">
+          <div class="transaction-row__right">
+            <span class="transaction-row__amount" [class]="getValueClass(item)">
               {{ item.montant | amount: item.type }}
             </span>
-            <span class="recurring-item__date">
-              {{ item.nextOccurrence | date: 'dd/MM/yyyy' }}
-            </span>
-            @switch (getStatus(item.nextOccurrence)) {
-              @case ('overdue') {
-                <span class="badge badge--overdue">En retard</span>
-              }
-              @case ('today') {
-                <span class="badge badge--today">Aujourd'hui</span>
-              }
-              @default {
-                <span class="badge badge--upcoming">À venir</span>
-              }
-            }
           </div>
         </div>
-        <div class="recurring-item__actions">
-          <button
-            class="btn-action btn-action--primary"
-            [disabled]="actionInProgress() === item.id"
-            (click)="onValidate(item)"
-            aria-label="Valider"
-          >
-            <ng-icon name="phosphorCheck" size="16" />
-            Valider
-          </button>
-          <button
-            class="btn-action btn-action--secondary"
-            [disabled]="actionInProgress() === item.id"
-            (click)="onSkip(item)"
-            aria-label="Passer"
-          >
-            <ng-icon name="phosphorSkipForward" size="16" />
-            Passer
-          </button>
-          <button
-            class="btn-action btn-action--danger"
-            [disabled]="actionInProgress() === item.id"
-            (click)="onDeactivate(item)"
-            aria-label="Désactiver"
-          >
-            <ng-icon name="phosphorPause" size="16" />
-            Désactiver
-          </button>
-        </div>
-      </li>
-    }
-  </ul>
+      }
+    </div>
+  }
 }
