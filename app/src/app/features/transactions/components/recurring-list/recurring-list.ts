@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -21,8 +22,12 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Modal } from '../../../../shared/components/modal/modal';
+import { ConversionService } from '../../../../core/services/conversion';
+import { PreferenceService } from '../../../../core/services/preference';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -34,6 +39,8 @@ interface RecurringGroup {
 
 interface MonthlySummary {
   totalExpenses: number;
+  totalIncome: number;
+  net: number;
   expenseCount: number;
 }
 
@@ -51,7 +58,7 @@ const STATUS_LABELS: Record<RecurringStatus, string> = {
 
 @Component({
   selector: 'app-recurring-list',
-  imports: [NgIcon, AmountPipe, Modal],
+  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -69,6 +76,9 @@ export class RecurringList {
   private readonly service = inject(RecurringTransactionService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly conversionService = inject(ConversionService);
+  private readonly exchangeRateService = inject(ExchangeRateService);
+  readonly preferenceService = inject(PreferenceService);
 
   readonly loading = this.service.loading;
   readonly error = this.service.error;
@@ -105,15 +115,32 @@ export class RecurringList {
 
   readonly monthlySummary = computed<MonthlySummary>(() => {
     const items = this.recurringTransactions();
-    const expenses = items.filter(i => i.type === TransactionType.DEPENSE);
-    const totalExpenses = expenses.reduce(
-      (sum, i) => sum + this.toMonthlyAmount(i.montant, i.frequency), 0
-    );
-    return { totalExpenses, expenseCount: expenses.length };
+    const primary = this.preferenceService.primaryCurrency();
+    let totalExpenses = 0;
+    let totalIncome = 0;
+    let expenseCount = 0;
+
+    for (const item of items) {
+      const monthly = this.toMonthlyAmount(item.montant, item.frequency);
+      const currency = item.account?.currency ?? primary;
+      const converted = currency === primary
+        ? monthly
+        : (this.conversionService.convert(monthly, currency, primary) ?? monthly);
+
+      if (item.type === TransactionType.DEPENSE) {
+        totalExpenses += converted;
+        expenseCount++;
+      } else {
+        totalIncome += converted;
+      }
+    }
+
+    return { totalExpenses, totalIncome, net: totalIncome - totalExpenses, expenseCount };
   });
 
   constructor() {
     this.service.loadActive();
+    this.exchangeRateService.loadRates();
   }
 
   getStatus(nextOccurrence: string): RecurringStatus {

@@ -60,8 +60,14 @@
 } @else {
   @if (monthlySummary(); as summary) {
     <div class="monthly-summary">
-      <span>MENSUEL · {{ summary.expenseCount }} charges</span>
-      <span>~{{ summary.totalExpenses | amount }} /mois</span>
+      <div class="monthly-summary__row">
+        <span>BILAN MENSUEL</span>
+        <span [class]="summary.net >= 0 ? 'amount-income' : 'amount-expense'">{{ summary.net >= 0 ? '+' : '' }}{{ summary.net | number:'1.2-2' }} €</span>
+      </div>
+      <div class="monthly-summary__row">
+        <span>{{ summary.expenseCount }} CHARGES</span>
+        <span>~{{ summary.totalExpenses | amount }} /mois</span>
+      </div>
     </div>
   }
 
@@ -93,8 +99,13 @@
           </div>
           <div class="transaction-row__right">
             <span class="transaction-row__amount" [class]="getValueClass(item)">
-              {{ item.montant | amount: item.type }}
+              {{ item.montant | amount: item.type : item.account.currency }}
             </span>
+            @if (item.account.currency && item.account.currency !== preferenceService.primaryCurrency()) {
+              <span class="transaction-row__converted">
+                {{ item.montant | convertAmount: item.account.currency : preferenceService.primaryCurrency() }}
+              </span>
+            }
           </div>
         </div>
       }

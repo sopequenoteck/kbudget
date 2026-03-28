@@ -4,11 +4,10 @@
   padding: var(--space-4);
 }
 
-// -- Page header (back + title) --
+// -- Page header (back + centered title) --
 .page-header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   padding-bottom: var(--space-4);
 
   &__back {
@@ -24,6 +23,7 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: color var(--duration-fast);
+    flex-shrink: 0;
 
     &:hover {
       color: var(--color-primary);
@@ -31,23 +31,31 @@
   }
 
   &__title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-secondary);
+    flex: 1;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
     margin: 0;
+    text-align: right;
   }
 }
 
-// -- Monthly summary (single line) --
+// -- Monthly summary (2 rows) --
 .monthly-summary {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-1);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 // -- Label de statut --
@@ -164,6 +172,13 @@
 .transaction-row__amount {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.transaction-row__converted {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-style: italic;
   white-space: nowrap;
 }
 
