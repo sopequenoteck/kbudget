@@ -1,31 +1,35 @@
-<section class="product-filter" role="group" aria-label="Filtrer les produits">
-  <button
-    class="product-filter__btn"
-    [class.active]="filter() === 'active'"
-    (click)="setFilter('active')"
-  >
-    Actifs
-  </button>
-  <button
-    class="product-filter__btn"
-    [class.active]="filter() === 'inactive'"
-    (click)="setFilter('inactive')"
-  >
-    Inactifs
-  </button>
-  <button
-    class="product-filter__btn"
-    [class.active]="filter() === 'all'"
-    (click)="setFilter('all')"
-  >
-    Tous
-  </button>
-</section>
+<!-- Hero -->
+<div class="hero">
+  <span class="hero__amount-label">Chiffre d'affaires</span>
+  <span class="hero__amount-value">{{ totalCA() | amount }}</span>
+  <div class="hero__meta">
+    <div class="hero__meta-line">
+      <ng-icon name="phosphorTrendUp" />
+      {{ totalMargin() | amount }} de marge
+      <span class="hero__meta-dot">·</span>
+      <ng-icon name="phosphorPackage" />
+      {{ activeCount() }} produit{{ activeCount() !== 1 ? 's' : '' }}
+    </div>
+    <div class="hero__meta-line">
+      <ng-icon name="phosphorCube" />
+      Valeur stock&nbsp;: {{ stockValue() | amount }}
+    </div>
+  </div>
+</div>
+
+<!-- Sticky sentinel -->
+<div #stickySentinel class="sticky-sentinel"></div>
+
+<!-- Section header -->
+<div class="section-header" [class.stuck]="isStuck()">
+  <span class="section-header__title">Produits</span>
+  <span class="section-header__count">{{ activeCount() }} actif{{ activeCount() !== 1 ? 's' : '' }}</span>
+</div>
 
 @if (loading()) {
-  <ul class="product-list">
+  <div class="product-group">
     @for (item of skeletonItems; track $index) {
-      <li class="skeleton-item">
+      <div class="skeleton-item">
         <div class="skeleton-circle"></div>
         <div class="skeleton-lines">
           <div class="skeleton-line skeleton-line--title"></div>
@@ -35,35 +39,66 @@
           <div class="skeleton-line skeleton-line--value"></div>
           <div class="skeleton-line skeleton-line--small"></div>
         </div>
-      </li>
+      </div>
     }
-  </ul>
+  </div>
 } @else if (error()) {
   <div class="state-error">
     <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
-} @else if (filteredProducts().length === 0) {
+} @else if (products().length === 0) {
   <div class="state-empty">
     <span class="state-empty__icon"><ng-icon name="phosphorStorefront" size="48" /></span>
     <p>Aucun produit</p>
     <button class="btn-primary" (click)="onCreate()">Créer un produit</button>
   </div>
 } @else {
-  <ul class="product-list">
-    @for (product of filteredProducts(); track product.id) {
-      <li [style.opacity]="!product.actif || product.stock === 0 ? 0.5 : 1">
-        <app-list-item
-          [icon]="product.icone ?? '📦'"
-          [imageUrl]="product.imageUrl"
-          [title]="product.nom"
-          [value]="product.prixVente | amount"
-          [subtitle]="'Stock\u00a0: ' + product.stock"
-          [rightSubtitle]="product.stock === 0 ? 'Rupture' : product.totalVendu + ' ventes'"
-          (pressed)="onProductPressed(product)"
-        />
-      </li>
+  @for (group of groupedProducts(); track group.status) {
+    <button
+      class="group-label"
+      [class.group-label--warning]="group.status === 'warning'"
+      [class.group-label--inactive]="group.status === 'inactive'"
+      (click)="toggleGroup(group.status)"
+    >
+      <span>{{ group.label }}</span>
+      <span class="group-label__count">{{ group.items.length }}</span>
+      <ng-icon
+        class="group-label__chevron"
+        [class.group-label__chevron--collapsed]="isCollapsed(group.status)"
+        name="phosphorCaretDown"
+        size="14"
+      />
+    </button>
+    @if (!isCollapsed(group.status)) {
+      <div class="product-group">
+        @for (product of group.items; track product.id) {
+          <div
+            class="product-row"
+            [class.inactive]="!product.actif"
+            (click)="onProductPressed(product)"
+          >
+            <div class="product-row__icon">
+              @if (product.imageUrl) {
+                <img [src]="product.imageUrl" [alt]="product.nom" />
+              } @else {
+                {{ product.icone ?? '📦' }}
+              }
+            </div>
+            <div class="product-row__content">
+              <span class="product-row__title">{{ product.nom }}</span>
+              <span class="product-row__subtitle">Stock&nbsp;: {{ product.stock }} · {{ product.totalVendu }} vente{{ product.totalVendu !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="product-row__right">
+              <span class="product-row__amount">{{ product.prixVente | amount }}</span>
+              @if (product.stock === 0 && product.actif) {
+                <span class="product-row__stock-warning">Rupture</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
     }
-  </ul>
+  }
   <div class="list-fab-spacer"></div>
 }

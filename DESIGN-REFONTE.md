@@ -287,6 +287,37 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Le pattern navigation (pipe + icone Phosphor dans le section header) est repris des Transactions/Recurrences
 - Les icones Phosphor 14px dans les meta-lines sont des reperes visuels discrets, pas du bruit — elles facilitent le scan
 
+## Ce qui a ete fait (session 9)
+
+### Page Boutique — liste — refonte complete
+- Supprime : segmented control filtre (Actifs/Inactifs/Tous), composant app-list-item partage, box-shadow sur le conteneur liste
+- Hero : CA total dominant (3xl bold, color-income vert), meta-lines avec icones Phosphor 14px (phosphorTrendUp marge, phosphorPackage produits, phosphorCube valeur stock)
+- Section header sticky : "Produits" + "X actifs" (meme pattern que Transactions/Abonnements/Dettes)
+- Groupement par statut : En stock (default), Rupture de stock (label rouge), Inactifs (opacity 0.5)
+- Groupes collapsibles : chevron + compteur, Rupture et Inactifs fermes par defaut — focus sur ce qui compte
+- Rows custom : icone cercle 36px (image produit ronde ou emoji), titre text-secondary, subtitle "Stock: X · Y ventes", prix de vente a droite, badge "Rupture" rouge si stock=0
+- Images produit dans les cercles 36px (object-fit cover, border-radius round)
+
+### Page Boutique — detail — refonte complete
+- Supprime : header centre avec emoji/image 80px, grille 7 stat-cards (prix achat/vente/marge/stock/vendu/CA/marge totale), boutons full-width Vendre/Restocker, badge Inactif rouge, bandeau warning inactif, box-shadow partout
+- Header pattern recurrences : fleche retour + nom produit aligne a droite
+- Image produit : grand format 16:9 arrondi (radius-xl) entre header et hero, object-fit cover. Affichee uniquement si imageUrl existe
+- Hero condense : label "PRIX DE VENTE" uppercase + badge statut (bordure neutre si inactif, fond vert si actif) + montant 3xl color-income + "Achat X € · Marge Y €" + meta-lines (stock, vendus, CA, marge totale coloree vert/rouge) + description optionnelle
+- Actions pills compactes : corbeille (danger) a gauche | spacer | Modifier · Restocker · Vendre (primary amber) a droite
+- Ajout action Supprimer (avec confirm) — manquait sur l'ancienne page
+- Historique groupe par date relative : Aujourd'hui, Hier, Ce mois-ci, puis par mois (Fevrier 2026, Janvier 2026...) — meme vocabulaire temporel que les autres pages
+- Icones metier au lieu de fleches financieres : phosphorShoppingBag pour les ventes, phosphorPackage pour les restocks — la semantique est "entree/sortie stock", pas "recette/depense"
+- Ventes cliquables : ouvrent le formulaire transaction associe via modalService (meme pattern que la page Transactions)
+- Montants historique neutres (xs/medium/text-secondary)
+
+### Decisions de design (session 9)
+- Le hero boutique liste montre le CA total (chiffre d'affaires) en vert (color-income) — la boutique genere du revenu, le signal doit etre positif
+- Les prix dans les rows restent neutres (text-secondary) — seul le hero porte la couleur
+- Groupes collapsibles testes et valides : Rupture et Inactifs fermes par defaut evite le bruit visuel, le compteur dans le label donne l'info sans ouvrir
+- L'image produit en grand format sur le detail est necessaire pour un produit physique (contrairement aux abonnements/dettes qui n'ont pas d'image)
+- Les fleches financieres (TrendUp/TrendDown) etaient confuses sur l'historique produit : une vente fait SORTIR du stock mais est une RECETTE — la double semantique creait un conflit. Les icones metier (ShoppingBag/Package) resolvent ce conflit
+- Pas de page detail transaction : le clic sur une vente ouvre directement le formulaire d'edition (progressive disclosure, pas de navigation supplementaire)
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -295,6 +326,7 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - [x] Page Dettes — liste (session 7)
 - [x] Page detail dette (session 7)
 - [x] Propager le style a la page Budgets (session 8)
+- [x] Page Boutique — liste + detail (session 9)
 - [ ] Page Settings
 - [x] Page Transactions recurrentes (session 4)
 - [ ] Modales et formulaires (bottom sheets) — progressive disclosure (debut : bottom sheet actions recurrences)

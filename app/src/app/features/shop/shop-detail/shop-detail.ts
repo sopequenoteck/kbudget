@@ -7,7 +7,7 @@ import {
   isDevMode,
   signal,
 } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
@@ -15,28 +15,40 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
   phosphorPencilSimple,
+  phosphorTrash,
   phosphorTag,
-  phosphorShoppingCart,
+  phosphorPackage,
+  phosphorChartLineUp,
   phosphorTrendUp,
-  phosphorTrendDown,
+  phosphorShoppingCart,
+  phosphorShoppingBag,
 } from '@ng-icons/phosphor-icons/regular';
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
 import { Product, RestockRequest } from '../../../core/models/product.model';
 import { Transaction } from '../../../core/models/transaction.model';
 import { RestockDialog } from '../components/restock-dialog/restock-dialog';
+import { AmountPipe } from '../../../shared/pipes/amount.pipe';
+
+interface SalesGroup {
+  label: string;
+  items: Transaction[];
+}
 
 @Component({
   selector: 'app-shop-detail',
-  imports: [DatePipe, DecimalPipe, RestockDialog, NgIcon],
+  imports: [DatePipe, RestockDialog, NgIcon, AmountPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
       phosphorPencilSimple,
+      phosphorTrash,
       phosphorTag,
-      phosphorShoppingCart,
+      phosphorPackage,
+      phosphorChartLineUp,
       phosphorTrendUp,
-      phosphorTrendDown,
+      phosphorShoppingCart,
+      phosphorShoppingBag,
     }),
   ],
   templateUrl: './shop-detail.html',
@@ -75,6 +87,62 @@ export class ShopDetail {
     const p = this.product();
     if (!p) return 0;
     return p.totalVendu * this.margeUnitaire();
+  });
+
+  readonly groupedHistory = computed((): SalesGroup[] => {
+    const txs = this.salesHistory();
+    if (txs.length === 0) return [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Lundi
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const buckets = new Map<string, SalesGroup>();
+
+    const add = (key: string, label: string, tx: Transaction) => {
+      if (!buckets.has(key)) buckets.set(key, { label, items: [] });
+      buckets.get(key)!.items.push(tx);
+    };
+
+    for (const tx of txs) {
+      const txDate = new Date(tx.date);
+      txDate.setHours(0, 0, 0, 0);
+
+      if (txDate.getTime() === today.getTime()) {
+        add('today', "Aujourd'hui", tx);
+      } else if (txDate.getTime() === yesterday.getTime()) {
+        add('yesterday', 'Hier', tx);
+      } else if (txDate >= startOfWeek) {
+        add('thisWeek', 'Cette semaine', tx);
+      } else if (txDate >= startOfMonth) {
+        add('ce-mois', 'Ce mois-ci', tx);
+      } else {
+        const monthLabel = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(txDate);
+        const sortKey = `month-${txDate.getFullYear()}-${String(txDate.getMonth()).padStart(2, '0')}`;
+        add(sortKey, monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1), tx);
+      }
+    }
+
+    const order = ['today', 'yesterday', 'thisWeek', 'ce-mois'];
+    const result: SalesGroup[] = [];
+    for (const key of order) {
+      if (buckets.has(key)) {
+        result.push(buckets.get(key)!);
+        buckets.delete(key);
+      }
+    }
+    // Remaining month groups (sorted by key descending)
+    for (const [, group] of [...buckets.entries()].sort((a, b) => b[0].localeCompare(a[0]))) {
+      result.push(group);
+    }
+    return result;
   });
 
   constructor() {
@@ -124,10 +192,7 @@ export class ShopDetail {
     try {
       await firstValueFrom(this.productService.sell(p.id));
     } catch (err: unknown) {
-      const status = (err as { status?: number }).status;
-      if (status === 409) {
-        window.alert('Stock insuffisant ou produit inactif.');
-      } else if (isDevMode()) {
+      if (isDevMode()) {
         console.error('Failed to sell product', err);
       }
     }
@@ -147,6 +212,22 @@ export class ShopDetail {
     }
   }
 
+  async onDelete(): Promise<void> {
+    const p = this.product();
+    if (!p) return;
+
+    if (!window.confirm(`Supprimer le produit "${p.nom}" ?`)) return;
+
+    try {
+      await firstValueFrom(this.productService.delete(p.id));
+      this.router.navigate(['/shop']);
+    } catch (err: unknown) {
+      if (isDevMode()) {
+        console.error('Failed to delete product', err);
+      }
+    }
+  }
+
   private async loadSalesHistory(id: string): Promise<void> {
     this.salesLoading.set(true);
     try {
@@ -159,6 +240,10 @@ export class ShopDetail {
     } finally {
       this.salesLoading.set(false);
     }
+  }
+
+  onTransactionPressed(tx: Transaction): void {
+    this.modalService.openModal('transaction', tx);
   }
 
   onBack(): void {

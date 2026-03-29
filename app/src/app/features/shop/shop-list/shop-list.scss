@@ -1,63 +1,239 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
   padding: var(--space-4);
 }
 
-// -- Segmented control filtre --
-.product-filter {
-  display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border-radius: var(--radius-lg);
-  background-color: var(--bg-tertiary);
-
-  &__btn {
-    flex: 1;
-    padding: var(--space-2);
-    border: none;
-    border-radius: var(--radius-md);
-    background-color: transparent;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition:
-      background-color var(--duration-normal) var(--easing-default),
-      color var(--duration-normal) var(--easing-default),
-      box-shadow var(--duration-normal) var(--easing-default);
-
-    &.active {
-      background-color: var(--surface-default);
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
-    }
-  }
-}
-
-// -- Liste de produits (card blanche arrondie) --
-.product-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+// Hero
+.hero {
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  gap: var(--space-2);
+  padding-bottom: var(--space-6);
+}
 
-  li {
-    transition: opacity var(--duration-normal) var(--easing-default);
+.hero__amount-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
-    &:not(:last-child) {
-      border-bottom: 1px solid var(--border-default);
+.hero__amount-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--color-income);
+}
+
+.hero__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-1);
+}
+
+.hero__meta-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+
+  ::ng-deep ng-icon {
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+  }
+}
+
+.hero__meta-dot {
+  margin: 0 2px;
+}
+
+// Sticky section header
+.sticky-sentinel {
+  height: 1px;
+  margin: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 10;
+  background-color: var(--surface-background);
+  transition:
+    background-color var(--duration-fast),
+    margin var(--duration-fast),
+    padding var(--duration-fast);
+
+  &.stuck {
+    background-color: var(--surface-raised);
+    margin-left: calc(-1 * var(--space-4));
+    margin-right: calc(-1 * var(--space-4));
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  &__title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__count {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+  }
+}
+
+// Groupe labels — cliquables avec chevron
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4) var(--space-1) var(--space-2);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  text-align: left;
+
+  &:first-of-type {
+    padding-top: var(--space-2);
+  }
+
+  &--warning {
+    color: var(--text-error);
+  }
+
+  &--inactive {
+    color: var(--text-tertiary);
+  }
+
+  &__count {
+    font-weight: var(--font-weight-normal);
+    opacity: 0.6;
+  }
+
+  &__chevron {
+    margin-left: auto;
+    transition: transform var(--duration-fast);
+
+    ::ng-deep ng-icon {
+      width: 14px;
+      min-width: 14px;
+      height: 14px;
+    }
+
+    &--collapsed {
+      transform: rotate(-90deg);
     }
   }
 }
 
-// -- États --
+// Groupe conteneur
+.product-group {
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+
+  .product-row:not(:last-child) {
+    border-bottom: 1px solid var(--border-default);
+  }
+}
+
+// Rows
+.product-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+
+  &:hover {
+    background: var(--hover-bg);
+  }
+
+  &.inactive {
+    opacity: 0.5;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+  }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+
+  &__amount {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+  }
+
+  &__stock-warning {
+    font-size: var(--font-size-xs);
+    color: var(--text-error);
+  }
+}
+
+// États
 .state-empty,
 .state-error {
   display: flex;
@@ -69,7 +245,12 @@
   color: var(--text-secondary);
 }
 
-// -- Skeleton loading --
+.state-empty__icon {
+  font-size: var(--font-size-3xl);
+  opacity: 0.3;
+}
+
+// Skeleton loading
 .skeleton-item {
   display: flex;
   align-items: center;
@@ -82,8 +263,8 @@
 }
 
 .skeleton-circle {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: var(--surface-secondary);
   flex-shrink: 0;
@@ -131,19 +312,13 @@
   100% {
     opacity: 0.4;
   }
+
   50% {
     opacity: 1;
   }
 }
 
-// -- Empty state icon --
-.state-empty__icon {
-  font-size: var(--font-size-3xl);
-  opacity: 0.3;
-}
-
-// -- FAB spacer --
+// FAB spacer
 .list-fab-spacer {
   height: 96px;
 }
-
