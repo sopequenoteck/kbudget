@@ -12,6 +12,9 @@ import {
   phosphorArrowLeft,
   phosphorPencilSimple,
   phosphorCreditCard,
+  phosphorPause,
+  phosphorPlay,
+  phosphorTrash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
@@ -20,16 +23,22 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Subscription, Frequency } from '../../../../core/models/subscription.model';
 import { SubscriptionPaymentResponse } from '../../../../core/models/subscription-payment.model';
+import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { PreferenceService } from '../../../../core/services/preference';
 
 @Component({
   selector: 'app-subscription-detail',
-  imports: [AmountPipe, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
   providers: [
     provideIcons({
       phosphorArrowLeft,
       phosphorPencilSimple,
       phosphorCreditCard,
+      phosphorPause,
+      phosphorPlay,
+      phosphorTrash,
     }),
   ],
   templateUrl: './subscription-detail.html',
@@ -42,10 +51,11 @@ export class SubscriptionDetail {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
+  readonly preferenceService = inject(PreferenceService);
 
   readonly subscription = signal<Subscription | null>(null);
   readonly payments = signal<SubscriptionPaymentResponse[]>([]);
-  readonly totalPaid = signal<{ total: number; count: number } | null>(null);
+  readonly totalPaid = signal<{ totalPaid: number; paymentCount: number } | null>(null);
   readonly loading = signal(true);
   readonly paymentsLoading = signal(true);
   readonly payInProgress = signal(false);
@@ -136,6 +146,45 @@ export class SubscriptionDetail {
     }
   }
 
+  async onToggleActive(): Promise<void> {
+    const sub = this.subscription();
+    if (!sub) return;
+
+    try {
+      const updated = await firstValueFrom(
+        this.subscriptionService.update(sub.id, {
+          nom: sub.nom,
+          montant: sub.montant,
+          frequence: sub.frequence,
+          dateDebut: sub.dateDebut,
+          actif: !sub.actif,
+          categoryId: sub.category?.id,
+          accountId: sub.account?.id,
+          currency: sub.currency,
+        }),
+      );
+      this.subscription.set(updated);
+      this.toastService.success(updated.actif ? 'Abonnement activé' : 'Abonnement désactivé');
+    } catch {
+      this.toastService.error('Échec de la mise à jour');
+    }
+  }
+
+  async onDelete(): Promise<void> {
+    const sub = this.subscription();
+    if (!sub) return;
+
+    if (!confirm(`Supprimer l'abonnement "${sub.nom}" ?`)) return;
+
+    try {
+      await firstValueFrom(this.subscriptionService.delete(sub.id));
+      this.toastService.success('Abonnement supprimé');
+      this.router.navigate(['/subscriptions']);
+    } catch {
+      this.toastService.error('Échec de la suppression');
+    }
+  }
+
   goBack(): void {
     this.router.navigate(['/subscriptions']);
   }
@@ -153,6 +202,10 @@ export class SubscriptionDetail {
       case Frequency.MENSUEL: return 'Mensuel';
       case Frequency.ANNUEL: return 'Annuel';
     }
+  }
+
+  getAccountLogo(account: AccountSummary): string | null {
+    return account.bankCustomLogo || account.bankLogoUrl || null;
   }
 
   formatDate(date: string): string {

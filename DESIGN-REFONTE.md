@@ -159,10 +159,48 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Sur une page 100% depenses, le hero DOIT porter la couleur expense sinon la page parait neutre/sans consequence
 - Filtre Tous/Actifs/Inactifs supprime : le groupement par periode + section Inactifs en bas suffit
 
+## Ce qui a ete fait (session 6)
+
+### Page detail abonnement — refonte complete
+- Supprime : header avec bouton edit inline (back + titre + edit cote a cote), info card separee (Montant/Frequence/Date/Categorie/Compte en rows), total card isolee, bouton "Payer" full-width
+- Header aligne sur le pattern recurrences : fleche retour ronde transparente + titre aligne a droite (sans emoji categorie)
+- Hero condense : premiere ligne MENSUEL + badge Actif + categorie + date de debut, montant dominant 3xl, conversion devise secondaire, equivalent annuel/mensuel, total paye + nombre de paiements, logo banque + nom du compte
+- Plus de card info separee : toutes les metadonnees vivent dans le hero
+- Actions en pills compactes : 🗑️ (icone seule, danger) a gauche | spacer | Desactiver · Modifier · Payer (primaire) a droite
+- Bouton Payer desactive sur les abonnements inactifs
+- Ajout actions manquantes : Desactiver/Activer (toggle via update API), Supprimer (avec confirm)
+- Historique paiements : emoji/logo banque devant chaque item, montants en xs/medium/text-secondary (neutres, pas de vert)
+
+### AccountSummary — enrichissement backend
+- Ajout `bankLogoUrl` resolu via BankRegistry (logos SVG des banques connues)
+- Ajout `bankCustomLogo` (logos uploades manuellement)
+- ProductService corrige : utilise `AccountSummary.from()` au lieu du constructeur direct
+- Frontend AccountSummary aligne avec les 2 nouveaux champs
+- Helper `getAccountLogo()` : priorite bankCustomLogo > bankLogoUrl > fallback emoji
+
+### Fix pre-existant : SubscriptionService.getTotalPaid
+- Le type Angular disait `{ total, count }` mais l'API retourne `{ totalPaid, paymentCount }`
+- Corrige dans le service, le composant et le template
+
+### Hierarchie typographique alignee DESIGN.md
+- Captions (categorie hero, date hero) : xs/normal/tertiary (etait medium)
+- Total paye hero : sm/semibold/text-secondary (etait xs/medium/success)
+- Compte hero : sm/normal/secondary
+- Payment account : sm/medium/text-secondary (etait text-primary)
+- Payment date : xs/tertiary (etait secondary)
+- Payment amount : xs/medium/text-secondary (etait base/semibold/success)
+- Suppression du vert sur tous les montants de la page (hero total + historique) — couleur = information, pas decoration
+
+### Fix ng-icon width 0px
+- ng-icon dans un conteneur flex sans texte collapse a width:0 malgre le CSS variable --ng-icon__size
+- Fix via `::ng-deep ng-icon { min-width: Xpx }` dans les boutons concernes
+- Bug pre-existant egalement present sur la page dettes (meme pattern btn-icon)
+
 ## Ce qui reste a faire
 
 ### Priorite haute
 - [x] Propager le style aux pages Abonnements (session 5)
+- [x] Page detail abonnement (session 6)
 - [ ] Propager le style aux pages Dettes, Budgets
 - [ ] Page Settings
 - [x] Page Transactions recurrentes (session 4)

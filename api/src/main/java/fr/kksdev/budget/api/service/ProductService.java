@@ -260,9 +260,7 @@ public class ProductService {
                         cat.getId(), cat.getNom(), cat.getIcone(), cat.getCouleur(),
                         Boolean.TRUE.equals(cat.getIsSystem())) : null,
                 transaction.getNote(),
-                acc != null ? new AccountSummary(
-                        acc.getId(), acc.getNom(), acc.getIcone(), acc.getCouleur(),
-                        acc.getCurrency().name()) : null,
+                acc != null ? AccountSummary.from(acc) : null,
                 transaction.getTransferId(),
                 transaction.getProduct() != null ? transaction.getProduct().getId() : null,
                 transaction.getProduct() != null ? transaction.getProduct().getNom() : null,
