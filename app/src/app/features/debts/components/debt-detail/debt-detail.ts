@@ -7,7 +7,6 @@ import {
   isDevMode,
   signal,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -15,30 +14,34 @@ import {
   phosphorPencilSimple,
   phosphorBell,
   phosphorCalendar,
-  phosphorBank,
   phosphorArrowCircleDown,
+  phosphorTrash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
 import { DebtService } from '../../../../core/services/debt';
+import { PreferenceService } from '../../../../core/services/preference';
+import { ConversionService } from '../../../../core/services/conversion';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
+import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { RepayDialog } from '../repay-dialog/repay-dialog';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-debt-detail',
-  imports: [NgClass, AmountPipe, RepayDialog, SnoozeDialog, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, RepayDialog, SnoozeDialog, NgIcon],
   providers: [
     provideIcons({
       phosphorArrowLeft,
       phosphorPencilSimple,
       phosphorBell,
       phosphorCalendar,
-      phosphorBank,
       phosphorArrowCircleDown,
+      phosphorTrash,
     }),
   ],
   templateUrl: './debt-detail.html',
@@ -51,6 +54,8 @@ export class DebtDetail {
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
+  readonly preferenceService = inject(PreferenceService);
+  readonly conversionService = inject(ConversionService);
 
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
@@ -138,6 +143,24 @@ export class DebtDetail {
     }
   }
 
+  async onDelete(): Promise<void> {
+    const d = this.debt();
+    if (!d) return;
+
+    if (!confirm(`Supprimer la dette de ${d.personne} ?`)) return;
+
+    try {
+      await firstValueFrom(this.debtService.delete(d.id));
+      this.toastService.success('Dette supprimée');
+      this.router.navigate(['/debts']);
+    } catch (err: unknown) {
+      if (isDevMode()) {
+        console.error('Failed to delete debt', err);
+      }
+      this.toastService.error('Erreur lors de la suppression');
+    }
+  }
+
   onBack(): void {
     this.router.navigate(['/debts']);
   }
@@ -171,6 +194,20 @@ export class DebtDetail {
     if (id) {
       this.loadDebt(id);
     }
+  }
+
+  isOverdue(): boolean {
+    const d = this.debt();
+    if (!d?.dueDate || d.rembourse) return false;
+    const dueDate = new Date(d.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+    return dueDate < today;
+  }
+
+  getAccountLogo(account: AccountSummary): string | null {
+    return account.bankCustomLogo || account.bankLogoUrl || null;
   }
 
   formatDate(date: string): string {

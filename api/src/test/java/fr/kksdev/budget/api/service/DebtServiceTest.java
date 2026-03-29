@@ -111,7 +111,7 @@ class DebtServiceTest {
     void should_create_debt_when_valid_request() {
         var user = buildUser();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null,
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null, null,
                 null, null, null, null);
         var saved = buildDebt(user);
 
@@ -154,7 +154,7 @@ class DebtServiceTest {
                 .build();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.of(2026, 2, 1), null, null, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
         when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
@@ -230,8 +230,8 @@ class DebtServiceTest {
         var user = buildUser();
         var existing = buildDebt(user);
         var request = new DebtRequest("Bob", new BigDecimal("200.00"),
-                DebtType.PRET, LocalDate.of(2026, 2, 5), true, null, null,
-                null, null, null, null);
+                DebtType.PRET, LocalDate.of(2026, 2, 5), null, true, null,
+                null, null, null, null, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(existing));
         when(debtRepository.save(any(Debt.class))).thenReturn(existing);
@@ -398,7 +398,7 @@ class DebtServiceTest {
         var account = buildAccount(user);
         account.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.now(), null, null, Currency.EUR,
+                DebtType.EMPRUNT, LocalDate.now(), null, null, null, Currency.EUR,
                 account.getId(), null, null, null);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
@@ -423,7 +423,7 @@ class DebtServiceTest {
         var preference = UserPreference.builder().currencies(List.of(Currency.XOF)).build();
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
@@ -449,7 +449,7 @@ class DebtServiceTest {
         usdAccount.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                usdAccount.getId(), null, null, null);
+                null, usdAccount.getId(), null, null, null);
 
         var rate = ExchangeRate.builder()
                 .baseCurrency(Currency.EUR).targetCurrency(Currency.USD)
@@ -474,7 +474,7 @@ class DebtServiceTest {
         usdAccount.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                usdAccount.getId(), null, null, null);
+                null, usdAccount.getId(), null, null, null);
 
         var rate = ExchangeRate.builder()
                 .baseCurrency(Currency.EUR).targetCurrency(Currency.USD)
@@ -502,7 +502,7 @@ class DebtServiceTest {
         usdAccount.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                usdAccount.getId(), null, null, null);
+                null, usdAccount.getId(), null, null, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
         when(accountRepository.findById(usdAccount.getId())).thenReturn(Optional.of(usdAccount));
@@ -520,7 +520,7 @@ class DebtServiceTest {
         debt.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                null, null, null, null);
+                null, null, null, null, null);
 
         when(debtRepository.findById(debtId)).thenReturn(Optional.of(debt));
         when(debtRepository.save(any(Debt.class))).thenAnswer(inv -> {
@@ -583,7 +583,7 @@ class DebtServiceTest {
         usdAccount.setCurrency(Currency.USD);
         var request = new DebtRequest("Alice", new BigDecimal("100.00"),
                 DebtType.EMPRUNT, LocalDate.now(), null, null, null,
-                usdAccount.getId(), null, null, null);
+                null, usdAccount.getId(), null, null, null);
 
         var rate = ExchangeRate.builder()
                 .baseCurrency(Currency.EUR).targetCurrency(Currency.USD)

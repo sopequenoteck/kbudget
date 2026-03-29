@@ -196,12 +196,46 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Fix via `::ng-deep ng-icon { min-width: Xpx }` dans les boutons concernes
 - Bug pre-existant egalement present sur la page dettes (meme pattern btn-icon)
 
+## Ce qui a ete fait (session 7)
+
+### Page Dettes — refonte complete
+- Supprime : 3 summary cards (Emprunts/Prets/Solde net) avec dots colores et box-shadow, segmented control filtre (Tous/En cours/Rembourse), border-left coloree 3px sur les sections, composant app-list-item partage, sections separees "Prets" / "Emprunts" avec totaux colores
+- Hero : solde net dominant (3xl bold), couleur dynamique selon signe (income si positif, expense si negatif), conversion devise secondaire, sous-ligne "X prets · Y emprunts · Z en cours" + toggle devise
+- Section header sticky : "Dettes" + "X en cours" (meme pattern abonnements/transactions)
+- Groupement par echeance (dueDate) : En retard (label rouge), Aujourd'hui (label amber), Cette semaine, Ce mois-ci, Plus tard, Sans echeance, Remboursees
+- Rows custom : icone cercle avec couleur categorie (15% opacite), personne (titre text-secondary), subtitle (categorie · type · date relative), montant restant (vert pour prets, neutre pour emprunts)
+- Remboursees : opacity 50%, groupees en bas sous label "Remboursees"
+- Conversion multi-devise : chargement ExchangeRateService.loadRates(), affichage italique sous les montants en devise etrangere
+- Plus de liste separee prets/emprunts : tout dans une liste unique groupee par echeance temporelle — le sens est communique par la couleur du montant
+
+### Decisions de design (session 7)
+- Le hero montre le solde net = "est-ce qu'on me doit plus que je dois ?" — reponse immediate sans calcul mental
+- Le montantRestant est affiche (pas montant initial) — c'est ce qui reste a recuperer/rembourser, plus actionnable
+- Pas de segmented control : le groupement temporel + section Remboursees en bas suffit (meme decision que pour les abonnements)
+- Le type (pret/emprunt) est secondaire — le nom de la personne est le titre, le type vit dans le subtitle en texte plat (pas de badge pill)
+- Le solde net hero change de couleur : positif = vert (on me doit plus), negatif = rouge (je dois plus) — signal financier immediat
+- Dates relatives a droite (sous le montant) : "14 j. en retard" en rouge, "dans 4 j." en tertiary — separation claire du subtitle a gauche
+- Badges pills testes puis retires des rows de liste : ils cassaient le rythme visuel par rapport aux autres pages (abonnements/transactions qui utilisent du texte plat). Badge conserve uniquement sur la page detail.
+- dueDate ajoutee au DebtRequest backend (champ manquant) pour supporter le groupement par echeance
+
+### Page detail dette — refonte complete
+- Supprime : header avec back + titre + edit cote a cote, 2 amount cards (initial + restant) en grille, section progress bar isolee, section info-rows (date/devise/echeance/categorie/compte/rappel en lignes), boutons Rembourser/Reporter full-width
+- Header aligne sur le pattern abonnement : fleche retour + nom personne aligne a droite
+- Hero condense : badge type neutre (bordure, pas de couleur) + badge Rembourse + categorie + date, montant restant dominant 3xl (vert=pret, neutre=emprunt), conversion devise, "Initial X € · Y € rembourse · Z paiements", echeance avec icone calendrier (rouge si en retard), rappel avec icone cloche, logo banque + compte
+- Progress bar deplacee du hero vers la section paiements — le hero etait surcharge, la progress bar a plus de sens en contexte avec l'historique
+- Actions pills compactes : corbeille (danger) a gauche | spacer | Reporter · Modifier · Rembourser (primary amber) a droite
+- Ajout action Supprimer (avec confirm) — manquait sur l'ancienne page
+- Historique paiements : logo banque devant chaque item, montants en xs/medium/text-secondary (neutres)
+- Ordre hero : tags → montant → secondary → echeance → rappel → compte (echeance et rappel avant le compte)
+
 ## Ce qui reste a faire
 
 ### Priorite haute
 - [x] Propager le style aux pages Abonnements (session 5)
 - [x] Page detail abonnement (session 6)
-- [ ] Propager le style aux pages Dettes, Budgets
+- [x] Page Dettes — liste (session 7)
+- [x] Page detail dette (session 7)
+- [ ] Propager le style a la page Budgets
 - [ ] Page Settings
 - [x] Page Transactions recurrentes (session 4)
 - [ ] Modales et formulaires (bottom sheets) — progressive disclosure (debut : bottom sheet actions recurrences)
@@ -232,3 +266,4 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - Couleurs saturees Tailwind 400 en dark mode
 - Cards individuelles par item de liste (preferer un conteneur groupe)
 - Variation badges avec fond colore full-width
+- Badge pills repetes dans les rows de liste (preferer texte plat tertiary — badges reserves aux pages detail)

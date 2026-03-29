@@ -28,6 +28,7 @@ export interface DebtRequest {
   montant: number;
   sens: DebtType;
   date: string;
+  dueDate?: string | null;
   rembourse?: boolean;
   categoryId?: string;
   currency?: string;

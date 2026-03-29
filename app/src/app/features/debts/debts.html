@@ -1,81 +1,38 @@
-@if (hasDebts()) {
-  <section class="summary">
-    <div class="summary__card">
-      <span class="summary__dot summary__dot--owe"></span>
-      <span class="summary__label">Emprunts</span>
-      @for (ct of totalJeDoisByCurrency(); track ct.currency) {
-        <span class="summary__value debt-owe" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
-        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
-          @let convertedOwe = conversionService.convert(ct.total, ct.currency, targetCurrency);
-          @if (convertedOwe !== null) {
-            <span class="summary__converted">≈ {{ convertedOwe | amount: null : targetCurrency }}</span>
-          }
+<div class="hero">
+  @if (preferenceService.currencies().length > 1) {
+    <div class="hero__top-row">
+      <div class="currency-toggle">
+        @for (currency of preferenceService.currencies(); track currency) {
+          <button
+            class="currency-toggle__btn"
+            [class.active]="currency === activeCurrency()"
+            (click)="activeCurrency.set(currency)"
+          >
+            {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+          </button>
         }
-      }
-      @if (totalJeDoisByCurrency().length === 0) {
-        <span class="summary__value debt-owe" appAutoFitText>{{ 0 | amount }}</span>
-      }
+      </div>
     </div>
-    <div class="summary__card">
-      <span class="summary__dot summary__dot--owed"></span>
-      <span class="summary__label">Prêts</span>
-      @for (ct of totalOnMeDoitByCurrency(); track ct.currency) {
-        <span class="summary__value debt-owed" appAutoFitText>{{ ct.total | amount: null : ct.currency }}</span>
-        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
-          @let convertedOwed = conversionService.convert(ct.total, ct.currency, targetCurrency);
-          @if (convertedOwed !== null) {
-            <span class="summary__converted">≈ {{ convertedOwed | amount: null : targetCurrency }}</span>
-          }
-        }
+  }
+  @if (hasDebts()) {
+    <div class="hero__amount">
+      <span class="hero__amount-label">Solde net</span>
+      <span class="hero__amount-value" [class]="activeCurrencyNet() >= 0 ? 'hero__amount-value--positive' : 'hero__amount-value--negative'">
+        {{ activeCurrencyNet() | amount: null : activeCurrency() }}
+      </span>
+      @if (heroConverted(); as converted) {
+        <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
       }
-      @if (totalOnMeDoitByCurrency().length === 0) {
-        <span class="summary__value debt-owed" appAutoFitText>{{ 0 | amount }}</span>
-      }
+      <span class="hero__secondary">{{ pretsCount() }} prêts · {{ empruntsCount() }} emprunts · {{ activeCount() }} en cours</span>
     </div>
-    <div class="summary__card">
-      <span class="summary__dot" [ngClass]="(netBalanceByCurrency()[0]?.total ?? 0) > 0 ? 'summary__dot--owed' : (netBalanceByCurrency()[0]?.total ?? 0) < 0 ? 'summary__dot--owe' : 'summary__dot--neutral'"></span>
-      <span class="summary__label">Solde net</span>
-      @for (ct of netBalanceByCurrency(); track ct.currency) {
-        <span class="summary__value" appAutoFitText [ngClass]="ct.total >= 0 ? 'debt-owed' : 'debt-owe'">
-          {{ ct.total | amount: null : ct.currency }}
-        </span>
-        @if (secondaryCurrencyFor(ct.currency); as targetCurrency) {
-          @let convertedNet = conversionService.convert(ct.total, ct.currency, targetCurrency);
-          @if (convertedNet !== null) {
-            <span class="summary__converted">≈ {{ convertedNet | amount: null : targetCurrency }}</span>
-          }
-        }
-      }
-      @if (netBalanceByCurrency().length === 0) {
-        <span class="summary__value debt-owed" appAutoFitText>{{ 0 | amount }}</span>
-      }
-    </div>
-  </section>
-}
+  }
+</div>
 
-<section class="status-filter" role="group" aria-label="Filtrer par statut">
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'ALL'"
-    (click)="setStatusFilter('ALL')"
-  >
-    Tous
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'EN_COURS'"
-    (click)="setStatusFilter('EN_COURS')"
-  >
-    En cours
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'REMBOURSE'"
-    (click)="setStatusFilter('REMBOURSE')"
-  >
-    Remboursé
-  </button>
-</section>
+<div class="sticky-sentinel" #stickySentinel></div>
+<div class="section-header" [class.stuck]="isStuck()">
+  <h2 class="section-header__title">Dettes</h2>
+  <span class="section-header__count">{{ activeCount() }} en cours</span>
+</div>
 
 @if (loading()) {
   <div class="state-loading">
@@ -86,66 +43,41 @@
     <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
-} @else if (filteredDebts().length === 0) {
+} @else if (groupedDebts().length === 0) {
   <div class="state-empty">
     <p>Aucune dette</p>
   </div>
 } @else {
-  @if (debtsOnMeDoit().length > 0) {
-    <section class="debt-section debt-section--owed">
-      <div class="section-header">
-        <span class="section-header__title">Prêts</span>
-        @for (ct of sectionTotalOnMeDoitByCurrency(); track ct.currency) {
-          <span class="section-header__total debt-owed">{{
-            ct.total | amount: null : ct.currency
-          }}</span>
-        }
-      </div>
-      <ul class="debt-list">
-        @for (debt of debtsOnMeDoit(); track debt.id) {
-          <li class="debt-item" [class.debt-item--rembourse]="debt.rembourse">
-            <app-list-item
-              [icon]="getIcon(debt)"
-              [title]="debt.personne"
-              [subtitle]="getSubtitle(debt)"
-              [rightSubtitle]="debt.date | relativeDate"
-              [value]="debt.montant | amount: null : debt.currency"
-              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency()"
-              [valueClass]="getValueClass(debt)"
-              (pressed)="onDebtPressed(debt)"
-            />
-          </li>
-        }
-      </ul>
-    </section>
-  }
-
-  @if (debtsJeDois().length > 0) {
-    <section class="debt-section debt-section--owe">
-      <div class="section-header">
-        <span class="section-header__title">Emprunts</span>
-        @for (ct of sectionTotalJeDoisByCurrency(); track ct.currency) {
-          <span class="section-header__total debt-owe">{{
-            ct.total | amount: null : ct.currency
-          }}</span>
-        }
-      </div>
-      <ul class="debt-list">
-        @for (debt of debtsJeDois(); track debt.id) {
-          <li class="debt-item" [class.debt-item--rembourse]="debt.rembourse">
-            <app-list-item
-              [icon]="getIcon(debt)"
-              [title]="debt.personne"
-              [subtitle]="getSubtitle(debt)"
-              [rightSubtitle]="debt.date | relativeDate"
-              [value]="debt.montant | amount: null : debt.currency"
-              [valueSubtitle]="debt.montant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency()"
-              [valueClass]="getValueClass(debt)"
-              (pressed)="onDebtPressed(debt)"
-            />
-          </li>
-        }
-      </ul>
-    </section>
+  @for (group of groupedDebts(); track group.label) {
+    <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
+    <div class="debt-group">
+      @for (debt of group.items; track debt.id) {
+        <div class="debt-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
+          <span
+            class="debt-row__icon"
+            [style.background-color]="getIconBg(debt)"
+          >{{ getIcon(debt) }}</span>
+          <div class="debt-row__content">
+            <span class="debt-row__title">{{ debt.personne }}</span>
+            <span class="debt-row__subtitle">
+              {{ getSubtitle(debt) }}
+            </span>
+          </div>
+          <div class="debt-row__right">
+            <span class="debt-row__amount" [class]="getAmountClass(debt)">
+              {{ debt.montantRestant | amount: null : (debt.currency || 'EUR') }}
+            </span>
+            @if (!debt.rembourse && (debt.currency || 'EUR') !== preferenceService.primaryCurrency()) {
+              <span class="debt-row__converted">
+                {{ debt.montantRestant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency() }}
+              </span>
+            }
+            @if (getRelativeDate(debt); as relDate) {
+              <span class="debt-row__due" [class.debt-row__due--overdue]="isOverdue(debt)">{{ relDate }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
   }
 }
