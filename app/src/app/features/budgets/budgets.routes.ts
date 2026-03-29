@@ -9,4 +9,9 @@ export const BUDGETS_ROUTES: Routes = [
     path: 'details',
     loadComponent: () => import('./components/budget-detail/budget-detail').then((m) => m.BudgetDetail),
   },
+  {
+    path: 'unbudgeted',
+    loadComponent: () =>
+      import('./components/budget-unbudgeted/budget-unbudgeted').then((m) => m.BudgetUnbudgeted),
+  },
 ];

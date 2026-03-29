@@ -23,7 +23,19 @@
       @if (heroConverted(); as converted) {
         <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
       }
-      <span class="hero__secondary">{{ pretsCount() }} prêts · {{ empruntsCount() }} emprunts · {{ activeCount() }} en cours</span>
+      <div class="hero__meta">
+        <div class="hero__meta-line">
+          <ng-icon name="phosphorHandCoins" size="14" />
+          <span>{{ pretsCount() }} prêts</span>
+          <span class="hero__meta-dot">&middot;</span>
+          <ng-icon name="phosphorHandshake" size="14" />
+          <span>{{ empruntsCount() }} emprunts</span>
+        </div>
+        <div class="hero__meta-line">
+          <ng-icon name="phosphorClock" size="14" />
+          <span>{{ activeCount() }} en cours</span>
+        </div>
+      </div>
     </div>
   }
 </div>

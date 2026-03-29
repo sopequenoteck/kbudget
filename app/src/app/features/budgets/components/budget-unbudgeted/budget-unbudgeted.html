@@ -1,0 +1,93 @@
+<div class="detail-header">
+  <button class="detail-header__back" (click)="goBack()">
+    <ng-icon name="phosphorArrowLeft" size="20" />
+  </button>
+  <h1 class="detail-header__title">Non budgété</h1>
+</div>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (unbudgetedItems().length === 0) {
+  <div class="state-empty">
+    <p>Toutes vos catégories ont un budget</p>
+  </div>
+} @else {
+  <div class="hero">
+    <div class="hero__body">
+      <div class="hero__text">
+        <span class="hero__label">DÉPENSÉ</span>
+        <span class="hero__value">
+          {{ unbudgetedTotal() | amount: null : currency() }}
+        </span>
+        @if (heroConverted(); as converted) {
+          <span class="hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
+        }
+        <div class="hero__meta">
+          <div class="hero__meta-line">
+            <ng-icon name="phosphorSquaresFour" size="14" />
+            <span>{{ unbudgetedItems().length }} catégories sans budget</span>
+          </div>
+        </div>
+      </div>
+      @if (doughnutSegments().length > 0) {
+        <app-doughnut-mini [segments]="doughnutSegments()" />
+      }
+    </div>
+  </div>
+
+  <div class="sticky-sentinel" #stickySentinel></div>
+  <div class="section-header" [class.stuck]="isStuck()">
+    <h2 class="section-header__title">Par catégorie</h2>
+    <span class="section-header__count">{{ totalTransactions() }} transactions</span>
+  </div>
+
+  @if (transactionsLoading()) {
+    <div class="state-loading state-loading--small">
+      <div class="spinner"></div>
+    </div>
+  } @else {
+    @for (group of categoryGroups(); track group.categoryId) {
+      <div class="category-header">
+        <span
+          class="category-header__icon"
+          [style.background-color]="group.categoryCouleur ? group.categoryCouleur + '26' : null"
+        >{{ group.categoryIcone }}</span>
+        <span class="category-header__name">{{ group.categoryNom }}</span>
+        <span class="category-header__amount amount-expense">
+          {{ group.montantDepense | amount: null : currency() }}
+        </span>
+        <button
+          class="category-header__create"
+          (click)="onCreateBudget()"
+          aria-label="Créer un budget"
+        >
+          <ng-icon name="phosphorPlus" size="14" />
+        </button>
+      </div>
+      @if (group.transactions.length > 0) {
+        <div class="transaction-group">
+          @for (tx of group.transactions; track tx.id) {
+            <div class="transaction-row">
+              <div class="transaction-row__content">
+                <span class="transaction-row__title">{{ tx.libelle }}</span>
+                <span class="transaction-row__subtitle">{{ formatDate(tx.date) }}</span>
+              </div>
+              <div class="transaction-row__right">
+                <span class="transaction-row__amount amount-expense">
+                  {{ tx.montant | amount: 'DEPENSE' : (tx.account?.currency || currency()) }}
+                </span>
+                @if (tx.account?.currency && tx.account!.currency !== preferenceService.primaryCurrency()) {
+                  <span class="transaction-row__converted">
+                    {{ tx.montant | convertAmount: tx.account!.currency! : preferenceService.primaryCurrency() }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+}

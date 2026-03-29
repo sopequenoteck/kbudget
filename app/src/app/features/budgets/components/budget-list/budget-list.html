@@ -1,0 +1,155 @@
+<div class="hero">
+  <div class="hero__top-row">
+    <div class="hero__nav">
+      <span class="hero__nav-label">{{ selectedMonthLabel() }}</span>
+      <button class="hero__nav-btn" (click)="prevMonth()" aria-label="Mois précédent">&#9664;</button>
+      <button class="hero__nav-btn" (click)="nextMonth()" aria-label="Mois suivant">&#9654;</button>
+    </div>
+    @if (preferenceService.currencies().length > 1) {
+      <div class="currency-toggle">
+        @for (currency of preferenceService.currencies(); track currency) {
+          <button
+            class="currency-toggle__btn"
+            [class.active]="currency === activeCurrency()"
+            (click)="setActiveCurrency(currency)"
+          >
+            {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+  @if (monthData()) {
+    <div class="hero__body">
+      <div class="hero__amount">
+        <span class="hero__amount-label">Dépensé</span>
+        <span class="hero__amount-value" [class.over-budget]="monthData()!.percentage > 100">
+          {{ budgetedSpent() | amount: null : monthData()!.currency }}
+        </span>
+        @if (heroConverted(); as converted) {
+          <span class="hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
+        }
+        <div class="hero__meta">
+          <div class="hero__meta-line">
+            @if (overBudgetCount() > 0) {
+              <ng-icon name="phosphorWarning" size="14" />
+              <span>{{ overBudgetCount() }} en dépassement</span>
+              <span class="hero__meta-dot">&middot;</span>
+            }
+            <ng-icon name="phosphorChartPie" size="14" />
+            <span>{{ activeCount() }} budgets</span>
+          </div>
+          @if (unbudgetedTotal() > 0) {
+            <div class="hero__meta-line hero__meta-line--clickable" (click)="onShowUnbudgeted()">
+              <ng-icon name="phosphorTray" size="14" />
+              <span>{{ unbudgetedTotal() | amount: null : monthData()!.currency }} non budgété</span>
+            </div>
+          }
+        </div>
+      </div>
+      @if (doughnutSegments().length > 0) {
+        <app-doughnut-mini [segments]="doughnutSegments()" />
+      }
+    </div>
+  }
+</div>
+
+<div class="sticky-sentinel" #stickySentinel></div>
+<div class="section-header" [class.stuck]="isStuck()">
+  <h2 class="section-header__title">Budgets</h2>
+  <div class="section-header__right">
+    <span class="section-header__count">{{ activeCount() }} actifs</span>
+    @if (isCurrentMonth()) {
+      <button
+        class="section-header__add-btn"
+        (click)="onCreate()"
+        [disabled]="allCategoriesHaveBudget()"
+        aria-label="Nouveau budget"
+      >+</button>
+    }
+    @if (unbudgetedTotal() > 0) {
+      <span class="section-header__separator"></span>
+      <a
+        class="section-header__action-btn"
+        (click)="onShowUnbudgeted()"
+        aria-label="Non budgété"
+      >
+        <ng-icon name="phosphorTray" size="20" />
+      </a>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="state-loading">
+    <div class="spinner"></div>
+  </div>
+} @else if (error()) {
+  <div class="state-error">
+    <p>Erreur de chargement</p>
+    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+  </div>
+} @else if (items().length === 0 && unbudgetedTotal() === 0) {
+  <div class="state-empty">
+    <p>Aucun budget pour cette période</p>
+  </div>
+} @else {
+  @if (activeItems().length > 0) {
+    <div class="budget-group">
+      @for (item of activeItems(); track item.categoryId) {
+        <div
+          class="budget-row clickable"
+          (click)="onBudgetPressed(item)"
+        >
+          <span
+            class="budget-row__icon"
+            [style.background-color]="item.categoryCouleur ? item.categoryCouleur + '26' : null"
+          >{{ item.categoryIcone }}</span>
+          <div class="budget-row__body">
+            <div class="budget-row__header">
+              <span class="budget-row__name">{{ item.categoryNom }}</span>
+              <span class="budget-row__amount" [class.over-budget]="item.percentage > 100">
+                {{ item.montantDepense | amount: null : monthData()!.currency }}
+                / {{ budgetAmount(item) | amount: null : monthData()!.currency }}
+              </span>
+            </div>
+            <div class="budget-bar">
+              <div
+                class="budget-bar__fill"
+                [style.width.%]="Math.min(item.percentage, 100)"
+                [style.background-color]="item.percentage > 100 ? null : item.percentage >= 80 ? null : item.categoryCouleur"
+                [class.budget-bar__fill--warning]="item.percentage >= 80 && item.percentage <= 100"
+                [class.budget-bar__fill--exceeded]="item.percentage > 100"
+              ></div>
+              @if (item.percentage > 100) {
+                <div class="budget-bar__overflow-marker"></div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (inactiveItems().length > 0) {
+    <div class="date-label">Inactifs</div>
+    <div class="budget-group">
+      @for (item of inactiveItems(); track item.categoryId) {
+        <div class="budget-row inactive clickable" (click)="onBudgetPressed(item)">
+          <span
+            class="budget-row__icon"
+            [style.background-color]="item.categoryCouleur ? item.categoryCouleur + '26' : null"
+          >{{ item.categoryIcone }}</span>
+          <div class="budget-row__body">
+            <div class="budget-row__header">
+              <span class="budget-row__name">{{ item.categoryNom }}</span>
+              <span class="budget-row__amount">
+                {{ budgetAmount(item) | amount: null : monthData()!.currency }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

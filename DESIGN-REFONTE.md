@@ -228,6 +228,65 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Historique paiements : logo banque devant chaque item, montants en xs/medium/text-secondary (neutres)
 - Ordre hero : tags → montant → secondary → echeance → rappel → compte (echeance et rappel avant le compte)
 
+## Ce qui a ete fait (session 8)
+
+### Page Budgets — liste — refonte complete
+- Supprime : row "Non budgete" intercalee dans la liste (📦 Autre), hero affichant le total global (budgete + non budgete)
+- Hero : montant "Depense" = total budgete uniquement (3xl bold, color-expense), conversion devise secondaire
+- Hero meta-lines avec icones Phosphor 14px : ⚠ X en depassement · 🥧 Y budgets (ligne 1), 📥 Z € non budgete (ligne 2, cliquable → page dediee)
+- Doughnut chart SVG pur dans le hero : a droite du bloc texte (layout flex row), segments = depenses par categorie, couleurs categories, opacite 0.7, ~130px, stroke 22px, bords francs (butt)
+- Section header : ajout pipe separator + icone Phosphor `phosphorTray` pour naviguer vers la page Non budgete (pattern identique aux recurrences sur Transactions)
+- Budget items inactifs rendus cliquables → navigation vers la page detail (bouton Activer disponible)
+- Fix : double attribut `class` sur budget-row
+- Templates et styles extraits en fichiers separes (etaient inline)
+
+### Page Non budgete — nouveau composant dedie
+- Route `/budgets/unbudgeted` avec composant `BudgetUnbudgeted` (etait un mode dans budget-detail, reverte car couplage inapproprie)
+- Header pattern recurrences : fleche retour + "Non budgete" aligne a droite
+- Hero : total depense (3xl bold, color-expense), conversion devise secondaire, meta-line "X categories sans budget"
+- Doughnut chart SVG dans le hero (meme composant que la liste) : visualise le poids relatif de chaque categorie non budgetee
+- Section header sticky "Par categorie" + compteur transactions
+- Groupement par categorie (triees par montant decroissant) : icone emoji + couleur, nom, montant, bouton + pour creer un budget
+- Transactions listees sous chaque categorie avec conversion multi-devise
+
+### Page Budget detail — refonte complete
+- Templates et styles extraits en fichiers separes (etaient inline)
+- Header pattern recurrences/abonnements : fleche retour + icone categorie + nom aligne a droite
+- Hero condense : label "DEPENSE" uppercase, montant 3xl, conversion devise, meta-line avec icones (🎯 budget · 🥧/⚠ reste/depassement)
+- Actions pills compactes : corbeille (danger) a gauche | spacer | Desactiver/Activer · Modifier
+- Section header sticky "Transactions" + compteur
+- Progress bar entre section header et transactions (warning amber >=80%, exceeded rouge >100%)
+- Transactions groupees par date (Aujourd'hui, Hier, date absolue) avec conversion devise
+- Support des budgets inactifs : chargement via getAll(true) quand non trouve dans l'overview
+- Ajout `TransactionService.getByMonth()` pour charger les transactions du mois
+
+### Composant DoughnutMini — nouveau composant partage
+- SVG pur (pas de librairie chart.js), composant Angular standalone
+- Inputs : segments (value + color), size (defaut 130), strokeWidth (defaut 22), gap (defaut 3)
+- Arcs calcules via stroke-dasharray/dashoffset sur des cercles SVG
+- Opacite 0.7 pour s'aligner avec les couleurs attenuees du dark mode
+- Bords francs (stroke-linecap: butt), gaps entre segments
+- Utilise sur la page budget liste et la page Non budgete
+
+### Hero meta-lines — pattern propage globalement
+- Remplacement de `hero__secondary` (texte plat) par `hero__meta` (lignes avec icones Phosphor 14px, text-tertiary)
+- Pages modifiees : budget liste, budget detail, budget unbudgeted, dettes liste, abonnements liste
+- Icones par page :
+  - Budgets : phosphorWarning (depassement), phosphorChartPie (budgets), phosphorTray (non budgete)
+  - Budget detail : phosphorTarget (objectif), phosphorChartPie/phosphorWarning (reste/depassement)
+  - Dettes : phosphorHandCoins (prets), phosphorHandshake (emprunts), phosphorClock (en cours)
+  - Abonnements : phosphorCalendar (cout annuel), phosphorRepeat (nombre)
+  - Non budgete : phosphorSquaresFour (categories)
+- Variante `--clickable` avec hover pour les lignes interactives
+
+### Decisions de design (session 8)
+- Le hero budget liste montre le total budgete uniquement, pas le total global — la sous-ligne "dont X € non budgete" fait le pont
+- "Non budgete" n'est pas un sous-cas du budget detail, c'est une page a part entiere avec sa propre logique (groupement par categorie, CTA creation)
+- Le doughnut chart est de l'information visuelle, pas de la decoration — il repond a "quelle proportion ?" que la liste seule ne montre pas
+- Le doughnut dans la page Non budgete sert a la priorisation : visualiser quelle categorie budgeter en premier
+- Le pattern navigation (pipe + icone Phosphor dans le section header) est repris des Transactions/Recurrences
+- Les icones Phosphor 14px dans les meta-lines sont des reperes visuels discrets, pas du bruit — elles facilitent le scan
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -235,7 +294,7 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - [x] Page detail abonnement (session 6)
 - [x] Page Dettes — liste (session 7)
 - [x] Page detail dette (session 7)
-- [ ] Propager le style a la page Budgets
+- [x] Propager le style a la page Budgets (session 8)
 - [ ] Page Settings
 - [x] Page Transactions recurrentes (session 4)
 - [ ] Modales et formulaires (bottom sheets) — progressive disclosure (debut : bottom sheet actions recurrences)

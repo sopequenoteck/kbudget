@@ -18,6 +18,8 @@ import { PreferenceService } from '../../core/services/preference';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { Debt, DebtType } from '../../core/models/debt.model';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 
@@ -29,7 +31,8 @@ interface DebtGroup {
 
 @Component({
   selector: 'app-debts',
-  imports: [AmountPipe, ConvertAmountPipe],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

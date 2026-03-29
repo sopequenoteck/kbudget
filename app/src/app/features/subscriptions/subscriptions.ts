@@ -17,6 +17,8 @@ import { SubscriptionService } from '../../core/services/subscription';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
 import { Subscription, Frequency } from '../../core/models/subscription.model';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorCalendar, phosphorRepeat } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { ConversionService } from '../../core/services/conversion';
@@ -30,7 +32,8 @@ interface SubscriptionGroup {
 
 @Component({
   selector: 'app-subscriptions',
-  imports: [AmountPipe, ConvertAmountPipe],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

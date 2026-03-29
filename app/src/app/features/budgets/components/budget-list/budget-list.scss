@@ -5,26 +5,69 @@
 }
 
 // =============================================================================
-// Hero — total mensuel dominant
+// Hero — depense dominant + progress bar globale
 // =============================================================================
 
 .hero {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
   padding-bottom: var(--space-6);
 }
 
 .hero__top-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.hero__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hero__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+  }
+}
+
+.hero__nav-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.hero__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .hero__amount {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .hero__amount-label {
@@ -40,6 +83,10 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-expense);
   letter-spacing: -0.02em;
+
+  &.over-budget {
+    color: var(--color-expense);
+  }
 }
 
 .hero__converted {
@@ -80,7 +127,6 @@
 .hero__meta-dot {
   margin: 0 2px;
 }
-
 
 // =============================================================================
 // Currency toggle
@@ -150,15 +196,76 @@
     margin: 0;
   }
 
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   &__count {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     color: var(--text-tertiary);
   }
+
+  &__add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-round);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: color var(--duration-fast), border-color var(--duration-fast);
+
+    &:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  &__separator {
+    width: 1px;
+    height: 16px;
+    background: var(--border-default);
+  }
+
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color var(--duration-fast);
+
+    ::ng-deep ng-icon {
+      width: 20px;
+      min-width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
 }
 
 // =============================================================================
-// Date labels — groupement par periode
+// Date labels
 // =============================================================================
 
 .date-label {
@@ -166,44 +273,39 @@
   font-weight: var(--font-weight-medium);
   color: var(--text-tertiary);
   padding: var(--space-4) var(--space-1) var(--space-2);
-
-  &:first-of-type {
-    padding-top: var(--space-2);
-  }
-
-  &--today {
-    color: var(--color-primary);
-  }
-
-  &--inactive {
-    color: var(--text-tertiary);
-  }
 }
 
 // =============================================================================
-// Liste — conteneur groupe avec dividers
+// Budget group — conteneur groupe avec dividers
 // =============================================================================
 
-.subscription-group {
+.budget-group {
   background-color: var(--surface-default);
   border-radius: var(--radius-xl);
   overflow: hidden;
 
-  .subscription-row:not(:last-child) {
+  .budget-row:not(:last-child) {
     border-bottom: 1px solid var(--border-default);
   }
 }
 
-.subscription-row {
+// =============================================================================
+// Budget row
+// =============================================================================
+
+.budget-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  cursor: pointer;
   transition: background var(--duration-fast);
 
-  &:hover {
-    background: var(--hover-bg);
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover-bg);
+    }
   }
 
   &.inactive {
@@ -222,48 +324,91 @@
     flex-shrink: 0;
   }
 
-  &__content {
+  &__body {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: var(--space-2);
   }
 
-  &__title {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  &__name {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  &__subtitle {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
-  }
-
-  &__right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1px;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
   }
 
   &__amount {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
     white-space: nowrap;
+    flex-shrink: 0;
+
+    &.over-budget {
+      color: var(--color-expense);
+      font-weight: var(--font-weight-semibold);
+    }
   }
 
-  &__converted {
+  &__amount-right {
     font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     color: var(--text-tertiary);
-    font-style: italic;
     white-space: nowrap;
+    flex-shrink: 0;
   }
+}
+
+// =============================================================================
+// Budget bar — 4px, meme style que dashboard
+// =============================================================================
+
+.budget-bar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background-color: var(--border-default);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+}
+
+.budget-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  background-color: var(--color-income);
+  opacity: 0.7;
+  transition: width var(--duration-slow) var(--easing-out);
+
+  &.budget-bar__fill--warning {
+    background-color: var(--text-warning);
+  }
+
+  &.budget-bar__fill--exceeded {
+    background-color: var(--color-expense);
+  }
+}
+
+.budget-bar__overflow-marker {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--color-expense);
+  border-radius: 0 var(--radius-round) var(--radius-round) 0;
 }
 
 // =============================================================================

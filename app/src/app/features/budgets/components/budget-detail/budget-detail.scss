@@ -5,29 +5,77 @@
 }
 
 // =============================================================================
-// Hero — total mensuel dominant
+// Header — back + titre aligné droite
+// =============================================================================
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+
+  &__back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-round);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color var(--duration-fast);
+
+    ::ng-deep ng-icon {
+      width: 20px;
+      min-width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  &__title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+  }
+}
+
+// =============================================================================
+// Hero — montant dépensé dominant + reste
 // =============================================================================
 
 .hero {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 2px;
   padding-bottom: var(--space-6);
 }
 
-.hero__top-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.hero__amount {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.hero__amount-label {
+.hero__label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
@@ -35,11 +83,15 @@
   letter-spacing: 0.05em;
 }
 
-.hero__amount-value {
+.hero__value {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-expense);
+  color: var(--text-primary);
   letter-spacing: -0.02em;
+
+  &.over-budget {
+    color: var(--color-expense);
+  }
 }
 
 .hero__converted {
@@ -83,29 +135,51 @@
 
 
 // =============================================================================
-// Currency toggle
+// Actions pills — pattern abonnements/dettes
 // =============================================================================
 
-.currency-toggle {
+.actions {
   display: flex;
-  gap: var(--space-1);
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+}
 
-  &__btn {
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-round);
-    background: none;
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast);
+.actions__spacer {
+  flex: 1;
+}
 
-    &.active {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-primary-contrast);
-      font-weight: var(--font-weight-semibold);
+.action-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+
+  ::ng-deep ng-icon {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+  }
+
+  &--danger {
+    color: var(--text-error);
+    border-color: transparent;
+
+    &:hover {
+      background: var(--bg-error);
     }
   }
 }
@@ -158,7 +232,7 @@
 }
 
 // =============================================================================
-// Date labels — groupement par periode
+// Date labels — groupement par date
 // =============================================================================
 
 .date-label {
@@ -170,45 +244,27 @@
   &:first-of-type {
     padding-top: var(--space-2);
   }
-
-  &--today {
-    color: var(--color-primary);
-  }
-
-  &--inactive {
-    color: var(--text-tertiary);
-  }
 }
 
 // =============================================================================
-// Liste — conteneur groupe avec dividers
+// Transaction list — même pattern que page transactions
 // =============================================================================
 
-.subscription-group {
+.transaction-group {
   background-color: var(--surface-default);
   border-radius: var(--radius-xl);
   overflow: hidden;
 
-  .subscription-row:not(:last-child) {
+  .transaction-row:not(:last-child) {
     border-bottom: 1px solid var(--border-default);
   }
 }
 
-.subscription-row {
+.transaction-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  cursor: pointer;
-  transition: background var(--duration-fast);
-
-  &:hover {
-    background: var(--hover-bg);
-  }
-
-  &.inactive {
-    opacity: 0.5;
-  }
 
   &__icon {
     display: flex;
@@ -267,12 +323,53 @@
 }
 
 // =============================================================================
+// Progress row — entre section header et transactions (pattern dettes)
+// =============================================================================
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+
+  &__track {
+    flex: 1;
+    height: 4px;
+    background-color: var(--bg-tertiary, var(--border-default));
+    border-radius: var(--radius-round);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: var(--radius-round);
+    background-color: var(--color-primary);
+    opacity: 0.7;
+    transition: width var(--duration-normal) var(--easing-default);
+
+    &--warning {
+      background-color: var(--text-warning);
+    }
+
+    &--exceeded {
+      background-color: var(--color-expense);
+    }
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+}
+
+// =============================================================================
 // States
 // =============================================================================
 
 .state-loading,
-.state-empty,
-.state-error {
+.state-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -280,6 +377,10 @@
   padding: var(--space-10) var(--space-4);
   gap: var(--space-4);
   color: var(--text-secondary);
+
+  &--small {
+    padding: var(--space-6) var(--space-4);
+  }
 }
 
 .spinner {
@@ -294,19 +395,5 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-.btn-outline {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--hover-bg);
   }
 }
