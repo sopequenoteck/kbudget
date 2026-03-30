@@ -44,15 +44,19 @@ Definir des objectifs et suivre la progression.
 - Barre de progression sur le dashboard
 - Seuils d'alerte (80%, 100%) alimentant les notifications
 
-### 4. Notifications push
+### 4. Notifications
 
-Rendre l'app proactive via Web Push (PWA).
+Rendre l'app proactive.
 
-- **Infra** : Service Worker + Web Push API (VAPID keys)
-- **Rappels abonnements** : notification J-1 ou J-3 avant prelevement
-- **Alertes budget** : notification au franchissement des seuils (80%, 100%)
-- **Resumes periodiques** : bilan hebdo ou mensuel automatique
-- Push natif sur telephone meme app fermee
+**Implemente :**
+- Notifications in-app via WebSocket/STOMP (temps reel)
+- Scheduler backend (NotificationScheduler) pour echeances abonnements, dettes, seuils budgets
+- CRUD notifications : liste paginee, compteur non lues, marquage lu, suppression
+- Preferences : types de notifications activables (opt-out par type)
+
+**Non implemente (prevu plus tard) :**
+- Web Push API (VAPID keys) pour notifications native meme app fermee
+- Resumes periodiques (bilan hebdo/mensuel automatique)
 
 ### 5. Graphiques & bilans
 
@@ -97,5 +101,5 @@ Phase 3 — Visibilite
 | Compte sur abonnement | Oui | Savoir ou est preleve chaque abo |
 | Compte sur dette | Non | Pas pertinent tant que non remboursee |
 | Virements | Oui | 2 transactions liees par transferId |
-| Type de notifications | Push (PWA) | Notifications meme app fermee, indispensable pour les alertes |
-| Rappels | Abonnements + budget + resumes | Les 3 types des le debut |
+| Type de notifications | In-app (WebSocket/STOMP) | Web Push prevu plus tard, notifications in-app suffisantes pour le MVP |
+| Rappels | Abonnements + dettes + budget | Les 3 types implementes via scheduler backend |

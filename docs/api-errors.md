@@ -57,26 +57,45 @@ Declenchee explicitement dans les services. Messages connus :
 }
 ```
 
+### 401 Unauthorized
+
+Declenchee par les exceptions JWT dans `RefreshTokenService`. **Format different** du format standard — utilise le DTO `ErrorResponse` :
+
+```json
+{
+  "error": "TOKEN_EXPIRED",
+  "message": "Le refresh token a expire. Veuillez vous reconnecter."
+}
+```
+
+| Exception | Code erreur | Message |
+|-----------|-------------|---------|
+| `TokenExpiredException` | `TOKEN_EXPIRED` | Le refresh token a expire. Veuillez vous reconnecter. |
+| `TokenRevokedException` | `TOKEN_REVOKED` | Le refresh token a ete revoque. |
+| `TokenReusedException` | `TOKEN_REUSE_DETECTED` | Reutilisation de token detectee. Tous vos tokens ont ete revoques par securite. |
+| `TokenInvalidException` | `TOKEN_INVALID` | Refresh token invalide. |
+
+> **Attention** : ces erreurs ne suivent pas le format standard (`timestamp`/`status`/`message`). Elles retournent un objet `ErrorResponse` avec les champs `error` et `message` uniquement.
+
 ### 403 Forbidden
 
-Declenchee par **Spring Security** quand :
+Deux sources distinctes.
 
-- Le header `Authorization` est absent
-- Le token JWT est invalide ou expire
-- La route n'est pas dans la liste des routes publiques
+#### Spring Security (access denied)
 
-Spring Security retourne son propre format ou un corps vide dans ces cas.
+Declenchee quand le header `Authorization` est absent ou le token invalide sur une route protegee. Spring Security retourne son propre format ou un corps vide.
 
-Declenchee par le `GlobalExceptionHandler` via `FeatureDisabledException` quand :
+#### Feature desactivee (FeatureDisabledException)
 
-- Une feature optionnelle est desactivee dans les preferences utilisateur (ex: SHOP)
-- Le corps suit le format standard (`timestamp`, `status: 403`, `message`)
+Declenchee par le `GlobalExceptionHandler` quand une feature optionnelle est desactivee dans les preferences utilisateur (ex: SHOP). Le corps suit le format standard (`timestamp`, `status: 403`, `message`).
 
 Routes publiques (pas de JWT requis) :
 
 - `/auth/**`
 - `/error`
 - `/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html`
+- `/banks`, `/bank-logos/**`
+- `/ws/**` (auth via StompAuthInterceptor)
 
 ### 404 Not Found
 
@@ -210,9 +229,17 @@ switch (error.status) {
     // Sinon → erreur metier directe
     break;
 
+  case 401:
+    // Format ErrorResponse : { error: string, message: string }
+    // Utiliser error.error.error pour le code (TOKEN_EXPIRED, etc.)
+    // TOKEN_REUSE_DETECTED → forcer deconnexion immediate
+    // TOKEN_EXPIRED → tenter un refresh silencieux
+    break;
+
   case 403:
-    // Pas de body fiable — rediriger vers login
-    // Supprimer le token stocke (expire ou invalide)
+    // Deux cas : Spring Security (pas de body fiable) ou FeatureDisabledException (format standard)
+    // Si body present avec status 403 → feature desactivee
+    // Sinon → rediriger vers login
     break;
 
   case 404:
@@ -226,12 +253,19 @@ switch (error.status) {
 }
 ```
 
-### Interface TypeScript
+### Interfaces TypeScript
 
 ```typescript
+// Format standard (400, 403 feature, 404, 409, 422, 500)
 interface ApiError {
   timestamp: string;  // ISO-8601 sans timezone
   status: number;
+  message: string;
+}
+
+// Format JWT (401)
+interface TokenError {
+  error: string;   // TOKEN_EXPIRED | TOKEN_REVOKED | TOKEN_REUSE_DETECTED | TOKEN_INVALID
   message: string;
 }
 ```

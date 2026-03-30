@@ -1,6 +1,53 @@
 # Budget App — Architecture technique
 
-Ce document couvre les decisions techniques, le modele de donnees et la vision frontend. Pour la stack, les endpoints API et le quickstart, voir le [`README.md`](../README.md).
+Ce document couvre les decisions techniques, la securite, le modele de donnees et la vision frontend.
+
+## Structure du code
+
+### Backend (api/)
+
+```
+api/src/main/java/fr/kksdev/budget/api/
+├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Budget, Product, ExchangeRate, Currency, Preference, Notification, Import, User, Dev)
+├── service/       # Logique metier
+├── repository/    # Spring Data JPA
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile) + Bank (record, non-persiste)
+├── dto/
+│   ├── request/   # DTOs d'entree (validation Bean Validation)
+│   └── response/  # DTOs de sortie
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType, ImportDraftStatus, ImportLineStatus, ImportProfileSource
+```
+
+### Frontend (app/)
+
+```
+app/src/
+├── app/
+│   ├── core/          # Services singleton, guards, interceptors
+│   ├── shared/        # Composants/pipes/directives reutilisables
+│   └── features/      # Modules lazy-loaded par feature
+├── environments/      # Config dev/prod (apiUrl)
+└── styles/            # SCSS globaux
+```
+
+Architecture en couches : Controller → Service → Repository. Les entites JPA ne sont jamais exposees directement — toujours via DTOs.
+
+## Securite
+
+- JWT stateless. Access token (15 min), refresh token (30 jours)
+- Toutes les routes protegees sauf `/api/auth/**`, `/api/actuator/health`, `/api/banks`, `/api/bank-logos/**` et `/ws/**` (auth WebSocket via StompAuthInterceptor)
+- Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
+- Mots de passe hashes en BCrypt
+- Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
+
+## Profils Spring
+
+| Profil | Usage | BDD | DDL |
+|--------|-------|-----|-----|
+| `dev` | Developpement local | PostgreSQL local, fallback config | `validate` |
+| `prod` | Production | Variables d'environnement obligatoires | `validate` |
+| `test` | Tests automatises | H2 en memoire | `create-drop` |
 
 ## Decisions architecturales
 
@@ -172,7 +219,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
 
 ### ExchangeRate
 
@@ -202,72 +249,113 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | createdAt | LocalDateTime | Date de creation |
 | user | User | FK → User |
 
+### Budget
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| montant | BigDecimal | Montant du budget |
+| frequence | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL |
+| currency | Currency | Devise (default EUR) |
+| seuilNotification | Integer | Seuil d'alerte en % (default 80) |
+| actif | Boolean | Budget actif (default true) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+| category | Category | FK → Category. UNIQUE(user_id, category_id) |
+
+### BudgetSnapshot
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| montantBudget | BigDecimal | Montant du budget au moment du snapshot |
+| currency | Currency | Devise |
+| tauxChange | BigDecimal | Taux de change applique (nullable) |
+| montantDepense | BigDecimal | Montant depense sur la periode |
+| mois | String | Periode au format yyyy-MM |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
+| category | Category | FK → Category |
+
 ### ImportDraft
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| status | Enum | PENDING / CONFIRMED / CANCELLED |
-| originalFilename | String | Nom du fichier CSV uploade |
-| profileId | String | Identifiant du profil utilise (nullable) |
-| account | Account | FK → Account cible |
+| status | Enum | PENDING / COMPLETED / EXPIRED |
+| fileName | String | Nom du fichier CSV uploade |
+| totalLines | Integer | Nombre total de lignes |
+| readyCount | Integer | Lignes prates a importer |
+| reviewCount | Integer | Lignes a revoir |
+| duplicateCount | Integer | Doublons detectes |
+| skippedCount | Integer | Lignes ignorees |
+| profileId | UUID | Identifiant du profil utilise (nullable) |
+| profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
 | createdAt | LocalDateTime | Date de creation |
+| expiresAt | LocalDateTime | Date d'expiration |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+| account | Account | FK → Account cible. UNIQUE(user_id, account_id) WHERE status = 'PENDING' |
 
 ### ImportDraftLine
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| draft | ImportDraft | FK → ImportDraft |
+| draft | ImportDraft | FK → ImportDraft (CASCADE) |
 | lineNumber | Integer | Numero de ligne dans le CSV |
-| rawData | String | Donnee brute (JSON) |
-| date | LocalDate | Date parsee (nullable) |
-| libelle | String | Libelle parse (nullable) |
-| montant | BigDecimal | Montant parse (nullable) |
-| type | Enum | DEPENSE / RECETTE (nullable) |
-| category | Category | FK → Category (nullable, suggestion ou choix utilisateur) |
-| status | Enum | PENDING / IMPORTED / IGNORED / ERROR |
-| errorMessage | String | Message d'erreur de parsing (nullable) |
+| rawLabel | String | Libelle brut du CSV |
+| cleanLabel | String | Libelle nettoye |
+| amount | BigDecimal | Montant |
+| date | LocalDate | Date de la ligne |
+| transactionType | Enum | DEPENSE / RECETTE |
+| status | Enum | READY / NEEDS_REVIEW / DUPLICATE / SKIPPED |
+| statusMessage | String | Message de statut (nullable) |
+| duplicateTransactionId | UUID | ID de la transaction doublon (nullable) |
+| category | Category | FK → Category (nullable) |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
 
 ### CategoryRule
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| pattern | String | Motif de correspondance sur le libelle (insensible a la casse) |
+| pattern | String | Motif de correspondance (max 200, insensible a la casse) |
 | category | Category | FK → Category a appliquer |
-| priority | Integer | Priorite (plus grand = prioritaire) |
 | createdAt | LocalDateTime | Date de creation |
-| user | User | FK → User |
+| user | User | FK → User. UNIQUE(user_id, pattern) |
 
 ### ImportHistory
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| originalFilename | String | Nom du fichier source |
-| profileId | String | Profil utilise (nullable) |
-| totalLines | Integer | Nombre total de lignes CSV |
-| importedCount | Integer | Lignes importees en transactions |
-| ignoredCount | Integer | Lignes ignorees |
-| errorCount | Integer | Lignes en erreur |
-| account | Account | FK → Account cible |
-| confirmedAt | LocalDateTime | Date de confirmation |
+| transactionCount | Integer | Nombre de transactions importees |
+| fileName | String | Nom du fichier source (nullable) |
+| importedAt | LocalDateTime | Date d'import |
 | user | User | FK → User |
+| account | Account | FK → Account cible |
 
 ### ImportProfile
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | String | Identifiant (slug, ex: "bnp-particuliers") |
+| id | UUID | Identifiant |
 | name | String | Nom affiche |
-| source | Enum | BUILTIN / CUSTOM |
-| columnMapping | String | Mapping colonnes JSON (nullable pour profils custom) |
-| separator | Character | Separateur CSV (defaut ';') |
-| encoding | String | Encodage (defaut "UTF-8") |
-| user | User | FK → User (nullable pour les profils BUILTIN) |
+| separator | String | Separateur CSV |
+| dateFormat | String | Format de date |
+| dateColumn | Integer | Index colonne date |
+| amountColumn | Integer | Index colonne montant (nullable) |
+| debitColumn | Integer | Index colonne debit (nullable) |
+| creditColumn | Integer | Index colonne credit (nullable) |
+| labelColumn | Integer | Index colonne libelle |
+| encoding | String | Encodage du fichier |
+| decimalSeparator | String | Separateur decimal |
+| skipHeaderLines | Integer | Lignes d'en-tete a ignorer |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
 
 ## Architecture frontend
 

@@ -131,6 +131,45 @@ Response `200` :
 }
 ```
 
+### Lister `GET /api/transactions?month=2&year=2026`
+
+Parametres optionnels : `month` et `year` pour filtrer par mois.
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "montant": 42.50,
+    "libelle": "Courses Carrefour",
+    "type": "DEPENSE",
+    "date": "2026-02-07",
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false },
+    "note": null,
+    "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" },
+    "transferId": null,
+    "productId": null,
+    "productName": null,
+    "debtId": null
+  }
+]
+```
+
+### Consulter `GET /api/transactions/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/transactions/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : la transaction mise a jour.
+
+### Supprimer `DELETE /api/transactions/{id}`
+
+Response `204` (corps vide).
+
 ### Bilan mensuel `GET /api/transactions/summary?month=2&year=2026`
 
 Response `200` :
@@ -249,6 +288,54 @@ Response `200` :
     "account": null
   }
 ]
+```
+
+### Consulter `GET /api/subscriptions/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Supprimer `DELETE /api/subscriptions/{id}`
+
+Response `204` (corps vide).
+
+### Payer `POST /api/subscriptions/{id}/pay`
+
+Response `201` :
+
+```json
+{
+  "id": "uuid-transaction",
+  "montant": 15.99,
+  "date": "2026-03-30",
+  "subscriptionName": "Netflix",
+  "accountName": "Compte Principal"
+}
+```
+
+### Historique paiements `GET /api/subscriptions/{id}/payments`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "uuid-transaction",
+    "montant": 15.99,
+    "date": "2026-03-01",
+    "subscriptionName": "Netflix",
+    "accountName": "Compte Principal"
+  }
+]
+```
+
+### Cumul paiements `GET /api/subscriptions/{id}/payments/total`
+
+Response `200` :
+
+```json
+{
+  "total": 191.88
+}
 ```
 
 ## Dettes
@@ -401,6 +488,14 @@ Request :
 
 Response `200` : la dette mise a jour avec les nouveaux `reminderDate` et `reminderTime`.
 
+### Consulter `GET /api/debts/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Supprimer `DELETE /api/debts/{id}`
+
+Response `204` (corps vide).
+
 ### Solde total `GET /api/accounts/total-balance`
 
 Response `200` :
@@ -547,6 +642,32 @@ Response `201` :
 }
 ```
 
+### Consulter `GET /api/accounts/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/accounts/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : le compte mis a jour.
+
+### Supprimer `DELETE /api/accounts/{id}`
+
+Response `204` (corps vide).
+
+### Ajuster le solde `POST /api/accounts/{id}/adjust-balance`
+
+Request :
+
+```json
+{
+  "newBalance": 1500.00
+}
+```
+
+Response `200` : le compte mis a jour avec le nouveau solde.
+
 ### Definir par defaut `PUT /api/accounts/{id}/default`
 
 Response `200` :
@@ -599,6 +720,20 @@ Response `200` :
   "isSystem": false
 }
 ```
+
+### Consulter `GET /api/categories/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/categories/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : la categorie mise a jour.
+
+### Supprimer `DELETE /api/categories/{id}`
+
+Response `204` (corps vide). Erreur `409` si categorie systeme.
 
 ### Lister `GET /api/categories`
 
@@ -713,6 +848,26 @@ Request (body optionnel, defaut `quantity: 1`) :
 ```
 
 Response `200` : le produit mis a jour (stock decremente, totalVendu incremente).
+
+### Consulter `GET /api/products/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Restocker `POST /api/products/{id}/restock`
+
+Request :
+
+```json
+{
+  "quantity": 10
+}
+```
+
+Response `200` : le produit mis a jour (stock incremente).
+
+### Historique ventes `GET /api/products/{id}/sales`
+
+Response `200` : liste de `TransactionResponse` liees aux ventes du produit.
 
 ### Supprimer `DELETE /api/products/{id}`
 
@@ -1016,6 +1171,172 @@ Response `200` :
 
 > 29 entrees au total. Extraits ci-dessus pour illustration.
 
+## Transactions recurrentes
+
+### Creer `POST /api/transactions/recurring`
+
+Request :
+
+```json
+{
+  "montant": 950.00,
+  "libelle": "Loyer",
+  "type": "DEPENSE",
+  "frequency": "MENSUEL",
+  "nextOccurrence": "2026-04-01",
+  "categoryId": "uuid-category",
+  "accountId": "uuid-account",
+  "note": null
+}
+```
+
+Response `201` :
+
+```json
+{
+  "id": "uuid",
+  "montant": 950.00,
+  "libelle": "Loyer",
+  "type": "DEPENSE",
+  "frequency": "MENSUEL",
+  "nextOccurrence": "2026-04-01",
+  "recurringActive": true,
+  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false },
+  "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" }
+}
+```
+
+### Lister les actives `GET /api/transactions/recurring`
+
+Response `200` : liste de `RecurringTransactionResponse`.
+
+### Valider une occurrence `POST /api/transactions/recurring/{id}/validate`
+
+Cree la transaction pour l'occurrence courante et avance `nextOccurrence`.
+
+Response `201` : `TransactionResponse` (la transaction creee).
+
+### Passer une occurrence `PATCH /api/transactions/recurring/{id}/skip`
+
+Avance `nextOccurrence` sans creer de transaction.
+
+Response `200` : `RecurringTransactionResponse` mise a jour.
+
+### Desactiver `PATCH /api/transactions/recurring/{id}/deactivate`
+
+Response `200` : `RecurringTransactionResponse` avec `recurringActive: false`.
+
+## Notifications
+
+### Lister `GET /api/notifications?page=0&size=20&unread=true`
+
+Parametres optionnels : `page` (defaut 0), `size` (defaut 20, max 100), `unread` (filtre optionnel).
+
+Response `200` :
+
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "type": "SUBSCRIPTION_DUE",
+      "title": "Echeance abonnement",
+      "message": "Netflix arrive a echeance dans 3 jours",
+      "entityType": "SUBSCRIPTION",
+      "entityId": "uuid-subscription",
+      "read": false,
+      "readAt": null,
+      "createdAt": "2026-03-27T08:00:00"
+    }
+  ],
+  "number": 0,
+  "size": 20,
+  "totalElements": 5,
+  "totalPages": 1
+}
+```
+
+### Compteur non lues `GET /api/notifications/unread-count`
+
+Response `200` :
+
+```json
+{
+  "count": 3
+}
+```
+
+### Marquer comme lue `PUT /api/notifications/{id}/read`
+
+Response `200` : `NotificationResponse` avec `read: true` et `readAt` renseigne.
+
+### Tout marquer comme lu `PUT /api/notifications/read-all`
+
+Response `204` (corps vide).
+
+### Supprimer `DELETE /api/notifications/{id}`
+
+Response `204` (corps vide).
+
+### Tout supprimer `DELETE /api/notifications`
+
+Response `204` (corps vide).
+
+## Profil utilisateur
+
+### Consulter `GET /api/users/me`
+
+Response `200` :
+
+```json
+{
+  "name": "Kelly",
+  "email": "user@example.com"
+}
+```
+
+### Modifier `PUT /api/users/me`
+
+Request :
+
+```json
+{
+  "name": "Kelly K."
+}
+```
+
+Response `200` :
+
+```json
+{
+  "name": "Kelly K.",
+  "email": "user@example.com"
+}
+```
+
+## Devises
+
+### Lister `GET /api/currencies`
+
+Response `200` :
+
+```json
+[
+  {
+    "code": "EUR",
+    "symbol": "€",
+    "name": "Euro",
+    "decimalPlaces": 2
+  },
+  {
+    "code": "XOF",
+    "symbol": "CFA",
+    "name": "Franc CFA",
+    "decimalPlaces": 0
+  }
+]
+```
+
 ## Valeurs des enums
 
 | Enum | Valeurs |
@@ -1165,6 +1486,20 @@ Response `200` :
 ### Upload avec mapping `POST /api/imports/upload-with-mapping`
 
 Request (multipart/form-data) : `file`, `accountId`, `mapping` (JSON string)
+
+### Consulter un brouillon `GET /api/imports/drafts/{draftId}`
+
+Response `200` : meme format que la reponse de l'upload (avec toutes les lignes).
+
+### Supprimer un brouillon `DELETE /api/imports/drafts/{draftId}`
+
+Response `204` (corps vide).
+
+### Modifier une regle `PUT /api/imports/rules/{ruleId}`
+
+Request : meme format que la creation (`pattern`, `categoryId`).
+
+Response `200` : la regle mise a jour.
 
 ### Lister brouillons `GET /api/imports/drafts` — liste des brouillons PENDING
 
