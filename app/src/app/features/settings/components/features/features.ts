@@ -4,12 +4,13 @@ import { firstValueFrom } from 'rxjs';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  phosphorHouse,
+  phosphorArrowsClockwise,
+  phosphorCaretLeft,
   phosphorCurrencyDollar,
   phosphorDotsSixVertical,
-  phosphorLock,
-  phosphorArrowsClockwise,
   phosphorHandshake,
+  phosphorHouse,
+  phosphorLock,
   phosphorStorefront,
 } from '@ng-icons/phosphor-icons/regular';
 
@@ -23,12 +24,13 @@ import { FEATURES, type Feature } from '../../../../core/models/preference.model
   imports: [RouterLink, CdkDropList, CdkDrag, NgIcon],
   providers: [
     provideIcons({
-      phosphorHouse,
+      phosphorArrowsClockwise,
+      phosphorCaretLeft,
       phosphorCurrencyDollar,
       phosphorDotsSixVertical,
-      phosphorLock,
-      phosphorArrowsClockwise,
       phosphorHandshake,
+      phosphorHouse,
+      phosphorLock,
       phosphorStorefront,
     }),
   ],

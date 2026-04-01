@@ -1,19 +1,52 @@
-<a class="section-back" routerLink="/settings">
-  <span class="section-back__arrow">&#9664;</span>
-  <span>Paramètres</span>
-</a>
-
-<h2 class="profile-title">Profil</h2>
+<div class="page-header">
+  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <ng-icon name="phosphorCaretLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">Profil</h1>
+</div>
 
 @if (currentUser(); as user) {
-  <div class="profile-card">
-    <div class="profile-field">
-      <span class="profile-field__label">Nom</span>
-      <span class="profile-field__value">{{ user.name }}</span>
+  <!-- Avatar -->
+  <div class="profile-avatar">
+    <div class="profile-avatar__circle">
+      <span class="profile-avatar__initials">{{ getInitials(user.name) }}</span>
     </div>
-    <div class="profile-field">
-      <span class="profile-field__label">Email</span>
-      <span class="profile-field__value">{{ user.email }}</span>
+    <button class="profile-avatar__edit" aria-label="Modifier la photo">
+      <ng-icon name="phosphorCamera" size="14" />
+    </button>
+  </div>
+
+  <!-- Informations -->
+  <div class="profile-section">
+    <div class="profile-section__label">Informations</div>
+    <div class="profile-section__container">
+      <button class="profile-row profile-row--editable">
+        <ng-icon class="profile-row__icon" name="phosphorUser" size="16" />
+        <span class="profile-row__label">Nom</span>
+        <span class="profile-row__value">{{ user.name }}</span>
+        <span class="profile-row__chevron">›</span>
+      </button>
+      <button class="profile-row profile-row--editable">
+        <ng-icon class="profile-row__icon" name="phosphorEnvelope" size="16" />
+        <span class="profile-row__label">Email</span>
+        <span class="profile-row__value">{{ user.email }}</span>
+        <span class="profile-row__chevron">›</span>
+      </button>
+      <div class="profile-row">
+        <ng-icon class="profile-row__icon" name="phosphorCalendar" size="16" />
+        <span class="profile-row__label">Membre depuis</span>
+        <span class="profile-row__value">Mars 2025</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Déconnexion -->
+  <div class="profile-section">
+    <div class="profile-section__container">
+      <button class="profile-row profile-row--danger">
+        <ng-icon class="profile-row__icon" name="phosphorSignOut" size="16" />
+        <span class="profile-row__label">Déconnexion</span>
+      </button>
     </div>
   </div>
 } @else {

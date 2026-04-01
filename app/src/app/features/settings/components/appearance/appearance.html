@@ -1,63 +1,75 @@
-<a class="section-back" routerLink="/settings">
-  <span class="section-back__arrow">&#9664;</span>
-  <span>Paramètres</span>
-</a>
+<div class="page-header">
+  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <ng-icon name="phosphorCaretLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">Apparence</h1>
+</div>
 
-<h2 class="appearance-title">Apparence</h2>
-
-<div class="theme-section">
-  <h3 class="theme-section__label">Thème</h3>
-  <div class="segmented-control">
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTheme() === 'light'"
-      (click)="setTheme('light')"
-    >
-      Clair
-    </button>
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTheme() === 'dark'"
-      (click)="setTheme('dark')"
-    >
-      Sombre
-    </button>
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTheme() === 'auto'"
-      (click)="setTheme('auto')"
-    >
-      Automatique
-    </button>
+<!-- Thème -->
+<div class="appearance-section">
+  <div class="appearance-section__label">Thème</div>
+  <div class="appearance-section__container">
+    <div class="segmented-control">
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTheme() === 'light'"
+        (click)="setTheme('light')"
+      >
+        <ng-icon name="phosphorSun" size="16" />
+        Clair
+      </button>
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTheme() === 'dark'"
+        (click)="setTheme('dark')"
+      >
+        <ng-icon name="phosphorMoon" size="16" />
+        Sombre
+      </button>
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTheme() === 'auto'"
+        (click)="setTheme('auto')"
+      >
+        <ng-icon name="phosphorCircleHalf" size="16" />
+        Auto
+      </button>
+    </div>
   </div>
 </div>
 
-<div class="theme-section">
-  <h3 class="theme-section__label">Taille du texte</h3>
-  <div class="segmented-control">
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTextScale() === 'small'"
-      (click)="setTextScale('small')"
-    >
-      Petit
-    </button>
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTextScale() === 'medium'"
-      (click)="setTextScale('medium')"
-    >
-      Normal
-    </button>
-    <button
-      class="segmented-control__option"
-      [class.segmented-control__option--active]="currentTextScale() === 'large'"
-      (click)="setTextScale('large')"
-    >
-      Grand
-    </button>
-  </div>
-  <div class="text-preview" [style.fontSize.%]="textScaleService.scaleFactor() * 100">
-    Voici un aperçu de la taille du texte choisie.
+<!-- Taille du texte -->
+<div class="appearance-section">
+  <div class="appearance-section__label">Taille du texte</div>
+  <div class="appearance-section__container">
+    <div class="segmented-control">
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTextScale() === 'small'"
+        (click)="setTextScale('small')"
+      >
+        <span class="segmented-control__text-sample segmented-control__text-sample--small">A</span>
+        Petit
+      </button>
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTextScale() === 'medium'"
+        (click)="setTextScale('medium')"
+      >
+        <span class="segmented-control__text-sample">A</span>
+        Normal
+      </button>
+      <button
+        class="segmented-control__option"
+        [class.segmented-control__option--active]="currentTextScale() === 'large'"
+        (click)="setTextScale('large')"
+      >
+        <span class="segmented-control__text-sample segmented-control__text-sample--large">A</span>
+        Grand
+      </button>
+    </div>
+    <div class="text-preview" [style.fontSize.%]="textScaleService.scaleFactor() * 100">
+      Voici un aperçu de la taille du texte choisie.
+    </div>
   </div>
 </div>

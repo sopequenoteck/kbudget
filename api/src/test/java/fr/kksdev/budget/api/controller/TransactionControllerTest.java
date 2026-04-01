@@ -67,7 +67,7 @@ class TransactionControllerTest {
     }
 
     private AccountSummary buildAccountSummary() {
-        return new AccountSummary(accountId, "Compte Principal", "🏦", "#3b82f6", "EUR");
+        return new AccountSummary(accountId, "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
     }
 
     private String transactionJson(String montant, String libelle, String type, String date) {

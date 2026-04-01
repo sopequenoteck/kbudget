@@ -1,80 +1,119 @@
 :host {
-  display: block;
-  padding: var(--space-4);
-}
-
-.section-back {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-6);
-
-  &:hover {
-    color: var(--text-primary);
-  }
-
-  &__arrow {
-    font-size: var(--font-size-xs);
-  }
-}
-
-.accounts-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  padding: var(--space-4);
+  gap: var(--space-5);
+}
+
+// =============================================================================
+// Page header
+// =============================================================================
+
+.page-header {
+  display: flex;
   align-items: center;
-  margin-bottom: var(--space-4);
-}
 
-.accounts-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.account-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border-default);
-    flex-wrap: wrap;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &.inactive {
-      opacity: 0.6;
-    }
-  }
-
-  &__icon {
+  &__back {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--space-8);
-    height: var(--space-8);
-    font-size: var(--font-size-lg);
-    background-color: var(--color-primary-light);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
     border-radius: var(--radius-round);
-    line-height: 1;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
     flex-shrink: 0;
+
+    ::ng-deep ng-icon {
+      min-width: 20px;
+    }
   }
 
-  &__info {
+  &__title {
+    flex: 1;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+    text-align: right;
+  }
+}
+
+// =============================================================================
+// Section
+// =============================================================================
+
+.accounts-section {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+  }
+
+  &__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-round);
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color var(--duration-fast);
+
+    &:active {
+      color: var(--text-primary);
+      background-color: var(--hover-bg);
+    }
+  }
+
+  &__container {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: var(--surface-default);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+}
+
+// =============================================================================
+// Account row
+// =============================================================================
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  flex-wrap: wrap;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--inactive {
+    opacity: 0.5;
+  }
+
+  &__content {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -82,47 +121,60 @@
     gap: 2px;
   }
 
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
   &__name {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: var(--text-secondary);
   }
 
-  &__bank {
+  &__badge {
+    font-size: 10px;
+    font-weight: var(--font-weight-medium);
+    padding: 1px var(--space-1-5);
+    border-radius: var(--radius-round);
+    border: 1px solid var(--border-default);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+
+  &__subtitle {
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
   }
 
-  &__type {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-  }
-
   &__solde {
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
     white-space: nowrap;
-  }
-
-  &__badges {
-    display: flex;
-    gap: var(--space-1);
   }
 
   &__actions {
     display: flex;
-    gap: var(--space-1);
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    margin-top: var(--space-1);
+  }
+
+  &__actions-spacer {
+    flex: 1;
   }
 
   &__confirm {
     width: 100%;
     margin-top: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-lg);
-    background: var(--bg-error);
+    background: var(--surface-raised);
     font-size: var(--font-size-sm);
-    color: var(--text-error);
+    color: var(--text-secondary);
 
     p {
       margin: 0 0 var(--space-2);
@@ -131,6 +183,7 @@
 
   &__confirm-error {
     font-weight: var(--font-weight-medium);
+    color: var(--color-expense);
   }
 
   &__confirm-actions {
@@ -140,105 +193,99 @@
   }
 }
 
-.badge {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-round);
-  white-space: nowrap;
+// =============================================================================
+// Action buttons
+// =============================================================================
 
-  &--primary {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-
-  &--muted {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-  }
-}
-
-.btn-primary--sm {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
-.import-file-input {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.btn-icon {
+.btn-action {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-8);
-  height: var(--space-8);
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-round);
   background: transparent;
+  color: var(--text-tertiary);
   cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: background var(--duration-fast) var(--easing-default);
+  transition: background-color var(--duration-fast);
 
-  &:hover {
-    background: var(--bg-tertiary);
+  &:active {
+    background: var(--hover-bg);
   }
 
-  &--danger:hover {
-    background: var(--bg-error);
+  &--danger {
+    color: var(--color-expense);
   }
 }
 
-.btn-danger {
-  padding: var(--space-2) var(--space-3);
+.btn-cancel {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+
+  &:active {
+    background-color: var(--hover-bg);
+  }
+}
+
+.btn-delete {
+  padding: var(--space-1) var(--space-3);
   border: none;
-  border-radius: var(--radius-xl);
-  background: var(--text-error);
-  color: var(--text-inverse);
+  border-radius: var(--radius-round);
+  background-color: var(--color-expense);
+  color: white;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  font-family: inherit;
   cursor: pointer;
 
-  &:hover {
+  &:active {
     opacity: 0.9;
   }
-
-  &--sm {
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--font-size-xs);
-  }
 }
 
-.btn-outline--sm {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
+.btn-retry {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
 }
+
+// =============================================================================
+// States
+// =============================================================================
 
 .state-loading,
-.state-empty,
-.state-error {
+.state-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6) var(--space-4);
-  gap: var(--space-4);
-  color: var(--text-secondary);
-}
-
-.state-empty__hint {
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+  color: var(--text-tertiary);
   font-size: var(--font-size-sm);
 }
 
+.state-empty__hint {
+  font-size: var(--font-size-xs);
+}
+
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-default);
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-default);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;

@@ -10,7 +10,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorPencilSimple, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -21,7 +21,9 @@ import { Category } from '../../../../core/models/category.model';
   imports: [RouterLink, NgIcon],
   providers: [
     provideIcons({
+      phosphorCaretLeft,
       phosphorPencilSimple,
+      phosphorPlus,
       phosphorTrash,
     }),
   ],
@@ -62,6 +64,10 @@ export class Categories {
       this.error.set(true);
       this.loading.set(false);
     }
+  }
+
+  createCategory(): void {
+    this.modalService.openModal('category');
   }
 
   editCategory(category: Category): void {

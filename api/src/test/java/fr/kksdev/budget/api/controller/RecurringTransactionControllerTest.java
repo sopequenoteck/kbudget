@@ -62,7 +62,7 @@ class RecurringTransactionControllerTest {
     }
 
     private RecurringTransactionResponse buildRecurringResponse() {
-        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR");
+        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
         return new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
                 Frequency.MENSUEL, LocalDate.of(2027, 3, 15), true, null, account);
@@ -143,7 +143,7 @@ class RecurringTransactionControllerTest {
 
     @Test
     void should_return201_when_validateRecurrence() throws Exception {
-        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR");
+        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
         var transactionResponse = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
                 LocalDate.now(), null, null, account, null, null, null, null);
@@ -202,7 +202,7 @@ class RecurringTransactionControllerTest {
         var deactivatedResponse = new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
                 Frequency.MENSUEL, LocalDate.of(2027, 3, 15), false, null,
-                new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR"));
+                new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null));
 
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class))).thenReturn(deactivatedResponse);
 

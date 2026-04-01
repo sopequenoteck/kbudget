@@ -1,0 +1,50 @@
+<div class="page-header">
+  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <ng-icon name="phosphorCaretLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">Notifications</h1>
+</div>
+
+<!-- Types de notifications -->
+<div class="notif-section">
+  <div class="notif-section__label">Types de notifications</div>
+  <div class="notif-section__container">
+    @for (config of notificationTypes; track config.type) {
+      <div class="notif-row">
+        <ng-icon class="notif-row__icon" [name]="config.icon" size="16" />
+        <div class="notif-row__content">
+          <span class="notif-row__title">{{ config.label }}</span>
+          <span class="notif-row__description">{{ config.description }}</span>
+        </div>
+        <label class="notif-toggle">
+          <input
+            type="checkbox"
+            [checked]="isTypeEnabled(config.type)"
+            (change)="toggleType(config.type)"
+          />
+          <span class="notif-toggle__slider"></span>
+        </label>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Fuseau horaire -->
+<div class="notif-section">
+  <div class="notif-section__label">Fuseau horaire</div>
+  <div class="notif-section__container">
+    <div class="notif-row">
+      <ng-icon class="notif-row__icon" name="phosphorGlobe" size="16" />
+      <span class="notif-row__title">Zone</span>
+      <select
+        class="notif-select"
+        [value]="timezone()"
+        (change)="onTimezoneChange($event)"
+      >
+        @for (tz of timezones; track tz) {
+          <option [value]="tz">{{ tz }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</div>

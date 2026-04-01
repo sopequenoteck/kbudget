@@ -1,11 +1,8 @@
-<a class="section-back" routerLink="/settings">
-  <span class="section-back__arrow">&#9664;</span>
-  <span>Paramètres</span>
-</a>
-
-<div class="accounts-header">
-  <h2 class="accounts-title">Mes comptes</h2>
-  <button class="btn-primary btn-primary--sm" (click)="createAccount()">+ Nouveau</button>
+<div class="page-header">
+  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <ng-icon name="phosphorCaretLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">Comptes</h1>
 </div>
 
 @if (loading()) {
@@ -13,9 +10,9 @@
     <div class="spinner"></div>
   </div>
 } @else if (error()) {
-  <div class="state-error">
+  <div class="state-empty">
     <p>Erreur de chargement</p>
-    <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
+    <button class="btn-retry" (click)="loadAccounts()">Réessayer</button>
   </div>
 } @else if (accounts().length === 0) {
   <div class="state-empty">
@@ -23,79 +20,69 @@
     <p class="state-empty__hint">Créez votre premier compte pour commencer</p>
   </div>
 } @else {
-  <ul class="account-list">
-    @for (account of accounts(); track account.id) {
-      <li class="account-list__item" [class.inactive]="!account.actif">
-        <app-account-bank-icon [account]="account" [size]="32" />
-        <div class="account-list__info">
-          <span class="account-list__name">{{ account.nom }}</span>
-          @if (account.bankName) {
-            <span class="account-list__bank">{{ account.bankName }}</span>
-          }
-          <span class="account-list__type">{{ account.type }}</span>
-        </div>
-        <span class="account-list__solde" [class.amount-expense]="account.solde < 0">
-          {{ account.solde | amount: null : account.currency }}
-        </span>
-        <div class="account-list__badges">
-          @if (account.isDefault) {
-            <span class="badge badge--primary">Défaut</span>
-          }
-          @if (!account.actif) {
-            <span class="badge badge--muted">Inactif</span>
-          }
-        </div>
-        <div class="account-list__actions">
-          @if (!account.isDefault && account.actif) {
-            <button
-              type="button"
-              class="btn-icon"
-              (click)="setDefault(account)"
-              title="Définir par défaut"
-            >
-              <ng-icon name="phosphorStar" size="20" />
-            </button>
-          }
-          <button
-            type="button"
-            class="btn-icon"
-            (click)="editAccount(account)"
-            aria-label="Modifier"
-          >
-            <ng-icon name="phosphorPencilSimple" size="20" />
-          </button>
-          <button
-            type="button"
-            class="btn-icon"
-            (click)="triggerImport(account.id)"
-            title="Importer un CSV"
-            aria-label="Importer un CSV"
-          >
-            <ng-icon name="phosphorUploadSimple" size="20" />
-          </button>
-          <button
-            type="button"
-            class="btn-icon btn-icon--danger"
-            (click)="requestDelete(account.id)"
-            aria-label="Supprimer"
-          >
-            <ng-icon name="phosphorTrash" size="20" />
-          </button>
-        </div>
-
-        @if (confirmDeleteId() === account.id) {
-          <div class="account-list__confirm">
-            <p>Supprimer ce compte ?</p>
-            @if (deleteError()) {
-              <p class="account-list__confirm-error">{{ deleteError() }}</p>
-            }
-            <div class="account-list__confirm-actions">
-              <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
-              <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
+  <div class="accounts-section">
+    <div class="accounts-section__header">
+      <span class="accounts-section__label">{{ accounts().length }} comptes</span>
+      <button class="accounts-section__add" (click)="createAccount()">
+        <ng-icon name="phosphorPlus" size="16" />
+      </button>
+    </div>
+    <ul class="accounts-section__container">
+      @for (account of accounts(); track account.id) {
+        <li class="account-row" [class.account-row--inactive]="!account.actif">
+          <app-account-bank-icon [account]="account" [size]="32" />
+          <div class="account-row__content">
+            <div class="account-row__top">
+              <span class="account-row__name">{{ account.nom }}</span>
+              @if (account.isDefault) {
+                <span class="account-row__badge">Défaut</span>
+              }
+              @if (!account.actif) {
+                <span class="account-row__badge">Inactif</span>
+              }
             </div>
+            <span class="account-row__subtitle">
+              @if (account.bankName) {
+                {{ account.bankName }} ·
+              }
+              {{ account.type }}
+            </span>
           </div>
-        }
-      </li>
-    }
-  </ul>
+          <span class="account-row__solde" [class.amount-expense]="account.solde < 0">
+            {{ account.solde | amount: null : account.currency }}
+          </span>
+          <div class="account-row__actions">
+            <button class="btn-action btn-action--danger" (click)="requestDelete(account.id)" aria-label="Supprimer">
+              <ng-icon name="phosphorTrash" size="16" />
+            </button>
+            <span class="account-row__actions-spacer"></span>
+            @if (!account.isDefault && account.actif) {
+              <button class="btn-action" (click)="setDefault(account)" title="Définir par défaut">
+                <ng-icon name="phosphorStar" size="16" />
+              </button>
+            }
+            <button class="btn-action" (click)="editAccount(account)" aria-label="Modifier">
+              <ng-icon name="phosphorPencilSimple" size="16" />
+            </button>
+            <button class="btn-action" (click)="triggerImport(account.id)" title="Importer un CSV">
+              <ng-icon name="phosphorUploadSimple" size="16" />
+            </button>
+          </div>
+
+          @if (confirmDeleteId() === account.id) {
+            <div class="account-row__confirm">
+              <p>Supprimer ce compte ?</p>
+              @if (deleteError()) {
+                <p class="account-row__confirm-error">{{ deleteError() }}</p>
+              }
+              <div class="account-row__confirm-actions">
+                <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+                <button class="btn-delete" (click)="confirmDelete()">Supprimer</button>
+              </div>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </div>
 }

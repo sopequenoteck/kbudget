@@ -7,7 +7,17 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorEnvelope } from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorArrowsLeftRight,
+  phosphorBank,
+  phosphorCaretLeft,
+  phosphorEnvelope,
+  phosphorGearSix,
+  phosphorHandCoins,
+  phosphorRepeat,
+  phosphorTag,
+  phosphorTimer,
+} from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import packageJson from '../../../../../../package.json';
 import { HealthService, HealthCheckResult } from '../../../../core/services/health';
@@ -20,7 +30,17 @@ import { DebtService } from '../../../../core/services/debt';
   selector: 'app-about',
   imports: [RouterLink, NgIcon],
   viewProviders: [
-    provideIcons({ phosphorEnvelope }),
+    provideIcons({
+      phosphorArrowsLeftRight,
+      phosphorBank,
+      phosphorCaretLeft,
+      phosphorEnvelope,
+      phosphorGearSix,
+      phosphorHandCoins,
+      phosphorRepeat,
+      phosphorTag,
+      phosphorTimer,
+    }),
   ],
   templateUrl: './about.html',
   styleUrl: './about.scss',

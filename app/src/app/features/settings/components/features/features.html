@@ -1,23 +1,24 @@
-<a class="section-back" routerLink="/settings">
-  <span class="section-back__arrow">&#9664;</span>
-  <span>Paramètres</span>
-</a>
-
-<h2 class="features-title">Fonctionnalités</h2>
+<div class="page-header">
+  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <ng-icon name="phosphorCaretLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">Fonctionnalités</h1>
+</div>
 
 @if (preferenceService.error(); as error) {
   <div class="features-error">{{ error }}</div>
 }
 
-<section class="features-section">
-  <h3 class="features-section__title">Modules</h3>
-  <div class="features-list">
+<!-- Modules -->
+<div class="features-section">
+  <div class="features-section__label">Modules</div>
+  <div class="features-section__container">
     @for (feature of features; track feature.value) {
-      <div class="feature-item">
-        <span class="feature-item__icon"><ng-icon [name]="feature.icon" size="24" /></span>
-        <div class="feature-item__text">
-          <span class="feature-item__label">{{ feature.label }}</span>
-          <span class="feature-item__description">{{ feature.description }}</span>
+      <div class="feature-row">
+        <ng-icon class="feature-row__icon" [name]="feature.icon" size="20" />
+        <div class="feature-row__content">
+          <span class="feature-row__title">{{ feature.label }}</span>
+          <span class="feature-row__description">{{ feature.description }}</span>
         </div>
         <label class="feature-toggle">
           <input
@@ -30,32 +31,33 @@
       </div>
     }
   </div>
-</section>
+</div>
 
-<section class="features-section">
-  <h3 class="features-section__title">Navigation</h3>
-  <div class="features-list">
-    <div class="nav-item nav-item--locked">
-      <span class="nav-item__icon"><ng-icon name="phosphorHouse" size="24" /></span>
-      <span class="nav-item__label">Accueil</span>
-      <span class="nav-item__lock"><ng-icon name="phosphorLock" size="16" /></span>
+<!-- Navigation -->
+<div class="features-section">
+  <div class="features-section__label">Ordre de navigation</div>
+  <div class="features-section__container">
+    <div class="nav-row nav-row--locked">
+      <ng-icon class="nav-row__icon" name="phosphorHouse" size="20" />
+      <span class="nav-row__label">Accueil</span>
+      <ng-icon class="nav-row__lock" name="phosphorLock" size="14" />
     </div>
-    <div class="nav-item nav-item--locked">
-      <span class="nav-item__icon"><ng-icon name="phosphorCurrencyDollar" size="24" /></span>
-      <span class="nav-item__label">Transactions</span>
-      <span class="nav-item__lock"><ng-icon name="phosphorLock" size="16" /></span>
+    <div class="nav-row nav-row--locked">
+      <ng-icon class="nav-row__icon" name="phosphorCurrencyDollar" size="20" />
+      <span class="nav-row__label">Transactions</span>
+      <ng-icon class="nav-row__lock" name="phosphorLock" size="14" />
     </div>
     <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="nav-drop-list">
       @for (item of enabledNavItems(); track item.value) {
-        <div cdkDrag class="nav-item nav-item--draggable">
-          <span cdkDragHandle class="nav-item__handle"><ng-icon name="phosphorDotsSixVertical" size="20" /></span>
-          <span class="nav-item__icon"><ng-icon [name]="item.icon" size="24" /></span>
-          <span class="nav-item__label">{{ item.label }}</span>
+        <div cdkDrag class="nav-row nav-row--draggable">
+          <ng-icon cdkDragHandle class="nav-row__handle" name="phosphorDotsSixVertical" size="18" />
+          <ng-icon class="nav-row__icon" [name]="item.icon" size="20" />
+          <span class="nav-row__label">{{ item.label }}</span>
         </div>
       }
     </div>
   </div>
-</section>
+</div>
 
 @if (confirmDisableFeature(); as feature) {
   <div class="confirm-banner">

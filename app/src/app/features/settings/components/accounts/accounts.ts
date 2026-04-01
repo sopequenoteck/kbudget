@@ -11,8 +11,10 @@ import { firstValueFrom } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  phosphorStar,
+  phosphorCaretLeft,
   phosphorPencilSimple,
+  phosphorPlus,
+  phosphorStar,
   phosphorTrash,
   phosphorUploadSimple,
 } from '@ng-icons/phosphor-icons/regular';
@@ -27,8 +29,10 @@ import { AccountBankIcon } from '../../../../shared/components/account-bank-icon
   imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon],
   providers: [
     provideIcons({
-      phosphorStar,
+      phosphorCaretLeft,
       phosphorPencilSimple,
+      phosphorPlus,
+      phosphorStar,
       phosphorTrash,
       phosphorUploadSimple,
     }),

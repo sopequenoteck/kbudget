@@ -1,13 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCurrencyCircleDollar } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretLeft } from '@ng-icons/phosphor-icons/regular';
 
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../../core/services/preference';
@@ -15,24 +16,20 @@ import { AccountService } from '../../../../core/services/account';
 import { Account } from '../../../../core/models/account.model';
 import { CurrencyList } from './currency-list';
 import { ExchangeRateManager } from './exchange-rate-manager';
-import { RateCalculator } from './rate-calculator';
 
 @Component({
   selector: 'app-currency-settings',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, RouterLink, CurrencyList, ExchangeRateManager, RateCalculator],
-  viewProviders: [provideIcons({ phosphorCurrencyCircleDollar })],
+  imports: [NgIcon, RouterLink, CurrencyList, ExchangeRateManager],
+  viewProviders: [provideIcons({ phosphorCaretLeft })],
   template: `
-    <a class="section-back" routerLink="/settings">
-      <span class="section-back__arrow">&#9664;</span>
-      <span>Paramètres</span>
-    </a>
-
-    <h2 class="page-title">
-      <ng-icon name="phosphorCurrencyCircleDollar" size="24" />
-      Devises &amp; Taux
-    </h2>
+    <div class="page-header">
+      <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+        <ng-icon name="phosphorCaretLeft" size="20" />
+      </button>
+      <h1 class="page-header__title">Devises &amp; Taux</h1>
+    </div>
 
     <app-currency-list
       [currencies]="currencies()"
@@ -48,41 +45,47 @@ import { RateCalculator } from './rate-calculator';
       (rateDeleted)="rateService.loadRates()"
     />
 
-    <app-rate-calculator [currencies]="allCurrencies" />
   `,
   styles: [
     `
       :host {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
         padding: var(--space-4);
       }
 
-      .section-back {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        color: var(--text-secondary);
-        text-decoration: none;
-        font-size: var(--font-size-sm);
-        margin-bottom: var(--space-6);
-
-        &:hover {
-          color: var(--text-primary);
-        }
-
-        &__arrow {
-          font-size: var(--font-size-xs);
-        }
-      }
-
-      .page-title {
+      .page-header {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
-        font-size: var(--font-size-xl);
-        font-weight: var(--font-weight-semibold);
+      }
+
+      .page-header__back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: none;
+        border-radius: var(--radius-round);
+        background: transparent;
         color: var(--text-primary);
-        margin-bottom: var(--space-6);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .page-header__back ::ng-deep ng-icon {
+        min-width: 20px;
+      }
+
+      .page-header__title {
+        flex: 1;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-bold);
+        color: var(--text-primary);
+        margin: 0;
+        text-align: right;
       }
     `,
   ],
@@ -101,8 +104,13 @@ export class CurrencySettings {
 
   constructor() {
     this.rateService.loadRates();
-    this.currencies.set(this.prefService.currencies());
     this.loadAccounts();
+    effect(() => {
+      const c = this.prefService.currencies();
+      if (c.length > 0) {
+        this.currencies.set(c);
+      }
+    });
   }
 
   private async loadAccounts(): Promise<void> {
