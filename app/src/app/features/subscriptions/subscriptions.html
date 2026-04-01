@@ -1,22 +1,22 @@
 <div class="hero">
-  @if (preferenceService.currencies().length > 1) {
-    <div class="hero__top-row">
-      <div class="currency-toggle">
-        @for (currency of preferenceService.currencies(); track currency) {
-          <button
-            class="currency-toggle__btn"
-            [class.active]="currency === activeCurrency()"
-            (click)="setActiveCurrency(currency)"
-          >
-            {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
-          </button>
-        }
-      </div>
-    </div>
-  }
   @if (hasActiveSubscriptions()) {
     <div class="hero__amount">
-      <span class="hero__amount-label">Total mensuel</span>
+      <div class="hero__amount-top">
+        <span class="hero__amount-label">Total mensuel</span>
+        @if (preferenceService.currencies().length > 1) {
+          <div class="currency-toggle">
+            @for (currency of preferenceService.currencies(); track currency) {
+              <button
+                class="currency-toggle__btn"
+                [class.active]="currency === activeCurrency()"
+                (click)="setActiveCurrency(currency)"
+              >
+                {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+              </button>
+            }
+          </div>
+        }
+      </div>
       <span class="hero__amount-value">
         {{ activeCurrencyTotal() | amount: null : activeCurrency() }}
       </span>

@@ -23,6 +23,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
+import { PreferenceService } from '../../../core/services/preference';
 import { Product } from '../../../core/models/product.model';
 import { AmountPipe } from '../../../shared/pipes/amount.pipe';
 
@@ -52,6 +53,8 @@ export class ShopList implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
+  readonly preferenceService = inject(PreferenceService);
+  readonly activeCurrency = signal('EUR');
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -109,6 +112,10 @@ export class ShopList implements AfterViewInit, OnDestroy {
   });
 
   constructor() {
+    effect(() => {
+      const primary = this.preferenceService.primaryCurrency();
+      this.activeCurrency.set(primary);
+    });
     effect(() => {
       this.productService.refreshTrigger();
       this.loadData();

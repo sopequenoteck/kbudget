@@ -16,9 +16,7 @@
     </div>
   } @else {
     <div class="hero__top-row">
-      @if (isOnDashboard()) {
-        <span class="hero__greeting">Bonjour{{ userName()?.name ? ' ' + userName()!.name : '' }}</span>
-      }
+      <span class="hero__greeting">{{ greeting() }}</span>
       @if (currencies().length > 1) {
         <app-currency-pill-selector
           [currencies]="currencies()"
@@ -71,21 +69,28 @@
       }
     </div>
 
-    <!-- Revenus / Dépenses — inline, pas de cards -->
+    <!-- Revenus / Dépenses — meta-lines Phosphor -->
     @if (!summaryLoading() && !summaryError()) {
-      <div class="hero__summary-row">
-        <div class="hero__summary-item">
-          <span class="hero__summary-label">Revenus</span>
-          <span class="hero__summary-value hero__summary-value--income">
-            {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
-          </span>
+      <div class="hero__meta-row">
+        <div class="hero__meta-group">
+          <div class="hero__meta-line">
+            <ng-icon name="phosphorTrendUp" size="14" />
+            @if ((currentSummary()?.totalRecettes ?? 0) > 0) {
+              <span>{{ currentSummary()!.totalRecettes | amount: 'RECETTE' : preferenceService.primaryCurrency() }}</span>
+            } @else {
+              <span>0 revenus</span>
+            }
+          </div>
         </div>
-        <div class="hero__summary-divider"></div>
-        <div class="hero__summary-item">
-          <span class="hero__summary-label">Dépenses</span>
-          <span class="hero__summary-value hero__summary-value--expense">
-            {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
-          </span>
+        <div class="hero__meta-group">
+          <div class="hero__meta-line">
+            <ng-icon name="phosphorTrendDown" size="14" />
+            @if ((currentSummary()?.totalDepenses ?? 0) > 0) {
+              <span class="hero__meta-line--expense">{{ currentSummary()!.totalDepenses | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}</span>
+            } @else {
+              <span>0 dépenses</span>
+            }
+          </div>
         </div>
       </div>
     } @else if (summaryLoading()) {

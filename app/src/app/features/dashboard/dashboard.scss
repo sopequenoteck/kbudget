@@ -30,7 +30,7 @@
 
 .hero__greeting {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-normal);
   color: var(--text-secondary);
 }
 
@@ -66,46 +66,40 @@
   color: var(--text-tertiary);
 }
 
-// -- Résumé revenus / dépenses — contained row --
-.hero__summary-row {
+.hero__meta-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
+  margin-top: var(--space-1);
 }
 
-.hero__summary-item {
+.hero__meta-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex: 1;
+  gap: 1px;
 }
 
-.hero__summary-divider {
-  width: 1px;
-  height: 32px;
-  background-color: var(--border-default);
-  flex-shrink: 0;
-}
-
-.hero__summary-label {
+.hero__meta-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-normal);
   color: var(--text-tertiary);
-}
 
-.hero__summary-value {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-
-  &--income {
-    color: var(--color-income);
+  ::ng-deep ng-icon {
+    min-width: 14px;
   }
 
   &--expense {
     color: var(--color-expense);
+  }
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-secondary);
+    }
   }
 }
 

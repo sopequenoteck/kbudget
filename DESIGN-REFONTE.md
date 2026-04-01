@@ -318,6 +318,188 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Les fleches financieres (TrendUp/TrendDown) etaient confuses sur l'historique produit : une vente fait SORTIR du stock mais est une RECETTE — la double semantique creait un conflit. Les icones metier (ShoppingBag/Package) resolvent ce conflit
 - Pas de page detail transaction : le clic sur une vente ouvre directement le formulaire d'edition (progressive disclosure, pas de navigation supplementaire)
 
+## Direction validee — Surfaces modales
+
+Deux types de surfaces, deux roles distincts :
+
+### Bottom sheet — formulaires et saisie
+
+Le bottom sheet est le conteneur unique pour toute creation et edition. Pas de modal empile par-dessus, pas de navigation multi-step. Tout vit dans le sheet, qui grandit/retrecit via inline expand.
+
+**Pattern creation :**
+1. **Montant en hero** — clavier numerique immediat a l'ouverture, montant affiche en 3xl (meme langage que les pages detail). C'est le champ dominant.
+2. **Label** — input discret en dessous, fond surface-raised, pas de bordure visible
+3. **3 categories les plus utilisees** (30 derniers jours) affichees en chips. Tap = selectionne. Si aucune ne convient → inline expand : barre de recherche + suggestions live (max 3 resultats affiches)
+4. **Barre d'icones Phosphor** pour les champs secondaires — chaque icone declenche un inline expand dans le sheet (le sheet grandit, pas de deuxieme surface) :
+   - Calendrier → date picker
+   - Wallet → selecteur compte
+   - Repeat → toggle recurrence + frequence
+   - Note → champ texte
+5. **Bouton validation** en bas
+
+**Pattern edition :**
+1. **Zone lecture** (haut du sheet) — infos non modifiables affichees comme dans les heroes : label uppercase xs/tertiary, valeur sm/semibold/secondary. Pas de champ, pas de bordure.
+2. **Zone action** (en dessous) — champs modifiables derriere les memes icones Phosphor. Champs pre-remplis avec les valeurs actuelles. Meme principe d'inline expand.
+
+**Contrainte iPhone :** Le clavier iOS prend ~50% du viewport (466px restants sur iPhone 14 Pro). Le montant hero + label doivent rester visibles au-dessus du clavier. Les categories et la barre d'icones scrollent sous le fold quand le clavier est ouvert.
+
+**Regle :** Un seul niveau de profondeur. Jamais deux surfaces empilees. Le bottom sheet est l'unique conteneur actif.
+
+### Modal centre — confirmations et alertes
+
+Reserve aux actions qui demandent une interruption volontaire du flux :
+- Suppression (irreversible)
+- Desactivation
+- Confirmation d'action groupee ("Tout marquer comme paye")
+
+Court, focalise, deux boutons max. Le modal centre bloque le flux — c'est voulu.
+
+## Direction validee — Realignement heroes
+
+Les heroes du dashboard et des transactions datent des sessions 1-3 et divergent du pattern qui s'est cristallise ensuite (sessions 5-9). A realigner sur la grammaire commune :
+
+- Label uppercase xs/letter-spacing/text-secondary
+- Montant dominant 3xl bold
+- Conversion devise secondaire
+- Meta-lines avec icones Phosphor 14px/text-tertiary
+
+### Dashboard — a reprendre
+- Supprimer le greeting "Bonjour Kelly SOSSOE" ou le reduire a un element minimal
+- "PATRIMOINE TOTAL" → label uppercase xs (deja fait mais le greeting prend trop de place au-dessus)
+- Revenus/Depenses → meta-lines avec icones Phosphor (comme dettes/abonnements)
+- Gagner de l'espace vertical — chaque pixel compte sur iPhone 14 Pro
+
+### Transactions — a reprendre
+- "SOLDE" → label uppercase xs (deja fait)
+- Recettes/Depenses → meta-lines avec icones Phosphor au lieu du conteneur arrondi inline
+- Aligner le selecteur mois sur le style des autres pages
+
+## Direction validee — Settings (session 10)
+
+### Diagnostic
+
+Les Settings existants (11 sous-pages) souffrent de 3 problemes :
+1. Aucun lien visuel avec les pages principales de l'app (pas de vocabulaire partage)
+2. Chaque sous-page reinvente sa structure (profile-section, accounts-section, cat-section, about-section, notif-section — meme pattern copie 6 fois avec des noms differents)
+3. L'organisation en 3 groupes (General / Gestion / Autre) est un heritage d'avant la refonte
+
+### Decision : casser et reconstruire
+
+**De 11 pages → 1 hub + 2 sous-pages.**
+
+### Structure finale
+
+**Hub Settings — page unique scrollable, tout inline :**
+
+1. **Mon compte** (ancrage visuel, haut de page)
+   - Avatar centre + nom + email en dessous
+   - Deconnexion dans ce meme conteneur
+   - Pas de hero 3xl — la zone avatar fait ancrage sans forcer un chiffre
+
+2. **Apparence** (inline)
+   - Segmented control theme (Clair / Sombre / Auto)
+   - Segmented control taille texte (Petit / Normal / Grand)
+   - Preview texte
+
+3. **Notifications** (inline)
+   - Toggles par type de notification
+   - Timezone
+
+4. **Navigation** (inline)
+   - 4 lignes : Abonnements, Dettes, Budgets, Boutique
+   - Chaque ligne = toggle active/desactive + drag handle pour l'ordre nav
+   - Un seul controle fait les deux jobs (activer + ordonner)
+   - Accueil et Transactions implicitement toujours la, pas affiches (locked)
+
+5. **Gestion** (liens vers sous-pages)
+   - Comptes → sous-page CRUD (+ acces Import depuis un compte)
+   - Categories → sous-page CRUD
+   - Rows avec chevron (navigation)
+
+6. **Footer**
+   - Version, environnement, sante serveur
+   - Texte xs/tertiary, discret, pas une page
+
+**Sous-pages (2 seulement) :**
+- **Comptes** : header (fleche retour + titre droite) → section header avec compteur + bouton add → conteneur arrondi avec rows CRUD. Import accessible depuis un compte.
+- **Categories** : meme pattern que Comptes.
+
+### Ce qui disparait
+
+- **7 sous-pages supprimees** : Profil, Apparence, Notifications, Fonctionnalites & Navigation, Donnees, A propos, Securite (placeholder)
+- **Page Devises & Taux** : automatisee a la creation de compte avec devise differente. La devise est portee par le compte, le taux se resout automatiquement. Pas besoin de page dediee.
+- **Import** : sort des Settings. Accessible depuis la page Comptes (on importe dans un compte, pas dans les parametres).
+
+### Vocabulaire visuel du hub
+
+- Label section : uppercase xs / letter-spacing / text-tertiary
+- Conteneurs arrondis : surface-default / radius-xl
+- Rows : padding space-3 space-4 / dividers border-default
+- Controles a droite : toggles, segmented controls, drag handles, chevrons
+- Pas de hero financier. La zone Mon Compte fait ancrage visuel.
+
+Le vocabulaire est identique aux listes groupees des pages financieres (abonnements par periode, dettes par echeance), sauf que le contenu des rows est des controles au lieu de donnees.
+
+### Vocabulaire visuel des sous-pages (Comptes, Categories)
+
+Alignees sur le pattern des pages principales :
+- Header : fleche retour + titre aligne a droite
+- Section header : label avec compteur + bouton add
+- Conteneur arrondi : surface-default, rows avec dividers
+- Actions CRUD : boutons pills compactes (pattern detail abonnement/dette)
+
+### Justification (recherche UX)
+
+Les apps de reference (TickTick, Stoic, Copilot Money) et les guidelines iOS/Material Design convergent sur le meme pattern pour les settings :
+- **Single-page quand possible** : si < 15-20 controles, tout sur un ecran scrollable
+- **Groupement par contexte** : pas par type de controle
+- **Controles inline montrent l'etat actuel** : toggle = on/off visible, segmented = selection visible
+- **Chevrons = navigation vers contenu dynamique** (listes CRUD)
+- **Priorite visuelle** : qui (compte) en haut, comment (preferences) au milieu, quoi (gestion) en bas
+
+## Ce qui a ete fait (session 10)
+
+### Hero Dashboard — realignement grammaire commune
+- Supprime : greeting statique "Bonjour Kelly SOSSOE" (sm/medium/secondary)
+- Ajoute : greeting dynamique contextuel (sm/normal/secondary) — salutation temporelle (Bonjour/Bon apres-midi/Bonsoir) + signal financier (charges en retard > budgets depasses > mois positif/negatif > mois calme)
+- Greeting = futur composant a part (logique propre, dependencies propres)
+- Revenus/Depenses : conteneur arrondi surface-default avec divider → meta-lines Phosphor (TrendUp/TrendDown 14px), deux groupes cote a cote
+- Currency pills : de space-between (avec greeting) a flex-end quand seul, puis space-between avec le nouveau greeting
+- Zero state : "0,00 €" rouge → "0 revenus" / "0 depenses" en tertiary neutre — le zero n'est pas une depense
+
+### Hero Transactions — realignement grammaire commune
+- Recettes/Depenses : conteneur arrondi surface-default avec divider → meta-lines Phosphor (TrendUp/TrendDown 14px), deux groupes cote a cote
+- Conversions devise secondaire : sous chaque montant (pas inline), alignees verticalement
+- Hero toujours visible : ne disparait plus quand le summary est null (mois sans transactions). Affiche SOLDE 0,00 € + "0 revenus" / "0 depenses"
+- Solde colore : vert si positif, rouge si negatif, neutre si zero (comme le hero dettes)
+
+### Empty state Transactions — contextuel + incitatif
+- Icone phosphorReceipt 48px + "Aucune transaction en [mois annee]" + lien "Ajouter une transaction" (xs/medium/primary, ouvre le formulaire creation)
+- Remplacement du texte generique "Aucune transaction"
+
+### Toggle devise — harmonisation globale
+- Abonnements et Dettes : toggle deplace de hero__top-row isolee (flex-end) vers la meme ligne que le label uppercase (hero__amount-top : label a gauche, toggle a droite)
+- Boutique : toggle devise ajoute (n'existait pas), meme pattern label + toggle
+- Supprime : hero__top-row sur abonnements et dettes (devenue inutile)
+
+Cartographie finale du toggle devise :
+
+| Page | Gauche | Droite |
+|------|--------|--------|
+| Dashboard | Greeting dynamique | Currency pills |
+| Transactions | Nav mois | Toggle devise |
+| Abonnements | TOTAL MENSUEL (label) | Toggle devise |
+| Dettes | SOLDE NET (label) | Toggle devise |
+| Budgets | Nav mois | Toggle devise |
+| Boutique | CHIFFRE D'AFFAIRES (label) | Toggle devise |
+
+### Decisions de design (session 10)
+- Le greeting dynamique justifie sa place parce qu'il dit quelque chose de nouveau a chaque ouverture — un greeting statique ne le justifie pas
+- "0 revenus" au lieu de "0,00 €" : le texte est plus honnete quand il ne s'est rien passe. "Couleur = information" : pas de rouge sur un zero
+- Le hero ne doit jamais disparaitre — la structure reste stable quel que soit l'etat des donnees
+- Le toggle devise doit toujours etre ancre a un element existant (label, nav mois, greeting), jamais flotter seul
+- Les empty states sont un moment de design important — a traiter page par page avant d'extraire un composant partage
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -327,13 +509,18 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - [x] Page detail dette (session 7)
 - [x] Propager le style a la page Budgets (session 8)
 - [x] Page Boutique — liste + detail (session 9)
-- [ ] Page Settings
 - [x] Page Transactions recurrentes (session 4)
-- [ ] Modales et formulaires (bottom sheets) — progressive disclosure (debut : bottom sheet actions recurrences)
+- [x] Realigner hero Dashboard (session 10)
+- [x] Realigner hero Transactions (session 10)
+- [ ] Empty states — design par page puis composant partage
+- [ ] Settings — refonte structure + hub + sous-pages
+- [ ] Bottom sheet formulaires — creation (montant hero + label + categories + icones inline expand)
+- [ ] Bottom sheet formulaires — edition (zone lecture + zone action)
+- [ ] Modal centre — confirmations (supprimer, desactiver, actions groupees)
+- [ ] Migrer RepayDialog et SellDialog vers le bottom sheet partage
 
 ### Priorite moyenne
 - [ ] Micro-interactions (transitions de page, feedback tactile)
-- [ ] Empty states (illustrations ou messages soignes)
 - [ ] Skeleton loading au lieu de spinners
 
 ### A faire en dernier
@@ -346,6 +533,8 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - **TickTick** : clean, utilitaire, listes propres, accent discret
 - **Stoic** : calme, minimal, couleurs douces
 - **Apple Journal** : natif iOS, invisible, contenu-first
+- **Apple Wallet** : montant dominant a la saisie, clavier numerique immediat
+- **Apple Reminders** : bottom sheet unique, champs qui se deploient inline
 
 ## Anti-patterns identifies
 
@@ -358,3 +547,6 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - Cards individuelles par item de liste (preferer un conteneur groupe)
 - Variation badges avec fond colore full-width
 - Badge pills repetes dans les rows de liste (preferer texte plat tertiary — badges reserves aux pages detail)
+- Empiler deux surfaces modales (bottom sheet + modal par-dessus)
+- Formulaires qui exposent tous les champs d'un coup
+- Segmented controls pour filtrer (preferer groupement + sections en bas)

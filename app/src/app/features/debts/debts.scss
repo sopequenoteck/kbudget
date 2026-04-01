@@ -15,16 +15,18 @@
   padding-bottom: var(--space-6);
 }
 
-.hero__top-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
+
 
 .hero__amount {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.hero__amount-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .hero__amount-label {

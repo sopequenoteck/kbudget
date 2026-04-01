@@ -26,6 +26,9 @@ import {
   phosphorMagnifyingGlass,
   phosphorFunnel,
   phosphorArrowsClockwise,
+  phosphorTrendUp,
+  phosphorTrendDown,
+  phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
 
@@ -37,6 +40,9 @@ import { RouterLink } from '@angular/router';
       phosphorMagnifyingGlass,
       phosphorFunnel,
       phosphorArrowsClockwise,
+      phosphorTrendUp,
+      phosphorTrendDown,
+      phosphorReceipt,
     }),
   ],
   templateUrl: './transactions.html',
@@ -226,6 +232,10 @@ export class Transactions implements AfterViewInit {
   onTransactionPressed(transaction: Transaction): void {
     if (transaction.type === TransactionType.AJUSTEMENT) return;
     this.modalService.openModal('transaction', transaction);
+  }
+
+  onAddTransaction(): void {
+    this.modalService.openModal('transaction');
   }
 
 }

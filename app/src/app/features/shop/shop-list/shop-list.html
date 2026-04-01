@@ -1,7 +1,24 @@
 <!-- Hero -->
 <div class="hero">
-  <span class="hero__amount-label">Chiffre d'affaires</span>
-  <span class="hero__amount-value">{{ totalCA() | amount }}</span>
+  <div class="hero__amount">
+    <div class="hero__amount-top">
+      <span class="hero__amount-label">Chiffre d'affaires</span>
+      @if (preferenceService.currencies().length > 1) {
+        <div class="currency-toggle">
+          @for (currency of preferenceService.currencies(); track currency) {
+            <button
+              class="currency-toggle__btn"
+              [class.active]="currency === activeCurrency()"
+              (click)="activeCurrency.set(currency)"
+            >
+              {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+    <span class="hero__amount-value">{{ totalCA() | amount }}</span>
+  </div>
   <div class="hero__meta">
     <div class="hero__meta-line">
       <ng-icon name="phosphorTrendUp" />

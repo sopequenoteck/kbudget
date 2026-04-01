@@ -17,39 +17,40 @@
       }
     </div>
   </div>
-  @if (activeSummary(); as summary) {
-    <div class="hero__amount">
-      <span class="hero__amount-label">Solde</span>
-      <span class="hero__amount-value" [class.negative]="summary.solde < 0">
-        {{ summary.solde | amount: null : summary.currency }}
-      </span>
-    </div>
-    <div class="hero__summary-row">
-      <div class="hero__summary-item">
-        <span class="hero__summary-label">Recettes</span>
-        <span class="hero__summary-value hero__summary-value--income">
-          {{ summary.totalRecettes | amount: 'RECETTE' : summary.currency }}
-        </span>
-        @if (convertedRecettes() !== null && secondaryCurrency(); as sec) {
-          <span class="hero__summary-converted">
-            ≈ {{ convertedRecettes()! | amount: 'RECETTE' : sec }}
-          </span>
+  <div class="hero__amount">
+    <span class="hero__amount-label">Solde</span>
+    <span class="hero__amount-value" [class.positive]="(activeSummary()?.solde ?? 0) > 0" [class.negative]="(activeSummary()?.solde ?? 0) < 0">
+      {{ (activeSummary()?.solde ?? 0) | amount: null : activeCurrency() }}
+    </span>
+  </div>
+  <div class="hero__meta-row">
+    <div class="hero__meta-group">
+      <div class="hero__meta-line">
+        <ng-icon name="phosphorTrendUp" size="14" />
+        @if ((activeSummary()?.totalRecettes ?? 0) > 0) {
+          <span>{{ activeSummary()!.totalRecettes | amount: 'RECETTE' : activeSummary()!.currency }}</span>
+        } @else {
+          <span>0 revenus</span>
         }
       </div>
-      <div class="hero__summary-divider"></div>
-      <div class="hero__summary-item">
-        <span class="hero__summary-label">Dépenses</span>
-        <span class="hero__summary-value hero__summary-value--expense">
-          {{ summary.totalDepenses | amount: 'DEPENSE' : summary.currency }}
-        </span>
-        @if (convertedDepenses() !== null && secondaryCurrency(); as sec) {
-          <span class="hero__summary-converted">
-            ≈ {{ convertedDepenses()! | amount: 'DEPENSE' : sec }}
-          </span>
+      @if (convertedRecettes() !== null && secondaryCurrency(); as sec) {
+        <span class="hero__meta-converted">≈ {{ convertedRecettes()! | amount: 'RECETTE' : sec }}</span>
+      }
+    </div>
+    <div class="hero__meta-group">
+      <div class="hero__meta-line">
+        <ng-icon name="phosphorTrendDown" size="14" />
+        @if ((activeSummary()?.totalDepenses ?? 0) > 0) {
+          <span class="hero__meta-line--expense">{{ activeSummary()!.totalDepenses | amount: 'DEPENSE' : activeSummary()!.currency }}</span>
+        } @else {
+          <span>0 dépenses</span>
         }
       </div>
+      @if (convertedDepenses() !== null && secondaryCurrency(); as sec) {
+        <span class="hero__meta-converted">≈ {{ convertedDepenses()! | amount: 'DEPENSE' : sec }}</span>
+      }
     </div>
-  }
+  </div>
 </div>
 
 <div class="sticky-sentinel" #stickySentinel></div>
@@ -80,7 +81,9 @@
   </div>
 } @else if (groupedTransactions().length === 0) {
   <div class="state-empty">
-    <p>Aucune transaction</p>
+    <ng-icon name="phosphorReceipt" size="48" />
+    <p>Aucune transaction en {{ selectedMonthLabel() }}</p>
+    <button class="state-empty__cta" (click)="onAddTransaction()">Ajouter une transaction</button>
   </div>
 } @else {
   @for (group of groupedTransactions(); track group.label) {

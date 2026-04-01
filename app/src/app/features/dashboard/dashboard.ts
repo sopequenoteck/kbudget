@@ -11,7 +11,7 @@ import {
 import { DecimalPipe, NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorWarningCircle } from '@ng-icons/phosphor-icons/regular';
+import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
@@ -20,6 +20,7 @@ import { ConversionService } from '../../core/services/conversion';
 import { PreferenceService } from '../../core/services/preference';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
+import { RecurringTransactionService } from '../../core/services/recurring-transaction';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -38,7 +39,7 @@ import {AuthService} from '../../core/services/auth';
 @Component({
   selector: 'app-dashboard',
   imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
-  providers: [provideIcons({ phosphorWarningCircle })],
+  providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +51,7 @@ export class Dashboard {
   readonly conversionService = inject(ConversionService);
   readonly preferenceService = inject(PreferenceService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly recurringService = inject(RecurringTransactionService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -204,6 +206,36 @@ export class Dashboard {
       .slice(0, 4);
   });
 
+  readonly overdueCount = computed(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return this.recurringService.recurringTransactions()
+      .filter(r => r.recurringActive && r.nextOccurrence < today)
+      .length;
+  });
+
+  readonly exceededBudgetCount = computed(() => {
+    return (this.budgetOverview()?.items ?? []).filter(b => b.percentage > 100).length;
+  });
+
+  readonly greeting = computed(() => {
+    const hour = new Date().getHours();
+    const name = this.userName()?.name;
+    const salut = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+    const prefix = name ? `${salut} ${name}` : salut;
+
+    const overdue = this.overdueCount();
+    if (overdue > 0) return `${prefix} · ${overdue} charge${overdue > 1 ? 's' : ''} en retard`;
+
+    const exceeded = this.exceededBudgetCount();
+    if (exceeded > 0) return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
+
+    const net = this.netDuMois();
+    const hasTransactions = (this.currentSummary()?.totalRecettes ?? 0) > 0 || (this.currentSummary()?.totalDepenses ?? 0) > 0;
+    if (hasTransactions) return `${prefix} · Mois ${net >= 0 ? 'positif' : 'négatif'}`;
+
+    return `${prefix} · Mois calme`;
+  });
+
   constructor() {
     // Charger les taux de change et synchroniser la devise active au demarrage
     effect(() => {
@@ -245,6 +277,7 @@ export class Dashboard {
       this.loadBudgetOverview(),
       this.loadTransactions(),
       this.exchangeRateService.loadRates(),
+      this.recurringService.loadActive(),
     ]);
   }
 
@@ -260,6 +293,7 @@ export class Dashboard {
         firstValueFrom(this.budgetService.getOverview()).then((data) => this.budgetOverview.set(data)),
         firstValueFrom(this.transactionService.getAll()).then((data) => this.transactions.set(data)),
         this.exchangeRateService.loadRates(),
+        this.recurringService.loadActive(),
       ]);
     } catch {
       // Silent fail — donnees existantes restent affichees

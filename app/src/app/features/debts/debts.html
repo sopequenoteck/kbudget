@@ -1,22 +1,22 @@
 <div class="hero">
-  @if (preferenceService.currencies().length > 1) {
-    <div class="hero__top-row">
-      <div class="currency-toggle">
-        @for (currency of preferenceService.currencies(); track currency) {
-          <button
-            class="currency-toggle__btn"
-            [class.active]="currency === activeCurrency()"
-            (click)="activeCurrency.set(currency)"
-          >
-            {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
-          </button>
-        }
-      </div>
-    </div>
-  }
   @if (hasDebts()) {
     <div class="hero__amount">
-      <span class="hero__amount-label">Solde net</span>
+      <div class="hero__amount-top">
+        <span class="hero__amount-label">Solde net</span>
+        @if (preferenceService.currencies().length > 1) {
+          <div class="currency-toggle">
+            @for (currency of preferenceService.currencies(); track currency) {
+              <button
+                class="currency-toggle__btn"
+                [class.active]="currency === activeCurrency()"
+                (click)="activeCurrency.set(currency)"
+              >
+                {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
+              </button>
+            }
+          </div>
+        }
+      </div>
       <span class="hero__amount-value" [class]="activeCurrencyNet() >= 0 ? 'hero__amount-value--positive' : 'hero__amount-value--negative'">
         {{ activeCurrencyNet() | amount: null : activeCurrency() }}
       </span>
