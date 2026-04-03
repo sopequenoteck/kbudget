@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorBank,
   phosphorCaretLeft,
   phosphorPencilSimple,
   phosphorPlus,
@@ -19,16 +20,21 @@ import {
   phosphorUploadSimple,
 } from '@ng-icons/phosphor-icons/regular';
 import { AccountService } from '../../../../core/services/account';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
+import { CurrencyList } from '../currency-settings/currency-list';
+import { ExchangeRateManager } from '../currency-settings/exchange-rate-manager';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon],
+  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager],
   providers: [
     provideIcons({
+      phosphorBank,
       phosphorCaretLeft,
       phosphorPencilSimple,
       phosphorPlus,
@@ -45,17 +51,28 @@ export class Accounts {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
+  readonly rateService = inject(ExchangeRateService);
+  private readonly prefService = inject(PreferenceService);
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly confirmDeleteId = signal<string | null>(null);
   readonly deleteError = signal<string | null>(null);
+  readonly currencies = signal<string[]>(['EUR']);
+  readonly primaryCurrency = this.prefService.primaryCurrency;
 
   constructor() {
     effect(() => {
       this.accountService.refreshTrigger();
       this.loadAccounts();
+    });
+    this.rateService.loadRates();
+    effect(() => {
+      const c = this.prefService.currencies();
+      if (c.length > 0) {
+        this.currencies.set(c);
+      }
     });
   }
 
@@ -124,5 +141,10 @@ export class Accounts {
 
   triggerImport(accountId: string): void {
     this.router.navigate(['/settings/import'], { queryParams: { accountId } });
+  }
+
+  onCurrenciesChange(currencies: string[]): void {
+    this.currencies.set(currencies);
+    this.prefService.update({ currencies });
   }
 }

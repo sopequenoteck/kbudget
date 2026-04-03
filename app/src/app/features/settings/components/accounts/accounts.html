@@ -2,7 +2,7 @@
   <button class="page-header__back" routerLink="/settings" aria-label="Retour">
     <ng-icon name="phosphorCaretLeft" size="20" />
   </button>
-  <h1 class="page-header__title">Comptes</h1>
+  <h1 class="page-header__title"><ng-icon name="phosphorBank" size="20" /> Comptes &amp; Devises</h1>
 </div>
 
 @if (loading()) {
@@ -86,3 +86,17 @@
     </ul>
   </div>
 }
+
+<app-currency-list
+  [currencies]="currencies()"
+  [accounts]="accounts()"
+  (currenciesChange)="onCurrenciesChange($event)"
+/>
+
+<app-exchange-rate-manager
+  [primaryCurrency]="primaryCurrency()"
+  [rates]="rateService.rates()"
+  [loading]="rateService.loading()"
+  (rateSaved)="rateService.loadRates()"
+  (rateDeleted)="rateService.loadRates()"
+/>

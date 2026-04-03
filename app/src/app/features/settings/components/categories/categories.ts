@@ -10,7 +10,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -24,6 +24,7 @@ import { Category } from '../../../../core/models/category.model';
       phosphorCaretLeft,
       phosphorPencilSimple,
       phosphorPlus,
+      phosphorTag,
       phosphorTrash,
     }),
   ],
