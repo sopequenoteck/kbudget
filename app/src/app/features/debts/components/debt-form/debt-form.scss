@@ -214,19 +214,19 @@
 .debt-form__tool-pill {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: 3px;
+  padding: 3px 8px;
   background: transparent;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-round);
   color: var(--text-tertiary);
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--duration-fast) var(--easing-default);
 
-  ::ng-deep ng-icon { min-width: 16px; }
+  ::ng-deep ng-icon { min-width: 14px; font-size: 14px; }
   &:active { transform: scale(0.96); }
   &.active { color: var(--color-primary); border-color: var(--color-primary); }
 

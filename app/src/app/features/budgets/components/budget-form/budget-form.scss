@@ -107,14 +107,14 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-round);
   color: var(--text-tertiary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--duration-fast) var(--easing-default);
   margin-left: auto;
 
-  ::ng-deep ng-icon { min-width: 14px; }
+  ::ng-deep ng-icon { min-width: 18px; }
   &:active { transform: scale(0.96); }
   &.active { color: var(--color-primary); border-color: var(--color-primary); }
   &.has-value { color: var(--text-secondary); }
@@ -136,7 +136,13 @@
 .budget-form__meta-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.budget-form__icons {
+  display: flex;
+  flex-shrink: 0;
 }
 
 .budget-form__meta-pills {
@@ -150,19 +156,19 @@
 .budget-form__tool-pill {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: 3px;
+  padding: 3px 8px;
   background: transparent;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-round);
   color: var(--text-tertiary);
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--duration-fast) var(--easing-default);
 
-  ::ng-deep ng-icon { min-width: 16px; }
+  ::ng-deep ng-icon { min-width: 14px; font-size: 14px; }
   &:active { transform: scale(0.96); }
   &.active { color: var(--color-primary); border-color: var(--color-primary); }
 
