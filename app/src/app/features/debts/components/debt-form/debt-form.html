@@ -64,15 +64,6 @@
           [style.opacity]="hasReminderDate() ? '0.7' : '1'"
         />
       </button>
-      @if (isEditing()) {
-        <button type="button" class="debt-form__icon-btn" [class.active]="rembourse()" (click)="toggleRembourse()" aria-label="Remboursé">
-          <ng-icon
-            [name]="rembourse() ? 'phosphorToggleRight' : 'phosphorToggleLeft'"
-            size="18"
-            [style.color]="rembourse() ? 'var(--color-primary)' : 'var(--text-tertiary)'"
-          />
-        </button>
-      }
     </div>
     <div class="debt-form__meta-pills">
       <button type="button" class="debt-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
@@ -126,6 +117,10 @@
       @if (isEditing()) {
         <button type="button" class="debt-form__action-pill debt-form__action-pill--danger" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
+        </button>
+        <button type="button" class="debt-form__action-pill debt-form__action-pill--status" [class.debt-form__action-pill--done]="rembourse()" (click)="toggleRembourse()">
+          <ng-icon [name]="rembourse() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
+          {{ rembourse() ? 'Remboursé' : 'Non remboursé' }}
         </button>
       } @else {
         <button type="button" class="debt-form__action-pill debt-form__action-pill--cancel" (click)="cancelled.emit()">

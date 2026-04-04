@@ -237,6 +237,16 @@
   }
 }
 
+.debt-form__action-pill--status {
+  color: var(--text-secondary);
+
+  ::ng-deep ng-icon { color: var(--text-tertiary); }
+
+  &.debt-form__action-pill--done {
+    ::ng-deep ng-icon { color: var(--color-income); }
+  }
+}
+
 .debt-form__action-pill {
   display: flex;
   align-items: center;

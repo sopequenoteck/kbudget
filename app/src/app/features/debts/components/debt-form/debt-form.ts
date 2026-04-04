@@ -21,8 +21,8 @@ import {
   phosphorTag,
   phosphorTrash,
   phosphorBell,
-  phosphorToggleLeft,
-  phosphorToggleRight,
+  phosphorCheckCircle,
+  phosphorCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
@@ -67,8 +67,8 @@ export class ShortDatePipe implements PipeTransform {
       phosphorTag,
       phosphorTrash,
       phosphorBell,
-      phosphorToggleLeft,
-      phosphorToggleRight,
+      phosphorCheckCircle,
+      phosphorCircle,
     }),
   ],
   templateUrl: './debt-form.html',
