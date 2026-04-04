@@ -283,10 +283,6 @@ export class Shell {
     this.subscriptionFrequency.set(freq);
   }
 
-  onDebtTypeChange(type: DebtType): void {
-    this.debtType.set(type);
-  }
-
   onFabToggle(): void {
     this.speedDialOpen.update((open) => !open);
   }

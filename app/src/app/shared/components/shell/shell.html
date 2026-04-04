@@ -70,30 +70,10 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
-  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription'"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt'"
   (closed)="onModalClose()"
 >
-  @if (modalService.activeModal() === 'debt') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Type de dette">
-      <button
-        type="button"
-        [class.active]="debtType() === DebtType.EMPRUNT"
-        [attr.aria-pressed]="debtType() === DebtType.EMPRUNT"
-        (click)="onDebtTypeChange(DebtType.EMPRUNT)"
-      >
-        Emprunt
-      </button>
-      <button
-        type="button"
-        [class.active]="debtType() === DebtType.PRET"
-        [attr.aria-pressed]="debtType() === DebtType.PRET"
-        (click)="onDebtTypeChange(DebtType.PRET)"
-      >
-        Pret
-      </button>
-    </div>
-  }
-  @switch (modalService.activeModal()) {
+@switch (modalService.activeModal()) {
     @case ('transaction') {
       <app-transaction-form
         [type]="transactionType()"

@@ -6,66 +6,151 @@ import {
   inject,
   input,
   output,
+  Pipe,
+  PipeTransform,
   signal,
 } from '@angular/core';
-
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorCalendarBlank,
+  phosphorWallet,
+  phosphorHandCoins,
+  phosphorTag,
+  phosphorTrash,
+  phosphorBell,
+  phosphorToggleLeft,
+  phosphorToggleRight,
+} from '@ng-icons/phosphor-icons/regular';
 
-import { FormField } from '../../../../shared/components/form-field/form-field';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
+import { AccountService } from '../../../../core/services/account';
+import { CategoryService } from '../../../../core/services/category';
 import { CurrencyService } from '../../../../core/services/currency';
 import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
-import { AccountService } from '../../../../core/services/account';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
-import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+
+type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
+
+@Pipe({ name: 'shortDate', standalone: true })
+export class ShortDatePipe implements PipeTransform {
+  transform(value: string): string {
+    if (!value) return '';
+    const date = new Date(value + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = date.getTime() - today.getTime();
+    const days = Math.round(diff / 86400000);
+    if (days === 0) return "Aujourd'hui";
+    if (days === -1) return 'Hier';
+    if (days === 1) return 'Demain';
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
+}
 
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, FormField, CategoryPicker, SelectPicker],
+  imports: [ReactiveFormsModule, CategoryPicker, SelectPicker, NgIcon, ShortDatePipe],
+  providers: [
+    provideIcons({
+      phosphorCalendarBlank,
+      phosphorWallet,
+      phosphorHandCoins,
+      phosphorTag,
+      phosphorTrash,
+      phosphorBell,
+      phosphorToggleLeft,
+      phosphorToggleRight,
+    }),
+  ],
   templateUrl: './debt-form.html',
   styleUrl: './debt-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DebtForm {
   private readonly fb = inject(FormBuilder);
+  private readonly accountService = inject(AccountService);
+  private readonly categoryService = inject(CategoryService);
   private readonly currencyService = inject(CurrencyService);
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
-  private readonly accountService = inject(AccountService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
-  readonly isEditMode = computed(() => this.debt() !== null);
+  readonly DebtType = DebtType;
+  readonly currentSens = signal(DebtType.EMPRUNT);
+  readonly isEditing = computed(() => this.debt() !== null);
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+  readonly expandedSection = signal<ExpandableSection>(null);
 
-  readonly currencyItems = this.currencyService.currencyItems;
+  readonly amountWidth = signal('2ch');
 
-  private readonly accounts = signal<Account[]>([]);
+  private readonly allAccounts = toSignal(this.accountService.getAll(), {
+    initialValue: [] as Account[],
+  });
+
+  readonly activeAccounts = computed(() => this.allAccounts().filter((a) => a.actif));
+  readonly defaultAccount = computed(() => this.activeAccounts().find((a) => a.isDefault) ?? null);
 
   readonly accountItems = computed<SelectPickerItem[]>(() =>
-    this.accounts().map((a) => ({
+    this.activeAccounts().map((a) => ({
       id: a.id,
       label: a.nom,
       icon: a.icone,
-      secondaryText: null,
+      secondaryText: `${a.solde.toFixed(2)} ${a.currency}`,
       color: a.couleur,
       iconUrl: a.bankLogoUrl ?? a.bankCustomLogo ?? null,
     })),
   );
 
+  readonly selectedAccount = computed(() => {
+    const accountId = this.form.get('accountId')?.value;
+    if (!accountId) return null;
+    return this.activeAccounts().find((a) => a.id === accountId) ?? null;
+  });
+
+  readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
+  readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
+
+  readonly currencySymbol = computed(() => {
+    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
+    return (0)
+      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .replace('0', '')
+      .trim();
+  });
+
+  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
+
+  readonly selectedCategory = computed(() => {
+    const categoryId = this.form.get('categoryId')?.value;
+    if (!categoryId) return null;
+    return this.allCategories().find((c) => c.id === categoryId) ?? null;
+  });
+
+  readonly selectedCategoryName = computed(() => this.selectedCategory()?.nom ?? null);
+  readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
+
+  readonly currencyItems = this.currencyService.currencyItems;
+  readonly showCurrencyPicker = computed(() => !this.form.get('accountId')?.value);
+
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
-    montant: ['', [Validators.required, Validators.min(0.01)]],
-    date: [new Date().toISOString().split('T')[0], [Validators.required]],
+    montant: ['', [Validators.required, decimalMin(0.01)]],
+    date: [this.localDate(), [Validators.required]],
     rembourse: [false],
     categoryId: [''],
     currency: [''],
@@ -75,25 +160,36 @@ export class DebtForm {
     reminderTime: [''],
   });
 
-  readonly selectedCurrency = computed(() => this.form.get('currency')?.value || 'EUR');
+  readonly rembourse = toSignal(this.form.get('rembourse')!.valueChanges, { initialValue: false });
 
-  readonly hasAccount = computed(() => !!this.form.get('accountId')?.value);
+  private readonly reminderDateValue = toSignal(this.form.get('reminderDate')!.valueChanges, { initialValue: '' });
+  readonly hasReminderDate = computed(() => !!this.reminderDateValue());
 
-  readonly hasReminderDate = computed(() => !!this.form.get('reminderDate')?.value);
+  private localDate(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
 
   constructor() {
     this.currencyService.loadIfEmpty();
 
-    firstValueFrom(this.accountService.getAll()).then((accounts) => {
-      this.accounts.set(accounts.filter((a) => a.actif));
+    // Largeur adaptative du montant
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = 'bold 40px Inter, sans-serif';
+    this.form.get('montant')!.valueChanges.subscribe((val) => {
+      const text = val || '0';
+      const measured = ctx.measureText(text).width;
+      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
     });
 
     effect(() => {
       const d = this.debt();
       if (d) {
+        this.currentSens.set(d.sens);
         this.form.patchValue({
           personne: d.personne,
-          montant: String(d.montant),
+          montant: d.montant.toFixed(2),
           date: d.date,
           rembourse: d.rembourse,
           categoryId: d.category?.id ?? '',
@@ -103,17 +199,36 @@ export class DebtForm {
           reminderDate: d.reminderDate ?? '',
           reminderTime: d.reminderTime ?? '',
         });
+      } else {
+        this.currentSens.set(this.sens());
+        const def = this.defaultAccount();
+        if (def) {
+          this.form.patchValue({ accountId: def.id });
+        }
       }
     });
 
     this.form.get('accountId')?.valueChanges.subscribe((accountId) => {
       if (accountId) {
-        const account = this.accounts().find((a) => a.id === accountId);
+        const account = this.activeAccounts().find((a) => a.id === accountId);
         if (account) {
           this.form.patchValue({ currency: account.currency, includeInBalance: true });
         }
       }
     });
+  }
+
+  toggleSection(section: ExpandableSection): void {
+    this.expandedSection.update((current) => (current === section ? null : section));
+  }
+
+  onSensChange(s: DebtType): void {
+    this.currentSens.set(s);
+  }
+
+  toggleRembourse(): void {
+    const current = this.form.get('rembourse')?.value ?? false;
+    this.form.patchValue({ rembourse: !current });
   }
 
   async onSubmit(): Promise<void> {
@@ -123,10 +238,18 @@ export class DebtForm {
     this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
+    const montant = normalizeDecimal(raw.montant);
+
+    if (isNaN(montant) || montant < 0.01) {
+      this.errorMessage.set('Montant invalide');
+      this.submitting.set(false);
+      return;
+    }
+
     const request: DebtRequest = {
       personne: raw.personne,
-      montant: Number(raw.montant),
-      sens: this.sens(),
+      montant,
+      sens: this.currentSens(),
       date: raw.date,
       rembourse: raw.rembourse,
       categoryId: raw.categoryId || undefined,
@@ -156,6 +279,16 @@ export class DebtForm {
   async onDelete(): Promise<void> {
     const d = this.debt();
     if (!d) return;
+    const currency = d.account?.currency ?? d.currency ?? 'EUR';
+    const amount = d.montant.toLocaleString('fr-FR', { style: 'currency', currency });
+    const ok = await this.confirmService.confirm({
+      title: `${d.personne} — ${amount}`,
+      message: 'Voulez-vous vraiment supprimer cette dette ?',
+      confirmLabel: 'Supprimer',
+      variant: 'danger',
+      icon: 'phosphorHandCoins',
+    });
+    if (!ok) return;
     try {
       await firstValueFrom(this.debtService.delete(d.id));
       this.modalService.closeModal();
