@@ -105,6 +105,7 @@ export class TransactionForm {
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
 
+  readonly amountWidth = signal('2ch');
 
   readonly frequencyOptions: SelectPickerItem[] = [
     { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
@@ -179,6 +180,16 @@ export class TransactionForm {
   });
 
   constructor() {
+    // Largeur adaptative du montant
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = 'bold 40px Inter, sans-serif';
+    this.form.get('montant')!.valueChanges.subscribe((val) => {
+      const text = val || '0';
+      const measured = ctx.measureText(text).width;
+      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
+    });
+
     // Toggle récurrence
     effect(() => {
       const isRecurring = this.isRecurringSignal();
@@ -201,7 +212,7 @@ export class TransactionForm {
       if (asRecurring && tx) {
         this.form.patchValue({
           libelle: tx.libelle,
-          montant: String(tx.montant),
+          montant: tx.montant.toFixed(2),
           categoryId: tx.category?.id ?? '',
           note: tx.note ?? '',
           accountId: tx.account?.id ?? '',
@@ -215,7 +226,7 @@ export class TransactionForm {
       } else if (tx) {
         this.form.patchValue({
           libelle: tx.libelle,
-          montant: String(tx.montant),
+          montant: tx.montant.toFixed(2),
           date: tx.date,
           categoryId: tx.category?.id ?? '',
           note: tx.note ?? '',

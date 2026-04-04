@@ -647,6 +647,7 @@ Cartographie finale du toggle devise :
 - [ ] Migrer RepayDialog et SellDialog vers le bottom sheet partage
 
 ### Priorite moyenne
+- [ ] Date picker inline custom — remplacer `<input type="date">` natif par un calendrier integre dans la section expand (respecter "un seul niveau de profondeur")
 - [ ] Micro-interactions (transitions de page, feedback tactile)
 - [ ] Skeleton loading au lieu de spinners
 

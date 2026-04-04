@@ -27,6 +27,7 @@
         class="tx-form__amount"
         [class.amount--expense]="type() === TransactionType.DEPENSE"
         [class.amount--income]="type() === TransactionType.RECETTE"
+        [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
         formControlName="montant"
