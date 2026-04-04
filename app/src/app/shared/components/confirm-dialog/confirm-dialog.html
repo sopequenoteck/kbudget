@@ -1,0 +1,51 @@
+@if (confirmService.isOpen()) {
+  @if (confirmService.config(); as config) {
+    <div
+      class="confirm-overlay"
+      (click)="onOverlayClick()"
+      role="presentation"
+    >
+      <div
+        class="confirm-panel"
+        role="alertdialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="'confirm-title'"
+        [attr.aria-describedby]="'confirm-message'"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="confirm-header">
+          @if (config.icon) {
+            <ng-icon [name]="config.icon" size="20" class="confirm-header__icon" />
+          }
+          <h2 id="confirm-title" class="confirm-title">{{ config.title }}</h2>
+        </div>
+        <p id="confirm-message" class="confirm-message">{{ config.message }}</p>
+        <div class="confirm-actions">
+          <button
+            type="button"
+            class="confirm-btn confirm-btn--cancel"
+            (click)="onCancel()"
+          >
+            <ng-icon name="phosphorX" size="14" />
+            {{ config.cancelLabel }}
+          </button>
+          <button
+            type="button"
+            class="confirm-btn confirm-btn--confirm"
+            [class.confirm-btn--danger]="config.variant === 'danger'"
+            (click)="onConfirm()"
+          >
+            @if (config.variant === 'danger') {
+              <ng-icon name="phosphorTrash" size="14" />
+            } @else {
+              <ng-icon name="phosphorCheck" size="14" />
+            }
+            {{ config.confirmLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

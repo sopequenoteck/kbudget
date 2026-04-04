@@ -70,28 +70,9 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
+  [hideHeader]="modalService.activeModal() === 'transaction'"
   (closed)="onModalClose()"
 >
-  @if (modalService.activeModal() === 'transaction') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Type de transaction">
-      <button
-        type="button"
-        [class.active]="transactionType() === TransactionType.DEPENSE"
-        [attr.aria-pressed]="transactionType() === TransactionType.DEPENSE"
-        (click)="onTransactionTypeChange(TransactionType.DEPENSE)"
-      >
-        Depense
-      </button>
-      <button
-        type="button"
-        [class.active]="transactionType() === TransactionType.RECETTE"
-        [attr.aria-pressed]="transactionType() === TransactionType.RECETTE"
-        (click)="onTransactionTypeChange(TransactionType.RECETTE)"
-      >
-        Recette
-      </button>
-    </div>
-  }
   @if (modalService.activeModal() === 'subscription') {
     <div modal-header-actions class="type-toggle" role="group" aria-label="Frequence">
       <button
@@ -138,6 +119,7 @@
         [type]="transactionType()"
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
+        (typeChanged)="onTransactionTypeChange($event)"
       />
     }
     @case ('subscription') {
@@ -197,3 +179,5 @@
 />
 
 <app-toast />
+
+<app-confirm-dialog />

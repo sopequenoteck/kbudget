@@ -71,6 +71,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByUserIdAndAccountIdAndDateBetween(UUID userId, UUID accountId, LocalDate from, LocalDate to);
 
+    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt " +
+            "FROM transactions t JOIN categories c ON t.category_id = c.id " +
+            "WHERE t.user_id = :userId AND t.is_recurring = false " +
+            "AND t.date >= :since AND t.category_id IS NOT NULL " +
+            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, c.is_system " +
+            "ORDER BY cnt DESC LIMIT :limit",
+            nativeQuery = true)
+    List<Object[]> findMostUsedCategories(
+            @Param("userId") UUID userId,
+            @Param("since") LocalDate since,
+            @Param("limit") int limit);
+
     @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +

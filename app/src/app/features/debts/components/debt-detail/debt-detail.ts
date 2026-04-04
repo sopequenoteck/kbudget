@@ -24,6 +24,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -54,6 +55,7 @@ export class DebtDetail {
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
 
@@ -147,7 +149,9 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    if (!confirm(`Supprimer la dette de ${d.personne} ?`)) return;
+    const amount = d.montantRestant.toLocaleString('fr-FR', { style: 'currency', currency: d.currency });
+    const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
+    if (!ok) return;
 
     try {
       await firstValueFrom(this.debtService.delete(d.id));

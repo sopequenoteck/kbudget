@@ -500,6 +500,132 @@ Cartographie finale du toggle devise :
 - Le toggle devise doit toujours etre ancre a un element existant (label, nav mois, greeting), jamais flotter seul
 - Les empty states sont un moment de design important — a traiter page par page avant d'extraire un composant partage
 
+## Ce qui a ete fait (session 11)
+
+### Settings — refonte complete (hub unique)
+- Supprime : 11 sous-pages (Profil, Apparence, Notifications, Fonctionnalites & Navigation, Donnees, A propos, Securite placeholder, Devises & Taux, Rate Calculator) + routing settings.routes.ts entier
+- 9 composants orphelins supprimes : about, appearance, data-settings, features, notification-settings, placeholder, profile, currency-settings, rate-calculator (-2794 lignes)
+- **Hub scrollable unique** remplace les 3 groupes (General / Gestion / Autre) et leurs sous-pages :
+
+1. **Mon compte** (ancrage visuel, haut de page)
+   - Avatar cercle avec initiales + bouton camera overlay
+   - Nom + email en dessous
+   - Bouton Deconnexion dans le meme conteneur (phosphorSignOut)
+   - Pas de hero 3xl — la zone avatar fait ancrage
+
+2. **Gestion** (liens vers sous-pages)
+   - Comptes & Devises → sous-page CRUD (phosphorBank, teal)
+   - Categories → sous-page CRUD (phosphorTag, orange)
+   - Rows avec icone cercle coloree + description + chevron
+
+3. **Apparence** (inline)
+   - Segmented control theme (Clair / Sombre / Auto) avec icones Phosphor (phosphorSun, phosphorMoon, phosphorDevices)
+   - Segmented control taille texte (Petit / Normal / Grand)
+   - Preview texte en temps reel
+
+4. **Notifications** (inline)
+   - Toggles par type : rappels recurrentes, rappels dettes, alertes budgets
+   - Selecteur timezone
+
+5. **Navigation** (inline)
+   - 4 rows : Abonnements, Dettes, Budgets, Boutique
+   - Chaque row = toggle active/desactive + drag handle (phosphorDotsSixVertical)
+   - Drag & drop reordonnancement (CdkDragDrop)
+   - Accueil et Transactions implicitement toujours la (locked)
+
+6. **Footer** (inline, discret)
+   - Version + environnement + sante serveur sur une ligne
+   - Texte xs/tertiary
+
+### Sous-pages conservees (2 seulement)
+- **Comptes & Devises** : header (fleche retour + "Comptes & Devises" + icone Phosphor) → conteneur arrondi rows CRUD. Devises & taux integres (plus de page separee)
+- **Categories** : meme pattern. Icone Phosphor dans le header
+
+### Vocabulaire visuel du hub
+- Label section : uppercase xs / letter-spacing / text-tertiary (identique aux hero labels)
+- Conteneurs arrondis : surface-default / radius-xl
+- Rows : padding space-3 space-4 / dividers border-default
+- Controles a droite : toggles, segmented controls, drag handles, chevrons
+- Meme vocabulaire que les listes groupees des pages financieres, sauf contenu = controles au lieu de donnees
+
+### Shell — adaptation pour Settings
+- FAB cache sur toutes les routes `/settings/**` via `isOnSettingsRoute` computed signal
+
+### Modal — refonte bottom sheet / dialog adaptatif
+- Mobile (< 768px) : panel ancre en bas (bottom sheet), arrondi uniquement en haut (radius-xl radius-xl 0 0), animation slide-up
+- Desktop (>= 768px) : dialog centre, border-radius full, animation scale-in
+- Ajout input `hideHeader` : permet aux formulaires de gerer leur propre header (handle bar + toggle au lieu du titre modal)
+- Gestion focus : sauvegarde `previouslyFocusedElement` a l'ouverture, restauration a la fermeture
+- Slot `ng-content select="[modal-header-actions]"` dans le header pour controles additionnels
+
+### Confirm Dialog — nouveau composant global
+- Composant standalone separe du Modal (plus compact, toujours centre, pas de bottom sheet)
+- `ConfirmService` singleton (signals) : `confirm()` retourne `Promise<boolean>`, pattern imperatif sans abonnement
+- Panel max-width 320px, padding space-4, surface-raised, animations modal-fade-in + modal-scale-in
+- Deux variantes : `default` (bouton amber) et `danger` (bouton rouge)
+- Focus trap (CdkTrapFocus), fermeture Escape, restoration focus, overflow hidden body
+- Accessibilite : `role="alertdialog"`, `aria-labelledby`, `aria-describedby`
+- Integre dans shell.html (apres toast, hors stacking context)
+
+### Confirm Dialog — structure visuelle
+- **Header** : icone metier + titre en row, aligne a gauche, separe par border-bottom
+- **Titre** = element concret (nom + montant/info), pas "Supprimer le X" generique
+- **Message** = question de confirmation ("Voulez-vous vraiment supprimer..."), aligne sous le titre (padding-left = icone 20px + gap), font-size xs, text-secondary
+- **Actions** : alignees a droite, separees par border-top. Boutons pills compacts (space-1 space-3), sans bordure visible, texte + icone uniquement
+- **Bouton cancel** : text-secondary, icone phosphorX
+- **Bouton confirm** : color-primary (default) ou color-expense (danger), icone phosphorCheck ou phosphorTrash selon variante
+
+### Migration ConfirmService — toutes les pages
+- Remplacement de `window.confirm()` natif par `confirmService.confirm()` avec config contextuelle
+- Pattern uniforme : titre = element concret, message = question de confirmation
+- Pages migrees avec icone metier : TransactionForm (phosphorReceipt), BudgetForm (phosphorChartPie), BudgetDetail (phosphorChartPie), DebtDetail (phosphorHandCoins), ProductForm (phosphorPackage), ShopDetail (phosphorPackage + phosphorShoppingBag pour vente), SubscriptionDetail (phosphorRepeat)
+
+### Transaction Form — refonte bottom sheet
+- Supprime : formulaire classique champs empiles, header modal standard
+- **Handle bar** centree (36px x 4px, radius round) — indicateur visuel bottom sheet
+- **Toggle depense/recette** a droite du handle. Actif = color-primary, inactif = text-tertiary. Pas de border, juste la couleur du texte
+- **Row 2 — Montant + Libelle** : montant hero (40px, bold) a gauche, couleur contextuelle rouge/vert selon type. Libelle aligne a droite avec underline seul. `inputmode="decimal"` pour clavier numerique iPhone
+- **Note preview** : si une note existe, affichee en italique xs/tertiary sous la row montant+libelle, alignee a droite, max 2 lignes avec troncature
+- **Row 3 — Icones + Pills** : icone note (gauche, tertiary si vide, color-secondary opacity 0.7 si remplie) + icone recurrence (gauche, masquee en edition) | pills date + categorie + compte (droite)
+- **Pills meta** : icone calendrier (color-secondary 0.7) + "Aujourd'hui/Hier/15 avr.", icone tag (couleur categorie 0.7) + nom categorie, icone wallet (couleur compte 0.7) + nom compte tronque
+- **Sections expandables** : une seule active a la fois via signal. S'affichent inline entre row 3 et row 4
+- **Row 4 — Actions** : bouton Annuler (text-secondary, mode creation) ou corbeille (danger, mode edition) a gauche | bouton Enregistrer/Modifier (primary) a droite
+- ShortDatePipe inline : "Aujourd'hui", "Hier", "Demain", "15 avr."
+- CategoryService injecte pour afficher le nom et la couleur de la categorie selectionnee
+- AccountService : couleur du compte propagee a l'icone wallet
+
+### Fix date locale
+- `new Date().toISOString().split('T')[0]` retournait la date UTC — affichait "Hier" apres minuit en Europe
+- Remplace par `getFullYear()/getMonth()/getDate()` (fuseau local) pour `today` et la valeur initiale du champ date
+
+### Utilitaires formulaire — extraction
+- `form.utils.ts` : `normalizeDecimal()` (virgule → point iPhone), `decimalMin()` validateur custom, `isFieldInvalid()`, `validateForm()`
+- Utilise dans TransactionForm, BudgetForm, ProductForm — supprime la duplication
+
+### CategoryService — refreshTrigger
+- Signal `refreshTrigger` pour notifier les composants dependants apres create/update/delete
+- Les formulaires qui affichent des categories reagissent au changement sans polling
+
+### Decisions de design (session 11)
+- Le hub Settings est un ecran scrollable unique parce qu'il y a < 15 controles — pas besoin de navigation
+- Devises & Taux integres dans Comptes parce qu'une devise est portee par un compte, pas par un setting global
+- Le confirm dialog est separe du modal : deux surfaces, deux roles. Le modal = conteneur formulaire (bottom sheet). Le confirm = interruption volontaire (toujours centre, compact)
+- Le bottom sheet transaction form gere son propre header (handle bar + toggle) parce que le header modal standard ne convient pas — le formulaire a besoin d'un toggle type, pas d'un titre
+- Montant hero 40px dans le formulaire = meme langage que les pages detail (montant dominant), continuite visuelle
+- Les sections expandables (une seule a la fois) evitent le formulaire-qui-expose-tout-d'un-coup
+- `window.confirm()` remplace par le confirm dialog partage : coherence visuelle, icones metier, variante danger
+- Le titre du confirm dialog doit etre l'element concret (nom + montant), pas une action generique ("Supprimer le budget") — l'utilisateur voit immediatement CE qu'il supprime
+- Le message pose la question de confirmation — c'est le role du message, pas du titre
+- L'icone metier et le titre sont en row (pas empiles) : lecture horizontale naturelle, plus compact
+- Le message est aligne sous le titre (pas sous l'icone) pour creer une hierarchie visuelle claire : icone = repere, titre = info, message = question
+- Boutons sans bordure visible, compacts — le separator border-top suffit a delimiter la zone actions
+- Les icones du formulaire suivent le pattern doughnut (opacity 0.7) : couleurs attenueees, pas les valeurs Tailwind 400 brutes
+- Icones fixes (note, calendrier) en color-secondary 0.7 — marque l'etat "il y a une valeur" sans etre criard. Icone note tertiary quand vide
+- Icones dynamiques (categorie, compte) portent la couleur de l'entite a opacity 0.7 — coherence avec le doughnut chart
+- La note en preview (italique, xs, tertiary, alignee droite) vit sous la row montant+libelle — pas dans les pills, c'est du contenu secondaire
+- Bouton Annuler en mode creation (a gauche) — remplace le vide. En edition, la corbeille prend cette place
+- La date initiale doit utiliser le fuseau local, pas UTC — important pour les utilisateurs apres minuit
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -512,11 +638,12 @@ Cartographie finale du toggle devise :
 - [x] Page Transactions recurrentes (session 4)
 - [x] Realigner hero Dashboard (session 10)
 - [x] Realigner hero Transactions (session 10)
+- [x] Settings — refonte hub unique + 2 sous-pages (session 11)
+- [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
+- [ ] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (en cours, session 11)
 - [ ] Empty states — design par page puis composant partage
-- [ ] Settings — refonte structure + hub + sous-pages
-- [ ] Bottom sheet formulaires — creation (montant hero + label + categories + icones inline expand)
 - [ ] Bottom sheet formulaires — edition (zone lecture + zone action)
-- [ ] Modal centre — confirmations (supprimer, desactiver, actions groupees)
+- [ ] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit)
 - [ ] Migrer RepayDialog et SellDialog vers le bottom sheet partage
 
 ### Priorite moyenne

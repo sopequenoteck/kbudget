@@ -42,6 +42,16 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllByUser(userId));
     }
 
+    @Operation(summary = "Catégories les plus utilisées")
+    @GetMapping("/most-used")
+    public ResponseEntity<List<CategoryResponse>> getMostUsed(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "3") int limit,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(categoryService.getMostUsed(userId, days, limit));
+    }
+
     @Operation(summary = "Consulter une catégorie par son ID")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getById(

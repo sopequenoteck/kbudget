@@ -20,6 +20,10 @@ export class CategoryService {
     return this.api.get<Category[]>('/categories');
   }
 
+  getMostUsed(days = 30, limit = 3): Observable<Category[]> {
+    return this.api.get<Category[]>(`/categories/most-used?days=${days}&limit=${limit}`);
+  }
+
   getById(id: string): Observable<Category> {
     return this.api.get<Category>(`/categories/${id}`);
   }

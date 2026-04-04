@@ -21,6 +21,7 @@ import { firstValueFrom } from 'rxjs';
 import { SubscriptionService } from '../../../../core/services/subscription';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Subscription, Frequency } from '../../../../core/models/subscription.model';
 import { SubscriptionPaymentResponse } from '../../../../core/models/subscription-payment.model';
 import { AccountSummary } from '../../../../core/models/account.model';
@@ -51,6 +52,7 @@ export class SubscriptionDetail {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
 
   readonly subscription = signal<Subscription | null>(null);
@@ -174,7 +176,10 @@ export class SubscriptionDetail {
     const sub = this.subscription();
     if (!sub) return;
 
-    if (!confirm(`Supprimer l'abonnement "${sub.nom}" ?`)) return;
+    const freq = sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
+    const amount = sub.montant.toLocaleString('fr-FR', { style: 'currency', currency: sub.currency });
+    const ok = await this.confirmService.confirm({ title: `${sub.nom} — ${amount}${freq}`, message: 'Voulez-vous vraiment supprimer cet abonnement ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorRepeat' });
+    if (!ok) return;
 
     try {
       await firstValueFrom(this.subscriptionService.delete(sub.id));

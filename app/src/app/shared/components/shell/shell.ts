@@ -56,6 +56,7 @@ import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 import { Toast } from '../toast/toast';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-shell',
@@ -79,6 +80,7 @@ import { Toast } from '../toast/toast';
     NotificationBadge,
     NotificationPanel,
     Toast,
+    ConfirmDialog,
   ],
   providers: [
     provideIcons({

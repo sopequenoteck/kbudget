@@ -15,6 +15,7 @@ import { CategoryService } from '../../../../core/services/category';
 import { BudgetService } from '../../../../core/services/budget';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
 import { FormField } from '../../../../shared/components/form-field/form-field';
@@ -161,6 +162,7 @@ export class BudgetForm {
   private readonly budgetService = inject(BudgetService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly budget = computed(() => this.modalService.editingEntity() as Budget | null);
   readonly saved = output<void>();
@@ -268,7 +270,9 @@ export class BudgetForm {
   async onDelete(): Promise<void> {
     const b = this.budget();
     if (!b) return;
-    if (!confirm('Supprimer ce budget ?')) return;
+    const amount = b.montant.toLocaleString('fr-FR', { style: 'currency', currency: b.currency });
+    const ok = await this.confirmService.confirm({ title: `${b.category.nom} — ${amount}`, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
+    if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(b.id));
       this.modalService.closeModal();

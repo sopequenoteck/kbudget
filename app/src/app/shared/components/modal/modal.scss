@@ -78,6 +78,11 @@
   padding: var(--space-3) var(--space-5) var(--space-5);
   overflow-y: auto;
   flex: 1;
+
+  &:first-child {
+    // When header is hidden, body is the first child — add top padding
+    padding-top: var(--space-3);
+  }
 }
 
 @keyframes modal-fade-in {

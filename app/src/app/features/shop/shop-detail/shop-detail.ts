@@ -25,6 +25,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { Product, RestockRequest } from '../../../core/models/product.model';
 import { Transaction } from '../../../core/models/transaction.model';
 import { RestockDialog } from '../components/restock-dialog/restock-dialog';
@@ -60,6 +61,7 @@ export class ShopDetail {
   private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
 
   private readonly paramMap = toSignal(this.route.paramMap);
 
@@ -187,7 +189,9 @@ export class ShopDetail {
     const p = this.product();
     if (!p) return;
 
-    if (!window.confirm('Confirmer la vente de 1 unité ?')) return;
+    const price = p.prixVente.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+    const ok = await this.confirmService.confirm({ title: `${p.nom} — 1 unité à ${price}`, message: 'Voulez-vous confirmer cette vente ?', confirmLabel: 'Vendre', icon: 'phosphorShoppingBag' });
+    if (!ok) return;
 
     try {
       await firstValueFrom(this.productService.sell(p.id));
@@ -216,7 +220,8 @@ export class ShopDetail {
     const p = this.product();
     if (!p) return;
 
-    if (!window.confirm(`Supprimer le produit "${p.nom}" ?`)) return;
+    const ok = await this.confirmService.confirm({ title: `${p.nom} — ${p.stock} en stock`, message: 'Voulez-vous vraiment supprimer ce produit ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorPackage' });
+    if (!ok) return;
 
     try {
       await firstValueFrom(this.productService.delete(p.id));

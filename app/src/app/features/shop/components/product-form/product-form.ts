@@ -17,6 +17,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { ProductService } from '../../../../core/services/product';
 import { ModalService } from '../../../../core/services/modal.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import {
   Product,
   ProductRequest,
@@ -36,6 +37,7 @@ export class ProductForm {
   private readonly fb = inject(FormBuilder);
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly product = computed(() => this.modalService.editingEntity() as Product | null);
   readonly saved = output<void>();
@@ -160,7 +162,8 @@ export class ProductForm {
   async onDelete(): Promise<void> {
     const p = this.product();
     if (!p) return;
-    if (!window.confirm('Supprimer ce produit ?')) return;
+    const ok = await this.confirmService.confirm({ title: `${p.nom} — ${p.stock} en stock`, message: 'Voulez-vous vraiment supprimer ce produit ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorPackage' });
+    if (!ok) return;
     try {
       await firstValueFrom(this.productService.delete(p.id));
       this.modalService.closeModal();

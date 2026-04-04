@@ -27,6 +27,7 @@ import { firstValueFrom } from 'rxjs';
 import { BudgetService } from '../../../../core/services/budget';
 import { TransactionService } from '../../../../core/services/transaction';
 import { ModalService } from '../../../../core/services/modal.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
@@ -71,6 +72,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   private readonly budgetService = inject(BudgetService);
   private readonly transactionService = inject(TransactionService);
   private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
@@ -306,14 +308,16 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
   async onDelete(): Promise<void> {
     const budgetId = this.overviewBudgetId();
+    const item = this.budgetItem();
     if (!budgetId) return;
-    if (confirm('Supprimer ce budget ?')) {
-      try {
-        await firstValueFrom(this.budgetService.delete(budgetId));
-        this.router.navigate(['/budgets']);
-      } catch (err) {
-        if (isDevMode()) console.error('Failed to delete budget', err);
-      }
+    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString('fr-FR', { style: 'currency', currency: item.currency })}` : 'Ce budget';
+    const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.budgetService.delete(budgetId));
+      this.router.navigate(['/budgets']);
+    } catch (err) {
+      if (isDevMode()) console.error('Failed to delete budget', err);
     }
   }
 }

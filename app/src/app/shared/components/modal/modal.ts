@@ -19,6 +19,7 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
 export class Modal {
   readonly isOpen = input.required<boolean>();
   readonly title = input.required<string>();
+  readonly hideHeader = input<boolean>(false);
   readonly closed = output<void>();
 
   readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
