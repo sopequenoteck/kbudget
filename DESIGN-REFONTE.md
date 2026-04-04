@@ -642,7 +642,7 @@ Cartographie finale du toggle devise :
 - [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
 - [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
 - [ ] Empty states — design par page puis composant partage
-- [ ] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit)
+- [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit) (session 11)
 - [ ] Migrer RepayDialog et SellDialog vers le bottom sheet partage
 
 ### Priorite moyenne
