@@ -70,7 +70,7 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
-  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt'"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget'"
   (closed)="onModalClose()"
 >
 @switch (modalService.activeModal()) {

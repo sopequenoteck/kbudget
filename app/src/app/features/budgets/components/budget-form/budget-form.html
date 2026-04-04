@@ -1,0 +1,134 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="budget-form">
+  @if (errorMessage()) {
+    <div class="budget-form__error">{{ errorMessage() }}</div>
+  }
+
+  <!-- ROW 1: Handle bar + titre -->
+  <div class="budget-form__top">
+    <div class="budget-form__handle-bar"></div>
+    <div class="budget-form__top-title">
+      <ng-icon name="phosphorChartPie" size="16" />
+      <span>Budget</span>
+    </div>
+  </div>
+
+  @if (noAvailableCategories() && !isEditing()) {
+    <!-- EMPTY STATE -->
+    <div class="budget-form__empty-state">
+      <p class="budget-form__empty-text">Toutes les catégories ont déjà un budget.</p>
+      <button type="button" class="budget-form__action-pill budget-form__action-pill--cancel" (click)="onCancel()">
+        Annuler
+      </button>
+    </div>
+  } @else {
+    <!-- ROW 2: Montant hero + Catégorie pill -->
+    <div class="budget-form__main-row">
+      <div class="budget-form__amount-group">
+        <input
+          class="budget-form__amount"
+          [style.width]="amountWidth()"
+          type="text"
+          inputmode="decimal"
+          formControlName="montant"
+          placeholder="0"
+          autocomplete="off"
+        />
+        <span class="budget-form__currency">{{ currencySymbol() }}</span>
+      </div>
+      <button
+        type="button"
+        class="budget-form__category-pill"
+        [class.budget-form__category-pill--locked]="isEditing()"
+        [class.has-value]="!!form.get('categoryId')?.value"
+        (click)="!isEditing() && toggleSection('category')"
+        [class.active]="expandedSection() === 'category'"
+        aria-label="Catégorie"
+      >
+        <ng-icon name="phosphorTag" size="14" [style.color]="selectedCategoryColor() ?? 'var(--text-tertiary)'" style="opacity: 0.8" />
+        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+      </button>
+    </div>
+
+    <!-- ROW 3: Pills meta -->
+    <div class="budget-form__meta-row">
+      <div class="budget-form__meta-pills">
+        <button type="button" class="budget-form__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" aria-label="Fréquence">
+          <ng-icon name="phosphorRepeat" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <span>{{ frequencyLabel() }}</span>
+        </button>
+        <button type="button" class="budget-form__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" aria-label="Devise">
+          <ng-icon name="phosphorCoins" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <span>{{ form.get('currency')?.value || 'EUR' }}</span>
+        </button>
+        <button type="button" class="budget-form__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" aria-label="Seuil d'alerte">
+          <ng-icon name="phosphorWarning" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <span>{{ form.get('seuilNotification')?.value }}%</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- EXPANDED SECTIONS -->
+    @if (expandedSection() === 'category') {
+      <div class="budget-form__expand">
+        <select formControlName="categoryId" class="budget-form__select">
+          <option value="" disabled>Choisir une catégorie</option>
+          @for (cat of availableCategories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+          }
+        </select>
+      </div>
+    }
+    @if (expandedSection() === 'frequency') {
+      <div class="budget-form__expand">
+        <select formControlName="frequence" class="budget-form__select">
+          @for (freq of frequencies; track freq.value) {
+            <option [value]="freq.value">{{ freq.label }}</option>
+          }
+        </select>
+      </div>
+    }
+    @if (expandedSection() === 'currency') {
+      <div class="budget-form__expand">
+        <select formControlName="currency" class="budget-form__select">
+          @for (cur of currencies(); track cur) {
+            <option [value]="cur">{{ cur }}</option>
+          }
+        </select>
+      </div>
+    }
+    @if (expandedSection() === 'threshold') {
+      <div class="budget-form__expand">
+        <input
+          type="number"
+          formControlName="seuilNotification"
+          class="budget-form__input"
+          min="0"
+          max="100"
+          placeholder="Seuil d'alerte (%)"
+        />
+      </div>
+    }
+
+    <!-- ROW 4: Actions -->
+    <div class="budget-form__bottom-row">
+      <div class="budget-form__bottom-left">
+        @if (isEditing()) {
+          <button type="button" class="budget-form__action-pill budget-form__action-pill--danger" (click)="onDelete()">
+            <ng-icon name="phosphorTrash" size="16" />
+          </button>
+          <button type="button" class="budget-form__action-pill budget-form__action-pill--status" [class.budget-form__action-pill--active]="actif()" (click)="toggleActif()">
+            <ng-icon [name]="actif() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
+            {{ actif() ? 'Actif' : 'Inactif' }}
+          </button>
+        } @else {
+          <button type="button" class="budget-form__action-pill budget-form__action-pill--cancel" (click)="onCancel()">
+            Annuler
+          </button>
+        }
+      </div>
+      <button type="submit" class="budget-form__action-pill budget-form__action-pill--primary" [disabled]="submitting()">
+        {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
+      </button>
+    </div>
+  }
+</form>
