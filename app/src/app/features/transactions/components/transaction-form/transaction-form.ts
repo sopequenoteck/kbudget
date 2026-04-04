@@ -139,6 +139,10 @@ export class TransactionForm {
 
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
+  readonly currencySymbol = computed(() => {
+    const currency = this.selectedAccount()?.currency ?? 'EUR';
+    return (0).toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
+  });
 
   private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
 

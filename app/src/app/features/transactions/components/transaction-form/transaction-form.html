@@ -37,7 +37,7 @@
       <span class="tx-form__currency"
         [class.currency--expense]="type() === TransactionType.DEPENSE"
         [class.currency--income]="type() === TransactionType.RECETTE"
-      >€</span>
+      >{{ currencySymbol() }}</span>
     </div>
     <input
       class="tx-form__libelle"
@@ -61,12 +61,12 @@
       </button>
       @if (!isEditing()) {
         <button type="button" class="tx-form__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" aria-label="Récurrence">
-          <ng-icon name="phosphorRepeat" size="18" />
+          <ng-icon name="phosphorRepeat" size="18" style="color: var(--text-tertiary)" />
         </button>
       }
     </div>
     <div class="tx-form__meta-pills">
-      <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')">
+      <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-secondary); opacity: 0.7" />
         <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
       </button>
@@ -75,7 +75,7 @@
         <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
       </button>
       @if (hasAccounts()) {
-        <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')">
+        <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
           <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
           <span>{{ selectedAccountName() ?? 'Compte' }}</span>
         </button>
