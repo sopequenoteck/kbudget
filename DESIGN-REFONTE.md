@@ -640,7 +640,7 @@ Cartographie finale du toggle devise :
 - [x] Realigner hero Transactions (session 10)
 - [x] Settings — refonte hub unique + 2 sous-pages (session 11)
 - [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
-- [ ] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (en cours, session 11)
+- [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
 - [ ] Empty states — design par page puis composant partage
 - [ ] Bottom sheet formulaires — edition (zone lecture + zone action)
 - [ ] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit)
