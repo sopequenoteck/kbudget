@@ -12,9 +12,21 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-
 import { DecimalPipe } from '@angular/common';
-import { FormField } from '../../../../shared/components/form-field/form-field';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorPackage,
+  phosphorCamera,
+  phosphorNoteBlank,
+  phosphorTag,
+  phosphorTrendUp,
+  phosphorTrendDown,
+  phosphorCube,
+  phosphorTrash,
+  phosphorCheckCircle,
+  phosphorCircle,
+} from '@ng-icons/phosphor-icons/regular';
+
 import { ProductService } from '../../../../core/services/product';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
@@ -23,12 +35,28 @@ import {
   ProductRequest,
   ProductUpdateRequest,
 } from '../../../../core/models/product.model';
-import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { compressImage } from '../../../../shared/utils/image.utils';
+
+type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
 @Component({
   selector: 'app-product-form',
-  imports: [ReactiveFormsModule, FormField, DecimalPipe],
+  imports: [ReactiveFormsModule, NgIcon, DecimalPipe],
+  providers: [
+    provideIcons({
+      phosphorPackage,
+      phosphorCamera,
+      phosphorNoteBlank,
+      phosphorTag,
+      phosphorTrendUp,
+      phosphorTrendDown,
+      phosphorCube,
+      phosphorTrash,
+      phosphorCheckCircle,
+      phosphorCircle,
+    }),
+  ],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,9 +71,11 @@ export class ProductForm {
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
-  readonly isEditMode = computed(() => this.product() !== null);
+  readonly isEditing = computed(() => this.product() !== null);
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+  readonly expandedSection = signal<ExpandableSection>(null);
+  readonly amountWidth = signal('2ch');
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   readonly imagePreview = signal<string | null>(null);
@@ -53,52 +83,97 @@ export class ProductForm {
   readonly form = this.fb.nonNullable.group({
     nom: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', [Validators.maxLength(500)]],
-    prixAchat: ['', [Validators.required, Validators.min(0.01)]],
-    prixVente: ['', [Validators.required, Validators.min(0.01)]],
+    prixAchat: ['', [decimalMin(0.01)]],
+    prixVente: ['', [Validators.required, decimalMin(0.01)]],
     stock: [0, [Validators.required, Validators.min(0)]],
     actif: [true],
   });
 
-  private readonly prixAchat = signal(0);
-  private readonly prixVente = signal(0);
+  private readonly prixAchatVal = signal(0);
+  private readonly prixVenteVal = signal(0);
 
-  readonly marge = computed(() => this.prixVente() - this.prixAchat());
+  readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
+
+  readonly marge = computed(() => this.prixVenteVal() - this.prixAchatVal());
+  readonly margePositive = computed(() => this.marge() >= 0);
+
+  readonly prixAchatDisplay = computed(() => {
+    const v = this.prixAchatVal();
+    return v > 0 ? (v | 0) === v ? `${v}` : v.toFixed(2) : '—';
+  });
+
+  readonly margeDisplay = computed(() => {
+    const m = this.marge();
+    const abs = Math.abs(m);
+    const str = (abs | 0) === abs ? `${abs}` : abs.toFixed(2);
+    return `${m >= 0 ? '+' : '-'}${str}€`;
+  });
 
   constructor() {
+    // Canvas measureText pour largeur adaptative prixVente
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = 'bold 40px Inter, sans-serif';
+    this.form.get('prixVente')!.valueChanges.subscribe((val) => {
+      const text = val || '0';
+      const measured = ctx.measureText(text).width;
+      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
+    });
+
+    const prixAchatSignal = toSignal(this.form.controls.prixAchat.valueChanges, { initialValue: '' });
+    const prixVenteSignal = toSignal(this.form.controls.prixVente.valueChanges, { initialValue: '' });
+
+    effect(() => {
+      const achat = normalizeDecimal(prixAchatSignal() ?? '');
+      this.prixAchatVal.set(isNaN(achat) ? 0 : achat);
+    });
+
+    effect(() => {
+      const vente = normalizeDecimal(prixVenteSignal() ?? '');
+      this.prixVenteVal.set(isNaN(vente) ? 0 : vente);
+    });
+
     effect(() => {
       const p = this.product();
       if (p) {
         this.form.patchValue({
           nom: p.nom,
           description: p.description ?? '',
-          prixAchat: String(p.prixAchat),
-          prixVente: String(p.prixVente),
+          prixAchat: p.prixAchat.toFixed(2),
+          prixVente: p.prixVente.toFixed(2),
           stock: p.stock,
           actif: p.actif,
         });
-        this.prixAchat.set(p.prixAchat);
-        this.prixVente.set(p.prixVente);
+        this.prixAchatVal.set(p.prixAchat);
+        this.prixVenteVal.set(p.prixVente);
         const url = p.imageUrl;
         this.imagePreview.set(url && (url.startsWith('http') || url.startsWith('data:')) ? url : null);
       }
     });
+  }
 
-    const prixAchatSignal = toSignal(this.form.controls.prixAchat.valueChanges, {
-      initialValue: '',
-    });
-    const prixVenteSignal = toSignal(this.form.controls.prixVente.valueChanges, {
-      initialValue: '',
-    });
+  toggleSection(section: ExpandableSection): void {
+    this.expandedSection.update((current) => (current === section ? null : section));
+  }
 
-    effect(() => {
-      const achat = parseFloat(prixAchatSignal() ?? '');
-      this.prixAchat.set(isNaN(achat) ? 0 : achat);
-    });
+  toggleActif(): void {
+    const current = this.form.get('actif')?.value ?? true;
+    this.form.patchValue({ actif: !current });
+  }
 
-    effect(() => {
-      const vente = parseFloat(prixVenteSignal() ?? '');
-      this.prixVente.set(isNaN(vente) ? 0 : vente);
+  onImagePicked(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    compressImage(file).then((dataUri) => {
+      this.imagePreview.set(dataUri);
     });
+  }
+
+  removeImage(): void {
+    this.imagePreview.set(null);
+    const el = this.fileInput()?.nativeElement;
+    if (el) el.value = '';
   }
 
   async onSubmit(): Promise<void> {
@@ -108,6 +183,14 @@ export class ProductForm {
     this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
+    const prixVente = normalizeDecimal(raw.prixVente);
+    const prixAchat = normalizeDecimal(raw.prixAchat);
+
+    if (isNaN(prixVente) || prixVente < 0.01) {
+      this.errorMessage.set('Prix de vente invalide');
+      this.submitting.set(false);
+      return;
+    }
 
     try {
       const p = this.product();
@@ -117,8 +200,8 @@ export class ProductForm {
           description: raw.description || undefined,
           icone: p.icone ?? undefined,
           imageUrl: this.imagePreview() ?? undefined,
-          prixAchat: Number(raw.prixAchat),
-          prixVente: Number(raw.prixVente),
+          prixAchat: isNaN(prixAchat) ? 0 : prixAchat,
+          prixVente,
           stock: p.stock,
           actif: raw.actif,
         };
@@ -128,8 +211,8 @@ export class ProductForm {
           nom: raw.nom,
           description: raw.description || undefined,
           imageUrl: this.imagePreview() ?? undefined,
-          prixAchat: Number(raw.prixAchat),
-          prixVente: Number(raw.prixVente),
+          prixAchat: isNaN(prixAchat) ? 0 : prixAchat,
+          prixVente,
           stock: raw.stock,
         };
         await firstValueFrom(this.productService.create(request));
@@ -143,26 +226,16 @@ export class ProductForm {
     }
   }
 
-  onImagePicked(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    compressImage(file).then(dataUri => {
-      this.imagePreview.set(dataUri);
-    });
-  }
-
-  removeImage(): void {
-    this.imagePreview.set(null);
-    const el = this.fileInput()?.nativeElement;
-    if (el) el.value = '';
-  }
-
   async onDelete(): Promise<void> {
     const p = this.product();
     if (!p) return;
-    const ok = await this.confirmService.confirm({ title: `${p.nom} — ${p.stock} en stock`, message: 'Voulez-vous vraiment supprimer ce produit ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorPackage' });
+    const ok = await this.confirmService.confirm({
+      title: `${p.nom} — ${p.stock} en stock`,
+      message: 'Voulez-vous vraiment supprimer ce produit ?',
+      confirmLabel: 'Supprimer',
+      variant: 'danger',
+      icon: 'phosphorPackage',
+    });
     if (!ok) return;
     try {
       await firstValueFrom(this.productService.delete(p.id));
