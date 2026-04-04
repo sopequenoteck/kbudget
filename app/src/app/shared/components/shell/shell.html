@@ -70,29 +70,9 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
-  [hideHeader]="modalService.activeModal() === 'transaction'"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription'"
   (closed)="onModalClose()"
 >
-  @if (modalService.activeModal() === 'subscription') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Frequence">
-      <button
-        type="button"
-        [class.active]="subscriptionFrequency() === Frequency.MENSUEL"
-        [attr.aria-pressed]="subscriptionFrequency() === Frequency.MENSUEL"
-        (click)="onFrequencyChange(Frequency.MENSUEL)"
-      >
-        Mensuel
-      </button>
-      <button
-        type="button"
-        [class.active]="subscriptionFrequency() === Frequency.ANNUEL"
-        [attr.aria-pressed]="subscriptionFrequency() === Frequency.ANNUEL"
-        (click)="onFrequencyChange(Frequency.ANNUEL)"
-      >
-        Annuel
-      </button>
-    </div>
-  }
   @if (modalService.activeModal() === 'debt') {
     <div modal-header-actions class="type-toggle" role="group" aria-label="Type de dette">
       <button

@@ -1,78 +1,111 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="subscription-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="sub-form">
   @if (errorMessage()) {
-    <div class="form-error-banner">{{ errorMessage() }}</div>
+    <div class="sub-form__error">{{ errorMessage() }}</div>
   }
-  <div class="form-row form-row--name-amount">
-    <app-form-field
-      label="Nom"
-      fieldId="nom"
-      [showError]="isInvalid('nom')"
-      [errorMessage]="
-        form.get('nom')?.hasError('required') ? 'Nom requis' : '255 caracteres maximum'
-      "
-    >
-      <input id="nom" type="text" formControlName="nom" />
-    </app-form-field>
 
-    <app-form-field
-      label="Montant"
-      fieldId="montant"
-      [showError]="isInvalid('montant')"
-      [errorMessage]="'Le montant doit etre superieur a 0'"
-    >
-      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-    </app-form-field>
+  <!-- ROW 1: Handle bar + titre + toggle fréquence -->
+  <div class="sub-form__top">
+    <div class="sub-form__handle-bar"></div>
+    <div class="sub-form__top-title">
+      <ng-icon name="phosphorRepeat" size="16" />
+      <span>Abonnement</span>
+    </div>
+    <div class="sub-form__type-toggle" role="group" aria-label="Fréquence">
+      <button type="button" [class.active]="currentFrequency() === Frequency.MENSUEL" (click)="onFrequencyChange(Frequency.MENSUEL)">Mensuel</button>
+      <button type="button" [class.active]="currentFrequency() === Frequency.ANNUEL" (click)="onFrequencyChange(Frequency.ANNUEL)">Annuel</button>
+    </div>
   </div>
 
-  <div class="form-row">
-    <app-form-field
-      label="Date de debut"
-      fieldId="dateDebut"
-      [showError]="isInvalid('dateDebut')"
-      [errorMessage]="'Date de debut requise'"
-    >
-      <input id="dateDebut" type="date" formControlName="dateDebut" />
-    </app-form-field>
+  <!-- ROW 2: Montant + Nom -->
+  <div class="sub-form__main-row">
+    <div class="sub-form__amount-group">
+      <input
+        class="sub-form__amount"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="montant"
+        placeholder="0"
+        autocomplete="off"
+      />
+      <span class="sub-form__currency">{{ currencySymbol() }}</span>
+    </div>
+    <input
+      class="sub-form__libelle"
+      type="text"
+      formControlName="nom"
+      placeholder="Nom"
+      autocomplete="off"
+      maxlength="255"
+    />
+  </div>
 
-    <app-form-field label="Categorie" fieldId="categoryId">
+  <!-- ROW 3: Actif (édition) à gauche | Pills meta à droite -->
+  <div class="sub-form__meta-row">
+    <div class="sub-form__icons">
+      @if (isEditing()) {
+        <button type="button" class="sub-form__icon-btn" [class.active]="actif()" (click)="toggleActif()" aria-label="Actif">
+          <ng-icon
+            [name]="actif() ? 'phosphorToggleRight' : 'phosphorToggleLeft'"
+            size="18"
+            [style.color]="actif() ? 'var(--color-primary)' : 'var(--text-tertiary)'"
+          />
+        </button>
+      }
+    </div>
+    <div class="sub-form__meta-pills">
+      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date de début">
+        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+        <span>{{ (form.get('dateDebut')?.value ?? '') | shortDate }}</span>
+      </button>
+      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+        <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
+        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+      </button>
+      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+        <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
+        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- EXPANDED SECTIONS -->
+  @if (expandedSection() === 'date') {
+    <div class="sub-form__expand">
+      <input type="date" formControlName="dateDebut" class="sub-form__input" />
+    </div>
+  }
+  @if (expandedSection() === 'category') {
+    <div class="sub-form__expand">
       <app-category-picker formControlName="categoryId" />
-    </app-form-field>
-  </div>
-
-  @if (activeAccounts().length > 0) {
-    <app-form-field label="Compte (optionnel)" fieldId="accountId">
-      <app-select-picker
-        formControlName="accountId"
-        [items]="accountItems()"
-        placeholder="Aucun compte"
-        [clearable]="true"
-      />
-    </app-form-field>
+    </div>
+  }
+  @if (expandedSection() === 'account') {
+    <div class="sub-form__expand">
+      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
+    </div>
+  }
+  @if (expandedSection() === 'currency' && showCurrencyPicker()) {
+    <div class="sub-form__expand">
+      <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
+    </div>
   }
 
-  @if (showCurrencyPicker()) {
-    <app-form-field label="Devise (optionnel)" fieldId="currency">
-      <app-select-picker
-        formControlName="currency"
-        [items]="currencyItems()"
-        placeholder="Devise par défaut"
-        [clearable]="true"
-      />
-    </app-form-field>
-  }
-
-  <label class="checkbox-field">
-    <input type="checkbox" formControlName="actif" />
-    Abonnement actif
-  </label>
-
-  <div class="form-actions">
-    @if (isEditMode()) {
-      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-    }
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
+  <!-- ROW 4: Actions -->
+  <div class="sub-form__bottom-row">
+    <div class="sub-form__bottom-left">
+      @if (isEditing()) {
+        <button type="button" class="sub-form__action-pill sub-form__action-pill--danger" (click)="onDelete()">
+          <ng-icon name="phosphorTrash" size="16" />
+        </button>
+      } @else {
+        <button type="button" class="sub-form__action-pill sub-form__action-pill--cancel" (click)="cancelled.emit()">
+          Annuler
+        </button>
+      }
+    </div>
+    <button type="submit" class="sub-form__action-pill sub-form__action-pill--primary" [disabled]="submitting()">
+      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

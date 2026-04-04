@@ -23,6 +23,7 @@ import {
   phosphorNoteBlank,
   phosphorTag,
   phosphorTrash,
+  phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
@@ -74,6 +75,7 @@ export class ShortDatePipe implements PipeTransform {
       phosphorNoteBlank,
       phosphorTag,
       phosphorTrash,
+      phosphorReceipt,
     }),
   ],
   templateUrl: './transaction-form.html',

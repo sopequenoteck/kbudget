@@ -3,9 +3,13 @@
     <div class="tx-form__error">{{ errorMessage() }}</div>
   }
 
-  <!-- ROW 1: Handle + Type toggle à droite -->
+  <!-- ROW 1: Handle + titre à gauche + toggle type à droite -->
   <div class="tx-form__top">
     <div class="tx-form__handle-bar"></div>
+    <div class="tx-form__top-title">
+      <ng-icon name="phosphorReceipt" size="16" />
+      <span>Transaction</span>
+    </div>
     <div class="tx-form__type-toggle" role="group" aria-label="Type de transaction">
       <button
         type="button"

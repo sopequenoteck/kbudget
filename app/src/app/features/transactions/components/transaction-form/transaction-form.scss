@@ -12,12 +12,23 @@
   border-radius: var(--radius-lg);
 }
 
-// ROW 1: handle centré + toggle à droite
+// ROW 1: handle centré + titre à gauche + toggle à droite
 .tx-form__top {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   position: relative;
+}
+
+.tx-form__top-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+
+  ::ng-deep ng-icon { min-width: 18px; }
 }
 
 .tx-form__handle-bar {
