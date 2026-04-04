@@ -57,18 +57,18 @@
 }
 
 .prod-form__amount {
-  min-width: 24px;
-  max-width: 70%;
-  text-align: left;
-  font-size: 40px;
-  font-weight: var(--font-weight-bold);
+  min-width: 24px !important;
+  max-width: 70% !important;
+  text-align: left !important;
+  font-size: 32px !important;
+  font-weight: var(--font-weight-bold) !important;
   letter-spacing: -0.5px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  outline: none;
-  padding: 0;
-  box-shadow: none;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
   color: var(--color-income);
   caret-color: var(--color-income);
 
@@ -83,22 +83,23 @@
 }
 
 .prod-form__libelle {
-  flex: 1;
-  min-width: 0;
-  padding: var(--space-1) 0;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border-default);
-  border-radius: 0;
-  box-shadow: none;
+  flex: 1 !important;
+  min-width: 0 !important;
+  width: auto !important;
+  padding: var(--space-1) 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border-default) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   color: var(--text-secondary);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-base) !important;
   text-align: right;
   outline: none;
   transition: border-color var(--duration-fast) var(--easing-default);
 
   &::placeholder { color: var(--text-tertiary); }
-  &:focus { border-bottom-color: var(--color-primary); }
+  &:focus { border-bottom-color: var(--color-primary) !important; }
 }
 
 // Description preview
@@ -255,6 +256,7 @@
 
 .prod-form__bottom-left {
   display: flex;
+  gap: var(--space-2);
 }
 
 .prod-form__action-pill--status {

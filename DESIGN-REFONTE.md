@@ -626,6 +626,56 @@ Cartographie finale du toggle devise :
 - Bouton Annuler en mode creation (a gauche) — remplace le vide. En edition, la corbeille prend cette place
 - La date initiale doit utiliser le fuseau local, pas UTC — important pour les utilisateurs apres minuit
 
+### Propagation bottom sheet — 4 formulaires (session 11)
+
+Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
+
+#### Pattern commun a tous les formulaires
+- **Row 1** : handle bar centree (position absolute) + titre entite a gauche (icone Phosphor + nom, base/bold/secondary) + toggle a droite (si applicable)
+- **Row 2** : montant hero (40px bold, largeur adaptative canvas measureText) + libelle/nom aligne a droite (border-bottom)
+- **Row 3** : icones secondaires a gauche | pills meta a droite (10px, 14px icones, padding 3px 8px, scrollable horizontal)
+- **Row 4** : actions a gauche (Supprimer/Annuler) | Enregistrer/Modifier a droite, border-top separator
+- Sections expandables : une seule a la fois via signal
+- Shell : `hideHeader` active sur tous les formulaires (handle bar remplace le header modal)
+
+#### Subscription form
+- Row 1 : `[phosphorRepeat] Abonnement` + toggle Mensuel/Annuel (migre du shell vers le form)
+- Row 2 : montant color-expense + nom
+- Row 3 : toggle actif/inactif a gauche (edition, toSignal sur valueChanges) | pills date debut, categorie, compte
+- Frequence geree par `currentFrequency` signal interne (initialisee depuis input en creation, depuis sub.frequence en edition)
+
+#### Debt form
+- Row 1 : `[phosphorHandCoins] Dette` + toggle Emprunt/Pret (migre du shell vers le form)
+- Row 2 : montant colore par sens (color-income pret, color-expense emprunt) + personne
+- Row 3 : icone rappel (phosphorBell, tertiary si vide, secondary si rempli) | pills date, categorie, compte
+- Row 4 : pill status rembourse (icone CheckCircle/Circle, texte gris, icone seule coloree en vert) apres le bouton supprimer
+- Sections expand : date, categorie, compte, rappel (date + heure conditionnelle), devise (si pas de compte)
+- `currentSens` signal interne, meme pattern que currentFrequency
+
+#### Budget form
+- Row 1 : `[phosphorChartPie] Budget` (pas de toggle)
+- Row 2 : montant color-expense + pill categorie a droite (base/semibold, locked en edition avec opacity reduite)
+- Row 3 : pill actif/inactif a gauche (edition) | pills frequence, devise, seuil d'alerte
+- Template et styles extraits en fichiers separes (etaient inline dans le .ts)
+- Montant converti en string-based pour canvas measureText
+- Select natif conserve pour les categories (filtre les categories deja budgetees)
+
+#### Product form
+- Row 1 : `[phosphorPackage] Produit` (pas de toggle)
+- Row 2 : prix de vente hero 32px color-income + nom
+- Row 3 : image picker compact (32px cercle, miniature si image existe) + icone description | pills prix achat, marge calculee (lecture seule, icone TrendUp/Down coloree), stock (creation uniquement)
+- Row 4 : pill status actif/inactif (edition) apres supprimer
+- Description preview italique sous row 2 (meme pattern que note preview)
+- Montant 32px (plus petit que les autres, les produits ont des montants plus longs)
+
+### Decisions de design — propagation formulaires
+- Le titre entite (icone + nom) a gauche de la row 1 donne du contexte immediat — l'utilisateur sait quel type d'entite il edite sans lire le header modal
+- Les toggles (type transaction, frequence abonnement, sens dette) migres du shell vers le form : le formulaire est autonome, pas besoin du header modal
+- Pill status (rembourse, actif) avec texte gris + icone coloree : l'etat est lisible mais discret, pas de toggle binaire anonyme
+- Le toggle rembourse dans la row actions (pres de Supprimer) plutot que dans les pills meta : c'est une action de changement d'etat, pas une metadonnee
+- Le pill actif/inactif sur budget vit dans la row 3 (c'est un filtre, pas une action)
+- Product form a 32px au lieu de 40px : les prix produits sont plus longs (4+ chiffres + decimales), il faut prevenir le debordement
+
 ## Ce qui reste a faire
 
 ### Priorite haute

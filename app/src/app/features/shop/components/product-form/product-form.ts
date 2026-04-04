@@ -113,7 +113,7 @@ export class ProductForm {
     // Canvas measureText pour largeur adaptative prixVente
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
+    ctx.font = 'bold 32px Inter, sans-serif';
     this.form.get('prixVente')!.valueChanges.subscribe((val) => {
       const text = val || '0';
       const measured = ctx.measureText(text).width;
