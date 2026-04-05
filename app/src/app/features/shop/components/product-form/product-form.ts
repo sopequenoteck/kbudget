@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Signal,
   computed,
   effect,
   inject,
@@ -30,6 +31,7 @@ import {
 import { ProductService } from '../../../../core/services/product';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { PreferenceService } from '../../../../core/services/preference';
 import {
   Product,
   ProductRequest,
@@ -37,6 +39,7 @@ import {
 } from '../../../../core/models/product.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { compressImage } from '../../../../shared/utils/image.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
@@ -66,6 +69,7 @@ export class ProductForm {
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly preferenceService = inject(PreferenceService);
 
   readonly product = computed(() => this.modalService.editingEntity() as Product | null);
   readonly saved = output<void>();
@@ -75,7 +79,7 @@ export class ProductForm {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   readonly imagePreview = signal<string | null>(null);
@@ -102,23 +106,20 @@ export class ProductForm {
     return v > 0 ? (v | 0) === v ? `${v}` : v.toFixed(2) : '—';
   });
 
+  readonly currencySymbol = computed(() => {
+    const currency = this.preferenceService.primaryCurrency();
+    return (0).toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
+  });
+
   readonly margeDisplay = computed(() => {
     const m = this.marge();
     const abs = Math.abs(m);
     const str = (abs | 0) === abs ? `${abs}` : abs.toFixed(2);
-    return `${m >= 0 ? '+' : '-'}${str}€`;
+    return `${m >= 0 ? '+' : '-'}${str}${this.currencySymbol()}`;
   });
 
   constructor() {
-    // Canvas measureText pour largeur adaptative prixVente
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 32px Inter, sans-serif';
-    this.form.get('prixVente')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('prixVente')!, 26);
 
     const prixAchatSignal = toSignal(this.form.controls.prixAchat.valueChanges, { initialValue: '' });
     const prixVenteSignal = toSignal(this.form.controls.prixVente.valueChanges, { initialValue: '' });

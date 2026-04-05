@@ -8,6 +8,7 @@ import {
   output,
   Pipe,
   PipeTransform,
+  Signal,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -37,6 +38,7 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
 
@@ -96,7 +98,7 @@ export class DebtForm {
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
 
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -116,36 +118,7 @@ export class DebtForm {
     })),
   );
 
-  readonly selectedAccount = computed(() => {
-    const accountId = this.form.get('accountId')?.value;
-    if (!accountId) return null;
-    return this.activeAccounts().find((a) => a.id === accountId) ?? null;
-  });
-
-  readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
-  readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
-
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
-    return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
-
-  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
-
-  readonly selectedCategory = computed(() => {
-    const categoryId = this.form.get('categoryId')?.value;
-    if (!categoryId) return null;
-    return this.allCategories().find((c) => c.id === categoryId) ?? null;
-  });
-
-  readonly selectedCategoryName = computed(() => this.selectedCategory()?.nom ?? null);
-  readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
-
   readonly currencyItems = this.currencyService.currencyItems;
-  readonly showCurrencyPicker = computed(() => !this.form.get('accountId')?.value);
 
   readonly form = this.fb.nonNullable.group({
     personne: ['', [Validators.required, Validators.maxLength(255)]],
@@ -165,6 +138,41 @@ export class DebtForm {
   private readonly reminderDateValue = toSignal(this.form.get('reminderDate')!.valueChanges, { initialValue: '' });
   readonly hasReminderDate = computed(() => !!this.reminderDateValue());
 
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
+
+  readonly selectedAccount = computed(() => {
+    const accountId = this.accountIdSignal();
+    if (!accountId) return null;
+    return this.activeAccounts().find((a) => a.id === accountId) ?? null;
+  });
+
+  readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
+  readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
+
+  readonly currencySymbol = computed(() => {
+    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
+    return (0)
+      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .replace('0', '')
+      .trim();
+  });
+
+  readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
+
+  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
+
+  readonly selectedCategory = computed(() => {
+    const categoryId = this.form.get('categoryId')?.value;
+    if (!categoryId) return null;
+    return this.allCategories().find((c) => c.id === categoryId) ?? null;
+  });
+
+  readonly selectedCategoryName = computed(() => this.selectedCategory()?.nom ?? null);
+  readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
+
   private localDate(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -172,16 +180,7 @@ export class DebtForm {
 
   constructor() {
     this.currencyService.loadIfEmpty();
-
-    // Largeur adaptative du montant
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
-    this.form.get('montant')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     effect(() => {
       const d = this.debt();

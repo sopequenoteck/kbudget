@@ -8,6 +8,7 @@ import {
   output,
   Pipe,
   PipeTransform,
+  Signal,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -40,6 +41,7 @@ import {
   SubscriptionRequest,
 } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
@@ -98,7 +100,7 @@ export class SubscriptionForm {
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
 
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -118,8 +120,27 @@ export class SubscriptionForm {
     })),
   );
 
+  readonly currencyItems = this.currencyService.currencyItems;
+
+  readonly form = this.fb.nonNullable.group({
+    nom: ['', [Validators.required, Validators.maxLength(255)]],
+    montant: ['', [Validators.required, decimalMin(0.01)]],
+    dateDebut: [this.localDate(), [Validators.required]],
+    actif: [true],
+    categoryId: [''],
+    accountId: [''],
+    currency: [''],
+  });
+
+  readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
+
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
+
   readonly selectedAccount = computed(() => {
-    const accountId = this.form.get('accountId')?.value;
+    const accountId = this.accountIdSignal();
     if (!accountId) return null;
     return this.activeAccounts().find((a) => a.id === accountId) ?? null;
   });
@@ -135,6 +156,8 @@ export class SubscriptionForm {
       .trim();
   });
 
+  readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
+
   private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
 
   readonly selectedCategory = computed(() => {
@@ -146,21 +169,6 @@ export class SubscriptionForm {
   readonly selectedCategoryName = computed(() => this.selectedCategory()?.nom ?? null);
   readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
 
-  readonly currencyItems = this.currencyService.currencyItems;
-  readonly showCurrencyPicker = computed(() => !this.form.get('accountId')?.value);
-
-  readonly form = this.fb.nonNullable.group({
-    nom: ['', [Validators.required, Validators.maxLength(255)]],
-    montant: ['', [Validators.required, decimalMin(0.01)]],
-    dateDebut: [this.localDate(), [Validators.required]],
-    actif: [true],
-    categoryId: [''],
-    accountId: [''],
-    currency: [''],
-  });
-
-  readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
-
   private localDate(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -168,16 +176,7 @@ export class SubscriptionForm {
 
   constructor() {
     this.currencyService.loadIfEmpty();
-
-    // Largeur adaptative du montant
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
-    this.form.get('montant')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     effect(() => {
       const sub = this.subscription();

@@ -860,6 +860,37 @@ Wrapper autour de select-picker + bouton creation inline.
 | Logo banque | Account form | image/* |
 | Fichier CSV | Import settings | .csv,.txt |
 
+## Ce qui a ete fait (session 14)
+
+### Consolidation SCSS — classes partagees
+- Extraction de `_bottom-sheet.scss` : classes `.bsheet__*` pour les 7 formulaires bottom sheet (container, handle, top, main-row, amount, currency, libelle, meta-row, pills, expand, actions)
+- Extraction de `_list-patterns.scss` : classes partagees pour les pages liste (hero, hero meta-lines, currency-toggle, section-header sticky, date-label, list-group, list-row, group-label collapsible, states)
+- Migration des 7 formulaires : transaction, dette, abonnement, budget, produit, repay, sell
+- Migration des 4 pages liste : transactions, abonnements, dettes, boutique + budget (partiel — hero + section-header, pas budget-row)
+- Budget-row conserve sa structure locale (body > header > name + amount + progress bar — trop different de list-row)
+- Reduction ~3350 → ~1350 lignes SCSS (-60%), chaque pattern modifiable a un seul endroit
+- Ajout `.input-naked` dans `_forms.scss` pour empecher les styles globaux d'ecraser les inputs bottom sheet
+- Route `/dev/design-lab` ajoutee pour iterer visuellement sur les composants atomiques
+
+### Input montant hero — refonte
+- Tailles reduites : 40px → 30px (defaut), 32px → 26px (produit `--md`), 30px → 22px (repay/sell `--sm`). Devise 24px → 18px, `--sm` 14px
+- Wrap automatique : `flex-wrap: wrap` sur `.bsheet__main-row` — quand le montant est trop large (FCFA avec 6+ chiffres), le libelle passe automatiquement a la ligne en dessous
+- `.bsheet__amount-group` passe a `max-width: 100%` au lieu de `max-width: 70%`
+- Utilitaire `createAmountWidth()` extrait dans `shared/utils/amount-width.utils.ts` — supprime la duplication canvas/measureText dans les 7 formulaires
+
+### Devise dynamique — correction reactivite
+- `selectedAccount` etait un `computed()` lisant `form.get('accountId')?.value` — non reactif (Angular computed ne track que les signals, pas les FormControl)
+- Fix : `accountIdSignal = toSignal(form.get('accountId')!.valueChanges)` converti en signal, puis utilise dans le computed
+- Corrige sur : transaction-form, debt-form, subscription-form, repay-dialog
+- Product-form : devise hardcodee `€` remplacee par `currencySymbol()` via `PreferenceService.primaryCurrency()`
+- Marge display utilise maintenant le symbole devise dynamique
+
+### Decisions de design (session 14)
+- La consolidation SCSS ne change rien visuellement — c'est du refactoring structurel pour que chaque modification future se fasse a un seul endroit
+- 30px est le bon compromis pour le montant hero : assez grand pour etre dominant, assez petit pour accueillir des montants FCFA a 6+ chiffres
+- Le wrap automatique est plus robuste qu'un seuil arbitraire : le navigateur gere le point de rupture naturellement via flexbox
+- La reactivite de la devise est un bug pre-existant corrige — l'utilisateur doit voir la devise changer immediatement quand il selectionne un compte
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -880,7 +911,7 @@ Wrapper autour de select-picker + bouton creation inline.
 - [x] Migrer RepayDialog et SellDialog vers le bottom sheet partage (session 13)
 
 ### Priorite moyenne
-- [ ] Revoir les inputs de tous les formulaires bottom sheet — l'input montant hero (largeur dynamique canvas measureText, 30-40px bold) ne fonctionne pas bien visuellement. Trouver un pattern d'input montant plus propre pour le dark mode.
+- [x] Revoir les inputs de tous les formulaires bottom sheet — tailles reduites, wrap automatique, devise reactive, utilitaire partage (session 14)
 - [ ] Date picker inline custom — remplacer `<input type="date">` natif par un calendrier integre dans la section expand (respecter "un seul niveau de profondeur")
 - [ ] Micro-interactions (transitions de page, feedback tactile)
 - [ ] Skeleton loading au lieu de spinners

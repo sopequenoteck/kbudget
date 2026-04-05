@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Signal,
   computed,
   effect,
   inject,
@@ -23,6 +24,7 @@ import { SelectPickerItem } from '../../../../shared/components/select-picker/se
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'account' | null;
 
@@ -47,7 +49,7 @@ export class RepayDialog {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   private readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly debtPersonne = computed(() => this.debt()?.personne ?? '');
@@ -71,8 +73,18 @@ export class RepayDialog {
     })),
   );
 
+  readonly form = this.fb.nonNullable.group({
+    amount: ['', [Validators.required]],
+    accountId: ['', [Validators.required]],
+  });
+
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
+
   readonly selectedAccount = computed(() => {
-    const accountId = this.form.get('accountId')?.value;
+    const accountId = this.accountIdSignal();
     if (!accountId) return null;
     return this.activeAccounts().find((a) => a.id === accountId) ?? null;
   });
@@ -90,20 +102,8 @@ export class RepayDialog {
       .trim();
   });
 
-  readonly form = this.fb.nonNullable.group({
-    amount: ['', [Validators.required]],
-    accountId: ['', [Validators.required]],
-  });
-
   constructor() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 30px Inter, sans-serif'; // match repay-form__amount font-size
-    this.form.get('amount')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('amount')!, 22);
 
     effect(() => {
       const d = this.debt();

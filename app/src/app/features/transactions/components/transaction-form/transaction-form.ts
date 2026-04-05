@@ -9,6 +9,7 @@ import {
   output,
   Pipe,
   PipeTransform,
+  Signal,
   signal,
   viewChild,
 } from '@angular/core';
@@ -45,6 +46,7 @@ import {
 import { RecurringTransactionRequest } from '../../../../core/models/recurring-transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' | null;
 
@@ -107,7 +109,7 @@ export class TransactionForm {
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
 
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   readonly frequencyOptions: SelectPickerItem[] = [
     { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
@@ -134,8 +136,25 @@ export class TransactionForm {
     })),
   );
 
+  readonly form = this.fb.nonNullable.group({
+    libelle: ['', [Validators.required, Validators.maxLength(255)]],
+    montant: ['', [Validators.required, decimalMin(0.01)]],
+    date: [this.localDate(), [Validators.required]],
+    categoryId: [''],
+    note: ['', [Validators.maxLength(500)]],
+    accountId: [''],
+    isRecurring: [false],
+    frequency: [{ value: Frequency.MENSUEL, disabled: true }],
+    nextOccurrence: [{ value: '', disabled: true }],
+  });
+
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
+
   readonly selectedAccount = computed(() => {
-    const accountId = this.form.get('accountId')?.value;
+    const accountId = this.accountIdSignal();
     if (!accountId) return null;
     return this.activeAccounts().find((a) => a.id === accountId) ?? null;
   });
@@ -158,18 +177,6 @@ export class TransactionForm {
   readonly selectedCategoryName = computed(() => this.selectedCategory()?.nom ?? null);
   readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
 
-  readonly form = this.fb.nonNullable.group({
-    libelle: ['', [Validators.required, Validators.maxLength(255)]],
-    montant: ['', [Validators.required, decimalMin(0.01)]],
-    date: [this.localDate(), [Validators.required]],
-    categoryId: [''],
-    note: ['', [Validators.maxLength(500)]],
-    accountId: [''],
-    isRecurring: [false],
-    frequency: [{ value: Frequency.MENSUEL, disabled: true }],
-    nextOccurrence: [{ value: '', disabled: true }],
-  });
-
   readonly today = this.localDate();
 
   private localDate(): string {
@@ -182,15 +189,7 @@ export class TransactionForm {
   });
 
   constructor() {
-    // Largeur adaptative du montant
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
-    this.form.get('montant')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     // Toggle récurrence
     effect(() => {

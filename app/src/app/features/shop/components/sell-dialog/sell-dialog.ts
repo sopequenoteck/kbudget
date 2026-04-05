@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Signal,
   computed,
   effect,
   inject,
@@ -20,6 +21,7 @@ import { Product } from '../../../../core/models/product.model';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'product' | 'quantity' | null;
 
@@ -44,7 +46,7 @@ export class SellDialog {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   private readonly products = signal<Product[]>([]);
 
@@ -94,10 +96,7 @@ export class SellDialog {
 
   constructor() {
     this.loadProducts();
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
+    this.amountWidth = createAmountWidth(this.form.get('totalPrice')!, 22);
 
     this.form.get('productId')!.valueChanges.subscribe((id) => {
       this.selectedProductId.set(id);
@@ -107,12 +106,6 @@ export class SellDialog {
 
     this.form.get('quantity')!.valueChanges.subscribe(() => {
       this.updateTotalPrice();
-    });
-
-    this.form.get('totalPrice')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
     });
 
     effect(() => {

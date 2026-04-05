@@ -72,6 +72,7 @@
   align-items: baseline;
   gap: var(--space-3);
   padding: var(--space-1) 0;
+  flex-wrap: wrap;
 
   &--between { justify-content: space-between; }
 }
@@ -81,13 +82,14 @@
   align-items: baseline;
   gap: 4px;
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .bsheet__amount {
   min-width: 24px;
-  max-width: 70%;
+  max-width: 100%;
   text-align: left;
-  font-size: 40px;
+  font-size: 30px;
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.5px;
   color: var(--text-primary);
@@ -102,8 +104,8 @@
   &::placeholder { color: var(--text-tertiary); opacity: 0.25; }
 
   // Tailles
-  &--md { font-size: 32px; }
-  &--sm { font-size: 30px; }
+  &--md { font-size: 26px; }
+  &--sm { font-size: 22px; }
 
   // Alignement
   &--right { text-align: right; }
@@ -114,7 +116,7 @@
 }
 
 .bsheet__currency {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: var(--font-weight-medium);
   color: var(--text-tertiary);
   opacity: 0.4;

@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   output,
+  Signal,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -31,6 +32,7 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 
 type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | null;
 
@@ -68,7 +70,7 @@ export class BudgetForm {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly expandedSection = signal<ExpandableSection>(null);
-  readonly amountWidth = signal('2ch');
+  readonly amountWidth: Signal<string>;
 
   readonly categories = signal<Category[]>([]);
   readonly existingBudgets = signal<Budget[]>([]);
@@ -138,16 +140,7 @@ export class BudgetForm {
   constructor() {
     this.loadCategories();
     this.loadExistingBudgets();
-
-    // Largeur adaptative du montant
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    ctx.font = 'bold 40px Inter, sans-serif';
-    this.form.get('montant')!.valueChanges.subscribe((val) => {
-      const text = val || '0';
-      const measured = ctx.measureText(text).width;
-      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
-    });
+    this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     effect(() => {
       const b = this.budget();
