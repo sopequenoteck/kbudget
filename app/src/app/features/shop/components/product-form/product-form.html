@@ -1,22 +1,22 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="prod-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="prod-form__error">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
 
   <!-- ROW 1: Handle bar + titre -->
-  <div class="prod-form__top">
-    <div class="prod-form__handle-bar"></div>
-    <div class="prod-form__top-title">
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
       <ng-icon name="phosphorPackage" size="16" />
       <span>Produit</span>
     </div>
   </div>
 
   <!-- ROW 2: Prix de vente hero + Nom -->
-  <div class="prod-form__main-row">
-    <div class="prod-form__amount-group">
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
       <input
-        class="prod-form__amount"
+        class="bsheet__amount bsheet__amount--md bsheet__amount--income input-naked"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -24,10 +24,10 @@
         placeholder="0"
         autocomplete="off"
       />
-      <span class="prod-form__currency">€</span>
+      <span class="bsheet__currency bsheet__currency--income">€</span>
     </div>
     <input
-      class="prod-form__libelle"
+      class="bsheet__libelle input-naked"
       type="text"
       formControlName="nom"
       placeholder="Nom du produit"
@@ -42,12 +42,12 @@
   }
 
   <!-- ROW 3: Icons à gauche | Pills meta à droite -->
-  <div class="prod-form__meta-row">
-    <div class="prod-form__icons">
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
       <!-- Image picker compact -->
       <button
         type="button"
-        class="prod-form__icon-btn prod-form__icon-btn--image"
+        class="bsheet__icon-btn prod-form__icon-btn--image"
         (click)="fileInput.click()"
         aria-label="Image produit"
       >
@@ -62,7 +62,7 @@
       <!-- Description -->
       <button
         type="button"
-        class="prod-form__icon-btn"
+        class="bsheet__icon-btn"
         [class.active]="expandedSection() === 'description'"
         (click)="toggleSection('description')"
         aria-label="Description"
@@ -76,11 +76,11 @@
       </button>
     </div>
 
-    <div class="prod-form__meta-pills">
+    <div class="bsheet__meta-pills">
       <!-- Prix d'achat -->
       <button
         type="button"
-        class="prod-form__tool-pill"
+        class="bsheet__tool-pill"
         [class.active]="expandedSection() === 'prixAchat'"
         (click)="toggleSection('prixAchat')"
         aria-label="Prix d'achat"
@@ -103,7 +103,7 @@
       @if (!isEditing()) {
         <button
           type="button"
-          class="prod-form__tool-pill"
+          class="bsheet__tool-pill"
           [class.active]="expandedSection() === 'stock'"
           (click)="toggleSection('stock')"
           aria-label="Stock"
@@ -117,58 +117,58 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'prixAchat') {
-    <div class="prod-form__expand">
+    <div class="bsheet__expand">
       <input
         type="text"
         inputmode="decimal"
         formControlName="prixAchat"
         placeholder="Prix d'achat"
-        class="prod-form__input"
+        class="bsheet__input input-naked"
         autocomplete="off"
       />
     </div>
   }
   @if (expandedSection() === 'description') {
-    <div class="prod-form__expand">
+    <div class="bsheet__expand">
       <textarea
         formControlName="description"
         rows="3"
         placeholder="Ajouter une description..."
         maxlength="500"
-        class="prod-form__textarea"
+        class="bsheet__textarea input-naked"
       ></textarea>
     </div>
   }
   @if (expandedSection() === 'stock' && !isEditing()) {
-    <div class="prod-form__expand">
+    <div class="bsheet__expand">
       <input
         type="number"
         formControlName="stock"
         placeholder="Stock initial"
         min="0"
-        class="prod-form__input"
+        class="bsheet__input input-naked"
       />
     </div>
   }
 
   <!-- ROW 4: Actions -->
-  <div class="prod-form__bottom-row">
-    <div class="prod-form__bottom-left">
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
       @if (isEditing()) {
-        <button type="button" class="prod-form__action-pill prod-form__action-pill--danger" (click)="onDelete()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
         </button>
-        <button type="button" class="prod-form__action-pill prod-form__action-pill--status" [class.prod-form__action-pill--active]="actif()" (click)="toggleActif()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="actif()" (click)="toggleActif()">
           <ng-icon [name]="actif() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
           {{ actif() ? 'Actif' : 'Inactif' }}
         </button>
       } @else {
-        <button type="button" class="prod-form__action-pill prod-form__action-pill--cancel" (click)="cancelled.emit()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="cancelled.emit()">
           Annuler
         </button>
       }
     </div>
-    <button type="submit" class="prod-form__action-pill prod-form__action-pill--primary" [disabled]="submitting()">
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
       {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>

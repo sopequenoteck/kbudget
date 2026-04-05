@@ -2,7 +2,7 @@
 // Forms — Styles globaux pour inputs, textarea, select
 // =============================================================================
 
-input:not([type='checkbox']):not([type='radio']),
+input:not([type='checkbox']):not([type='radio']):not(.input-naked),
 textarea,
 select {
   width: 100%;
@@ -42,8 +42,8 @@ select {
   }
 }
 
-// appearance: none uniquement sur input et textarea (sauf color)
-input:not([type='checkbox']):not([type='radio']):not([type='color']),
+// appearance: none uniquement sur input et textarea (sauf color, sauf naked)
+input:not([type='checkbox']):not([type='radio']):not([type='color']):not(.input-naked),
 textarea {
   appearance: none;
 }

@@ -1,16 +1,16 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="tx-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="tx-form__error">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
 
   <!-- ROW 1: Handle + titre à gauche + toggle type à droite -->
-  <div class="tx-form__top">
-    <div class="tx-form__handle-bar"></div>
-    <div class="tx-form__top-title">
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
       <ng-icon name="phosphorReceipt" size="16" />
       <span>Transaction</span>
     </div>
-    <div class="tx-form__type-toggle" role="group" aria-label="Type de transaction">
+    <div class="bsheet__type-toggle" role="group" aria-label="Type de transaction">
       <button
         type="button"
         [class.active]="type() === TransactionType.DEPENSE"
@@ -25,12 +25,12 @@
   </div>
 
   <!-- ROW 2: Montant + Libellé -->
-  <div class="tx-form__main-row">
-    <div class="tx-form__amount-group">
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
       <input
-        class="tx-form__amount"
-        [class.amount--expense]="type() === TransactionType.DEPENSE"
-        [class.amount--income]="type() === TransactionType.RECETTE"
+        class="bsheet__amount input-naked"
+        [class.bsheet__amount--expense]="type() === TransactionType.DEPENSE"
+        [class.bsheet__amount--income]="type() === TransactionType.RECETTE"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -39,13 +39,13 @@
         autocomplete="off"
         #amountInput
       />
-      <span class="tx-form__currency"
-        [class.currency--expense]="type() === TransactionType.DEPENSE"
-        [class.currency--income]="type() === TransactionType.RECETTE"
+      <span class="bsheet__currency"
+        [class.bsheet__currency--expense]="type() === TransactionType.DEPENSE"
+        [class.bsheet__currency--income]="type() === TransactionType.RECETTE"
       >{{ currencySymbol() }}</span>
     </div>
     <input
-      class="tx-form__libelle"
+      class="bsheet__libelle input-naked"
       type="text"
       formControlName="libelle"
       placeholder="Libellé"
@@ -55,32 +55,32 @@
   </div>
 
   @if (form.get('note')?.value; as noteValue) {
-    <div class="tx-form__note-preview">{{ noteValue }}</div>
+    <div class="bsheet__note-preview">{{ noteValue }}</div>
   }
 
   <!-- ROW 3: Note à gauche | Catégorie + Date + Compte à droite -->
-  <div class="tx-form__meta-row">
-    <div class="tx-form__icons">
-      <button type="button" class="tx-form__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" aria-label="Note">
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
+      <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" aria-label="Note">
         <ng-icon name="phosphorNoteBlank" size="18" [style.color]="form.get('note')?.value ? 'var(--color-secondary)' : 'var(--text-tertiary)'" [style.opacity]="form.get('note')?.value ? '0.7' : '1'" />
       </button>
       @if (!isEditing()) {
-        <button type="button" class="tx-form__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" aria-label="Récurrence">
+        <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" aria-label="Récurrence">
           <ng-icon name="phosphorRepeat" size="18" style="color: var(--text-tertiary)" />
         </button>
       }
     </div>
-    <div class="tx-form__meta-pills">
-      <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
+    <div class="bsheet__meta-pills">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-secondary); opacity: 0.7" />
         <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
       </button>
-      <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
         <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
       </button>
       @if (hasAccounts()) {
-        <button type="button" class="tx-form__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
           <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
           <span>{{ selectedAccountName() ?? 'Compte' }}</span>
         </button>
@@ -90,55 +90,55 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'category') {
-    <div class="tx-form__expand">
+    <div class="bsheet__expand">
       <app-category-picker formControlName="categoryId" />
     </div>
   }
   @if (expandedSection() === 'recurring') {
-    <div class="tx-form__expand">
-      <label class="tx-form__toggle-row">
-        <span class="tx-form__toggle-text">Transaction récurrente</span>
-        <input type="checkbox" formControlName="isRecurring" class="tx-form__toggle-input" />
-        <span class="tx-form__toggle-track"></span>
+    <div class="bsheet__expand">
+      <label class="bsheet__toggle-row">
+        <span class="bsheet__toggle-text">Transaction récurrente</span>
+        <input type="checkbox" formControlName="isRecurring" class="bsheet__toggle-input" />
+        <span class="bsheet__toggle-track"></span>
       </label>
       @if (form.get('isRecurring')?.value) {
-        <div class="tx-form__recurring-fields">
+        <div class="bsheet__recurring-fields">
           <app-select-picker formControlName="frequency" [items]="frequencyOptions" placeholder="Fréquence" [clearable]="false" />
-          <input type="date" formControlName="nextOccurrence" [min]="today" class="tx-form__input" />
+          <input type="date" formControlName="nextOccurrence" [min]="today" class="bsheet__input input-naked" />
         </div>
       }
     </div>
   }
   @if (expandedSection() === 'note') {
-    <div class="tx-form__expand">
-      <textarea formControlName="note" rows="3" placeholder="Ajouter une note..." maxlength="500" class="tx-form__textarea"></textarea>
+    <div class="bsheet__expand">
+      <textarea formControlName="note" rows="3" placeholder="Ajouter une note..." maxlength="500" class="bsheet__textarea input-naked"></textarea>
     </div>
   }
   @if (expandedSection() === 'date') {
-    <div class="tx-form__expand">
-      <input type="date" formControlName="date" class="tx-form__input" />
+    <div class="bsheet__expand">
+      <input type="date" formControlName="date" class="bsheet__input input-naked" />
     </div>
   }
   @if (expandedSection() === 'account') {
-    <div class="tx-form__expand">
+    <div class="bsheet__expand">
       <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
     </div>
   }
 
   <!-- ROW 4: Supprimer à gauche, Enregistrer/Modifier à droite -->
-  <div class="tx-form__bottom-row">
-    <div class="tx-form__bottom-left">
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
       @if (isEditing()) {
-        <button type="button" class="tx-form__action-pill tx-form__action-pill--danger" (click)="onDelete()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
         </button>
       } @else {
-        <button type="button" class="tx-form__action-pill tx-form__action-pill--cancel" (click)="cancelled.emit()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="cancelled.emit()">
           Annuler
         </button>
       }
     </div>
-    <button type="submit" class="tx-form__action-pill tx-form__action-pill--primary" [disabled]="submitting()">
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
       {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>

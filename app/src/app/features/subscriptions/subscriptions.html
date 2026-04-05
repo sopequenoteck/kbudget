@@ -61,24 +61,24 @@
 } @else {
   @for (group of groupedSubscriptions(); track group.label) {
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
-    <div class="subscription-group">
+    <div class="list-group">
       @for (subscription of group.items; track subscription.id) {
-        <div class="subscription-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
+        <div class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
           <span
-            class="subscription-row__icon"
+            class="list-row__icon"
             [style.background-color]="subscription.category?.couleur ? subscription.category!.couleur + '26' : null"
           >{{ subscription.category?.icone ?? '🔄' }}</span>
-          <div class="subscription-row__content">
-            <span class="subscription-row__title">{{ subscription.nom }}</span>
-            <span class="subscription-row__subtitle">
+          <div class="list-row__content">
+            <span class="list-row__title">{{ subscription.nom }}</span>
+            <span class="list-row__subtitle">
               {{ getRelativeDate(subscription) }}
               · {{ subscription.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel' }}
             </span>
           </div>
-          <div class="subscription-row__right">
-            <span class="subscription-row__amount amount-expense">{{ formatAmount(subscription) }}</span>
+          <div class="list-row__right">
+            <span class="list-row__amount amount-expense">{{ formatAmount(subscription) }}</span>
             @if (subscription.actif && (subscription.currency || 'EUR') !== preferenceService.primaryCurrency()) {
-              <span class="subscription-row__converted">
+              <span class="list-row__converted">
                 {{ subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency() }}
               </span>
             }

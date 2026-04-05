@@ -1,26 +1,26 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="sub-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="sub-form__error">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
 
   <!-- ROW 1: Handle bar + titre + toggle fréquence -->
-  <div class="sub-form__top">
-    <div class="sub-form__handle-bar"></div>
-    <div class="sub-form__top-title">
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
       <ng-icon name="phosphorRepeat" size="16" />
       <span>Abonnement</span>
     </div>
-    <div class="sub-form__type-toggle" role="group" aria-label="Fréquence">
+    <div class="bsheet__type-toggle" role="group" aria-label="Fréquence">
       <button type="button" [class.active]="currentFrequency() === Frequency.MENSUEL" (click)="onFrequencyChange(Frequency.MENSUEL)">Mensuel</button>
       <button type="button" [class.active]="currentFrequency() === Frequency.ANNUEL" (click)="onFrequencyChange(Frequency.ANNUEL)">Annuel</button>
     </div>
   </div>
 
   <!-- ROW 2: Montant + Nom -->
-  <div class="sub-form__main-row">
-    <div class="sub-form__amount-group">
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
       <input
-        class="sub-form__amount"
+        class="bsheet__amount bsheet__amount--expense input-naked"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -28,10 +28,10 @@
         placeholder="0"
         autocomplete="off"
       />
-      <span class="sub-form__currency">{{ currencySymbol() }}</span>
+      <span class="bsheet__currency bsheet__currency--expense">{{ currencySymbol() }}</span>
     </div>
     <input
-      class="sub-form__libelle"
+      class="bsheet__libelle input-naked"
       type="text"
       formControlName="nom"
       placeholder="Nom"
@@ -41,10 +41,10 @@
   </div>
 
   <!-- ROW 3: Actif (édition) à gauche | Pills meta à droite -->
-  <div class="sub-form__meta-row">
-    <div class="sub-form__icons">
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
       @if (isEditing()) {
-        <button type="button" class="sub-form__icon-btn" [class.active]="actif()" (click)="toggleActif()" aria-label="Actif">
+        <button type="button" class="bsheet__icon-btn" [class.active]="actif()" (click)="toggleActif()" aria-label="Actif">
           <ng-icon
             [name]="actif() ? 'phosphorToggleRight' : 'phosphorToggleLeft'"
             size="18"
@@ -53,16 +53,16 @@
         </button>
       }
     </div>
-    <div class="sub-form__meta-pills">
-      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date de début">
+    <div class="bsheet__meta-pills">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date de début">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-secondary); opacity: 0.7" />
         <span>{{ (form.get('dateDebut')?.value ?? '') | shortDate }}</span>
       </button>
-      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
         <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
       </button>
-      <button type="button" class="sub-form__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
         <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
         <span>{{ selectedAccountName() ?? 'Compte' }}</span>
       </button>
@@ -71,40 +71,40 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'date') {
-    <div class="sub-form__expand">
-      <input type="date" formControlName="dateDebut" class="sub-form__input" />
+    <div class="bsheet__expand">
+      <input type="date" formControlName="dateDebut" class="bsheet__input input-naked" />
     </div>
   }
   @if (expandedSection() === 'category') {
-    <div class="sub-form__expand">
+    <div class="bsheet__expand">
       <app-category-picker formControlName="categoryId" />
     </div>
   }
   @if (expandedSection() === 'account') {
-    <div class="sub-form__expand">
+    <div class="bsheet__expand">
       <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
     </div>
   }
   @if (expandedSection() === 'currency' && showCurrencyPicker()) {
-    <div class="sub-form__expand">
+    <div class="bsheet__expand">
       <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
     </div>
   }
 
   <!-- ROW 4: Actions -->
-  <div class="sub-form__bottom-row">
-    <div class="sub-form__bottom-left">
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
       @if (isEditing()) {
-        <button type="button" class="sub-form__action-pill sub-form__action-pill--danger" (click)="onDelete()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
         </button>
       } @else {
-        <button type="button" class="sub-form__action-pill sub-form__action-pill--cancel" (click)="cancelled.emit()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="cancelled.emit()">
           Annuler
         </button>
       }
     </div>
-    <button type="submit" class="sub-form__action-pill sub-form__action-pill--primary" [disabled]="submitting()">
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
       {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>

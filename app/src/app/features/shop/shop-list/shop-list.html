@@ -44,7 +44,7 @@
 </div>
 
 @if (loading()) {
-  <div class="product-group">
+  <div class="list-group">
     @for (item of skeletonItems; track $index) {
       <div class="skeleton-item">
         <div class="skeleton-circle"></div>
@@ -89,28 +89,28 @@
       />
     </button>
     @if (!isCollapsed(group.status)) {
-      <div class="product-group">
+      <div class="list-group">
         @for (product of group.items; track product.id) {
           <div
-            class="product-row"
+            class="list-row"
             [class.inactive]="!product.actif"
             (click)="onProductPressed(product)"
           >
-            <div class="product-row__icon">
+            <div class="list-row__icon">
               @if (product.imageUrl) {
                 <img [src]="product.imageUrl" [alt]="product.nom" />
               } @else {
                 {{ product.icone ?? '📦' }}
               }
             </div>
-            <div class="product-row__content">
-              <span class="product-row__title">{{ product.nom }}</span>
-              <span class="product-row__subtitle">Stock&nbsp;: {{ product.stock }} · {{ product.totalVendu }} vente{{ product.totalVendu !== 1 ? 's' : '' }}</span>
+            <div class="list-row__content">
+              <span class="list-row__title">{{ product.nom }}</span>
+              <span class="list-row__subtitle">Stock&nbsp;: {{ product.stock }} · {{ product.totalVendu }} vente{{ product.totalVendu !== 1 ? 's' : '' }}</span>
             </div>
-            <div class="product-row__right">
-              <span class="product-row__amount">{{ product.prixVente | amount }}</span>
+            <div class="list-row__right">
+              <span class="list-row__amount">{{ product.prixVente | amount }}</span>
               @if (product.stock === 0 && product.actif) {
-                <span class="product-row__stock-warning">Rupture</span>
+                <span class="list-row__stock-warning">Rupture</span>
               }
             </div>
           </div>

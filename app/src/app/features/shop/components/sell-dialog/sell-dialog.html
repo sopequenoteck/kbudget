@@ -1,11 +1,11 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="sell-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="sell-form__error">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
 
-  <div class="sell-form__top">
-    <div class="sell-form__handle-bar"></div>
-    <div class="sell-form__top-title">
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
       <ng-icon name="phosphorShoppingBag" size="16" />
       <span>Vente rapide</span>
     </div>
@@ -14,7 +14,7 @@
     }
   </div>
 
-  <div class="sell-form__main-row">
+  <div class="bsheet__main-row">
     <button type="button" class="sell-form__product-name" [class.has-value]="!!selectedProduct()" [class.active]="expandedSection() === 'product'" (click)="toggleSection('product')">
       @if (selectedProduct()?.imageUrl; as img) {
         <img class="sell-form__product-img" [src]="img" [alt]="selectedProduct()?.nom" />
@@ -23,9 +23,9 @@
       }
       {{ selectedProduct()?.nom ?? 'Produit' }}
     </button>
-    <div class="sell-form__amount-group">
+    <div class="bsheet__amount-group">
       <input
-        class="sell-form__amount amount--income"
+        class="bsheet__amount bsheet__amount--sm bsheet__amount--right bsheet__amount--income input-naked"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -33,7 +33,7 @@
         placeholder="0"
         autocomplete="off"
       />
-      <span class="sell-form__currency currency--income">{{ currencySymbol() }}</span>
+      <span class="bsheet__currency bsheet__currency--sm bsheet__currency--income">{{ currencySymbol() }}</span>
     </div>
   </div>
 
@@ -41,11 +41,11 @@
     <div class="sell-form__description-preview">{{ desc }}</div>
   }
 
-  <div class="sell-form__meta-row">
-    <div class="sell-form__meta-pills">
+  <div class="bsheet__meta-row bsheet__meta-row--end">
+    <div class="bsheet__meta-pills">
       <button
         type="button"
-        class="sell-form__tool-pill"
+        class="bsheet__tool-pill"
         [class.active]="expandedSection() === 'quantity'"
         (click)="toggleSection('quantity')"
         aria-label="Quantité"
@@ -57,7 +57,7 @@
   </div>
 
   @if (expandedSection() === 'product') {
-    <div class="sell-form__expand">
+    <div class="bsheet__expand">
       <app-select-picker
         formControlName="productId"
         [items]="productItems()"
@@ -67,28 +67,28 @@
     </div>
   }
   @if (expandedSection() === 'quantity') {
-    <div class="sell-form__expand">
+    <div class="bsheet__expand">
       <input
         type="number"
         formControlName="quantity"
         [attr.min]="1"
         [attr.max]="maxStock()"
-        class="sell-form__input"
+        class="bsheet__input input-naked"
       />
     </div>
   }
 
-  <div class="sell-form__bottom-row">
+  <div class="bsheet__bottom-row">
     <button
       type="button"
-      class="sell-form__action-pill sell-form__action-pill--cancel"
+      class="bsheet__action-pill bsheet__action-pill--cancel"
       (click)="onCancel()"
     >
       Annuler
     </button>
     <button
       type="submit"
-      class="sell-form__action-pill sell-form__action-pill--primary"
+      class="bsheet__action-pill bsheet__action-pill--primary"
       [disabled]="submitting()"
     >
       {{ submitting() ? '...' : 'Confirmer' }}

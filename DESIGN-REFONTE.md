@@ -723,6 +723,143 @@ Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
 - L'input montant a 30px (pas 40px) : c'est un champ editable, pas un hero de page
 - Le montant est editable meme s'il est pre-calcule : l'utilisateur peut ajuster un prix de vente ponctuel
 
+## Inventaire des inputs
+
+Cartographie de tous les types d'inputs utilises dans l'app. Sert de reference pour la refonte composant par composant.
+
+### Montant hero (7 occurrences) — PRIORITE
+
+Input `text` avec `inputmode="decimal"`, taille 30-40px bold, largeur dynamique via canvas measureText. Probleme identifie : le rendu visuel ne fonctionne pas bien en dark mode.
+
+| Formulaire | Taille | Couleur | Fichier |
+|------------|--------|---------|---------|
+| Transaction | 40px | rouge/vert (type) | transaction-form |
+| Dette | 40px | vert (pret) / rouge (emprunt) | debt-form |
+| Abonnement | 40px | color-expense | subscription-form |
+| Budget | 40px | color-expense | budget-form |
+| Produit | 32px | color-income | product-form |
+| Remboursement | 30px | neutre | repay-dialog |
+| Vente | 30px | neutre | sell-dialog |
+
+### Texte libre (~12 occurrences)
+
+Input `text` standard. Noms, libelles, personnes.
+
+| Champ | Formulaire | Max | Notes |
+|-------|------------|-----|-------|
+| Libelle | Transaction | - | Aligne a droite, underline |
+| Nom | Abonnement | - | Aligne a droite, underline |
+| Personne | Dette | - | Aligne a droite, underline |
+| Nom | Produit | - | Aligne a droite, underline |
+| Nom | Compte | 100 | Form classique |
+| Nom banque | Compte | 100 | Form classique |
+| Nom | Categorie | 30 | Form classique |
+| Nom profil | CSV import | - | Conditionnel |
+| Pattern | CSV import | - | Regles categorisation |
+
+### Date natif (~8 occurrences)
+
+Input `date` HTML natif. A remplacer par un date picker inline custom (priorite moyenne).
+
+| Champ | Formulaire |
+|-------|------------|
+| Date | Transaction |
+| Prochaine occurrence | Transaction (recurrence) |
+| Date | Dette |
+| Date rappel | Dette |
+| Date debut | Abonnement |
+| Date rappel | Snooze dialog |
+
+### Time natif (2 occurrences)
+
+Input `time` HTML natif. Couple avec les dates de rappel.
+
+| Champ | Formulaire |
+|-------|------------|
+| Heure rappel | Dette |
+| Heure rappel | Snooze dialog |
+
+### Number natif (~6 occurrences)
+
+Input `number` avec min/max.
+
+| Champ | Formulaire | Contraintes |
+|-------|------------|-------------|
+| Stock initial | Produit | min=0 |
+| Quantite | Restock dialog | min=1 |
+| Quantite | Sell dialog | min/max dynamique |
+| Montant transfert | Transfer form | step=0.01, min=0.01 |
+| Seuil alerte | Budget | 0-100% |
+| Taux de change | Exchange rate | step=0.000001 |
+
+### Textarea (4 occurrences)
+
+| Champ | Formulaire | Max |
+|-------|------------|-----|
+| Note | Transaction | 500 |
+| Description | Produit | 500 |
+| Note | Transfert | 500 |
+
+### Select natif (~15 occurrences)
+
+Utilise dans les formulaires non-bottom-sheet (budget, settings, CSV import).
+
+| Contexte | Nombre |
+|----------|--------|
+| Budget form (categorie, frequence, devise) | 3 |
+| Settings (timezone) | 1 |
+| Exchange rate (devise cible) | 1 |
+| CSV import (parsing + mapping) | ~8 |
+| Auth register (devise) | 1 |
+
+### app-select-picker (~15 occurrences)
+
+Composant custom avec recherche, bottom sheet mobile, dropdown desktop.
+
+| Usage | Formulaires |
+|-------|-------------|
+| Compte | Transaction, Dette, Abo, Repay, Transfer (x2) |
+| Devise | Dette, Abo, Compte |
+| Frequence | Transaction (recurrence) |
+| Produit | Sell dialog |
+| Categorie | Via app-category-picker (Transaction, Dette, Abo) |
+
+### app-category-picker (4 occurrences)
+
+Wrapper autour de select-picker + bouton creation inline.
+
+| Formulaire |
+|------------|
+| Transaction |
+| Dette |
+| Abonnement |
+| CSV import (review) |
+
+### Composants custom (comptes/categories)
+
+| Composant | Usage | Contexte |
+|-----------|-------|----------|
+| app-emoji-input | Selection emoji | Compte, Categorie |
+| app-bank-select | Selection banque | Compte |
+| Swatches couleur | Boutons radio custom | Compte, Categorie |
+
+### Checkbox/Toggle (~10 occurrences)
+
+| Contexte | Nombre |
+|----------|--------|
+| Settings (notifications x3, navigation x4) | 7 |
+| Transaction (recurrence on/off) | 1 |
+| Compte (actif/inactif) | 1 |
+| CSV import (selection lignes) | N |
+
+### File (3 occurrences)
+
+| Usage | Formulaire | Accept |
+|-------|------------|--------|
+| Image produit | Product form | image/* |
+| Logo banque | Account form | image/* |
+| Fichier CSV | Import settings | .csv,.txt |
+
 ## Ce qui reste a faire
 
 ### Priorite haute

@@ -65,30 +65,30 @@
 } @else {
   @for (group of groupedDebts(); track group.label) {
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
-    <div class="debt-group">
+    <div class="list-group">
       @for (debt of group.items; track debt.id) {
-        <div class="debt-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
+        <div class="list-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
           <span
-            class="debt-row__icon"
+            class="list-row__icon"
             [style.background-color]="getIconBg(debt)"
           >{{ getIcon(debt) }}</span>
-          <div class="debt-row__content">
-            <span class="debt-row__title">{{ debt.personne }}</span>
-            <span class="debt-row__subtitle">
+          <div class="list-row__content">
+            <span class="list-row__title">{{ debt.personne }}</span>
+            <span class="list-row__subtitle">
               {{ getSubtitle(debt) }}
             </span>
           </div>
-          <div class="debt-row__right">
-            <span class="debt-row__amount" [class]="getAmountClass(debt)">
+          <div class="list-row__right">
+            <span class="list-row__amount" [class]="getAmountClass(debt)">
               {{ debt.montantRestant | amount: null : (debt.currency || 'EUR') }}
             </span>
             @if (!debt.rembourse && (debt.currency || 'EUR') !== preferenceService.primaryCurrency()) {
-              <span class="debt-row__converted">
+              <span class="list-row__converted">
                 {{ debt.montantRestant | convertAmount: (debt.currency || 'EUR') : preferenceService.primaryCurrency() }}
               </span>
             }
             @if (getRelativeDate(debt); as relDate) {
-              <span class="debt-row__due" [class.debt-row__due--overdue]="isOverdue(debt)">{{ relDate }}</span>
+              <span class="list-row__due" [class.list-row__due--overdue]="isOverdue(debt)">{{ relDate }}</span>
             }
           </div>
         </div>

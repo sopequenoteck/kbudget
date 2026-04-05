@@ -1,22 +1,22 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="repay-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="repay-form__error">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
 
-  <div class="repay-form__top">
-    <div class="repay-form__handle-bar"></div>
-    <div class="repay-form__top-title">
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
       <ng-icon name="phosphorArrowCircleDown" size="16" />
       <span>Remboursement</span>
     </div>
     <span class="repay-form__remaining">Restant : {{ debtMontantRestant() | amount: null : debtCurrency() }}</span>
   </div>
 
-  <div class="repay-form__main-row">
+  <div class="bsheet__main-row bsheet__main-row--between">
     <span class="repay-form__personne">{{ debtPersonne() }}</span>
-    <div class="repay-form__amount-group">
+    <div class="bsheet__amount-group">
       <input
-        class="repay-form__amount amount--income"
+        class="bsheet__amount bsheet__amount--sm bsheet__amount--right bsheet__amount--income input-naked"
         [style.width]="amountWidth()"
         type="text"
         inputmode="decimal"
@@ -24,15 +24,15 @@
         placeholder="0"
         autocomplete="off"
       />
-      <span class="repay-form__currency currency--income">{{ currencySymbol() }}</span>
+      <span class="bsheet__currency bsheet__currency--sm bsheet__currency--income">{{ currencySymbol() }}</span>
     </div>
   </div>
 
-  <div class="repay-form__meta-row">
-    <div class="repay-form__meta-pills">
+  <div class="bsheet__meta-row bsheet__meta-row--end">
+    <div class="bsheet__meta-pills">
       <button
         type="button"
-        class="repay-form__tool-pill"
+        class="bsheet__tool-pill"
         [class.active]="expandedSection() === 'account'"
         (click)="toggleSection('account')"
         aria-label="Compte"
@@ -44,7 +44,7 @@
   </div>
 
   @if (expandedSection() === 'account') {
-    <div class="repay-form__expand">
+    <div class="bsheet__expand">
       <app-select-picker
         formControlName="accountId"
         [items]="accountItems()"
@@ -54,17 +54,17 @@
     </div>
   }
 
-  <div class="repay-form__bottom-row">
+  <div class="bsheet__bottom-row">
     <button
       type="button"
-      class="repay-form__action-pill repay-form__action-pill--cancel"
+      class="bsheet__action-pill bsheet__action-pill--cancel"
       (click)="onCancel()"
     >
       Annuler
     </button>
     <button
       type="submit"
-      class="repay-form__action-pill repay-form__action-pill--primary"
+      class="bsheet__action-pill bsheet__action-pill--primary"
       [disabled]="submitting()"
     >
       {{ submitting() ? '...' : 'Rembourser' }}

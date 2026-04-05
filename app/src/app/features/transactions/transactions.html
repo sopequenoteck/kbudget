@@ -19,7 +19,7 @@
   </div>
   <div class="hero__amount">
     <span class="hero__amount-label">Solde</span>
-    <span class="hero__amount-value" [class.positive]="(activeSummary()?.solde ?? 0) > 0" [class.negative]="(activeSummary()?.solde ?? 0) < 0">
+    <span class="hero__amount-value" [class.hero__amount-value--positive]="(activeSummary()?.solde ?? 0) > 0" [class.hero__amount-value--negative]="(activeSummary()?.solde ?? 0) < 0">
       {{ (activeSummary()?.solde ?? 0) | amount: null : activeCurrency() }}
     </span>
   </div>
@@ -64,7 +64,7 @@
       <ng-icon name="phosphorFunnel" size="20" />
     </button>
     <span class="section-header__separator"></span>
-    <a class="section-header__action-btn section-header__action-btn--nav" routerLink="/transactions/recurring" aria-label="Récurrences">
+    <a class="section-header__action-btn" routerLink="/transactions/recurring" aria-label="Récurrences">
       <ng-icon name="phosphorArrowsClockwise" size="20" />
     </a>
   </div>
@@ -89,23 +89,23 @@
 } @else {
   @for (group of groupedTransactions(); track group.label) {
     <div class="date-label">{{ group.label }}</div>
-    <div class="transaction-group">
+    <div class="list-group">
       @for (transaction of group.transactions; track transaction.id) {
-        <div class="transaction-row" (click)="onTransactionPressed(transaction)">
+        <div class="list-row" (click)="onTransactionPressed(transaction)">
           <span
-            class="transaction-row__icon"
+            class="list-row__icon"
             [style.background-color]="transaction.category?.couleur ? transaction.category!.couleur + '26' : null"
           >{{ getIcon(transaction) }}</span>
-          <div class="transaction-row__content">
-            <span class="transaction-row__title">{{ transaction.libelle }}</span>
-            <span class="transaction-row__subtitle">{{ transaction.category?.nom ?? '' }}</span>
+          <div class="list-row__content">
+            <span class="list-row__title">{{ transaction.libelle }}</span>
+            <span class="list-row__subtitle">{{ transaction.category?.nom ?? '' }}</span>
           </div>
-          <div class="transaction-row__right">
-            <span class="transaction-row__amount" [class]="getValueClass(transaction)">
+          <div class="list-row__right">
+            <span class="list-row__amount" [class]="getValueClass(transaction)">
               {{ transaction.montant | amount: transaction.type : transaction.account?.currency }}
             </span>
             @if (transaction.account?.currency && transaction.account!.currency !== preferenceService.primaryCurrency()) {
-              <span class="transaction-row__converted">
+              <span class="list-row__converted">
                 {{ transaction.montant | convertAmount: transaction.account!.currency! : preferenceService.primaryCurrency() }}
               </span>
             }

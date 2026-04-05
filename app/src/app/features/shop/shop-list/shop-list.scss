@@ -4,280 +4,18 @@
   padding: var(--space-4);
 }
 
-// Hero
-.hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-bottom: var(--space-6);
-}
+// Shop list — styles specifiques uniquement
+// Le reste est dans _list-patterns.scss
 
-.hero__amount {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.hero__amount-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.currency-toggle {
-  display: flex;
-  gap: var(--space-1);
-
-  &__btn {
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-round);
-    background: none;
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast);
-
-    &.active {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-primary-contrast);
-      font-weight: var(--font-weight-semibold);
-    }
-  }
-}
-
-.hero__amount-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
+// Hero amount toujours income sur cette page
 .hero__amount-value {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
   color: var(--color-income);
 }
 
-.hero__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: var(--space-1);
-}
-
-.hero__meta-line {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+// Stock warning badge
+.list-row__stock-warning {
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-
-  ::ng-deep ng-icon {
-    width: 14px;
-    min-width: 14px;
-    height: 14px;
-  }
-}
-
-.hero__meta-dot {
-  margin: 0 2px;
-}
-
-// Sticky section header
-.sticky-sentinel {
-  height: 1px;
-  margin: 0;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--space-2);
-  padding-bottom: var(--space-2);
-  position: sticky;
-  top: var(--header-height);
-  z-index: 10;
-  background-color: var(--surface-background);
-  transition:
-    background-color var(--duration-fast),
-    margin var(--duration-fast),
-    padding var(--duration-fast);
-
-  &.stuck {
-    background-color: var(--surface-raised);
-    margin-left: calc(-1 * var(--space-4));
-    margin-right: calc(-1 * var(--space-4));
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-    border-bottom: 1px solid var(--border-default);
-  }
-
-  &__title {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
-  &__count {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-tertiary);
-  }
-}
-
-// Groupe labels — cliquables avec chevron
-.group-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-4) var(--space-1) var(--space-2);
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-tertiary);
-  text-align: left;
-
-  &:first-of-type {
-    padding-top: var(--space-2);
-  }
-
-  &--warning {
-    color: var(--text-error);
-  }
-
-  &--inactive {
-    color: var(--text-tertiary);
-  }
-
-  &__count {
-    font-weight: var(--font-weight-normal);
-    opacity: 0.6;
-  }
-
-  &__chevron {
-    margin-left: auto;
-    transition: transform var(--duration-fast);
-
-    ::ng-deep ng-icon {
-      width: 14px;
-      min-width: 14px;
-      height: 14px;
-    }
-
-    &--collapsed {
-      transform: rotate(-90deg);
-    }
-  }
-}
-
-// Groupe conteneur
-.product-group {
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-
-  .product-row:not(:last-child) {
-    border-bottom: 1px solid var(--border-default);
-  }
-}
-
-// Rows
-.product-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  cursor: pointer;
-  transition: background var(--duration-fast);
-
-  &:hover {
-    background: var(--hover-bg);
-  }
-
-  &.inactive {
-    opacity: 0.5;
-  }
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-round);
-    font-size: var(--font-size-base);
-    flex-shrink: 0;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  &__content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
-
-  &__title {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__subtitle {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
-  }
-
-  &__right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1px;
-    flex-shrink: 0;
-  }
-
-  &__amount {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    white-space: nowrap;
-  }
-
-  &__stock-warning {
-    font-size: var(--font-size-xs);
-    color: var(--text-error);
-  }
-}
-
-// États
-.state-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-10) var(--space-4);
-  gap: var(--space-4);
-  color: var(--text-secondary);
+  color: var(--text-error);
 }
 
 // Skeleton loading
@@ -319,36 +57,17 @@
   background-color: var(--surface-secondary);
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 
-  &--title {
-    width: 120px;
-  }
-
-  &--subtitle {
-    width: 80px;
-  }
-
-  &--value {
-    width: 60px;
-  }
-
-  &--small {
-    width: 50px;
-    height: 10px;
-  }
+  &--title { width: 120px; }
+  &--subtitle { width: 80px; }
+  &--value { width: 60px; }
+  &--small { width: 50px; height: 10px; }
 }
 
 @keyframes skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
-// FAB spacer
 .list-fab-spacer {
   height: 96px;
 }

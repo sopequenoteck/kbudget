@@ -65,6 +65,10 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'dev/design-lab',
+    loadChildren: () => import('./features/dev/dev.routes').then((m) => m.DEV_ROUTES),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },
