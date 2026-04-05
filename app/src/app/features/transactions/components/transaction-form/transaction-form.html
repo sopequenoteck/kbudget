@@ -104,7 +104,7 @@
       @if (form.get('isRecurring')?.value) {
         <div class="bsheet__recurring-fields">
           <app-select-picker formControlName="frequency" [items]="frequencyOptions" placeholder="Fréquence" [clearable]="false" />
-          <input type="date" formControlName="nextOccurrence" [min]="today" class="bsheet__input input-naked" />
+          <app-inline-date-picker [value]="nextOccurrenceSignal() ?? ''" [min]="today" (valueChange)="onNextOccurrenceSelected($event)" />
         </div>
       }
     </div>
@@ -116,7 +116,7 @@
   }
   @if (expandedSection() === 'date') {
     <div class="bsheet__expand">
-      <input type="date" formControlName="date" class="bsheet__input input-naked" />
+      <app-inline-date-picker [value]="dateSignal() ?? ''" [originalValue]="transaction()?.date ?? ''" (valueChange)="onDateSelected($event)" />
     </div>
   }
   @if (expandedSection() === 'account') {

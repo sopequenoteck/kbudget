@@ -28,6 +28,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
@@ -68,7 +69,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, CategoryPicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -178,6 +179,24 @@ export class TransactionForm {
   readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
 
   readonly today = this.localDate();
+
+  readonly dateSignal = toSignal(
+    this.form.get('date')!.valueChanges,
+    { initialValue: this.form.get('date')!.value }
+  );
+
+  readonly nextOccurrenceSignal = toSignal(
+    this.form.get('nextOccurrence')!.valueChanges,
+    { initialValue: this.form.get('nextOccurrence')!.value }
+  );
+
+  onDateSelected(isoDate: string): void {
+    this.form.patchValue({ date: isoDate });
+  }
+
+  onNextOccurrenceSelected(isoDate: string): void {
+    this.form.patchValue({ nextOccurrence: isoDate });
+  }
 
   private localDate(): string {
     const d = new Date();

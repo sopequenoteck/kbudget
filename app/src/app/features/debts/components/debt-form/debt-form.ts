@@ -27,6 +27,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
@@ -60,7 +61,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, CategoryPicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -137,6 +138,16 @@ export class DebtForm {
 
   private readonly reminderDateValue = toSignal(this.form.get('reminderDate')!.valueChanges, { initialValue: '' });
   readonly hasReminderDate = computed(() => !!this.reminderDateValue());
+
+  readonly dateSignal = toSignal(
+    this.form.get('date')!.valueChanges,
+    { initialValue: this.form.get('date')!.value }
+  );
+
+  readonly reminderDateSignal = toSignal(
+    this.form.get('reminderDate')!.valueChanges,
+    { initialValue: this.form.get('reminderDate')!.value }
+  );
 
   private readonly accountIdSignal = toSignal(
     this.form.get('accountId')!.valueChanges,
@@ -219,6 +230,10 @@ export class DebtForm {
 
   toggleSection(section: ExpandableSection): void {
     this.expandedSection.update((current) => (current === section ? null : section));
+  }
+
+  onDateFieldChanged(field: string, isoDate: string): void {
+    this.form.patchValue({ [field]: isoDate });
   }
 
   onSensChange(s: DebtType): void {

@@ -891,6 +891,50 @@ Wrapper autour de select-picker + bouton creation inline.
 - Le wrap automatique est plus robuste qu'un seuil arbitraire : le navigateur gere le point de rupture naturellement via flexbox
 - La reactivite de la devise est un bug pre-existant corrige — l'utilisateur doit voir la devise changer immediatement quand il selectionne un compte
 
+## Ce qui a ete fait (session 15)
+
+### Date picker inline — nouveau composant partage
+- Supprime : `<input type="date">` natif dans toutes les sections expandables des bottom sheets (6 occurrences)
+- Composant `InlineDatePicker` (`shared/components/inline-date-picker/`) : calendrier grille inline, SVG/HTML pur, zero dependance externe
+- Grille 7 colonnes (L M M J V S D), semaine commencant le lundi (convention francaise)
+- Navigation mois via boutons ‹ › (border circle, meme vocabulaire que les fleches nav mois sur Transactions)
+- Clic sur le label du mois = retour au mois actuel (raccourci)
+- Noms de mois en francais, capitalises
+
+### Etats visuels des jours
+- **Jour selectionne** : cercle `color-primary` (amber), texte noir — reperage immediat
+- **Jour original (edition)** : cercle `color-secondary` (indigo, 20% opacite), texte `color-secondary` — coherent avec l'icone calendrier des pills
+- **Aujourd'hui (non selectionne)** : outline `border-default` subtil
+- **Jours hors mois courant** : `text-tertiary`, opacity 0.3, non cliquables
+- **Jours hors plage min/max** : meme traitement disabled
+
+### Comportement edition (original vs nouvelle selection)
+- Sans `originalValue` (creation) : jour selectionne = primary (amber)
+- Avec `originalValue` et pas de changement : jour original = secondary (indigo) — pas de primary
+- Avec `originalValue` et changement : original = secondary (indigo), nouvelle selection = primary (amber)
+- Feedback visuel "d'ou je viens → ou je vais" sans texte explicatif
+
+### API du composant
+- `value = model<string>('')` — two-way binding, ISO date string
+- `originalValue = input<string>()` — date originale en edition (optionnel)
+- `min = input<string>()` — date minimum (optionnel, utilise pour nextOccurrence)
+- `max = input<string>()` — date maximum (optionnel)
+
+### Propagation a tous les formulaires
+- Transaction form : date principale + nextOccurrence (section recurrence, avec `[min]="today"`)
+- Debt form : date + reminderDate (2 date pickers dans le meme formulaire)
+- Subscription form : dateDebut
+- Bridge FormControl → signal via `toSignal(valueChanges)` + handler `patchValue`
+- Snooze dialog : conserve l'input natif (contexte different — modal overlay dans le notification panel, usage mineur)
+
+### Decisions de design (session 15)
+- Le date picker vit dans la section expand du bottom sheet — respecte "un seul niveau de profondeur"
+- Pas de librairie externe (meme approche que DoughnutMini) — controle total du style
+- Le `color-secondary` (indigo) pour le jour original cree un lien visuel avec l'icone calendrier des pills (meme couleur, meme opacite 0.7)
+- Cellules 36px pour un bon compromis taille/densite sur mobile
+- La grille est naturellement compacte (~250px de haut) — pas de scroll necessaire
+- Pas de header "today" explicite — l'outline discret suffit, quiet utility
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -912,7 +956,7 @@ Wrapper autour de select-picker + bouton creation inline.
 
 ### Priorite moyenne
 - [x] Revoir les inputs de tous les formulaires bottom sheet — tailles reduites, wrap automatique, devise reactive, utilitaire partage (session 14)
-- [ ] Date picker inline custom — remplacer `<input type="date">` natif par un calendrier integre dans la section expand (respecter "un seul niveau de profondeur")
+- [x] Date picker inline custom — composant InlineDatePicker, propage a 5 formulaires (session 15)
 - [ ] Micro-interactions (transitions de page, feedback tactile)
 - [ ] Skeleton loading au lieu de spinners
 
@@ -943,3 +987,4 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - Empiler deux surfaces modales (bottom sheet + modal par-dessus)
 - Formulaires qui exposent tous les champs d'un coup
 - Segmented controls pour filtrer (preferer groupement + sections en bas)
+- `<input type="date">` natif dans les bottom sheets (preferer InlineDatePicker inline)

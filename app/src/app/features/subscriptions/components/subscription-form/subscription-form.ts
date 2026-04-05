@@ -26,6 +26,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
@@ -63,7 +64,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategoryPicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -134,6 +135,11 @@ export class SubscriptionForm {
 
   readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
 
+  readonly dateDebutSignal = toSignal(
+    this.form.get('dateDebut')!.valueChanges,
+    { initialValue: this.form.get('dateDebut')!.value }
+  );
+
   private readonly accountIdSignal = toSignal(
     this.form.get('accountId')!.valueChanges,
     { initialValue: this.form.get('accountId')!.value }
@@ -202,6 +208,10 @@ export class SubscriptionForm {
 
   toggleSection(section: ExpandableSection): void {
     this.expandedSection.update((current) => (current === section ? null : section));
+  }
+
+  onDateSelected(isoDate: string): void {
+    this.form.patchValue({ dateDebut: isoDate });
   }
 
   onFrequencyChange(freq: Frequency): void {

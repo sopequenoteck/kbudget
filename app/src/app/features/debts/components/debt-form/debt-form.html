@@ -84,7 +84,7 @@
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'date') {
     <div class="bsheet__expand">
-      <input type="date" formControlName="date" class="bsheet__input input-naked" />
+      <app-inline-date-picker [value]="dateSignal() ?? ''" [originalValue]="debt()?.date ?? ''" (valueChange)="onDateFieldChanged('date', $event)" />
     </div>
   }
   @if (expandedSection() === 'category') {
@@ -99,7 +99,7 @@
   }
   @if (expandedSection() === 'reminder') {
     <div class="bsheet__expand">
-      <input type="date" formControlName="reminderDate" class="bsheet__input input-naked" />
+      <app-inline-date-picker [value]="reminderDateSignal() ?? ''" [originalValue]="debt()?.reminderDate ?? ''" (valueChange)="onDateFieldChanged('reminderDate', $event)" />
       @if (hasReminderDate()) {
         <input type="time" formControlName="reminderTime" class="bsheet__input bsheet__input--time input-naked" />
       }

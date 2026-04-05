@@ -1,0 +1,156 @@
+:host {
+  display: block;
+}
+
+.idp {
+  padding: var(--space-2);
+}
+
+// --- Header ---
+
+.idp__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.idp__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.idp__month-label {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-default);
+  text-align: center;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+// --- Grid ---
+
+.idp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+// --- Day header row ---
+
+.idp__day-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  user-select: none;
+}
+
+// --- Day cells ---
+
+.idp__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  border-radius: var(--radius-round);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    color var(--duration-fast) var(--easing-default);
+  position: relative;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+  }
+
+  &:active:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  // Today indicator — subtle outline circle
+  &--today {
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  // Original day (edit mode — where it was)
+  &--original {
+    background: color-mix(in srgb, var(--color-secondary) 20%, transparent);
+    color: var(--color-secondary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  // Selected day (new selection)
+  &--selected {
+    background: var(--color-primary);
+    color: #0a0a0a;
+    font-weight: var(--font-weight-semibold);
+    border: none;
+
+    &:hover {
+      background: var(--color-primary-hover);
+      color: #0a0a0a;
+    }
+  }
+
+  // Days outside current month
+  &--outside {
+    color: var(--text-tertiary);
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  // Disabled days (min/max)
+  &--disabled:not(.idp__day--outside) {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
