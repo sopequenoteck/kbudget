@@ -18,7 +18,18 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 
     @if (isLoading()) {
       <div class="budget-summary__state">
-        <div class="spinner"></div>
+        @for (item of skeletonItems; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line skeleton-line--title"></div>
+              <div class="skeleton-line skeleton-line--subtitle"></div>
+            </div>
+            <div class="skeleton-lines skeleton-lines--right">
+              <div class="skeleton-line skeleton-line--value"></div>
+            </div>
+          </div>
+        }
       </div>
     } @else {
       <ul class="budget-summary__list">
@@ -74,24 +85,8 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 
     .budget-summary__state {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-6) var(--space-4);
-    }
-
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border-default);
-      border-top-color: var(--color-primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      flex-direction: column;
+      gap: 0;
     }
 
     .budget-summary__list {
@@ -199,6 +194,7 @@ export class BudgetSummary {
   readonly overview = input<BudgetOverview | null>(null);
   readonly isLoading = input<boolean>(false);
   readonly animated = signal(false);
+  readonly skeletonItems = Array(3);
 
   constructor() {
     effect(() => {

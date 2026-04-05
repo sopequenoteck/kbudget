@@ -59,6 +59,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly Math = Math;
   readonly isOverviewItem = isOverviewItem;
   readonly budgetAmount = budgetAmount;
+  readonly skeletonItems = Array(5);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);

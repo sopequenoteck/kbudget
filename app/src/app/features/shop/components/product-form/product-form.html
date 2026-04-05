@@ -117,7 +117,7 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'prixAchat') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <input
         type="text"
         inputmode="decimal"
@@ -129,7 +129,7 @@
     </div>
   }
   @if (expandedSection() === 'description') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <textarea
         formControlName="description"
         rows="3"
@@ -140,7 +140,7 @@
     </div>
   }
   @if (expandedSection() === 'stock' && !isEditing()) {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <input
         type="number"
         formControlName="stock"

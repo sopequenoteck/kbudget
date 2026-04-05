@@ -44,7 +44,7 @@
   </div>
 
   @if (expandedSection() === 'account') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-select-picker
         formControlName="accountId"
         [items]="accountItems()"

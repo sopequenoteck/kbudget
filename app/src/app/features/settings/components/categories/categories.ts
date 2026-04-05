@@ -36,6 +36,8 @@ export class Categories {
   private readonly categoryService = inject(CategoryService);
   private readonly modalService = inject(ModalService);
 
+  readonly skeletonItems = Array(3);
+
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);

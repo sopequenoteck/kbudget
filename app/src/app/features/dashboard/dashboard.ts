@@ -153,6 +153,8 @@ export class Dashboard {
   readonly transactionsError = signal(false);
   readonly transactions = signal<Transaction[]>([]);
 
+  readonly skeletonItems = Array(3);
+
   readonly recentTransactions = computed(() =>
     [...this.transactions()]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

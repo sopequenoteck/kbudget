@@ -935,6 +935,43 @@ Wrapper autour de select-picker + bouton creation inline.
 - La grille est naturellement compacte (~250px de haut) — pas de scroll necessaire
 - Pas de header "today" explicite — l'outline discret suffit, quiet utility
 
+## Ce qui a ete fait (session 16)
+
+### Sections expand — animation ouverture + fermeture
+- Animation Angular `expandCollapse` (shared/animations/expand-collapse.ts) : `:enter` fade + translateY(-8px) → 0 (200ms, easing-out), `:leave` fade + translateY(0 → -8px) + maxHeight collapse (150ms, easing-in)
+- Remplace l'animation CSS-only (qui ne pouvait gerer que l'ouverture)
+- Propagee aux 7 formulaires bottom sheet via `animations: [expandCollapse]` + `@expandCollapse` sur chaque `.bsheet__expand`
+- Le switch entre sections (ex: date → categorie) anime la fermeture de l'une ET l'ouverture de l'autre simultanement
+
+### Fermeture modal — animation slide-down
+- `ModalService.closeModal()` : signal `isClosing`, delai 200ms avant destruction du DOM, timer annulable
+- `ModalService.resetModal()` : fermeture instantanee sans animation (utilisee par l'effect de navigation)
+- Classes `.is-closing` sur overlay et panel : keyframes `modal-fade-out`, `modal-slide-down` (mobile), `modal-scale-out` (desktop)
+- Fix bug : l'effect de navigation dans le shell appelait `closeModal()` qui fermait le modal immediatement apres ouverture — remplace par `resetModal()`
+
+### Transitions de page — fade entre routes
+- `@angular/animations` installe (peer dependency manquant)
+- `provideAnimations()` dans `app.config.ts`
+- Trigger `@routeAnimation` sur le `<router-outlet>` dans `shell.html`
+- Fade-out 100ms + fade-in 100ms (200ms total) sur chaque changement de route
+- `data: { animation: '...' }` sur chaque route enfant du Shell
+
+### Skeleton loading — remplacement des spinners
+- Styles skeleton mutualises dans `_list-patterns.scss` : `.skeleton-item`, `.skeleton-circle`, `.skeleton-lines`, `.skeleton-line`, `.skeleton-hero`, `.skeleton-bar`, `@keyframes skeleton-pulse`
+- Suppression des styles skeleton locaux de `shop-list.scss` (deja couverts par le partage)
+- Pages liste migrees (spinner → skeleton list) : Transactions, Abonnements, Dettes, Budgets, Recurrentes
+- Pages detail migrees (spinner → skeleton hero + list) : Subscription detail, Debt detail, Budget detail
+- Dashboard : 3 zones migrees (hero, summary, transactions) + budget-summary (composant inline)
+- Settings : Accounts et Categories migrees
+- Suppression des `@keyframes spin` locaux dans les SCSS des composants migres
+
+### Decisions de design (session 16)
+- L'animation expand est un fade+slide subtil (translateY -8px), pas un slide pleine hauteur — coherent avec quiet utility
+- La fermeture du modal doit etre animee pour que l'ouverture/fermeture soient symetriques
+- `resetModal()` vs `closeModal()` : la navigation n'a pas besoin d'animation (la page a deja change), seule la fermeture explicite (Annuler, overlay click, Escape) anime
+- Le fade entre pages est volontairement court (200ms) : perceptible mais pas genant sur un usage intensif
+- Les skeletons imitent la forme reelle du contenu (cercle + lignes) pour reduire le saut visuel au chargement
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -957,8 +994,8 @@ Wrapper autour de select-picker + bouton creation inline.
 ### Priorite moyenne
 - [x] Revoir les inputs de tous les formulaires bottom sheet — tailles reduites, wrap automatique, devise reactive, utilitaire partage (session 14)
 - [x] Date picker inline custom — composant InlineDatePicker, propage a 5 formulaires (session 15)
-- [ ] Micro-interactions (transitions de page, feedback tactile)
-- [ ] Skeleton loading au lieu de spinners
+- [x] Micro-interactions — sections expand animees, fermeture modal animee, transitions de page fade (session 16)
+- [x] Skeleton loading — spinners remplaces par skeleton pulse sur toutes les pages (session 16)
 
 ### A faire en dernier
 - [ ] Reecrire DESIGN.md a partir du resultat valide
@@ -988,3 +1025,4 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - Formulaires qui exposent tous les champs d'un coup
 - Segmented controls pour filtrer (preferer groupement + sections en bas)
 - `<input type="date">` natif dans les bottom sheets (preferer InlineDatePicker inline)
+- Spinners CSS tournants (preferer skeleton pulse qui imite la forme du contenu)

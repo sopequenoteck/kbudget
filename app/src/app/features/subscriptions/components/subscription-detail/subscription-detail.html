@@ -1,6 +1,23 @@
 @if (loading()) {
-  <div class="state-loading">
-    <div class="spinner"></div>
+  <div class="skeleton-hero">
+    <div class="skeleton-bar skeleton-bar--xs"></div>
+    <div class="skeleton-bar skeleton-bar--lg"></div>
+    <div class="skeleton-bar skeleton-bar--md"></div>
+    <div class="skeleton-bar skeleton-bar--sm"></div>
+  </div>
+  <div class="list-group" style="margin-top: var(--space-4)">
+    @for (item of skeletonItems; track $index) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+        </div>
+      </div>
+    }
   </div>
 } @else if (error()) {
   <div class="state-error">
@@ -85,8 +102,19 @@
       }
     </div>
     @if (paymentsLoading()) {
-      <div class="payments-loading">
-        <div class="spinner"></div>
+      <div class="list-group">
+        @for (item of skeletonItems; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line skeleton-line--title"></div>
+              <div class="skeleton-line skeleton-line--subtitle"></div>
+            </div>
+            <div class="skeleton-lines skeleton-lines--right">
+              <div class="skeleton-line skeleton-line--value"></div>
+            </div>
+          </div>
+        }
       </div>
     } @else if (sortedPayments().length === 0) {
       <p class="payments-empty">Aucun paiement enregistré</p>

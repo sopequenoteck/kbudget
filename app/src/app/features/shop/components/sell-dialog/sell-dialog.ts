@@ -22,6 +22,7 @@ import { SelectPickerItem } from '../../../../shared/components/select-picker/se
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'product' | 'quantity' | null;
 
@@ -32,6 +33,7 @@ type ExpandableSection = 'product' | 'quantity' | null;
   templateUrl: './sell-dialog.html',
   styleUrl: './sell-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class SellDialog {
   private readonly fb = inject(FormBuilder);

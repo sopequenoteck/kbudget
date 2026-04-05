@@ -54,6 +54,8 @@ export class Accounts {
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
 
+  readonly skeletonItems = Array(3);
+
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);

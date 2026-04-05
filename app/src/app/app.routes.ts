@@ -21,18 +21,20 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        data: { animation: 'Dashboard' },
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
         path: 'transactions',
+        data: { animation: 'Transactions' },
         loadChildren: () =>
           import('./features/transactions/transactions.routes').then((m) => m.TRANSACTIONS_ROUTES),
       },
       {
         path: 'subscriptions',
         canActivate: [featureGuard],
-        data: { feature: 'SUBSCRIPTIONS' },
+        data: { feature: 'SUBSCRIPTIONS', animation: 'Subscriptions' },
         loadChildren: () =>
           import('./features/subscriptions/subscriptions.routes').then(
             (m) => m.SUBSCRIPTIONS_ROUTES,
@@ -41,24 +43,25 @@ export const routes: Routes = [
       {
         path: 'debts',
         canActivate: [featureGuard],
-        data: { feature: 'DEBTS' },
+        data: { feature: 'DEBTS', animation: 'Debts' },
         loadChildren: () => import('./features/debts/debts.routes').then((m) => m.DEBTS_ROUTES),
       },
       {
         path: 'shop',
         canActivate: [featureGuard],
-        data: { feature: 'SHOP' },
+        data: { feature: 'SHOP', animation: 'Shop' },
         loadChildren: () => import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
       },
       {
         path: 'budgets',
         canActivate: [featureGuard],
-        data: { feature: 'BUDGETS' },
+        data: { feature: 'BUDGETS', animation: 'Budgets' },
         loadChildren: () =>
           import('./features/budgets/budgets.routes').then((m) => m.BUDGETS_ROUTES),
       },
       {
         path: 'settings',
+        data: { animation: 'Settings' },
         loadChildren: () =>
           import('./features/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },

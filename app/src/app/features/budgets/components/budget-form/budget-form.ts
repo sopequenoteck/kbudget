@@ -33,6 +33,7 @@ import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budg
 import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | null;
 
@@ -54,6 +55,7 @@ type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | n
   templateUrl: './budget-form.html',
   styleUrl: './budget-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class BudgetForm {
   private readonly categoryService = inject(CategoryService);

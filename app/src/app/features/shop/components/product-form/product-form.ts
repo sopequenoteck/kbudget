@@ -40,6 +40,7 @@ import {
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { compressImage } from '../../../../shared/utils/image.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
@@ -63,6 +64,7 @@ type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class ProductForm {
   private readonly fb = inject(FormBuilder);

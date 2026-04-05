@@ -7,9 +7,11 @@ import {
   HostListener,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { trigger, transition, style, animate, query } from '@angular/animations';
 import { filter } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -102,11 +104,21 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
       phosphorChartPieFill,
     }),
   ],
+  animations: [
+    trigger('routeAnimation', [
+      transition('* <=> *', [
+        query(':enter', [style({ opacity: 0 })], { optional: true }),
+        query(':leave', [animate('100ms ease-out', style({ opacity: 0 }))], { optional: true }),
+        query(':enter', [animate('100ms ease-in', style({ opacity: 1 }))], { optional: true }),
+      ]),
+    ]),
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Shell {
+  private readonly outlet = viewChild(RouterOutlet);
   private readonly authService = inject(AuthService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
@@ -166,7 +178,7 @@ export class Shell {
       this.navigationEnd();
       this.speedDialOpen.set(false);
       this.dropdownOpen.set(false);
-      this.modalService.closeModal();
+      this.modalService.resetModal();
     });
 
     // Sync type toggles when editing existing entities
@@ -270,6 +282,10 @@ export class Shell {
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     this.closeDropdown();
+  }
+
+  getRouteAnimationData(): string | undefined {
+    return this.outlet()?.activatedRouteData?.['animation'];
   }
 
   onLogout(): void {

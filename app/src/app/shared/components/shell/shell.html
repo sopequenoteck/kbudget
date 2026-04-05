@@ -54,7 +54,9 @@
 </nav>
 
 <main class="shell-content">
-  <router-outlet />
+  <div [@routeAnimation]="getRouteAnimationData()">
+    <router-outlet />
+  </div>
 </main>
 
 <bottom-nav [items]="navItems()" [activeRoute]="currentRoute()" />

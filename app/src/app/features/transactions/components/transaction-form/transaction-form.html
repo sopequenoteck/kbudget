@@ -90,12 +90,12 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'category') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-category-picker formControlName="categoryId" />
     </div>
   }
   @if (expandedSection() === 'recurring') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <label class="bsheet__toggle-row">
         <span class="bsheet__toggle-text">Transaction récurrente</span>
         <input type="checkbox" formControlName="isRecurring" class="bsheet__toggle-input" />
@@ -110,17 +110,17 @@
     </div>
   }
   @if (expandedSection() === 'note') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <textarea formControlName="note" rows="3" placeholder="Ajouter une note..." maxlength="500" class="bsheet__textarea input-naked"></textarea>
     </div>
   }
   @if (expandedSection() === 'date') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-inline-date-picker [value]="dateSignal() ?? ''" [originalValue]="transaction()?.date ?? ''" (valueChange)="onDateSelected($event)" />
     </div>
   }
   @if (expandedSection() === 'account') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
     </div>
   }

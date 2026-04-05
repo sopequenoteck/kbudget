@@ -48,6 +48,7 @@ import { RecurringTransactionRequest } from '../../../../core/models/recurring-t
 import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' | null;
 
@@ -84,6 +85,7 @@ export class ShortDatePipe implements PipeTransform {
   templateUrl: './transaction-form.html',
   styleUrl: './transaction-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class TransactionForm {
   private readonly fb = inject(FormBuilder);

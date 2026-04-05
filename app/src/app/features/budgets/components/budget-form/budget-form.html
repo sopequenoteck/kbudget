@@ -77,7 +77,7 @@
 
     <!-- EXPANDED SECTIONS -->
     @if (expandedSection() === 'category') {
-      <div class="bsheet__expand">
+      <div class="bsheet__expand" @expandCollapse>
         <select formControlName="categoryId" class="budget-form__select">
           <option value="" disabled>Choisir une catégorie</option>
           @for (cat of availableCategories(); track cat.id) {
@@ -87,7 +87,7 @@
       </div>
     }
     @if (expandedSection() === 'frequency') {
-      <div class="bsheet__expand">
+      <div class="bsheet__expand" @expandCollapse>
         <select formControlName="frequence" class="budget-form__select">
           @for (freq of frequencies; track freq.value) {
             <option [value]="freq.value">{{ freq.label }}</option>
@@ -96,7 +96,7 @@
       </div>
     }
     @if (expandedSection() === 'currency') {
-      <div class="bsheet__expand">
+      <div class="bsheet__expand" @expandCollapse>
         <select formControlName="currency" class="budget-form__select">
           @for (cur of currencies(); track cur) {
             <option [value]="cur">{{ cur }}</option>
@@ -105,7 +105,7 @@
       </div>
     }
     @if (expandedSection() === 'threshold') {
-      <div class="bsheet__expand">
+      <div class="bsheet__expand" @expandCollapse>
         <input
           type="number"
           formControlName="seuilNotification"

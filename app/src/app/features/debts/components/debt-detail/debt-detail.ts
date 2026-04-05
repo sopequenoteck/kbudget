@@ -75,6 +75,8 @@ export class DebtDetail {
     this.payments().reduce((acc, p) => acc + p.amount, 0),
   );
 
+  readonly skeletonItems = Array(4);
+
   readonly DebtType = DebtType;
 
   constructor() {

@@ -3,11 +3,13 @@ import {
   Component,
   ElementRef,
   effect,
+  inject,
   input,
   output,
   viewChild,
 } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
+import { ModalService } from '../../../core/services/modal.service';
 
 @Component({
   selector: 'app-modal',
@@ -23,6 +25,7 @@ export class Modal {
   readonly closed = output<void>();
 
   readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
+  readonly modalService = inject(ModalService);
 
   private previouslyFocusedElement: HTMLElement | null = null;
 

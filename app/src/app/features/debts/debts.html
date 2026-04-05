@@ -47,8 +47,20 @@
 </div>
 
 @if (loading()) {
-  <div class="state-loading">
-    <div class="spinner"></div>
+  <div class="list-group">
+    @for (item of skeletonItems; track $index) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+          <div class="skeleton-line skeleton-line--small"></div>
+        </div>
+      </div>
+    }
   </div>
 } @else if (error()) {
   <div class="state-error">

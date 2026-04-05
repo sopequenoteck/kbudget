@@ -81,6 +81,8 @@ export class RecurringList {
   private readonly exchangeRateService = inject(ExchangeRateService);
   readonly preferenceService = inject(PreferenceService);
 
+  readonly skeletonItems = Array(5);
+
   readonly loading = this.service.loading;
   readonly error = this.service.error;
   readonly recurringTransactions = this.service.recurringTransactions;

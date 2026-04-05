@@ -57,7 +57,7 @@
   </div>
 
   @if (expandedSection() === 'product') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-select-picker
         formControlName="productId"
         [items]="productItems()"
@@ -67,7 +67,7 @@
     </div>
   }
   @if (expandedSection() === 'quantity') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <input
         type="number"
         formControlName="quantity"

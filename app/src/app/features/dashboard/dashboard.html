@@ -1,8 +1,11 @@
 <!-- Hero: patrimoine + résumé mensuel (une seule section) -->
 <section class="hero">
   @if (totalBalanceLoading()) {
-    <div class="state-loading state-loading--accounts">
-      <div class="spinner"></div>
+    <div class="skeleton-hero">
+      <div class="skeleton-bar skeleton-bar--xs"></div>
+      <div class="skeleton-bar skeleton-bar--lg"></div>
+      <div class="skeleton-bar skeleton-bar--sm"></div>
+      <div class="skeleton-bar skeleton-bar--sm"></div>
     </div>
   } @else if (totalBalanceError()) {
     <div class="state-error">
@@ -96,8 +99,9 @@
         </div>
       </div>
     } @else if (summaryLoading()) {
-      <div class="state-loading state-loading--summary">
-        <div class="spinner"></div>
+      <div class="skeleton-hero">
+        <div class="skeleton-bar skeleton-bar--md"></div>
+        <div class="skeleton-bar skeleton-bar--md"></div>
       </div>
     }
   }
@@ -126,8 +130,19 @@
   </div>
 
   @if (transactionsLoading()) {
-    <div class="state-loading">
-      <div class="spinner"></div>
+    <div class="list-group">
+      @for (item of skeletonItems; track $index) {
+        <div class="skeleton-item">
+          <div class="skeleton-circle"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line skeleton-line--subtitle"></div>
+          </div>
+          <div class="skeleton-lines skeleton-lines--right">
+            <div class="skeleton-line skeleton-line--value"></div>
+          </div>
+        </div>
+      }
     </div>
   } @else if (transactionsError()) {
     <div class="state-error">

@@ -40,6 +40,7 @@ import { Account } from '../../../../core/models/account.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
 
@@ -77,6 +78,7 @@ export class ShortDatePipe implements PipeTransform {
   templateUrl: './debt-form.html',
   styleUrl: './debt-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class DebtForm {
   private readonly fb = inject(FormBuilder);

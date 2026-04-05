@@ -71,22 +71,22 @@
 
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'date') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-inline-date-picker [value]="dateDebutSignal() ?? ''" [originalValue]="subscription()?.dateDebut ?? ''" (valueChange)="onDateSelected($event)" />
     </div>
   }
   @if (expandedSection() === 'category') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-category-picker formControlName="categoryId" />
     </div>
   }
   @if (expandedSection() === 'account') {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
     </div>
   }
   @if (expandedSection() === 'currency' && showCurrencyPicker()) {
-    <div class="bsheet__expand">
+    <div class="bsheet__expand" @expandCollapse>
       <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
     </div>
   }

@@ -67,6 +67,8 @@ export class Transactions implements AfterViewInit {
   readonly transactions = signal<Transaction[]>([]);
   readonly summaries = signal<MonthlySummary[]>([]);
 
+  readonly skeletonItems = Array(5);
+
   readonly activeCurrency = signal(this.preferenceService.primaryCurrency());
 
   readonly secondaryCurrency = computed(() => {

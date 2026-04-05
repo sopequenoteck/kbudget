@@ -25,6 +25,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 
 type ExpandableSection = 'account' | null;
 
@@ -35,6 +36,7 @@ type ExpandableSection = 'account' | null;
   templateUrl: './repay-dialog.html',
   styleUrl: './repay-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class RepayDialog {
   private readonly fb = inject(FormBuilder);

@@ -51,6 +51,8 @@ export class Debts implements AfterViewInit, OnDestroy {
   readonly isStuck = signal(false);
   private observer: IntersectionObserver | null = null;
 
+  readonly skeletonItems = Array(5);
+
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly debts = signal<Debt[]>([]);

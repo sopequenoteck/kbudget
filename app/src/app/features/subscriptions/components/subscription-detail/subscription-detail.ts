@@ -63,6 +63,8 @@ export class SubscriptionDetail {
   readonly payInProgress = signal(false);
   readonly error = signal(false);
 
+  readonly skeletonItems = Array(4);
+
   readonly sortedPayments = computed(() =>
     [...this.payments()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   );
