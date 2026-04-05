@@ -90,9 +90,12 @@
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
 } @else if (items().length === 0 && unbudgetedTotal() === 0) {
-  <div class="state-empty">
-    <p>Aucun budget pour cette période</p>
-  </div>
+  <app-empty-state
+    icon="phosphorChartPie"
+    message="Aucun budget pour cette période"
+    ctaLabel="Créer un budget"
+    (ctaClick)="onCreate()"
+  />
 } @else {
   @if (activeItems().length > 0) {
     <div class="budget-group">

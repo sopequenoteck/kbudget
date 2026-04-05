@@ -85,7 +85,7 @@
       Modifier
     </button>
     @if (!d.rembourse) {
-      <button class="action-btn action-btn--primary" (click)="showRepayDialog.set(true)">
+      <button class="action-btn action-btn--primary" (click)="onRepay()">
         <ng-icon name="phosphorArrowCircleDown" size="18" />
         Rembourser
       </button>
@@ -134,14 +134,6 @@
       </ul>
     }
   </section>
-
-  @if (showRepayDialog()) {
-    <app-repay-dialog
-      [debt]="d"
-      (closed)="showRepayDialog.set(false)"
-      (repaid)="onRepaid($event)"
-    />
-  }
 
   @if (showSnoozeDialog()) {
     <app-snooze-dialog

@@ -14,6 +14,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { DebtService } from '../../core/services/debt';
+import { ModalService } from '../../core/services/modal.service';
 import { PreferenceService } from '../../core/services/preference';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
@@ -22,6 +23,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 interface DebtGroup {
   label: string;
@@ -31,7 +33,7 @@ interface DebtGroup {
 
 @Component({
   selector: 'app-debts',
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',
@@ -39,6 +41,7 @@ interface DebtGroup {
 })
 export class Debts implements AfterViewInit, OnDestroy {
   private readonly debtService = inject(DebtService);
+  private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
@@ -248,6 +251,10 @@ export class Debts implements AfterViewInit, OnDestroy {
 
   getAmountClass(debt: Debt): string {
     return debt.sens === DebtType.PRET ? 'amount-income' : 'amount-expense';
+  }
+
+  onAddDebt(): void {
+    this.modalService.openModal('debt');
   }
 
   onDebtPressed(debt: Debt): void {

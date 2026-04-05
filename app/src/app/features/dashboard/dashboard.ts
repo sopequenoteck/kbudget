@@ -11,7 +11,7 @@ import {
 import { DecimalPipe, NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown } from '@ng-icons/phosphor-icons/regular';
+import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
@@ -35,11 +35,12 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
-  providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown })],
+  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
+  providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -389,6 +390,10 @@ export class Dashboard {
       this.preferenceService.update({ currencies: reordered });
       this.exchangeRateService.loadRates();
     }, 2000);
+  }
+
+  goToAccounts(): void {
+    this.router.navigate(['/settings/accounts']);
   }
 
   getTransactionIcon(t: Transaction): string {

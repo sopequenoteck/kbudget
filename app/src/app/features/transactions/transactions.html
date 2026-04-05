@@ -80,11 +80,12 @@
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
 } @else if (groupedTransactions().length === 0) {
-  <div class="state-empty">
-    <ng-icon name="phosphorReceipt" size="48" />
-    <p>Aucune transaction en {{ selectedMonthLabel() }}</p>
-    <button class="state-empty__cta" (click)="onAddTransaction()">Ajouter une transaction</button>
-  </div>
+  <app-empty-state
+    icon="phosphorReceipt"
+    [message]="'Aucune transaction en ' + selectedMonthLabel()"
+    ctaLabel="Ajouter une transaction"
+    (ctaClick)="onAddTransaction()"
+  />
 } @else {
   @for (group of groupedTransactions(); track group.label) {
     <div class="date-label">{{ group.label }}</div>

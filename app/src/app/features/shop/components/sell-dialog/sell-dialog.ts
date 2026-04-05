@@ -2,23 +2,31 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   output,
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorShoppingBag, phosphorPackage, phosphorHash } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
-import { FormField } from '../../../../shared/components/form-field/form-field';
 import { ProductService } from '../../../../core/services/product';
 import { ModalService } from '../../../../core/services/modal.service';
+import { PreferenceService } from '../../../../core/services/preference';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Product } from '../../../../core/models/product.model';
-import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
+import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
+import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
+
+type ExpandableSection = 'product' | 'quantity' | null;
 
 @Component({
   selector: 'app-sell-dialog',
-  imports: [ReactiveFormsModule, DecimalPipe, FormField],
+  imports: [ReactiveFormsModule, NgIcon, SelectPicker],
+  providers: [provideIcons({ phosphorShoppingBag, phosphorPackage, phosphorHash })],
   templateUrl: './sell-dialog.html',
   styleUrl: './sell-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,31 +35,104 @@ export class SellDialog {
   private readonly fb = inject(FormBuilder);
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
+  private readonly preferenceService = inject(PreferenceService);
+  private readonly toastService = inject(ToastService);
 
-  readonly confirmed = output<void>();
+  readonly saved = output<void>();
   readonly cancelled = output<void>();
 
-  readonly products = signal<Product[]>([]);
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+  readonly expandedSection = signal<ExpandableSection>(null);
+  readonly amountWidth = signal('2ch');
 
-  readonly selectedProductId = signal<string>('');
+  private readonly products = signal<Product[]>([]);
+
+  readonly sellableProducts = computed(() => this.products().filter((p) => p.actif && p.stock > 0));
+
+  readonly selectedProductId = signal('');
+
   readonly selectedProduct = computed(() => {
     const id = this.selectedProductId();
-    return this.products().find((p) => p.id === id) ?? null;
+    if (!id) return null;
+    return this.sellableProducts().find((p) => p.id === id) ?? null;
   });
 
   readonly maxStock = computed(() => this.selectedProduct()?.stock ?? 1);
 
+  readonly currencySymbol = computed(() => {
+    const currency = this.preferenceService.primaryCurrency();
+    return (0)
+      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .replace('0', '')
+      .trim();
+  });
+
+  readonly totalAmount = computed(() => {
+    const product = this.selectedProduct();
+    const quantity = this.form.get('quantity')?.value ?? 1;
+    if (!product) return '0';
+    return (product.prixVente * quantity).toFixed(2);
+  });
+
+  readonly productItems = computed<SelectPickerItem[]>(() =>
+    this.sellableProducts().map((p) => ({
+      id: p.id,
+      label: p.nom,
+      icon: p.icone,
+      secondaryText: `stock: ${p.stock}`,
+      color: null,
+      iconUrl: p.imageUrl ?? null,
+    })),
+  );
+
   readonly form = this.fb.nonNullable.group({
     productId: ['', [Validators.required]],
     quantity: [1, [Validators.required, Validators.min(1)]],
+    totalPrice: ['', [Validators.required]],
   });
-
-  readonly sellableProducts = computed(() => this.products().filter((p) => p.actif && p.stock > 0));
 
   constructor() {
     this.loadProducts();
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = 'bold 40px Inter, sans-serif';
+
+    this.form.get('productId')!.valueChanges.subscribe((id) => {
+      this.selectedProductId.set(id);
+      this.form.get('quantity')!.setValue(1);
+      this.updateTotalPrice();
+    });
+
+    this.form.get('quantity')!.valueChanges.subscribe(() => {
+      this.updateTotalPrice();
+    });
+
+    this.form.get('totalPrice')!.valueChanges.subscribe((val) => {
+      const text = val || '0';
+      const measured = ctx.measureText(text).width;
+      this.amountWidth.set(`${Math.ceil(measured) + 4}px`);
+    });
+
+    effect(() => {
+      const max = this.maxStock();
+      this.form.get('quantity')!.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(max),
+      ]);
+      this.form.get('quantity')!.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  private updateTotalPrice(): void {
+    const product = this.selectedProduct();
+    const quantity = this.form.get('quantity')?.value ?? 1;
+    if (!product) return;
+    const total = product.prixVente * quantity;
+    const formatted = total % 1 === 0 ? String(total) : total.toFixed(2);
+    this.form.get('totalPrice')!.setValue(formatted, { emitEvent: true });
   }
 
   private async loadProducts(): Promise<void> {
@@ -59,18 +140,15 @@ export class SellDialog {
     this.products.set(all);
   }
 
-  onProductChange(): void {
-    const id = this.form.get('productId')!.value;
-    this.selectedProductId.set(id);
-    this.form.get('quantity')!.setValue(1);
+  toggleSection(section: ExpandableSection): void {
+    this.expandedSection.update((current) => (current === section ? null : section));
   }
 
   async onSubmit(): Promise<void> {
     if (!validateForm(this.form)) return;
 
     const raw = this.form.getRawValue();
-    const max = this.maxStock();
-    if (raw.quantity > max) return;
+    if (raw.quantity > this.maxStock()) return;
 
     this.submitting.set(true);
     this.errorMessage.set('');
@@ -78,7 +156,8 @@ export class SellDialog {
     try {
       await firstValueFrom(this.productService.sell(raw.productId, raw.quantity));
       this.modalService.closeModal();
-      this.confirmed.emit();
+      this.saved.emit();
+      this.toastService.success('Vente enregistrée');
     } catch (err: unknown) {
       this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la vente');
     } finally {
@@ -88,6 +167,7 @@ export class SellDialog {
 
   onCancel(): void {
     this.modalService.closeModal();
+    this.cancelled.emit();
   }
 
   isInvalid(controlName: string): boolean {

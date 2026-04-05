@@ -29,12 +29,11 @@ import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/deb
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
-import { RepayDialog } from '../repay-dialog/repay-dialog';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-debt-detail',
-  imports: [AmountPipe, ConvertAmountPipe, RepayDialog, SnoozeDialog, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, SnoozeDialog, NgIcon],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -62,7 +61,6 @@ export class DebtDetail {
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
-  readonly showRepayDialog = signal(false);
   readonly showSnoozeDialog = signal(false);
   readonly payments = signal<DebtPaymentResponse[]>([]);
   readonly paymentsLoading = signal(false);
@@ -169,21 +167,10 @@ export class DebtDetail {
     this.router.navigate(['/debts']);
   }
 
-  onRepaid(updatedDebt: Debt): void {
-    this.debt.set(updatedDebt);
-    this.showRepayDialog.set(false);
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadPayments(id);
-    }
-
-    if (updatedDebt.montantRestant === 0) {
-      this.toastService.success('Dette remboursée !');
-    } else {
-      const reste = updatedDebt.montantRestant;
-      const currency = updatedDebt.currency || 'EUR';
-      const formatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency });
-      this.toastService.success(`Remboursement enregistré. Reste : ${formatter.format(reste)}`);
+  onRepay(): void {
+    const d = this.debt();
+    if (d) {
+      this.modalService.openModal('repay', d);
     }
   }
 

@@ -26,6 +26,7 @@ import { ModalService } from '../../../core/services/modal.service';
 import { PreferenceService } from '../../../core/services/preference';
 import { Product } from '../../../core/models/product.model';
 import { AmountPipe } from '../../../shared/pipes/amount.pipe';
+import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 
 interface ProductGroup {
   label: string;
@@ -35,7 +36,7 @@ interface ProductGroup {
 
 @Component({
   selector: 'app-shop-list',
-  imports: [AmountPipe, NgIcon],
+  imports: [AmountPipe, NgIcon, EmptyState],
   providers: [
     provideIcons({
       phosphorStorefront,

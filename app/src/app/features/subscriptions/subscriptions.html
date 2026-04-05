@@ -52,9 +52,12 @@
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
 } @else if (groupedSubscriptions().length === 0) {
-  <div class="state-empty">
-    <p>Aucun abonnement</p>
-  </div>
+  <app-empty-state
+    icon="phosphorRepeat"
+    message="Aucun abonnement"
+    ctaLabel="Ajouter un abonnement"
+    (ctaClick)="onAddSubscription()"
+  />
 } @else {
   @for (group of groupedSubscriptions(); track group.label) {
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>

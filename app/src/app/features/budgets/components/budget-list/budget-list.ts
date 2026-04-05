@@ -37,10 +37,11 @@ import {
 import { type Category } from '../../../../core/models/category.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-budget-list',
-  imports: [AmountPipe, NgIcon, DoughnutMini],
+  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',

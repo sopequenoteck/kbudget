@@ -28,6 +28,7 @@ import { Modal } from '../../../../shared/components/modal/modal';
 import { ConversionService } from '../../../../core/services/conversion';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -58,7 +59,7 @@ const STATUS_LABELS: Record<RecurringStatus, string> = {
 
 @Component({
   selector: 'app-recurring-list',
-  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe],
+  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe, EmptyState],
   providers: [
     provideIcons({
       phosphorArrowLeft,

@@ -143,13 +143,6 @@
   padding: var(--space-4);
 }
 
-.state-empty--accounts {
-  padding: var(--space-6) var(--space-4);
-
-  .btn-outline {
-    text-decoration: none;
-  }
-}
 
 // =============================================================================
 // Detail sections (budgets, opérations)
@@ -210,7 +203,6 @@
 // =============================================================================
 
 .state-loading,
-.state-empty,
 .state-error {
   display: flex;
   flex-direction: column;

@@ -56,9 +56,12 @@
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
 } @else if (groupedDebts().length === 0) {
-  <div class="state-empty">
-    <p>Aucune dette</p>
-  </div>
+  <app-empty-state
+    icon="phosphorHandCoins"
+    message="Aucune dette"
+    ctaLabel="Ajouter une dette"
+    (ctaClick)="onAddDebt()"
+  />
 } @else {
   @for (group of groupedDebts(); track group.label) {
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>

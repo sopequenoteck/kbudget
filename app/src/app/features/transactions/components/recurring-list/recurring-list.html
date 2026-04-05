@@ -53,10 +53,10 @@
     <button class="btn-outline" (click)="reload()">Réessayer</button>
   </div>
 } @else if (sortedRecurringTransactions().length === 0) {
-  <div class="state-empty">
-    <ng-icon name="phosphorRepeat" size="40" />
-    <p>Aucune transaction récurrente</p>
-  </div>
+  <app-empty-state
+    icon="phosphorRepeat"
+    message="Aucune transaction récurrente"
+  />
 } @else {
   @if (monthlySummary(); as summary) {
     <div class="monthly-summary">

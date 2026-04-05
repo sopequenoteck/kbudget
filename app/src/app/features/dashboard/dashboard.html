@@ -10,10 +10,12 @@
       <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
     </div>
   } @else if (accounts().length === 0) {
-    <div class="state-empty state-empty--accounts">
-      <p>Aucun compte</p>
-      <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
-    </div>
+    <app-empty-state
+      icon="phosphorWarningCircle"
+      message="Aucun compte"
+      ctaLabel="Créer mon premier compte"
+      (ctaClick)="goToAccounts()"
+    />
   } @else {
     <div class="hero__top-row">
       <span class="hero__greeting">{{ greeting() }}</span>
@@ -133,9 +135,10 @@
       <button class="btn-outline" (click)="loadTransactions()">Réessayer</button>
     </div>
   } @else if (recentTransactions().length === 0) {
-    <div class="state-empty">
-      <p>Aucune transaction</p>
-    </div>
+    <app-empty-state
+      icon="phosphorReceipt"
+      message="Aucune transaction"
+    />
   } @else {
     <ul class="dashboard-list">
       @for (transaction of recentTransactions(); track transaction.id) {

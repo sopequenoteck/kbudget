@@ -1,46 +1,97 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="sell-dialog">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="sell-form">
   @if (errorMessage()) {
-    <div class="form-error-banner">{{ errorMessage() }}</div>
+    <div class="sell-form__error">{{ errorMessage() }}</div>
   }
-  <app-form-field
-    label="Produit"
-    fieldId="productId"
-    [showError]="isInvalid('productId')"
-    [errorMessage]="'Sélectionnez un produit'"
-  >
-    <select id="productId" formControlName="productId" (change)="onProductChange()">
-      <option value="" disabled>Choisir un produit</option>
-      @for (p of sellableProducts(); track p.id) {
-        <option [value]="p.id">{{ p.icone ?? '📦' }} {{ p.nom }} (stock: {{ p.stock }})</option>
+
+  <div class="sell-form__top">
+    <div class="sell-form__handle-bar"></div>
+    <div class="sell-form__top-title">
+      <ng-icon name="phosphorShoppingBag" size="16" />
+      <span>Vente rapide</span>
+    </div>
+    @if (selectedProduct(); as p) {
+      <span class="sell-form__remaining">Stock : {{ p.stock }}</span>
+    }
+  </div>
+
+  <div class="sell-form__main-row">
+    <button type="button" class="sell-form__product-name" [class.has-value]="!!selectedProduct()" [class.active]="expandedSection() === 'product'" (click)="toggleSection('product')">
+      @if (selectedProduct()?.imageUrl; as img) {
+        <img class="sell-form__product-img" [src]="img" [alt]="selectedProduct()?.nom" />
+      } @else if (selectedProduct()?.icone; as icone) {
+        <span class="sell-form__product-icon">{{ icone }}</span>
       }
-    </select>
-  </app-form-field>
+      {{ selectedProduct()?.nom ?? 'Produit' }}
+    </button>
+    <div class="sell-form__amount-group">
+      <input
+        class="sell-form__amount amount--income"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="totalPrice"
+        placeholder="0"
+        autocomplete="off"
+      />
+      <span class="sell-form__currency currency--income">{{ currencySymbol() }}</span>
+    </div>
+  </div>
 
-  <app-form-field
-    label="Quantité"
-    fieldId="quantity"
-    [showError]="isInvalid('quantity')"
-    [errorMessage]="'Quantité entre 1 et ' + maxStock()"
-  >
-    <input
-      id="quantity"
-      type="number"
-      formControlName="quantity"
-      [attr.min]="1"
-      [attr.max]="maxStock()"
-    />
-  </app-form-field>
+  @if (selectedProduct()?.description; as desc) {
+    <div class="sell-form__description-preview">{{ desc }}</div>
+  }
 
-  @if (selectedProduct(); as sp) {
-    <div class="sell-summary">
-      Total : {{ sp.prixVente * form.get('quantity')!.value | number: '1.2-2' }} €
+  <div class="sell-form__meta-row">
+    <div class="sell-form__meta-pills">
+      <button
+        type="button"
+        class="sell-form__tool-pill"
+        [class.active]="expandedSection() === 'quantity'"
+        (click)="toggleSection('quantity')"
+        aria-label="Quantité"
+      >
+        <ng-icon name="phosphorHash" size="16" style="opacity: 0.7" />
+        <span>{{ form.get('quantity')?.value }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (expandedSection() === 'product') {
+    <div class="sell-form__expand">
+      <app-select-picker
+        formControlName="productId"
+        [items]="productItems()"
+        placeholder="Sélectionner un produit"
+        [clearable]="false"
+      />
+    </div>
+  }
+  @if (expandedSection() === 'quantity') {
+    <div class="sell-form__expand">
+      <input
+        type="number"
+        formControlName="quantity"
+        [attr.min]="1"
+        [attr.max]="maxStock()"
+        class="sell-form__input"
+      />
     </div>
   }
 
-  <div class="form-actions">
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
-      {{ submitting() ? 'Vente...' : 'Confirmer' }}
+  <div class="sell-form__bottom-row">
+    <button
+      type="button"
+      class="sell-form__action-pill sell-form__action-pill--cancel"
+      (click)="onCancel()"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      class="sell-form__action-pill sell-form__action-pill--primary"
+      [disabled]="submitting()"
+    >
+      {{ submitting() ? '...' : 'Confirmer' }}
     </button>
   </div>
 </form>

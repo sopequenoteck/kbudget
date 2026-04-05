@@ -270,7 +270,6 @@
 }
 
 // États
-.state-empty,
 .state-error {
   display: flex;
   flex-direction: column;
@@ -279,11 +278,6 @@
   padding: var(--space-10) var(--space-4);
   gap: var(--space-4);
   color: var(--text-secondary);
-}
-
-.state-empty__icon {
-  font-size: var(--font-size-3xl);
-  opacity: 0.3;
 }
 
 // Skeleton loading

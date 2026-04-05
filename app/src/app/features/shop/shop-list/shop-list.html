@@ -65,11 +65,12 @@
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
 } @else if (products().length === 0) {
-  <div class="state-empty">
-    <span class="state-empty__icon"><ng-icon name="phosphorStorefront" size="48" /></span>
-    <p>Aucun produit</p>
-    <button class="btn-primary" (click)="onCreate()">Créer un produit</button>
-  </div>
+  <app-empty-state
+    icon="phosphorStorefront"
+    message="Aucun produit"
+    ctaLabel="Créer un produit"
+    (ctaClick)="onCreate()"
+  />
 } @else {
   @for (group of groupedProducts(); track group.status) {
     <button

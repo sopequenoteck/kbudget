@@ -70,7 +70,7 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
-  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget' || modalService.activeModal() === 'product'"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget' || modalService.activeModal() === 'product' || modalService.activeModal() === 'repay' || modalService.activeModal() === 'sell'"
   (closed)="onModalClose()"
 >
 @switch (modalService.activeModal()) {
@@ -120,12 +120,18 @@
     }
     @case ('sell') {
       <app-sell-dialog
-        (confirmed)="onModalClose()"
+        (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
     }
     @case ('budget') {
       <app-budget-form
+        (saved)="onModalClose()"
+        (cancelled)="onModalClose()"
+      />
+    }
+    @case ('repay') {
+      <app-repay-dialog
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />

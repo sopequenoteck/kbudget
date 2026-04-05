@@ -1,67 +1,73 @@
-<div
-  class="repay-overlay"
-  (click)="onCancel()"
-  (keydown.escape)="onCancel()"
-  role="presentation"
->
-  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
-  <div
-    class="repay-card"
-    (click)="$event.stopPropagation()"
-    role="dialog"
-    aria-label="Enregistrer un remboursement"
-  >
-    <h3>Rembourser</h3>
-    <p class="repay-subtitle">{{ debt().personne }}</p>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="repay-form">
+  @if (errorMessage()) {
+    <div class="repay-form__error">{{ errorMessage() }}</div>
+  }
 
-    @if (errorMessage()) {
-      <div class="form-error-banner">{{ errorMessage() }}</div>
-    }
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <app-form-field
-        label="Compte"
-        fieldId="repayAccountId"
-        [showError]="isInvalid('accountId')"
-        [errorMessage]="'Sélectionnez un compte'"
-      >
-        <select id="repayAccountId" formControlName="accountId">
-          <option value="" disabled>Choisir un compte</option>
-          @for (account of accounts(); track account.id) {
-            <option [value]="account.id">{{ account.icone }} {{ account.nom }}</option>
-          }
-        </select>
-      </app-form-field>
-
-      <app-form-field
-        label="Montant"
-        fieldId="repayAmount"
-        [showError]="isInvalid('amount')"
-        [errorMessage]="'Montant entre 0,01 et ' + debt().montantRestant"
-      >
-        <div class="amount-input-wrapper">
-          <input
-            id="repayAmount"
-            type="number"
-            formControlName="amount"
-            step="0.01"
-            min="0.01"
-            [attr.max]="debt().montantRestant"
-          />
-          <span class="amount-input-wrapper__suffix">{{ debt().currency || 'EUR' }}</span>
-        </div>
-      </app-form-field>
-
-      <div class="form-actions">
-        <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-        <button
-          type="submit"
-          class="btn-primary"
-          [disabled]="form.invalid || submitting() || accounts().length === 0"
-        >
-          {{ submitting() ? 'Enregistrement...' : 'Rembourser' }}
-        </button>
-      </div>
-    </form>
+  <div class="repay-form__top">
+    <div class="repay-form__handle-bar"></div>
+    <div class="repay-form__top-title">
+      <ng-icon name="phosphorArrowCircleDown" size="16" />
+      <span>Remboursement</span>
+    </div>
+    <span class="repay-form__remaining">Restant : {{ debtMontantRestant() | amount: null : debtCurrency() }}</span>
   </div>
-</div>
+
+  <div class="repay-form__main-row">
+    <span class="repay-form__personne">{{ debtPersonne() }}</span>
+    <div class="repay-form__amount-group">
+      <input
+        class="repay-form__amount amount--income"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="amount"
+        placeholder="0"
+        autocomplete="off"
+      />
+      <span class="repay-form__currency currency--income">{{ currencySymbol() }}</span>
+    </div>
+  </div>
+
+  <div class="repay-form__meta-row">
+    <div class="repay-form__meta-pills">
+      <button
+        type="button"
+        class="repay-form__tool-pill"
+        [class.active]="expandedSection() === 'account'"
+        (click)="toggleSection('account')"
+        aria-label="Compte"
+      >
+        <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
+        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (expandedSection() === 'account') {
+    <div class="repay-form__expand">
+      <app-select-picker
+        formControlName="accountId"
+        [items]="accountItems()"
+        placeholder="Sélectionner un compte"
+        [clearable]="false"
+      />
+    </div>
+  }
+
+  <div class="repay-form__bottom-row">
+    <button
+      type="button"
+      class="repay-form__action-pill repay-form__action-pill--cancel"
+      (click)="onCancel()"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      class="repay-form__action-pill repay-form__action-pill--primary"
+      [disabled]="submitting()"
+    >
+      {{ submitting() ? '...' : 'Rembourser' }}
+    </button>
+  </div>
+</form>

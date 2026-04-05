@@ -17,7 +17,8 @@ export type ModalType =
   | 'transfer'
   | 'product'
   | 'sell'
-  | 'budget';
+  | 'budget'
+  | 'repay';
 
 type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product | Budget;
 
@@ -31,6 +32,7 @@ const CREATE_TITLES: Record<ModalType, string> = {
   product: 'Nouveau produit',
   sell: 'Vente rapide',
   budget: 'Nouveau budget',
+  repay: 'Remboursement',
 };
 
 const EDIT_TITLES: Record<ModalType, string> = {
@@ -43,6 +45,7 @@ const EDIT_TITLES: Record<ModalType, string> = {
   product: 'Modifier le produit',
   sell: 'Vente rapide',
   budget: 'Modifier le budget',
+  repay: 'Remboursement',
 };
 
 @Injectable({ providedIn: 'root' })

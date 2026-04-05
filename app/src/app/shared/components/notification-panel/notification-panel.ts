@@ -20,14 +20,14 @@ import { DebtService } from '../../../core/services/debt';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { ToastService } from '../toast/toast.service';
+import { ModalService } from '../../../core/services/modal.service';
 import { type Debt } from '../../../core/models/debt.model';
-import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
 import { SnoozeDialog } from '../../../features/debts/components/snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, NgIcon, RepayDialog, SnoozeDialog],
+  imports: [DatePipe, NgIcon, SnoozeDialog],
   providers: [
     provideIcons({
       phosphorBellRinging,
@@ -51,6 +51,7 @@ export class NotificationPanel {
   private readonly recurringTransactionService = inject(RecurringTransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
   readonly notificationService = inject(NotificationService);
   readonly isOpen = input(false);
@@ -58,7 +59,6 @@ export class NotificationPanel {
   readonly confirmDeleteAll = signal(false);
   readonly activeDebt = signal<Debt | null>(null);
   readonly activeNotification = signal<NotificationModel | null>(null);
-  readonly showRepayDialog = signal(false);
   readonly showSnoozeDialog = signal(false);
 
   readonly groupedNotifications = computed(() => {
@@ -143,9 +143,8 @@ export class NotificationPanel {
     if (!notification.entityId) return;
     try {
       const debt = await firstValueFrom(this.debtService.getById(notification.entityId));
-      this.activeDebt.set(debt);
       this.activeNotification.set(notification);
-      this.showRepayDialog.set(true);
+      this.modalService.openModal('repay', debt);
     } catch {
       this.toastService.error('Impossible de charger la dette');
     }
@@ -162,13 +161,6 @@ export class NotificationPanel {
     } catch {
       this.toastService.error('Impossible de charger la dette');
     }
-  }
-
-  onRepaid(_updatedDebt: Debt, notification: NotificationModel): void {
-    this.showRepayDialog.set(false);
-    this.activeDebt.set(null);
-    this.toastService.success('Remboursement enregistré');
-    this.notificationService.markAsRead(notification.id);
   }
 
   onSnoozed(_updatedDebt: Debt, notification: NotificationModel): void {

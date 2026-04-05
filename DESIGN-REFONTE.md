@@ -676,6 +676,53 @@ Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
 - Le pill actif/inactif sur budget vit dans la row 3 (c'est un filtre, pas une action)
 - Product form a 32px au lieu de 40px : les prix produits sont plus longs (4+ chiffres + decimales), il faut prevenir le debordement
 
+## Ce qui a ete fait (session 12)
+
+### Composant partage EmptyState
+- Composant `shared/components/empty-state/` : icone phosphor (48px, opacity 0.5), message principal, hint optionnel, CTA optionnel (text link amber)
+- Propage a toutes les pages : Transactions, Abonnements, Dettes, Budgets, Boutique, Recurrentes, Dashboard (comptes + transactions)
+- Chaque page a maintenant une icone contextuelle + un CTA vers la creation (sauf pages sans formulaire propre)
+- Supprime les `.state-empty` dupliques de 7 fichiers SCSS — le composant gere son propre style
+- Ajout methodes CTA manquantes : `onAddDebt()`, `onAddSubscription()`, `goToAccounts()`
+
+### Decisions de design — empty states
+- Quiet utility : pas d'illustration, pas d'emoji, juste icone + texte + action
+- Icone a 50% opacity pour ne pas attirer l'attention plus que necessaire
+- CTA en text link amber (pas un bouton plein) : coherent avec le pattern valide sur Transactions
+- Pas de hint/sous-message par defaut — les messages sont assez explicites seuls
+
+## Ce qui a ete fait (session 13)
+
+### RepayDialog — migration bottom sheet
+- Supprime : overlay custom fixe (z-index 1000, card centree, animations propres), inputs classiques (select + number), outputs `closed`/`repaid`, composant local dans debt-detail
+- Integre dans le ModalService : type `'repay'` ajoute, dette passee via `editingEntity`
+- Bottom sheet pattern 4 rows : handle bar + titre "Remboursement" + "Restant : X €" (row 1), nom personne lg/bold a gauche + montant 30px editable a droite (row 2), pill compte expandable (row 3), Annuler + Rembourser (row 4)
+- Devise reactive : change selon le compte selectionne (fallback devise de la dette)
+- Format montant intelligent : pas de decimales sur les montants entiers (200 au lieu de 200.00)
+- Pre-remplissage montant et compte via effects avec allowSignalWrites
+- Toast de succes integre dans le composant (plus dans debt-detail)
+- Debt-detail : `showRepayDialog` supprime, bouton appelle `modalService.openModal('repay', d)`
+- Notification-panel : meme migration vers modalService
+
+### SellDialog — migration bottom sheet
+- Supprime : formulaire classique (select produit + input quantite + summary badge), composant FormField
+- Bottom sheet pattern : handle bar + "Vente rapide" + stock restant (row 1), nom produit cliquable lg/bold a gauche + montant editable 30px a droite (row 2), description produit en preview italique xs/tertiary (row 2.5), pill quantite (row 3), Annuler + Confirmer (row 4)
+- Nom produit = trigger du SelectPicker (pas de pill doublon) : tertiary + underline quand vide, secondary + image/emoji quand selectionne
+- Miniature image produit 28px ronde devant le nom (fallback emoji)
+- Stock affiche en row 1 quand un produit est selectionne (meme pattern "Restant" du RepayDialog)
+- Montant editable (input, pas span) : pre-rempli automatiquement prix × quantite, modifiable manuellement
+- selectedProductId devenu signal (etait computed sur form value, non reactif)
+- hideHeader active dans le shell pour le type 'sell'
+- Output `confirmed` renomme en `saved` (coherence avec les autres forms)
+
+### Decisions de design (session 13)
+- Le nom de la personne (RepayDialog) et le nom du produit (SellDialog) sont l'entite principale — ils vivent dans la row 2 en lg/bold, pas dans une pill
+- Pill produit supprimee : elle faisait doublon avec le label row 2. Le produit n'est pas une metadonnee secondaire, c'est le sujet du formulaire
+- La description produit en preview comble le vide visuel et donne du contexte (meme pattern que la note dans TransactionForm)
+- Le stock en row 1 repond a la question "combien il en reste ?" sans encombrer le formulaire
+- L'input montant a 30px (pas 40px) : c'est un champ editable, pas un hero de page
+- Le montant est editable meme s'il est pre-calcule : l'utilisateur peut ajuster un prix de vente ponctuel
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -691,11 +738,12 @@ Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
 - [x] Settings — refonte hub unique + 2 sous-pages (session 11)
 - [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
 - [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
-- [ ] Empty states — design par page puis composant partage
+- [x] Empty states — composant partage EmptyState (icone + message + CTA), propage a toutes les pages (session 12)
 - [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit) (session 11)
-- [ ] Migrer RepayDialog et SellDialog vers le bottom sheet partage
+- [x] Migrer RepayDialog et SellDialog vers le bottom sheet partage (session 13)
 
 ### Priorite moyenne
+- [ ] Revoir les inputs de tous les formulaires bottom sheet — l'input montant hero (largeur dynamique canvas measureText, 30-40px bold) ne fonctionne pas bien visuellement. Trouver un pattern d'input montant plus propre pour le dark mode.
 - [ ] Date picker inline custom — remplacer `<input type="date">` natif par un calendrier integre dans la section expand (respecter "un seul niveau de profondeur")
 - [ ] Micro-interactions (transitions de page, feedback tactile)
 - [ ] Skeleton loading au lieu de spinners

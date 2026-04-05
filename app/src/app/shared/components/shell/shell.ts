@@ -52,6 +52,7 @@ import { TransferForm } from '../transfer-form/transfer-form';
 import { ProductForm } from '../../../features/shop/components/product-form/product-form';
 import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
 import { BudgetForm } from '../../../features/budgets/components/budget-form/budget-form';
+import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
@@ -77,6 +78,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
     ProductForm,
     SellDialog,
     BudgetForm,
+    RepayDialog,
     NotificationBadge,
     NotificationPanel,
     Toast,

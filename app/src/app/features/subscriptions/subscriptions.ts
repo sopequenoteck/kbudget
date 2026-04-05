@@ -23,6 +23,7 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 interface SubscriptionGroup {
   label: string;
@@ -32,7 +33,7 @@ interface SubscriptionGroup {
 
 @Component({
   selector: 'app-subscriptions',
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
@@ -235,6 +236,10 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     }).format(subscription.montant);
 
     return subscription.frequence === Frequency.MENSUEL ? `${formatted}/mois` : `${formatted}/an`;
+  }
+
+  onAddSubscription(): void {
+    this.modalService.openModal('subscription');
   }
 
   onSubscriptionPressed(subscription: Subscription): void {

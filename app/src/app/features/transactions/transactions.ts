@@ -31,10 +31,11 @@ import {
   phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-transactions',
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState],
   providers: [
     provideIcons({
       phosphorMagnifyingGlass,
