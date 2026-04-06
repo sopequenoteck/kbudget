@@ -26,9 +26,8 @@ import {
 import { ProductService } from '../../../core/services/product';
 import { ModalService } from '../../../core/services/modal.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { Product, RestockRequest } from '../../../core/models/product.model';
+import { Product } from '../../../core/models/product.model';
 import { Transaction } from '../../../core/models/transaction.model';
-import { RestockDialog } from '../components/restock-dialog/restock-dialog';
 import { AmountPipe } from '../../../shared/pipes/amount.pipe';
 
 interface SalesGroup {
@@ -38,7 +37,7 @@ interface SalesGroup {
 
 @Component({
   selector: 'app-shop-detail',
-  imports: [DatePipe, RestockDialog, NgIcon, AmountPipe],
+  imports: [DatePipe, NgIcon, AmountPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -68,7 +67,6 @@ export class ShopDetail {
   readonly productId = computed(() => this.paramMap()?.get('id') ?? null);
   readonly product = signal<Product | null>(null);
   readonly loading = signal<boolean>(true);
-  readonly showRestockDialog = signal(false);
   readonly salesHistory = signal<Transaction[]>([]);
   readonly salesLoading = signal(true);
   readonly historySkeletonItems = Array(3);
@@ -185,35 +183,14 @@ export class ShopDetail {
     }
   }
 
-  async onSell(): Promise<void> {
+  onSell(): void {
     const p = this.product();
-    if (!p) return;
-
-    const price = p.prixVente.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
-    const ok = await this.confirmService.confirm({ title: `${p.nom} — 1 unité à ${price}`, message: 'Voulez-vous confirmer cette vente ?', confirmLabel: 'Vendre', icon: 'phosphorShoppingBag' });
-    if (!ok) return;
-
-    try {
-      await firstValueFrom(this.productService.sell(p.id));
-    } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to sell product', err);
-      }
-    }
+    if (p) this.modalService.openModal('sell', p);
   }
 
-  async onRestock(req: RestockRequest): Promise<void> {
+  onRestockOpen(): void {
     const p = this.product();
-    if (!p) return;
-
-    try {
-      await firstValueFrom(this.productService.restock(p.id, req));
-      this.showRestockDialog.set(false);
-    } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to restock product', err);
-      }
-    }
+    if (p) this.modalService.openModal('restock', p);
   }
 
   async onDelete(): Promise<void> {

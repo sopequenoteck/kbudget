@@ -90,7 +90,7 @@
       <ng-icon name="phosphorPencilSimple" size="18" />
       Modifier
     </button>
-    <button class="action-btn" (click)="showRestockDialog.set(true)" [disabled]="!p.actif">
+    <button class="action-btn" (click)="onRestockOpen()" [disabled]="!p.actif">
       <ng-icon name="phosphorShoppingCart" size="18" />
       Restocker
     </button>
@@ -147,9 +147,4 @@
     }
   </section>
 
-  <app-restock-dialog
-    [visible]="showRestockDialog()"
-    (confirmed)="onRestock($event)"
-    (cancelled)="showRestockDialog.set(false)"
-  />
 }

@@ -1,34 +1,42 @@
-.restock-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
+.restock-form__product-name {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.restock-card {
-  background: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-6);
-  width: min(90vw, 400px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+.restock-form__stock-info {
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  color: var(--text-tertiary);
+}
 
-  h3 {
+.restock-form__quantity {
+  width: 60px;
+  text-align: right;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-default);
+  border-radius: 0;
+  outline: none;
+  padding: var(--space-1) 0;
+  -moz-appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
     margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
   }
-}
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
+  &:focus {
+    border-bottom-color: var(--color-primary);
+  }
 }

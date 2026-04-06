@@ -119,6 +119,17 @@ export class SellDialog {
       ]);
       this.form.get('quantity')!.updateValueAndValidity({ emitEvent: false });
     });
+
+    // Pré-sélection quand ouvert depuis shop-detail avec un produit
+    effect(() => {
+      const entity = this.modalService.editingEntity() as Product | null;
+      if (!entity?.id) return;
+      const available = this.sellableProducts();
+      if (available.length === 0) return;
+      if (available.find((p) => p.id === entity.id)) {
+        this.form.patchValue({ productId: entity.id });
+      }
+    }, { allowSignalWrites: true });
   }
 
   private updateTotalPrice(): void {

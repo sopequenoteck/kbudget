@@ -972,6 +972,49 @@ Wrapper autour de select-picker + bouton creation inline.
 - Le fade entre pages est volontairement court (200ms) : perceptible mais pas genant sur un usage intensif
 - Les skeletons imitent la forme reelle du contenu (cercle + lignes) pour reduire le saut visuel au chargement
 
+## Ce qui a ete fait (session 17)
+
+### Restock dialog — migration bottom sheet
+- Supprime : overlay custom fixe (z-index 1000, card centree, animations propres), composant FormField, signal `showRestockDialog` dans shop-detail
+- Integre dans le ModalService : type `'restock'` ajoute, produit passe via `editingEntity`
+- Bottom sheet pattern 3 rows : handle bar + "Restockage" + icone phosphorPackage + "Stock actuel : X" (row 1), nom produit a gauche + input quantite compact a droite (row 2), Annuler + Confirmer (row 3)
+- Input quantite : type="number" inputmode="numeric", 60px, underline, sans spinners, aligne a droite
+- Toast de succes avec stock mis a jour integre dans le composant
+- shop-detail : `onRestockOpen()` via `modalService.openModal('restock', product)`
+
+### Vente depuis detail produit — branchement SellDialog
+- Supprime : `onSell()` avec confirm dialog + vente directe 1 unite (ne passait pas par le bottom sheet)
+- shop-detail : `onSell()` ouvre `modalService.openModal('sell', product)`
+- SellDialog : ajout effect de pre-selection quand `editingEntity` est un Product (patchValue productId)
+- L'utilisateur accede maintenant au meme bottom sheet que la "Vente rapide" du FAB, avec choix quantite et montant editable
+
+### FAB Menu — alignement quiet utility
+- Supprime : shadow-colored-primary (glow amber en light mode), scale(1.05) au hover, box-shadow sur les items, staggered animation delays (nth-child)
+- FAB button : 56px → 48px, box-shadow → shadow-sm neutre, icone font-size-xl
+- Speed dial : items individuels flottants → conteneur unique arrondi (surface-raised + border-default) avec dividers, style iOS action sheet
+- Items : label a gauche + icone a droite (justify-content: space-between), icone en text-tertiary
+- Animation sur le conteneur (un seul fade-in uniforme), plus sur chaque item
+- Font sm pour les labels, icones 18px, padding compact (space-3 space-4)
+
+### Notification Panel — alignement quiet utility
+- Supprime : box-shadow (-4px 0 24px), fond bleu unread (rgba(59,130,246,0.05)), fallbacks hardcodes (#fff, #e5e7eb, etc.), anciens noms de tokens (--bg-primary, --border-primary, --font-lg), z-index hardcodes (999, 1000), boutons action amber plein
+- Panel : surface-raised + border-left (pas de shadow), z-index via var(--z-overlay)
+- Header : h2 en base/semibold/text-secondary (plus discret, style section-header)
+- Items dans conteneur groupe (surface-default, radius-lg) + dividers (meme pattern que toutes les listes)
+- Unread : dot amber 8px sur l'icone (position absolute, border surface-default) au lieu du fond bleu
+- Icones : cercle rgba(255,255,255,0.06) (meme pattern que le reste de l'app)
+- Boutons action : pills discretes (border-default, transparent, text-primary) au lieu d'amber plein
+- Tous les tokens remplaces par les vrais noms (--font-size-sm, --text-primary, --surface-raised, etc.)
+
+### Decisions de design (session 17)
+- Le restock dialog est le plus simple des bottom sheets (3 rows, pas de section expandable) — la quantite n'est pas un montant hero, c'est un input compact
+- La vente depuis detail produit doit passer par le SellDialog pour coherence : meme experience que le FAB, avec choix quantite et montant editable
+- Le FAB en conteneur unique iOS est plus coherent avec le vocabulaire "conteneur arrondi + dividers" utilise partout dans l'app
+- Le label a gauche + icone a droite sur les items FAB est le pattern iOS natif (action sheet)
+- Le notification panel utilise le meme vocabulaire que les pages liste (conteneur groupe, dividers, surface-default)
+- Le dot amber pour les unread est de l'information pure (couleur = information), le fond bleu etait decoratif
+- Les boutons d'action en pills discretes sont coherents avec les boutons pills des pages detail
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -996,6 +1039,11 @@ Wrapper autour de select-picker + bouton creation inline.
 - [x] Date picker inline custom — composant InlineDatePicker, propage a 5 formulaires (session 15)
 - [x] Micro-interactions — sections expand animees, fermeture modal animee, transitions de page fade (session 16)
 - [x] Skeleton loading — spinners remplaces par skeleton pulse sur toutes les pages (session 16)
+- [x] Restock dialog — migrer vers bottom sheet (session 17)
+- [x] Vente depuis detail produit — brancher le SellDialog bottom sheet existant (session 17)
+- [x] FAB Menu — aligner sur quiet utility, style iOS action sheet (session 17)
+- [x] Notification Panel — aligner vocabulaire visuel, conteneur groupe, dot unread, pills discretes (session 17)
+- [ ] Recherche & filtres Transactions — designer et implementer la UX (icones placeholder sans handler)
 
 ### A faire en dernier
 - [ ] Reecrire DESIGN.md a partir du resultat valide

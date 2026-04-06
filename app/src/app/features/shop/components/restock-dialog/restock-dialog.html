@@ -1,33 +1,44 @@
-@if (visible()) {
-  <div
-    class="restock-overlay"
-    (click)="onCancel()"
-    (keydown.escape)="onCancel()"
-    role="presentation"
-  >
-    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
-    <div
-      class="restock-card"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-label="Ajouter du stock"
-    >
-      <h3>Ajouter du stock</h3>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <app-form-field
-          label="Quantité"
-          fieldId="restockQuantity"
-          [showError]="isInvalid('quantity')"
-          [errorMessage]="'Minimum 1'"
-        >
-          <input id="restockQuantity" type="number" formControlName="quantity" min="1" />
-        </app-form-field>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
+  @if (errorMessage()) {
+    <div class="bsheet__error">{{ errorMessage() }}</div>
+  }
 
-        <div class="form-actions">
-          <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-          <button type="submit" class="btn-primary">Confirmer</button>
-        </div>
-      </form>
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
+      <ng-icon name="phosphorPackage" size="16" />
+      <span>Restockage</span>
     </div>
+    <span class="restock-form__stock-info">Stock actuel : {{ productStock() }}</span>
   </div>
-}
+
+  <div class="bsheet__main-row bsheet__main-row--between">
+    <span class="restock-form__product-name">{{ productName() }}</span>
+    <input
+      class="restock-form__quantity input-naked"
+      type="number"
+      inputmode="numeric"
+      formControlName="quantity"
+      min="1"
+      placeholder="1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="bsheet__bottom-row">
+    <button
+      type="button"
+      class="bsheet__action-pill bsheet__action-pill--cancel"
+      (click)="onCancel()"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      class="bsheet__action-pill bsheet__action-pill--primary"
+      [disabled]="submitting()"
+    >
+      {{ submitting() ? '...' : 'Confirmer' }}
+    </button>
+  </div>
+</form>

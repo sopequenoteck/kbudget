@@ -18,7 +18,8 @@ export type ModalType =
   | 'product'
   | 'sell'
   | 'budget'
-  | 'repay';
+  | 'repay'
+  | 'restock';
 
 type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product | Budget;
 
@@ -33,6 +34,7 @@ const CREATE_TITLES: Record<ModalType, string> = {
   sell: 'Vente rapide',
   budget: 'Nouveau budget',
   repay: 'Remboursement',
+  restock: 'Restockage',
 };
 
 const EDIT_TITLES: Record<ModalType, string> = {
@@ -46,6 +48,7 @@ const EDIT_TITLES: Record<ModalType, string> = {
   sell: 'Vente rapide',
   budget: 'Modifier le budget',
   repay: 'Remboursement',
+  restock: 'Restockage',
 };
 
 const CLOSE_DURATION = 200;
