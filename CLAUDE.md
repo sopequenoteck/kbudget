@@ -90,9 +90,12 @@ Approche **signals-first** obligatoire :
 
 ### Design System
 
-Source de verite : [`docs/design-tokens.md`](docs/design-tokens.md). Primaire : Amber (#f59e0b). Secondaire : Indigo (#4f46e5). Police : Inter.
+Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux couleur : amber (action), vert (revenu), rouge (depense), gris (structure). Police : Inter.
 
-- `var(--token-name)` uniquement, jamais d'import SCSS direct. Structure dans `app/src/styles/`.
+- `var(--token-name)` uniquement, jamais de hex/rgba hardcode dans les composants
+- Patterns partages dans `_list-patterns.scss` et `_bottom-sheet.scss` — les reutiliser, pas les reinventer
+- Avant modification frontend : lire `DESIGN.md` et verifier la conformite
+- Commande `/design-check` pour audit de coherence design
 
 ## Conventions Flutter
 
@@ -134,7 +137,9 @@ Source de verite : [`docs/design-tokens.md`](docs/design-tokens.md). Primaire : 
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
-| [`docs/design-tokens.md`](docs/design-tokens.md) | Design tokens partages (couleurs, typo, spacing, radius, ombres, animations) |
+| [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
+| [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
+| [`docs/design-tokens.md`](docs/design-tokens.md) | Design tokens legacy (obsolete — voir DESIGN.md) |
 | [`docs/roadmap-v2.md`](docs/roadmap-v2.md) | Roadmap V2 : features, phases, decisions |
 | [`docs/dette-technique.md`](docs/dette-technique.md) | Registre des dettes techniques identifiees |
 | [`docs/pwa-install.md`](docs/pwa-install.md) | Guide d'installation PWA (Android/iOS) |

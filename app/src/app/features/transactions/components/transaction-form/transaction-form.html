@@ -62,7 +62,7 @@
   <div class="bsheet__meta-row">
     <div class="bsheet__icons">
       <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" aria-label="Note">
-        <ng-icon name="phosphorNoteBlank" size="18" [style.color]="form.get('note')?.value ? 'var(--color-secondary)' : 'var(--text-tertiary)'" [style.opacity]="form.get('note')?.value ? '0.7' : '1'" />
+        <ng-icon name="phosphorNoteBlank" size="18" [style.color]="form.get('note')?.value ? 'var(--color-primary)' : 'var(--text-tertiary)'" [style.opacity]="form.get('note')?.value ? '0.7' : '1'" />
       </button>
       @if (!isEditing()) {
         <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" aria-label="Récurrence">
@@ -72,7 +72,7 @@
     </div>
     <div class="bsheet__meta-pills">
       <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
-        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
         <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
       </button>
       <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">

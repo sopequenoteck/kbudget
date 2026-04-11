@@ -61,15 +61,15 @@
       </div>
       <div class="bsheet__meta-pills">
         <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" aria-label="Fréquence">
-          <ng-icon name="phosphorRepeat" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <ng-icon name="phosphorRepeat" size="16" style="color: var(--color-primary); opacity: 0.7" />
           <span>{{ frequencyLabel() }}</span>
         </button>
         <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" aria-label="Devise">
-          <ng-icon name="phosphorCoins" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <ng-icon name="phosphorCoins" size="16" style="color: var(--color-primary); opacity: 0.7" />
           <span>{{ form.get('currency')?.value || 'EUR' }}</span>
         </button>
         <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" aria-label="Seuil d'alerte">
-          <ng-icon name="phosphorWarning" size="16" style="color: var(--color-secondary); opacity: 0.7" />
+          <ng-icon name="phosphorWarning" size="16" style="color: var(--color-primary); opacity: 0.7" />
           <span>{{ form.get('seuilNotification')?.value }}%</span>
         </button>
       </div>

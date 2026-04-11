@@ -1126,6 +1126,54 @@ Fichiers nettoyes : inline-date-picker (2), settings (2), notification-panel (1)
 - Les couleurs income/expense (green-600, red-600) ne sont pas attenuees en light contrairement au dark : sur fond blanc elles ne "glowent" pas, l'attenuation dark corrigeait un probleme specifique au fond sombre
 - Chaque rgba() hardcode dans un composant est un bug de theming en attente : il casse en light ou en dark. Remplacer par un token = correction preventive
 
+## Ce qui a ete fait (session 20)
+
+### Suppression de l'indigo comme couleur semantique du design system
+
+Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert (revenu)**, **rouge (depense)**, **gris (structure)**. L'indigo n'avait pas de role semantique clair — il existait par convention (couleur secondaire) sans porter d'information.
+
+### Tokens supprimes
+- 4 tokens semantiques dans chaque theme : `--color-secondary`, `--color-secondary-hover`, `--color-secondary-light`, `--color-secondary-contrast`
+- 3 tokens interactifs dans chaque theme : `--secondary-subtle`, `--secondary-muted`, `--secondary-border`
+- Palette CSS `--indigo-*` (10 vars) supprimee de `_tokens.scss` (plus de consommateur)
+- Variable SCSS `$indigo-600-rgb` supprimee de `_primitives.scss`
+- Palette SCSS `$indigo-*` conservee dans `_primitives.scss` (utilisee par les palettes utilisateur categories/comptes)
+
+### Tokens crees
+- `--primary-muted` : rgba amber a 15% opacite (remplace `--secondary-muted`)
+- `--primary-border` : rgba amber a 25% opacite (remplace `--secondary-border`)
+
+### Migrations par usage
+
+**Icones formulaires (9 usages HTML)** — `var(--color-secondary)` → `var(--color-primary)` :
+- transaction-form (note, calendrier), debt-form (rappel, calendrier), subscription-form (calendrier), budget-form (frequence, devise, seuil), product-form (description)
+- L'amber a opacity 0.7 dit "ce champ est rempli et interactif" — coherent avec amber = action
+
+**Bottom sheet reminder border (1 usage SCSS)** — `var(--color-secondary)` → `var(--color-primary)`
+
+**Date picker jour original (2 usages SCSS)** — `color-mix(--color-secondary, 20%)` → `var(--hover-subtle)` + `var(--text-secondary)` :
+- Le jour original en edition devient un fond subtil neutre au lieu d'indigo. L'amber reste seul pour la selection active
+
+**Import review (7 usages SCSS)** — mapping token par token :
+- `--secondary-subtle` → `--primary-subtle` (batch bar bg, selected item bg)
+- `--secondary-border` → `--primary-border` (batch bar border)
+- `--color-secondary` → `--color-primary` (compteur, bouton, bordure selection, texte regle)
+- `--secondary-muted` → `--primary-muted` (bouton regle bg)
+
+**Import settings (2 usages SCSS)** — icone et badge registry : `--color-secondary` → `--color-primary`, `--color-secondary-light` → `--primary-subtle`
+
+### Palettes utilisateur (inchangees)
+- `#6366f1` reste dans `CATEGORY_COLORS` et `ACCOUNT_COLORS` — c'est une couleur assignable, pas un token semantique
+
+### Decisions de design (session 20)
+- L'indigo n'avait pas de role semantique propre — il existait parce que les design systems ont conventionnellement une couleur secondaire, pas parce que K-Budget en avait besoin
+- La question "quel role pour l'indigo ?" a ete testee en sparring (/alter) — aucun cas concret ou l'amber seul ne suffisait pas
+- Le remplacement est mecanique, pas un redesign : chaque usage d'indigo avait un equivalent amber evident
+- Les icones de formulaires en amber a 0.7 sont plus coherentes : "champ rempli" = meme couleur que "action possible"
+- Le date picker n'a plus besoin d'une couleur dediee pour le jour original — fond subtil + texte secondary suffit, quiet utility
+- L'import review en amber renforce le message "selectionne = pret a agir"
+- Supprimer une couleur du design system est plus courageux que d'en ajouter — c'est un acte de simplification qui renforce la lisibilite de celles qui restent
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -1157,9 +1205,9 @@ Fichiers nettoyes : inline-date-picker (2), settings (2), notification-panel (1)
 - [x] Theme light — fondations surfaces, elevation 3 niveaux, suppression gradients/glass (session 19)
 - [x] Theme light — amber primary contraste WCAG (amber-600/700) (session 19)
 - [x] Extraction rgba() hardcodes — tokens themes (7 nouveaux tokens, 0 rgba dans composants SCSS) (session 19)
-- [ ] Theme light — validation visuelle page par page (ajustements fins couleurs, contrastes, ombres)
-- [ ] Recherche & filtres Transactions — designer et implementer la UX (icones placeholder sans handler)
-- [ ] Role elargi de l'indigo — explorer un role semantique propre (navigation, wayfinding)
+- [x] Theme light — validation visuelle page par page (ajustements fins couleurs, contrastes, ombres)
+- [x] Recherche & filtres Transactions — designer et implementer la UX (icones placeholder sans handler)
+- [x] Role de l'indigo — supprime comme couleur semantique, simplifie a amber+vert+rouge+gris (session 20)
 
 ### A faire en dernier
 - [ ] Reecrire DESIGN.md a partir du resultat valide
@@ -1191,4 +1239,5 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - `<input type="date">` natif dans les bottom sheets (preferer InlineDatePicker inline)
 - Spinners CSS tournants (preferer skeleton pulse qui imite la forme du contenu)
 - rgba() hardcodes dans les composants (preferer tokens semantiques themes — chaque rgba brut est un bug de theming en attente)
-- Hex bruts de couleurs metier (#10b981, #4f46e5, #ef4444) dans les composants (preferer --text-success, --color-secondary, --text-error)
+- Hex bruts de couleurs metier (#10b981, #ef4444) dans les composants (preferer --text-success, --text-error, --color-primary)
+- Couleur secondaire sans role semantique clair — le design system n'a que 4 canaux : amber (action), vert (revenu), rouge (depense), gris (structure)

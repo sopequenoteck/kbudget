@@ -215,7 +215,7 @@
   &:active { transform: scale(0.95); }
   &.active { color: var(--color-primary); border-color: var(--color-primary); }
   &.has-value { color: var(--text-secondary); }
-  &.has-reminder { border-color: var(--color-secondary); }
+  &.has-reminder { border-color: var(--color-primary); }
 }
 
 .bsheet__tool-pill {

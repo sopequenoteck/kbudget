@@ -25,12 +25,6 @@
   --color-primary-light: var(--amber-100);
   --color-primary-contrast: #fff;
 
-  // -- Secondary --
-  --color-secondary: var(--indigo-600);
-  --color-secondary-hover: var(--indigo-700);
-  --color-secondary-light: var(--indigo-100);
-  --color-secondary-contrast: #fff;
-
   // -- Surfaces --
   --surface-default: #fff;
   --surface-raised: var(--gray-100);
@@ -58,9 +52,8 @@
   --highlight-subtle: rgba(0, 0, 0, 0.06);
   --overlay-light: rgba(0, 0, 0, 0.1);
   --primary-subtle: rgba(217, 119, 6, 0.1);
-  --secondary-subtle: rgba(79, 70, 229, 0.06);
-  --secondary-muted: rgba(79, 70, 229, 0.15);
-  --secondary-border: rgba(79, 70, 229, 0.25);
+  --primary-muted: rgba(217, 119, 6, 0.15);
+  --primary-border: rgba(217, 119, 6, 0.25);
   --focus-ring: rgb(var(--amber-500-rgb) / 0.5);
 
   // -- Business tokens --

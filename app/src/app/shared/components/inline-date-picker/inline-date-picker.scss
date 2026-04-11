@@ -117,8 +117,8 @@
 
   // Original day (edit mode — where it was)
   &--original {
-    background: color-mix(in srgb, var(--color-secondary) 20%, transparent);
-    color: var(--color-secondary);
+    background: var(--hover-subtle);
+    color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
   }
 

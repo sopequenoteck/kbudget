@@ -24,12 +24,6 @@
   --color-primary-light: rgba(255, 255, 255, 0.08);
   --color-primary-contrast: var(--gray-900);
 
-  // -- Secondary --
-  --color-secondary: var(--indigo-400);
-  --color-secondary-hover: var(--indigo-300);
-  --color-secondary-light: var(--indigo-900);
-  --color-secondary-contrast: var(--gray-900);
-
   // -- Surfaces --
   --surface-default: var(--gray-800);
   --surface-raised: var(--gray-700);
@@ -60,9 +54,8 @@
   --highlight-subtle: rgba(255, 255, 255, 0.1);
   --overlay-light: rgba(255, 255, 255, 0.15);
   --primary-subtle: rgba(224, 168, 32, 0.1);
-  --secondary-subtle: rgba(129, 140, 248, 0.06);
-  --secondary-muted: rgba(129, 140, 248, 0.15);
-  --secondary-border: rgba(129, 140, 248, 0.25);
+  --primary-muted: rgba(224, 168, 32, 0.15);
+  --primary-border: rgba(224, 168, 32, 0.25);
   --focus-ring: rgb(var(--amber-400-rgb) / 0.5);
 
   // -- Business tokens (muted for dark) --
