@@ -20,7 +20,7 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
   imports: [BaseChartDirective],
   template: `
     @if (hasExpenses()) {
-      <section class="chart-section" [class.clickable]="clickable()" (click)="onClick()">
+      <section class="chart-section" [class.clickable]="clickable()" (click)="onClick()" (keydown.enter)="onClick()" [attr.tabindex]="clickable() ? 0 : null" [attr.role]="clickable() ? 'button' : null">
         <h3 class="chart-section__title">Répartition des dépenses</h3>
         <div class="chart-container">
           <canvas baseChart type="doughnut" [data]="chartData()" [options]="chartOptions()"></canvas>

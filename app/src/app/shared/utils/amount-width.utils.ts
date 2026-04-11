@@ -7,7 +7,7 @@ import { AbstractControl } from '@angular/forms';
  */
 export function createAmountWidth(
   control: AbstractControl,
-  fontSize: number = 30
+  fontSize = 30
 ): Signal<string> {
   const width = signal('2ch');
   const canvas = document.createElement('canvas');

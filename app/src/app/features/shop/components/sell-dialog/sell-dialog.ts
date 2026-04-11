@@ -20,7 +20,7 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
 import { Product } from '../../../../core/models/product.model';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
-import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 

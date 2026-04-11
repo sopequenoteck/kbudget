@@ -98,7 +98,7 @@
     </div>
     <div class="recurring-group">
       @for (item of group.items; track item.id) {
-        <div class="transaction-row" (click)="onItemPressed(item)">
+        <button type="button" class="transaction-row" (click)="onItemPressed(item)">
           <span
             class="transaction-row__icon"
             [style.background-color]="item.category.couleur ? item.category.couleur + '26' : null"
@@ -119,7 +119,7 @@
               </span>
             }
           </div>
-        </div>
+        </button>
       }
     </div>
   }

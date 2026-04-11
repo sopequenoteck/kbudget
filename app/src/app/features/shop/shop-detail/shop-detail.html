@@ -127,7 +127,7 @@
         <span class="history-date-label">{{ group.label }}</span>
         <ul class="history-list">
           @for (tx of group.items; track tx.id) {
-            <li class="history-item" (click)="onTransactionPressed(tx)">
+            <li class="history-item" (click)="onTransactionPressed(tx)" (keydown.enter)="onTransactionPressed(tx)" tabindex="0" role="button">
               <div class="history-icon" [class.history-icon--sale]="tx.type === 'RECETTE'">
                 @if (tx.type === 'RECETTE') {
                   <ng-icon name="phosphorShoppingBag" size="16" />

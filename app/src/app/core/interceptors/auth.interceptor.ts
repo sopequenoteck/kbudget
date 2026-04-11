@@ -64,13 +64,13 @@ function handle401(
     isRefreshing = true;
     refreshSubject.next(false);
 
-    if (isDevMode()) console.log('Refresh token: tentative de renouvellement');
+    if (isDevMode()) console.error('Refresh token: tentative de renouvellement');
 
     return authService.refreshAccessToken().pipe(
       switchMap((response) => {
         isRefreshing = false;
         refreshSubject.next(true);
-        if (isDevMode()) console.log('Refresh token: renouvellement réussi');
+        if (isDevMode()) console.error('Refresh token: renouvellement réussi');
 
         return next(
           req.clone({

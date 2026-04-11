@@ -5,7 +5,7 @@ import { phosphorHouse, phosphorCurrencyDollar, phosphorArrowsClockwise, phospho
 import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseFill, phosphorHandshakeFill, phosphorStorefrontFill } from '@ng-icons/phosphor-icons/fill';
 
 @Component({
-  selector: 'bottom-nav',
+  selector: 'app-bottom-nav',
   imports: [RouterLink, NgIcon],
   host: { '[attr.data-item-count]': 'items().length.toString()' },
   providers: [

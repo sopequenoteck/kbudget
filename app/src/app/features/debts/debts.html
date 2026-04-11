@@ -79,7 +79,7 @@
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
     <div class="list-group">
       @for (debt of group.items; track debt.id) {
-        <div class="list-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
+        <button type="button" class="list-row" [class.repaid]="debt.rembourse" (click)="onDebtPressed(debt)">
           <span
             class="list-row__icon"
             [style.background-color]="getIconBg(debt)"
@@ -103,7 +103,7 @@
               <span class="list-row__due" [class.list-row__due--overdue]="isOverdue(debt)">{{ relDate }}</span>
             }
           </div>
-        </div>
+        </button>
       }
     </div>
   }

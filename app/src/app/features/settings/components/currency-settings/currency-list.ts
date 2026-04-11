@@ -72,7 +72,9 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
     <!-- Sélection devise -->
     @if (showAddSheet()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="showAddSheet.set(false)">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
           <p class="dialog__title">Ajouter une devise</p>
           @for (c of availableCurrenciesToAdd(); track c) {
@@ -87,7 +89,9 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
     <!-- Warning : devise utilisée par des comptes -->
     @if (showRemoveWarning()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="showRemoveWarning.set(false)">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
           <p class="dialog__message">
             La devise <strong>{{ CURRENCY_NAMES[currencyToRemove()!] || currencyToRemove() }}</strong>

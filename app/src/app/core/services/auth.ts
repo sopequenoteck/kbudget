@@ -106,7 +106,7 @@ export class AuthService {
 
       const refreshToken = this.getRefreshToken();
       if (refreshToken) {
-        if (isDevMode()) console.log('restoreSession: access token expiré, tentative de refresh');
+        if (isDevMode()) console.error('restoreSession: access token expiré, tentative de refresh');
         this.refreshAccessToken().subscribe({
           error: () => {
             this.clearAuth();

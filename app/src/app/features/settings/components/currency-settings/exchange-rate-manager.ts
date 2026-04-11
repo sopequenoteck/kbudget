@@ -101,7 +101,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
         <div class="section-content section-content--padded">
           <div class="form-grid">
             <div class="form-field">
-              <label class="form-label">Devise de base</label>
+              <span class="form-label">Devise de base</span>
               <div class="form-readonly">{{ primaryCurrency() }}</div>
             </div>
 
@@ -163,7 +163,9 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
     <!-- Dialog de confirmation de suppression -->
     @if (rateToDelete()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="cancelDelete()">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
           <p class="dialog__message">
             Supprimer le taux

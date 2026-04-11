@@ -91,7 +91,8 @@
     @if (!isCollapsed(group.status)) {
       <div class="list-group">
         @for (product of group.items; track product.id) {
-          <div
+          <button
+            type="button"
             class="list-row"
             [class.inactive]="!product.actif"
             (click)="onProductPressed(product)"
@@ -113,7 +114,7 @@
                 <span class="list-row__stock-warning">Rupture</span>
               }
             </div>
-          </div>
+          </button>
         }
       </div>
     }

@@ -83,7 +83,7 @@ describe('StompService', () => {
     // Arrange — premier connect
     service.connect();
     // Simuler que le client est actif
-    const clientField = (service as any)['client'];
+    const clientField = (service as { client: { active: boolean } | null })['client'];
     if (clientField) clientField.active = true;
 
     // Act — deuxième connect ne doit pas recréer
@@ -101,6 +101,6 @@ describe('StompService', () => {
     service.disconnect();
 
     // Assert
-    expect((service as any)['client']).toBeNull();
+    expect((service as { client: unknown })['client']).toBeNull();
   });
 });

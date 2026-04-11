@@ -248,8 +248,9 @@ export class BudgetList implements AfterViewInit, OnDestroy {
       if (isDevMode()) console.error('Failed to load budget data', err);
       this.error.set('Impossible de charger les budgets');
     } finally {
-      if (version !== this.loadVersion) return;
-      this.loading.set(false);
+      if (version === this.loadVersion) {
+        this.loading.set(false);
+      }
     }
   }
 

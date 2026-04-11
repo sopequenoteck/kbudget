@@ -12,6 +12,8 @@ import { AccountService } from '../../../../core/services/account';
 import { TransactionType, type Transaction } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
 import { type RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
+import { type Category } from '../../../../core/models/category.model';
+import { type AccountSummary } from '../../../../core/models/account.model';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
@@ -38,8 +40,8 @@ const makeRecurringResponse = (): RecurringTransactionResponse => ({
   frequency: Frequency.MENSUEL,
   nextOccurrence: '2026-04-01',
   recurringActive: true,
-  category: null as any,
-  account: null as any,
+  category: null as unknown as Category,
+  account: null as unknown as AccountSummary,
 });
 
 describe('TransactionForm', () => {

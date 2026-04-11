@@ -75,7 +75,7 @@
     <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
     <div class="list-group">
       @for (subscription of group.items; track subscription.id) {
-        <div class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
+        <button type="button" class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
           <span
             class="list-row__icon"
             [style.background-color]="subscription.category?.couleur ? subscription.category!.couleur + '26' : null"
@@ -95,7 +95,7 @@
               </span>
             }
           </div>
-        </div>
+        </button>
       }
     </div>
   }

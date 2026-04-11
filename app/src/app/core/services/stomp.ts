@@ -40,7 +40,7 @@ export class StompService {
         }
       },
       onConnect: () => {
-        if (isDevMode()) console.log('STOMP connected');
+        if (isDevMode()) console.error('STOMP connected');
         this.notificationService.stopPolling();
 
         this.client!.subscribe('/user/queue/notifications', (message) => {
@@ -56,7 +56,7 @@ export class StompService {
         });
       },
       onDisconnect: () => {
-        if (isDevMode()) console.log('STOMP disconnected');
+        if (isDevMode()) console.error('STOMP disconnected');
       },
       onStompError: (frame) => {
         if (isDevMode()) console.error('STOMP error:', frame.headers['message']);

@@ -162,7 +162,7 @@
     <div class="date-label">{{ group.label }}</div>
     <div class="list-group">
       @for (transaction of group.transactions; track transaction.id) {
-        <div class="list-row" (click)="onTransactionPressed(transaction)">
+        <button type="button" class="list-row" (click)="onTransactionPressed(transaction)">
           <span
             class="list-row__icon"
             [style.background-color]="transaction.category?.couleur ? transaction.category!.couleur + '26' : null"
@@ -181,7 +181,7 @@
               </span>
             }
           </div>
-        </div>
+        </button>
       }
     </div>
   }

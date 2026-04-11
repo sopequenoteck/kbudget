@@ -269,7 +269,7 @@
       }
     </div>
 
-    <div class="upload-zone" (click)="triggerFileInput()" [class.upload-zone--disabled]="uploading()">
+    <div class="upload-zone" (click)="triggerFileInput()" (keydown.enter)="triggerFileInput()" tabindex="0" role="button" [class.upload-zone--disabled]="uploading()">
       <input
         id="csv-file-input"
         type="file"
