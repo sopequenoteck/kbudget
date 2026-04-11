@@ -10,15 +10,16 @@ import {
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, phosphorTrash, phosphorWarning } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Category } from '../../../../core/models/category.model';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-categories',
-  imports: [RouterLink, NgIcon],
+  imports: [RouterLink, NgIcon, EmptyState],
   providers: [
     provideIcons({
       phosphorCaretLeft,
@@ -26,6 +27,7 @@ import { Category } from '../../../../core/models/category.model';
       phosphorPlus,
       phosphorTag,
       phosphorTrash,
+      phosphorWarning,
     }),
   ],
   templateUrl: './categories.html',

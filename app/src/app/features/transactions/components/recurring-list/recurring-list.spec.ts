@@ -215,7 +215,7 @@ describe('RecurringList', () => {
     expect(component.sortedRecurringTransactions().length).toBe(0);
 
     const nativeEl: HTMLElement = fixture.nativeElement;
-    const emptyState = nativeEl.querySelector('.state-empty');
+    const emptyState = nativeEl.querySelector('app-empty-state');
     expect(emptyState).not.toBeNull();
   });
 

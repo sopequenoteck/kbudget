@@ -21,6 +21,8 @@ import {
   phosphorTarget,
   phosphorChartPie,
   phosphorWarning,
+  phosphorMagnifyingGlass,
+  phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
@@ -41,6 +43,7 @@ import {
 import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 interface TransactionGroup {
   label: string;
@@ -49,7 +52,7 @@ interface TransactionGroup {
 
 @Component({
   selector: 'app-budget-detail',
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -60,6 +63,8 @@ interface TransactionGroup {
       phosphorTarget,
       phosphorChartPie,
       phosphorWarning,
+      phosphorMagnifyingGlass,
+      phosphorReceipt,
     }),
   ],
   templateUrl: './budget-detail.html',

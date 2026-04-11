@@ -306,8 +306,7 @@
 // States
 // =============================================================================
 
-.state-loading,
-.state-empty {
+.state-loading {
   display: flex;
   flex-direction: column;
   align-items: center;

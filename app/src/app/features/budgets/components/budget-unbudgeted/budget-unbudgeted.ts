@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorArrowLeft, phosphorPlus, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
+import { phosphorArrowLeft, phosphorCheckCircle, phosphorPlus, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
 import { BudgetService } from '../../../../core/services/budget';
@@ -30,6 +30,7 @@ import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 interface CategoryGroup {
   categoryId: string;
@@ -42,12 +43,13 @@ interface CategoryGroup {
 
 @Component({
   selector: 'app-budget-unbudgeted',
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState],
   providers: [
     provideIcons({
       phosphorArrowLeft,
       phosphorPlus,
       phosphorSquaresFour,
+      phosphorCheckCircle,
     }),
   ],
   templateUrl: './budget-unbudgeted.html',

@@ -1015,6 +1015,24 @@ Wrapper autour de select-picker + bouton creation inline.
 - Le dot amber pour les unread est de l'information pure (couleur = information), le fond bleu etait decoratif
 - Les boutons d'action en pills discretes sont coherents avec les boutons pills des pages detail
 
+## Ce qui a ete fait (session 18)
+
+### Empty states — nettoyage final
+- Migration des 6 derniers fichiers utilisant `.state-empty` vers le composant partage `<app-empty-state>`
+- **budget-detail** : "Budget introuvable" (phosphorMagnifyingGlass) + "Aucune transaction ce mois" (phosphorReceipt)
+- **budget-unbudgeted** : "Toutes vos categories ont un budget" (phosphorCheckCircle)
+- **categories** : erreur de chargement (phosphorWarning + CTA "Reessayer") + "Aucune categorie" (phosphorTag + CTA "Creer une categorie")
+- **accounts** : erreur de chargement (phosphorWarning + CTA "Reessayer") + "Aucun compte" (phosphorBank + hint + CTA "Creer un compte")
+- **import-settings** / **csv-mapping** : `.state-empty` renomme en `.inline-empty` (messages inline simples, pas de composant partage — contexte different)
+- Suppression de 6 blocs `.state-empty` SCSS + 2 `.btn-retry` orphelins
+- Test `recurring-list.spec.ts` mis a jour (selecteur `.state-empty` → `app-empty-state`)
+- **0 occurrence** de `.state-empty` restante dans le projet
+
+### Decisions de design (session 18)
+- Les empty states riches (pleine page, centres) utilisent le composant partage — coherence visuelle garantie
+- Les messages inline (import-settings, csv-mapping) restent des `<p>` simples — le composant partage avec son padding space-10 serait disproportionne dans une section de formulaire
+- Les CTA "Creer une categorie" / "Creer un compte" sur les empty states vides encouragent l'action sans etre intrusifs (text link amber, pas bouton plein)
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -1030,7 +1048,7 @@ Wrapper autour de select-picker + bouton creation inline.
 - [x] Settings — refonte hub unique + 2 sous-pages (session 11)
 - [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
 - [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
-- [x] Empty states — composant partage EmptyState (icone + message + CTA), propage a toutes les pages (session 12)
+- [x] Empty states — composant partage EmptyState (icone + message + CTA), propage a toutes les pages (session 12, nettoyage final session 18)
 - [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit) (session 11)
 - [x] Migrer RepayDialog et SellDialog vers le bottom sheet partage (session 13)
 

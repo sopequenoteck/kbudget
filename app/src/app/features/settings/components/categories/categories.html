@@ -21,14 +21,19 @@
     }
   </div>
 } @else if (error()) {
-  <div class="state-empty">
-    <p>Erreur de chargement</p>
-    <button class="btn-retry" (click)="loadCategories()">Réessayer</button>
-  </div>
+  <app-empty-state
+    icon="phosphorWarning"
+    message="Erreur de chargement"
+    ctaLabel="Réessayer"
+    (ctaClick)="loadCategories()"
+  />
 } @else if (userCategories().length === 0) {
-  <div class="state-empty">
-    <p>Aucune catégorie</p>
-  </div>
+  <app-empty-state
+    icon="phosphorTag"
+    message="Aucune catégorie"
+    ctaLabel="Créer une catégorie"
+    (ctaClick)="createCategory()"
+  />
 } @else {
   <div class="cat-section">
     <div class="cat-section__header">

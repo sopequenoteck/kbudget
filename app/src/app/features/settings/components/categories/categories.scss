@@ -220,29 +220,9 @@
   }
 }
 
-.btn-retry {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-round);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-family: inherit;
-  cursor: pointer;
-}
 
 // =============================================================================
 // States
 // =============================================================================
 
-.state-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8) var(--space-4);
-  gap: var(--space-3);
-  color: var(--text-tertiary);
-  font-size: var(--font-size-sm);
-}
 

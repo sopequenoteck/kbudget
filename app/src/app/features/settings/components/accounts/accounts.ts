@@ -18,6 +18,7 @@ import {
   phosphorStar,
   phosphorTrash,
   phosphorUploadSimple,
+  phosphorWarning,
 } from '@ng-icons/phosphor-icons/regular';
 import { AccountService } from '../../../../core/services/account';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
@@ -28,10 +29,11 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
 import { CurrencyList } from '../currency-settings/currency-list';
 import { ExchangeRateManager } from '../currency-settings/exchange-rate-manager';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager],
+  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager, EmptyState],
   providers: [
     provideIcons({
       phosphorBank,
@@ -41,6 +43,7 @@ import { ExchangeRateManager } from '../currency-settings/exchange-rate-manager'
       phosphorStar,
       phosphorTrash,
       phosphorUploadSimple,
+      phosphorWarning,
     }),
   ],
   templateUrl: './accounts.html',

@@ -21,15 +21,20 @@
     }
   </div>
 } @else if (error()) {
-  <div class="state-empty">
-    <p>Erreur de chargement</p>
-    <button class="btn-retry" (click)="loadAccounts()">Réessayer</button>
-  </div>
+  <app-empty-state
+    icon="phosphorWarning"
+    message="Erreur de chargement"
+    ctaLabel="Réessayer"
+    (ctaClick)="loadAccounts()"
+  />
 } @else if (accounts().length === 0) {
-  <div class="state-empty">
-    <p>Aucun compte</p>
-    <p class="state-empty__hint">Créez votre premier compte pour commencer</p>
-  </div>
+  <app-empty-state
+    icon="phosphorBank"
+    message="Aucun compte"
+    hint="Créez votre premier compte pour commencer"
+    ctaLabel="Créer un compte"
+    (ctaClick)="createAccount()"
+  />
 } @else {
   <div class="accounts-section">
     <div class="accounts-section__header">

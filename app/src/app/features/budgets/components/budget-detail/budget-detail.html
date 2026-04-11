@@ -35,9 +35,10 @@
     }
   </div>
 } @else if (!budgetItem()) {
-  <div class="state-empty">
-    <p>Budget introuvable</p>
-  </div>
+  <app-empty-state
+    icon="phosphorMagnifyingGlass"
+    message="Budget introuvable"
+  />
 } @else {
   <div class="hero">
     <span class="hero__label">DÉPENSÉ</span>
@@ -111,9 +112,10 @@
       }
     </div>
   } @else if (categoryTransactions().length === 0) {
-    <div class="state-empty">
-      <p>Aucune transaction ce mois</p>
-    </div>
+    <app-empty-state
+      icon="phosphorReceipt"
+      message="Aucune transaction ce mois"
+    />
   } @else {
     @for (group of groupedTransactions(); track group.label) {
       <div class="date-label">{{ group.label }}</div>

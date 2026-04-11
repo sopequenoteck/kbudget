@@ -10,9 +10,10 @@
     <div class="spinner"></div>
   </div>
 } @else if (unbudgetedItems().length === 0) {
-  <div class="state-empty">
-    <p>Toutes vos catégories ont un budget</p>
-  </div>
+  <app-empty-state
+    icon="phosphorCheckCircle"
+    message="Toutes vos catégories ont un budget"
+  />
 } @else {
   <div class="hero">
     <div class="hero__body">
