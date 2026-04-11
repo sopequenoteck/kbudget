@@ -44,6 +44,7 @@ import {
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
@@ -59,7 +60,7 @@ export class ShortDatePipe implements PipeTransform {
     if (days === 0) return "Aujourd'hui";
     if (days === -1) return 'Hier';
     if (days === 1) return 'Demain';
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
   }
 }
 
@@ -159,7 +160,7 @@ export class SubscriptionForm {
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? 'EUR';
     return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -271,7 +272,7 @@ export class SubscriptionForm {
     const sub = this.subscription();
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
-    const amount = sub.montant.toLocaleString('fr-FR', { style: 'currency', currency });
+    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
     const ok = await this.confirmService.confirm({
       title: `${sub.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cet abonnement ?',

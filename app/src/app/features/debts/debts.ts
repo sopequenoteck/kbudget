@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -18,12 +17,14 @@ import { ModalService } from '../../core/services/modal.service';
 import { PreferenceService } from '../../core/services/preference';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
+import { DevLogger } from '../../core/services/dev-logger';
 import { Debt, DebtType } from '../../core/models/debt.model';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 interface DebtGroup {
   label: string;
@@ -47,6 +48,7 @@ export class Debts implements AfterViewInit, OnDestroy {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -202,9 +204,7 @@ export class Debts implements AfterViewInit, OnDestroy {
       this.debts.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load debts', err);
-      }
+      this.logger.error('Failed to load debts', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -249,7 +249,7 @@ export class Debts implements AfterViewInit, OnDestroy {
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(dueDate);
+    return new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short' }).format(dueDate);
   }
 
   getAmountClass(debt: Debt): string {

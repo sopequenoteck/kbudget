@@ -22,6 +22,7 @@ import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
 import { ModalService } from '../../../core/services/modal.service';
+import { PALETTE_COLORS } from '../../../core/constants/palette.constants';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 import { compressImage } from '../../utils/image.utils';
 
@@ -48,20 +49,6 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
   [AccountType.ESPECES]: '#f59e0b',
 };
 
-const ACCOUNT_COLORS: string[] = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#f97316',
-  '#84cc16',
-  '#22c55e',
-  '#06b6d4',
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#78716c',
-];
 
 @Component({
   selector: 'app-account-form',
@@ -100,7 +87,7 @@ export class AccountForm {
   readonly AccountType = AccountType;
   readonly typeLabels = ACCOUNT_TYPE_LABELS;
   readonly defaultIcons = DEFAULT_ICONS;
-  readonly accountColors = ACCOUNT_COLORS;
+  readonly accountColors = PALETTE_COLORS;
   readonly currencyItems = this.currencyService.currencyItems;
 
   readonly canDeactivate = computed(() => {

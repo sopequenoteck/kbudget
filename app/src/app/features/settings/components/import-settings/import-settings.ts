@@ -3,7 +3,6 @@ import {
   Component,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -28,6 +27,8 @@ import { AccountService } from '../../../../core/services/account';
 import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
 import { CategoryRule, ImportDraftSummary, ImportHistoryEntry, ImportProfile } from '../../../../core/models/import.model';
@@ -61,6 +62,7 @@ export class ImportSettings {
   private readonly categoryRuleService = inject(CategoryRuleService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly logger = inject(DevLogger);
 
   private readonly queryParams = toSignal(this.route.queryParamMap);
 
@@ -129,9 +131,7 @@ export class ImportSettings {
         this.selectedAccountId.set(defaultAcc.id);
       }
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load accounts', err);
-      }
+      this.logger.error('Failed to load accounts', err);
     }
   }
 
@@ -141,9 +141,7 @@ export class ImportSettings {
       const data = await firstValueFrom(this.importService.listDrafts());
       this.drafts.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load drafts', err);
-      }
+      this.logger.error('Failed to load drafts', err);
       this.drafts.set([]);
     } finally {
       this.draftsLoading.set(false);
@@ -156,9 +154,7 @@ export class ImportSettings {
       const response = await firstValueFrom(this.importService.listHistory(0, 20));
       this.history.set(response.content);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load history', err);
-      }
+      this.logger.error('Failed to load history', err);
       this.history.set([]);
     } finally {
       this.historyLoading.set(false);
@@ -192,9 +188,7 @@ export class ImportSettings {
     try {
       await firstValueFrom(this.importService.deleteDraft(draftId));
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete draft', err);
-      }
+      this.logger.error('Failed to delete draft', err);
     } finally {
       this.deletingDraftId.set(null);
     }
@@ -202,7 +196,7 @@ export class ImportSettings {
 
   formatDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   private async loadRules(): Promise<void> {
@@ -210,9 +204,7 @@ export class ImportSettings {
       const data = await firstValueFrom(this.categoryRuleService.getAll());
       this.rules.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load rules', err);
-      }
+      this.logger.error('Failed to load rules', err);
     }
   }
 
@@ -221,9 +213,7 @@ export class ImportSettings {
       const data = await firstValueFrom(this.categoryService.getAll());
       this.categories.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load categories', err);
-      }
+      this.logger.error('Failed to load categories', err);
     }
   }
 
@@ -275,9 +265,7 @@ export class ImportSettings {
       this.showRuleForm.set(false);
       this.editingRuleId.set(null);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to save rule', err);
-      }
+      this.logger.error('Failed to save rule', err);
       this.ruleFormError.set('Erreur lors de la sauvegarde de la règle.');
     } finally {
       this.ruleFormSaving.set(false);
@@ -288,9 +276,7 @@ export class ImportSettings {
     try {
       await firstValueFrom(this.categoryRuleService.delete(ruleId));
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete rule', err);
-      }
+      this.logger.error('Failed to delete rule', err);
     }
   }
 
@@ -308,9 +294,7 @@ export class ImportSettings {
       const draft = await firstValueFrom(this.importService.upload(file, accountId));
       this.router.navigate(['/settings/import/review', draft.id]);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to upload CSV', err);
-      }
+      this.logger.error('Failed to upload CSV', err);
       const httpErr = err as { status?: number; error?: { message?: string } };
       if (httpErr?.status === 409) {
         this.uploadError.set(
@@ -338,9 +322,7 @@ export class ImportSettings {
       const data = await firstValueFrom(this.importService.getProfiles());
       this.profiles.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load profiles', err);
-      }
+      this.logger.error('Failed to load profiles', err);
       this.profiles.set([]);
     } finally {
       this.profilesLoading.set(false);
@@ -352,9 +334,7 @@ export class ImportSettings {
     try {
       await firstValueFrom(this.importService.deleteProfile(profileId));
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete profile', err);
-      }
+      this.logger.error('Failed to delete profile', err);
     } finally {
       this.deletingProfileId.set(null);
     }

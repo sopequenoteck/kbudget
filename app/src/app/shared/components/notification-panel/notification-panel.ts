@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, computed, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { APP_LOCALE } from '../../../core/constants/locale.constants';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -72,7 +73,7 @@ export class NotificationPanel {
       const date = new Date(dateStr);
       if (date.toDateString() === today.toDateString()) return "Aujourd'hui";
       if (date.toDateString() === yesterday.toDateString()) return 'Hier';
-      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
     };
 
     for (const notification of notifications) {

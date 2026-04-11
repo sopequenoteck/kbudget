@@ -3,7 +3,6 @@ import {
   Component,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -24,6 +23,7 @@ import { AccountService } from '../../../../core/services/account';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
+import { DevLogger } from '../../../../core/services/dev-logger';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
@@ -55,6 +55,7 @@ export class Accounts {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
+  private readonly logger = inject(DevLogger);
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
 
@@ -91,9 +92,7 @@ export class Accounts {
       this.accounts.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load accounts', err);
-      }
+      this.logger.error('Failed to load accounts', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -111,9 +110,7 @@ export class Accounts {
     try {
       await firstValueFrom(this.accountService.setDefault(account.id));
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to set default account', err);
-      }
+      this.logger.error('Failed to set default account', err);
     }
   }
 
@@ -139,9 +136,7 @@ export class Accounts {
       const httpErr = err as { error?: { message?: string } };
       const message = httpErr?.error?.message ?? 'Erreur lors de la suppression';
       this.deleteError.set(message);
-      if (isDevMode()) {
-        console.error('Failed to delete account', err);
-      }
+      this.logger.error('Failed to delete account', err);
     }
   }
 

@@ -1,4 +1,5 @@
-import { Signal, signal } from '@angular/core';
+import { Signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl } from '@angular/forms';
 
 /**
@@ -9,16 +10,15 @@ export function createAmountWidth(
   control: AbstractControl,
   fontSize = 30
 ): Signal<string> {
-  const width = signal('2ch');
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
   ctx.font = `bold ${fontSize}px Inter, sans-serif`;
 
-  control.valueChanges.subscribe((val) => {
-    const text = val || '0';
-    const measured = ctx.measureText(text).width;
-    width.set(`${Math.ceil(measured) + 4}px`);
-  });
+  const val = toSignal(control.valueChanges, { initialValue: control.value || '0' });
 
-  return width;
+  return computed(() => {
+    const text = val() || '0';
+    const measured = ctx.measureText(text).width;
+    return `${Math.ceil(measured) + 4}px`;
+  });
 }

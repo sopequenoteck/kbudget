@@ -23,18 +23,18 @@
   animation: toast-slide-in 0.25s ease-out;
 
   &--success {
-    background-color: var(--color-success, #22c55e);
-    color: #fff;
+    background-color: var(--text-success);
+    color: var(--text-inverse);
   }
 
   &--error {
-    background-color: var(--color-danger, #ef4444);
-    color: #fff;
+    background-color: var(--text-error);
+    color: var(--text-inverse);
   }
 
   &--info {
-    background-color: var(--color-primary, #f59e0b);
-    color: #fff;
+    background-color: var(--color-primary);
+    color: var(--text-inverse);
   }
 }
 

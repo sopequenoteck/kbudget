@@ -41,6 +41,7 @@ import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model'
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
 
@@ -56,7 +57,7 @@ export class ShortDatePipe implements PipeTransform {
     if (days === 0) return "Aujourd'hui";
     if (days === -1) return 'Hier';
     if (days === 1) return 'Demain';
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
   }
 }
 
@@ -168,7 +169,7 @@ export class DebtForm {
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
     return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -220,7 +221,8 @@ export class DebtForm {
       }
     });
 
-    this.form.get('accountId')?.valueChanges.subscribe((accountId) => {
+    effect(() => {
+      const accountId = this.accountIdSignal();
       if (accountId) {
         const account = this.activeAccounts().find((a) => a.id === accountId);
         if (account) {
@@ -296,7 +298,7 @@ export class DebtForm {
     const d = this.debt();
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
-    const amount = d.montant.toLocaleString('fr-FR', { style: 'currency', currency });
+    const amount = d.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
     const ok = await this.confirmService.confirm({
       title: `${d.personne} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cette dette ?',

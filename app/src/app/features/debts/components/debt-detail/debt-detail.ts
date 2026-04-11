@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,6 +24,8 @@ import { ConversionService } from '../../../../core/services/conversion';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -58,6 +59,7 @@ export class DebtDetail {
   private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
+  private readonly logger = inject(DevLogger);
 
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
@@ -112,9 +114,7 @@ export class DebtDetail {
       this.loading.set(false);
       this.loadPayments(id);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load debt', err);
-      }
+      this.logger.error('Failed to load debt', err);
       const status = (err as { status?: number }).status;
       if (status === 404) {
         this.router.navigate(['/debts']);
@@ -131,9 +131,7 @@ export class DebtDetail {
       const data = await firstValueFrom(this.debtService.getPayments(id));
       this.payments.set(data);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load payments', err);
-      }
+      this.logger.error('Failed to load payments', err);
     } finally {
       this.paymentsLoading.set(false);
     }
@@ -150,7 +148,7 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    const amount = d.montantRestant.toLocaleString('fr-FR', { style: 'currency', currency: d.currency });
+    const amount = d.montantRestant.toLocaleString(APP_LOCALE, { style: 'currency', currency: d.currency });
     const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
     if (!ok) return;
 
@@ -159,9 +157,7 @@ export class DebtDetail {
       this.toastService.success('Dette supprimée');
       this.router.navigate(['/debts']);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to delete debt', err);
-      }
+      this.logger.error('Failed to delete debt', err);
       this.toastService.error('Erreur lors de la suppression');
     }
   }
@@ -205,6 +201,6 @@ export class DebtDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat('fr-FR').format(new Date(date));
+    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
   }
 }

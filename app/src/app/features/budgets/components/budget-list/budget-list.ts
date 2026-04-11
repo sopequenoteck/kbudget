@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -26,6 +25,8 @@ import { CategoryService } from '../../../../core/services/category';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import {
   type Budget,
   type BudgetOverview,
@@ -56,6 +57,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly Math = Math;
   readonly isOverviewItem = isOverviewItem;
@@ -86,7 +88,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   });
 
   readonly selectedMonthLabel = computed(() =>
-    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString('fr-FR', {
+    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString(APP_LOCALE, {
       month: 'long',
       year: 'numeric',
     }),
@@ -246,7 +248,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
       this.monthData.set(data);
     } catch (err) {
       if (version !== this.loadVersion) return;
-      if (isDevMode()) console.error('Failed to load budget data', err);
+      this.logger.error('Failed to load budget data', err);
       this.error.set('Impossible de charger les budgets');
     } finally {
       if (version === this.loadVersion) {
@@ -260,7 +262,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
       const data = await firstValueFrom(this.budgetService.getAll());
       this.allBudgets.set(data);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load all budgets', err);
+      this.logger.error('Failed to load all budgets', err);
     }
   }
 
@@ -269,7 +271,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
       const data = await firstValueFrom(this.categoryService.getAll());
       this.allCategories.set(data);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load categories', err);
+      this.logger.error('Failed to load categories', err);
     }
   }
 

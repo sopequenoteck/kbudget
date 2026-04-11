@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 
-const longDateFormatter = new Intl.DateTimeFormat('fr-FR', {
+const longDateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
   day: 'numeric',
   month: 'long',
   year: 'numeric',

@@ -7,7 +7,6 @@ import {
   effect,
   ElementRef,
   inject,
-  isDevMode,
   signal,
   viewChild,
 } from '@angular/core';
@@ -19,6 +18,7 @@ import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { CategoryService } from '../../core/services/category';
 import { AccountService } from '../../core/services/account';
+import { DevLogger } from '../../core/services/dev-logger';
 import { Transaction, TransactionType, MonthlySummary } from '../../core/models/transaction.model';
 import { Category } from '../../core/models/category.model';
 import { Account } from '../../core/models/account.model';
@@ -36,6 +36,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 @Component({
   selector: 'app-transactions',
@@ -67,6 +68,7 @@ export class Transactions implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   private readonly searchInput = viewChild<ElementRef>('searchInput');
+  private readonly logger = inject(DevLogger);
   readonly isStuck = signal(false);
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -129,7 +131,7 @@ export class Transactions implements AfterViewInit {
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
-    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
   });
 
   readonly filteredTransactions = computed(() => {
@@ -285,9 +287,7 @@ export class Transactions implements AfterViewInit {
         this.loading.set(false);
       },
       error: (err) => {
-        if (isDevMode()) {
-          console.error('Failed to load transactions', err);
-        }
+        this.logger.error('Failed to load transactions', err);
         this.error.set(true);
         this.loading.set(false);
       },

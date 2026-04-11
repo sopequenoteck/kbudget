@@ -49,6 +49,7 @@ import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' | null;
 
@@ -64,7 +65,7 @@ export class ShortDatePipe implements PipeTransform {
     if (days === 0) return "Aujourd'hui";
     if (days === -1) return 'Hier';
     if (days === 1) return 'Demain';
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
   }
 }
 
@@ -166,7 +167,7 @@ export class TransactionForm {
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0).toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
+    return (0).toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
   });
 
   private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
@@ -339,7 +340,7 @@ export class TransactionForm {
     const tx = this.transaction();
     if (!tx) return;
     const currency = tx.account?.currency ?? 'EUR';
-    const amount = tx.montant.toLocaleString('fr-FR', { style: 'currency', currency });
+    const amount = tx.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
     let message = 'Voulez-vous vraiment supprimer cette transaction ?';
     if (tx.transferId) {
       message += '\nLa contrepartie du virement sera aussi supprimée.';

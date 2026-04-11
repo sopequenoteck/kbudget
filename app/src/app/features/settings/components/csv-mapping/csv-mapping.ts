@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -17,6 +16,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { ImportService } from '../../../../core/services/import';
+import { DevLogger } from '../../../../core/services/dev-logger';
 import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/models/import.model';
 
 @Component({
@@ -37,6 +37,7 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
 export class CsvMapping {
   private readonly importService = inject(ImportService);
   private readonly router = inject(Router);
+  private readonly logger = inject(DevLogger);
 
   // File & account (passed via router state)
   protected file: File | null = null;
@@ -127,9 +128,7 @@ export class CsvMapping {
       // Auto-select first matching columns by common names
       this.autoSelectColumns(result.headers);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to preview CSV', err);
-      }
+      this.logger.error('Failed to preview CSV', err);
       this.previewError.set('Impossible de prévisualiser le fichier. Vérifiez les paramètres.');
     } finally {
       this.previewLoading.set(false);
@@ -195,9 +194,7 @@ export class CsvMapping {
       );
       this.router.navigate(['/settings/import/review', draft.id]);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to import with mapping', err);
-      }
+      this.logger.error('Failed to import with mapping', err);
       const httpErr = err as { error?: { message?: string } };
       this.importError.set(
         httpErr?.error?.message ?? "Erreur lors de l'import. Vérifiez le mapping et réessayez.",

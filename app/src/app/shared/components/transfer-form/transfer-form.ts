@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  isDevMode,
   output,
   signal,
 } from '@angular/core';
@@ -23,6 +22,7 @@ import { SelectPickerItem } from '../select-picker/select-picker.model';
 import { AccountService } from '../../../core/services/account';
 import { TransactionService } from '../../../core/services/transaction';
 import { ModalService } from '../../../core/services/modal.service';
+import { DevLogger } from '../../../core/services/dev-logger';
 import { Account, TransferRequest } from '../../../core/models/account.model';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
@@ -39,6 +39,7 @@ export class TransferForm {
   private readonly accountService = inject(AccountService);
   private readonly transactionService = inject(TransactionService);
   private readonly modalService = inject(ModalService);
+  private readonly logger = inject(DevLogger);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -106,9 +107,7 @@ export class TransferForm {
       const httpErr = err as { error?: { message?: string } };
       const message = httpErr?.error?.message ?? 'Erreur lors du virement';
       this.errorMessage.set(message);
-      if (isDevMode()) {
-        console.error('Transfer failed:', err);
-      }
+      this.logger.error('Transfer failed:', err);
     } finally {
       this.submitting.set(false);
     }

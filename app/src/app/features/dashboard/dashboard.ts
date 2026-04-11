@@ -5,7 +5,6 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { DecimalPipe, NgClass } from '@angular/common';
@@ -21,6 +20,8 @@ import { PreferenceService } from '../../core/services/preference';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
 import { RecurringTransactionService } from '../../core/services/recurring-transaction';
+import { DevLogger } from '../../core/services/dev-logger';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -57,6 +58,7 @@ export class Dashboard {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(DevLogger);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -146,7 +148,7 @@ export class Dashboard {
   readonly budgetOverview = signal<BudgetOverview | null>(null);
   readonly budgetLoading = signal(true);
   readonly budgetCurrentMonth = computed(() => {
-    return new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return new Date().toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
   });
 
   // -- Dernières transactions --
@@ -195,7 +197,7 @@ export class Dashboard {
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    return prev.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+    return prev.toLocaleDateString(APP_LOCALE, { month: 'short' }).replace('.', '');
   });
 
   readonly sortedBudgetItems = computed(() => {
@@ -312,9 +314,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.accountService.getAll());
       this.accounts.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load accounts', err);
-      }
+      this.logger.error('Failed to load accounts', err);
       this.totalBalanceError.set(true);
     } finally {
       this.totalBalanceLoading.set(false);
@@ -337,9 +337,7 @@ export class Dashboard {
       this.currentSummary.set(current[0] ?? null);
       this.previousSummary.set(previous[0] ?? null);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load summaries', err);
-      }
+      this.logger.error('Failed to load summaries', err);
       this.summaryError.set(true);
     } finally {
       this.summaryLoading.set(false);
@@ -353,9 +351,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.budgetService.getOverview());
       this.budgetOverview.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load budget overview', err);
-      }
+      this.logger.error('Failed to load budget overview', err);
     } finally {
       this.budgetLoading.set(false);
     }
@@ -369,9 +365,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.transactionService.getAll());
       this.transactions.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load transactions', err);
-      }
+      this.logger.error('Failed to load transactions', err);
       this.transactionsError.set(true);
     } finally {
       this.transactionsLoading.set(false);
@@ -415,7 +409,7 @@ export class Dashboard {
     const converted = this.conversionService.convert(t.montant, txCurrency, target);
     if (converted === null) return '';
 
-    const formatted = new Intl.NumberFormat('fr-FR', {
+    const formatted = new Intl.NumberFormat(APP_LOCALE, {
       style: 'currency',
       currency: target,
     }).format(Math.abs(converted));

@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -29,6 +28,8 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { Product } from '../../../core/models/product.model';
 import { Transaction } from '../../../core/models/transaction.model';
 import { AmountPipe } from '../../../shared/pipes/amount.pipe';
+import { DevLogger } from '../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../core/constants/locale.constants';
 
 interface SalesGroup {
   label: string;
@@ -62,6 +63,7 @@ export class ShopDetail {
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly logger = inject(DevLogger);
 
   private readonly paramMap = toSignal(this.route.paramMap);
 
@@ -125,7 +127,7 @@ export class ShopDetail {
       } else if (txDate >= startOfMonth) {
         add('ce-mois', 'Ce mois-ci', tx);
       } else {
-        const monthLabel = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(txDate);
+        const monthLabel = new Intl.DateTimeFormat(APP_LOCALE, { month: 'long', year: 'numeric' }).format(txDate);
         const sortKey = `month-${txDate.getFullYear()}-${String(txDate.getMonth()).padStart(2, '0')}`;
         add(sortKey, monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1), tx);
       }
@@ -165,9 +167,7 @@ export class ShopDetail {
       this.loading.set(false);
       this.loadSalesHistory(id);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load product', err);
-      }
+      this.logger.error('Failed to load product', err);
       const status = (err as { status?: number }).status;
       if (status === 404) {
         this.router.navigate(['/shop']);
@@ -205,9 +205,7 @@ export class ShopDetail {
       await firstValueFrom(this.productService.delete(p.id));
       this.router.navigate(['/shop']);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to delete product', err);
-      }
+      this.logger.error('Failed to delete product', err);
     }
   }
 
@@ -217,9 +215,7 @@ export class ShopDetail {
       const history = await firstValueFrom(this.productService.getSalesHistory(id));
       this.salesHistory.set(history);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load sales history', err);
-      }
+      this.logger.error('Failed to load sales history', err);
     } finally {
       this.salesLoading.set(false);
     }

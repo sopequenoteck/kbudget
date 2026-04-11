@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorShoppingBag, phosphorPackage, phosphorHash } from '@ng-icons/phosphor-icons/regular';
@@ -23,6 +24,7 @@ import { SelectPicker } from '../../../../shared/components/select-picker/select
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'product' | 'quantity' | null;
 
@@ -68,7 +70,7 @@ export class SellDialog {
   readonly currencySymbol = computed(() => {
     const currency = this.preferenceService.primaryCurrency();
     return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -97,19 +99,24 @@ export class SellDialog {
     totalPrice: ['', [Validators.required]],
   });
 
+  private readonly productIdValue = toSignal(this.form.get('productId')!.valueChanges, { initialValue: '' });
+  private readonly quantityValue = toSignal(this.form.get('quantity')!.valueChanges, { initialValue: 1 });
+
   constructor() {
     this.loadProducts();
     this.amountWidth = createAmountWidth(this.form.get('totalPrice')!, 22);
 
-    this.form.get('productId')!.valueChanges.subscribe((id) => {
+    effect(() => {
+      const id = this.productIdValue();
       this.selectedProductId.set(id);
-      this.form.get('quantity')!.setValue(1);
+      this.form.get('quantity')!.setValue(1, { emitEvent: false });
       this.updateTotalPrice();
-    });
+    }, { allowSignalWrites: true });
 
-    this.form.get('quantity')!.valueChanges.subscribe(() => {
+    effect(() => {
+      this.quantityValue();
       this.updateTotalPrice();
-    });
+    }, { allowSignalWrites: true });
 
     effect(() => {
       const max = this.maxStock();

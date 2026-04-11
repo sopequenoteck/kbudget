@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -24,6 +23,8 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { DevLogger } from '../../core/services/dev-logger';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 interface SubscriptionGroup {
   label: string;
@@ -47,6 +48,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -120,7 +122,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     const sorted = [...subs].sort((a, b) => {
       if (!a.actif && b.actif) return 1;
       if (a.actif && !b.actif) return -1;
-      if (!a.actif) return a.nom.localeCompare(b.nom, 'fr-FR');
+      if (!a.actif) return a.nom.localeCompare(b.nom, APP_LOCALE);
       return this.getNextRenewalRaw(a).getTime() - this.getNextRenewalRaw(b).getTime();
     });
 
@@ -187,9 +189,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
       this.subscriptions.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load subscriptions', err);
-      }
+      this.logger.error('Failed to load subscriptions', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -229,11 +229,11 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(nextDate);
+    return new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short' }).format(nextDate);
   }
 
   formatAmount(subscription: Subscription): string {
-    const formatted = new Intl.NumberFormat('fr-FR', {
+    const formatted = new Intl.NumberFormat(APP_LOCALE, {
       style: 'currency',
       currency: subscription.currency || 'EUR',
     }).format(subscription.montant);

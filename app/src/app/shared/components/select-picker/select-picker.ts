@@ -16,6 +16,8 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { SelectPickerItem } from './select-picker.model';
 
+const DROPDOWN_MIN_SPACE = 224;
+
 @Component({
   selector: 'app-select-picker',
   standalone: true,
@@ -211,6 +213,6 @@ export class SelectPicker implements ControlValueAccessor {
     if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    this.dropAbove.set(spaceBelow < 224);
+    this.dropAbove.set(spaceBelow < DROPDOWN_MIN_SPACE);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
@@ -6,6 +6,7 @@ import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxj
 import { ApiService } from './api';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
+import { DevLogger } from './dev-logger';
 
 const STORAGE_TOKEN_KEY = 'budget_token';
 const STORAGE_REFRESH_TOKEN_KEY = 'budget_refresh_token';
@@ -17,6 +18,7 @@ const STORAGE_USER_KEY = 'budget_user';
 export class AuthService {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly logger = inject(DevLogger);
 
   readonly currentUser = signal<UserInfo | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
@@ -33,7 +35,7 @@ export class AuthService {
       }
       return token;
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
       return null;
     }
   }
@@ -42,7 +44,7 @@ export class AuthService {
     try {
       return localStorage.getItem(STORAGE_REFRESH_TOKEN_KEY);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
       return null;
     }
   }
@@ -98,7 +100,7 @@ export class AuthService {
           const user: UserInfo = JSON.parse(userJson);
           this.currentUser.set(user);
         } catch {
-          if (isDevMode()) console.error('budget_user corrompu');
+          this.logger.error('budget_user corrompu');
           this.clearAuth();
         }
         return;
@@ -106,7 +108,7 @@ export class AuthService {
 
       const refreshToken = this.getRefreshToken();
       if (refreshToken) {
-        if (isDevMode()) console.error('restoreSession: access token expiré, tentative de refresh');
+        this.logger.error('restoreSession: access token expiré, tentative de refresh');
         this.refreshAccessToken().subscribe({
           error: () => {
             this.clearAuth();
@@ -119,7 +121,7 @@ export class AuthService {
         this.clearAuth();
       }
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 
@@ -132,7 +134,7 @@ export class AuthService {
         JSON.stringify({ name: response.name, email: response.email }),
       );
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
     this.currentUser.set({ name: response.name, email: response.email });
   }
@@ -143,7 +145,7 @@ export class AuthService {
       localStorage.removeItem(STORAGE_REFRESH_TOKEN_KEY);
       localStorage.removeItem(STORAGE_USER_KEY);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
     this.currentUser.set(null);
   }
@@ -157,7 +159,7 @@ export class AuthService {
       const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(atob(payload));
     } catch {
-      if (isDevMode()) console.error('Token corrompu');
+      this.logger.error('Token corrompu');
       return null;
     }
   }
@@ -175,7 +177,7 @@ export class AuthService {
       return error.error?.message ?? 'Une erreur est survenue';
     }
     if (error.status === 0) {
-      if (isDevMode()) console.error('Erreur réseau', error);
+      this.logger.error('Erreur réseau', error);
       return 'Impossible de contacter le serveur';
     }
     return 'Une erreur est survenue';

@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -27,6 +26,7 @@ import { PreferenceService } from '../../../core/services/preference';
 import { Product } from '../../../core/models/product.model';
 import { AmountPipe } from '../../../shared/pipes/amount.pipe';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
+import { DevLogger } from '../../../core/services/dev-logger';
 
 interface ProductGroup {
   label: string;
@@ -56,6 +56,7 @@ export class ShopList implements AfterViewInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private readonly modalService = inject(ModalService);
   readonly preferenceService = inject(PreferenceService);
+  private readonly logger = inject(DevLogger);
   readonly activeCurrency = signal('EUR');
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
@@ -148,9 +149,7 @@ export class ShopList implements AfterViewInit, OnDestroy {
       this.products.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load products', err);
-      }
+      this.logger.error('Failed to load products', err);
       this.error.set(true);
       this.loading.set(false);
     }

@@ -5,7 +5,6 @@ import {
   computed,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -21,6 +20,8 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -66,6 +67,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -172,7 +174,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
       this.unbudgetedItems.set(data.unbudgetedItems);
       this.currency.set(data.currency);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load unbudgeted data', err);
+      this.logger.error('Failed to load unbudgeted data', err);
     } finally {
       this.loading.set(false);
     }
@@ -186,7 +188,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
       );
       this.allTransactions.set(data);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load transactions', err);
+      this.logger.error('Failed to load transactions', err);
     } finally {
       this.transactionsLoading.set(false);
     }
@@ -194,7 +196,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(APP_LOCALE, {
       day: 'numeric',
       month: 'long',
     }).format(date);

@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,6 +27,8 @@ import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { PreferenceService } from '../../../../core/services/preference';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 @Component({
   selector: 'app-subscription-detail',
@@ -55,6 +56,7 @@ export class SubscriptionDetail {
   private readonly toastService = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
+  private readonly logger = inject(DevLogger);
 
   readonly subscription = signal<Subscription | null>(null);
   readonly payments = signal<SubscriptionPaymentResponse[]>([]);
@@ -90,9 +92,7 @@ export class SubscriptionDetail {
       this.loadPayments(id);
       this.loadTotalPaid(id);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load subscription', err);
-      }
+      this.logger.error('Failed to load subscription', err);
       const status = (err as { status?: number }).status;
       if (status === 404) {
         this.router.navigate(['/subscriptions']);
@@ -109,9 +109,7 @@ export class SubscriptionDetail {
       const data = await firstValueFrom(this.subscriptionService.getPayments(id));
       this.payments.set(data);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load payments', err);
-      }
+      this.logger.error('Failed to load payments', err);
     } finally {
       this.paymentsLoading.set(false);
     }
@@ -122,9 +120,7 @@ export class SubscriptionDetail {
       const data = await firstValueFrom(this.subscriptionService.getTotalPaid(id));
       this.totalPaid.set(data);
     } catch (err: unknown) {
-      if (isDevMode()) {
-        console.error('Failed to load total paid', err);
-      }
+      this.logger.error('Failed to load total paid', err);
     }
   }
 
@@ -180,7 +176,7 @@ export class SubscriptionDetail {
     if (!sub) return;
 
     const freq = sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
-    const amount = sub.montant.toLocaleString('fr-FR', { style: 'currency', currency: sub.currency });
+    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency: sub.currency });
     const ok = await this.confirmService.confirm({ title: `${sub.nom} — ${amount}${freq}`, message: 'Voulez-vous vraiment supprimer cet abonnement ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorRepeat' });
     if (!ok) return;
 
@@ -217,6 +213,6 @@ export class SubscriptionDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat('fr-FR').format(new Date(date));
+    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
   }
 }

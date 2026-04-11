@@ -29,6 +29,7 @@ import { ConversionService } from '../../../../core/services/conversion';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -184,7 +185,7 @@ export class RecurringList {
     if (diffDays === 0) return "aujourd'hui";
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
-    return next.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    return next.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: 'short' });
   }
 
   getValueClass(item: RecurringTransactionResponse): string {

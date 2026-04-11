@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -14,6 +13,7 @@ import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, pho
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
+import { DevLogger } from '../../../../core/services/dev-logger';
 import { Category } from '../../../../core/models/category.model';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
@@ -38,6 +38,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 export class Categories {
   private readonly categoryService = inject(CategoryService);
   private readonly modalService = inject(ModalService);
+  private readonly logger = inject(DevLogger);
 
   readonly skeletonItems = Array(3);
 
@@ -64,9 +65,7 @@ export class Categories {
       this.categories.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load categories', err);
-      }
+      this.logger.error('Failed to load categories', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -96,9 +95,7 @@ export class Categories {
       await firstValueFrom(this.categoryService.delete(id));
       this.confirmDeleteId.set(null);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete category', err);
-      }
+      this.logger.error('Failed to delete category', err);
     }
   }
 }

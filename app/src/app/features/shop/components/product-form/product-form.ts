@@ -41,6 +41,7 @@ import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../.
 import { compressImage } from '../../../../shared/utils/image.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
@@ -111,7 +112,7 @@ export class ProductForm {
 
   readonly currencySymbol = computed(() => {
     const currency = this.preferenceService.primaryCurrency();
-    return (0).toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
+    return (0).toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
   });
 
   readonly margeDisplay = computed(() => {

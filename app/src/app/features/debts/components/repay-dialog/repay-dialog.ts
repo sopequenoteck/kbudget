@@ -26,6 +26,7 @@ import { SelectPicker } from '../../../../shared/components/select-picker/select
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'account' | null;
 
@@ -100,7 +101,7 @@ export class RepayDialog {
   readonly currencySymbol = computed(() => {
     const currency = this.activeCurrency();
     return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -170,7 +171,7 @@ export class RepayDialog {
       } else {
         const reste = updatedDebt.montantRestant;
         const currency = updatedDebt.currency || 'EUR';
-        const formatter = new Intl.NumberFormat('fr-FR', { style: 'currency', currency });
+        const formatter = new Intl.NumberFormat(APP_LOCALE, { style: 'currency', currency });
         this.toastService.success(`Remboursement enregistré. Reste : ${formatter.format(reste)}`);
       }
     } catch (err: unknown) {

@@ -5,7 +5,6 @@ import {
   computed,
   ElementRef,
   inject,
-  isDevMode,
   OnDestroy,
   signal,
   viewChild,
@@ -33,6 +32,8 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -82,6 +83,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly Math = Math;
   readonly budgetAmount = budgetAmount;
@@ -168,7 +170,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       } else if (txDate.getTime() === yesterday.getTime()) {
         add('yesterday', 'Hier', tx);
       } else {
-        const label = new Intl.DateTimeFormat('fr-FR', {
+        const label = new Intl.DateTimeFormat(APP_LOCALE, {
           day: 'numeric',
           month: 'long',
         }).format(txDate);
@@ -249,7 +251,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
       this.budgetItem.set(item);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load budget data', err);
+      this.logger.error('Failed to load budget data', err);
     } finally {
       this.loading.set(false);
     }
@@ -263,7 +265,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       );
       this.allTransactions.set(data);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load transactions', err);
+      this.logger.error('Failed to load transactions', err);
     } finally {
       this.transactionsLoading.set(false);
     }
@@ -271,7 +273,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(APP_LOCALE, {
       day: 'numeric',
       month: 'long',
     }).format(date);
@@ -288,7 +290,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       const budget = await firstValueFrom(this.budgetService.getById(budgetId));
       this.modalService.openModal('budget', budget);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to load budget for edit', err);
+      this.logger.error('Failed to load budget for edit', err);
     }
   }
 
@@ -309,7 +311,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       );
       this.router.navigate(['/budgets']);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to toggle budget', err);
+      this.logger.error('Failed to toggle budget', err);
     }
   }
 
@@ -317,14 +319,14 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const budgetId = this.overviewBudgetId();
     const item = this.budgetItem();
     if (!budgetId) return;
-    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString('fr-FR', { style: 'currency', currency: item.currency })}` : 'Ce budget';
+    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(APP_LOCALE, { style: 'currency', currency: item.currency })}` : 'Ce budget';
     const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
     if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(budgetId));
       this.router.navigate(['/budgets']);
     } catch (err) {
-      if (isDevMode()) console.error('Failed to delete budget', err);
+      this.logger.error('Failed to delete budget', err);
     }
   }
 }

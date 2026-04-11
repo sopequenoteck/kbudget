@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ApiService } from './api';
@@ -9,6 +9,7 @@ import {
   type UserPreference,
   type UserPreferenceRequest,
 } from '../models/preference.model';
+import { DevLogger } from './dev-logger';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,7 @@ import {
 export class PreferenceService {
   private readonly apiService = inject(ApiService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly logger = inject(DevLogger);
 
   readonly enabledFeatures = signal<Feature[]>([]);
   readonly navOrder = signal<Feature[]>([]);
@@ -39,7 +41,7 @@ export class PreferenceService {
       this.textScale.set(prefs.textScale ?? 'MEDIUM');
       this.error.set(null);
     } catch (e) {
-      if (isDevMode()) console.error('Failed to load preferences:', e);
+      this.logger.error('Failed to load preferences:', e);
       this.error.set('Impossible de charger les préférences');
     }
   }
@@ -63,7 +65,7 @@ export class PreferenceService {
     const request: UserPreferenceRequest = { enabledFeatures: updated };
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', request)).catch(
       (e) => {
-        if (isDevMode()) console.error('Failed to update preferences:', e);
+        this.logger.error('Failed to update preferences:', e);
         this.error.set('Impossible de sauvegarder les préférences');
       },
     );
@@ -98,7 +100,7 @@ export class PreferenceService {
         }
       })
       .catch((e) => {
-        if (isDevMode()) console.error('Failed to update preferences:', e);
+        this.logger.error('Failed to update preferences:', e);
         this.error.set('Impossible de sauvegarder les préférences');
       });
   }
@@ -133,7 +135,7 @@ export class PreferenceService {
     };
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', request)).catch(
       (e) => {
-        if (isDevMode()) console.error('Failed to reorder navigation:', e);
+        this.logger.error('Failed to reorder navigation:', e);
         this.error.set("Impossible de sauvegarder l'ordre de navigation");
       },
     );

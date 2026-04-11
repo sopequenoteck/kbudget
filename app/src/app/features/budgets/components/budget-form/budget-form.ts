@@ -34,6 +34,7 @@ import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 
 type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | null;
 
@@ -135,7 +136,7 @@ export class BudgetForm {
   readonly currencySymbol = computed(() => {
     const currency = this.form.get('currency')?.value || 'EUR';
     return (0)
-      .toLocaleString('fr-FR', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -219,7 +220,7 @@ export class BudgetForm {
   async onDelete(): Promise<void> {
     const b = this.budget();
     if (!b) return;
-    const amount = b.montant.toLocaleString('fr-FR', { style: 'currency', currency: b.currency });
+    const amount = b.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency: b.currency });
     const ok = await this.confirmService.confirm({
       title: `${b.category.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer ce budget ?',

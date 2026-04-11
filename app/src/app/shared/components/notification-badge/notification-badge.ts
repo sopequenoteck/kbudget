@@ -41,7 +41,7 @@ import { NotificationService } from '../../../core/services/notification';
       height: 18px;
       padding: 0 5px;
       border-radius: 9px;
-      background-color: var(--color-danger, #ef4444);
+      background-color: var(--text-error);
       color: white;
       font-size: 11px;
       font-weight: 600;
