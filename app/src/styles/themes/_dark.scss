@@ -50,6 +50,9 @@
   // -- Shadows (neutral, no colored glow) --
   --shadow-colored-primary: 0 8px 24px -4px rgb(0 0 0 / 0.4);
 
+  // -- Misc --
+  --icon-circle-bg: rgba(255, 255, 255, 0.06);
+
   // -- Interactive --
   --hover-bg: var(--gray-700);
   --focus-ring: rgb(var(--amber-400-rgb) / 0.5);
@@ -69,5 +72,5 @@
   --page-gradient-color: transparent;
   --font-size-hero: 2.25rem;
   --shadow-hero-text: none;
-  --nav-border-top: 1px solid rgba(255, 255, 255, 0.06);
+  --nav-border-top: 1px solid var(--icon-circle-bg);
 }

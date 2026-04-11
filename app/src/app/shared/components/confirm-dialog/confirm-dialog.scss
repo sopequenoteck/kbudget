@@ -92,7 +92,7 @@
     color: var(--color-primary);
 
     &:hover {
-      background: rgba(224, 168, 32, 0.1);
+      background: var(--color-primary-light);
       border-color: var(--color-primary);
     }
   }
@@ -101,7 +101,7 @@
     color: var(--color-expense);
 
     &:hover {
-      background: rgba(217, 119, 119, 0.1);
+      background: var(--bg-error);
       border-color: var(--color-expense);
     }
   }

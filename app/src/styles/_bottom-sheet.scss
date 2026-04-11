@@ -15,7 +15,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-expense);
   padding: var(--space-2) var(--space-3);
-  background: rgba(217, 119, 119, 0.08);
+  background: var(--bg-error);
   border-radius: var(--radius-lg);
 }
 
@@ -373,7 +373,7 @@
     color: var(--color-expense);
     padding: 5px 8px;
     ::ng-deep ng-icon { min-width: 16px; }
-    &:hover { background: rgba(217, 119, 119, 0.1); border-color: var(--color-expense); }
+    &:hover { background: var(--bg-error); border-color: var(--color-expense); }
   }
 
   &--cancel {
@@ -384,7 +384,7 @@
   &--primary {
     color: var(--color-primary);
     border-color: var(--color-primary);
-    &:hover { background: rgba(224, 168, 32, 0.08); }
+    &:hover { background: var(--color-primary-light); }
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 

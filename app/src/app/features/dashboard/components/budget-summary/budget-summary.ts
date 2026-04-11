@@ -120,7 +120,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       width: var(--space-8);
       height: var(--space-8);
       font-size: var(--font-size-lg);
-      background-color: rgba(255, 255, 255, 0.06);
+      background-color: var(--icon-circle-bg);
       border-radius: var(--radius-round);
       line-height: 1;
       flex-shrink: 0;
