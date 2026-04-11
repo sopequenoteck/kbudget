@@ -6,46 +6,6 @@
 }
 
 // =============================================================================
-// Page header
-// =============================================================================
-
-.page-header {
-  display: flex;
-  align-items: center;
-
-  &__back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-round);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    flex-shrink: 0;
-
-    ::ng-deep ng-icon {
-      min-width: 20px;
-    }
-  }
-
-  &__title {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin: 0;
-  }
-}
-
-// =============================================================================
 // Section
 // =============================================================================
 

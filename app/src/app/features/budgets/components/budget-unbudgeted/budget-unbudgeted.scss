@@ -4,52 +4,7 @@
   padding: var(--space-4);
 }
 
-// =============================================================================
-// Header — back + titre aligné droite (pattern récurrences)
-// =============================================================================
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding-bottom: var(--space-4);
-
-  &__back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-round);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: color var(--duration-fast);
-
-    ::ng-deep ng-icon {
-      width: 20px;
-      min-width: 20px;
-      height: 20px;
-    }
-
-    &:hover {
-      color: var(--color-primary);
-    }
-  }
-
-  &__title {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin: 0;
-  }
-}
+// Header via .page-header partagé (_list-patterns.scss)
 
 // =============================================================================
 // Hero — total non budgété + conversion

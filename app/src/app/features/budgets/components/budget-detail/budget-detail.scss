@@ -5,64 +5,8 @@
 }
 
 // =============================================================================
-// Header — back + titre aligné droite
+// Header — page-header étendu avec icône catégorie
 // =============================================================================
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding-bottom: var(--space-4);
-
-  &__back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-round);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: color var(--duration-fast);
-
-    ::ng-deep ng-icon {
-      width: 20px;
-      min-width: 20px;
-      height: 20px;
-    }
-
-    &:hover {
-      color: var(--color-primary);
-    }
-  }
-
-  &__title {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: var(--icon-circle-bg);
-    border-radius: var(--radius-round);
-    font-size: var(--font-size-base);
-    flex-shrink: 0;
-  }
-}
 
 // =============================================================================
 // Hero — montant dépensé dominant + reste
