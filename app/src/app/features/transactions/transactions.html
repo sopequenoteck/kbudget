@@ -55,13 +55,38 @@
 
 <div class="sticky-sentinel" #stickySentinel></div>
 <div class="section-header" [class.stuck]="isStuck()">
-  <h2 class="section-header__title">Transactions</h2>
+  @if (searchOpen()) {
+    <div class="section-header__search-wrapper">
+      <input class="section-header__search-input input-naked"
+        type="text"
+        placeholder="Rechercher..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        (keydown.escape)="toggleSearch()"
+        #searchInput />
+      <button class="section-header__search-clear" (click)="toggleSearch()" aria-label="Fermer">
+        <ng-icon name="phosphorX" size="16" />
+      </button>
+    </div>
+  } @else {
+    <h2 class="section-header__title">Transactions</h2>
+  }
   <div class="section-header__actions">
-    <button class="section-header__action-btn" aria-label="Rechercher">
-      <ng-icon name="phosphorMagnifyingGlass" size="20" />
-    </button>
-    <button class="section-header__action-btn" aria-label="Filtrer">
+    @if (!searchOpen()) {
+      <button class="section-header__action-btn"
+        (click)="toggleSearch()"
+        aria-label="Rechercher">
+        <ng-icon name="phosphorMagnifyingGlass" size="20" />
+      </button>
+    }
+    <button class="section-header__action-btn"
+      [class.active]="filterOpen() || hasActiveFilters()"
+      (click)="toggleFilter()"
+      aria-label="Filtrer">
       <ng-icon name="phosphorFunnel" size="20" />
+      @if (hasActiveFilters()) {
+        <span class="section-header__filter-dot"></span>
+      }
     </button>
     <span class="section-header__separator"></span>
     <a class="section-header__action-btn" routerLink="/transactions/recurring" aria-label="Récurrences">
@@ -69,6 +94,40 @@
     </a>
   </div>
 </div>
+
+@if (filterOpen()) {
+  <div class="filter-panel">
+    <div class="filter-panel__row">
+      <button class="filter-chip" [class.active]="typeFilter() === null" (click)="setTypeFilter(null)">Tout</button>
+      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.DEPENSE" (click)="setTypeFilter(TransactionType.DEPENSE)">Dépenses</button>
+      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.RECETTE" (click)="setTypeFilter(TransactionType.RECETTE)">Recettes</button>
+    </div>
+
+    @if (monthCategories().length > 0) {
+      <div class="filter-panel__row filter-panel__row--scroll">
+        @for (cat of monthCategories(); track cat.id) {
+          <button class="filter-chip" [class.active]="categoryFilter() === cat.id" (click)="setCategoryFilter(cat.id)">
+            {{ cat.icone }} {{ cat.nom }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (accounts().length > 1) {
+      <div class="filter-panel__row filter-panel__row--scroll">
+        @for (acc of accounts(); track acc.id) {
+          <button class="filter-chip" [class.active]="accountFilter() === acc.id" (click)="setAccountFilter(acc.id)">
+            {{ acc.icone }} {{ acc.nom }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (hasActiveFilters()) {
+      <button class="filter-panel__reset" (click)="resetFilters()">Réinitialiser</button>
+    }
+  </div>
+}
 
 @if (loading()) {
   <div class="list-group">
@@ -93,10 +152,10 @@
   </div>
 } @else if (groupedTransactions().length === 0) {
   <app-empty-state
-    icon="phosphorReceipt"
-    [message]="'Aucune transaction en ' + selectedMonthLabel()"
-    ctaLabel="Ajouter une transaction"
-    (ctaClick)="onAddTransaction()"
+    [icon]="emptyStateConfig().icon"
+    [message]="emptyStateConfig().message"
+    [ctaLabel]="emptyStateConfig().ctaLabel"
+    (ctaClick)="emptyStateConfig().ctaLabel === 'Réinitialiser les filtres' ? resetFilters() : onAddTransaction()"
   />
 } @else {
   @for (group of groupedTransactions(); track group.label) {
