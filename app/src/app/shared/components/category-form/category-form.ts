@@ -18,6 +18,7 @@ import { EmojiInput } from '../emoji-input/emoji-input';
 
 @Component({
   selector: 'app-category-form',
+  standalone: true,
   imports: [ReactiveFormsModule, EmojiInput],
   templateUrl: './category-form.html',
   styleUrl: './category-form.scss',

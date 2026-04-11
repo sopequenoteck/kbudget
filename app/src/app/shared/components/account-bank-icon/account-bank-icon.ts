@@ -3,6 +3,7 @@ import { Account } from '../../../core/models/account.model';
 
 @Component({
   selector: 'app-account-bank-icon',
+  standalone: true,
   templateUrl: './account-bank-icon.html',
   styleUrl: './account-bank-icon.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

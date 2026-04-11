@@ -18,6 +18,7 @@ import { CategoryForm } from '../category-form/category-form';
 
 @Component({
   selector: 'app-category-picker',
+  standalone: true,
   imports: [FormsModule, SelectPicker, Modal, CategoryForm],
   templateUrl: './category-picker.html',
   styleUrl: './category-picker.scss',

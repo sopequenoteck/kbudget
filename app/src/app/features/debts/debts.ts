@@ -33,6 +33,7 @@ interface DebtGroup {
 
 @Component({
   selector: 'app-debts',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',

@@ -52,6 +52,7 @@ interface TransactionGroup {
 
 @Component({
   selector: 'app-budget-detail',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [
     provideIcons({

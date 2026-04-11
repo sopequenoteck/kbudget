@@ -19,6 +19,7 @@ import { validateForm } from '../../../../shared/utils/form.utils';
 
 @Component({
   selector: 'app-restock-dialog',
+  standalone: true,
   imports: [ReactiveFormsModule, NgIcon],
   providers: [provideIcons({ phosphorPackage })],
   templateUrl: './restock-dialog.html',

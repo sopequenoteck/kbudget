@@ -18,7 +18,7 @@ function getFormatter(currency: string): Intl.NumberFormat {
   return formatter;
 }
 
-@Pipe({ name: 'amount', pure: true })
+@Pipe({ name: 'amount', standalone: true, pure: true })
 export class AmountPipe implements PipeTransform {
   transform(
     value: number | null | undefined,

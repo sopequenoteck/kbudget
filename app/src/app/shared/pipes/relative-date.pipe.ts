@@ -6,7 +6,7 @@ const longDateFormatter = new Intl.DateTimeFormat('fr-FR', {
   year: 'numeric',
 });
 
-@Pipe({ name: 'relativeDate', pure: true })
+@Pipe({ name: 'relativeDate', standalone: true, pure: true })
 export class RelativeDatePipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     if (!value) {

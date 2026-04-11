@@ -19,6 +19,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 
 @Component({
   selector: 'app-categories',
+  standalone: true,
   imports: [RouterLink, NgIcon, EmptyState],
   providers: [
     provideIcons({

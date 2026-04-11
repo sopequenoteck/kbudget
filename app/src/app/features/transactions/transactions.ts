@@ -39,6 +39,7 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-transactions',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState],
   providers: [
     provideIcons({

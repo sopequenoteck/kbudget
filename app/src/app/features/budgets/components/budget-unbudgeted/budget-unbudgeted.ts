@@ -43,6 +43,7 @@ interface CategoryGroup {
 
 @Component({
   selector: 'app-budget-unbudgeted',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState],
   providers: [
     provideIcons({

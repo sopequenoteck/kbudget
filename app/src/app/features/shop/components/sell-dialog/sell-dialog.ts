@@ -28,6 +28,7 @@ type ExpandableSection = 'product' | 'quantity' | null;
 
 @Component({
   selector: 'app-sell-dialog',
+  standalone: true,
   imports: [ReactiveFormsModule, NgIcon, SelectPicker],
   providers: [provideIcons({ phosphorShoppingBag, phosphorPackage, phosphorHash })],
   templateUrl: './sell-dialog.html',

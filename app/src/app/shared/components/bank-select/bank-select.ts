@@ -19,6 +19,7 @@ interface BankGroup {
 
 @Component({
   selector: 'app-bank-select',
+  standalone: true,
   templateUrl: './bank-select.html',
   styleUrl: './bank-select.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

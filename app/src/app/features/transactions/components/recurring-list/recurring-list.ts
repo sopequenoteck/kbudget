@@ -59,6 +59,7 @@ const STATUS_LABELS: Record<RecurringStatus, string> = {
 
 @Component({
   selector: 'app-recurring-list',
+  standalone: true,
   imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe, EmptyState],
   providers: [
     provideIcons({

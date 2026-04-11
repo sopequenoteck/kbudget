@@ -31,6 +31,7 @@ type ExpandableSection = 'account' | null;
 
 @Component({
   selector: 'app-repay-dialog',
+  standalone: true,
   imports: [ReactiveFormsModule, NgIcon, AmountPipe, SelectPicker],
   providers: [provideIcons({ phosphorArrowCircleDown, phosphorWallet })],
   templateUrl: './repay-dialog.html',

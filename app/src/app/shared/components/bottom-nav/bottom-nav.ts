@@ -6,6 +6,7 @@ import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseF
 
 @Component({
   selector: 'app-bottom-nav',
+  standalone: true,
   imports: [RouterLink, NgIcon],
   host: { '[attr.data-item-count]': 'items().length.toString()' },
   providers: [

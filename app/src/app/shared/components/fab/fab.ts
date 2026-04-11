@@ -47,6 +47,7 @@ const BUDGET_ACTION: SpeedDialItem = { type: 'budget', label: 'Nouveau budget', 
 
 @Component({
   selector: 'app-fab',
+  standalone: true,
   imports: [NgIcon],
   providers: [
     provideIcons({

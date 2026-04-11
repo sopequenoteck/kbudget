@@ -7,6 +7,7 @@ export interface DoughnutSegment {
 
 @Component({
   selector: 'app-doughnut-mini',
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <svg [attr.width]="size()" [attr.height]="size()" [attr.viewBox]="viewBox()">

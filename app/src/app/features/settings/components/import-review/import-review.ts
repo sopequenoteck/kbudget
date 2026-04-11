@@ -36,6 +36,7 @@ interface SuggestRuleBanner {
 
 @Component({
   selector: 'app-import-review',
+  standalone: true,
   imports: [RouterLink, NgIcon, AmountPipe, FormsModule],
   providers: [
     provideIcons({

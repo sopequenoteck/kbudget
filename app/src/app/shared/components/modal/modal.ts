@@ -13,6 +13,7 @@ import { ModalService } from '../../../core/services/modal.service';
 
 @Component({
   selector: 'app-modal',
+  standalone: true,
   imports: [CdkTrapFocus],
   templateUrl: './modal.html',
   styleUrl: './modal.scss',

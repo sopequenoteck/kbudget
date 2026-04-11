@@ -41,6 +41,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 
 @Component({
   selector: 'app-budget-list',
+  standalone: true,
   imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',

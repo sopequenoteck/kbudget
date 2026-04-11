@@ -50,6 +50,7 @@ function isoToDate(iso: string): Date | null {
 
 @Component({
   selector: 'app-inline-date-picker',
+  standalone: true,
   imports: [],
   templateUrl: './inline-date-picker.html',
   styleUrl: './inline-date-picker.scss',

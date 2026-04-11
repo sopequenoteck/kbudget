@@ -67,6 +67,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
 
 @Component({
   selector: 'app-settings',
+  standalone: true,
   imports: [RouterLink, NgIcon, CdkDropList, CdkDrag, CdkDragHandle],
   providers: [
     provideIcons({

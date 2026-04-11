@@ -34,6 +34,7 @@ import { CategoryRule, ImportDraftSummary, ImportHistoryEntry, ImportProfile } f
 
 @Component({
   selector: 'app-import-settings',
+  standalone: true,
   imports: [RouterLink, NgIcon, FormsModule],
   providers: [
     provideIcons({

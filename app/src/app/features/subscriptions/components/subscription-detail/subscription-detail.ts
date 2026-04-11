@@ -31,6 +31,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 
 @Component({
   selector: 'app-subscription-detail',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon],
   providers: [
     provideIcons({

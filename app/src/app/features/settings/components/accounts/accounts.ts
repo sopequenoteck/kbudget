@@ -33,6 +33,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 
 @Component({
   selector: 'app-accounts',
+  standalone: true,
   imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager, EmptyState],
   providers: [
     provideIcons({

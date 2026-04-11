@@ -33,6 +33,7 @@ import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-debt-detail',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, SnoozeDialog, NgIcon],
   providers: [
     provideIcons({

@@ -65,6 +65,7 @@ const ACCOUNT_COLORS: string[] = [
 
 @Component({
   selector: 'app-account-form',
+  standalone: true,
   imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker, BankSelect],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',

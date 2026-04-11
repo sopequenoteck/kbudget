@@ -8,6 +8,7 @@ if (!getTestBed().platform) {
 }
 
 @Component({
+    standalone: true,
   template: `
     <app-list-item
       [icon]="icon()"

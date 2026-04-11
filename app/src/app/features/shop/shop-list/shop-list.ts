@@ -36,6 +36,7 @@ interface ProductGroup {
 
 @Component({
   selector: 'app-shop-list',
+  standalone: true,
   imports: [AmountPipe, NgIcon, EmptyState],
   providers: [
     provideIcons({

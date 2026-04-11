@@ -14,6 +14,7 @@ import { FormField } from '../../shared/components/form-field/form-field';
 
 @Component({
   selector: 'app-auth',
+  standalone: true,
   imports: [ReactiveFormsModule, FormField],
   templateUrl: './auth.html',
   styleUrl: './auth.scss',

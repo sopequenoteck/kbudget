@@ -28,6 +28,7 @@ import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
 @Component({
   selector: 'app-transfer-form',
+  standalone: true,
   imports: [ReactiveFormsModule, FormField, SelectPicker],
   templateUrl: './transfer-form.html',
   styleUrl: './transfer-form.scss',

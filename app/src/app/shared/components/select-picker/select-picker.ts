@@ -18,6 +18,7 @@ import { SelectPickerItem } from './select-picker.model';
 
 @Component({
   selector: 'app-select-picker',
+  standalone: true,
   imports: [CdkTrapFocus],
   templateUrl: './select-picker.html',
   styleUrl: './select-picker.scss',

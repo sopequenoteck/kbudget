@@ -39,6 +39,7 @@ type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | n
 
 @Component({
   selector: 'app-budget-form',
+  standalone: true,
   imports: [ReactiveFormsModule, NgIcon],
   providers: [
     provideIcons({

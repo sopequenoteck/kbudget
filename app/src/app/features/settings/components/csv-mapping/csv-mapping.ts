@@ -21,6 +21,7 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
 
 @Component({
   selector: 'app-csv-mapping',
+  standalone: true,
   imports: [RouterLink, NgIcon, FormsModule],
   providers: [
     provideIcons({

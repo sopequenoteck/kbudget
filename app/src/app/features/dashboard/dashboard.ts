@@ -39,6 +39,7 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
   providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',

@@ -64,6 +64,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-shell',
+  standalone: true,
   imports: [
     RouterOutlet,
     RouterLink,

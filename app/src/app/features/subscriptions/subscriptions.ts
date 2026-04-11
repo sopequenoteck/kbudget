@@ -33,6 +33,7 @@ interface SubscriptionGroup {
 
 @Component({
   selector: 'app-subscriptions',
+  standalone: true,
   imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
   providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',

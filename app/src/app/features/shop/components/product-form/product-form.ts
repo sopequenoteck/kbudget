@@ -46,6 +46,7 @@ type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
 @Component({
   selector: 'app-product-form',
+  standalone: true,
   imports: [ReactiveFormsModule, NgIcon],
   providers: [
     provideIcons({

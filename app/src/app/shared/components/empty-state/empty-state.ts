@@ -3,6 +3,7 @@ import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-empty-state',
+  standalone: true,
   imports: [NgIcon],
   templateUrl: './empty-state.html',
   styleUrl: './empty-state.scss',

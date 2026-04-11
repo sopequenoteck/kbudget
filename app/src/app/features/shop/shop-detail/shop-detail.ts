@@ -37,6 +37,7 @@ interface SalesGroup {
 
 @Component({
   selector: 'app-shop-detail',
+  standalone: true,
   imports: [DatePipe, NgIcon, AmountPipe],
   providers: [
     provideIcons({
