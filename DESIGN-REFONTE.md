@@ -1028,10 +1028,26 @@ Wrapper autour de select-picker + bouton creation inline.
 - Test `recurring-list.spec.ts` mis a jour (selecteur `.state-empty` → `app-empty-state`)
 - **0 occurrence** de `.state-empty` restante dans le projet
 
+### rgba() hardcodes — remplacement par tokens semantiques
+- 3 valeurs rgba repetees dans les partials SCSS remplacees par des tokens existants ou nouveaux
+- `rgba(255,255,255,0.06)` (17 occurrences, 12 fichiers) → nouveau token `--icon-circle-bg` (dark: `rgba(255,255,255,0.06)`, light: `rgba(0,0,0,0.04)`)
+- `rgba(217,119,119,0.08/0.1)` (bottom-sheet + confirm-dialog) → `--bg-error` (existant)
+- `rgba(224,168,32,0.08/0.1)` (bottom-sheet + confirm-dialog) → `--color-primary-light` (existant)
+- `--nav-border-top` dans le theme dark utilise maintenant `--icon-circle-bg` au lieu du rgba hardcode
+
+### .page-header — extraction dans _list-patterns.scss
+- 8 copies locales identiques supprimees (6 `.page-header` + 2 `.detail-header`) → 1 definition unique dans `_list-patterns.scss`
+- Fichiers nettoyes : subscription-detail, debt-detail, shop-detail, recurring-list, categories, accounts, budget-detail, budget-unbudgeted
+- `.detail-header` renomme en `.page-header` dans les 2 HTML budget (detail + unbudgeted)
+- La version partagee inclut `__back` (hover primary + transition), `__title` (flex-end + gap), `__icon` (cercle 32px pour budget-detail)
+- **-277 lignes nettes**
+
 ### Decisions de design (session 18)
 - Les empty states riches (pleine page, centres) utilisent le composant partage — coherence visuelle garantie
 - Les messages inline (import-settings, csv-mapping) restent des `<p>` simples — le composant partage avec son padding space-10 serait disproportionne dans une section de formulaire
 - Les CTA "Creer une categorie" / "Creer un compte" sur les empty states vides encouragent l'action sans etre intrusifs (text link amber, pas bouton plein)
+- Les rgba hardcodes dans les partials sont un anti-pattern : ils cassent le theming light/dark et rendent le changement global impossible. Chaque valeur repetee merite un token
+- Le `.page-header` est le meme pattern partout (back + titre aligne droite) — une seule source de verite evite les derives entre pages
 
 ## Ce qui reste a faire
 
