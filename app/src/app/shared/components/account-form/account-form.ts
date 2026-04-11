@@ -44,9 +44,9 @@ const DEFAULT_ICONS: Record<AccountType, string> = {
 };
 
 const DEFAULT_COLORS: Record<AccountType, string> = {
-  [AccountType.COURANT]: '#3b82f6',
-  [AccountType.EPARGNE]: '#10b981',
-  [AccountType.ESPECES]: '#f59e0b',
+  [AccountType.COURANT]: PALETTE_COLORS[8],  // bleu
+  [AccountType.EPARGNE]: PALETTE_COLORS[5],  // vert
+  [AccountType.ESPECES]: PALETTE_COLORS[2],  // ambre
 };
 
 
@@ -77,7 +77,7 @@ export class AccountForm {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly selectedEmoji = signal('🏦');
-  readonly selectedColor = signal('#3b82f6');
+  readonly selectedColor = signal(DEFAULT_COLORS[AccountType.COURANT]);
   readonly selectedBankCode = signal('OTHER');
   readonly bankCustomName = signal('');
   readonly bankCustomLogo = signal<string | null>(null);
@@ -107,7 +107,7 @@ export class AccountForm {
     nom: ['', [Validators.required, Validators.maxLength(50)]],
     type: [AccountType.COURANT as AccountType, [Validators.required]],
     soldeInitial: ['0'],
-    couleur: ['#3b82f6'],
+    couleur: [DEFAULT_COLORS[AccountType.COURANT]],
     actif: [true],
     currency: [''],
     newBalance: [''],

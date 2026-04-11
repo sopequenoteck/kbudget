@@ -43,7 +43,7 @@ import { NotificationService } from '../../../core/services/notification';
       border-radius: 9px;
       background-color: var(--text-error);
       color: white;
-      font-size: 11px;
+      font-size: var(--font-size-2xs);
       font-weight: 600;
       display: flex;
       align-items: center;

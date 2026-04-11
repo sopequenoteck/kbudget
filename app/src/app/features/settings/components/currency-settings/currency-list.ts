@@ -156,7 +156,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       &__symbol { font-weight: var(--font-weight-semibold); min-width: 40px; color: var(--text-secondary); font-size: var(--font-size-sm); }
       &__name { flex: 1; font-size: var(--font-size-sm); color: var(--text-tertiary); }
       &__badge {
-        font-size: 10px; color: var(--text-tertiary); background: transparent;
+        font-size: var(--font-size-2xs); color: var(--text-tertiary); background: transparent;
         border: 1px solid var(--border-default); padding: var(--space-1) var(--space-2);
         border-radius: var(--radius-round); font-weight: var(--font-weight-medium);
       }

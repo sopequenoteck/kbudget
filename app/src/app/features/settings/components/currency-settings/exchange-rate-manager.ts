@@ -280,7 +280,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       .form-readonly {
         padding: var(--space-2) var(--space-3);
         background: transparent;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--border-default);
         border-radius: var(--radius-md);
         font-size: var(--font-size-sm);
         color: var(--text-primary);

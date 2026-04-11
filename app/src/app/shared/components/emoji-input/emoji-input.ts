@@ -13,6 +13,8 @@ import {
 const PICKER_HEIGHT = 435;
 const PICKER_SPACING = 8;
 
+const EMOJI_LOCALE = 'fr';
+
 const EMOJI_PICKER_THEME: Record<string, Record<string, string>> = {
   dark: {
     '--rgb-background': '31, 41, 55',
@@ -110,7 +112,7 @@ export class EmojiInput implements AfterViewChecked {
     const pickerEl = new Picker({
       data,
       theme,
-      locale: 'fr',
+      locale: EMOJI_LOCALE,
       onEmojiSelect: (emoji: { native: string }) => {
         if (emoji.native) {
           this.valueChange.emit(emoji.native);

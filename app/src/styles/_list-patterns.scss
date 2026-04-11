@@ -612,7 +612,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-raised);
   flex-shrink: 0;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
@@ -632,7 +632,7 @@
 .skeleton-line {
   height: 12px;
   border-radius: var(--radius-sm);
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-raised);
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 
   &--title { width: 120px; }
@@ -650,7 +650,7 @@
 
 .skeleton-bar {
   border-radius: var(--radius-sm);
-  background-color: var(--surface-secondary);
+  background-color: var(--surface-raised);
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 
   &--lg { width: 180px; height: 28px; }

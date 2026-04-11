@@ -33,10 +33,10 @@
   align-items: center;
   gap: 3px;
   padding: 3px 4px;
-  font-size: 10px;
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: default;
 
-  ::ng-deep ng-icon { min-width: 14px; font-size: 14px; }
+  ::ng-deep ng-icon { min-width: 14px; font-size: var(--font-size-sm); }
 }

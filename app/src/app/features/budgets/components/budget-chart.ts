@@ -14,6 +14,8 @@ import { type BudgetItem } from '../../../core/models/budget.model';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
+const UNBUDGETED_COLOR = '#9ca3af';
+
 @Component({
   selector: 'app-budget-chart',
   standalone: true,
@@ -93,7 +95,7 @@ export class BudgetChart {
     if (this.unbudgetedTotal() > 0) {
       labels.push('Autre');
       data.push(this.unbudgetedTotal());
-      colors.push('#9ca3af');
+      colors.push(UNBUDGETED_COLOR);
     }
 
     if (labels.length === 0) {

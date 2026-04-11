@@ -266,7 +266,7 @@
   50% { opacity: 1; }
 }
 
-.shimmer { background-color: var(--surface-secondary); animation: skeleton-pulse 1.5s ease-in-out infinite; }
+.shimmer { background-color: var(--surface-raised); animation: skeleton-pulse 1.5s ease-in-out infinite; }
 
 .state-loading { display: flex; justify-content: center; padding: var(--space-4); }
 
