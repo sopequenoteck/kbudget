@@ -105,9 +105,11 @@ export class Transactions implements AfterViewInit {
     return all.find(c => c !== active) ?? null;
   });
 
-  readonly activeSummary = computed(() => {
+  readonly activeSummary = computed((): MonthlySummary | null => {
+    const summaries = this.summaries();
+    if (summaries.length === 0) return null;
     const currency = this.activeCurrency();
-    return this.summaries().find(s => s.currency === currency) ?? this.summaries()[0] ?? null;
+    return summaries.find(s => s.currency === currency) ?? summaries[0];
   });
 
   readonly convertedRecettes = computed(() => {

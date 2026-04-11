@@ -13,7 +13,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { DecimalPipe } from '@angular/common';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPackage,
@@ -46,7 +46,7 @@ type ExpandableSection = 'prixAchat' | 'description' | 'stock' | null;
 
 @Component({
   selector: 'app-product-form',
-  imports: [ReactiveFormsModule, NgIcon, DecimalPipe],
+  imports: [ReactiveFormsModule, NgIcon],
   providers: [
     provideIcons({
       phosphorPackage,

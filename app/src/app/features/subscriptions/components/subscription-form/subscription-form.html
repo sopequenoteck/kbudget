@@ -72,7 +72,7 @@
   <!-- EXPANDED SECTIONS -->
   @if (expandedSection() === 'date') {
     <div class="bsheet__expand" @expandCollapse>
-      <app-inline-date-picker [value]="dateDebutSignal() ?? ''" [originalValue]="subscription()?.dateDebut ?? ''" (valueChange)="onDateSelected($event)" />
+      <app-inline-date-picker [value]="dateDebutSignal()" [originalValue]="subscription()?.dateDebut ?? ''" (valueChange)="onDateSelected($event)" />
     </div>
   }
   @if (expandedSection() === 'category') {
