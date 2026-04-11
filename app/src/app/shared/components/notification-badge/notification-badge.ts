@@ -31,7 +31,7 @@ import { NotificationService } from '../../../core/services/notification';
       transition: background-color 0.15s;
     }
     .notification-badge:hover {
-      background-color: var(--bg-hover, rgba(0,0,0,0.05));
+      background-color: var(--hover-bg);
     }
     .badge {
       position: absolute;

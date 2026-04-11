@@ -1049,6 +1049,83 @@ Wrapper autour de select-picker + bouton creation inline.
 - Les rgba hardcodes dans les partials sont un anti-pattern : ils cassent le theming light/dark et rendent le changement global impossible. Chaque valeur repetee merite un token
 - Le `.page-header` est le meme pattern partout (back + titre aligne droite) — une seule source de verite evite les derives entre pages
 
+## Ce qui a ete fait (session 19)
+
+### Theme light — fondations surfaces et elevation
+
+**Objectif** : creer 3 niveaux d'elevation distinguables en light mode (etaient identiques #fff/#fff).
+
+- `--bg-primary` : `var(--gray-50)` (#fafafa) → `#f0f0f0` — fond de page notablement gris pour que les cards blanches ressortent
+- `--surface-raised` : `#fff` → `var(--gray-200)` (#e5e5e5) — chrome (header, bottom nav, sticky headers, FAB, dialogs) distinguable du fond et des cards
+- `--surface-default` : reste `#fff` — cards et conteneurs de contenu blancs = elements les plus lumineux
+- `--surface-background: transparent` ajoute dans les 2 themes (etait utilise mais jamais defini)
+
+Hierarchie light resultante :
+```
+#f0f0f0  fond page (bg-primary)
+#e5e5e5  chrome : header, bottom nav, sticky, FAB (surface-raised)
+#ffffff  cards, conteneurs de contenu (surface-default)
+```
+
+### Theme light — suppression gradients/glass decoratifs
+
+Alignement sur le dark mode (quiet utility) :
+- `--hero-gradient` : `linear-gradient(135deg, amber-50, indigo-50)` → `none`
+- `--page-gradient-color` : `rgba(245,158,11,0.05)` → `transparent`
+- `--glass-bg` : `var(--surface-raised)` → `var(--surface-default)` (aligne sur dark)
+
+### Theme light — couleur primaire amber (contraste)
+
+- `--color-primary` : `var(--amber-500)` (#f59e0b, ratio 2.8:1 sur blanc = echec WCAG) → `var(--amber-600)` (#d97706, ratio 3.9:1)
+- `--color-primary-hover` : `var(--amber-600)` → `var(--amber-700)` (#b45309, ratio 5.6:1)
+- Income/expense/feedback : conserves en Tailwind 600 (contraste OK sur blanc, pas de "glow" comme en dark)
+
+### Extraction rgba() en tokens themes — composants primaires
+
+3 tokens crees dans les 2 themes pour remplacer les `rgba(255,255,255,x)` hardcodes :
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--hover-subtle` | `rgba(255,255,255,0.04)` | `rgba(0,0,0,0.04)` | fonds discrets, hover notifications |
+| `--highlight-subtle` | `rgba(255,255,255,0.1)` | `rgba(0,0,0,0.06)` | press feedback (date picker :active) |
+| `--overlay-light` | `rgba(255,255,255,0.15)` | `rgba(0,0,0,0.1)` | toggle slider OFF (settings) |
+
+Fichiers nettoyes : inline-date-picker (2), settings (2), notification-panel (1).
+
+### Extraction rgba() en tokens themes — composants secondaires
+
+4 tokens supplementaires crees pour les tints indigo/amber :
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--primary-subtle` | `rgba(224,168,32,0.1)` | `rgba(217,119,6,0.1)` | hover bouton primary icon, fond bouton amber |
+| `--secondary-subtle` | `rgba(129,140,248,0.06)` | `rgba(79,70,229,0.06)` | fond selection, batch bar import |
+| `--secondary-muted` | `rgba(129,140,248,0.15)` | `rgba(79,70,229,0.15)` | fond bouton secondaire |
+| `--secondary-border` | `rgba(129,140,248,0.25)` | `rgba(79,70,229,0.25)` | bordure batch bar, hover bouton |
+
+12 fichiers nettoyes :
+- `import-review.scss` : 12 rgba + 5 hex bruts (#10b981, #4f46e5) → tokens semantiques (--bg-success, --text-success, --color-secondary, --secondary-*)
+- `import-settings.scss` : 2 rgba + 1 fallback hex → tokens
+- `csv-mapping.scss` : 2 fallbacks rgba retires (tokens deja en place)
+- `settings.scss` : 1 shadow rgba → --shadow-lg
+- `snooze-dialog.scss` : 1 overlay → --surface-overlay
+- `account-form.scss` : 1 overlay → --surface-overlay
+- `toast.scss` : 1 shadow fallback retire
+- `notification-badge.ts` : 1 hover fallback → --hover-bg
+- `currency-list.ts` : 1 overlay + 1 shadow → tokens
+- `exchange-rate-manager.ts` : 1 overlay + 1 shadow + 1 danger hover → tokens
+- `emoji-input.scss` : 1 shadow → --shadow-lg
+
+**Resultat** : 0 rgba() dans les SCSS composants. 4 restants dans emoji-input.ts (shadow DOM tiers emoji-mart, deja correctement branche dark/light — intouchable).
+
+### Decisions de design (session 19)
+
+- En light, l'elevation n'est pas "plus clair = plus eleve" (comme en dark) — c'est "blanc = contenu, gris = chrome". Les cards blanches attirent l'oeil, le chrome gris s'efface
+- L'amber-500 (#f59e0b) echoue comme texte sur blanc (2.8:1). Amber-600 (#d97706, 3.9:1) est le bon compromis light. Le dark garde son amber attenue (#e0a820)
+- L'inversion primary/secondary (indigo en primary light) a ete envisagee puis ecartee : l'amber est l'identite de K-Budget, changer de couleur primaire entre themes creerait une dissonance. L'indigo sera explore pour un role semantique propre (navigation, wayfinding) dans une session future
+- Les couleurs income/expense (green-600, red-600) ne sont pas attenuees en light contrairement au dark : sur fond blanc elles ne "glowent" pas, l'attenuation dark corrigeait un probleme specifique au fond sombre
+- Chaque rgba() hardcode dans un composant est un bug de theming en attente : il casse en light ou en dark. Remplacer par un token = correction preventive
+
 ## Ce qui reste a faire
 
 ### Priorite haute
@@ -1077,7 +1154,12 @@ Wrapper autour de select-picker + bouton creation inline.
 - [x] Vente depuis detail produit — brancher le SellDialog bottom sheet existant (session 17)
 - [x] FAB Menu — aligner sur quiet utility, style iOS action sheet (session 17)
 - [x] Notification Panel — aligner vocabulaire visuel, conteneur groupe, dot unread, pills discretes (session 17)
+- [x] Theme light — fondations surfaces, elevation 3 niveaux, suppression gradients/glass (session 19)
+- [x] Theme light — amber primary contraste WCAG (amber-600/700) (session 19)
+- [x] Extraction rgba() hardcodes — tokens themes (7 nouveaux tokens, 0 rgba dans composants SCSS) (session 19)
+- [ ] Theme light — validation visuelle page par page (ajustements fins couleurs, contrastes, ombres)
 - [ ] Recherche & filtres Transactions — designer et implementer la UX (icones placeholder sans handler)
+- [ ] Role elargi de l'indigo — explorer un role semantique propre (navigation, wayfinding)
 
 ### A faire en dernier
 - [ ] Reecrire DESIGN.md a partir du resultat valide
@@ -1108,3 +1190,5 @@ Ce qu'on a retire et qu'il ne faut PAS reintroduire :
 - Segmented controls pour filtrer (preferer groupement + sections en bas)
 - `<input type="date">` natif dans les bottom sheets (preferer InlineDatePicker inline)
 - Spinners CSS tournants (preferer skeleton pulse qui imite la forme du contenu)
+- rgba() hardcodes dans les composants (preferer tokens semantiques themes — chaque rgba brut est un bug de theming en attente)
+- Hex bruts de couleurs metier (#10b981, #4f46e5, #ef4444) dans les composants (preferer --text-success, --color-secondary, --text-error)

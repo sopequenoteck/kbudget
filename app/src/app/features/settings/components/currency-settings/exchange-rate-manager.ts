@@ -247,7 +247,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
           color: var(--color-expense);
 
           &:hover {
-            background-color: rgba(239, 68, 68, 0.1);
+            background-color: var(--bg-error);
           }
         }
       }
@@ -384,7 +384,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       .dialog-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--surface-overlay);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -398,7 +398,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
         padding: var(--space-6);
         max-width: 400px;
         width: 100%;
-        box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
+        box-shadow: var(--shadow-xl);
 
         &__message {
           font-size: var(--font-size-sm);

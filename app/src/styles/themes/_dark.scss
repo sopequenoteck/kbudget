@@ -33,6 +33,7 @@
   // -- Surfaces --
   --surface-default: var(--gray-800);
   --surface-raised: var(--gray-700);
+  --surface-background: transparent;
   --surface-overlay: rgb(0 0 0 / 0.6);
 
   // -- Feedback backgrounds (very subtle on dark) --
@@ -55,6 +56,13 @@
 
   // -- Interactive --
   --hover-bg: var(--gray-700);
+  --hover-subtle: rgba(255, 255, 255, 0.04);
+  --highlight-subtle: rgba(255, 255, 255, 0.1);
+  --overlay-light: rgba(255, 255, 255, 0.15);
+  --primary-subtle: rgba(224, 168, 32, 0.1);
+  --secondary-subtle: rgba(129, 140, 248, 0.06);
+  --secondary-muted: rgba(129, 140, 248, 0.15);
+  --secondary-border: rgba(129, 140, 248, 0.25);
   --focus-ring: rgb(var(--amber-400-rgb) / 0.5);
 
   // -- Business tokens (muted for dark) --

@@ -38,7 +38,7 @@
   }
 
   &:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--highlight-subtle);
   }
 }
 
@@ -106,7 +106,7 @@
   }
 
   &:active:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--highlight-subtle);
   }
 
   // Today indicator — subtle outline circle

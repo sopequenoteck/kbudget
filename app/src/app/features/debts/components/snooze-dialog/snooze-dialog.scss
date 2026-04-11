@@ -10,7 +10,7 @@
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--surface-overlay);
   animation: fade-in var(--duration-fast) var(--ease-default);
 }
 

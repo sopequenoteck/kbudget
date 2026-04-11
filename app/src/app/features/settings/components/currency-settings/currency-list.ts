@@ -178,7 +178,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
     }
 
     .dialog-overlay {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+      position: fixed; inset: 0; background: var(--surface-overlay);
       display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4);
     }
     .dialog {
@@ -207,7 +207,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
     .cdk-drag-preview {
       display: flex; align-items: center; gap: var(--space-3);
       padding: var(--space-3) var(--space-4); background-color: var(--surface-raised);
-      border-radius: var(--radius-lg); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); font-size: var(--font-size-sm);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); font-size: var(--font-size-sm);
     }
     .cdk-drag-placeholder { opacity: 0.3; }
   `],

@@ -175,7 +175,7 @@
 .text-preview {
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: var(--hover-subtle);
   border-radius: var(--radius-lg);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
@@ -202,7 +202,7 @@
   &__slider {
     position: absolute;
     inset: 0;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--overlay-light);
     border-radius: var(--radius-round);
     cursor: pointer;
     transition: background-color var(--duration-fast);
@@ -257,7 +257,7 @@
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background-color: var(--surface-raised); border-radius: var(--radius-lg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-lg); font-size: var(--font-size-sm);
 }
 .cdk-drag-placeholder { opacity: 0.3; }
 .cdk-drag-animating { transition: transform var(--duration-normal); }
