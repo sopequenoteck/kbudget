@@ -5,49 +5,43 @@
       <button class="hero__nav-btn" (click)="prevMonth()" aria-label="Mois précédent">◀</button>
       <button class="hero__nav-btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
     </div>
-    <div class="currency-toggle">
-      @for (currency of preferenceService.currencies(); track currency) {
-        <button
-          class="currency-toggle__btn"
-          [class.active]="currency === activeCurrency()"
-          (click)="setActiveCurrency(currency)"
-        >
-          {{ currency === 'EUR' ? '€' : currency === 'XOF' ? 'CFA' : currency }}
-        </button>
-      }
-    </div>
+    <app-currency-pill-selector
+      [currencies]="preferenceService.currencies()"
+      [activeCurrency]="activeCurrency()"
+      (currencyChange)="setActiveCurrency($event)"
+    />
   </div>
   <div class="hero__amount">
     <span class="hero__amount-label">Solde</span>
-    <span class="hero__amount-value" [class.hero__amount-value--positive]="(activeSummary()?.solde ?? 0) > 0" [class.hero__amount-value--negative]="(activeSummary()?.solde ?? 0) < 0">
-      {{ (activeSummary()?.solde ?? 0) | amount: null : activeCurrency() }}
+    <span class="hero__amount-value" [class.hero__amount-value--positive]="convertedSolde() > 0" [class.hero__amount-value--negative]="convertedSolde() < 0">
+      {{ convertedSolde() | amount: null : activeCurrency() }}
     </span>
   </div>
   <div class="hero__meta-row">
     <div class="hero__meta-group">
       <div class="hero__meta-line">
         <ng-icon name="phosphorTrendUp" size="14" />
-        @if ((activeSummary()?.totalRecettes ?? 0) > 0) {
-          <span>{{ activeSummary()!.totalRecettes | amount: 'RECETTE' : activeSummary()!.currency }}</span>
+        @if (convertedRecettes() > 0) {
+          <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
         } @else {
           <span>0 revenus</span>
         }
       </div>
-      @if (convertedRecettes() !== null && secondaryCurrency(); as sec) {
-        <span class="hero__meta-converted">≈ {{ convertedRecettes()! | amount: 'RECETTE' : sec }}</span>
+      @if (secondaryRecettes() !== null && secondaryCurrency(); as sec) {
+        <span class="hero__meta-converted">≈ {{ secondaryRecettes()! | amount: 'RECETTE' : sec }}</span>
       }
     </div>
     <div class="hero__meta-group">
       <div class="hero__meta-line">
         <ng-icon name="phosphorTrendDown" size="14" />
-        @if ((activeSummary()?.totalDepenses ?? 0) > 0) {
-          <span class="hero__meta-line--expense">{{ activeSummary()!.totalDepenses | amount: 'DEPENSE' : activeSummary()!.currency }}</span>
+        @if (convertedDepenses() > 0) {
+          <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
         } @else {
           <span>0 dépenses</span>
         }
       </div>
-      @if (convertedDepenses() !== null && secondaryCurrency(); as sec) {
-        <span class="hero__meta-converted">≈ {{ convertedDepenses()! | amount: 'DEPENSE' : sec }}</span>
+      @if (secondaryDepenses() !== null && secondaryCurrency(); as sec) {
+        <span class="hero__meta-converted">≈ {{ secondaryDepenses()! | amount: 'DEPENSE' : sec }}</span>
       }
     </div>
   </div>

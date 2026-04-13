@@ -24,6 +24,7 @@ import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/p
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 interface DebtGroup {
@@ -35,7 +36,7 @@ interface DebtGroup {
 @Component({
   selector: 'app-debts',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',
@@ -60,6 +61,7 @@ export class Debts implements AfterViewInit, OnDestroy {
   readonly error = signal(false);
   readonly debts = signal<Debt[]>([]);
   readonly activeCurrency = signal('EUR');
+  private persistTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // -- Hero computeds --
 
@@ -88,8 +90,17 @@ export class Debts implements AfterViewInit, OnDestroy {
 
   readonly activeCurrencyNet = computed(() => {
     const nets = this.netBalanceByCurrency();
-    const currency = this.activeCurrency();
-    return nets.find((n) => n.currency === currency)?.total ?? 0;
+    const target = this.activeCurrency();
+    let total = 0;
+    for (const entry of nets) {
+      if (entry.currency === target) {
+        total += entry.total;
+      } else {
+        const converted = this.conversionService.convert(entry.total, entry.currency, target);
+        if (converted !== null) total += converted;
+      }
+    }
+    return total;
   });
 
   readonly heroConverted = computed(() => {
@@ -193,6 +204,7 @@ export class Debts implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
   }
 
   async loadData(): Promise<void> {
@@ -208,6 +220,22 @@ export class Debts implements AfterViewInit, OnDestroy {
       this.error.set(true);
       this.loading.set(false);
     }
+  }
+
+  setActiveCurrency(currency: string): void {
+    this.activeCurrency.set(currency);
+
+    const current = this.preferenceService.currencies();
+    const reordered = [currency, ...current.filter(c => c !== currency)];
+    this.preferenceService.setCurrencies(reordered);
+
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
+    this.persistTimeout = setTimeout(async () => {
+      this.persistTimeout = null;
+      this.preferenceService.update({ currencies: reordered });
+      await this.exchangeRateService.loadRates();
+      this.loadData();
+    }, 2000);
   }
 
   getIcon(debt: Debt): string {

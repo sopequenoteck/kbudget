@@ -204,31 +204,6 @@
   font-style: italic;
 }
 
-// --- Currency toggle ---
-.currency-toggle {
-  display: flex;
-  gap: var(--space-1);
-
-  &__btn {
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-round);
-    background: none;
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: all var(--duration-fast);
-
-    &.active {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-primary-contrast);
-      font-weight: var(--font-weight-semibold);
-    }
-  }
-}
-
 // --- Section header sticky ---
 .sticky-sentinel {
   height: 1px;

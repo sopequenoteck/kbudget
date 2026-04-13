@@ -50,17 +50,17 @@
           />
         }
       </span>
-      @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
+      @if (convertedNet() !== 0 || convertedVariationPct() !== null) {
         <span class="variation-badge"
           [ngClass]="{
-            'variation-badge--positive': netDuMois() > 0,
-            'variation-badge--negative': netDuMois() < 0,
-            'variation-badge--neutral': netDuMois() === 0
+            'variation-badge--positive': convertedNet() > 0,
+            'variation-badge--negative': convertedNet() < 0,
+            'variation-badge--neutral': convertedNet() === 0
           }"
         >
-          {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
-          @if (variationPatrimoinePct() !== null) {
-            ({{ variationPatrimoinePct()! >= 0 ? '+' : '' }}{{ variationPatrimoinePct()! | number:'1.1-1' }}%)
+          {{ convertedNet() >= 0 ? '+' : '' }}{{ convertedNet() | amount: null : activeCurrency() }} ce mois
+          @if (convertedVariationPct() !== null) {
+            ({{ convertedVariationPct()! >= 0 ? '+' : '' }}{{ convertedVariationPct()! | number:'1.1-1' }}%)
           }
         </span>
       }
@@ -80,8 +80,8 @@
         <div class="hero__meta-group">
           <div class="hero__meta-line">
             <ng-icon name="phosphorTrendUp" size="14" />
-            @if ((currentSummary()?.totalRecettes ?? 0) > 0) {
-              <span>{{ currentSummary()!.totalRecettes | amount: 'RECETTE' : preferenceService.primaryCurrency() }}</span>
+            @if (convertedRecettes() > 0) {
+              <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
             } @else {
               <span>0 revenus</span>
             }
@@ -90,8 +90,8 @@
         <div class="hero__meta-group">
           <div class="hero__meta-line">
             <ng-icon name="phosphorTrendDown" size="14" />
-            @if ((currentSummary()?.totalDepenses ?? 0) > 0) {
-              <span class="hero__meta-line--expense">{{ currentSummary()!.totalDepenses | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}</span>
+            @if (convertedDepenses() > 0) {
+              <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
             } @else {
               <span>0 dépenses</span>
             }
@@ -108,15 +108,15 @@
 </section>
 
 <!-- Section Budgets -->
-@if (preferenceService.isEnabled('BUDGETS') && (sortedBudgetItems().length > 0 || budgetLoading())) {
+@if (preferenceService.isEnabled('BUDGETS') && (convertedSortedBudgetItems().length > 0 || budgetLoading())) {
   <section class="dashboard-section">
     <div class="dashboard-section__header">
       <h2 class="dashboard-section__title">Budgets · {{ budgetCurrentMonth() }}</h2>
       <a class="dashboard-section__link" routerLink="/budgets">Voir tout</a>
     </div>
     <app-budget-summary
-      [items]="sortedBudgetItems()"
-      [overview]="budgetOverview()"
+      [items]="convertedSortedBudgetItems()"
+      [overview]="convertedBudgetOverview()"
       [isLoading]="budgetLoading()"
     />
   </section>

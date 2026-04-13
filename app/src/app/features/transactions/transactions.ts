@@ -10,7 +10,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Subscription, forkJoin } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { TransactionService } from '../../core/services/transaction';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
@@ -36,12 +36,13 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector],
   providers: [
     provideIcons({
       phosphorMagnifyingGlass,
@@ -83,6 +84,7 @@ export class Transactions implements AfterViewInit {
   readonly skeletonItems = Array(5);
 
   readonly activeCurrency = signal(this.preferenceService.primaryCurrency());
+  private persistTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // Expose enum pour le template
   readonly TransactionType = TransactionType;
@@ -108,25 +110,41 @@ export class Transactions implements AfterViewInit {
     return all.find(c => c !== active) ?? null;
   });
 
-  readonly activeSummary = computed((): MonthlySummary | null => {
+  readonly baseSummary = computed((): MonthlySummary | null => {
     const summaries = this.summaries();
-    if (summaries.length === 0) return null;
-    const currency = this.activeCurrency();
-    return summaries.find(s => s.currency === currency) ?? summaries[0];
+    return summaries.length > 0 ? summaries[0] : null;
   });
 
   readonly convertedRecettes = computed(() => {
-    const summary = this.activeSummary();
-    const sec = this.secondaryCurrency();
-    if (!summary || !sec) return null;
-    return this.conversionService.convert(summary.totalRecettes, summary.currency, sec);
+    const summary = this.baseSummary();
+    if (!summary || summary.totalRecettes === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalRecettes, from, to) ?? summary.totalRecettes;
   });
 
   readonly convertedDepenses = computed(() => {
-    const summary = this.activeSummary();
+    const summary = this.baseSummary();
+    if (!summary || summary.totalDepenses === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalDepenses, from, to) ?? summary.totalDepenses;
+  });
+
+  readonly convertedSolde = computed(() => {
+    return this.convertedRecettes() - this.convertedDepenses();
+  });
+
+  readonly secondaryRecettes = computed(() => {
     const sec = this.secondaryCurrency();
-    if (!summary || !sec) return null;
-    return this.conversionService.convert(summary.totalDepenses, summary.currency, sec);
+    if (!sec || this.convertedRecettes() === 0) return null;
+    return this.conversionService.convert(this.convertedRecettes(), this.activeCurrency(), sec);
+  });
+
+  readonly secondaryDepenses = computed(() => {
+    const sec = this.secondaryCurrency();
+    if (!sec || this.convertedDepenses() === 0) return null;
+    return this.conversionService.convert(this.convertedDepenses(), this.activeCurrency(), sec);
   });
 
   readonly selectedMonthLabel = computed(() => {
@@ -244,14 +262,15 @@ export class Transactions implements AfterViewInit {
     return { icon: 'phosphorReceipt', message: `Aucune transaction en ${this.selectedMonthLabel()}`, ctaLabel: 'Ajouter une transaction' };
   });
 
-  private loadSub: Subscription | null = null;
-
   constructor() {
     effect(() => {
       this.transactionService.refreshTrigger();
       this.selectedMonth();
       this.selectedYear();
       this.loadData();
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.persistTimeout) clearTimeout(this.persistTimeout);
     });
   }
 
@@ -267,31 +286,28 @@ export class Transactions implements AfterViewInit {
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
-  loadData(): void {
-    this.loadSub?.unsubscribe();
+  async loadData(): Promise<void> {
     this.loading.set(true);
     this.error.set(false);
     this.exchangeRateService.loadRates();
 
-    this.loadSub = forkJoin({
-      transactions: this.transactionService.getAll(),
-      summary: this.transactionService.getSummary(this.selectedMonth(), this.selectedYear()),
-      categories: this.categoryService.getAll(),
-      accounts: this.accountService.getAll(),
-    }).subscribe({
-      next: ({ transactions, summary, categories, accounts }) => {
-        this.transactions.set(transactions);
-        this.summaries.set(summary);
-        this.categories.set(categories);
-        this.accounts.set(accounts);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.logger.error('Failed to load transactions', err);
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+    try {
+      const [transactions, summary, categories, accounts] = await Promise.all([
+        firstValueFrom(this.transactionService.getAll()),
+        firstValueFrom(this.transactionService.getSummary(this.selectedMonth(), this.selectedYear())),
+        firstValueFrom(this.categoryService.getAll()),
+        firstValueFrom(this.accountService.getAll()),
+      ]);
+      this.transactions.set(transactions);
+      this.summaries.set(summary);
+      this.categories.set(categories);
+      this.accounts.set(accounts);
+      this.loading.set(false);
+    } catch (err) {
+      this.logger.error('Failed to load transactions', err);
+      this.error.set(true);
+      this.loading.set(false);
+    }
   }
 
   prevMonth(): void {
@@ -314,6 +330,18 @@ export class Transactions implements AfterViewInit {
 
   setActiveCurrency(currency: string): void {
     this.activeCurrency.set(currency);
+
+    const current = this.preferenceService.currencies();
+    const reordered = [currency, ...current.filter(c => c !== currency)];
+    this.preferenceService.setCurrencies(reordered);
+
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
+    this.persistTimeout = setTimeout(async () => {
+      this.persistTimeout = null;
+      this.preferenceService.update({ currencies: reordered });
+      await this.exchangeRateService.loadRates();
+      this.loadData();
+    }, 2000);
   }
 
   getIcon(transaction: Transaction): string {

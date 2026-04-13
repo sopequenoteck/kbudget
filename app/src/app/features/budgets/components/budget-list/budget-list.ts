@@ -39,11 +39,12 @@ import { type Category } from '../../../../core/models/category.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { CurrencyPillSelector } from '../../../dashboard/components/currency-pill-selector';
 
 @Component({
   selector: 'app-budget-list',
   standalone: true,
-  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState],
+  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',
@@ -76,6 +77,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly allBudgets = signal<Budget[]>([]);
   readonly allCategories = signal<Category[]>([]);
   readonly activeCurrency = signal('EUR');
+  private persistTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private loadVersion = 0;
 
@@ -94,14 +96,12 @@ export class BudgetList implements AfterViewInit, OnDestroy {
     }),
   );
 
-  readonly items = computed<BudgetItem[]>(() => this.monthData()?.items ?? []);
-
   readonly activeItems = computed(() =>
-    this.items().filter((item) => !isOverviewItem(item) || item.actif !== false),
+    this.convertedItems().filter((item) => !isOverviewItem(item) || item.actif !== false),
   );
 
   readonly inactiveItems = computed(() =>
-    this.items().filter((item) => isOverviewItem(item) && item.actif === false),
+    this.convertedItems().filter((item) => isOverviewItem(item) && item.actif === false),
   );
 
   readonly activeCount = computed(() => this.activeItems().length);
@@ -122,21 +122,62 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly budgetedSpent = computed(() => {
     const data = this.monthData();
     if (!data) return 0;
-    return data.totalSpent - (data.unbudgetedTotal ?? 0);
+    const raw = data.totalSpent - (data.unbudgetedTotal ?? 0);
+    const from = data.currency || 'EUR';
+    const to = this.activeCurrency();
+    if (from === to) return raw;
+    return this.conversionService.convert(raw, from, to) ?? raw;
+  });
+
+  readonly convertedUnbudgetedTotal = computed(() => {
+    const data = this.monthData();
+    if (!data) return 0;
+    const raw = data.unbudgetedTotal ?? 0;
+    const from = data.currency || 'EUR';
+    const to = this.activeCurrency();
+    if (from === to) return raw;
+    return this.conversionService.convert(raw, from, to) ?? raw;
   });
 
   readonly heroConverted = computed(() => {
     const spent = this.budgetedSpent();
     if (spent === 0) return null;
-    const data = this.monthData();
-    if (!data) return null;
-    const from = data.currency;
     const currencies = this.preferenceService.currencies();
     if (currencies.length < 2) return null;
+    const from = this.activeCurrency();
     const to = currencies.find((c) => c !== from);
     if (!to) return null;
     const converted = this.conversionService.convert(spent, from, to);
     return converted !== null ? { amount: converted, currency: to } : null;
+  });
+
+  readonly convertedItems = computed<BudgetItem[]>(() => {
+    const data = this.monthData();
+    if (!data) return [];
+    const from = data.currency || 'EUR';
+    const to = this.activeCurrency();
+    if (from === to) return data.items;
+
+    const convert = (amount: number): number =>
+      this.conversionService.convert(amount, from, to) ?? amount;
+
+    return data.items.map(item => {
+      if (isOverviewItem(item)) {
+        return {
+          ...item,
+          montantDepense: convert(item.montantDepense),
+          montantBudget: convert(item.montantBudgetNormalise),
+          montantBudgetNormalise: convert(item.montantBudgetNormalise),
+          currency: to,
+        };
+      }
+      return {
+        ...item,
+        montantDepense: convert(item.montantDepense),
+        montantBudget: convert(item.montantBudget),
+        currency: to,
+      };
+    });
   });
 
   readonly doughnutSegments = computed(() =>
@@ -177,6 +218,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
   }
 
   prevMonth(): void {
@@ -207,6 +249,18 @@ export class BudgetList implements AfterViewInit, OnDestroy {
 
   setActiveCurrency(currency: string): void {
     this.activeCurrency.set(currency);
+
+    const current = this.preferenceService.currencies();
+    const reordered = [currency, ...current.filter(c => c !== currency)];
+    this.preferenceService.setCurrencies(reordered);
+
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
+    this.persistTimeout = setTimeout(async () => {
+      this.persistTimeout = null;
+      this.preferenceService.update({ currencies: reordered });
+      await this.exchangeRateService.loadRates();
+      this.loadData();
+    }, 2000);
   }
 
   async loadData(): Promise<void> {

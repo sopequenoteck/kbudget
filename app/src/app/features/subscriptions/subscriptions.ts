@@ -23,6 +23,7 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
+import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { DevLogger } from '../../core/services/dev-logger';
 import { APP_LOCALE } from '../../core/constants/locale.constants';
 
@@ -35,7 +36,7 @@ interface SubscriptionGroup {
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector],
   providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
@@ -60,6 +61,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   readonly error = signal(false);
   readonly subscriptions = signal<Subscription[]>([]);
   readonly activeCurrency = signal('EUR');
+  private persistTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // -- Hero computeds --
 
@@ -80,8 +82,17 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
 
   readonly activeCurrencyTotal = computed(() => {
     const totals = this.monthlyTotalsByCurrency();
-    const currency = this.activeCurrency();
-    return totals.find((t) => t.currency === currency)?.total ?? 0;
+    const target = this.activeCurrency();
+    let total = 0;
+    for (const entry of totals) {
+      if (entry.currency === target) {
+        total += entry.total;
+      } else {
+        const converted = this.conversionService.convert(entry.total, entry.currency, target);
+        if (converted !== null) total += converted;
+      }
+    }
+    return total;
   });
 
   readonly heroConverted = computed(() => {
@@ -178,6 +189,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
   }
 
   async loadData(): Promise<void> {
@@ -197,6 +209,18 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
 
   setActiveCurrency(currency: string): void {
     this.activeCurrency.set(currency);
+
+    const current = this.preferenceService.currencies();
+    const reordered = [currency, ...current.filter(c => c !== currency)];
+    this.preferenceService.setCurrencies(reordered);
+
+    if (this.persistTimeout) clearTimeout(this.persistTimeout);
+    this.persistTimeout = setTimeout(async () => {
+      this.persistTimeout = null;
+      this.preferenceService.update({ currencies: reordered });
+      await this.exchangeRateService.loadRates();
+      this.loadData();
+    }, 2000);
   }
 
   getNextRenewalRaw(subscription: Subscription): Date {

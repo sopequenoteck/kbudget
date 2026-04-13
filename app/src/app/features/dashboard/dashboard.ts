@@ -194,6 +194,80 @@ export class Dashboard {
     return current - previous;
   });
 
+  // -- Montants summary convertis dans activeCurrency --
+  readonly convertedRecettes = computed(() => {
+    const summary = this.currentSummary();
+    if (!summary || summary.totalRecettes === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalRecettes, from, to) ?? summary.totalRecettes;
+  });
+
+  readonly convertedDepenses = computed(() => {
+    const summary = this.currentSummary();
+    if (!summary || summary.totalDepenses === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalDepenses, from, to) ?? summary.totalDepenses;
+  });
+
+  readonly convertedNet = computed(() => {
+    return this.convertedRecettes() - this.convertedDepenses();
+  });
+
+  readonly convertedPatrimoineDebutMois = computed(() => {
+    return this.convertedTotalBalance().total - this.convertedNet();
+  });
+
+  readonly convertedVariationPct = computed(() => {
+    const debut = this.convertedPatrimoineDebutMois();
+    if (debut === 0) return null;
+    return (this.convertedNet() / debut) * 100;
+  });
+
+  // -- Budget overview converti dans activeCurrency --
+  readonly convertedBudgetOverview = computed<BudgetOverview | null>(() => {
+    const ov = this.budgetOverview();
+    if (!ov) return null;
+    const from = ov.currency || 'EUR';
+    const to = this.activeCurrency();
+    if (from === to) return ov;
+
+    const convert = (amount: number): number =>
+      this.conversionService.convert(amount, from, to) ?? amount;
+
+    return {
+      ...ov,
+      totalBudget: convert(ov.totalBudget),
+      totalSpent: convert(ov.totalSpent),
+      currency: to,
+      unbudgetedTotal: convert(ov.unbudgetedTotal),
+      unbudgetedItems: ov.unbudgetedItems.map(item => ({
+        ...item,
+        montantDepense: convert(item.montantDepense),
+      })),
+      items: ov.items.map(item => ({
+        ...item,
+        montantBudget: convert(item.montantBudget),
+        montantBudgetNormalise: convert(item.montantBudgetNormalise),
+        montantDepense: convert(item.montantDepense),
+        currency: to,
+      })),
+    };
+  });
+
+  readonly convertedSortedBudgetItems = computed(() => {
+    const items = this.convertedBudgetOverview()?.items ?? [];
+    return [...items]
+      .sort((a, b) => {
+        const aExceeded = a.percentage >= 100;
+        const bExceeded = b.percentage >= 100;
+        if (aExceeded !== bExceeded) return aExceeded ? -1 : 1;
+        return b.percentage - a.percentage;
+      })
+      .slice(0, 4);
+  });
+
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
@@ -380,12 +454,14 @@ export class Dashboard {
     const reordered = [currency, ...current.filter((c) => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
-    // Debounce persistance 2s
+    // Debounce persistance 2s + re-fetch summary/budget avec nouvelle devise principale
     if (this.persistTimeout) clearTimeout(this.persistTimeout);
-    this.persistTimeout = setTimeout(() => {
+    this.persistTimeout = setTimeout(async () => {
       this.persistTimeout = null;
       this.preferenceService.update({ currencies: reordered });
-      this.exchangeRateService.loadRates();
+      await this.exchangeRateService.loadRates();
+      this.loadSummaries();
+      this.loadBudgetOverview();
     }, 2000);
   }
 
