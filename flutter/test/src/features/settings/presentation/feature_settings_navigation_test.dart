@@ -142,12 +142,12 @@ void main() {
     testWidgets(
       'should_display_preview_with_correct_order',
       (tester) async {
-        // navOrder : debts en premier, puis subscriptions, puis shop
-        // enabledFeatures : subscriptions + debts (shop désactivé)
+        // navOrder : debts en premier, puis subscriptions, puis budgets
+        // enabledFeatures : subscriptions + debts (budgets désactivé)
         // enabledOrdered = navOrder.where(enabled) = [debts, subscriptions]
         await tester.pumpWidget(buildApp(
           enabledFeatures: [Feature.subscriptions, Feature.debts],
-          navOrder: [Feature.debts, Feature.subscriptions, Feature.shop],
+          navOrder: [Feature.debts, Feature.subscriptions, Feature.budgets],
         ));
         await tester.pumpAndSettle();
 

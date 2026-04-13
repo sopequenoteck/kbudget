@@ -39,14 +39,9 @@ import 'package:k_budget/src/features/budgets/presentation/budget_list_screen.da
 import 'package:k_budget/src/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_form.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
-import 'package:k_budget/src/features/shop/presentation/product_list_screen.dart';
-import 'package:k_budget/src/features/shop/presentation/product_detail_screen.dart';
 import 'package:k_budget/src/features/recurring/presentation/recurring_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_list_screen.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_detail_screen.dart';
-import 'package:k_budget/src/domain/models/product.dart';
-import 'package:k_budget/src/features/shop/application/product_notifier.dart';
-import 'package:k_budget/src/features/shop/presentation/widgets/product_form.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
@@ -231,24 +226,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   return DebtDetailScreen(
                     debtId: state.pathParameters['id']!,
                     initialDebt: debt,
-                  );
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: RouteNames.shop,
-            name: RouteNames.shopName,
-            builder: (context, state) => const ProductListScreen(),
-            routes: [
-              GoRoute(
-                path: ':id',
-                parentNavigatorKey: _rootNavigatorKey,
-                builder: (context, state) {
-                  final product = state.extra as Product?;
-                  return ProductDetailScreen(
-                    productId: state.pathParameters['id']!,
-                    initialProduct: product,
                   );
                 },
               ),
@@ -480,14 +457,6 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
             label: 'Dettes',
           ),
         ),
-        Feature.shop => (
-          RouteNames.shop,
-          const NavDestination(
-            icon: PhosphorIconsRegular.storefront,
-            selectedIcon: PhosphorIconsFill.storefront,
-            label: 'Boutique',
-          ),
-        ),
         Feature.budgets => (
           RouteNames.budgets,
           const NavDestination(
@@ -553,13 +522,6 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       );
     } else if (state.type == ModalType.transfer) {
       return _TransferFormConsumer(
-        onDone: () {
-          Navigator.of(context).pop();
-        },
-      );
-    } else if (state.type == ModalType.product) {
-      return _ProductFormConsumer(
-        product: state.entity as Product?,
         onDone: () {
           Navigator.of(context).pop();
         },
@@ -749,35 +711,6 @@ class _TransferFormConsumer extends ConsumerWidget {
         unawaited(
             ref.read(transactionListNotifierProvider.notifier).refresh());
         unawaited(ref.read(accountNotifierProvider.notifier).refresh());
-        onDone();
-      },
-      onCancelled: onDone,
-    );
-  }
-}
-
-class _ProductFormConsumer extends ConsumerWidget {
-  final Product? product;
-  final VoidCallback onDone;
-
-  const _ProductFormConsumer({
-    this.product,
-    required this.onDone,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final modalState = ref.watch(modalNotifierProvider);
-    if (modalState is! ModalOpen) return const SizedBox.shrink();
-
-    return ProductForm(
-      product: product,
-      onSaved: (p) async {
-        if (product == null) {
-          await ref.read(productNotifierProvider.notifier).create(p);
-        } else {
-          await ref.read(productNotifierProvider.notifier).update(p);
-        }
         onDone();
       },
       onCancelled: onDone,

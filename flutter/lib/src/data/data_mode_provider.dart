@@ -12,7 +12,6 @@ import 'package:k_budget/src/data/remote/connectivity_interceptor.dart';
 import 'package:k_budget/src/data/remote/data_sources/account_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/data_sources/category_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/data_sources/debt_remote_data_source.dart';
-import 'package:k_budget/src/data/remote/data_sources/product_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/data_sources/subscription_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/data_sources/transaction_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/jwt_interceptor.dart';
@@ -21,7 +20,6 @@ import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/category_repository.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
-import 'package:k_budget/src/domain/repositories/product_repository.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
@@ -32,7 +30,6 @@ import 'package:k_budget/src/domain/repositories/notification_repository.dart';
 import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_remote_data_source.dart';
 import 'package:k_budget/src/features/exchange_rates/data/exchange_rate_repository_impl.dart';
 import 'package:k_budget/src/features/notifications/data/notification_repository_remote.dart';
-import 'package:k_budget/src/features/shop/data/product_repository_remote.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_local.dart';
 import 'package:k_budget/src/features/categories/data/category_repository_remote.dart';
@@ -252,12 +249,6 @@ final accountRemoteDataSourceProvider =
     FutureProvider<AccountRemoteDataSource>((ref) async {
   final dio = await ref.watch(authenticatedDioProvider.future);
   return AccountRemoteDataSource(dio);
-});
-
-// Product repository provider (server-only, no local fallback)
-final productRepositoryProvider = FutureProvider<ProductRepository>((ref) async {
-  final dio = await ref.watch(authenticatedDioProvider.future);
-  return ProductRepositoryRemote(ProductRemoteDataSource(dio));
 });
 
 // Exchange rate repository provider (server-only, no local fallback)

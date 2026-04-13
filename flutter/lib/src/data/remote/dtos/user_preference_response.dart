@@ -9,8 +9,6 @@ class UserPreferenceResponse with _$UserPreferenceResponse {
   const factory UserPreferenceResponse({
     required List<Feature> enabledFeatures,
     required List<Feature> navOrder,
-    String? shopAccountId,
-    required bool includeShopInBalance,
     @Default(['EUR']) List<String> currencies,
     @Default([]) List<NotificationType> enabledNotificationTypes,
     @Default('Europe/Paris') String timezone,

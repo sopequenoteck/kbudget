@@ -11,7 +11,6 @@ class RouteNames {
   static const String debtDetail = ':id'; // relatif
   static const String subscriptionDetail = ':id'; // relatif
   static const String settings = '/settings';
-  static const String shop = '/shop';
   static const String budgets = '/budgets';
   static const String budgetDetails = '/budgets/details';
   static const String login = '/login';
@@ -47,7 +46,6 @@ class RouteNames {
   static const String settingsDataName = 'settings-data';
   static const String settingsCurrenciesName = 'settings-currencies';
   static const String settingsNotificationsName = 'settings-notifications';
-  static const String shopName = 'shop';
   static const String budgetsName = 'budgets';
   static const String budgetDetailsName = 'budget-details';
   static const String debtDetailName = 'debt-detail';

@@ -145,7 +145,13 @@ Vérif finale : `git grep -iE "shop|product"` — 0 résultat attendu hors caté
 
 ## Dette repérée en cours de chantier
 
-_(à compléter au fil de l'extraction — tout ce qui n'entre pas dans le scope strict de cette PR)_
+_(à compléter au fil de l'extraction)_
+
+**Phase 3 Flutter :**
+- **`ModalType.product` dans `modal_type.dart`** : non listé dans le scope initial de la Phase 3 mais découvert lors de l'audit. Supprimé dans cette phase (était mort après suppression de `_ProductFormConsumer` dans `app_router.dart`). Aucun autre consommateur.
+- **8 tests préexistants en échec** (layout overflow, non liés au shop) : `register_screen_test.dart` (5 tests — overflow RenderFlex), `dashboard_notifier_test.dart` (1 test), `recurring_list_screen_test.dart` (1 test), `subscription_list_screen_test.dart` ou `subscription_detail_screen_test.dart` (1 test). Échouent pour des raisons d'environnement de test indépendantes de l'extraction. Hors scope de cette PR.
+- **`feature_settings_screen.dart`** : non listé dans le scope initial mais référençait `productNotifierProvider` et `Feature.shop` — nettoyé dans cette phase.
+- **`test/helpers/mocks.dart`** : non listé dans le scope initial mais référençait `ProductRepository` dans `@GenerateNiceMocks` — nettoyé dans cette phase.
 
 - **TransactionResponse.productId/productName** : ces champs étaient exposés dans l'API publique. Ils sont retirés dans cette phase. Les clients Angular/Flutter qui consomment `GET /transactions` et `GET /transactions/{id}` doivent vérifier qu'ils n'en dépendent pas (Phase 2 et 3 en charge de nettoyer leur côté).
 - **AccountResponse.isShopAccount** : champ exposé dans l'API publique, retiré. Même vigilance côté Angular/Flutter.
