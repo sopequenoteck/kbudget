@@ -1,5 +1,5 @@
 -- ============================================================
--- V24 — Extraction module shop
+-- V26 — Extraction module shop
 -- Supprime les tables, colonnes et données liées au module shop
 -- ============================================================
 
