@@ -5,7 +5,6 @@ import { type Subscription } from '../models/subscription.model';
 import { type Debt } from '../models/debt.model';
 import { type Category } from '../models/category.model';
 import { type Account } from '../models/account.model';
-import { type Product } from '../models/product.model';
 import { type Budget } from '../models/budget.model';
 
 export type ModalType =
@@ -15,13 +14,10 @@ export type ModalType =
   | 'category'
   | 'account'
   | 'transfer'
-  | 'product'
-  | 'sell'
   | 'budget'
-  | 'repay'
-  | 'restock';
+  | 'repay';
 
-type EditableEntity = Transaction | Subscription | Debt | Category | Account | Product | Budget;
+type EditableEntity = Transaction | Subscription | Debt | Category | Account | Budget;
 
 const CREATE_TITLES: Record<ModalType, string> = {
   transaction: 'Nouvelle transaction',
@@ -30,11 +26,8 @@ const CREATE_TITLES: Record<ModalType, string> = {
   category: 'Nouvelle catégorie',
   account: 'Nouveau compte',
   transfer: 'Nouveau virement',
-  product: 'Nouveau produit',
-  sell: 'Vente rapide',
   budget: 'Nouveau budget',
   repay: 'Remboursement',
-  restock: 'Restockage',
 };
 
 const EDIT_TITLES: Record<ModalType, string> = {
@@ -44,11 +37,8 @@ const EDIT_TITLES: Record<ModalType, string> = {
   category: 'Modifier la catégorie',
   account: 'Modifier le compte',
   transfer: 'Virement',
-  product: 'Modifier le produit',
-  sell: 'Vente rapide',
   budget: 'Modifier le budget',
   repay: 'Remboursement',
-  restock: 'Restockage',
 };
 
 const CLOSE_DURATION = 200;

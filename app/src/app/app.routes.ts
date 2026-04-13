@@ -47,12 +47,6 @@ export const routes: Routes = [
         loadChildren: () => import('./features/debts/debts.routes').then((m) => m.DEBTS_ROUTES),
       },
       {
-        path: 'shop',
-        canActivate: [featureGuard],
-        data: { feature: 'SHOP', animation: 'Shop' },
-        loadChildren: () => import('./features/shop/shop.routes').then((m) => m.SHOP_ROUTES),
-      },
-      {
         path: 'budgets',
         canActivate: [featureGuard],
         data: { feature: 'BUDGETS', animation: 'Budgets' },

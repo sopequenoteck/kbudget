@@ -18,8 +18,6 @@ import {
   phosphorArrowsClockwiseBold,
   phosphorHandshakeBold,
   phosphorArrowsLeftRightBold,
-  phosphorPackageBold,
-  phosphorTagBold,
   phosphorChartPieBold,
 } from '@ng-icons/phosphor-icons/bold';
 
@@ -41,8 +39,6 @@ const BASE_ACTIONS: readonly SpeedDialItem[] = [
 ] as const;
 
 const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: 'phosphorArrowsLeftRightBold' };
-const PRODUCT_ACTION: SpeedDialItem = { type: 'product', label: 'Nouveau produit', icon: 'phosphorPackageBold' };
-const SELL_ACTION: SpeedDialItem = { type: 'sell', label: 'Vente rapide', icon: 'phosphorTagBold' };
 const BUDGET_ACTION: SpeedDialItem = { type: 'budget', label: 'Nouveau budget', icon: 'phosphorChartPieBold' };
 
 @Component({
@@ -56,8 +52,6 @@ const BUDGET_ACTION: SpeedDialItem = { type: 'budget', label: 'Nouveau budget', 
       phosphorArrowsClockwiseBold,
       phosphorHandshakeBold,
       phosphorArrowsLeftRightBold,
-      phosphorPackageBold,
-      phosphorTagBold,
       phosphorChartPieBold,
     }),
   ],
@@ -90,14 +84,10 @@ export class Fab {
     () => this.currentRoute() === '/dashboard' || this.currentRoute() === '/',
   );
   readonly isOnBudgetsRoute = computed(() => this.currentRoute().startsWith('/budgets'));
-  readonly isOnShopRoute = computed(() => this.currentRoute().startsWith('/shop'));
 
   readonly actions = computed<SpeedDialItem[]>(() => {
     if (this.isOnBudgetsRoute() && this.preferenceService.isEnabled('BUDGETS')) {
       return [BUDGET_ACTION];
-    }
-    if (this.isOnShopRoute() && this.preferenceService.isEnabled('SHOP')) {
-      return [PRODUCT_ACTION, SELL_ACTION];
     }
 
     const base = BASE_ACTIONS.filter((action) => {

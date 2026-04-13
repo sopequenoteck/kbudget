@@ -11,10 +11,8 @@ if (!getTestBed().platform) {
 }
 
 const mockPreference: UserPreference = {
-  enabledFeatures: ['SUBSCRIPTIONS', 'DEBTS', 'SHOP'],
-  navOrder: ['SUBSCRIPTIONS', 'DEBTS', 'SHOP'],
-  shopAccountId: null,
-  includeShopInBalance: false,
+  enabledFeatures: ['SUBSCRIPTIONS', 'DEBTS'],
+  navOrder: ['SUBSCRIPTIONS', 'DEBTS'],
 };
 
 describe('PreferenceService', () => {
@@ -47,8 +45,8 @@ describe('PreferenceService', () => {
 
       // Assert
       expect(apiService.get).toHaveBeenCalledWith('/users/me/preferences');
-      expect(service.enabledFeatures()).toEqual(['SUBSCRIPTIONS', 'DEBTS', 'SHOP']);
-      expect(service.navOrder()).toEqual(['SUBSCRIPTIONS', 'DEBTS', 'SHOP']);
+      expect(service.enabledFeatures()).toEqual(['SUBSCRIPTIONS', 'DEBTS']);
+      expect(service.navOrder()).toEqual(['SUBSCRIPTIONS', 'DEBTS']);
       expect(service.error()).toBeNull();
     });
 
@@ -86,9 +84,9 @@ describe('PreferenceService', () => {
     });
 
     it('should_toggle_feature_off_when_enabled', () => {
-      // Arrange — initial state: all 3 features enabled
-      service.enabledFeatures.set(['SUBSCRIPTIONS', 'DEBTS', 'SHOP']);
-      service.navOrder.set(['SUBSCRIPTIONS', 'DEBTS', 'SHOP']);
+      // Arrange — initial state: all features enabled
+      service.enabledFeatures.set(['SUBSCRIPTIONS', 'DEBTS']);
+      service.navOrder.set(['SUBSCRIPTIONS', 'DEBTS']);
       apiService.put.mockReturnValue(of(mockPreference));
 
       // Act
@@ -98,7 +96,7 @@ describe('PreferenceService', () => {
       expect(service.enabledFeatures()).not.toContain('DEBTS');
       expect(service.navOrder()).not.toContain('DEBTS');
       expect(apiService.put).toHaveBeenCalledWith('/users/me/preferences', {
-        enabledFeatures: ['SUBSCRIPTIONS', 'SHOP'],
+        enabledFeatures: ['SUBSCRIPTIONS'],
       });
     });
   });
@@ -124,17 +122,17 @@ describe('PreferenceService', () => {
   describe('reorderNavigation()', () => {
     it('should_reorder_navigation', () => {
       // Arrange
-      const initialFeatures: Feature[] = ['SUBSCRIPTIONS', 'DEBTS', 'SHOP'];
+      const initialFeatures: Feature[] = ['SUBSCRIPTIONS', 'DEBTS'];
       service.enabledFeatures.set(initialFeatures);
-      service.navOrder.set(['SUBSCRIPTIONS', 'DEBTS', 'SHOP']);
-      const newOrder: Feature[] = ['SHOP', 'SUBSCRIPTIONS', 'DEBTS'];
+      service.navOrder.set(['SUBSCRIPTIONS', 'DEBTS']);
+      const newOrder: Feature[] = ['DEBTS', 'SUBSCRIPTIONS'];
       apiService.put.mockReturnValue(of(mockPreference));
 
       // Act
       service.reorderNavigation(newOrder);
 
       // Assert
-      expect(service.navOrder()).toEqual(['SHOP', 'SUBSCRIPTIONS', 'DEBTS']);
+      expect(service.navOrder()).toEqual(['DEBTS', 'SUBSCRIPTIONS']);
       expect(apiService.put).toHaveBeenCalledWith('/users/me/preferences', {
         enabledFeatures: initialFeatures,
         navOrder: newOrder,

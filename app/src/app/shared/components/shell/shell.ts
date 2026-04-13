@@ -21,13 +21,11 @@ import {
   phosphorCurrencyDollar,
   phosphorArrowsClockwise,
   phosphorHandshake,
-  phosphorStorefront,
   phosphorChartPie,
 } from '@ng-icons/phosphor-icons/regular';
 import {
   phosphorArrowsClockwiseFill,
   phosphorHandshakeFill,
-  phosphorStorefrontFill,
   phosphorHouseFill,
   phosphorCurrencyDollarFill,
   phosphorChartPieFill,
@@ -51,11 +49,8 @@ import { DebtForm } from '../../../features/debts/components/debt-form/debt-form
 import { CategoryForm } from '../category-form/category-form';
 import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
-import { ProductForm } from '../../../features/shop/components/product-form/product-form';
-import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
 import { BudgetForm } from '../../../features/budgets/components/budget-form/budget-form';
 import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
-import { RestockDialog } from '../../../features/shop/components/restock-dialog/restock-dialog';
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
@@ -79,11 +74,8 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
     CategoryForm,
     AccountForm,
     TransferForm,
-    ProductForm,
-    SellDialog,
     BudgetForm,
     RepayDialog,
-    RestockDialog,
     NotificationBadge,
     NotificationPanel,
     Toast,
@@ -101,8 +93,6 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
       phosphorArrowsClockwiseFill,
       phosphorHandshake,
       phosphorHandshakeFill,
-      phosphorStorefront,
-      phosphorStorefrontFill,
       phosphorChartPie,
       phosphorChartPieFill,
     }),

@@ -72,7 +72,7 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
-  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget' || modalService.activeModal() === 'product' || modalService.activeModal() === 'repay' || modalService.activeModal() === 'sell' || modalService.activeModal() === 'restock'"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget' || modalService.activeModal() === 'repay'"
   (closed)="onModalClose()"
 >
 @switch (modalService.activeModal()) {
@@ -114,18 +114,6 @@
     @case ('transfer') {
       <app-transfer-form (saved)="onModalClose()" (cancelled)="onModalClose()" />
     }
-    @case ('product') {
-      <app-product-form
-        (saved)="onModalClose()"
-        (cancelled)="onModalClose()"
-      />
-    }
-    @case ('sell') {
-      <app-sell-dialog
-        (saved)="onModalClose()"
-        (cancelled)="onModalClose()"
-      />
-    }
     @case ('budget') {
       <app-budget-form
         (saved)="onModalClose()"
@@ -134,12 +122,6 @@
     }
     @case ('repay') {
       <app-repay-dialog
-        (saved)="onModalClose()"
-        (cancelled)="onModalClose()"
-      />
-    }
-    @case ('restock') {
-      <app-restock-dialog
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
