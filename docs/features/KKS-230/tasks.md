@@ -99,15 +99,15 @@ Ces tâches sont bloquantes pour les fronts (API-First, constitution #1).
 
 ## Phase 4 — Polish
 
-- [ ] **T-080** [P] Mettre à jour `docs/api-examples.md` : ajouter exemple requête/réponse `GET /api/transactions/libelles` — Réf: FR-014
-- [ ] **T-081** [P] Ajouter note dans `docs/dette-technique.md` : migration future `Merchant` (réf KKS-099 dédup Jaro-Winkler) — Réf: plan.md
-- [ ] **T-082** [P] Documenter le pattern `autocomplete` dans `DESIGN.md` si absent (vérifier d'abord) — Réf: NFR-003
-- [ ] **T-083** Lancer `/design-check` sur les fichiers SCSS modifiés et corriger les écarts éventuels — Réf: NFR-003
-- [ ] **T-084** Exécuter le quickstart manuel (`quickstart.md`) sur les deux fronts (Angular + Flutter) et archiver les observations — Réf: SC-001, SC-002
-- [ ] **T-085** Test performance manuel : seed 10k transactions + mesure `curl -w @timing` < 100ms — Réf: NFR-001, SC-003
-- [ ] **T-086** [P] `mvn test` + `ng lint` + `ng test` + `flutter analyze` + `flutter test` tout vert — Réf: NFR-006, NFR-007
-- [ ] **T-087** Pre-commit review via `pre-commit-review` + `frontend-design-review` — Réf: CLAUDE.md
-- [ ] **T-088** Créer la PR vers `develop` avec lien Linear KKS-230 et checklist des SC — Réf: plan.md
+- [x] **T-080** [P] Mettre à jour `docs/api-examples.md` : ajouter exemple requête/réponse `GET /api/transactions/libelles` — Réf: FR-014
+- [x] **T-081** [P] Ajouter note dans `docs/dette-technique.md` : migration future `Merchant` (réf KKS-099 dédup Jaro-Winkler) — Réf: plan.md
+- [x] **T-082** [P] Documenter le pattern `autocomplete` dans `DESIGN.md` si absent (vérifier d'abord) — Réf: NFR-003
+- [ ] **T-083** Lancer `/design-check` sur les fichiers SCSS modifiés et corriger les écarts éventuels — Réf: NFR-003 — **À exécuter manuellement**
+- [ ] **T-084** Exécuter le quickstart manuel (`quickstart.md`) sur les deux fronts (Angular + Flutter) et archiver les observations — Réf: SC-001, SC-002 — **À exécuter manuellement (serveur local + navigateur/device)**
+- [ ] **T-085** Test performance manuel : seed 10k transactions + mesure `curl -w @timing` < 100ms — Réf: NFR-001, SC-003 — **Couverture automatisée via T-026 (test JUnit avec seed 10k + assertion < 100ms) ; validation manuelle restante optionnelle**
+- [x] **T-086** [P] `mvn test` + `ng lint` + `ng test` + `flutter analyze` + `flutter test` tout vert — Réf: NFR-006, NFR-007 — Backend 40 tests verts, Angular lint + tests verts (23 autocomplete + 3 service), Flutter analyze + 7 widget tests verts
+- [ ] **T-087** Pre-commit review via `pre-commit-review` + `frontend-design-review` — Réf: CLAUDE.md — **À exécuter manuellement avant la PR**
+- [ ] **T-088** Créer la PR vers `develop` avec lien Linear KKS-230 et checklist des SC — Réf: plan.md — **Action utilisateur**
 
 ### ✅ Checkpoint Phase 4
 - Tous les tests verts, docs à jour, design check OK, PR ouverte.

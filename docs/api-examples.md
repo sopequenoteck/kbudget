@@ -182,6 +182,23 @@ Response `200` :
 }
 ```
 
+### Libelles autocomplete `GET /api/transactions/libelles?q=car&limit=20`
+
+Retourne les libelles distincts de l'utilisateur authentifie, tries par frequence decroissante puis par date de derniere utilisation decroissante. Filtre `q` optionnel `contains` case-insensitive et accent-insensible. `limit` optionnel clampe a `[1, 50]` (defaut `20`).
+
+Response `200` :
+
+```json
+["Carrefour", "Carrefour Market", "Carte bleue"]
+```
+
+Exemples :
+- `GET /api/transactions/libelles` → tous les libelles tries par frequence
+- `GET /api/transactions/libelles?q=cafe` → "Cafe du coin" (accent-insensible)
+- `GET /api/transactions/libelles?q=market&limit=5` → max 5 libelles contenant "market"
+
+Erreur `401` si JWT absent ou invalide.
+
 ## Abonnements
 
 ### Creer `POST /api/subscriptions`

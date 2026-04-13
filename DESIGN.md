@@ -114,6 +114,24 @@ Toujours centre (jamais bottom sheet). Icone metier + titre concret (nom + monta
 
 Service : `ConfirmService.confirm()`
 
+### Autocomplete
+
+Champ input natif surmonte d'un overlay absolu listant les suggestions. Utilise pour le libelle de transaction (KKS-230) et potentiellement d'autres champs libres avec suggestions historiques.
+
+Contrat signals-first : `value` (model), `suggestions` (input), `minChars` (defaut 2), `maxDisplay` (defaut 5), outputs `selected` et `queryChange` (debounce 200ms).
+
+Comportement :
+- Seuil `minChars` avant ouverture — aucune requete en dessous
+- Debounce 200ms sur `queryChange`
+- Filtrage local additionnel case/accent-insensible (NFD + suppression diacritiques)
+- Navigation clavier : ArrowDown/Up (wrap), Enter (select), Escape (close sans modification)
+- ARIA : `role="combobox"`, `aria-autocomplete="list"`, `aria-expanded`, `role="listbox"`, `role="option"`, `aria-activedescendant`
+- Saisie libre toujours possible (aucun lock sur la valeur)
+
+Style : tokens CSS uniquement, overlay en `surface-raised` avec `radius-md` et shadow legere. Items actifs en `hover-bg`.
+
+Composant : `<app-autocomplete>` dans `app/src/app/shared/components/autocomplete/`
+
 ### Skeleton loading
 
 Imite la forme du contenu reel. Cercle 36px + lignes largeurs variees. Animation pulse 1.5s.
