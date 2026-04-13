@@ -180,6 +180,20 @@ BEGIN
     (gen_random_uuid(), 40.00, 'Jeux video', 'DEPENSE', '2026-02-21', NULL, v_user_id, v_cat_loisirs, v_compte_eur),
     (gen_random_uuid(), 52.00, 'Plein essence', 'DEPENSE', '2026-02-25', NULL, v_user_id, v_cat_transport, v_compte_eur);
 
+    -- TRANSACTIONS EUR — Avril 2026 (1er au 3)
+    -- Deplace depuis V24__seed_april_2026.sql (devenue no-op) pour garantir
+    -- l'idempotence sur reset DB dev.
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'Salaire Avril',     'RECETTE', '2026-04-01', NULL,               v_user_id, v_cat_salaire,      v_compte_eur),
+    (gen_random_uuid(),  750.00, 'Loyer avril',       'DEPENSE', '2026-04-01', NULL,               v_user_id, v_cat_logement,     v_compte_eur),
+    (gen_random_uuid(),   29.99, 'Orange Fibre',      'DEPENSE', '2026-04-01', 'Prelevement auto', v_user_id, v_cat_abonnement,   v_compte_eur),
+    (gen_random_uuid(),   67.40, 'Carrefour Market',  'DEPENSE', '2026-04-02', NULL,               v_user_id, v_cat_alimentation, v_compte_eur),
+    (gen_random_uuid(),    1.90, 'Ticket metro',      'DEPENSE', '2026-04-02', NULL,               v_user_id, v_cat_transport,    v_compte_eur),
+    (gen_random_uuid(),   12.50, 'Boulangerie',       'DEPENSE', '2026-04-02', NULL,               v_user_id, v_cat_alimentation, v_compte_eur),
+    (gen_random_uuid(),   14.90, 'Dejeuner kebab',    'DEPENSE', '2026-04-03', NULL,               v_user_id, v_cat_restaurant,   v_compte_eur),
+    (gen_random_uuid(),   43.20, 'Lidl',              'DEPENSE', '2026-04-03', NULL,               v_user_id, v_cat_courses,      v_compte_eur),
+    (gen_random_uuid(),   48.00, 'Plein essence',     'DEPENSE', '2026-04-03', NULL,               v_user_id, v_cat_transport,    v_compte_eur);
+
     -- ===========================================================
     -- TRANSACTIONS XOF — Mars 2026
     -- ===========================================================
@@ -193,6 +207,15 @@ BEGIN
     (gen_random_uuid(), 12000, 'Maquis', 'DEPENSE', '2026-03-18', NULL, v_user_id, v_cat_restaurant, v_compte_xof),
     (gen_random_uuid(), 35000, 'Courses semaine', 'DEPENSE', '2026-03-22', NULL, v_user_id, v_cat_courses, v_compte_xof),
     (gen_random_uuid(), 5000, 'Zem', 'DEPENSE', '2026-03-26', NULL, v_user_id, v_cat_transport, v_compte_xof);
+
+    -- TRANSACTIONS XOF — Avril 2026 (1er au 3)
+    -- Deplace depuis V24__seed_april_2026.sql
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 75000, 'Loyer local avril', 'DEPENSE', '2026-04-01', NULL, v_user_id, v_cat_logement,     v_compte_xof),
+    (gen_random_uuid(), 18500, 'Marche Assigame',   'DEPENSE', '2026-04-02', NULL, v_user_id, v_cat_alimentation, v_compte_xof),
+    (gen_random_uuid(),  3500, 'Zem trajet',        'DEPENSE', '2026-04-02', NULL, v_user_id, v_cat_transport,    v_compte_xof),
+    (gen_random_uuid(), 12000, 'Courses marche',    'DEPENSE', '2026-04-03', NULL, v_user_id, v_cat_courses,      v_compte_xof),
+    (gen_random_uuid(),  4500, 'Maquis midi',       'DEPENSE', '2026-04-03', NULL, v_user_id, v_cat_restaurant,   v_compte_xof);
 
     -- ===========================================================
     -- ABONNEMENTS
