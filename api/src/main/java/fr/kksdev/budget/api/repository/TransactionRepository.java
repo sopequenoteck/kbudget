@@ -94,4 +94,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("userId") UUID userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    @Query(value = """
+            SELECT t.libelle
+            FROM transactions t
+            WHERE t.user_id = :userId
+              AND (:q IS NULL OR LOWER(UNACCENT(t.libelle)) LIKE '%' || LOWER(UNACCENT(CAST(:q AS TEXT))) || '%')
+            GROUP BY t.libelle
+            ORDER BY COUNT(*) DESC, MAX(t.date) DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<String> findLibelleSuggestions(
+            @Param("userId") UUID userId,
+            @Param("q") String q,
+            @Param("limit") int limit);
 }

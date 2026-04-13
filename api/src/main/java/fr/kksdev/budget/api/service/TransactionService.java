@@ -75,6 +75,12 @@ public class TransactionService {
         return toResponse(transaction);
     }
 
+    public List<String> getLibelleSuggestions(UUID userId, String q, Integer limit) {
+        int safeLimit = Math.min(Math.max(limit == null ? 20 : limit, 1), 50);
+        String normalizedQ = (q == null || q.isBlank()) ? null : q;
+        return transactionRepository.findLibelleSuggestions(userId, normalizedQ, safeLimit);
+    }
+
     public List<TransactionResponse> getAllByUser(UUID userId) {
         return transactionRepository.findByUserIdAndIsRecurringFalseOrderByDateDesc(userId)
                 .stream()

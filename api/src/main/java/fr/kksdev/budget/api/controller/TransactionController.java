@@ -7,11 +7,13 @@ import fr.kksdev.budget.api.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
@@ -26,6 +29,17 @@ import java.util.UUID;
 public class TransactionController {
 
     private final TransactionService transactionService;
+
+    @Operation(summary = "Lister les libellés déjà utilisés (autocomplete)")
+    @GetMapping("/libelles")
+    public ResponseEntity<List<String>> getLibelleSuggestions(
+            @RequestParam(required = false) @Size(max = 255) String q,
+            @RequestParam(required = false, defaultValue = "20") Integer limit,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        log.info("GET /transactions/libelles user={} q={} limit={}", userId, q, limit);
+        return ResponseEntity.ok(transactionService.getLibelleSuggestions(userId, q, limit));
+    }
 
     @Operation(summary = "Créer une transaction")
     @PostMapping
