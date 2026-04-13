@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-App de gestion de budget. Self-hosted, single-user. Issues sur **Linear** (`KKS-*`), pas GitHub Issues.
+App de gestion de budget. Self-hosted, multi-user (groupe restreint, ~16 comptes actifs, pas d'inscription publique). Isolation stricte des données par user (principe #2 de la constitution). Issues sur **Linear** (`KKS-*`), pas GitHub Issues.
 
 ## Commandes
 

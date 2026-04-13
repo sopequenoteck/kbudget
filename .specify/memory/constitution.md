@@ -1,29 +1,29 @@
 <!--
   Sync Impact Report
   ==================================================
-  Version change: 2.0.0 → 2.1.0 (MINOR — ajout stack Flutter)
-  Bump rationale: Expansion matérielle de la section Contraintes
-    techniques et Workflow de développement pour inclure le module
-    Flutter (Dart, Riverpod, Drift, Freezed, go_router). Aucun
-    principe modifié ou supprimé.
+  Version change: 2.1.1 → 2.1.2 (PATCH — clarification contexte multi-user)
+  Bump rationale: Reconnaissance explicite du caractère multi-user
+    de l'instance self-hosted (groupe restreint ~16 comptes actifs).
+    Aucun principe modifié : le principe II (Sécurité par défaut)
+    couvrait déjà l'isolation par user authentifié. Ajout d'une
+    section "Contexte d'usage" et d'une bullet au principe VII pour
+    rendre explicites les décisions implicites (pas de partage
+    d'entités, pas de rapprochement cross-user auto, pas d'inscription
+    publique).
 
   Modified principles: aucun (les 7 principes restent identiques)
 
   Modified sections:
-    - Contraintes techniques: scindée en 3 sous-sections
-      (Backend, Frontend PWA, Mobile natif)
-    - Workflow de développement: inchangé (déjà générique)
+    - Principe VII (Self-Hosted Ready) : ajout d'une bullet sur le
+      support multi-user
 
   Added sections:
-    - Contraintes techniques > Frontend PWA (app/) — extrait
-      de l'ancien bloc monolithique
-    - Contraintes techniques > Mobile natif (flutter/) — NOUVEAU
+    - Contexte d'usage (nouveau) — avant "Contraintes techniques"
 
   Removed sections: aucune
 
   Templates requiring updates:
     - .specify/templates/plan-template.md ✅ compatible
-      (Constitution Check générique, accueille les 7 principes)
     - .specify/templates/spec-template.md ✅ compatible
     - .specify/templates/tasks-template.md ✅ compatible
     - .specify/templates/checklist-template.md ✅ compatible
@@ -156,6 +156,26 @@ sans dépendance à des services cloud externes.
   auth externe, CDN) en v1
 - L'application DOIT démarrer avec une seule commande
   (`mvn spring-boot:run` ou `java -jar`)
+- L'application DOIT supporter plusieurs utilisateurs sur une
+  même instance (multi-tenant logique via isolation par user
+  authentifié, cf. principe II). L'inscription publique
+  N'EST PAS un objectif : l'onboarding se fait via création
+  de compte contrôlée par l'administrateur du serveur.
+
+## Contexte d'usage
+
+- **Déploiement cible** : instance unique auto-hébergée,
+  utilisée par un groupe restreint (~10-20 comptes actifs).
+- **Isolation stricte** : chaque user a ses propres comptes,
+  transactions, budgets, dettes, produits Shop. Aucune entité
+  n'est partagée entre users.
+- **Flux cross-user** : les relations financières entre deux
+  users de l'instance (ex : prêt, commande pour compte de
+  tiers) sont modélisées séparément dans chaque compte.
+  Un rapprochement automatique inter-users N'EST PAS un
+  objectif de la v1.
+- **Pas d'inscription publique** : création de compte
+  contrôlée, pas de freemium, pas de quota payant.
 
 ## Contraintes techniques
 
@@ -239,4 +259,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 2.1.1 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-03-13
+**Version**: 2.1.2 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-04-13
