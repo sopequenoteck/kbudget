@@ -236,6 +236,98 @@ class TransactionRepositoryTest {
         assertThat(libelles.indexOf("Recent")).isLessThan(libelles.indexOf("Ancien"));
     }
 
+    // --- T-050 : filtre contains case-insensitive ---
+
+    @Test
+    void should_filter_contains_case_insensitive() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("45.00"))
+                .libelle("Carrefour Market")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("30.00"))
+                .libelle("Monoprix")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 2))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("10.00"))
+                .libelle("Carte bleue")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 3))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        // Filtre en minuscule : matche au milieu du libellé
+        List<String> resultatMinuscule = transactionRepository.findLibelleSuggestions(user1.getId(), "market", 20);
+        assertThat(resultatMinuscule).containsExactly("Carrefour Market");
+
+        // Filtre en majuscule : même résultat
+        List<String> resultatMajuscule = transactionRepository.findLibelleSuggestions(user1.getId(), "MARKET", 20);
+        assertThat(resultatMajuscule).containsExactly("Carrefour Market");
+
+        // Filtre casse mixte : même résultat
+        List<String> resultatMixte = transactionRepository.findLibelleSuggestions(user1.getId(), "Market", 20);
+        assertThat(resultatMixte).containsExactly("Carrefour Market");
+    }
+
+    // --- T-051 : filtre accent-insensitive ---
+
+    @Test
+    void should_filter_accent_insensitive() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("5.00"))
+                .libelle("Café du coin")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("20.00"))
+                .libelle("L'épicerie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 2))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("15.00"))
+                .libelle("Boulangerie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 3))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        // "cafe" sans accent doit matcher "Café du coin"
+        List<String> resultatCafe = transactionRepository.findLibelleSuggestions(user1.getId(), "cafe", 20);
+        assertThat(resultatCafe).containsExactly("Café du coin");
+
+        // "epicerie" sans accent doit matcher "L'épicerie"
+        List<String> resultatEpicerie = transactionRepository.findLibelleSuggestions(user1.getId(), "epicerie", 20);
+        assertThat(resultatEpicerie).containsExactly("L'épicerie");
+    }
+
     // --- T-026 : performance < 100ms sur 10 000 transactions ---
 
     @Test

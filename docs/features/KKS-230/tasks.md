@@ -76,24 +76,24 @@ Ces tâches sont bloquantes pour les fronts (API-First, constitution #1).
 
 #### Backend
 
-- [ ] **T-050** [P] [P2] [US3] Test `TransactionRepositoryTest.should_filter_contains_case_insensitive` ("market" → "Carrefour Market") — Réf: FR-017
-- [ ] **T-051** [P] [P2] [US3] Test `TransactionRepositoryTest.should_filter_accent_insensitive` ("cafe" → "Café du coin") — Réf: FR-017
+- [x] **T-050** [P] [P2] [US3] Test `TransactionRepositoryTest.should_filter_contains_case_insensitive` ("market" → "Carrefour Market") — Réf: FR-017
+- [x] **T-051** [P] [P2] [US3] Test `TransactionRepositoryTest.should_filter_accent_insensitive` ("cafe" → "Café du coin") — Réf: FR-017
 
 #### Angular
 
-- [ ] **T-060** [P2] [US3] Implémenter dans `AutocompleteComponent` : debounce 200ms (`Subject + debounceTime + distinctUntilChanged`) + émission `queryChange` uniquement si `value.length >= minChars` — Réf: FR-011, FR-015
-- [ ] **T-061** [P2] [US3] Implémenter filtrage local additionnel case/accent-insensible via NFD (`visibleSuggestions` computed) — Réf: FR-012
-- [ ] **T-062** [P2] [US3] Implémenter troncature UI à `maxDisplay=5` dans `visibleSuggestions` — Réf: FR-016
-- [ ] **T-063** [P2] [US3] Implémenter navigation clavier (ArrowUp/Down/Enter/Escape) + `activeIndex` — Réf: FR-010
-- [ ] **T-064** [P2] [US3] Ajouter attributs ARIA (`role=combobox`, `aria-autocomplete`, `aria-expanded`, `aria-activedescendant`, listbox, options) — Réf: NFR-005
-- [ ] **T-065** [P] [P2] [US3] Tests `autocomplete.spec.ts` : debounce (fakeAsync), seuil 2 chars, filtrage accent-insensible, navigation clavier, troncature 5, ARIA — Réf: NFR-007
+- [x] **T-060** [P2] [US3] Implémenter dans `AutocompleteComponent` : debounce 200ms (`Subject + debounceTime + distinctUntilChanged`) + émission `queryChange` uniquement si `value.length >= minChars` — Réf: FR-011, FR-015
+- [x] **T-061** [P2] [US3] Implémenter filtrage local additionnel case/accent-insensible via NFD (`visibleSuggestions` computed) — Réf: FR-012
+- [x] **T-062** [P2] [US3] Implémenter troncature UI à `maxDisplay=5` dans `visibleSuggestions` — Réf: FR-016
+- [x] **T-063** [P2] [US3] Implémenter navigation clavier (ArrowUp/Down/Enter/Escape) + `activeIndex` — Réf: FR-010
+- [x] **T-064** [P2] [US3] Ajouter attributs ARIA (`role=combobox`, `aria-autocomplete`, `aria-expanded`, `aria-activedescendant`, listbox, options) — Réf: NFR-005
+- [x] **T-065** [P] [P2] [US3] Tests `autocomplete.spec.ts` : debounce (fakeAsync), seuil 2 chars, filtrage accent-insensible, navigation clavier, troncature 5, ARIA — Réf: NFR-007
 
 #### Flutter
 
-- [ ] **T-070** [P2] [US3] Ajouter debounce 200ms (`Timer?`) dans `LibelleAutocompleteField` avant résolution du provider — Réf: FR-011
-- [ ] **T-071** [P2] [US3] Troncature `take(5)` dans l'`optionsBuilder` de `RawAutocomplete` — Réf: FR-016
-- [ ] **T-072** [P2] [US3] Filtrage accent-insensible en Dart sur les résultats local (Drift) via helper `removeDiacritics` — Réf: FR-012
-- [ ] **T-073** [P] [P2] [US3] Widget test Flutter : debounce + troncature 5 + accent-insensible — Réf: NFR-007
+- [x] **T-070** [P2] [US3] Ajouter debounce 200ms (`Timer?`) dans `LibelleAutocompleteField` avant résolution du provider — Réf: FR-011
+- [x] **T-071** [P2] [US3] Troncature `take(5)` dans l'`optionsBuilder` de `RawAutocomplete` — Réf: FR-016
+- [x] **T-072** [P2] [US3] Filtrage accent-insensible en Dart sur les résultats local (Drift) via helper `removeDiacritics` — Réf: FR-012
+- [x] **T-073** [P] [P2] [US3] Widget test Flutter : debounce + troncature 5 + accent-insensible — Réf: NFR-007
 
 ---
 
