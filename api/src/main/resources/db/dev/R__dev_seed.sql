@@ -20,11 +20,66 @@ DECLARE
     v_cat_courses UUID;
     v_cat_restaurant UUID;
 BEGIN
-    -- Recuperer le user existant
-    SELECT id INTO v_user_id FROM users LIMIT 1;
-    IF v_user_id IS NULL THEN
-        RAISE EXCEPTION 'Aucun utilisateur en base. Creer un compte via /api/auth/register d''abord.';
-    END IF;
+    -- =============================================================
+    -- USER DE DEV GENERIQUE
+    -- Email    : dev@local.test
+    -- Password : dev123 (hash BCrypt ci-dessous)
+    -- Ce user est cree automatiquement pour permettre le demarrage
+    -- de l'app en dev sans passer par /api/auth/register manuellement.
+    -- NE JAMAIS utiliser ce hash/password en production.
+    -- =============================================================
+
+    -- 1. Creer le user dev s'il n'existe pas (idempotent)
+    INSERT INTO users (id, email, password, name, created_at)
+    VALUES (
+        gen_random_uuid(),
+        'dev@local.test',
+        '$2a$10$bRDCPqItSOFJNMihfnz3Eu3CBZC9jc0/ZtzSnLYDcdI4rm8AO2rKq',
+        'Dev User',
+        NOW()
+    )
+    ON CONFLICT (email) DO NOTHING;
+
+    -- Recuperer l'ID du user dev
+    SELECT id INTO v_user_id FROM users WHERE email = 'dev@local.test';
+
+    -- 2. Categories systeme (reproduit CategoryService.seedSystemCategories)
+    --    is_system = true, idempotent : INSERT uniquement si la categorie n'existe pas deja
+    --    (l'index unique est sur LOWER(nom), user_id — index partiel, pas de contrainte nommee)
+    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
+    SELECT gen_random_uuid(), 'Abonnement', '🔄', '#6366f1', true, v_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'abonnement' AND user_id = v_user_id);
+
+    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
+    SELECT gen_random_uuid(), 'Dette', '💰', '#ef4444', true, v_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'dette' AND user_id = v_user_id);
+
+    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
+    SELECT gen_random_uuid(), 'Virement', '🔄', '#8b5cf6', true, v_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'virement' AND user_id = v_user_id);
+
+    -- 3. Compte principal EUR (reproduit AccountService.createDefaultAccount)
+    --    bank_code = 'OTHER', is_default = true
+    --    idempotent : INSERT uniquement si le compte n'existe pas deja (meme logique que l'index partiel)
+    INSERT INTO accounts (id, nom, type, solde_initial, icone, couleur, is_default, actif, currency, bank_code, user_id)
+    SELECT gen_random_uuid(), 'Compte Principal', 'COURANT', 0.00, '🏦', '#3b82f6', true, true, 'EUR', 'OTHER', v_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE LOWER(nom) = 'compte principal' AND user_id = v_user_id AND actif = true);
+
+    -- 4. Preferences initiales (reproduit PreferenceService.createInitialPreference)
+    --    enabled_features et nav_order = SUBSCRIPTIONS,DEBTS
+    --    currencies = EUR, timezone = Europe/Paris
+    --    idempotent via contrainte UNIQUE sur user_id
+    INSERT INTO user_preferences (id, user_id, enabled_features, nav_order, currencies, timezone, text_scale)
+    VALUES (
+        gen_random_uuid(),
+        v_user_id,
+        'SUBSCRIPTIONS,DEBTS',
+        'SUBSCRIPTIONS,DEBTS',
+        'EUR',
+        'Europe/Paris',
+        'MEDIUM'
+    )
+    ON CONFLICT (user_id) DO NOTHING;
 
     -- ===========================================================
     -- CATEGORIES (custom, en plus des systeme)
