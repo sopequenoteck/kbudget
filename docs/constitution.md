@@ -104,7 +104,7 @@ saisie rapide est la priorité absolue.
   (PWA service worker côté Angular, SQLite local côté Flutter).
   **Exception** : les features dont les données doivent être
   fraîches en temps réel (remboursements, paiements, soldes
-  agrégés, préférences, comptes, catégories, shop) peuvent
+  agrégés, préférences, comptes, catégories) peuvent
   utiliser le mode server-only (API REST sans Drift/SQLite)
   si justifié dans le plan
 

@@ -2,7 +2,7 @@
 
 Application de gestion de budget personnel. Self-hosted, single-user, mobile-first.
 
-Gérez vos finances au quotidien : transactions, abonnements, dettes, budgets, et meme une boutique intégrée pour les petits commerçants. Multi-devises (EUR, XOF, USD, GBP, CHF, CAD, MAD), multi-comptes, import CSV bancaire.
+Gérez vos finances au quotidien : transactions, abonnements, dettes, budgets. Multi-devises (EUR, XOF, USD, GBP, CHF, CAD, MAD), multi-comptes, import CSV bancaire.
 
 > *English version coming soon*
 
@@ -10,7 +10,6 @@ Gérez vos finances au quotidien : transactions, abonnements, dettes, budgets, e
   <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="383" height="829">
   <img src="docs/screenshots/transactions.png" alt="Transactions" width="386" height="831">
   <img src="docs/screenshots/budget.png" alt="Budgets" width="383" height="921">
-  <img src="docs/screenshots/shop.png" alt="Boutique" width="383" height="932">
 </p>
 
 ## Fonctionnalités
@@ -19,7 +18,6 @@ Gérez vos finances au quotidien : transactions, abonnements, dettes, budgets, e
 - **Abonnements** — Vue centralisée, total mensuel, paiement en un clic, historique et cumul
 - **Dettes & prêts** — Suivi des remboursements (partiels ou totaux), rappels configurables, multi-devises, inclusion optionnelle dans le solde
 - **Budgets** — Par catégorie (hebdo/mensuel/annuel), seuil d'alerte configurable, historique avec snapshots mensuels, detection des dépenses hors budget
-- **Boutique** — Gestion de produits (stock, prix achat/vente), vente et réapprovisionnement, historique des ventes
 - **Import CSV** — Detection automatique du profil bancaire, preview, dedup Jaro-Winkler, règles de categorisation par pattern
 - **Multi-comptes** — Courant, épargné, espèces. 29 banques supportées (FR/TG/International). Solde total agrégé par devise
 - **Personnalisation** — Features activables, ordre de navigation, devise principale, taille de texte, notifications
@@ -84,7 +82,7 @@ k-budget/
 | Document                                         | Contenu                                                                  |
 |--------------------------------------------------|--------------------------------------------------------------------------|
 | [`docs/vision.md`](docs/vision.md)               | Vision produit, modules fonctionnels, principes UX                       |
-| [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (16 entites), structure frontend |
+| [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (17 entites), structure frontend |
 | [`docs/api-examples.md`](docs/api-examples.md)   | Exemples de requetes et reponses pour chaque endpoint                    |
 | [`docs/api-errors.md`](docs/api-errors.md)       | Contrat d'erreurs HTTP et guide d'integration                            |
 | [`docs/deployment.md`](docs/deployment.md)       | Deploiement Docker, bare-metal, reverse proxy, backup                    |

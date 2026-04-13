@@ -104,7 +104,7 @@ saisie rapide est la priorité absolue.
   (PWA service worker côté Angular, SQLite local côté Flutter).
   **Exception** : les features dont les données doivent être
   fraîches en temps réel (remboursements, paiements, soldes
-  agrégés, préférences, comptes, catégories, shop) peuvent
+  agrégés, préférences, comptes, catégories) peuvent
   utiliser le mode server-only (API REST sans Drift/SQLite)
   si justifié dans le plan
 
@@ -167,8 +167,8 @@ sans dépendance à des services cloud externes.
 - **Déploiement cible** : instance unique auto-hébergée,
   utilisée par un groupe restreint (~10-20 comptes actifs).
 - **Isolation stricte** : chaque user a ses propres comptes,
-  transactions, budgets, dettes, produits Shop. Aucune entité
-  n'est partagée entre users.
+  transactions, budgets, dettes. Aucune entité n'est partagée
+  entre users.
 - **Flux cross-user** : les relations financières entre deux
   users de l'instance (ex : prêt, commande pour compte de
   tiers) sont modélisées séparément dans chaque compte.

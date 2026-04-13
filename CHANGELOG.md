@@ -5,6 +5,9 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Removed
+- Module shop (gestion de produits et ventes) extrait de l'app. Code préservé dans le tag git `archive/shop-v0` et specs archivées dans `.specify/specs/_archived/`. Une refonte séparée sera faite dans un projet `kshop` dédié.
+
 ## [4.2.4] - 2026-03-22
 
 ### Changed

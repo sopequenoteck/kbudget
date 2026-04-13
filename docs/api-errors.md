@@ -87,7 +87,7 @@ Declenchee quand le header `Authorization` est absent ou le token invalide sur u
 
 #### Feature desactivee (FeatureDisabledException)
 
-Declenchee par le `GlobalExceptionHandler` quand une feature optionnelle est desactivee dans les preferences utilisateur (ex: SHOP). Le corps suit le format standard (`timestamp`, `status: 403`, `message`).
+Declenchee par le `GlobalExceptionHandler` quand une feature optionnelle est desactivee dans les preferences utilisateur (ex: DEBTS). Le corps suit le format standard (`timestamp`, `status: 403`, `message`).
 
 Routes publiques (pas de JWT requis) :
 
@@ -206,7 +206,7 @@ Declenchee par le handler generique `Exception`. Le message est toujours le meme
 
 | Champ | Contraintes | Obligatoire |
 |-------|-------------|:-----------:|
-| `enabledFeatures` | `@NotNull`, `List<Feature>` (SUBSCRIPTIONS, DEBTS, SHOP) | oui |
+| `enabledFeatures` | `@NotNull`, `List<Feature>` (SUBSCRIPTIONS, DEBTS, BUDGETS) | oui |
 | `navOrder` | `List<Feature>` — si fourni : doit contenir exactement les features activees, sans doublons | non |
 
 Messages d'erreur metier (IllegalArgumentException → 400) :

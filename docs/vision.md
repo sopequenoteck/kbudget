@@ -46,13 +46,7 @@ Hebergee en self-hosted sur serveur personnel.
 - Historique (snapshots mensuels)
 - Detection des depenses hors budget
 
-### 6. Boutique (feature optionnelle)
-
-- Gestion de produits (stock, prix achat/vente)
-- Vente et reapprovisionnement (transactions automatiques)
-- Historique des ventes par produit
-
-### 7. Import CSV
+### 6. Import CSV
 
 - Upload avec detection automatique du profil bancaire
 - Preview, mapping manuel, brouillons editables
@@ -60,7 +54,7 @@ Hebergee en self-hosted sur serveur personnel.
 - Regles de categorisation par pattern
 - Profils pre-configures + personnalises
 
-### 8. Notifications
+### 7. Notifications
 
 - Notifications en temps reel via WebSocket/STOMP (auth via StompAuthInterceptor)
 - Scheduler backend pour les notifications planifiees (echeances abonnements, dettes, seuils budgets)
@@ -68,13 +62,13 @@ Hebergee en self-hosted sur serveur personnel.
 - Marquage lu/non lu, compteur non lues, suppression unitaire et globale
 - Pagination des notifications
 
-### 9. Profil utilisateur
+### 8. Profil utilisateur
 
 - Consultation et modification du profil (nom)
 
-### 10. Preferences et personnalisation
+### 9. Preferences et personnalisation
 
-- Features activables (SUBSCRIPTIONS, DEBTS, SHOP, BUDGETS)
+- Features activables (SUBSCRIPTIONS, DEBTS, BUDGETS)
 - Multi-devises avec devise principale configurable
 - Taux de conversion manuels avec rebase automatique
 - Ordre de navigation personnalisable

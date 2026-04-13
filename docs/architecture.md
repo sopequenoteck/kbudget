@@ -9,10 +9,10 @@ Ce document couvre les decisions techniques, la securite, le modele de donnees e
 ```
 api/src/main/java/fr/kksdev/budget/api/
 ├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
-├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Budget, Product, ExchangeRate, Currency, Preference, Notification, Import, User, Dev)
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Budget, ExchangeRate, Currency, Preference, Notification, Import, User, Dev)
 ├── service/       # Logique metier
 ├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile) + Bank (record, non-persiste)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile) + Bank (record, non-persiste)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie
@@ -116,7 +116,6 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | account | Account | FK → Account |
 | transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
 | debt | Debt | FK → Debt (nullable, lie la transaction a un remboursement de dette) |
-| product | Product | FK → Product (nullable, lie la transaction a un produit) |
 | subscription | Subscription | FK → Subscription (nullable, paiement d'abonnement) |
 | isRecurring | Boolean | Transaction recurrente (default false) |
 | frequency | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL (nullable, si isRecurring) |
@@ -174,24 +173,6 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
-### Product
-
-| Champ | Type | Description |
-|-------|------|-------------|
-| id | UUID | Identifiant |
-| nom | String | Nom du produit (max 100) |
-| description | String | Description (nullable, max 500) |
-| icone | String | Emoji (nullable) |
-| imageUrl | String | Image en base64 data URI (nullable) — format partage Flutter/Angular |
-| prixAchat | BigDecimal | Prix d'achat |
-| prixVente | BigDecimal | Prix de vente |
-| stock | Integer | Stock disponible (>= 0) |
-| totalVendu | Integer | Total vendu (auto, default 0) |
-| actif | Boolean | Toggle de visibilite (default true) |
-| createdAt | LocalDateTime | Date de creation |
-| updatedAt | LocalDateTime | Date de mise a jour |
-| user | User | FK → User |
-
 ### RefreshToken
 
 | Champ | Type | Description |
@@ -210,8 +191,6 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | id | UUID | Identifiant |
 | enabledFeatures | List\<Feature\> | Features optionnelles activees (VARCHAR via converter) |
 | navOrder | List\<Feature\> | Ordre des onglets de navigation (VARCHAR via converter) |
-| shopAccountId | UUID | Compte associe a la boutique (nullable) |
-| includeShopInBalance | Boolean | Inclure le stock boutique dans le solde total (default false) |
 | currencies | List\<Currency\> | Ordre des devises — [0] = devise principale (VARCHAR via converter) |
 | enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
 | timezone | String | Fuseau horaire (default "Europe/Paris") |
@@ -219,7 +198,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `BUDGETS`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
 
 ### ExchangeRate
 
@@ -374,12 +353,7 @@ app/src/app/
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
     ├── budgets/       # Module Budgets (liste mensuelle, historique camembert, formulaire)
-    ├── settings/      # Parametres (categories, comptes, fonctionnalites)
-    └── shop/          # Module Boutique (liste, detail, formulaire, sell/restock)
-        ├── shop-list/         # Grille produits + filtres actifs/inactifs
-        ├── shop-detail/       # Detail produit + historique ventes
-        ├── components/        # ProductForm, SellDialog, RestockDialog
-        └── shop.routes.ts     # Routing lazy-loaded
+    └── settings/      # Parametres (categories, comptes, fonctionnalites)
 ```
 
 ### Principes
@@ -406,8 +380,6 @@ app/src/app/
 | Dettes/Prets | `/debts` | Liste, resume, filtres |
 | Detail dette | `/debts/:id` | Montant restant, historique paiements, rembourser, snooze |
 | Parametres | `/settings` | Parametres utilisateur |
-| Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
-| Detail produit | `/shop/:id` | Infos, vente, restock, historique |
 | Budgets | `/budgets` | Vue mensuelle, historique camembert, CRUD budgets (guard BUDGETS) |
 
 ### Bouton flottant (FAB speed-dial)
@@ -417,7 +389,6 @@ app/src/app/
   - `/dashboard` : Transaction, Abonnement*, Dette*, Virement**
   - `/transactions`, `/subscriptions`, `/debts` (+ pages detail) : Transaction, Abonnement*, Dette*
   - `/budgets` : Budget (tap direct)
-  - `/shop`, `/shop/:id` : Nouveau produit, Vente rapide (si SHOP actif)
 - *si feature activee | **si ≥ 2 comptes actifs
 - Saisie en 2-3 taps
 

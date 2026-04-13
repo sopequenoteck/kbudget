@@ -174,7 +174,6 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 ### AccountSummary — enrichissement backend
 - Ajout `bankLogoUrl` resolu via BankRegistry (logos SVG des banques connues)
 - Ajout `bankCustomLogo` (logos uploades manuellement)
-- ProductService corrige : utilise `AccountSummary.from()` au lieu du constructeur direct
 - Frontend AccountSummary aligne avec les 2 nouveaux champs
 - Helper `getAccountLogo()` : priorite bankCustomLogo > bankLogoUrl > fallback emoji
 
@@ -287,37 +286,6 @@ Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un sty
 - Le pattern navigation (pipe + icone Phosphor dans le section header) est repris des Transactions/Recurrences
 - Les icones Phosphor 14px dans les meta-lines sont des reperes visuels discrets, pas du bruit — elles facilitent le scan
 
-## Ce qui a ete fait (session 9)
-
-### Page Boutique — liste — refonte complete
-- Supprime : segmented control filtre (Actifs/Inactifs/Tous), composant app-list-item partage, box-shadow sur le conteneur liste
-- Hero : CA total dominant (3xl bold, color-income vert), meta-lines avec icones Phosphor 14px (phosphorTrendUp marge, phosphorPackage produits, phosphorCube valeur stock)
-- Section header sticky : "Produits" + "X actifs" (meme pattern que Transactions/Abonnements/Dettes)
-- Groupement par statut : En stock (default), Rupture de stock (label rouge), Inactifs (opacity 0.5)
-- Groupes collapsibles : chevron + compteur, Rupture et Inactifs fermes par defaut — focus sur ce qui compte
-- Rows custom : icone cercle 36px (image produit ronde ou emoji), titre text-secondary, subtitle "Stock: X · Y ventes", prix de vente a droite, badge "Rupture" rouge si stock=0
-- Images produit dans les cercles 36px (object-fit cover, border-radius round)
-
-### Page Boutique — detail — refonte complete
-- Supprime : header centre avec emoji/image 80px, grille 7 stat-cards (prix achat/vente/marge/stock/vendu/CA/marge totale), boutons full-width Vendre/Restocker, badge Inactif rouge, bandeau warning inactif, box-shadow partout
-- Header pattern recurrences : fleche retour + nom produit aligne a droite
-- Image produit : grand format 16:9 arrondi (radius-xl) entre header et hero, object-fit cover. Affichee uniquement si imageUrl existe
-- Hero condense : label "PRIX DE VENTE" uppercase + badge statut (bordure neutre si inactif, fond vert si actif) + montant 3xl color-income + "Achat X € · Marge Y €" + meta-lines (stock, vendus, CA, marge totale coloree vert/rouge) + description optionnelle
-- Actions pills compactes : corbeille (danger) a gauche | spacer | Modifier · Restocker · Vendre (primary amber) a droite
-- Ajout action Supprimer (avec confirm) — manquait sur l'ancienne page
-- Historique groupe par date relative : Aujourd'hui, Hier, Ce mois-ci, puis par mois (Fevrier 2026, Janvier 2026...) — meme vocabulaire temporel que les autres pages
-- Icones metier au lieu de fleches financieres : phosphorShoppingBag pour les ventes, phosphorPackage pour les restocks — la semantique est "entree/sortie stock", pas "recette/depense"
-- Ventes cliquables : ouvrent le formulaire transaction associe via modalService (meme pattern que la page Transactions)
-- Montants historique neutres (xs/medium/text-secondary)
-
-### Decisions de design (session 9)
-- Le hero boutique liste montre le CA total (chiffre d'affaires) en vert (color-income) — la boutique genere du revenu, le signal doit etre positif
-- Les prix dans les rows restent neutres (text-secondary) — seul le hero porte la couleur
-- Groupes collapsibles testes et valides : Rupture et Inactifs fermes par defaut evite le bruit visuel, le compteur dans le label donne l'info sans ouvrir
-- L'image produit en grand format sur le detail est necessaire pour un produit physique (contrairement aux abonnements/dettes qui n'ont pas d'image)
-- Les fleches financieres (TrendUp/TrendDown) etaient confuses sur l'historique produit : une vente fait SORTIR du stock mais est une RECETTE — la double semantique creait un conflit. Les icones metier (ShoppingBag/Package) resolvent ce conflit
-- Pas de page detail transaction : le clic sur une vente ouvre directement le formulaire d'edition (progressive disclosure, pas de navigation supplementaire)
-
 ## Direction validee — Surfaces modales
 
 Deux types de surfaces, deux roles distincts :
@@ -406,7 +374,7 @@ Les Settings existants (11 sous-pages) souffrent de 3 problemes :
    - Timezone
 
 4. **Navigation** (inline)
-   - 4 lignes : Abonnements, Dettes, Budgets, Boutique
+   - 3 lignes : Abonnements, Dettes, Budgets
    - Chaque ligne = toggle active/desactive + drag handle pour l'ordre nav
    - Un seul controle fait les deux jobs (activer + ordonner)
    - Accueil et Transactions implicitement toujours la, pas affiches (locked)
@@ -479,7 +447,6 @@ Les apps de reference (TickTick, Stoic, Copilot Money) et les guidelines iOS/Mat
 
 ### Toggle devise — harmonisation globale
 - Abonnements et Dettes : toggle deplace de hero__top-row isolee (flex-end) vers la meme ligne que le label uppercase (hero__amount-top : label a gauche, toggle a droite)
-- Boutique : toggle devise ajoute (n'existait pas), meme pattern label + toggle
 - Supprime : hero__top-row sur abonnements et dettes (devenue inutile)
 
 Cartographie finale du toggle devise :
@@ -491,7 +458,6 @@ Cartographie finale du toggle devise :
 | Abonnements | TOTAL MENSUEL (label) | Toggle devise |
 | Dettes | SOLDE NET (label) | Toggle devise |
 | Budgets | Nav mois | Toggle devise |
-| Boutique | CHIFFRE D'AFFAIRES (label) | Toggle devise |
 
 ### Decisions de design (session 10)
 - Le greeting dynamique justifie sa place parce qu'il dit quelque chose de nouveau a chaque ouverture — un greeting statique ne le justifie pas
@@ -528,7 +494,7 @@ Cartographie finale du toggle devise :
    - Selecteur timezone
 
 5. **Navigation** (inline)
-   - 4 rows : Abonnements, Dettes, Budgets, Boutique
+   - 3 rows : Abonnements, Dettes, Budgets
    - Chaque row = toggle active/desactive + drag handle (phosphorDotsSixVertical)
    - Drag & drop reordonnancement (CdkDragDrop)
    - Accueil et Transactions implicitement toujours la (locked)
@@ -578,7 +544,7 @@ Cartographie finale du toggle devise :
 ### Migration ConfirmService — toutes les pages
 - Remplacement de `window.confirm()` natif par `confirmService.confirm()` avec config contextuelle
 - Pattern uniforme : titre = element concret, message = question de confirmation
-- Pages migrees avec icone metier : TransactionForm (phosphorReceipt), BudgetForm (phosphorChartPie), BudgetDetail (phosphorChartPie), DebtDetail (phosphorHandCoins), ProductForm (phosphorPackage), ShopDetail (phosphorPackage + phosphorShoppingBag pour vente), SubscriptionDetail (phosphorRepeat)
+- Pages migrees avec icone metier : TransactionForm (phosphorReceipt), BudgetForm (phosphorChartPie), BudgetDetail (phosphorChartPie), DebtDetail (phosphorHandCoins), SubscriptionDetail (phosphorRepeat)
 
 ### Transaction Form — refonte bottom sheet
 - Supprime : formulaire classique champs empiles, header modal standard
@@ -600,7 +566,7 @@ Cartographie finale du toggle devise :
 
 ### Utilitaires formulaire — extraction
 - `form.utils.ts` : `normalizeDecimal()` (virgule → point iPhone), `decimalMin()` validateur custom, `isFieldInvalid()`, `validateForm()`
-- Utilise dans TransactionForm, BudgetForm, ProductForm — supprime la duplication
+- Utilise dans TransactionForm, BudgetForm — supprime la duplication
 
 ### CategoryService — refreshTrigger
 - Signal `refreshTrigger` pour notifier les composants dependants apres create/update/delete
@@ -660,27 +626,18 @@ Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
 - Montant converti en string-based pour canvas measureText
 - Select natif conserve pour les categories (filtre les categories deja budgetees)
 
-#### Product form
-- Row 1 : `[phosphorPackage] Produit` (pas de toggle)
-- Row 2 : prix de vente hero 32px color-income + nom
-- Row 3 : image picker compact (32px cercle, miniature si image existe) + icone description | pills prix achat, marge calculee (lecture seule, icone TrendUp/Down coloree), stock (creation uniquement)
-- Row 4 : pill status actif/inactif (edition) apres supprimer
-- Description preview italique sous row 2 (meme pattern que note preview)
-- Montant 32px (plus petit que les autres, les produits ont des montants plus longs)
-
 ### Decisions de design — propagation formulaires
 - Le titre entite (icone + nom) a gauche de la row 1 donne du contexte immediat — l'utilisateur sait quel type d'entite il edite sans lire le header modal
 - Les toggles (type transaction, frequence abonnement, sens dette) migres du shell vers le form : le formulaire est autonome, pas besoin du header modal
 - Pill status (rembourse, actif) avec texte gris + icone coloree : l'etat est lisible mais discret, pas de toggle binaire anonyme
 - Le toggle rembourse dans la row actions (pres de Supprimer) plutot que dans les pills meta : c'est une action de changement d'etat, pas une metadonnee
 - Le pill actif/inactif sur budget vit dans la row 3 (c'est un filtre, pas une action)
-- Product form a 32px au lieu de 40px : les prix produits sont plus longs (4+ chiffres + decimales), il faut prevenir le debordement
 
 ## Ce qui a ete fait (session 12)
 
 ### Composant partage EmptyState
 - Composant `shared/components/empty-state/` : icone phosphor (48px, opacity 0.5), message principal, hint optionnel, CTA optionnel (text link amber)
-- Propage a toutes les pages : Transactions, Abonnements, Dettes, Budgets, Boutique, Recurrentes, Dashboard (comptes + transactions)
+- Propage a toutes les pages : Transactions, Abonnements, Dettes, Budgets, Recurrentes, Dashboard (comptes + transactions)
 - Chaque page a maintenant une icone contextuelle + un CTA vers la creation (sauf pages sans formulaire propre)
 - Supprime les `.state-empty` dupliques de 7 fichiers SCSS — le composant gere son propre style
 - Ajout methodes CTA manquantes : `onAddDebt()`, `onAddSubscription()`, `goToAccounts()`
@@ -704,24 +661,9 @@ Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
 - Debt-detail : `showRepayDialog` supprime, bouton appelle `modalService.openModal('repay', d)`
 - Notification-panel : meme migration vers modalService
 
-### SellDialog — migration bottom sheet
-- Supprime : formulaire classique (select produit + input quantite + summary badge), composant FormField
-- Bottom sheet pattern : handle bar + "Vente rapide" + stock restant (row 1), nom produit cliquable lg/bold a gauche + montant editable 30px a droite (row 2), description produit en preview italique xs/tertiary (row 2.5), pill quantite (row 3), Annuler + Confirmer (row 4)
-- Nom produit = trigger du SelectPicker (pas de pill doublon) : tertiary + underline quand vide, secondary + image/emoji quand selectionne
-- Miniature image produit 28px ronde devant le nom (fallback emoji)
-- Stock affiche en row 1 quand un produit est selectionne (meme pattern "Restant" du RepayDialog)
-- Montant editable (input, pas span) : pre-rempli automatiquement prix × quantite, modifiable manuellement
-- selectedProductId devenu signal (etait computed sur form value, non reactif)
-- hideHeader active dans le shell pour le type 'sell'
-- Output `confirmed` renomme en `saved` (coherence avec les autres forms)
-
 ### Decisions de design (session 13)
-- Le nom de la personne (RepayDialog) et le nom du produit (SellDialog) sont l'entite principale — ils vivent dans la row 2 en lg/bold, pas dans une pill
-- Pill produit supprimee : elle faisait doublon avec le label row 2. Le produit n'est pas une metadonnee secondaire, c'est le sujet du formulaire
-- La description produit en preview comble le vide visuel et donne du contexte (meme pattern que la note dans TransactionForm)
-- Le stock en row 1 repond a la question "combien il en reste ?" sans encombrer le formulaire
+- Le nom de la personne (RepayDialog) est l'entite principale — il vit dans la row 2 en lg/bold, pas dans une pill
 - L'input montant a 30px (pas 40px) : c'est un champ editable, pas un hero de page
-- Le montant est editable meme s'il est pre-calcule : l'utilisateur peut ajuster un prix de vente ponctuel
 
 ## Inventaire des inputs
 
@@ -737,9 +679,7 @@ Input `text` avec `inputmode="decimal"`, taille 30-40px bold, largeur dynamique 
 | Dette | 40px | vert (pret) / rouge (emprunt) | debt-form |
 | Abonnement | 40px | color-expense | subscription-form |
 | Budget | 40px | color-expense | budget-form |
-| Produit | 32px | color-income | product-form |
 | Remboursement | 30px | neutre | repay-dialog |
-| Vente | 30px | neutre | sell-dialog |
 
 ### Texte libre (~12 occurrences)
 
@@ -750,7 +690,6 @@ Input `text` standard. Noms, libelles, personnes.
 | Libelle | Transaction | - | Aligne a droite, underline |
 | Nom | Abonnement | - | Aligne a droite, underline |
 | Personne | Dette | - | Aligne a droite, underline |
-| Nom | Produit | - | Aligne a droite, underline |
 | Nom | Compte | 100 | Form classique |
 | Nom banque | Compte | 100 | Form classique |
 | Nom | Categorie | 30 | Form classique |
@@ -779,25 +718,21 @@ Input `time` HTML natif. Couple avec les dates de rappel.
 | Heure rappel | Dette |
 | Heure rappel | Snooze dialog |
 
-### Number natif (~6 occurrences)
+### Number natif (~3 occurrences)
 
 Input `number` avec min/max.
 
 | Champ | Formulaire | Contraintes |
 |-------|------------|-------------|
-| Stock initial | Produit | min=0 |
-| Quantite | Restock dialog | min=1 |
-| Quantite | Sell dialog | min/max dynamique |
 | Montant transfert | Transfer form | step=0.01, min=0.01 |
 | Seuil alerte | Budget | 0-100% |
 | Taux de change | Exchange rate | step=0.000001 |
 
-### Textarea (4 occurrences)
+### Textarea (3 occurrences)
 
 | Champ | Formulaire | Max |
 |-------|------------|-----|
 | Note | Transaction | 500 |
-| Description | Produit | 500 |
 | Note | Transfert | 500 |
 
 ### Select natif (~15 occurrences)
@@ -821,7 +756,6 @@ Composant custom avec recherche, bottom sheet mobile, dropdown desktop.
 | Compte | Transaction, Dette, Abo, Repay, Transfer (x2) |
 | Devise | Dette, Abo, Compte |
 | Frequence | Transaction (recurrence) |
-| Produit | Sell dialog |
 | Categorie | Via app-category-picker (Transaction, Dette, Abo) |
 
 ### app-category-picker (4 occurrences)
@@ -852,11 +786,10 @@ Wrapper autour de select-picker + bouton creation inline.
 | Compte (actif/inactif) | 1 |
 | CSV import (selection lignes) | N |
 
-### File (3 occurrences)
+### File (2 occurrences)
 
 | Usage | Formulaire | Accept |
 |-------|------------|--------|
-| Image produit | Product form | image/* |
 | Logo banque | Account form | image/* |
 | Fichier CSV | Import settings | .csv,.txt |
 
@@ -865,26 +798,23 @@ Wrapper autour de select-picker + bouton creation inline.
 ### Consolidation SCSS — classes partagees
 - Extraction de `_bottom-sheet.scss` : classes `.bsheet__*` pour les 7 formulaires bottom sheet (container, handle, top, main-row, amount, currency, libelle, meta-row, pills, expand, actions)
 - Extraction de `_list-patterns.scss` : classes partagees pour les pages liste (hero, hero meta-lines, currency-toggle, section-header sticky, date-label, list-group, list-row, group-label collapsible, states)
-- Migration des 7 formulaires : transaction, dette, abonnement, budget, produit, repay, sell
-- Migration des 4 pages liste : transactions, abonnements, dettes, boutique + budget (partiel — hero + section-header, pas budget-row)
+- Migration des 5 formulaires : transaction, dette, abonnement, budget, repay
+- Migration des 3 pages liste : transactions, abonnements, dettes + budget (partiel — hero + section-header, pas budget-row)
 - Budget-row conserve sa structure locale (body > header > name + amount + progress bar — trop different de list-row)
 - Reduction ~3350 → ~1350 lignes SCSS (-60%), chaque pattern modifiable a un seul endroit
 - Ajout `.input-naked` dans `_forms.scss` pour empecher les styles globaux d'ecraser les inputs bottom sheet
 - Route `/dev/design-lab` ajoutee pour iterer visuellement sur les composants atomiques
 
 ### Input montant hero — refonte
-- Tailles reduites : 40px → 30px (defaut), 32px → 26px (produit `--md`), 30px → 22px (repay/sell `--sm`). Devise 24px → 18px, `--sm` 14px
+- Tailles reduites : 40px → 30px (defaut), 30px → 22px (repay `--sm`). Devise 24px → 18px, `--sm` 14px
 - Wrap automatique : `flex-wrap: wrap` sur `.bsheet__main-row` — quand le montant est trop large (FCFA avec 6+ chiffres), le libelle passe automatiquement a la ligne en dessous
 - `.bsheet__amount-group` passe a `max-width: 100%` au lieu de `max-width: 70%`
-- Utilitaire `createAmountWidth()` extrait dans `shared/utils/amount-width.utils.ts` — supprime la duplication canvas/measureText dans les 7 formulaires
+- Utilitaire `createAmountWidth()` extrait dans `shared/utils/amount-width.utils.ts` — supprime la duplication canvas/measureText dans les formulaires
 
 ### Devise dynamique — correction reactivite
 - `selectedAccount` etait un `computed()` lisant `form.get('accountId')?.value` — non reactif (Angular computed ne track que les signals, pas les FormControl)
 - Fix : `accountIdSignal = toSignal(form.get('accountId')!.valueChanges)` converti en signal, puis utilise dans le computed
 - Corrige sur : transaction-form, debt-form, subscription-form, repay-dialog
-- Product-form : devise hardcodee `€` remplacee par `currencySymbol()` via `PreferenceService.primaryCurrency()`
-- Marge display utilise maintenant le symbole devise dynamique
-
 ### Decisions de design (session 14)
 - La consolidation SCSS ne change rien visuellement — c'est du refactoring structurel pour que chaque modification future se fasse a un seul endroit
 - 30px est le bon compromis pour le montant hero : assez grand pour etre dominant, assez petit pour accueillir des montants FCFA a 6+ chiffres
@@ -958,7 +888,6 @@ Wrapper autour de select-picker + bouton creation inline.
 
 ### Skeleton loading — remplacement des spinners
 - Styles skeleton mutualises dans `_list-patterns.scss` : `.skeleton-item`, `.skeleton-circle`, `.skeleton-lines`, `.skeleton-line`, `.skeleton-hero`, `.skeleton-bar`, `@keyframes skeleton-pulse`
-- Suppression des styles skeleton locaux de `shop-list.scss` (deja couverts par le partage)
 - Pages liste migrees (spinner → skeleton list) : Transactions, Abonnements, Dettes, Budgets, Recurrentes
 - Pages detail migrees (spinner → skeleton hero + list) : Subscription detail, Debt detail, Budget detail
 - Dashboard : 3 zones migrees (hero, summary, transactions) + budget-summary (composant inline)
@@ -973,20 +902,6 @@ Wrapper autour de select-picker + bouton creation inline.
 - Les skeletons imitent la forme reelle du contenu (cercle + lignes) pour reduire le saut visuel au chargement
 
 ## Ce qui a ete fait (session 17)
-
-### Restock dialog — migration bottom sheet
-- Supprime : overlay custom fixe (z-index 1000, card centree, animations propres), composant FormField, signal `showRestockDialog` dans shop-detail
-- Integre dans le ModalService : type `'restock'` ajoute, produit passe via `editingEntity`
-- Bottom sheet pattern 3 rows : handle bar + "Restockage" + icone phosphorPackage + "Stock actuel : X" (row 1), nom produit a gauche + input quantite compact a droite (row 2), Annuler + Confirmer (row 3)
-- Input quantite : type="number" inputmode="numeric", 60px, underline, sans spinners, aligne a droite
-- Toast de succes avec stock mis a jour integre dans le composant
-- shop-detail : `onRestockOpen()` via `modalService.openModal('restock', product)`
-
-### Vente depuis detail produit — branchement SellDialog
-- Supprime : `onSell()` avec confirm dialog + vente directe 1 unite (ne passait pas par le bottom sheet)
-- shop-detail : `onSell()` ouvre `modalService.openModal('sell', product)`
-- SellDialog : ajout effect de pre-selection quand `editingEntity` est un Product (patchValue productId)
-- L'utilisateur accede maintenant au meme bottom sheet que la "Vente rapide" du FAB, avec choix quantite et montant editable
 
 ### FAB Menu — alignement quiet utility
 - Supprime : shadow-colored-primary (glow amber en light mode), scale(1.05) au hover, box-shadow sur les items, staggered animation delays (nth-child)
@@ -1007,8 +922,6 @@ Wrapper autour de select-picker + bouton creation inline.
 - Tous les tokens remplaces par les vrais noms (--font-size-sm, --text-primary, --surface-raised, etc.)
 
 ### Decisions de design (session 17)
-- Le restock dialog est le plus simple des bottom sheets (3 rows, pas de section expandable) — la quantite n'est pas un montant hero, c'est un input compact
-- La vente depuis detail produit doit passer par le SellDialog pour coherence : meme experience que le FAB, avec choix quantite et montant editable
 - Le FAB en conteneur unique iOS est plus coherent avec le vocabulaire "conteneur arrondi + dividers" utilise partout dans l'app
 - Le label a gauche + icone a droite sur les items FAB est le pattern iOS natif (action sheet)
 - Le notification panel utilise le meme vocabulaire que les pages liste (conteneur groupe, dividers, surface-default)
@@ -1037,7 +950,7 @@ Wrapper autour de select-picker + bouton creation inline.
 
 ### .page-header — extraction dans _list-patterns.scss
 - 8 copies locales identiques supprimees (6 `.page-header` + 2 `.detail-header`) → 1 definition unique dans `_list-patterns.scss`
-- Fichiers nettoyes : subscription-detail, debt-detail, shop-detail, recurring-list, categories, accounts, budget-detail, budget-unbudgeted
+- Fichiers nettoyes : subscription-detail, debt-detail, recurring-list, categories, accounts, budget-detail, budget-unbudgeted
 - `.detail-header` renomme en `.page-header` dans les 2 HTML budget (detail + unbudgeted)
 - La version partagee inclut `__back` (hover primary + transition), `__title` (flex-end + gap), `__icon` (cercle 32px pour budget-detail)
 - **-277 lignes nettes**
@@ -1146,7 +1059,7 @@ Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert 
 ### Migrations par usage
 
 **Icones formulaires (9 usages HTML)** — `var(--color-secondary)` → `var(--color-primary)` :
-- transaction-form (note, calendrier), debt-form (rappel, calendrier), subscription-form (calendrier), budget-form (frequence, devise, seuil), product-form (description)
+- transaction-form (note, calendrier), debt-form (rappel, calendrier), subscription-form (calendrier), budget-form (frequence, devise, seuil)
 - L'amber a opacity 0.7 dit "ce champ est rempli et interactif" — coherent avec amber = action
 
 **Bottom sheet reminder border (1 usage SCSS)** — `var(--color-secondary)` → `var(--color-primary)`
@@ -1182,7 +1095,6 @@ Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert 
 - [x] Page Dettes — liste (session 7)
 - [x] Page detail dette (session 7)
 - [x] Propager le style a la page Budgets (session 8)
-- [x] Page Boutique — liste + detail (session 9)
 - [x] Page Transactions recurrentes (session 4)
 - [x] Realigner hero Dashboard (session 10)
 - [x] Realigner hero Transactions (session 10)
@@ -1190,16 +1102,14 @@ Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert 
 - [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
 - [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
 - [x] Empty states — composant partage EmptyState (icone + message + CTA), propage a toutes les pages (session 12, nettoyage final session 18)
-- [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement, produit) (session 11)
-- [x] Migrer RepayDialog et SellDialog vers le bottom sheet partage (session 13)
+- [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement) (session 11)
+- [x] Migrer RepayDialog vers le bottom sheet partage (session 13)
 
 ### Priorite moyenne
 - [x] Revoir les inputs de tous les formulaires bottom sheet — tailles reduites, wrap automatique, devise reactive, utilitaire partage (session 14)
 - [x] Date picker inline custom — composant InlineDatePicker, propage a 5 formulaires (session 15)
 - [x] Micro-interactions — sections expand animees, fermeture modal animee, transitions de page fade (session 16)
 - [x] Skeleton loading — spinners remplaces par skeleton pulse sur toutes les pages (session 16)
-- [x] Restock dialog — migrer vers bottom sheet (session 17)
-- [x] Vente depuis detail produit — brancher le SellDialog bottom sheet existant (session 17)
 - [x] FAB Menu — aligner sur quiet utility, style iOS action sheet (session 17)
 - [x] Notification Panel — aligner vocabulaire visuel, conteneur groupe, dot unread, pills discretes (session 17)
 - [x] Theme light — fondations surfaces, elevation 3 niveaux, suppression gradients/glass (session 19)
