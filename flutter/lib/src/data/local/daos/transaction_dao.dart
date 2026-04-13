@@ -47,6 +47,23 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// Retourne les libelles distincts tries par frequence d'utilisation
+  /// puis par date de derniere utilisation (SQLite, sans filtre accent).
+  /// Le filtre accent-insensible est applique en Dart apres ce retour.
+  Future<List<String>> getLibelleSuggestions({int limit = 20}) async {
+    final query = customSelect(
+      'SELECT libelle FROM transactions '
+      'GROUP BY libelle '
+      'ORDER BY COUNT(*) DESC, MAX(date) DESC '
+      'LIMIT ?',
+      variables: [Variable.withInt(limit)],
+      readsFrom: {transactions},
+    );
+
+    final rows = await query.get();
+    return rows.map((row) => row.read<String>('libelle')).toList();
+  }
+
   /// Calcule le resume mensuel local : SUM(montant) GROUP BY type
   /// pour le mois/annee donne. Exclut les ajustements.
   Future<List<Map<String, dynamic>>> getMonthlySummary(

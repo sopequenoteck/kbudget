@@ -29,10 +29,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -381,6 +384,30 @@ class TransactionServiceTest {
         // 65500 XOF / 655 = ~100 EUR (taux inverse 1/655 avec 6 décimales → léger arrondi attendu)
         assertThat(summary.totalDepenses()).isBetween(new BigDecimal("99.90"), new BigDecimal("100.10"));
         assertThat(summary.solde()).isBetween(new BigDecimal("899.90"), new BigDecimal("900.10"));
+    }
+
+    // --- T-025 : clamp limit entre 1 et 50 ---
+
+    @Test
+    void should_clamp_limit_between_1_and_50() {
+        when(transactionRepository.findLibelleSuggestions(any(UUID.class), isNull(), any(Integer.class)))
+                .thenReturn(List.of());
+
+        ArgumentCaptor<Integer> limitCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        // Appels : null→20, -1→1, 0→1, 100→50, 25→25
+        transactionService.getLibelleSuggestions(userId, null, null);
+        transactionService.getLibelleSuggestions(userId, null, -1);
+        transactionService.getLibelleSuggestions(userId, null, 0);
+        transactionService.getLibelleSuggestions(userId, null, 100);
+        transactionService.getLibelleSuggestions(userId, null, 25);
+
+        // Capture toutes les valeurs transmises au repository
+        verify(transactionRepository, org.mockito.Mockito.times(5))
+                .findLibelleSuggestions(eq(userId), isNull(), limitCaptor.capture());
+
+        List<Integer> capturedLimits = limitCaptor.getAllValues();
+        assertThat(capturedLimits).containsExactly(20, 1, 1, 50, 25);
     }
 
     @Test

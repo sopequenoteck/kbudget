@@ -1,0 +1,42 @@
+<div class="autocomplete" [class.autocomplete--disabled]="disabled()">
+  <input
+    class="autocomplete__input"
+    type="text"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel() || placeholder()"
+    role="combobox"
+    aria-autocomplete="list"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-controls]="isOpen() ? listboxId : null"
+    [attr.aria-activedescendant]="activeDescendant()"
+    autocomplete="off"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+  />
+
+  @if (isOpen() && visibleSuggestions().length > 0) {
+    <ul
+      class="autocomplete__list"
+      [id]="listboxId"
+      role="listbox"
+    >
+      @for (suggestion of visibleSuggestions(); track suggestion; let i = $index) {
+        <li
+          class="autocomplete__item"
+          [class.autocomplete__item--active]="activeIndex() === i"
+          [id]="listboxId + '-option-' + i"
+          role="option"
+          tabindex="-1"
+          [attr.aria-selected]="activeIndex() === i"
+          (click)="onSuggestionClick(i)"
+          (keydown.enter)="onSuggestionClick(i)"
+          (mouseenter)="onSuggestionMouseEnter(i)"
+        >
+          {{ suggestion }}
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -44,13 +44,15 @@
         [class.bsheet__currency--income]="type() === TransactionType.RECETTE"
       >{{ currencySymbol() }}</span>
     </div>
-    <input
-      class="bsheet__libelle input-naked"
-      type="text"
-      formControlName="libelle"
+    <app-autocomplete
+      class="bsheet__libelle"
+      [value]="libelleValue"
+      (valueChange)="onLibelleChange($event)"
+      [suggestions]="libelleSuggestions()"
+      [minChars]="2"
+      [maxDisplay]="5"
       placeholder="Libellé"
-      autocomplete="off"
-      maxlength="255"
+      (queryChange)="onLibelleQuery($event)"
     />
   </div>
 

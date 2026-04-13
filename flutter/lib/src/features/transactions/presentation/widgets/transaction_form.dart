@@ -11,6 +11,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/transactions/presentation/widgets/libelle_autocomplete_field.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
@@ -59,10 +60,17 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     _montantController = TextEditingController();
     _noteController = TextEditingController();
     _selectedDate = DateTime.now();
+    // Revalidation visuelle quand le libellé change (autocomplete ou saisie libre)
+    _libelleController.addListener(_onLibelleChanged);
+  }
+
+  void _onLibelleChanged() {
+    if (_showErrors) setState(() {});
   }
 
   @override
   void dispose() {
+    _libelleController.removeListener(_onLibelleChanged);
     _libelleController.dispose();
     _montantController.dispose();
     _noteController.dispose();
@@ -83,11 +91,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       _selectedCategoryId = tx.categoryId;
     } else {
       final accounts = ref.read(accountNotifierProvider).items;
-      final defaultAccount = accounts
-          .where((a) => a.actif && a.isDefault)
-          .firstOrNull;
-      _selectedAccountId = defaultAccount?.id ??
-          accounts.where((a) => a.actif).firstOrNull?.id;
+      final defaultAccount =
+          accounts.where((a) => a.actif && a.isDefault).firstOrNull;
+      _selectedAccountId =
+          defaultAccount?.id ?? accounts.where((a) => a.actif).firstOrNull?.id;
     }
   }
 
@@ -112,12 +119,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   }
 
   String? _validateAccount() {
-    if (_selectedAccountId == null) return AppLocalizations.of(context)!.validationRequired;
+    if (_selectedAccountId == null) {
+      return AppLocalizations.of(context)!.validationRequired;
+    }
     return null;
   }
 
   String? _validateCategory() {
-    if (_selectedCategoryId == null) return AppLocalizations.of(context)!.validationRequired;
+    if (_selectedCategoryId == null) {
+      return AppLocalizations.of(context)!.validationRequired;
+    }
     return null;
   }
 
@@ -219,14 +230,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final activeAccounts = accountState.items.where((a) => a.actif).toList();
 
     final accountItems = activeAccounts
-        .map((a) => SelectPickerItem(
-              id: a.id,
-              label: a.nom,
-              icon: a.icone,
-              color: parseHexColor(a.couleur),
-              secondaryText: AmountFormatter.format(a.solde),
-              imageUrl: resolveBankAssetPath(a),
-            ))
+        .map(
+          (a) => SelectPickerItem(
+            id: a.id,
+            label: a.nom,
+            icon: a.icone,
+            color: parseHexColor(a.couleur),
+            secondaryText: AmountFormatter.format(a.solde),
+            imageUrl: resolveBankAssetPath(a),
+          ),
+        )
         .toList();
 
     return Column(
@@ -243,15 +256,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 label: l10n.transactionFormLabelField,
                 showError: _showErrors && _validateLibelle() != null,
                 errorMessage: _validateLibelle() ?? '',
-                child: TextField(
+                child: LibelleAutocompleteField(
                   controller: _libelleController,
                   decoration: const InputDecoration.collapsed(hintText: ''),
-                  maxLength: 255,
-                  buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
-                  textInputAction: TextInputAction.next,
-                  onChanged: (_) {
-                    if (_showErrors) setState(() {});
-                  },
+                  validator: (_) => _validateLibelle(),
                 ),
               ),
             ),
@@ -264,8 +272,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 errorMessage: _validateMontant() ?? '',
                 child: TextField(
                   controller: _montantController,
-                  decoration: const InputDecoration.collapsed(hintText: '0.00'),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration:
+                      const InputDecoration.collapsed(hintText: '0.00'),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   textInputAction: TextInputAction.next,
                   onChanged: (_) {
                     if (_showErrors) setState(() {});
@@ -347,7 +357,13 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             decoration: const InputDecoration.collapsed(hintText: ''),
             maxLines: 3,
             maxLength: 500,
-            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+            buildCounter: (
+              _, {
+              required currentLength,
+              required isFocused,
+              maxLength,
+            }) =>
+                null,
             textInputAction: TextInputAction.done,
             onChanged: (_) {
               if (_showErrors) setState(() {});

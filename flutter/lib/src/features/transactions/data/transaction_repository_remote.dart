@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:k_budget/src/data/remote/data_sources/transaction_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/transaction_dtos.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -50,6 +51,22 @@ class TransactionRepositoryRemote implements TransactionRepository {
 
   @override
   Future<void> delete(String id) => _dataSource.delete(id);
+
+  @override
+  Future<List<String>> getLibelleSuggestions(
+    String query, {
+    int limit = 20,
+  }) async {
+    try {
+      final response = await _dataSource.getLibelleSuggestions(
+        query: query.isEmpty ? null : query,
+        limit: limit,
+      );
+      return response;
+    } on DioException {
+      return const <String>[];
+    }
+  }
 
   @override
   Future<List<MonthlySummary>> getMonthlySummary(int month, int year) async {

@@ -27,6 +27,7 @@ import {
   phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { Autocomplete } from '../../../../shared/components/autocomplete/autocomplete';
 import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
 import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
@@ -34,6 +35,7 @@ import { SelectPickerItem } from '../../../../shared/components/select-picker/se
 import { AccountService } from '../../../../core/services/account';
 import { CategoryService } from '../../../../core/services/category';
 import { TransactionService } from '../../../../core/services/transaction';
+import { TransactionLibelleService } from '../../services/transaction-libelle.service';
 import { RecurringTransactionService } from '../../../../core/services/recurring-transaction';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -71,7 +73,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, Autocomplete, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -94,6 +96,7 @@ export class TransactionForm {
   private readonly categoryService = inject(CategoryService);
   private readonly transactionService = inject(TransactionService);
   private readonly recurringTransactionService = inject(RecurringTransactionService);
+  private readonly libelleService = inject(TransactionLibelleService);
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
@@ -111,6 +114,7 @@ export class TransactionForm {
   readonly isEditing = computed(() => this.transaction() !== null && !this.modalService.asRecurring());
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+  readonly libelleSuggestions = signal<string[]>([]);
   readonly expandedSection = signal<ExpandableSection>(null);
 
   readonly amountWidth: Signal<string>;
@@ -270,6 +274,20 @@ export class TransactionForm {
         setTimeout(() => input.nativeElement.focus(), 100);
       }
     });
+  }
+
+  onLibelleQuery(q: string): void {
+    this.libelleService.search(q).subscribe((suggestions) => {
+      this.libelleSuggestions.set(suggestions);
+    });
+  }
+
+  onLibelleChange(val: string): void {
+    this.form.patchValue({ libelle: val });
+  }
+
+  get libelleValue(): string {
+    return this.form.get('libelle')!.value as string;
   }
 
   onTypeChange(type: TransactionType): void {

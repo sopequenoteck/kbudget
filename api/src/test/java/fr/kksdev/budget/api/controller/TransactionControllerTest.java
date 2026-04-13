@@ -239,4 +239,47 @@ class TransactionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
     }
+
+    // --- T-020 [US5] : 401 sans JWT ---
+
+    @Test
+    void should_return_401_when_unauthenticated() throws Exception {
+        mockMvc.perform(get("/transactions/libelles"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // --- T-021 [US5] : isolation des libellés par user ---
+
+    @Test
+    void should_isolate_libelles_by_user() throws Exception {
+        UUID userAId = UUID.randomUUID();
+        UUID userBId = UUID.randomUUID();
+        User userA = User.builder().id(userAId).email("usera@test.com").name("User A").build();
+        User userB = User.builder().id(userBId).email("userb@test.com").name("User B").build();
+
+        // userA se connecte avec son propre token
+        when(jwtUtil.isTokenValid("token-user-a")).thenReturn(true);
+        when(jwtUtil.extractEmail("token-user-a")).thenReturn("usera@test.com");
+        when(userRepository.findByEmail("usera@test.com")).thenReturn(Optional.of(userA));
+
+        // Les libellés de userA
+        List<String> libellesUserA = List.of("Salaire A", "Loyer A");
+        when(transactionService.getLibelleSuggestions(eq(userAId), any(), any()))
+                .thenReturn(libellesUserA);
+
+        // Les libellés de userB (ne doivent pas apparaître pour userA)
+        List<String> libellesUserB = List.of("Salaire B", "Loyer B");
+        when(transactionService.getLibelleSuggestions(eq(userBId), any(), any()))
+                .thenReturn(libellesUserB);
+
+        // Appel en tant que userA → doit retourner uniquement les libellés de A
+        mockMvc.perform(get("/transactions/libelles")
+                        .header("Authorization", "Bearer token-user-a"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("Salaire A"))
+                .andExpect(jsonPath("$[1]").value("Loyer A"))
+                // Assertions croisées : aucun libellé de userB ne doit apparaître
+                .andExpect(jsonPath("$[?(@=='Salaire B')]").isEmpty())
+                .andExpect(jsonPath("$[?(@=='Loyer B')]").isEmpty());
+    }
 }

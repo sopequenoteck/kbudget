@@ -61,4 +61,18 @@ class TransactionRemoteDataSource {
             MonthlySummaryResponse.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<List<String>> getLibelleSuggestions({
+    String? query,
+    int limit = 20,
+  }) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (query != null) queryParameters['q'] = query;
+
+    final response = await _dio.get<List<dynamic>>(
+      '/transactions/libelles',
+      queryParameters: queryParameters,
+    );
+    return (response.data ?? []).cast<String>();
+  }
 }

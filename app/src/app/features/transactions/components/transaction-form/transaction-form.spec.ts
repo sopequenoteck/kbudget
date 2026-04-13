@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { TransactionForm } from './transaction-form';
 import { TransactionService } from '../../../../core/services/transaction';
 import { RecurringTransactionService } from '../../../../core/services/recurring-transaction';
+import { TransactionLibelleService } from '../../services/transaction-libelle.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { AccountService } from '../../../../core/services/account';
@@ -78,6 +79,10 @@ describe('TransactionForm', () => {
     refreshTrigger: ReturnType<typeof signal>;
   };
 
+  let libelleServiceMock: {
+    search: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     transactionServiceMock = {
       create: vi.fn().mockReturnValue(of(makeTransaction())),
@@ -111,6 +116,10 @@ describe('TransactionForm', () => {
       getAll: vi.fn().mockReturnValue(of([])),
       refreshTrigger: signal(0),
     };
+
+    libelleServiceMock = {
+      search: vi.fn().mockReturnValue(of([])),
+    };
   });
 
   const setupTestBed = () => {
@@ -119,6 +128,7 @@ describe('TransactionForm', () => {
       providers: [
         { provide: TransactionService, useValue: transactionServiceMock },
         { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
+        { provide: TransactionLibelleService, useValue: libelleServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
@@ -187,6 +197,41 @@ describe('TransactionForm', () => {
     expect(callArgs.libelle).toBe('Loyer mensuel');
     expect(callArgs.montant).toBe(500);
     expect(callArgs.frequency).toBe(Frequency.MENSUEL);
+  });
+
+  it('should_allow_submission_of_novel_libelle', async () => {
+    // T-035 : un libellé inédit (non présent dans les suggestions) doit être accepté
+    // et permettre la soumission du formulaire (saisie libre — FR-009, SC-005)
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+    // Le service de suggestions ne retourne rien pour ce libellé
+    libelleServiceMock.search = vi.fn().mockReturnValue(of([]));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const today = new Date().toISOString().split('T')[0];
+
+    // Saisie d'un libellé inédit, non présent dans les suggestions
+    component.form.patchValue({
+      libelle: 'Nouveau libellé inédit',
+      montant: '25',
+      date: today,
+    });
+    fixture.detectChanges();
+
+    // Le formulaire doit être valide (libellé renseigné, montant valide)
+    expect(component.form.get('libelle')!.valid).toBe(true);
+    expect(component.form.valid).toBe(true);
+
+    // La soumission doit déclencher la création de la transaction
+    await component.onSubmit();
+
+    expect(transactionServiceMock.create).toHaveBeenCalledOnce();
+    const callArgs = transactionServiceMock.create.mock.calls[0][0];
+    expect(callArgs.libelle).toBe('Nouveau libellé inédit');
   });
 
   it('should_prefill_form_when_converting_transaction', () => {

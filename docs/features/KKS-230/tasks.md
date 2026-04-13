@@ -45,32 +45,32 @@ Ces tâches sont bloquantes pour les fronts (API-First, constitution #1).
 
 #### Backend — tests d'intégration (US1, US2, US4, US5)
 
-- [ ] **T-020** [P] [P1] [US5] Test `TransactionControllerTest.should_return_401_when_unauthenticated` — Réf: FR-006, SC-004
-- [ ] **T-021** [P] [P1] [US5] Test `TransactionControllerTest.should_isolate_libelles_by_user` (2 users, assertions croisées) — Réf: FR-005, SC-004
-- [ ] **T-022** [P] [P1] [US1] Test `TransactionRepositoryTest.should_return_distinct_libelles_for_user` — Réf: FR-001, FR-005
-- [ ] **T-023** [P] [P1] [US2] Test `TransactionRepositoryTest.should_order_by_frequency_desc` (10×Carrefour vs 2×Monoprix) — Réf: FR-004
-- [ ] **T-024** [P] [P1] [US2] Test `TransactionRepositoryTest.should_tiebreak_by_last_date_desc` — Réf: FR-004
-- [ ] **T-025** [P] [P1] [US1] Test `TransactionServiceTest.should_clamp_limit_between_1_and_50` (null→20, -1→1, 100→50) — Réf: FR-003
-- [ ] **T-026** [P] [P1] [US1] Test performance `TransactionRepositoryTest.should_respond_under_100ms_on_10k_transactions` — Réf: NFR-001, SC-003
+- [x] **T-020** [P] [P1] [US5] Test `TransactionControllerTest.should_return_401_when_unauthenticated` — Réf: FR-006, SC-004
+- [x] **T-021** [P] [P1] [US5] Test `TransactionControllerTest.should_isolate_libelles_by_user` (2 users, assertions croisées) — Réf: FR-005, SC-004
+- [x] **T-022** [P] [P1] [US1] Test `TransactionRepositoryTest.should_return_distinct_libelles_for_user` — Réf: FR-001, FR-005
+- [x] **T-023** [P] [P1] [US2] Test `TransactionRepositoryTest.should_order_by_frequency_desc` (10×Carrefour vs 2×Monoprix) — Réf: FR-004
+- [x] **T-024** [P] [P1] [US2] Test `TransactionRepositoryTest.should_tiebreak_by_last_date_desc` — Réf: FR-004
+- [x] **T-025** [P] [P1] [US1] Test `TransactionServiceTest.should_clamp_limit_between_1_and_50` (null→20, -1→1, 100→50) — Réf: FR-003
+- [x] **T-026** [P] [P1] [US1] Test performance `TransactionRepositoryTest.should_respond_under_100ms_on_10k_transactions` — Réf: NFR-001, SC-003
 
 #### Angular — US1, US2, US4, US5 (P1)
 
-- [ ] **T-030** [P] [P1] [US1] Créer `TransactionLibelleService` (`app/src/app/features/transactions/services/transaction-libelle.service.ts`) avec méthode `search(q, limit)` + gestion erreur → `of([])` — Réf: FR-007
-- [ ] **T-031** [P1] [US1] Créer le composant partagé `AutocompleteComponent` (`app/src/app/shared/components/autocomplete/autocomplete.ts|html|scss`) — standalone, OnPush, signals-first, conforme au contrat 3.1 — Réf: FR-007, FR-018
-- [ ] **T-032** [P1] [US4] Implémenter dans `AutocompleteComponent` : saisie libre non bloquante + `Escape` ferme sans modifier — Réf: FR-009
-- [ ] **T-033** [P1] [US1] Intégrer `AutocompleteComponent` dans `TransactionFormComponent` : remplacement du champ libellé, two-way binding, signal `libelleSuggestions`, handler `onQueryChange` qui appelle le service — Réf: FR-007, NFR-008
-- [ ] **T-034** [P] [P1] [US1] Tests unitaires `transaction-libelle.service.spec.ts` (HttpTestingController, gestion erreur) — Réf: NFR-007
-- [ ] **T-035** [P] [P1] [US4] Test `transaction-form.spec.ts` : saisie d'un libellé inédit → formulaire valide → création transaction OK — Réf: FR-009, SC-005
+- [x] **T-030** [P] [P1] [US1] Créer `TransactionLibelleService` (`app/src/app/features/transactions/services/transaction-libelle.service.ts`) avec méthode `search(q, limit)` + gestion erreur → `of([])` — Réf: FR-007
+- [x] **T-031** [P1] [US1] Créer le composant partagé `AutocompleteComponent` (`app/src/app/shared/components/autocomplete/autocomplete.ts|html|scss`) — standalone, OnPush, signals-first, conforme au contrat 3.1 — Réf: FR-007, FR-018
+- [x] **T-032** [P1] [US4] Implémenter dans `AutocompleteComponent` : saisie libre non bloquante + `Escape` ferme sans modifier — Réf: FR-009
+- [x] **T-033** [P1] [US1] Intégrer `AutocompleteComponent` dans `TransactionFormComponent` : remplacement du champ libellé, two-way binding, signal `libelleSuggestions`, handler `onQueryChange` qui appelle le service — Réf: FR-007, NFR-008
+- [x] **T-034** [P] [P1] [US1] Tests unitaires `transaction-libelle.service.spec.ts` (HttpTestingController, gestion erreur) — Réf: NFR-007
+- [x] **T-035** [P] [P1] [US4] Test `transaction-form.spec.ts` : saisie d'un libellé inédit → formulaire valide → création transaction OK — Réf: FR-009, SC-005
 
 #### Flutter — US1, US2, US4, US5 (P1)
 
-- [ ] **T-040** [P] [P1] [US1] Ajouter `getLibelleSuggestions(query, {limit})` dans `TransactionRepository` (interface abstraite) — Réf: FR-008
-- [ ] **T-041** [P] [P1] [US1] Implémenter `getLibelleSuggestions` dans `TransactionRepositoryRemote` (Dio) avec fallback `[]` sur erreur — Réf: FR-008
-- [ ] **T-042** [P] [P1] [US1] Implémenter `getLibelleSuggestions` dans `TransactionRepositoryLocal` (Drift) — requête `GROUP BY libelle ORDER BY COUNT DESC, MAX(date) DESC` — Réf: FR-008, FR-004
-- [ ] **T-043** [P1] [US1] Créer `libelleSuggestionsProvider` (`application/libelle_suggestions_provider.dart`) `FutureProvider.family<List<String>, String>` avec garde `query.length < 2` — Réf: FR-008, FR-015
-- [ ] **T-044** [P1] [US1] Créer le widget `LibelleAutocompleteField` (`presentation/widgets/libelle_autocomplete_field.dart`) basé sur `RawAutocomplete<String>`, stylé via tokens `AppColors/AppSpacing/AppTypography/AppRadius/AppShadows` — Réf: FR-008, NFR-004
-- [ ] **T-045** [P1] [US1] Intégrer `LibelleAutocompleteField` dans `transaction_form.dart` Flutter, validation `required` conservée — Réf: FR-008, NFR-008
-- [ ] **T-046** [P] [P1] [US4] Widget test `libelle_autocomplete_field_test.dart` : saisie inédite + sélection + seuil 2 chars — Réf: FR-009, FR-015, SC-005
+- [x] **T-040** [P] [P1] [US1] Ajouter `getLibelleSuggestions(query, {limit})` dans `TransactionRepository` (interface abstraite) — Réf: FR-008
+- [x] **T-041** [P] [P1] [US1] Implémenter `getLibelleSuggestions` dans `TransactionRepositoryRemote` (Dio) avec fallback `[]` sur erreur — Réf: FR-008
+- [x] **T-042** [P] [P1] [US1] Implémenter `getLibelleSuggestions` dans `TransactionRepositoryLocal` (Drift) — requête `GROUP BY libelle ORDER BY COUNT DESC, MAX(date) DESC` — Réf: FR-008, FR-004
+- [x] **T-043** [P1] [US1] Créer `libelleSuggestionsProvider` (`application/libelle_suggestions_provider.dart`) `FutureProvider.family<List<String>, String>` avec garde `query.length < 2` — Réf: FR-008, FR-015
+- [x] **T-044** [P1] [US1] Créer le widget `LibelleAutocompleteField` (`presentation/widgets/libelle_autocomplete_field.dart`) basé sur `RawAutocomplete<String>`, stylé via tokens `AppColors/AppSpacing/AppTypography/AppRadius/AppShadows` — Réf: FR-008, NFR-004
+- [x] **T-045** [P1] [US1] Intégrer `LibelleAutocompleteField` dans `transaction_form.dart` Flutter, validation `required` conservée — Réf: FR-008, NFR-008
+- [x] **T-046** [P] [P1] [US4] Widget test `libelle_autocomplete_field_test.dart` : saisie inédite + sélection + seuil 2 chars — Réf: FR-009, FR-015, SC-005
 
 ### 🟡 Priorité P2 — Filtrage en cours de frappe (US3)
 
