@@ -5,8 +5,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-04-13
+
 ### Removed
-- Module shop (gestion de produits et ventes) extrait de l'app. Code préservé dans le tag git `archive/shop-v0` et specs archivées dans `.specify/specs/_archived/`. Une refonte séparée sera faite dans un projet `kshop` dédié.
+- **BREAKING** — Module shop (gestion de produits et ventes) entièrement extrait de l'app. Endpoints `/api/products`, `/api/products/*/sell`, `/api/products/*/restock` supprimés. Champs DTO retirés : `TransactionResponse.productId/productName`, `AccountResponse.isShopAccount`, `UserPreferenceResponse/Request.shopAccountId/includeShopInBalance`. Entités JPA `Product` et relation `Transaction.product` supprimées. Feature toggle `SHOP` retirée de l'enum `Feature`. Le code du module est préservé dans le tag git `archive/shop-v0` et les specs devflow correspondantes sont archivées dans `.specify/specs/_archived/`. Une refonte séparée sera faite dans un projet `kshop` dédié à partir des vrais besoins de l'utilisatrice active.
+
+### Changed
+- Modèle de données : 19 → 17 entités JPA persistées
+- Enum `Feature` : `SUBSCRIPTIONS, DEBTS, SHOP, BUDGETS` → `SUBSCRIPTIONS, DEBTS, BUDGETS`
+- Catégorie système "Boutique" retirée du seeding à l'inscription ; les transactions existantes qui y étaient liées ont leur `category_id` mis à NULL via `ON DELETE SET NULL`
+- Migration `V26__drop_shop.sql` : DROP FK/colonnes/table `products`, nettoyage `enabled_features` et `nav_order` des users existants
 
 ## [4.2.4] - 2026-03-22
 
