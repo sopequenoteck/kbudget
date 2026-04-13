@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"category", "account", "product", "debt", "subscription", "user"})
+@ToString(exclude = {"category", "account", "debt", "subscription", "user"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -52,10 +52,6 @@ public class Transaction {
 
     @Column(name = "transfer_id")
     private UUID transferId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "debt_id")

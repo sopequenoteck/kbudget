@@ -72,7 +72,7 @@ class AccountControllerTest {
         return new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
     }
 
@@ -92,7 +92,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Livret A", AccountType.EPARGNE,
                 new BigDecimal("5000.00"), new BigDecimal("5000.00"),
-                "🐷", "#22c55e", false, true, "EUR", false,
+                "🐷", "#22c55e", false, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
@@ -136,7 +136,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Nouveau Nom", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.updateAccount(eq(accountId), any(AccountRequest.class), eq(userId)))
@@ -180,7 +180,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Livret A", AccountType.EPARGNE,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🐷", "#22c55e", true, true, "EUR", false,
+                "🐷", "#22c55e", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.setDefault(accountId, userId)).thenReturn(response);
@@ -292,7 +292,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("750.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
@@ -313,7 +313,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("300.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
@@ -334,7 +334,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 new BigDecimal("500.00"), new BigDecimal("500.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
@@ -385,7 +385,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte Principal", AccountType.COURANT,
                 BigDecimal.ZERO, new BigDecimal("-100.00"),
-                "🏦", "#3b82f6", true, true, "EUR", false,
+                "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
@@ -439,7 +439,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Compte SG", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#e2001a", false, true, "EUR", false,
+                "🏦", "#e2001a", false, true, "EUR",
                 "SG", "Société Générale", "FR", "#e2001a", "/api/bank-logos/sg.svg", null, null);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
@@ -464,7 +464,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Compte Sans Banque", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#3b82f6", false, true, "EUR", false,
+                "🏦", "#3b82f6", false, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
@@ -506,7 +506,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Compte BNP", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#00915a", true, true, "EUR", false,
+                "🏦", "#00915a", true, true, "EUR",
                 "BNP", "BNP Paribas", "FR", "#00915a", "/api/bank-logos/bnp.svg", null, null);
 
         when(accountService.getAccountById(accountId, userId)).thenReturn(response);
@@ -528,7 +528,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Ma Banque Perso", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#6b7280", false, true, "EUR", false,
+                "🏦", "#6b7280", false, true, "EUR",
                 "OTHER", "Ma Banque", null, "#6b7280", "/api/bank-logos/other.svg",
                 "Ma Banque", null);
 
@@ -555,7 +555,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Ma Banque Logo", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#6b7280", false, true, "EUR", false,
+                "🏦", "#6b7280", false, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg",
                 null, "data:image/png;base64,abc");
 
@@ -582,7 +582,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 UUID.randomUUID(), "Compte SG Custom", AccountType.COURANT,
                 BigDecimal.ZERO, BigDecimal.ZERO,
-                "🏦", "#e2001a", false, true, "EUR", false,
+                "🏦", "#e2001a", false, true, "EUR",
                 "SG", "Société Générale", "FR", "#e2001a", "/api/bank-logos/sg.svg", null, null);
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
@@ -610,7 +610,7 @@ class AccountControllerTest {
         var response = new AccountResponse(
                 accountId, "Ancien Compte", AccountType.COURANT,
                 new BigDecimal("200.00"), new BigDecimal("200.00"),
-                "💰", "#22c55e", false, true, "EUR", false,
+                "💰", "#22c55e", false, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
         when(accountService.getAccountById(accountId, userId)).thenReturn(response);

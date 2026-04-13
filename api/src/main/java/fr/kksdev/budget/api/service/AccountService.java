@@ -384,7 +384,6 @@ public class AccountService {
     }
 
     private AccountResponse toResponse(Account account) {
-        UUID shopAccountId = preferenceService.getOrCreatePreference(account.getUser().getId()).getShopAccountId();
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(account.getId());
         BigDecimal solde = account.getSoldeInitial().add(balance);
         BankService.BankResolvedInfo bankInfo = bankService.resolveBank(account);
@@ -399,7 +398,6 @@ public class AccountService {
                 Boolean.TRUE.equals(account.getIsDefault()),
                 Boolean.TRUE.equals(account.getActif()),
                 account.getCurrency().name(),
-                account.getId().equals(shopAccountId),
                 bankInfo.bankCode(),
                 bankInfo.bankName(),
                 bankInfo.bankCountry(),

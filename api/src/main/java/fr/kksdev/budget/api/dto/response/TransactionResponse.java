@@ -16,7 +16,5 @@ public record TransactionResponse(
         String note,
         AccountSummary account,
         UUID transferId,
-        UUID productId,
-        String productName,
         UUID debtId
 ) {}

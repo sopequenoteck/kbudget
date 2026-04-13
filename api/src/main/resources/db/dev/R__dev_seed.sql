@@ -88,7 +88,7 @@ BEGIN
     -- ===========================================================
     UPDATE user_preferences
     SET currencies = 'EUR,XOF',
-        enabled_features = 'SUBSCRIPTIONS,DEBTS,SHOP',
+        enabled_features = 'SUBSCRIPTIONS,DEBTS',
         timezone = 'Europe/Paris'
     WHERE user_id = v_user_id;
 

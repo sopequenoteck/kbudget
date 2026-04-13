@@ -11,11 +11,9 @@ import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.model.Transaction;
-import fr.kksdev.budget.api.model.Product;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
-import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,7 +28,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,7 +39,6 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
-    private final ProductRepository productRepository;
     private final PreferenceService preferenceService;
     private final BudgetService budgetService;
     private final DebtRepository debtRepository;
@@ -148,21 +144,6 @@ public class TransactionService {
         TransactionType deletedType = transaction.getType();
         UUID deletedCategoryId = transaction.getCategory() != null ? transaction.getCategory().getId() : null;
 
-        // Rollback stock produit si transaction liée à un produit
-        if (transaction.getProduct() != null) {
-            Product product = transaction.getProduct();
-            if (transaction.getType() == TransactionType.RECETTE) {
-                product.setStock(product.getStock() + 1);
-                product.setTotalVendu(product.getTotalVendu() - 1);
-                log.info("Rollback vente: productId={}, stock={}, totalVendu={}", product.getId(), product.getStock(), product.getTotalVendu());
-            } else if (transaction.getType() == TransactionType.DEPENSE) {
-                int quantity = transaction.getMontant().divide(product.getPrixAchat(), 0, java.math.RoundingMode.DOWN).intValue();
-                product.setStock(product.getStock() - quantity);
-                log.info("Rollback restock: productId={}, quantité={}, stock={}", product.getId(), quantity, product.getStock());
-            }
-            productRepository.save(product);
-        }
-
         // Cascade delete pour les virements
         if (transaction.getTransferId() != null) {
             List<Transaction> linked = transactionRepository.findByTransferId(transaction.getTransferId());
@@ -221,7 +202,7 @@ public class TransactionService {
         }
 
         // Determine user primary currency
-        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().get(0);
+        Currency primaryCurrency = preferenceService.getOrCreatePreference(userId).getCurrencies().getFirst();
 
         BigDecimal totalRecettes = BigDecimal.ZERO;
         BigDecimal totalDepenses = BigDecimal.ZERO;
@@ -311,8 +292,6 @@ public class TransactionService {
                 transaction.getNote(),
                 AccountSummary.from(transaction.getAccount()),
                 transaction.getTransferId(),
-                transaction.getProduct() != null ? transaction.getProduct().getId() : null,
-                transaction.getProduct() != null ? transaction.getProduct().getNom() : null,
                 transaction.getDebt() != null ? transaction.getDebt().getId() : null
         );
     }

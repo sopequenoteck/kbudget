@@ -26,6 +26,12 @@ BEGIN
     SELECT id INTO v_compte_eur FROM accounts WHERE user_id = v_user_id AND currency = 'EUR' AND nom = 'Compte Courant';
     SELECT id INTO v_compte_xof FROM accounts WHERE user_id = v_user_id AND currency = 'XOF' AND nom = 'Compte CFA';
 
+    -- Skip si les comptes n'existent pas encore (R__dev_seed les creera au prochain run)
+    IF v_compte_eur IS NULL OR v_compte_xof IS NULL THEN
+        RAISE NOTICE 'Comptes absents, seed V24 ignore.';
+        RETURN;
+    END IF;
+
     -- Recuperer les categories
     SELECT id INTO v_cat_alimentation FROM categories WHERE nom = 'Alimentation' AND user_id = v_user_id;
     SELECT id INTO v_cat_transport FROM categories WHERE nom = 'Transport' AND user_id = v_user_id;

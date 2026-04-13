@@ -85,7 +85,7 @@ class TransactionControllerTest {
     void should_return_201_when_create_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -104,7 +104,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_all_transactions() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -119,7 +119,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_transaction_by_id() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.getById(transactionId, userId)).thenReturn(response);
 
@@ -133,7 +133,7 @@ class TransactionControllerTest {
     void should_return_200_when_update_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("75.00"), "Courses modifiées", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 8), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 8), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenReturn(response);

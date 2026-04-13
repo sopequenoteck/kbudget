@@ -146,7 +146,7 @@ class RecurringTransactionControllerTest {
         var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
         var transactionResponse = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
-                LocalDate.now(), null, null, account, null, null, null, null);
+                LocalDate.now(), null, null, account, null, null);
 
         when(recurringTransactionService.validate(eq(recurringId), any(UUID.class))).thenReturn(transactionResponse);
 

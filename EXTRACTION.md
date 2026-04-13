@@ -147,7 +147,11 @@ Vérif finale : `git grep -iE "shop|product"` — 0 résultat attendu hors caté
 
 _(à compléter au fil de l'extraction — tout ce qui n'entre pas dans le scope strict de cette PR)_
 
-- ...
+- **TransactionResponse.productId/productName** : ces champs étaient exposés dans l'API publique. Ils sont retirés dans cette phase. Les clients Angular/Flutter qui consomment `GET /transactions` et `GET /transactions/{id}` doivent vérifier qu'ils n'en dépendent pas (Phase 2 et 3 en charge de nettoyer leur côté).
+- **AccountResponse.isShopAccount** : champ exposé dans l'API publique, retiré. Même vigilance côté Angular/Flutter.
+- **UserPreferenceResponse.shopAccountId / includeShopInBalance** : champs retirés du DTO. Les clients doivent être mis à jour (Phase 2 et 3).
+- **UserPreferenceRequest.shopAccountId / includeShopInBalance** : si des clients envoient ces champs dans leurs requêtes PUT /users/me/preferences, ils seront ignorés (JSON désérialisé sans erreur grâce à Jackson). Pas bloquant mais à nettoyer côté client.
+- **Catégorie système "Boutique"** : retirée du seeding à l'inscription (`seedSystemCategories`) et de la BDD en production (migration V24). Les transactions existantes liées à la catégorie "Boutique" conservent leur category_id — la catégorie est supprimée par `DELETE FROM categories WHERE nom = 'Boutique' AND is_system = true`, ce qui met `category_id` à NULL via ON DELETE SET NULL sur les transactions (à vérifier selon le schéma FK existant).
 
 ## Angles morts signalés
 

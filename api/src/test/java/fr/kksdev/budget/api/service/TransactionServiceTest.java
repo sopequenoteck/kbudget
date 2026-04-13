@@ -15,7 +15,6 @@ import fr.kksdev.budget.api.enums.DebtType;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
-import fr.kksdev.budget.api.repository.ProductRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -51,9 +50,6 @@ class TransactionServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
-
-    @Mock
-    private ProductRepository productRepository;
 
     @Mock
     private PreferenceService preferenceService;

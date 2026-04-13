@@ -37,8 +37,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     boolean existsByAccountId(UUID accountId);
 
-    List<Transaction> findByProductIdAndUserIdOrderByDateDesc(UUID productId, UUID userId);
-
     @Query(value = "SELECT COALESCE(SUM(t.montant), 0) FROM transactions t " +
             "WHERE t.user_id = :userId AND t.category_id = :categoryId " +
             "AND t.type = 'DEPENSE' AND t.is_recurring = false AND t.date >= :from AND t.date <= :to",
