@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.MonthlySummaryResponse;
 import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -30,10 +31,23 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @Operation(summary = "Lister les libellés déjà utilisés (autocomplete)")
+    @Operation(
+            summary = "Lister les libellés déjà utilisés (autocomplete)",
+            description = "Retourne les libellés distincts de l'utilisateur authentifié, " +
+                    "triés par fréquence décroissante puis par date de dernière utilisation décroissante. " +
+                    "Le filtre q applique un contains case-insensitive et accent-insensible."
+    )
     @GetMapping("/libelles")
     public ResponseEntity<List<String>> getLibelleSuggestions(
+            @Parameter(
+                    description = "Filtre contains case/accent-insensible (ex: 'market' matche 'Carrefour Market', 'cafe' matche 'Café du coin')",
+                    example = "car"
+            )
             @RequestParam(required = false) @Size(max = 255) String q,
+            @Parameter(
+                    description = "Nombre maximum de libellés retournés. Clampé à [1, 50], défaut 20.",
+                    example = "20"
+            )
             @RequestParam(required = false, defaultValue = "20") Integer limit,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();

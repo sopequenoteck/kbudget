@@ -47,8 +47,28 @@ class _LibelleAutocompleteFieldState
   Timer? _debounceTimer;
   String _debouncedQuery = '';
 
+  void _controllerListener() {
+    _onTextChanged(widget.controller.text);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_controllerListener);
+  }
+
+  @override
+  void didUpdateWidget(covariant LibelleAutocompleteField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_controllerListener);
+      widget.controller.addListener(_controllerListener);
+    }
+  }
+
   @override
   void dispose() {
+    widget.controller.removeListener(_controllerListener);
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -86,11 +106,8 @@ class _LibelleAutocompleteFieldState
         return suggestions.take(widget.maxDisplay);
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-        // Ecoute les changements pour déclencher le debounce
-        controller.addListener(() {
-          _onTextChanged(controller.text);
-        });
-
+        // Le listener du debounce est enregistré une seule fois dans initState
+        // sur widget.controller (identique à ce controller fourni par RawAutocomplete).
         return TextFormField(
           controller: controller,
           focusNode: focusNode,

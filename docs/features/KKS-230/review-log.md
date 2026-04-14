@@ -1,5 +1,32 @@
 # Review Log — KKS-230
 
+## 2026-04-13 — review-impl (itération 1) — **PASS**
+
+**Commits analysés** : b214b32, 16c9066, ae702cb, 306fa1f, 85328e3 (5 commits sur `feature/KKS-230-autocomplete-libelle-transactions`)
+
+**Conformité FR/NFR/SC** : 18 FR, 8 NFR, 7 SC implémentés. Architecture conforme au plan. Tests couvrant US1..US5.
+
+**Constats BLOQUANT** : aucun.
+
+**Constats WARNING** (3 — à corriger avant merge) :
+- **W-001** — `subscribe()` manuel dans `transaction-form.ts:onLibelleQuery` (ligne ~280). Risque : pas d'unsubscription à destruction. Correction : `takeUntilDestroyed()` ou pattern `toSignal()` piloté par signal query.
+- **W-002** — `controller.addListener()` appelé dans `LibelleAutocompleteField.fieldViewBuilder` de `libelle_autocomplete_field.dart`. Appelé à chaque rebuild → listeners s'accumulent (memory leak). Correction : déplacer dans `initState()` + `removeListener` dans `dispose()`.
+- **W-003** — `@Parameter(description=...)` absents sur `q` et `limit` dans `TransactionController.getLibelleSuggestions`. SC-006 partiel (visible dans Swagger mais descriptions manquantes). Correction : ajouter annotations `@Parameter` SpringDoc.
+
+**Constats INFO** (6 — observations, pas de correction requise) :
+- **I-001** Test 401 chevauche un test existant (regroupable stylistiquement).
+- **I-002** `visibleSuggestions` ne filtre pas sous `minChars` — cohérent mais non testé.
+- **I-003** Test Flutter `should_display_suggestions_from_provider_after_2_chars` a une branche else affaiblie (fallback RawAutocomplete focus).
+- **I-004** `limit` sans `@Min(1) @Max(50)` — clamp au service, acceptable.
+- **I-005** `TransactionRepositoryLocal` accepte `query=""` (filtré en amont par provider).
+- **I-006** `autocomplete.scss` utilise `radius-xl` alors que DESIGN.md "Autocomplete" mentionne `radius-md` — écart cosmétique doc/code.
+
+**Verdict** : **PASS** — aucun bloquant, 3 warnings à corriger avant merge. Les tâches ouvertes (T-083, T-084, T-085, T-087, T-088) sont explicitement manuelles.
+
+**Recommandation** : corriger W-001, W-002, W-003 en un micro-commit, puis exécuter T-087 (pre-commit-review + frontend-design-review) avant la PR.
+
+---
+
 ## 2026-04-13 — review-tasks (itération 1) — **PASS**
 
 **Fichiers analysés** : `spec.md`, `plan.md`, `contracts.md`, `tasks.md`

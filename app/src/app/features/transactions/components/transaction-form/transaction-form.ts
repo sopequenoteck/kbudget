@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -13,7 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -100,6 +101,7 @@ export class TransactionForm {
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly TransactionType = TransactionType;
 
@@ -277,9 +279,12 @@ export class TransactionForm {
   }
 
   onLibelleQuery(q: string): void {
-    this.libelleService.search(q).subscribe((suggestions) => {
-      this.libelleSuggestions.set(suggestions);
-    });
+    this.libelleService
+      .search(q)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((suggestions) => {
+        this.libelleSuggestions.set(suggestions);
+      });
   }
 
   onLibelleChange(val: string): void {
