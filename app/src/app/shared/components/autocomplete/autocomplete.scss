@@ -11,42 +11,20 @@
     pointer-events: none;
   }
 
-  // Reprend le style .bsheet__libelle pour s'intégrer dans le form de transaction
+  // Input neutre : structure seulement, le style visuel est porté par le contexte
+  // parent (ex : .bsheet__libelle input) pour permettre la réutilisabilité du composant.
   &__input {
     width: 100%;
-    padding: var(--space-1) 0;
+    padding: 0;
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--border-default);
-    border-radius: 0;
-    box-shadow: none;
-    color: var(--text-secondary);
-    font-size: var(--font-size-base);
-    text-align: right;
     outline: none;
-    transition: border-color var(--duration-fast) var(--easing-default);
     font-family: inherit;
-
-    &::placeholder {
-      color: var(--text-tertiary);
-    }
-
-    &:focus {
-      border-bottom-color: var(--color-primary);
-    }
+    font-size: inherit;
+    color: inherit;
 
     &:disabled {
       opacity: 0.5;
-    }
-
-    // Validation invalide propagée par Angular via ng-invalid.ng-touched sur l'hôte
-    .autocomplete.ng-invalid.ng-touched & {
-      border-bottom-color: var(--color-expense);
-
-      &::placeholder {
-        color: var(--color-expense);
-        opacity: 0.5;
-      }
     }
   }
 

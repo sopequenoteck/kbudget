@@ -138,9 +138,17 @@
   &--sm { font-size: 14px; }
 }
 
+// Applique les dimensions au container — fonctionne aussi bien sur un <input>
+// direct que sur un <app-autocomplete class="bsheet__libelle"> qui wrap l'input.
 .bsheet__libelle {
   flex: 1;
   min-width: 0;
+}
+
+// Styles visuels de l'input : cible soit l'input direct portant la classe,
+// soit l'input imbriqué à l'intérieur d'un wrapper portant la classe.
+input.bsheet__libelle,
+.bsheet__libelle input {
   padding: var(--space-1) 0;
   background: transparent;
   border: none;
@@ -155,10 +163,14 @@
 
   &::placeholder { color: var(--text-tertiary); }
   &:focus { border-bottom-color: var(--color-primary); }
-  &.ng-invalid.ng-touched {
-    border-bottom-color: var(--color-expense);
-    &::placeholder { color: var(--color-expense); opacity: 0.5; }
-  }
+}
+
+// Etat invalide propagé par Angular via ng-invalid.ng-touched
+// (fonctionne uniquement sur un input direct lié via formControlName ;
+// pour app-autocomplete, une intégration ControlValueAccessor sera nécessaire — cf. dette DT-003)
+input.bsheet__libelle.ng-invalid.ng-touched {
+  border-bottom-color: var(--color-expense);
+  &::placeholder { color: var(--color-expense); opacity: 0.5; }
 }
 
 .bsheet__note-preview {

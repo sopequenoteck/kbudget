@@ -39,3 +39,17 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 **Fichiers concernes** (futurs) : nouvelle entite `Merchant`, `TransactionService`, migration Flyway de schema, ecran de fusion frontend.
 
 **Dependance** : blocs sont interdependants — ne pas demarrer avant d'avoir un cas d'usage metier concret qui justifie la complexite.
+
+---
+
+### DT-003 — AutocompleteComponent sans ControlValueAccessor (KKS-230)
+
+**Identifie** : 2026-04-14
+
+**Description** : Le composant `app/src/app/shared/components/autocomplete/autocomplete.ts` utilise l'API signals-first (`model<string>`, `[value]/(valueChange)`) sans implementer `ControlValueAccessor`. Resultat : quand integre dans un ReactiveForm via wiring manuel (`patchValue`), les classes Angular `ng-invalid`, `ng-touched`, `ng-dirty` ne sont pas propagees sur l'element host.
+
+**Impact** : L'etat visuel d'erreur (bordure rouge sur le libelle quand le formulaire est invalide + touched) ne s'affiche plus comme avant. Le champ reste fonctionnel (validation logique inchangee, submit bloque), seule la retro visuelle est degradee.
+
+**Correction proposee** : Implementer `ControlValueAccessor` sur `AutocompleteComponent` pour permettre l'usage via `formControlName`. Cela restaurerait automatiquement la propagation des classes Angular et simplifierait l'integration dans les ReactiveForms. Pattern : `@Directive()`-ified avec `NG_VALUE_ACCESSOR` provider, methodes `writeValue`, `registerOnChange`, `registerOnTouched`, `setDisabledState`.
+
+**Fichiers concernes** (futurs) : `autocomplete.ts`, `transaction-form.ts` (retrait du wiring manuel `[value]/(valueChange)`), `transaction-form.html` (`formControlName="libelle"`).

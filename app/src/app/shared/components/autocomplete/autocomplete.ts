@@ -5,6 +5,7 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
+  ViewEncapsulation,
   computed,
   inject,
   input,
@@ -28,6 +29,10 @@ function normalize(s: string): string {
   templateUrl: './autocomplete.html',
   styleUrl: './autocomplete.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // None : les styles BEM .autocomplete__* sont globalisés pour permettre
+  // au contexte parent (ex: .bsheet__libelle input) de theme-r l'input interne.
+  // Aucun risque de fuite : toutes les classes sont préfixées .autocomplete__*.
+  encapsulation: ViewEncapsulation.None,
 })
 export class Autocomplete implements OnInit, OnDestroy {
   private readonly elementRef = inject(ElementRef);
