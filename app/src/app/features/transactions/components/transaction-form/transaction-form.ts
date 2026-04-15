@@ -287,14 +287,6 @@ export class TransactionForm {
       });
   }
 
-  onLibelleChange(val: string): void {
-    this.form.patchValue({ libelle: val });
-  }
-
-  get libelleValue(): string {
-    return this.form.get('libelle')!.value as string;
-  }
-
   onTypeChange(type: TransactionType): void {
     this.typeChanged.emit(type);
   }

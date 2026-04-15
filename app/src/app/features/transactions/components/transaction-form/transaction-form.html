@@ -46,8 +46,7 @@
     </div>
     <app-autocomplete
       class="bsheet__libelle"
-      [value]="libelleValue"
-      (valueChange)="onLibelleChange($event)"
+      formControlName="libelle"
       [suggestions]="libelleSuggestions()"
       [minChars]="2"
       [maxDisplay]="5"

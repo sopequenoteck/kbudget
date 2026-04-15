@@ -42,14 +42,20 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 
 ---
 
-### DT-003 — AutocompleteComponent sans ControlValueAccessor (KKS-230)
+### DT-003 — AutocompleteComponent sans ControlValueAccessor (KKS-230) — RESOLU 2026-04-14
 
 **Identifie** : 2026-04-14
+**Resolu** : 2026-04-14
 
-**Description** : Le composant `app/src/app/shared/components/autocomplete/autocomplete.ts` utilise l'API signals-first (`model<string>`, `[value]/(valueChange)`) sans implementer `ControlValueAccessor`. Resultat : quand integre dans un ReactiveForm via wiring manuel (`patchValue`), les classes Angular `ng-invalid`, `ng-touched`, `ng-dirty` ne sont pas propagees sur l'element host.
+**Description initiale** : Le composant `autocomplete.ts` utilisait l'API signals-first (`model<string>`, `[value]/(valueChange)`) sans implementer `ControlValueAccessor`, empechant la propagation des classes `ng-invalid`, `ng-touched`, `ng-dirty` sur le host.
 
-**Impact** : L'etat visuel d'erreur (bordure rouge sur le libelle quand le formulaire est invalide + touched) ne s'affiche plus comme avant. Le champ reste fonctionnel (validation logique inchangee, submit bloque), seule la retro visuelle est degradee.
+**Correction appliquee** :
+- `Autocomplete` implemente `ControlValueAccessor` (provider `NG_VALUE_ACCESSOR` + `forwardRef`)
+- `value` passe de `model<string>` a `signal<string>` interne, pilote par `writeValue`
+- `disabled` passe de `input<boolean>` a `signal<boolean>` pilote par `setDisabledState`
+- `onChange` appele dans `onInput` et `selectAt` ; `onTouched` appele dans nouveau handler `(blur)` et `selectAt`
+- `transaction-form.html` : `[value]`/`(valueChange)` -> `formControlName="libelle"`
+- `transaction-form.ts` : suppression du wiring manuel (`onLibelleChange`, getter `libelleValue`)
+- `_bottom-sheet.scss` : ajout du selecteur imbrique `.bsheet__libelle.ng-invalid.ng-touched input` pour couvrir le cas wrapper `app-autocomplete` (en plus du selecteur input direct pour `subscription-form`)
 
-**Correction proposee** : Implementer `ControlValueAccessor` sur `AutocompleteComponent` pour permettre l'usage via `formControlName`. Cela restaurerait automatiquement la propagation des classes Angular et simplifierait l'integration dans les ReactiveForms. Pattern : `@Directive()`-ified avec `NG_VALUE_ACCESSOR` provider, methodes `writeValue`, `registerOnChange`, `registerOnTouched`, `setDisabledState`.
-
-**Fichiers concernes** (futurs) : `autocomplete.ts`, `transaction-form.ts` (retrait du wiring manuel `[value]/(valueChange)`), `transaction-form.html` (`formControlName="libelle"`).
+**Resultat** : l'etat `ng-invalid.ng-touched` se propage a nouveau sur le host, la bordure rouge du libelle est restauree automatiquement via `_bottom-sheet.scss`. Tests `autocomplete.spec.ts` verts (23/23).

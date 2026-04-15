@@ -7,12 +7,13 @@ import {
   OnInit,
   ViewEncapsulation,
   computed,
+  forwardRef,
   inject,
   input,
-  model,
   output,
   signal,
 } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -33,26 +34,38 @@ function normalize(s: string): string {
   // au contexte parent (ex: .bsheet__libelle input) de theme-r l'input interne.
   // Aucun risque de fuite : toutes les classes sont préfixées .autocomplete__*.
   encapsulation: ViewEncapsulation.None,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => Autocomplete),
+      multi: true,
+    },
+  ],
 })
-export class Autocomplete implements OnInit, OnDestroy {
+export class Autocomplete implements OnInit, OnDestroy, ControlValueAccessor {
   private readonly elementRef = inject(ElementRef);
 
-  // --- Inputs (signals) ---
-  readonly value = model<string>('');
+  // --- Inputs ---
   readonly suggestions = input<string[]>([]);
   readonly minChars = input<number>(2);
   readonly maxDisplay = input<number>(5);
   readonly placeholder = input<string>('');
   readonly ariaLabel = input<string>('');
-  readonly disabled = input<boolean>(false);
 
   // --- Outputs ---
   readonly selected = output<string>();
   readonly queryChange = output<string>();
 
-  // --- État interne ---
+  // --- État interne (signals, pilotés par CVA) ---
+  readonly value = signal<string>('');
+  readonly disabled = signal<boolean>(false);
   readonly isOpen = signal(false);
   readonly activeIndex = signal(-1);
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private onChange: (value: string) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private onTouched: () => void = () => {};
 
   readonly visibleSuggestions = computed(() => {
     const val = normalize(this.value());
@@ -94,17 +107,40 @@ export class Autocomplete implements OnInit, OnDestroy {
     this.inputSubject.complete();
   }
 
+  // --- ControlValueAccessor ---
+
+  writeValue(value: string | null): void {
+    this.value.set(value ?? '');
+  }
+
+  registerOnChange(fn: (value: string) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled.set(isDisabled);
+  }
+
   // --- Gestionnaires ---
 
   onInput(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
     this.value.set(val);
+    this.onChange(val);
     this.activeIndex.set(-1);
     this.inputSubject.next(val);
     // Ferme immédiatement si en-dessous du seuil
     if (val.length < this.minChars()) {
       this.isOpen.set(false);
     }
+  }
+
+  onBlur(): void {
+    this.onTouched();
   }
 
   onKeydown(event: KeyboardEvent): void {
@@ -152,6 +188,8 @@ export class Autocomplete implements OnInit, OnDestroy {
     if (index < 0 || index >= suggestions.length) return;
     const chosen = suggestions[index];
     this.value.set(chosen);
+    this.onChange(chosen);
+    this.onTouched();
     this.selected.emit(chosen);
     this.close();
   }

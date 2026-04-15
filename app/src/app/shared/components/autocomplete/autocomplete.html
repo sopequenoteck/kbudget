@@ -1,6 +1,6 @@
 <div class="autocomplete" [class.autocomplete--disabled]="disabled()">
   <input
-    class="autocomplete__input"
+    class="autocomplete__input input-naked"
     type="text"
     [value]="value()"
     [placeholder]="placeholder()"
@@ -14,6 +14,7 @@
     autocomplete="off"
     (input)="onInput($event)"
     (keydown)="onKeydown($event)"
+    (blur)="onBlur()"
   />
 
   @if (isOpen() && visibleSuggestions().length > 0) {

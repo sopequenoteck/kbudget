@@ -166,9 +166,9 @@ input.bsheet__libelle,
 }
 
 // Etat invalide propagé par Angular via ng-invalid.ng-touched
-// (fonctionne uniquement sur un input direct lié via formControlName ;
-// pour app-autocomplete, une intégration ControlValueAccessor sera nécessaire — cf. dette DT-003)
-input.bsheet__libelle.ng-invalid.ng-touched {
+// Couvre input direct (subscription form) et wrapper app-autocomplete (transaction form)
+input.bsheet__libelle.ng-invalid.ng-touched,
+.bsheet__libelle.ng-invalid.ng-touched input {
   border-bottom-color: var(--color-expense);
   &::placeholder { color: var(--color-expense); opacity: 0.5; }
 }
