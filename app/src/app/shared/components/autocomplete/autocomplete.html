@@ -22,6 +22,7 @@
       class="autocomplete__list"
       [id]="listboxId"
       role="listbox"
+      @expandCollapse
     >
       @for (suggestion of visibleSuggestions(); track suggestion; let i = $index) {
         <li

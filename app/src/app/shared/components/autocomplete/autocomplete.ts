@@ -16,6 +16,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { expandCollapse } from '../../animations/expand-collapse';
 
 function normalize(s: string): string {
   return s
@@ -34,6 +35,7 @@ function normalize(s: string): string {
   // au contexte parent (ex: .bsheet__libelle input) de theme-r l'input interne.
   // Aucun risque de fuite : toutes les classes sont préfixées .autocomplete__*.
   encapsulation: ViewEncapsulation.None,
+  animations: [expandCollapse],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
