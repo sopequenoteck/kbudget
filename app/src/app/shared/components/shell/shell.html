@@ -111,9 +111,9 @@
           type="button"
           class="btn-primary"
           (click)="triggerCategorySubmit()"
-          [disabled]="categoryFormRef()?.submitting()"
+          [disabled]="categoryFormSubmitting()"
         >
-          {{ categoryFormRef()?.isEditMode ? 'Modifier' : 'Créer' }}
+          {{ categoryFormIsEditMode() ? 'Modifier' : 'Créer' }}
         </button>
       </div>
     }

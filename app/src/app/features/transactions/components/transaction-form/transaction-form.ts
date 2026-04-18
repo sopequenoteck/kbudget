@@ -29,7 +29,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { Autocomplete } from '../../../../shared/components/autocomplete/autocomplete';
-import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { CategorySelect } from '../../../../shared/components/category-select/category-select';
 import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
@@ -74,7 +74,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, Autocomplete, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -118,6 +118,7 @@ export class TransactionForm {
   readonly errorMessage = signal('');
   readonly libelleSuggestions = signal<string[]>([]);
   readonly expandedSection = signal<ExpandableSection>(null);
+  readonly categoryCreating = signal(false);
 
   readonly amountWidth: Signal<string>;
 
@@ -177,6 +178,8 @@ export class TransactionForm {
   });
 
   private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
+
+  readonly categories = this.allCategories;
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.form.get('categoryId')?.value;
@@ -274,6 +277,13 @@ export class TransactionForm {
       const input = this.amountInput();
       if (input && !this.isEditing()) {
         setTimeout(() => input.nativeElement.focus(), 100);
+      }
+    });
+
+    // Reset categoryCreating quand l'expand catégorie se ferme (T-037)
+    effect(() => {
+      if (this.expandedSection() !== 'category') {
+        this.categoryCreating.set(false);
       }
     });
   }

@@ -113,6 +113,8 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 export class Shell {
   private readonly outlet = viewChild(RouterOutlet);
   readonly categoryFormRef = viewChild<CategoryForm>('categoryFormRef');
+  readonly categoryFormSubmitting = computed(() => this.categoryFormRef()?.submitting() ?? false);
+  readonly categoryFormIsEditMode = computed(() => this.categoryFormRef()?.isEditMode ?? false);
   private readonly authService = inject(AuthService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
