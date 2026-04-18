@@ -89,7 +89,11 @@
   }
   @if (expandedSection() === 'category') {
     <div class="bsheet__expand" @expandCollapse>
-      <app-category-picker formControlName="categoryId" />
+      <app-category-select
+        formControlName="categoryId"
+        [categories]="categories()"
+        (isCreating)="categoryCreating.set($event)"
+      />
     </div>
   }
   @if (expandedSection() === 'account') {
@@ -115,20 +119,20 @@
   <div class="bsheet__bottom-row">
     <div class="bsheet__bottom-left">
       @if (isEditing()) {
-        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" (click)="onDelete()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
           <ng-icon name="phosphorTrash" size="16" />
         </button>
-        <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="rembourse()" (click)="toggleRembourse()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="rembourse()" [disabled]="categoryCreating()" (click)="toggleRembourse()">
           <ng-icon [name]="rembourse() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
           {{ rembourse() ? 'Remboursé' : 'Non remboursé' }}
         </button>
       } @else {
-        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="cancelled.emit()">
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
           Annuler
         </button>
       }
     </div>
-    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
       {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>

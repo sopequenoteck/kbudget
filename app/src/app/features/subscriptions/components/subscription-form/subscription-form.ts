@@ -25,7 +25,7 @@ import {
   phosphorToggleRight,
 } from '@ng-icons/phosphor-icons/regular';
 
-import { CategoryPicker } from '../../../../shared/components/category-picker/category-picker';
+import { CategorySelect } from '../../../../shared/components/category-select/category-select';
 import { InlineDatePicker } from '../../../../shared/components/inline-date-picker/inline-date-picker';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
@@ -36,6 +36,7 @@ import { CurrencyService } from '../../../../core/services/currency';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
+import { Category } from '../../../../core/models/category.model';
 import {
   Frequency,
   Subscription,
@@ -66,7 +67,7 @@ export class ShortDatePipe implements PipeTransform {
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategoryPicker, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -167,7 +168,10 @@ export class SubscriptionForm {
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
-  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
+  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] as Category[] });
+
+  readonly categories = this.allCategories;
+  readonly categoryCreating = signal(false);
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.form.get('categoryId')?.value;
@@ -186,6 +190,13 @@ export class SubscriptionForm {
   constructor() {
     this.currencyService.loadIfEmpty();
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
+
+    // Reset categoryCreating quand l'expand catégorie se ferme (T-037 equivalent)
+    effect(() => {
+      if (this.expandedSection() !== 'category') {
+        this.categoryCreating.set(false);
+      }
+    });
 
     effect(() => {
       const sub = this.subscription();

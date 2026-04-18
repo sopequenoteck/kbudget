@@ -243,4 +243,149 @@ describe('CategorySelect', () => {
     // sans fermer le mode création (FR-011)
     expect(component.mode()).toBe('create');
   });
+
+  // =========================================================================
+  // US3 — Recherche avec insensibilité casse/accents
+  // =========================================================================
+
+  it('should_filter_categories_when_search_matches_partially', () => {
+    const { fixture, component } = setup();
+    component.searchTerm.set('ali');
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.cs__item');
+    // 'ali' matche 'Alimentation'
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toContain('Alimentation');
+  });
+
+  it('should_ignore_case_when_filtering', () => {
+    const { fixture, component } = setup();
+    component.searchTerm.set('TRANSPORT');
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.cs__item');
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toContain('Transport');
+  });
+
+  it('should_ignore_accents_when_filtering', () => {
+    const { fixture, component } = setup();
+    // 'cafe' (sans accent) doit matcher 'Café'
+    component.searchTerm.set('cafe');
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.cs__item');
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toContain('Café');
+  });
+
+  it('should_also_filter_with_accent_normalized_uppercase', () => {
+    const { fixture, component } = setup();
+    // 'ECO' doit matcher 'Économie'
+    component.searchTerm.set('ECO');
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.cs__item');
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toContain('Économie');
+  });
+
+  it('should_reset_active_index_when_search_changes', () => {
+    const { fixture, component } = setup();
+    // Positionner activeIndex sur un item
+    component.activeIndex.set(2);
+    fixture.detectChanges();
+
+    // Simuler un input de recherche via la méthode directe
+    const inputEl = fixture.nativeElement.querySelector('.cs__search') as HTMLInputElement;
+    inputEl.value = 'ali';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(component.activeIndex()).toBe(-1);
+    expect(component.searchTerm()).toBe('ali');
+  });
+
+  // =========================================================================
+  // FR-019 — Navigation clavier
+  // =========================================================================
+
+  it('should_navigate_with_arrow_down_and_wrap_to_first', () => {
+    const { fixture, component } = setup();
+    fixture.detectChanges();
+
+    // ArrowDown depuis -1 → 0
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.activeIndex()).toBe(0);
+
+    // ArrowDown jusqu'au dernier item
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    // On est à l'index 3 (dernier de MOCK_CATEGORIES)
+    expect(component.activeIndex()).toBe(3);
+
+    // ArrowDown wrap → revient à 0
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.activeIndex()).toBe(0);
+  });
+
+  it('should_navigate_with_arrow_up_and_wrap_to_last', () => {
+    const { fixture, component } = setup();
+    fixture.detectChanges();
+
+    // ArrowUp depuis -1 → wrap → dernier (len - 1 = 3)
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(component.activeIndex()).toBe(MOCK_CATEGORIES.length - 1);
+
+    // ArrowUp depuis 3 → 2
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(component.activeIndex()).toBe(MOCK_CATEGORIES.length - 2);
+  });
+
+  it('should_select_active_item_on_enter_when_active_index_valid', () => {
+    const { fixture, component } = setup();
+    component.activeIndex.set(1);
+    fixture.detectChanges();
+
+    const selectedIds: string[] = [];
+    component.selected.subscribe((id) => selectedIds.push(id));
+
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+
+    expect(selectedIds).toContain(MOCK_CATEGORIES[1].id);
+    expect(component.value()).toBe(MOCK_CATEGORIES[1].id);
+  });
+
+  it('should_close_or_reset_on_escape_in_list_mode', () => {
+    const { fixture, component } = setup();
+    component.searchTerm.set('ali');
+    component.activeIndex.set(0);
+    fixture.detectChanges();
+
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    // En mode list, Escape reset searchTerm et activeIndex
+    expect(component.searchTerm()).toBe('');
+    expect(component.activeIndex()).toBe(-1);
+    expect(component.mode()).toBe('list');
+  });
+
+  it('should_pop_to_list_on_escape_in_create_mode', () => {
+    const { fixture, component } = setup();
+    component.searchTerm.set('nouvelle');
+    component.pushToCreate();
+    fixture.detectChanges();
+
+    component.onKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    // En mode create, Escape retourne en mode list (popToList)
+    expect(component.mode()).toBe('list');
+    // searchTerm préservé (FR-009)
+    expect(component.searchTerm()).toBe('nouvelle');
+  });
 });

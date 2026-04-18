@@ -128,10 +128,10 @@ description: "Task list — KKS-231 Refonte du sélecteur de catégorie en botto
 
 **Independent Test** : ouvrir l'expand, taper `cafe`, vérifier que `Café` apparaît ; taper `ECO`, vérifier que `économie` apparaît.
 
-- [ ] **T-040** [US3] Brancher l'input de recherche au signal `searchTerm` dans `category-select.html` (via `(input)="searchTerm.set($event.target.value)"` ou similaire). Reset `activeIndex` à -1 à chaque changement. — Réf : FR-012
-- [ ] **T-041** [US3] Vérifier que `filteredCategories` (déjà implémenté en T-022) gère correctement les cas `cafe`/`Café`, `ECO`/`économie`, espacements. Si besoin, ajuster le computed. — Réf : FR-012, SC-005
-- [ ] **T-042** [P] [US3] Compléter `category-select.spec.ts` avec les tests US3 : `should_filter_categories_when_search_matches_partially`, `should_ignore_case_when_filtering`, `should_ignore_accents_when_filtering`, `should_reset_active_index_on_search_change`. — Réf : NFR-005, SC-005
-- [ ] **T-043** [US3] Tester la navigation clavier avec wrap : `should_navigate_with_arrow_down_and_up_with_wrap`, `should_select_active_item_on_enter`. — Réf : FR-019, SC-010
+- [x] **T-040** [US3] Brancher l'input de recherche au signal `searchTerm` dans `category-select.html` (via `(input)="searchTerm.set($event.target.value)"` ou similaire). Reset `activeIndex` à -1 à chaque changement. — Réf : FR-012
+- [x] **T-041** [US3] Vérifier que `filteredCategories` (déjà implémenté en T-022) gère correctement les cas `cafe`/`Café`, `ECO`/`économie`, espacements. Si besoin, ajuster le computed. — Réf : FR-012, SC-005
+- [x] **T-042** [P] [US3] Compléter `category-select.spec.ts` avec les tests US3 : `should_filter_categories_when_search_matches_partially`, `should_ignore_case_when_filtering`, `should_ignore_accents_when_filtering`, `should_reset_active_index_on_search_change`. — Réf : NFR-005, SC-005
+- [x] **T-043** [US3] Tester la navigation clavier avec wrap : `should_navigate_with_arrow_down_and_up_with_wrap`, `should_select_active_item_on_enter`. — Réf : FR-019, SC-010
 
 **Checkpoint US3** : recherche fonctionnelle avec casse/accents, navigation clavier opérationnelle, tests passent.
 
@@ -146,7 +146,7 @@ description: "Task list — KKS-231 Refonte du sélecteur de catégorie en botto
 > Les tâches de cette US ont été **anticipées en Phase 2** (T-017 à T-019) car elles sont prérequises à la refonte globale du `CategoryForm`. Reste ici la validation finale et les tests.
 
 - [ ] **T-050** [US4] Re-tester manuellement la page Settings après que la Phase 3 (US1-US3) soit intégrée : vérifier que les catégories créées depuis `CategorySelect` apparaissent bien dans la liste Settings (via `refreshTrigger`), et que les CRUD depuis Settings fonctionnent. — Réf : SC-006
-- [ ] **T-051** [P] [US4] Ajouter un test d'intégration `shell.ts` ou un test manuel documenté dans `docs/manual-test-plan.md` : section « Catégories — Settings » couvrant créer/modifier/supprimer. — Réf : SC-006, US4
+- [x] **T-051** [P] [US4] Ajouter un test d'intégration `shell.ts` ou un test manuel documenté dans `docs/manual-test-plan.md` : section « Catégories — Settings » couvrant créer/modifier/supprimer. — Réf : SC-006, US4
 
 **Checkpoint US4** : aucune régression sur Settings. Les deux contextes (Settings et bottom-sheet forms) cohabitent sans interférence.
 
@@ -156,11 +156,11 @@ description: "Task list — KKS-231 Refonte du sélecteur de catégorie en botto
 
 **Objectif** : propager la migration aux 2 autres forms (`subscription-form`, `debt-form`) et supprimer l'ancien composant.
 
-- [ ] **T-060** [P] Migrer `subscription-form` selon le même pattern que `transaction-form` : TS (préchargement catégories via `toSignal(getAll())` + signal `categoryCreating` + **effect de reset** de `categoryCreating` quand `expandedSection()` sort de `'category'`, équivalent T-037), HTML (remplacement `app-category-picker` → `app-category-select`, écoute `(isCreating)`, footer `[disabled]="categoryCreating()"` pendant création). — Réf : FR-004, FR-008, US1 AS-4, risque R4
-- [ ] **T-061** [P] Migrer `debt-form` selon le même pattern, incluant **l'effect de reset** de `categoryCreating` équivalent à T-037. — Réf : FR-004, FR-008, US1 AS-4, risque R4
-- [ ] **T-062** Grep final : `grep -r "category-picker\|CategoryPicker" app/src` doit renvoyer **0 résultat**. — Réf : FR-016, SC-009
-- [ ] **T-063** Supprimer le dossier `app/src/app/shared/components/category-picker/` (4 fichiers : `.ts`, `.html`, `.scss`, `.spec.ts`). — Réf : FR-016, FR-017
-- [ ] **T-064** Lancer `ng lint` → 0 erreur ; `ng build` → OK. — Réf : FR-016
+- [x] **T-060** [P] Migrer `subscription-form` selon le même pattern que `transaction-form` : TS (préchargement catégories via `toSignal(getAll())` + signal `categoryCreating` + **effect de reset** de `categoryCreating` quand `expandedSection()` sort de `'category'`, équivalent T-037), HTML (remplacement `app-category-picker` → `app-category-select`, écoute `(isCreating)`, footer `[disabled]="categoryCreating()"` pendant création). — Réf : FR-004, FR-008, US1 AS-4, risque R4
+- [x] **T-061** [P] Migrer `debt-form` selon le même pattern, incluant **l'effect de reset** de `categoryCreating` équivalent à T-037. — Réf : FR-004, FR-008, US1 AS-4, risque R4
+- [x] **T-062** Grep final : `grep -r "category-picker\|CategoryPicker" app/src` doit renvoyer **0 résultat**. — Réf : FR-016, SC-009
+- [x] **T-063** Supprimer le dossier `app/src/app/shared/components/category-picker/` (4 fichiers : `.ts`, `.html`, `.scss`, `.spec.ts`). — Réf : FR-016, FR-017
+- [x] **T-064** Lancer `ng lint` → 0 erreur ; `ng build` → OK. — Réf : FR-016
 
 **Checkpoint Phase 4** : les 3 formulaires utilisent `CategorySelect` ; l'ancien `CategoryPicker` n'existe plus dans le code.
 

@@ -409,6 +409,59 @@
 
 ---
 
+---
+
+## 21. Angular — Catégories (KKS-231)
+
+> **Concerne** : Application Angular uniquement. Tests non-régression Settings + nouveaux parcours inline.
+> **Prérequis** : `ng serve` lancé, API Spring Boot active (profil dev), au moins un compte existant.
+
+### 21.1 — Settings — Gestion des catégories (non-régression US4)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-1 | Créer une catégorie | Settings → Catégories → `+` → Renseigner nom, icône, couleur → Créer | Catégorie apparaît dans la liste Settings | -- |
+| CAT-2 | Modifier une catégorie existante | Settings → Catégories → clic sur une catégorie → Modifier nom → Modifier | Nom mis à jour dans la liste | -- |
+| CAT-3 | Supprimer une catégorie | Settings → Catégories → clic sur une catégorie → Supprimer → Confirmer | Catégorie disparaît de la liste | -- |
+| CAT-4 | Footer modal Settings fonctionnel | Settings → Catégories → `+` → Renseigner un champ → clic `Annuler` | Modal fermée, catégorie non créée | -- |
+| CAT-5 | Bouton Modifier dans le footer | Settings → Catégories → éditer une catégorie → footer affiche « Modifier » | Label correct selon mode create/edit | -- |
+
+### 21.2 — Sélection inline dans les formulaires (US1)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-6 | Sélection inline transaction | Nouveau bottom-sheet transaction → pill Catégorie → liste inline s'affiche (aucun overlay) | Aucun bottom-sheet supplémentaire | -- |
+| CAT-7 | Sélection confirme la valeur | Expand catégorie ouvert → clic sur une catégorie | Expand se referme, pill affiche la catégorie sélectionnée | -- |
+| CAT-8 | Sélection abonnement | Nouveau bottom-sheet abonnement → pill Catégorie → liste inline | Même comportement que CAT-6/CAT-7 | -- |
+| CAT-9 | Sélection dette | Nouveau bottom-sheet dette → pill Catégorie → liste inline | Même comportement | -- |
+| CAT-10 | Scroll liste (>10 catégories) | Avec >10 catégories créées → ouvrir expand → faire défiler | Liste scrolle jusqu'au max 60vh, footer du sheet reste accessible | -- |
+
+### 21.3 — Recherche inline (US3)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-11 | Recherche partielle | Expand catégorie → taper `ali` | Seul « Alimentation » affiché | -- |
+| CAT-12 | Insensibilité casse | Expand catégorie → taper `TRANSPORT` | « Transport » affiché | -- |
+| CAT-13 | Insensibilité accents | Expand catégorie → taper `cafe` | « Café » affiché (si existant) | -- |
+| CAT-14 | Aucun résultat | Taper un terme inexistant | Message « Aucune catégorie trouvée » + bouton « + Créer » | -- |
+| CAT-15 | Navigation clavier ArrowDown | Input search focusé → ArrowDown | Premier item highlighté | -- |
+| CAT-16 | Navigation clavier Enter | Item highlighté → Enter | Item sélectionné, expand fermé | -- |
+| CAT-17 | Escape en mode liste | Recherche active → Escape | Recherche vidée, liste complète | -- |
+
+### 21.4 — Création inline (US2)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-18 | Bouton + Créer | Taper un terme sans correspondance exacte → bouton « + Créer "terme" » | Bouton visible | -- |
+| CAT-19 | Passage en mode création | Clic sur « + Créer "terme" » | Mode création s'affiche avec nom pré-rempli | -- |
+| CAT-20 | Création réussie auto-sélection | Remplir le form création → ✓ Créer | Catégorie créée + auto-sélectionnée + expand fermé | -- |
+| CAT-21 | Retour vers liste | Mode création → ← Retour | Retour vers liste, terme de recherche préservé | -- |
+| CAT-22 | Escape en mode création | Mode création → Escape | Retour vers liste (pas fermeture du sheet) | -- |
+| CAT-23 | Footer désactivé pendant création | Mode création actif | Boutons Annuler/Enregistrer du sheet grisés | -- |
+| CAT-24 | Catégorie créée visible dans Settings | Créer une catégorie depuis le bottom-sheet → aller dans Settings | Nouvelle catégorie visible dans la liste Settings | -- |
+
+---
+
 ## Notes d'execution
 
 1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19)
