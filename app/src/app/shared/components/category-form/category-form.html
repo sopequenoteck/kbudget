@@ -1,4 +1,4 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="category-form">
+<form [formGroup]="form" (ngSubmit)="submit()" class="category-form">
   <div class="category-form__field">
     <label for="categoryNom">Nom</label>
     <input
@@ -39,11 +39,4 @@
   @if (errorMessage()) {
     <div class="category-form__error-banner">{{ errorMessage() }}</div>
   }
-
-  <div class="category-form__actions">
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="submitting() || !selectedEmoji()">
-      {{ isEditMode ? 'Modifier' : 'Creer' }}
-    </button>
-  </div>
 </form>

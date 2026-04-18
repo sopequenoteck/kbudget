@@ -71,7 +71,7 @@ export class CategoryForm implements OnInit {
     this.selectedColor.set(color);
   }
 
-  async onSubmit(): Promise<void> {
+  async submit(): Promise<void> {
     if (this.form.invalid || !this.selectedEmoji()) {
       this.form.markAllAsTouched();
       return;

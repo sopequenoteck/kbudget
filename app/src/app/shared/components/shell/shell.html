@@ -100,10 +100,22 @@
     }
     @case ('category') {
       <app-category-form
+        #categoryFormRef
         [category]="$any(modalService.editingEntity())"
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
+      <div class="modal__actions">
+        <button type="button" class="btn-outline" (click)="onModalClose()">Annuler</button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="triggerCategorySubmit()"
+          [disabled]="categoryFormRef()?.submitting()"
+        >
+          {{ categoryFormRef()?.isEditMode ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
     }
     @case ('account') {
       <app-account-form

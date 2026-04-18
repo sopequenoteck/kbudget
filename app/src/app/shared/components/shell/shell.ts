@@ -112,6 +112,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 })
 export class Shell {
   private readonly outlet = viewChild(RouterOutlet);
+  readonly categoryFormRef = viewChild<CategoryForm>('categoryFormRef');
   private readonly authService = inject(AuthService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
@@ -305,5 +306,9 @@ export class Shell {
 
   onModalClose(): void {
     this.modalService.closeModal();
+  }
+
+  triggerCategorySubmit(): void {
+    this.categoryFormRef()?.submit();
   }
 }
