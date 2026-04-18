@@ -92,7 +92,9 @@
       <app-category-select
         formControlName="categoryId"
         [categories]="categories()"
+        (selected)="expandedSection.set(null)"
         (isCreating)="categoryCreating.set($event)"
+        (created)="onCategoryCreated($event)"
       />
     </div>
   }

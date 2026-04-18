@@ -11,7 +11,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -177,13 +177,18 @@ export class DebtForm {
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
-  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] as Category[] });
+  private readonly allCategories = signal<Category[]>([]);
 
-  readonly categories = this.allCategories;
+  readonly categories = this.allCategories.asReadonly();
   readonly categoryCreating = signal(false);
 
+  private readonly categoryIdSignal = toSignal(
+    this.form.get('categoryId')!.valueChanges,
+    { initialValue: this.form.get('categoryId')!.value }
+  );
+
   readonly selectedCategory = computed(() => {
-    const categoryId = this.form.get('categoryId')?.value;
+    const categoryId = this.categoryIdSignal();
     if (!categoryId) return null;
     return this.allCategories().find((c) => c.id === categoryId) ?? null;
   });
@@ -199,6 +204,11 @@ export class DebtForm {
   constructor() {
     this.currencyService.loadIfEmpty();
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
+
+    // Fetch initial des catégories
+    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
+      this.allCategories.set(cats);
+    });
 
     // Reset categoryCreating quand l'expand catégorie se ferme (T-037 equivalent)
     effect(() => {
@@ -241,6 +251,12 @@ export class DebtForm {
         }
       }
     });
+  }
+
+  onCategoryCreated(cat: Category): void {
+    this.allCategories.update(cats =>
+      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    );
   }
 
   toggleSection(section: ExpandableSection): void {

@@ -42,6 +42,7 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
 import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
+import { Category } from '../../../../core/models/category.model';
 import {
   Transaction,
   TransactionRequest,
@@ -177,12 +178,17 @@ export class TransactionForm {
     return (0).toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
   });
 
-  private readonly allCategories = toSignal(this.categoryService.getAll(), { initialValue: [] });
+  private readonly allCategories = signal<Category[]>([]);
 
-  readonly categories = this.allCategories;
+  readonly categories = this.allCategories.asReadonly();
+
+  private readonly categoryIdSignal = toSignal(
+    this.form.get('categoryId')!.valueChanges,
+    { initialValue: this.form.get('categoryId')!.value }
+  );
 
   readonly selectedCategory = computed(() => {
-    const categoryId = this.form.get('categoryId')?.value;
+    const categoryId = this.categoryIdSignal();
     if (!categoryId) return null;
     return this.allCategories().find((c) => c.id === categoryId) ?? null;
   });
@@ -221,6 +227,11 @@ export class TransactionForm {
 
   constructor() {
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
+
+    // Fetch initial des catégories
+    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
+      this.allCategories.set(cats);
+    });
 
     // Toggle récurrence
     effect(() => {
@@ -286,6 +297,12 @@ export class TransactionForm {
         this.categoryCreating.set(false);
       }
     });
+  }
+
+  onCategoryCreated(cat: Category): void {
+    this.allCategories.update(cats =>
+      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    );
   }
 
   onLibelleQuery(q: string): void {
