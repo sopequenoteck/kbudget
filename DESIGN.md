@@ -132,6 +132,29 @@ Style : tokens CSS uniquement, overlay en `surface-raised` avec `radius-md` et s
 
 Composant : `<app-autocomplete>` dans `app/src/app/shared/components/autocomplete/`
 
+### Category Select (inline expand)
+
+Selecteur de categorie dedie au contexte bottom-sheet. Remplace l'ancien `app-category-picker` qui empilait un second sheet (violation du principe #4). Utilise en tant que dumb component dans les formulaires `transaction-form`, `subscription-form` et `debt-form` via leur signal `expandedSection` (KKS-231).
+
+Contrat signals-first : `value` (model via CVA `formControlName`), `categories` (input — liste prechargee par le parent), outputs `selected` (id), `created` (nouvelle categorie), `isCreating` (bascule list ↔ create).
+
+Comportement :
+- Rendu inline dans un `bsheet__expand` (aucun overlay, aucun second bottom-sheet)
+- Recherche insensible a la casse et aux accents (helper partage `normalize()` — NFD + suppression diacritiques)
+- Scroll interne `max-height: 60vh` + `overflow-y: auto` sur la liste — footer du sheet toujours accessible
+- Bouton `+ Creer « terme »` quand la recherche ne matche aucune categorie
+- Mode creation inline : push/pop dans l'expand avec nom pre-rempli depuis la recherche ; en-tete `← Retour` + `✓ Creer` ; footer du sheet parent desactive (pas masque) pendant la creation
+- Retour depuis la creation : la recherche est conservee
+- Apres creation reussie : la nouvelle categorie est automatiquement selectionnee et l'expand se collapse
+- Navigation clavier : ArrowDown/Up (wrap), Enter (select), Escape (pop to list en mode creation, reset search en mode list)
+- ARIA : `role="combobox"`, `aria-autocomplete="list"`, `aria-expanded`, `role="listbox"`, `role="option"`, `aria-activedescendant`
+
+Integration cote parent : precharger les categories via `toSignal(CategoryService.getAll())` converti en signal mutable, ecouter `(created)` pour ajouter la nouvelle categorie au cache local, `(selected)` pour collapser l'expand (`expandedSection.set(null)`), `(isCreating)` pour desactiver le footer du sheet.
+
+Style : tokens uniquement, pattern `.cs__*` derive de `_list-patterns.scss` (icon-circle 36px avec fond colore a 15% via suffixe hex `+ '26'`, selection en `--primary-subtle`).
+
+Composant : `<app-category-select>` dans `app/src/app/shared/components/category-select/`
+
 ### Skeleton loading
 
 Imite la forme du contenu reel. Cercle 36px + lignes largeurs variees. Animation pulse 1.5s.

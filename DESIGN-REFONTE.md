@@ -1087,6 +1087,33 @@ Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert 
 - L'import review en amber renforce le message "selectionne = pret a agir"
 - Supprimer une couleur du design system est plus courageux que d'en ajouter — c'est un acte de simplification qui renforce la lisibilite de celles qui restent
 
+## Ce qui a ete fait (session 21)
+
+### KKS-231 — Selecteur de categorie inline expand
+
+Correction d'une violation majeure du **principe #4** de `DESIGN.md` (« un seul niveau de surface modale : bottom sheet OU dialog centre. Jamais deux empilés. »). L'ancien `app-category-picker` ouvrait un `app-select-picker` en second bottom-sheet par-dessus les formulaires `transaction-form`, `subscription-form` et `debt-form`. Le bouton « + Creer » ouvrait encore une `Modal` centree par-dessus — potentiellement 3 surfaces modales empilees.
+
+### Decisions de design (session 21)
+
+- **Refonte, pas polish** — la violation est architecturale, la correction aussi. Nouveau composant dedie `app-category-select` symetrique a `app-autocomplete` (KKS-230). L'ancien `SelectPicker` est conserve pour les contextes hors bottom-sheet (Settings, filtres).
+- **Dumb component** — `CategorySelect` n'a aucune logique d'ouverture/fermeture. C'est le form parent qui pilote l'expansion via son signal `expandedSection` existant (pattern identique a `InlineDatePicker`). Le composant se contente de rendre son contenu (liste + recherche + bouton creer, ou form de creation en mode push).
+- **Creation inline push/pop** — quand l'utilisateur tape un nom inexistant et clique « + Creer », le contenu de l'expand est remplace par le formulaire de creation avec le nom pre-rempli. En-tete `← Retour` + `✓ Creer` a gauche/droite. Au retour, la recherche est conservee (respect de l'intention utilisateur). Apres creation reussie, la nouvelle categorie est automatiquement selectionnee et l'expand se collapse.
+- **Footer du sheet parent desactive, pas masque** — pendant le mode creation, les boutons `Annuler`/`Enregistrer` du sheet restent visibles mais `[disabled]`. Signale l'etat transitoire sans faire bouger le layout.
+- **Scroll interne 60vh** — la liste est contrainte `max-height: 60vh` + `overflow-y: auto`. Le sheet garde une hauteur predictible, le footer reste accessible. Pattern Revolut-like.
+- **Refonte globale du CategoryForm** — le footer interne du `CategoryForm` (boutons `Annuler`/`Modifier`) est supprime. Les deux consommateurs (`shell.html` en mode Settings, `CategorySelect` en mode bottom-sheet) cablent leur propre footer. Methode publique `submit()` appelable via `viewChild`.
+- **Sprint-helper partage** — le helper `normalize(s)` (NFD + suppression diacritiques) est extrait de `autocomplete.ts` vers `shared/utils/string.utils.ts`. Utilisable par tout composant avec filtre insensible a la casse/accents.
+
+### Migrations par usage
+
+- **3 formulaires** (transaction, subscription, debt) : remplacement `<app-category-picker>` par `<app-category-select>` avec binding signals-first (`[categories]`, `(selected)`, `(isCreating)`, `(created)`). Ajout d'un `categoryIdSignal = toSignal(valueChanges)` pour rendre `selectedCategory` computed reactif (bug d'affichage decouvert et corrige pendant le test manuel). Pattern identique a `accountIdSignal`/`dateSignal` deja en place.
+- **shell.html** (gestion des categories depuis Settings) : footer custom `<div class="modal__actions">` avec 2 boutons, cables sur `categoryFormRef()?.submit()` via `viewChild`.
+- **category-picker** supprime : 4 fichiers (`.ts`, `.html`, `.scss`, `.spec.ts`). Plus aucun consommateur apres migration.
+
+### Ce qui change visuellement
+
+- Avant : un clic sur la pill catégorie ouvrait un second bottom-sheet qui recouvrait le premier. La liste apparaissait dans une surface empilee avec son propre header, son propre champ de recherche, son propre `cdkTrapFocus`.
+- Apres : un clic declenche l'expansion inline du `bsheet__expand` sous la row des pills. La liste coule dans le meme sheet, les pills restent visibles en haut, le footer reste accessible en bas. Cree une categorie met a jour la liste dans la foulee — aucun reload, aucune fermeture-reouverture du sheet.
+
 ## Ce qui reste a faire
 
 ### Priorite haute

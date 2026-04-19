@@ -170,14 +170,14 @@ description: "Task list — KKS-231 Refonte du sélecteur de catégorie en botto
 
 **Objectif** : finitions cross-cutting, documentation design, reviews automatisées.
 
-- [ ] **T-070** [P] Ajouter une section « Category Select (inline expand) » dans `DESIGN.md`, symétrique à la section Autocomplete (API, comportement, ARIA). — Réf : §Documentation ticket Linear
-- [ ] **T-071** [P] Ajouter une session « KKS-231 — Sélecteur de catégorie inline expand » dans `DESIGN-REFONTE.md` (décisions : voie B, option 2 footer, push/pop, persistance recherche, scroll 60vh). — Réf : §Documentation ticket Linear
-- [ ] **T-072** [P] Exécuter `ng test --code-coverage` et vérifier que `CategorySelect` atteint ≥ 80 % de couverture. — Réf : NFR-005, SC-008
-- [ ] **T-073** [P] Vérifier l'absence de hex/rgba hardcodés : `grep -rE "#[0-9a-fA-F]{3,8}|rgba?\(" app/src/app/shared/components/category-select/` → 0 résultat. — Réf : NFR-001, SC-007
+- [x] **T-070** [P] Ajouter une section « Category Select (inline expand) » dans `DESIGN.md`, symétrique à la section Autocomplete (API, comportement, ARIA). — Réf : §Documentation ticket Linear
+- [x] **T-071** [P] Ajouter une session « KKS-231 — Sélecteur de catégorie inline expand » dans `DESIGN-REFONTE.md` (décisions : voie B, option 2 footer, push/pop, persistance recherche, scroll 60vh). — Réf : §Documentation ticket Linear
+- [x] **T-072** [P] Exécuter `ng test --code-coverage` et vérifier que `CategorySelect` atteint ≥ 80 % de couverture. — Réf : NFR-005, SC-008
+- [x] **T-073** [P] Vérifier l'absence de hex/rgba hardcodés : `grep -rE "#[0-9a-fA-F]{3,8}|rgba?\(" app/src/app/shared/components/category-select/` → 0 résultat. — Réf : NFR-001, SC-007
 - [ ] **T-074** Vérifier manuellement l'ARIA : DevTools Accessibility sur un expand catégorie ouvert (US1) et un mode création (US2). — Réf : FR-018
 - [ ] **T-075** Test responsive manuel : 320px, 375px, 414px, 768px. Vérifier que l'expand 60vh scrolle correctement et que le footer du sheet reste accessible. — Réf : FR-020, risque R7
-- [ ] **T-076** Lancer `/design-check` (skill local) — audit cohérence visuelle. — Réf : design-coherence skill
-- [ ] **T-077** Mettre à jour `docs/manual-test-plan.md` section Angular avec les nouveaux parcours (sélection inline, création inline, désactivation footer). — Réf : NFR-005
+- [x] **T-076** Lancer `/design-check` (skill local) — audit cohérence visuelle. — Réf : design-coherence skill
+- [x] **T-077** Mettre à jour `docs/manual-test-plan.md` section Angular avec les nouveaux parcours (sélection inline, création inline, désactivation footer). — Réf : NFR-005
 - [ ] **T-078** Exécuter la checklist finale de `quickstart.md`. — Réf : quickstart.md
 
 **Checkpoint Phase 5** : documentation à jour, tests passent, couverture OK, aucun warning lint ou token hardcodé.
