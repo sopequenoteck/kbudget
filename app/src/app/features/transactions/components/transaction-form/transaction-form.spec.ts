@@ -145,11 +145,9 @@ describe('TransactionForm', () => {
     const fixture = TestBed.createComponent(TransactionForm);
     fixture.detectChanges();
 
-    const toggle = fixture.nativeElement.querySelector('.recurring-toggle');
+    // Le bouton de récurrence est rendu en mode création (aria-label="Récurrence")
+    const toggle = fixture.nativeElement.querySelector('button[aria-label="Récurrence"]');
     expect(toggle).not.toBeNull();
-
-    const checkbox = fixture.nativeElement.querySelector('#isRecurring');
-    expect(checkbox).not.toBeNull();
   });
 
   it('should_hide_recurring_toggle_in_edit_mode', () => {
@@ -161,7 +159,7 @@ describe('TransactionForm', () => {
     const fixture = TestBed.createComponent(TransactionForm);
     fixture.detectChanges();
 
-    const toggle = fixture.nativeElement.querySelector('.recurring-toggle');
+    const toggle = fixture.nativeElement.querySelector('button[aria-label="Récurrence"]');
     expect(toggle).toBeNull();
   });
 
@@ -253,7 +251,7 @@ describe('TransactionForm', () => {
     const component = fixture.componentInstance;
 
     expect(component.form.get('libelle')!.value).toBe('Abonnement salle');
-    expect(component.form.get('montant')!.value).toBe('35');
+    expect(component.form.get('montant')!.value).toBe('35.00');
     expect(component.form.get('isRecurring')!.value).toBe(true);
     // Le composant n'est pas en mode édition (asRecurring override isEditing)
     expect(component.isEditing()).toBe(false);

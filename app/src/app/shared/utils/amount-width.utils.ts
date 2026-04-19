@@ -11,14 +11,16 @@ export function createAmountWidth(
   fontSize = 30
 ): Signal<string> {
   const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+  }
 
   const val = toSignal(control.valueChanges, { initialValue: control.value || '0' });
 
   return computed(() => {
     const text = val() || '0';
-    const measured = ctx.measureText(text).width;
+    const measured = ctx ? ctx.measureText(text).width : text.length * fontSize * 0.6;
     return `${Math.ceil(measured) + 4}px`;
   });
 }

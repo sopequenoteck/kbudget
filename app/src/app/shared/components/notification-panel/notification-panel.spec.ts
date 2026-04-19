@@ -7,6 +7,7 @@ import { NotificationPanel } from './notification-panel';
 import { NotificationService } from '../../../core/services/notification';
 import { DebtService } from '../../../core/services/debt';
 import { ToastService } from '../toast/toast.service';
+import { ModalService } from '../../../core/services/modal.service';
 import { type NotificationModel } from '../../../core/models/notification.model';
 import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
@@ -82,6 +83,12 @@ describe('NotificationPanel', () => {
     pay: ReturnType<typeof vi.fn>;
   };
 
+  let modalServiceMock: {
+    openModal: ReturnType<typeof vi.fn>;
+    closeModal: ReturnType<typeof vi.fn>;
+    editingEntity: ReturnType<typeof signal>;
+  };
+
   const createNotificationServiceMock = (notifications: NotificationModel[]) => {
     const notificationsSignal = signal(notifications);
     const unreadCountSignal = signal(notifications.filter((n) => !n.read).length);
@@ -123,6 +130,12 @@ describe('NotificationPanel', () => {
     subscriptionServiceMock = {
       pay: vi.fn().mockReturnValue(of({})),
     };
+
+    modalServiceMock = {
+      openModal: vi.fn(),
+      closeModal: vi.fn(),
+      editingEntity: signal(null),
+    };
   });
 
   const setupTestBed = () => {
@@ -134,6 +147,7 @@ describe('NotificationPanel', () => {
         { provide: ToastService, useValue: toastServiceMock },
         { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
         { provide: SubscriptionService, useValue: subscriptionServiceMock },
+        { provide: ModalService, useValue: modalServiceMock },
       ],
     });
   };
@@ -291,8 +305,7 @@ describe('NotificationPanel', () => {
     await component.onRepayAction(fakeEvent, debtDueNotification);
 
     expect(debtServiceMock.getById).toHaveBeenCalledWith('debt-1');
-    expect(component.showRepayDialog()).toBe(true);
-    expect(component.activeDebt()).toEqual(mockDebt);
+    expect(modalServiceMock.openModal).toHaveBeenCalledWith('repay', mockDebt);
   });
 
   it('should_show_error_toast_when_repay_action_fails', async () => {

@@ -5,7 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
-## [5.0.0] - 2026-04-13
+### Fixed
+- Suite de tests Angular (Vitest) realignee avec l'API actuelle des composants — 55 tests corriges sur 8 fichiers (`debt-form`, `debt-detail`, `repay-dialog`, `transaction-form`, `subscriptions`, `subscription-detail`, `autocomplete`, `notification-panel`) : mocks de services manquants (`ModalService`, `CurrencyService`, `ToastService`, `PreferenceService`, etc.), stub `IntersectionObserver` pour jsdom, `provideNoopAnimations()` pour les composants avec animations, suppression des assertions sur methodes renommees/disparues (`isEditMode`→`isEditing`, `showRepayDialog()`→`modalService.openModal('repay')`, `hasAccount()`→`selectedAccount()`), alignement sur les selecteurs DOM actuels
+- `createAmountWidth` (shared/utils) — guard `if (ctx)` pour tolerer l'absence de canvas 2d context en environnement jsdom/SSR (valeur de largeur estimee en fallback)
+
+
 
 ### Removed
 - **BREAKING** — Module shop (gestion de produits et ventes) entièrement extrait de l'app. Endpoints `/api/products`, `/api/products/*/sell`, `/api/products/*/restock` supprimés. Champs DTO retirés : `TransactionResponse.productId/productName`, `AccountResponse.isShopAccount`, `UserPreferenceResponse/Request.shopAccountId/includeShopInBalance`. Entités JPA `Product` et relation `Transaction.product` supprimées. Feature toggle `SHOP` retirée de l'enum `Feature`. Le code du module est préservé dans le tag git `archive/shop-v0` et les specs devflow correspondantes sont archivées dans `.specify/specs/_archived/`. Une refonte séparée sera faite dans un projet `kshop` dédié à partir des vrais besoins de l'utilisatrice active.

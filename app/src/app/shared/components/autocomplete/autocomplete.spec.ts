@@ -1,5 +1,6 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { Autocomplete } from './autocomplete';
 
@@ -26,6 +27,7 @@ describe('Autocomplete', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [Autocomplete],
+      providers: [provideNoopAnimations()],
     });
   });
 

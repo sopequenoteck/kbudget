@@ -45,7 +45,7 @@ const mockPayments: SubscriptionPaymentResponse[] = [
   },
 ];
 
-const mockTotal = { total: 27.98, count: 2 };
+const mockTotal = { totalPaid: 27.98, paymentCount: 2 };
 
 describe('SubscriptionDetail', () => {
   let subscriptionServiceMock: {
@@ -145,7 +145,7 @@ describe('SubscriptionDetail', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Netflix');
     expect(compiled.querySelector('.badge-status')?.textContent?.trim()).toBe('Actif');
-    expect(compiled.querySelector('.info-value')?.textContent).toContain('13,99');
+    expect(compiled.querySelector('.hero__amount')?.textContent).toContain('13,99');
   });
 
   it('should_display_total_paid', async () => {
@@ -158,9 +158,9 @@ describe('SubscriptionDetail', () => {
 
     // Assert
     const compiled = fixture.nativeElement as HTMLElement;
-    const totalCount = compiled.querySelector('.total-count')?.textContent?.trim();
-    expect(totalCount).toBe('2 paiements');
-    expect(compiled.querySelector('.total-amount')?.textContent).toContain('27,98');
+    const heroTotal = compiled.querySelector('.hero__total')?.textContent ?? '';
+    expect(heroTotal).toContain('2 paiement');
+    expect(heroTotal).toContain('27,98');
   });
 
   it('should_display_payment_history', async () => {
@@ -197,7 +197,7 @@ describe('SubscriptionDetail', () => {
 
     // Assert
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe('Aucun paiement');
+    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe('Aucun paiement enregistré');
     expect(compiled.querySelectorAll('.payment-item').length).toBe(0);
   });
 
