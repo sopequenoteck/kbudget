@@ -114,21 +114,21 @@
 
 #### [US-012] UI Flutter Settings > Utilisateurs
 
-- [ ] [T-073] [P2] [US-012] Créer feature `flutter/lib/src/features/admin/` — squelette `data/`, `application/`, `presentation/` — Réf: FR-021
-- [ ] [T-074] [P2] [US-012] [P] Créer `data/invitation_model.dart` (Freezed + enum `InvitationStatus`) et `data/admin_user_model.dart` — Réf: FR-021
-- [ ] [T-075] [P2] [US-012] Créer `data/admin_repository.dart` (interface) + `data/admin_remote_repository.dart` (impl Dio, pas de Drift) — Réf: FR-021
-- [ ] [T-076] [P2] [US-012] Créer `application/invitations_notifier.dart` + `application/admin_users_notifier.dart` (Notifier<ListState<T>>) — Réf: FR-021
-- [ ] [T-077] [P2] [US-012] Créer `presentation/users_screen.dart` + `invite_dialog.dart` + widgets de liste — Réf: FR-021, US-012
-- [ ] [T-078] [P2] [US-012] Modifier `features/user/data/user_model.dart` : ajouter `isAdmin`, regen (`build_runner`) — Réf: FR-018, FR-024
-- [ ] [T-079] [P2] [US-012] Modifier `features/settings/presentation/settings_screen.dart` : tuile `Utilisateurs` conditionnelle à `user.isAdmin` — Réf: FR-024
-- [ ] [T-080] [P2] [US-012] Design check Flutter sur `UsersScreen` : `AppColors`, `AppSpacing`, `AppTypography` uniquement (après T-077) — Réf: DESIGN.md
+- [x] [T-073] [P2] [US-012] Créer feature `flutter/lib/src/features/admin/` — squelette `data/`, `application/`, `presentation/` — Réf: FR-021
+- [x] [T-074] [P2] [US-012] [P] Créer `data/invitation_model.dart` (Freezed + enum `InvitationStatus`) et `data/admin_user_model.dart` — Réf: FR-021
+- [x] [T-075] [P2] [US-012] Créer `data/admin_repository.dart` (interface) + `data/admin_remote_repository.dart` (impl Dio, pas de Drift) — Réf: FR-021
+- [x] [T-076] [P2] [US-012] Créer `application/invitations_notifier.dart` + `application/admin_users_notifier.dart` (Notifier<ListState<T>>) — Réf: FR-021
+- [x] [T-077] [P2] [US-012] Créer `presentation/users_screen.dart` + `invite_dialog.dart` + widgets de liste — Réf: FR-021, US-012
+- [x] [T-078] [P2] [US-012] Modifier `features/user/data/user_model.dart` : ajouter `isAdmin`, regen (`build_runner`) — Réf: FR-018, FR-024
+- [x] [T-079] [P2] [US-012] Modifier `features/settings/presentation/settings_screen.dart` : tuile `Utilisateurs` conditionnelle à `user.isAdmin` — Réf: FR-024
+- [x] [T-080] [P2] [US-012] Design check Flutter sur `UsersScreen` : `AppColors`, `AppSpacing`, `AppTypography` uniquement (après T-077) — Réf: DESIGN.md
 
 #### [US-013] UI Flutter page publique
 
-- [ ] [T-081] [P2] [US-013] Modifier `routing/route_names.dart` : `acceptInvite = '/accept-invite/:token'`, `acceptInviteName` ; supprimer `register`/`registerName` — Réf: FR-023, CX-003
-- [ ] [T-082] [P2] [US-013] Modifier `routing/app_router.dart` : nouvelle `GoRoute` `acceptInvite`, étendre `redirect` avec `isAcceptInviteRoute`, retirer `GoRoute` register + import — Réf: FR-023, CX-003
-- [ ] [T-083] [P2] [US-013] Créer `features/auth/presentation/accept_invite_screen.dart` (ConsumerStatefulWidget, lookup via `FutureProvider.family`, form, submit, auto-login, `context.go('/dashboard')`) — Réf: FR-023
-- [ ] [T-084] [P2] [US-013] [P] Supprimer `features/auth/presentation/register_screen.dart` + import depuis `app_router.dart` — Réf: FR-011, CX-003
+- [x] [T-081] [P2] [US-013] Modifier `routing/route_names.dart` : `acceptInvite = '/accept-invite/:token'`, `acceptInviteName` ; supprimer `register`/`registerName` — Réf: FR-023, CX-003
+- [x] [T-082] [P2] [US-013] Modifier `routing/app_router.dart` : nouvelle `GoRoute` `acceptInvite`, étendre `redirect` avec `isAcceptInviteRoute`, retirer `GoRoute` register + import — Réf: FR-023, CX-003
+- [x] [T-083] [P2] [US-013] Créer `features/auth/presentation/accept_invite_screen.dart` (ConsumerStatefulWidget, lookup via `FutureProvider.family`, form, submit, auto-login, `context.go('/dashboard')`) — Réf: FR-023
+- [x] [T-084] [P2] [US-013] [P] Supprimer `features/auth/presentation/register_screen.dart` + import depuis `app_router.dart` — Réf: FR-011, CX-003
 
 ### P3 — Nice to have
 

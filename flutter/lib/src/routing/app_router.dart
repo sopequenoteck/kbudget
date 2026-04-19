@@ -15,7 +15,8 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
-import 'package:k_budget/src/features/auth/presentation/register_screen.dart';
+import 'package:k_budget/src/features/admin/presentation/users_screen.dart';
+import 'package:k_budget/src/features/auth/presentation/accept_invite_screen.dart';
 import 'package:k_budget/src/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_detail_screen.dart';
@@ -82,10 +83,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final matchedLocation = state.matchedLocation;
       final isOnboarding = matchedLocation.startsWith(RouteNames.onboarding);
       final isLoginRoute = matchedLocation == RouteNames.login;
-      final isRegisterRoute = matchedLocation == RouteNames.register;
       final isLockRoute = matchedLocation == RouteNames.lock;
-      final isAuthRoute = isLoginRoute || isRegisterRoute;
-      final isInviteRoute = matchedLocation.startsWith('/invite');
+      final isAuthRoute = isLoginRoute;
+      final isInviteRoute = matchedLocation.startsWith('/invite') ||
+          matchedLocation.startsWith('/accept-invite');
 
       // Not onboarded yet → go to onboarding
       if (!isCompleted && !isOnboarding) {
@@ -150,17 +151,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: RouteNames.register,
-        name: RouteNames.registerName,
+        path: '/accept-invite/:token',
+        name: RouteNames.acceptInviteName,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => AcceptInviteScreen(
+          token: state.pathParameters['token']!,
+        ),
       ),
       GoRoute(
         path: '/invite/:token',
         name: 'invite',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => RegisterScreen(
-          invitationToken: state.pathParameters['token'],
+        builder: (context, state) => AcceptInviteScreen(
+          token: state.pathParameters['token']!,
         ),
       ),
       GoRoute(
@@ -339,6 +342,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.settingsNotificationsName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const NotificationSettingsScreen(),
+          ),
+          GoRoute(
+            path: 'users',
+            name: RouteNames.adminUsersName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const UsersScreen(),
           ),
         ],
       ),

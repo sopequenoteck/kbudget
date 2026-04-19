@@ -31,5 +31,6 @@ class UserRepositoryRemote implements UserRepository {
         name: r.name,
         defaultCurrency: Currency.values
             .byNameOrDefault(r.defaultCurrency.toLowerCase(), Currency.eur),
+        isAdmin: r.isAdmin,
       );
 }

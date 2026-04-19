@@ -195,13 +195,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.space4),
                     TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => context.go(RouteNames.register),
-                      child: const Text("Pas encore de compte ? S'inscrire"),
-                    ),
-                    const SizedBox(height: AppSpacing.space2),
-                    TextButton(
                       onPressed:
                           isLoading ? null : () => _handleSwitchToLocal(),
                       child: Text(

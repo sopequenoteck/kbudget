@@ -9,6 +9,7 @@ class UserResponse with _$UserResponse {
     String? name,
     required String email,
     required String defaultCurrency,
+    @Default(false) bool isAdmin,
   }) = _UserResponse;
 
   factory UserResponse.fromJson(Map<String, dynamic> json) =>

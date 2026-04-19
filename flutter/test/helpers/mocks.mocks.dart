@@ -572,6 +572,20 @@ class MockTransactionRepository extends _i1.Mock
                 ),
           )
           as _i17.Future<List<_i20.MonthlySummary>>);
+
+  @override
+  _i17.Future<List<String>> getLibelleSuggestions(
+    String? query, {
+    int? limit = 20,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLibelleSuggestions, [query], {#limit: limit}),
+            returnValue: _i17.Future<List<String>>.value(<String>[]),
+            returnValueForMissingStub: _i17.Future<List<String>>.value(
+              <String>[],
+            ),
+          )
+          as _i17.Future<List<String>>);
 }
 
 /// A class which mocks [SubscriptionRepository].
