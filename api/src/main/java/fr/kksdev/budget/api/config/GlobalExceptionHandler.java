@@ -73,10 +73,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
         log.warn("Conflict: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", HttpStatus.CONFLICT.value(),
+                "error", ex.getMessage(),
+                "message", resolveConflictMessage(ex.getMessage())
         ));
+    }
+
+    private String resolveConflictMessage(String errorCode) {
+        return switch (errorCode) {
+            case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "Impossible de désactiver le dernier admin actif.";
+            default -> errorCode;
+        };
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

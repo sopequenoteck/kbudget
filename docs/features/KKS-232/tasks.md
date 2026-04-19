@@ -71,13 +71,13 @@
 
 #### [US-004, US-005, US-007] Disable/Enable users + garde-fou
 
-- [ ] [T-041] [P1] [US-004] Créer DTO record `AdminUserResponse(id, email, displayName, createdAt, disabledAt, isAdmin)` — Réf: FR-006
-- [ ] [T-042] [P1] [US-004] Créer `fr.kksdev.budget.api.service.AdminUserService` avec `list()`, `disable(UUID)`, `enable(UUID)` (logs INFO format `"Admin action: user.<disable|enable> by <adminEmail> target=user:<id>"`) — Réf: FR-006, FR-007, FR-008, NFR-002
-- [ ] [T-043] [P1] [US-007] Implémenter garde-fou dans `AdminUserService.disable` : `ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")` si dernier admin actif — Réf: FR-017
-- [ ] [T-044] [P1] [US-004] Créer `fr.kksdev.budget.api.controller.AdminUserController` avec `GET /admin/users`, `PATCH /admin/users/{id}/disable`, `PATCH /admin/users/{id}/enable` (logs INFO) — Réf: FR-006, FR-007, FR-008, NFR-002
-- [ ] [T-045] [P1] [US-004] [P] Test d'intégration : disable user + requête avec son JWT → 401 — Réf: SC-007
-- [ ] [T-046] [P1] [US-005] [P] Test d'intégration `should_allow_reauthentication_after_enable` (disable → enable → login OK / requête 200) — Réf: SC-013
-- [ ] [T-047] [P1] [US-007] [P] Test d'intégration : fixture mono-admin tente self-disable → 409 `{error: "LAST_ADMIN_CANNOT_BE_DISABLED"}` — Réf: SC-008
+- [x] [T-041] [P1] [US-004] Créer DTO record `AdminUserResponse(id, email, displayName, createdAt, disabledAt, isAdmin)` — Réf: FR-006
+- [x] [T-042] [P1] [US-004] Créer `fr.kksdev.budget.api.service.AdminUserService` avec `list()`, `disable(UUID)`, `enable(UUID)` (logs INFO format `"Admin action: user.<disable|enable> by <adminEmail> target=user:<id>"`) — Réf: FR-006, FR-007, FR-008, NFR-002
+- [x] [T-043] [P1] [US-007] Implémenter garde-fou dans `AdminUserService.disable` : `ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")` si dernier admin actif — Réf: FR-017
+- [x] [T-044] [P1] [US-004] Créer `fr.kksdev.budget.api.controller.AdminUserController` avec `GET /admin/users`, `PATCH /admin/users/{id}/disable`, `PATCH /admin/users/{id}/enable` (logs INFO) — Réf: FR-006, FR-007, FR-008, NFR-002
+- [x] [T-045] [P1] [US-004] [P] Test d'intégration : disable user + requête avec son JWT → 401 — Réf: SC-007
+- [x] [T-046] [P1] [US-005] [P] Test d'intégration `should_allow_reauthentication_after_enable` (disable → enable → login OK / requête 200) — Réf: SC-013
+- [x] [T-047] [P1] [US-007] [P] Test d'intégration : fixture mono-admin tente self-disable → 409 `{error: "LAST_ADMIN_CANNOT_BE_DISABLED"}` — Réf: SC-008
 
 #### [US-006] Protection endpoints /admin/*
 
