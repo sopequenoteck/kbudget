@@ -42,7 +42,12 @@ public class JwtFilter extends OncePerRequestFilter {
         if (jwtUtil.isTokenValid(token)) {
             String email = jwtUtil.extractEmail(token);
 
-            userRepository.findByEmail(email).ifPresent(user -> {
+            var userOpt = userRepository.findByEmail(email);
+            userOpt.ifPresent(user -> {
+                if (user.getDisabledAt() != null) {
+                    log.info("User authentication blocked (disabled): {}", email);
+                    return;
+                }
                 var auth = new UsernamePasswordAuthenticationToken(
                         user.getId(), null, List.of());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

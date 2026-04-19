@@ -30,4 +30,7 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "disabled_at")
+    private LocalDateTime disabledAt;
 }

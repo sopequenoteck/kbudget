@@ -22,6 +22,7 @@ app:
   jwt:
     access-expiration: 900000
     refresh-expiration: 2592000000
+  admin-emails: ${ADMIN_EMAILS:}
 
 server:
   port: 8080

@@ -22,6 +22,22 @@ cp .env.example .env
 | `DB_USERNAME` | Utilisateur BDD | `budget_u` |
 | `DB_PASSWORD` | Mot de passe BDD | un mot de passe fort |
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
+| `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
+
+## Configuration admin
+
+L'instance identifie les administrateurs via la variable d'environnement `ADMIN_EMAILS`. Elle contient une liste d'emails separes par des virgules ; chaque email est normalise (trim + lowercase) au demarrage.
+
+```bash
+ADMIN_EMAILS=so-pequeno@live.fr,autre-admin@example.com
+```
+
+- Un user dont l'email figure dans `ADMIN_EMAILS` et dont `disabled_at IS NULL` peut appeler les endpoints `/api/admin/*` (invitations, desactivation de users).
+- Les users non-admin recoivent 403 sur ces endpoints.
+- Si `ADMIN_EMAILS` est vide OU si aucun user actif ne correspond a un email de la liste, un `WARN` est emis au boot : aucune invitation ne peut etre emise tant qu'un admin valide n'est pas configure.
+- **Pas d'inscription publique** : l'onboarding se fait exclusivement via le flux d'invitation (`POST /api/admin/invitations` puis acceptation via `POST /api/auth/accept-invite`). L'admin transmet le lien manuellement (Signal, SMS, face-a-face) — l'application n'envoie pas d'email.
+- **Changement d'admin** : modifier `ADMIN_EMAILS` dans l'env puis redemarrer. Pas de rechargement a chaud.
+- **Garde-fou dernier admin** : un admin ne peut pas se desactiver s'il est le seul admin actif (HTTP 409 `LAST_ADMIN_CANNOT_BE_DISABLED`).
 
 Generer un `JWT_SECRET` securise :
 
