@@ -95,22 +95,22 @@
 
 #### [US-011] UI Angular Settings > Utilisateurs
 
-- [ ] [T-060] [P2] [US-011] [P] Créer modèles TypeScript `shared/models/invitation.model.ts` (Invitation, InvitationStatus, InvitationCreated, CreateInvitationRequest, AcceptInviteRequest, InviteLookup) — Réf: FR-020, FR-022
-- [ ] [T-061] [P2] [US-011] [P] Modifier `shared/models/user.model.ts` : ajouter `isAdmin: boolean` à `CurrentUser`, créer `AdminUser` — Réf: FR-020, FR-024
-- [ ] [T-062] [P2] [US-011] [P] Créer service `core/services/admin.service.ts` (méthodes HttpClient typed) — Réf: FR-003, FR-004, FR-005, FR-006, FR-007, FR-008
-- [ ] [T-063] [P2] [US-011] [P] Créer service `core/services/invitation.service.ts` (lookup, accept) — Réf: FR-009, FR-010
-- [ ] [T-064] [P2] [US-011] Modifier `core/stores/current-user.store.ts` : ajouter signal/computed `isAdmin`, `loadMe()` met à jour — Réf: FR-018, FR-024
-- [ ] [T-065] [P2] [US-011] Créer page standalone `features/settings/pages/users/users.ts|html|scss` (tabs Invitations + Users, actions) — Réf: FR-020, US-011
-- [ ] [T-066] [P2] [US-011] Ajouter route `users` dans `features/settings/settings.routes.ts` — Réf: FR-020
-- [ ] [T-067] [P2] [US-011] [P] Ajouter tuile `Utilisateurs` dans menu Settings, conditionnelle à `@if (currentUser.isAdmin())` — Réf: FR-024
-- [ ] [T-068] [P2] [US-011] Design check sur la page `Users` : `var(--...)` only, patterns `_list-patterns.scss` + `_bottom-sheet.scss` réutilisés (après T-065) — Réf: DESIGN.md
+- [x] [T-060] [P2] [US-011] [P] Créer modèles TypeScript `shared/models/invitation.model.ts` (Invitation, InvitationStatus, InvitationCreated, CreateInvitationRequest, AcceptInviteRequest, InviteLookup) — Réf: FR-020, FR-022
+- [x] [T-061] [P2] [US-011] [P] Modifier `shared/models/user.model.ts` : ajouter `isAdmin: boolean` à `CurrentUser`, créer `AdminUser` — Réf: FR-020, FR-024
+- [x] [T-062] [P2] [US-011] [P] Créer service `core/services/admin.service.ts` (méthodes HttpClient typed) — Réf: FR-003, FR-004, FR-005, FR-006, FR-007, FR-008
+- [x] [T-063] [P2] [US-011] [P] Créer service `core/services/invitation.service.ts` (lookup, accept) — Réf: FR-009, FR-010
+- [x] [T-064] [P2] [US-011] Modifier `core/stores/current-user.store.ts` : ajouter signal/computed `isAdmin`, `loadMe()` met à jour — Réf: FR-018, FR-024
+- [x] [T-065] [P2] [US-011] Créer page standalone `features/settings/pages/users/users.ts|html|scss` (tabs Invitations + Users, actions) — Réf: FR-020, US-011
+- [x] [T-066] [P2] [US-011] Ajouter route `users` dans `features/settings/settings.routes.ts` — Réf: FR-020
+- [x] [T-067] [P2] [US-011] [P] Ajouter tuile `Utilisateurs` dans menu Settings, conditionnelle à `@if (currentUser.isAdmin())` — Réf: FR-024
+- [x] [T-068] [P2] [US-011] Design check sur la page `Users` : `var(--...)` only, patterns `_list-patterns.scss` + `_bottom-sheet.scss` réutilisés (après T-065) — Réf: DESIGN.md
 
 #### [US-013] UI Angular page publique `/auth/accept-invite/:token`
 
-- [ ] [T-069] [P2] [US-013] Créer composant standalone `features/auth/pages/accept-invite/accept-invite.ts|html|scss` (lookup au mount, form, submit, auto-login) — Réf: FR-022
-- [ ] [T-070] [P2] [US-013] Ajouter route `{ path: 'accept-invite/:token', loadComponent: ... }` dans `features/auth/auth.routes.ts` — Réf: FR-022
-- [ ] [T-071] [P2] [US-013] [P] Supprimer dossier `features/auth/pages/register/` + lien "Créer un compte" sur page login — Réf: FR-011, CX-002
-- [ ] [T-072] [P2] [US-013] Modifier `features/auth/services/auth.service.ts` : retirer `register()`, ajouter `acceptInvite()`, `lookupInvite()` — Réf: FR-009, FR-010, FR-011
+- [x] [T-069] [P2] [US-013] Créer composant standalone `features/auth/pages/accept-invite/accept-invite.ts|html|scss` (lookup au mount, form, submit, auto-login) — Réf: FR-022
+- [x] [T-070] [P2] [US-013] Ajouter route `{ path: 'accept-invite/:token', loadComponent: ... }` dans `features/auth/auth.routes.ts` — Réf: FR-022
+- [x] [T-071] [P2] [US-013] [P] Supprimer dossier `features/auth/pages/register/` + lien "Créer un compte" sur page login — Réf: FR-011, CX-002
+- [x] [T-072] [P2] [US-013] Modifier `features/auth/services/auth.service.ts` : retirer `register()`, ajouter `acceptInvite()`, `lookupInvite()` — Réf: FR-009, FR-010, FR-011
 
 #### [US-012] UI Flutter Settings > Utilisateurs
 

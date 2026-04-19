@@ -11,7 +11,13 @@ import { BehaviorSubject, Observable, catchError, filter, switchMap, take, throw
 import { AuthService } from '../services/auth';
 import { DevLogger } from '../services/dev-logger';
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+const PUBLIC_PATHS = [
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/logout',
+  '/auth/invitations/',
+  '/auth/accept-invite',
+];
 
 let isRefreshing = false;
 let refreshSubject = new BehaviorSubject<boolean>(true);

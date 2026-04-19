@@ -137,16 +137,17 @@ class AdminInvitationControllerTest {
     @Test
     void should_return_200_with_all_invitations_when_list() throws Exception {
         Instant now = Instant.now();
+        UUID activeToken = UUID.randomUUID();
 
         List<InvitationResponse> invitations = List.of(
                 new InvitationResponse(4L, "revoked@x.com", "admin@example.com", InvitationStatus.REVOKED,
-                        now, now.plus(7, ChronoUnit.DAYS), null, now.minus(1, ChronoUnit.HOURS)),
+                        null, now, now.plus(7, ChronoUnit.DAYS), null, now.minus(1, ChronoUnit.HOURS)),
                 new InvitationResponse(3L, "used@x.com", "admin@example.com", InvitationStatus.USED,
-                        now.minus(1, ChronoUnit.DAYS), now.plus(6, ChronoUnit.DAYS), now.minus(1, ChronoUnit.HOURS), null),
+                        null, now.minus(1, ChronoUnit.DAYS), now.plus(6, ChronoUnit.DAYS), now.minus(1, ChronoUnit.HOURS), null),
                 new InvitationResponse(2L, "expired@x.com", "admin@example.com", InvitationStatus.EXPIRED,
-                        now.minus(8, ChronoUnit.DAYS), now.minus(1, ChronoUnit.DAYS), null, null),
+                        null, now.minus(8, ChronoUnit.DAYS), now.minus(1, ChronoUnit.DAYS), null, null),
                 new InvitationResponse(1L, "active@x.com", "admin@example.com", InvitationStatus.ACTIVE,
-                        now, now.plus(7, ChronoUnit.DAYS), null, null)
+                        activeToken, now, now.plus(7, ChronoUnit.DAYS), null, null)
         );
 
         when(invitationService.list()).thenReturn(invitations);
@@ -156,9 +157,13 @@ class AdminInvitationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(4))
                 .andExpect(jsonPath("$[0].status").value("REVOKED"))
+                .andExpect(jsonPath("$[0].token").isEmpty())
                 .andExpect(jsonPath("$[1].status").value("USED"))
+                .andExpect(jsonPath("$[1].token").isEmpty())
                 .andExpect(jsonPath("$[2].status").value("EXPIRED"))
-                .andExpect(jsonPath("$[3].status").value("ACTIVE"));
+                .andExpect(jsonPath("$[2].token").isEmpty())
+                .andExpect(jsonPath("$[3].status").value("ACTIVE"))
+                .andExpect(jsonPath("$[3].token").value(activeToken.toString()));
     }
 
     @Test

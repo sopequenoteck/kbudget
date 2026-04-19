@@ -51,16 +51,21 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public List<InvitationResponse> list() {
         return invitationRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(inv -> new InvitationResponse(
-                        inv.getId(),
-                        inv.getEmail(),
-                        inv.getInvitedBy().getEmail(),
-                        deriveStatus(inv),
-                        inv.getCreatedAt(),
-                        inv.getExpiresAt(),
-                        inv.getUsedAt(),
-                        inv.getRevokedAt()
-                ))
+                .map(inv -> {
+                    InvitationStatus status = deriveStatus(inv);
+                    UUID exposedToken = status == InvitationStatus.ACTIVE ? inv.getToken() : null;
+                    return new InvitationResponse(
+                            inv.getId(),
+                            inv.getEmail(),
+                            inv.getInvitedBy().getEmail(),
+                            status,
+                            exposedToken,
+                            inv.getCreatedAt(),
+                            inv.getExpiresAt(),
+                            inv.getUsedAt(),
+                            inv.getRevokedAt()
+                    );
+                })
                 .toList();
     }
 

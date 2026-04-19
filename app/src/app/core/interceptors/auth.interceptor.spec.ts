@@ -128,15 +128,15 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
-  it('should_not_add_header_when_url_is_register', () => {
+  it('should_not_add_header_when_url_is_accept_invite', () => {
     // Arrange
     authService.getToken.mockReturnValue('my-token');
 
     // Act
-    httpClient.post('/api/auth/register', {}).subscribe();
+    httpClient.post('/api/auth/accept-invite', {}).subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/auth/register');
+    const req = httpTesting.expectOne('/api/auth/accept-invite');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });

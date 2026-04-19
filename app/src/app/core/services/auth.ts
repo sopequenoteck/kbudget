@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
 
 import { ApiService } from './api';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
+import { AuthResponse, LoginRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
 import { DevLogger } from './dev-logger';
 
@@ -22,6 +22,7 @@ export class AuthService {
 
   readonly currentUser = signal<UserInfo | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
+  readonly isAdmin = computed(() => this.currentUser()?.isAdmin ?? false);
 
   constructor() {
     this.restoreSession();
@@ -56,13 +57,6 @@ export class AuthService {
     );
   }
 
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>('/auth/register', data).pipe(
-      tap((response) => this.saveAuth(response)),
-      catchError((error) => throwError(() => this.mapAuthError(error))),
-    );
-  }
-
   refreshAccessToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
@@ -73,6 +67,17 @@ export class AuthService {
     return this.apiService
       .post<AuthResponse>('/auth/refresh', { refreshToken })
       .pipe(tap((response) => this.saveAuth(response)));
+  }
+
+  saveAuthResponse(response: AuthResponse): void {
+    this.saveAuth(response);
+  }
+
+  patchUserInfo(patch: Partial<UserInfo>): void {
+    const current = this.currentUser();
+    if (current) {
+      this.currentUser.set({ ...current, ...patch });
+    }
   }
 
   logout(): void {

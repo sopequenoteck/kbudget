@@ -23,8 +23,11 @@ if (!getTestBed().platform) {
 beforeAll(() => {
   if (typeof (globalThis as unknown as { IntersectionObserver?: unknown }).IntersectionObserver === 'undefined') {
     class IOStub {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       observe(): void {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       unobserve(): void {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       disconnect(): void {}
       takeRecords(): unknown[] { return []; }
     }

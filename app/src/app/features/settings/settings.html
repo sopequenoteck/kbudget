@@ -45,7 +45,26 @@
   </div>
 </div>
 
-<!-- ===== SECTION 3 : APPARENCE ===== -->
+<!-- ===== SECTION 3 : ADMINISTRATION (admin uniquement) ===== -->
+@if (isAdmin()) {
+  <div class="settings-section">
+    <div class="settings-section__label">ADMINISTRATION</div>
+    <div class="settings-section__container">
+      <a class="settings-row settings-row--link settings-row--last" routerLink="users">
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+          <ng-icon name="phosphorUsers" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Utilisateurs</span>
+          <span class="settings-row__description">Invitations et gestion des accès</span>
+        </div>
+        <span class="settings-row__chevron">›</span>
+      </a>
+    </div>
+  </div>
+}
+
+<!-- ===== SECTION 4 : APPARENCE ===== -->
 <div class="settings-section">
   <div class="settings-section__label">APPARENCE</div>
   <div class="settings-section__container">

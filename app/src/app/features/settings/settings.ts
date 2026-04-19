@@ -26,6 +26,7 @@ import {
   phosphorCamera,
   phosphorSignOut,
   phosphorChartPie,
+  phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { firstValueFrom } from 'rxjs';
@@ -87,6 +88,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
       phosphorCamera,
       phosphorSignOut,
       phosphorChartPie,
+      phosphorUsers,
     }),
   ],
   templateUrl: './settings.html',
@@ -104,6 +106,7 @@ export class Settings implements OnInit {
   private readonly healthService = inject(HealthService);
 
   readonly currentUser = this.authService.currentUser;
+  readonly isAdmin = this.authService.isAdmin;
   readonly currentTheme = this.themeService.currentTheme;
   readonly currentTextScale = this.textScaleService.currentTextScale;
   readonly enabledTypes = this.preferenceService.enabledNotificationTypes;

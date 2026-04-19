@@ -26,4 +26,8 @@ export const SETTINGS_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/csv-mapping/csv-mapping').then((m) => m.CsvMapping),
   },
+  {
+    path: 'users',
+    loadComponent: () => import('./pages/users/users').then((m) => m.Users),
+  },
 ];
