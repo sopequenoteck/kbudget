@@ -38,11 +38,11 @@
 
 #### [US-001] Admin crée une invitation
 
-- [ ] [T-020] [P1] [US-001] Créer DTO record `CreateInvitationRequest(@Email @NotBlank String email)` — Réf: FR-003
-- [ ] [T-021] [P1] [US-001] [P] Créer DTO record `InvitationCreatedResponse(UUID token, Instant expiresAt)` — Réf: FR-003
-- [ ] [T-022] [P1] [US-001] Créer `fr.kksdev.budget.api.service.InvitationService` avec méthode `create(User invitedBy, String email)` — Réf: FR-003, FR-013
-- [ ] [T-023] [P1] [US-001] Créer `fr.kksdev.budget.api.controller.AdminInvitationController` avec `POST /admin/invitations` (201, log INFO `"Admin action: invitation.create ..."`) — Réf: FR-003, NFR-002
-- [ ] [T-024] [P1] [US-001] [P] Test unitaire `InvitationServiceTest.should_persist_invitation_with_7d_expiry_when_created` — Réf: FR-013, NFR-006
+- [x] [T-020] [P1] [US-001] Créer DTO record `CreateInvitationRequest(@Email @NotBlank String email)` — Réf: FR-003
+- [x] [T-021] [P1] [US-001] [P] Créer DTO record `InvitationCreatedResponse(UUID token, Instant expiresAt)` — Réf: FR-003
+- [x] [T-022] [P1] [US-001] Créer `fr.kksdev.budget.api.service.InvitationService` avec méthode `create(User invitedBy, String email)` — Réf: FR-003, FR-013
+- [x] [T-023] [P1] [US-001] Créer `fr.kksdev.budget.api.controller.AdminInvitationController` avec `POST /admin/invitations` (201, log INFO `"Admin action: invitation.create ..."`) — Réf: FR-003, NFR-002
+- [x] [T-024] [P1] [US-001] [P] Test unitaire `InvitationServiceTest.should_persist_invitation_with_7d_expiry_when_created` — Réf: FR-013, NFR-006
 
 #### [US-002, US-013] Invité accepte une invitation
 
@@ -58,16 +58,16 @@
 
 #### [US-003] Admin révoque une invitation
 
-- [ ] [T-034] [P1] [US-003] Ajouter `InvitationService.revoke(Long id)` (log INFO format `"Admin action: invitation.revoke by <adminEmail> target=invitation:<id>"`) — Réf: FR-005, NFR-002
-- [ ] [T-035] [P1] [US-003] Ajouter endpoint `DELETE /admin/invitations/{id}` dans `AdminInvitationController` — Réf: FR-005
-- [ ] [T-036] [P1] [US-003] [P] Test d'intégration : revoke puis GET /auth/invitations/{token} → 404 ; tenter revoke sur une invitation `USED` → comportement défini (no-op idempotent ou rejet selon impl — couvre DC-003) — Réf: SC-005, DC-003
+- [x] [T-034] [P1] [US-003] Ajouter `InvitationService.revoke(Long id)` (log INFO format `"Admin action: invitation.revoke by <adminEmail> target=invitation:<id>"`) — Réf: FR-005, NFR-002
+- [x] [T-035] [P1] [US-003] Ajouter endpoint `DELETE /admin/invitations/{id}` dans `AdminInvitationController` — Réf: FR-005
+- [x] [T-036] [P1] [US-003] [P] Test d'intégration : revoke puis GET /auth/invitations/{token} → 404 ; tenter revoke sur une invitation `USED` → comportement défini (no-op idempotent ou rejet selon impl — couvre DC-003) — Réf: SC-005, DC-003
 
 #### [US-008] Admin liste les invitations
 
-- [ ] [T-037] [P1] [US-008] Créer DTO record `InvitationResponse(id, email, invitedByEmail, status, createdAt, expiresAt, usedAt, revokedAt)` — Réf: FR-004
-- [ ] [T-038] [P1] [US-008] Ajouter `InvitationService.list() -> List<InvitationResponse>` (tri createdAt DESC, statut dérivé, projection `invitedByEmail`) — Réf: FR-004, CL-002
-- [ ] [T-039] [P1] [US-008] Ajouter endpoint `GET /admin/invitations` dans `AdminInvitationController` — Réf: FR-004
-- [ ] [T-040] [P1] [US-008] [P] Test d'intégration : 4 fixtures (ACTIVE/EXPIRED/USED/REVOKED) → tous listés avec bon status — Réf: FR-004, NFR-006
+- [x] [T-037] [P1] [US-008] Créer DTO record `InvitationResponse(id, email, invitedByEmail, status, createdAt, expiresAt, usedAt, revokedAt)` — Réf: FR-004
+- [x] [T-038] [P1] [US-008] Ajouter `InvitationService.list() -> List<InvitationResponse>` (tri createdAt DESC, statut dérivé, projection `invitedByEmail`) — Réf: FR-004, CL-002
+- [x] [T-039] [P1] [US-008] Ajouter endpoint `GET /admin/invitations` dans `AdminInvitationController` — Réf: FR-004
+- [x] [T-040] [P1] [US-008] [P] Test d'intégration : 4 fixtures (ACTIVE/EXPIRED/USED/REVOKED) → tous listés avec bon status — Réf: FR-004, NFR-006
 
 #### [US-004, US-005, US-007] Disable/Enable users + garde-fou
 
