@@ -11,7 +11,9 @@ import fr.kksdev.budget.api.exception.TokenInvalidException;
 import fr.kksdev.budget.api.exception.TokenReusedException;
 import fr.kksdev.budget.api.exception.TokenRevokedException;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.service.AcceptInviteService;
 import fr.kksdev.budget.api.service.AuthService;
+import fr.kksdev.budget.api.service.InvitationService;
 import fr.kksdev.budget.api.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,12 @@ class AuthControllerRefreshTest {
 
     @MockitoBean
     private RefreshTokenService refreshTokenService;
+
+    @MockitoBean
+    private AcceptInviteService acceptInviteService;
+
+    @MockitoBean
+    private InvitationService invitationService;
 
     @MockitoBean
     private JwtUtil jwtUtil;

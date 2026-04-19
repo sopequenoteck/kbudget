@@ -46,15 +46,15 @@
 
 #### [US-002, US-013] Invité accepte une invitation
 
-- [ ] [T-025] [P1] [US-002] Créer DTO record `AcceptInviteRequest(UUID token, String password, String displayName, Currency currency, String timezone)` avec Bean Validation — Réf: FR-010, NFR-004
-- [ ] [T-026] [P1] [US-002] [P] Créer DTO record `InviteLookupResponse(String email)` — Réf: FR-009
-- [ ] [T-027] [P1] [US-002] Ajouter `InvitationService.validatePublic(UUID token) -> Optional<Invitation>` (retourne uniquement si ACTIVE) — Réf: FR-009, FR-014
-- [ ] [T-028] [P1] [US-002] Ajouter `InvitationService.markUsed(Invitation)` + `InvitationService.deriveStatus(Invitation)` — Réf: FR-014
-- [ ] [T-029] [P1] [US-002] Créer `fr.kksdev.budget.api.service.AcceptInviteService.acceptInvite(AcceptInviteRequest)` (`@Transactional`, migrer logique de `AuthService.register`, mark used, JWT + refresh, log INFO) — Réf: FR-010, FR-014, FR-015
-- [ ] [T-030] [P1] [US-002] Ajouter endpoints `GET /auth/invitations/{token}` et `POST /auth/accept-invite` dans `AuthController` — Réf: FR-009, FR-010
-- [ ] [T-031] [P1] [US-002] **SUPPRIMER** `POST /auth/register` du `AuthController` + méthode `AuthService.register` + DTO `RegisterRequest` — Réf: FR-011, SC-001
-- [ ] [T-032] [P1] [US-002] [P] Supprimer / migrer les tests obsolètes `AuthControllerIT.register_*` → adapter en `AuthControllerIT.acceptInvite_*` (nominal, token expiré, utilisé, révoqué, inconnu, email non modifiable dans body, **double-use après revoke / revoke après use** — couvre DC-003) — Réf: FR-014, FR-015, SC-003, SC-004, SC-005, DC-003, NFR-006
-- [ ] [T-033] [P1] [US-002] [P] Test unitaire `AcceptInviteServiceTest` (eager creation, markUsed, isolation données, **cas email déjà utilisé par un user existant → rejet**) — Réf: FR-010, NFR-003, SC-012
+- [x] [T-025] [P1] [US-002] Créer DTO record `AcceptInviteRequest(UUID token, String password, String displayName, Currency currency, String timezone)` avec Bean Validation — Réf: FR-010, NFR-004
+- [x] [T-026] [P1] [US-002] [P] Créer DTO record `InviteLookupResponse(String email)` — Réf: FR-009
+- [x] [T-027] [P1] [US-002] Ajouter `InvitationService.validatePublic(UUID token) -> Optional<Invitation>` (retourne uniquement si ACTIVE) — Réf: FR-009, FR-014
+- [x] [T-028] [P1] [US-002] Ajouter `InvitationService.markUsed(Invitation)` + `InvitationService.deriveStatus(Invitation)` — Réf: FR-014
+- [x] [T-029] [P1] [US-002] Créer `fr.kksdev.budget.api.service.AcceptInviteService.acceptInvite(AcceptInviteRequest)` (`@Transactional`, migrer logique de `AuthService.register`, mark used, JWT + refresh, log INFO) — Réf: FR-010, FR-014, FR-015
+- [x] [T-030] [P1] [US-002] Ajouter endpoints `GET /auth/invitations/{token}` et `POST /auth/accept-invite` dans `AuthController` — Réf: FR-009, FR-010
+- [x] [T-031] [P1] [US-002] **SUPPRIMER** `POST /auth/register` du `AuthController` + méthode `AuthService.register` + DTO `RegisterRequest` — Réf: FR-011, SC-001
+- [x] [T-032] [P1] [US-002] [P] Supprimer / migrer les tests obsolètes `AuthControllerIT.register_*` → adapter en `AuthControllerIT.acceptInvite_*` (nominal, token expiré, utilisé, révoqué, inconnu, email non modifiable dans body, **double-use après revoke / revoke après use** — couvre DC-003) — Réf: FR-014, FR-015, SC-003, SC-004, SC-005, DC-003, NFR-006
+- [x] [T-033] [P1] [US-002] [P] Test unitaire `AcceptInviteServiceTest` (eager creation, markUsed, isolation données, **cas email déjà utilisé par un user existant → rejet**) — Réf: FR-010, NFR-003, SC-012
 
 #### [US-003] Admin révoque une invitation
 

@@ -1,39 +1,39 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.dto.request.AcceptInviteRequest;
 import fr.kksdev.budget.api.dto.request.LoginRequest;
 import fr.kksdev.budget.api.dto.request.LogoutRequest;
 import fr.kksdev.budget.api.dto.request.RefreshRequest;
-import fr.kksdev.budget.api.dto.request.RegisterRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
+import fr.kksdev.budget.api.dto.response.InviteLookupResponse;
+import fr.kksdev.budget.api.model.Invitation;
+import fr.kksdev.budget.api.service.AcceptInviteService;
 import fr.kksdev.budget.api.service.AuthService;
+import fr.kksdev.budget.api.service.InvitationService;
 import fr.kksdev.budget.api.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentification", description = "Inscription, connexion et gestion des tokens")
+@Tag(name = "Authentification", description = "Connexion, gestion des tokens et onboarding via invitation")
 public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
-
-    @Operation(summary = "Inscrire un nouvel utilisateur")
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
-    }
+    private final AcceptInviteService acceptInviteService;
+    private final InvitationService invitationService;
 
     @Operation(summary = "Se connecter et obtenir un token JWT")
     @PostMapping("/login")
@@ -52,5 +52,19 @@ public class AuthController {
     public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
         refreshTokenService.revokeRefreshToken(request.refreshToken());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Valider un token d'invitation (public)")
+    @GetMapping("/invitations/{token}")
+    public ResponseEntity<InviteLookupResponse> lookupInvitation(@PathVariable UUID token) {
+        Invitation invitation = invitationService.validatePublic(token)
+                .orElseThrow(() -> new EntityNotFoundException("Invitation invalide."));
+        return ResponseEntity.ok(new InviteLookupResponse(invitation.getEmail()));
+    }
+
+    @Operation(summary = "Accepter une invitation et créer le compte utilisateur")
+    @PostMapping("/accept-invite")
+    public ResponseEntity<AuthResponse> acceptInvite(@Valid @RequestBody AcceptInviteRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(acceptInviteService.acceptInvite(request));
     }
 }

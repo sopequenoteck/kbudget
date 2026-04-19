@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -61,6 +62,19 @@ public class InvitationService {
                         inv.getRevokedAt()
                 ))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Invitation> validatePublic(UUID token) {
+        return invitationRepository.findByToken(token)
+                .filter(inv -> deriveStatus(inv) == InvitationStatus.ACTIVE);
+    }
+
+    @Transactional
+    public void markUsed(Invitation invitation) {
+        invitation.setUsedAt(Instant.now());
+        invitationRepository.save(invitation);
+        log.info("Invitation used: id={}, email={}", invitation.getId(), invitation.getEmail());
     }
 
     public InvitationStatus deriveStatus(Invitation inv) {
