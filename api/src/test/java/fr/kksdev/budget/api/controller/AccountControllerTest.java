@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.AccountRequest;
@@ -55,6 +56,9 @@ class AccountControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
 
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();

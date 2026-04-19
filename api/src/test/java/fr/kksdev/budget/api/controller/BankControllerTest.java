@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.response.BankResponse;
@@ -35,6 +36,9 @@ class BankControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
 
     @Test
     void should_returnAllBanks_when_getRequest() throws Exception {

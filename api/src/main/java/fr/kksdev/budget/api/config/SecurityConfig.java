@@ -1,5 +1,7 @@
 package fr.kksdev.budget.api.config;
 
+import fr.kksdev.budget.api.repository.UserRepository;
+
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -28,12 +30,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final AdminEmailResolver adminEmailResolver;
+    private final UserRepository userRepository;
 
     @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:49228}")
     private List<String> allowedOrigins;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public AdminAuthorizationFilter adminAuthorizationFilter() {
+        return new AdminAuthorizationFilter(adminEmailResolver, userRepository);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -49,6 +58,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(adminAuthorizationFilter(), JwtFilter.class)
                 .build();
     }
 
@@ -58,7 +68,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 

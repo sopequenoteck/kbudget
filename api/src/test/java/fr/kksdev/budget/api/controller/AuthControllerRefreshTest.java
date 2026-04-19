@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.LogoutRequest;
@@ -56,6 +57,9 @@ class AuthControllerRefreshTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
 
     @Test
     void should_return_200_when_refresh_success() throws Exception {

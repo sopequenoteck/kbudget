@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.response.UserResponse;
@@ -43,6 +44,9 @@ class UserControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
 
@@ -56,19 +60,20 @@ class UserControllerTest {
 
     @Test
     void should_returnProfile_when_authenticated() throws Exception {
-        var response = new UserResponse("Test", "test@mail.com");
+        var response = new UserResponse("Test", "test@mail.com", false);
         when(userService.getProfile(userId)).thenReturn(response);
 
         mockMvc.perform(get("/users/me")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test"))
-                .andExpect(jsonPath("$.email").value("test@mail.com"));
+                .andExpect(jsonPath("$.email").value("test@mail.com"))
+                .andExpect(jsonPath("$.isAdmin").value(false));
     }
 
     @Test
     void should_updateName_when_validRequest() throws Exception {
-        var response = new UserResponse("Updated", "test@mail.com");
+        var response = new UserResponse("Updated", "test@mail.com", false);
         when(userService.updateProfile(eq(userId), any())).thenReturn(response);
 
         mockMvc.perform(put("/users/me")
@@ -85,5 +90,27 @@ class UserControllerTest {
     void should_return401_when_notAuthenticated() throws Exception {
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void should_return_isAdmin_true_when_user_email_in_admin_list() throws Exception {
+        var response = new UserResponse("Admin", "admin@mail.com", true);
+        when(userService.getProfile(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/users/me")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isAdmin").value(true));
+    }
+
+    @Test
+    void should_return_isAdmin_false_when_user_email_not_admin() throws Exception {
+        var response = new UserResponse("User", "user@mail.com", false);
+        when(userService.getProfile(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/users/me")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isAdmin").value(false));
     }
 }

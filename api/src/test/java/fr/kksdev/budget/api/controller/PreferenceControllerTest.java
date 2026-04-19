@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.SecurityConfig;
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Currency;
@@ -43,6 +44,9 @@ class PreferenceControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
 
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();

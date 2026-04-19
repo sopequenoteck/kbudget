@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.AcceptInviteRequest;
@@ -58,6 +59,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
 
     // ---- SC-001 : POST /auth/register n'existe plus ----
 

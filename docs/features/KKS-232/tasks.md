@@ -81,15 +81,15 @@
 
 #### [US-006] Protection endpoints /admin/*
 
-- [ ] [T-048] [P1] [US-006] Créer `fr.kksdev.budget.api.config.AdminAuthorizationFilter` (OncePerRequestFilter, matche `/admin/**`, résout email via UserRepository, 403 si non-admin) — Réf: FR-019
-- [ ] [T-049] [P1] [US-006] Enregistrer `AdminAuthorizationFilter` dans `SecurityConfig` via `.addFilterAfter(adminAuthorizationFilter, JwtFilter.class)` — Réf: FR-019
-- [ ] [T-050] [P1] [US-006] [P] Test d'intégration `AdminAuthorizationFilterIT` — matrice { anonyme, user non-admin, admin } × { POST /admin/invitations, GET /admin/invitations, DELETE, GET /admin/users, PATCH disable, PATCH enable } → 401 / 403 / 200 — Réf: FR-019, SC-002
+- [x] [T-048] [P1] [US-006] Créer `fr.kksdev.budget.api.config.AdminAuthorizationFilter` (OncePerRequestFilter, matche `/admin/**`, résout email via UserRepository, 403 si non-admin) — Réf: FR-019
+- [x] [T-049] [P1] [US-006] Enregistrer `AdminAuthorizationFilter` dans `SecurityConfig` via `.addFilterAfter(adminAuthorizationFilter, JwtFilter.class)` — Réf: FR-019
+- [x] [T-050] [P1] [US-006] [P] Test d'intégration `AdminAuthorizationFilterIT` — matrice { anonyme, user non-admin, admin } × { POST /admin/invitations, GET /admin/invitations, DELETE, GET /admin/users, PATCH disable, PATCH enable } → 401 / 403 / 200 — Réf: FR-019, SC-002
 
 #### [US-010] `isAdmin` dans `/users/me`
 
-- [ ] [T-051] [P1] [US-010] Modifier record `UserResponse(name, email, isAdmin)` — Réf: FR-018
-- [ ] [T-052] [P1] [US-010] Injecter `AdminEmailResolver` dans `UserService` et peupler `isAdmin` dans `getProfile` — Réf: FR-018
-- [ ] [T-053] [P1] [US-010] [P] Test d'intégration `UserControllerIT.should_return_isAdmin_true_when_email_in_admin_list` + cas false — Réf: FR-018, SC-011
+- [x] [T-051] [P1] [US-010] Modifier record `UserResponse(name, email, isAdmin)` — Réf: FR-018
+- [x] [T-052] [P1] [US-010] Injecter `AdminEmailResolver` dans `UserService` et peupler `isAdmin` dans `getProfile` — Réf: FR-018
+- [x] [T-053] [P1] [US-010] [P] Test d'intégration `UserControllerIT.should_return_isAdmin_true_when_email_in_admin_list` + cas false — Réf: FR-018, SC-011
 
 ### P2 — Importantes
 
