@@ -4,32 +4,52 @@ Exemples de payloads (request/response) pour chaque endpoint. Toutes les routes 
 
 ## Authentification
 
-### Inscription `POST /api/auth/register`
+### Inscription publique
 
-Request :
+**Route supprimee** depuis KKS-232 (conformite constitution principe VII). L'onboarding se fait via invitation admin — voir `POST /api/auth/accept-invite` ci-dessous.
 
-```json
-{
-  "email": "user@example.com",
-  "password": "secret123",
-  "name": "Kelly",
-  "currency": "XOF",
-  "timezone": "Africa/Lome"
-}
-```
+### Valider un token d'invitation `GET /api/auth/invitations/{token}` (public)
 
-> `currency` et `timezone` sont optionnels. Defauts : `EUR` et `Europe/Paris`.
+Request : aucun body. Exemple : `GET /api/auth/invitations/8b3f7c2a-...`
 
 Response `200` :
 
 ```json
 {
+  "email": "nouveau@example.com"
+}
+```
+
+Response `404` : token invalide, expire, utilise ou revoque (indifferencie).
+
+### Accepter une invitation `POST /api/auth/accept-invite` (public)
+
+Request :
+
+```json
+{
+  "token": "8b3f7c2a-4d5e-...",
+  "password": "secret123",
+  "displayName": "Kelly",
+  "currency": "XOF",
+  "timezone": "Africa/Lome"
+}
+```
+
+> `email` n'est **pas** dans le body — l'email vient de l'invitation (verrouille cote serveur).
+
+Response `201` :
+
+```json
+{
   "token": "eyJhbGciOi...",
   "refreshToken": "a1b2c3d4e5f6...",
-  "email": "user@example.com",
+  "email": "nouveau@example.com",
   "name": "Kelly"
 }
 ```
+
+Response `404` : token invalide/expire/utilise/revoque.
 
 ### Connexion `POST /api/auth/login`
 
@@ -85,6 +105,91 @@ Request :
 ```
 
 Response `200` : (corps vide)
+
+## Administration
+
+> Endpoints proteges par `AdminAuthorizationFilter`. Requiert un JWT dont l'email figure dans `ADMIN_EMAILS` (env var). Sinon 403 Forbidden.
+
+### Creer une invitation `POST /api/admin/invitations`
+
+Request :
+
+```json
+{
+  "email": "nouveau@example.com"
+}
+```
+
+Response `201` :
+
+```json
+{
+  "token": "8b3f7c2a-4d5e-...",
+  "expiresAt": "2026-04-26T14:30:00Z"
+}
+```
+
+Le front compose le lien : `${origin}/auth/accept-invite/${token}` (TTL 7 jours). L'admin transmet le lien hors bande (Signal, SMS).
+
+### Lister les invitations `GET /api/admin/invitations`
+
+Response `200` : tri `createdAt DESC`, statut derive. Le champ `token` est expose uniquement pour les invitations `ACTIVE` (null pour EXPIRED/USED/REVOKED).
+
+```json
+[
+  {
+    "id": 42,
+    "email": "new@example.com",
+    "invitedByEmail": "admin@example.com",
+    "status": "ACTIVE",
+    "token": "8b3f7c2a-4d5e-...",
+    "createdAt": "2026-04-19T12:00:00Z",
+    "expiresAt": "2026-04-26T12:00:00Z",
+    "usedAt": null,
+    "revokedAt": null
+  }
+]
+```
+
+### Revoquer une invitation `DELETE /api/admin/invitations/{id}`
+
+Response `204` No Content. Positionne `revokedAt = now`. Le `GET /api/auth/invitations/{token}` retourne ensuite 404.
+
+### Lister les users `GET /api/admin/users`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "9fc3-...-uuid",
+    "email": "user@example.com",
+    "displayName": "Alice",
+    "createdAt": "2026-02-01T10:30:00",
+    "disabledAt": null,
+    "isAdmin": false
+  }
+]
+```
+
+### Desactiver un user `PATCH /api/admin/users/{id}/disable`
+
+Response `204` No Content. Positionne `disabledAt = now`. Le user ne peut plus s'authentifier (401 sur requetes authentifiees via `JwtFilter`).
+
+Erreur `409` si l'user cible est le dernier admin actif :
+
+```json
+{
+  "timestamp": "2026-04-19T14:30:25.123",
+  "status": 409,
+  "error": "LAST_ADMIN_CANNOT_BE_DISABLED",
+  "message": "Impossible de desactiver le dernier admin actif."
+}
+```
+
+### Reactiver un user `PATCH /api/admin/users/{id}/enable`
+
+Response `204` No Content. Remet `disabledAt = null`. Le user peut a nouveau se connecter.
 
 ## Transactions
 
@@ -1181,9 +1286,12 @@ Response `200` :
 ```json
 {
   "name": "Kelly",
-  "email": "user@example.com"
+  "email": "user@example.com",
+  "isAdmin": true
 }
 ```
+
+Le flag `isAdmin` est derive cote serveur via `AdminEmailResolver.isAdminEmail(user.email)`. Utilise par le frontend pour afficher conditionnellement la section `Settings > Utilisateurs`.
 
 ### Modifier `PUT /api/users/me`
 

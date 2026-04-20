@@ -117,6 +117,7 @@ Declenchee via `EntityNotFoundException` quand :
 Declenchee par `ConflictException` :
 - Un brouillon d'import actif (PENDING) existe deja pour le compte cible
 - Pattern de libelle de regle de categorisation deja existant pour l'utilisateur
+- Tentative de desactivation du dernier admin actif (via `PATCH /api/admin/users/{id}/disable`)
 
 ```json
 {
@@ -125,6 +126,19 @@ Declenchee par `ConflictException` :
   "message": "Un brouillon d'import actif existe deja pour ce compte"
 }
 ```
+
+Pour le garde-fou dernier admin, la reponse contient un champ `error` en plus pour permettre une distinction machine :
+
+```json
+{
+  "timestamp": "2026-04-19T14:30:25",
+  "status": 409,
+  "error": "LAST_ADMIN_CANNOT_BE_DISABLED",
+  "message": "Impossible de desactiver le dernier admin actif."
+}
+```
+
+Le frontend (Angular + Flutter) distingue ce cas via `error === 'LAST_ADMIN_CANNOT_BE_DISABLED'` pour afficher un message specifique.
 
 ### 422 Unprocessable Entity
 
@@ -154,15 +168,27 @@ Declenchee par le handler generique `Exception`. Le message est toujours le meme
 
 ## Regles de validation par endpoint
 
-### POST /api/auth/register — `RegisterRequest`
+### POST /api/auth/register — **supprime** (KKS-232)
+
+Route retiree. L'onboarding se fait via invitation admin (voir `POST /api/admin/invitations` puis `POST /api/auth/accept-invite`).
+
+### POST /api/auth/accept-invite — `AcceptInviteRequest`
+
+| Champ | Contraintes | Obligatoire |
+|-------|-------------|:-----------:|
+| `token` | `@NotNull`, UUID | oui |
+| `password` | `@NotBlank`, `@Size(min=8, max=100)` | oui |
+| `displayName` | `@NotBlank`, `@Size(max=100)` | oui |
+| `currency` | Enum `Currency` (EUR, XOF, USD, GBP, CHF, CAD, MAD) | oui |
+| `timezone` | Identifiant IANA valide | oui |
+
+> `email` n'est **pas** dans le body — il vient de l'invitation (verrouille cote serveur, FR-015).
+
+### POST /api/admin/invitations — `CreateInvitationRequest`
 
 | Champ | Contraintes | Obligatoire |
 |-------|-------------|:-----------:|
 | `email` | `@NotBlank`, `@Email` | oui |
-| `password` | `@NotBlank`, `@Size(min=6)` | oui |
-| `name` | `@Size(max=100)` | non |
-| `currency` | Enum `Currency` (EUR, XOF, USD, GBP, CHF, CAD, MAD). Defaut: EUR | non |
-| `timezone` | Identifiant IANA valide. Defaut: Europe/Paris | non |
 
 ### POST /api/auth/login — `LoginRequest`
 

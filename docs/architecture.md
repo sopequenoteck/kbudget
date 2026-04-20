@@ -41,6 +41,14 @@ Architecture en couches : Controller → Service → Repository. Les entites JPA
 - Mots de passe hashes en BCrypt
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
 
+### Controle d'acces admin (KKS-232)
+
+- **`AdminEmailResolver`** : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)`. Emet `WARN` au boot si la liste est vide.
+- **`AdminAuthorizationFilter`** : `OncePerRequestFilter` declare via `@Bean` dans `SecurityConfig`. Matche `/admin/**` (via `servletPath`, context-path `/api` strippe). Pour un user authentifie non-admin → `response.sendError(403)`. Si non authentifie, laisse passer (401 natif via `HttpStatusEntryPoint`).
+- **Ordre des filters** : `JwtFilter` → `AdminAuthorizationFilter` (`.addFilterAfter(...)`). `JwtFilter` refuse aussi les users dont `disabledAt != null` (401 natif).
+- **Onboarding controle** : l'inscription publique (`POST /auth/register`) a ete retiree. L'onboarding se fait uniquement via invitation admin : `POST /admin/invitations` (admin cree) → `GET /auth/invitations/:token` (invite verifie) → `POST /auth/accept-invite` (invite finalise son compte + auto-login). Conformite constitution principe VII.
+- **Garde-fou dernier admin** : `AdminUserService.disable` refuse de desactiver le dernier admin actif avec `ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")` → HTTP 409.
+
 ## Profils Spring
 
 | Profil | Usage | BDD | DDL |
@@ -82,6 +90,24 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | password | String | Mot de passe (hashe, BCrypt) |
 | name | String | Nom de l'utilisateur |
 | createdAt | LocalDateTime | Date de creation |
+| disabledAt | LocalDateTime | Soft-disable (nullable, NULL = actif). Si non null, `JwtFilter` bloque l'authentification |
+
+> Le flag admin n'est **pas** stocke en DB (YAGNI, principe III). Il est derive a chaque requete via `AdminEmailResolver` en comparant `user.email` avec la property `app.admin-emails` (env var `ADMIN_EMAILS`).
+
+### Invitation
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | Long | Identifiant auto (BIGSERIAL) |
+| token | UUID | Token UUID v4 unique (indexe). Transmis dans le lien d'invitation |
+| email | String | Email du futur invite (normalise lowercase) |
+| invitedBy | User | FK → User (l'admin emetteur) |
+| expiresAt | Instant | `createdAt + 7 jours` |
+| usedAt | Instant | Timestamp d'acceptation (nullable) |
+| revokedAt | Instant | Timestamp de revocation admin (nullable) |
+| createdAt | Instant | Creation |
+
+> Statut derive (non stocke) via `InvitationService.deriveStatus` : REVOKED > USED > EXPIRED > ACTIVE. `usedAt` et `revokedAt` sont mutuellement exclusifs.
 
 ### Account
 

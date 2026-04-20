@@ -138,15 +138,15 @@ _Aucune US P3 dans la spec v1._
 
 ## Phase 4 : Polish
 
-- [ ] [T-090] [P2] [P] Mettre à jour `docs/api-examples.md` (8 nouveaux endpoints + GET /users/me modifié) — Réf: Documentation
-- [ ] [T-091] [P2] [P] Mettre à jour `docs/api-errors.md` (409 LAST_ADMIN_CANNOT_BE_DISABLED, 404 invitation, 403 admin) — Réf: Documentation
-- [ ] [T-092] [P2] [P] Mettre à jour `docs/architecture.md` (nouvelle entité Invitation, AdminEmailResolver, AdminAuthorizationFilter) — Réf: Documentation
-- [ ] [T-093] [P2] [P] Mettre à jour `CHANGELOG.md` (section Unreleased) — Réf: Release
-- [ ] [T-094] [P2] Lancer `/design-check` sur les pages Angular (Users, AcceptInvite) — Réf: DESIGN.md
-- [ ] [T-095] [P2] [P] Exécuter suite complète backend : `cd api && mvn test` — Réf: NFR-006
-- [ ] [T-096] [P2] [P] Exécuter suite complète Angular : `cd app && ng test && ng lint` — Réf: NFR-006
-- [ ] [T-097] [P2] [P] Exécuter suite complète Flutter : `cd flutter && flutter test && flutter analyze` — Réf: NFR-006
-- [ ] [T-098] [P2] Parcours manuel E2E complet (cf. `quickstart.md` checklist) — Réf: SC-010
+- [x] [T-090] [P2] [P] Mettre à jour `docs/api-examples.md` (8 nouveaux endpoints + GET /users/me modifié) — Réf: Documentation
+- [x] [T-091] [P2] [P] Mettre à jour `docs/api-errors.md` (409 LAST_ADMIN_CANNOT_BE_DISABLED, 404 invitation, 403 admin) — Réf: Documentation
+- [x] [T-092] [P2] [P] Mettre à jour `docs/architecture.md` (nouvelle entité Invitation, AdminEmailResolver, AdminAuthorizationFilter) — Réf: Documentation
+- [x] [T-093] [P2] [P] Mettre à jour `CHANGELOG.md` (section Unreleased) — Réf: Release
+- [x] [T-094] [P2] Lancer `/design-check` sur les pages Angular (Users, AcceptInvite) — Réf: DESIGN.md _(validé via frontend-design-review en L2, corrections appliquées)_
+- [x] [T-095] [P2] [P] Exécuter suite complète backend : `cd api && mvn test` — Réf: NFR-006 _(504 tests, 0 failure)_
+- [x] [T-096] [P2] [P] Exécuter suite complète Angular : `cd app && ng test && ng lint` — Réf: NFR-006 _(433 tests, 0 failure, lint clean)_
+- [x] [T-097] [P2] [P] Exécuter suite complète Flutter : `cd flutter && flutter test && flutter analyze` — Réf: NFR-006 _(669 tests, 2 échecs préexistants non liés à KKS-232 ; analyze 0 error, 6 info deprecated Flutter)_
+- [ ] [T-098] [P2] Parcours manuel E2E complet (cf. `quickstart.md` checklist) — Réf: SC-010 _(à valider par l'utilisateur avant merge)_
 - [ ] [T-099] [P2] Review finale : `/devflow.review-impl KKS-232` — Réf: Qualité
 
 **Checkpoint** : Tous les tests PASS. `/design-check` clean. Parcours E2E manuel OK. `review-impl` PASS.
