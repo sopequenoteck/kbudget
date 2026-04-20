@@ -206,3 +206,59 @@ Tous principes (I à VII) : **OK**.
 **PASS** — 11 corrections validées + 2 ajustements résiduels appliqués. Aucun constat restant. Document prêt pour `/devflow.implement KKS-232`.
 
 ---
+
+## Review impl — 2026-04-19 (itération 1)
+
+**Mode** : review-impl
+**Verdict** : **PASS**
+**Commits analysés** : 3ec3f99, 9f70991, c9bbfd6, 4295c00, 485c23e, 5b1164c, 0969696, 3cdb8fa
+
+### Conformité constitution v2.1.2
+
+| Principe | Vérification | Résultat |
+|---------|-------------|---------|
+| I API-First | 9 endpoints REST, 6 DTOs records, entité non exposée | PASS |
+| II Sécurité | BCrypt, AdminAuthFilter 403, JwtFilter 401 disabled, Bean Validation | PASS |
+| III YAGNI | Pas de role DB, pas de pagination, logique inline `AcceptInviteService` | PASS |
+| IV Mobile-First | Page 4 champs, tabs admin, bottom-sheet | PASS |
+| V Testabilité | 504 tests backend + 433 Angular + 669 Flutter | PASS |
+| VI Observabilité | Logs INFO format NFR-002 dans tous les services admin | PASS |
+| VII Self-Hosted | Zéro nouvelle dépendance | PASS |
+
+### Success Criteria (13)
+
+| SC | Statut |
+|----|--------|
+| SC-001 → SC-008, SC-011, SC-012, SC-013 | Couverts (tests auto) |
+| SC-009, SC-010 | Manuels (T-098 en attente) |
+
+### Constats
+
+**BLOQUANT** : aucun.
+
+**WARNING** (3, non bloquants) :
+- **W-001** — NFR-008 partiellement implémenté : WARN "adminEmails vide" OK, mais WARN "aucun user actif correspondant" absent (`AdminEmailResolver` n'injecte pas `UserRepository`).
+- **W-002** — Route Flutter `/invite/:token` alias non spécifiée dans spec/plan/tasks (ajoutée probablement comme compatibilité).
+- **W-003** — 2 dépréciations Flutter introduites par L3 : `.withOpacity(0.15)` dans `invitation_list_item.dart:93`, `DropdownButtonFormField` dans `accept_invite_screen.dart:263`.
+
+**INFO** (5) :
+- I-001 — SC-001 testé indirectement (`status != 201` au lieu de `404`).
+- I-002 — SC-013 couvert par test unitaire seulement, pas d'intégration end-to-end.
+- I-003 — Exposition token dans `InvitationResponse` pour ACTIVE : cohérent NFR-003 (protégé par AdminAuthorizationFilter).
+- I-004 — Timezone Flutter utilise `DateTime.now().timeZoneName` (non IANA) ≠ Angular IANA.
+- I-005 — Complément W-001, à consigner dans `docs/dette-technique.md`.
+
+### Recommandations post-merge
+
+1. NFR-008 complétude — WARN manquant (deuxième condition) à ajouter ou consigner en dette.
+2. W-002 — documenter ou supprimer l'alias `/invite/:token` Flutter.
+3. W-003 — migrer `.withOpacity` → `.withValues(alpha: ...)` et `DropdownButtonFormField` → `DropdownMenu` lors du prochain nettoyage Flutter.
+4. I-004 — uniformiser la détection timezone Flutter avec un vrai IANA timezone.
+5. SC-013 — ajouter test d'intégration end-to-end disable → enable → login.
+6. SC-001 — renforcer l'assertion en `status().isNotFound()`.
+
+### Verdict
+
+**PASS** — implémentation complète, cohérente avec la spec / plan / contracts / data-model / constitution. Les 3 WARNING et 5 INFO sont des imperfections non bloquantes à traiter en Phase Amélioration. Prêt pour T-098 (parcours manuel E2E par Kelly) puis merge.
+
+---
