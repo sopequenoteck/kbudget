@@ -146,7 +146,7 @@ _Aucune US P3 dans la spec v1._
 - [x] [T-095] [P2] [P] Exécuter suite complète backend : `cd api && mvn test` — Réf: NFR-006 _(504 tests, 0 failure)_
 - [x] [T-096] [P2] [P] Exécuter suite complète Angular : `cd app && ng test && ng lint` — Réf: NFR-006 _(433 tests, 0 failure, lint clean)_
 - [x] [T-097] [P2] [P] Exécuter suite complète Flutter : `cd flutter && flutter test && flutter analyze` — Réf: NFR-006 _(669 tests, 2 échecs préexistants non liés à KKS-232 ; analyze 0 error, 6 info deprecated Flutter)_
-- [ ] [T-098] [P2] Parcours manuel E2E complet (cf. `quickstart.md` checklist) — Réf: SC-010 _(à valider par l'utilisateur avant merge)_
+- [x] [T-098] [P2] Parcours manuel E2E complet (cf. `quickstart.md` checklist) — Réf: SC-010 _(validé par Kelly le 2026-04-19)_
 - [x] [T-099] [P2] Review finale : `/devflow.review-impl KKS-232` — Réf: Qualité _(verdict PASS — 3 WARNING + 5 INFO non bloquants consignés en recommandations post-merge)_
 
 **Checkpoint** : Tous les tests PASS. `/design-check` clean. Parcours E2E manuel OK. `review-impl` PASS.
