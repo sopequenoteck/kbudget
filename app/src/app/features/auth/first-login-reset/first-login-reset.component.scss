@@ -76,32 +76,6 @@ form {
   gap: var(--space-4);
 }
 
-.btn-primary {
-  padding: var(--space-3);
-  border: none;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary);
-  color: var(--color-primary-contrast);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity var(--duration-fast);
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &:active:not(:disabled) {
-    opacity: 0.9;
-  }
-}
-
-.btn-block {
-  display: block;
-  width: 100%;
-}
 
 .input-error {
   border-color: var(--text-error);
