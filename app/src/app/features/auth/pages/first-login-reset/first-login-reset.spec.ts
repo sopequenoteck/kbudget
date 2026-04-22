@@ -4,9 +4,9 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
-import { FirstLoginResetComponent } from './first-login-reset.component';
-import { AuthService } from '../../../core/services/auth';
-import { AuthResponse } from '../../../core/models/auth.model';
+import { FirstLoginResetComponent } from './first-login-reset';
+import { AuthService } from '../../../../core/services/auth';
+import { AuthResponse } from '../../../../core/models/auth.model';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());

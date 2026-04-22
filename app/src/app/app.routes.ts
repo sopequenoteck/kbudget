@@ -15,7 +15,7 @@ export const routes: Routes = [
     path: 'first-login-reset',
     canActivate: [authGuard, notPasswordResetGuard],
     loadComponent: () =>
-      import('./features/auth/first-login-reset/first-login-reset.component').then(
+      import('./features/auth/pages/first-login-reset/first-login-reset').then(
         (m) => m.FirstLoginResetComponent,
       ),
   },

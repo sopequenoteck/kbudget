@@ -3,8 +3,8 @@ import { AbstractControl, ReactiveFormsModule, FormBuilder, ValidationErrors, Va
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { AuthService } from '../../../core/services/auth';
-import { FormField } from '../../../shared/components/form-field/form-field';
+import { AuthService } from '../../../../core/services/auth';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const form = control.parent;
@@ -17,8 +17,8 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   selector: 'app-first-login-reset',
   standalone: true,
   imports: [ReactiveFormsModule, FormField],
-  templateUrl: './first-login-reset.component.html',
-  styleUrl: './first-login-reset.component.scss',
+  templateUrl: './first-login-reset.html',
+  styleUrl: './first-login-reset.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FirstLoginResetComponent {
