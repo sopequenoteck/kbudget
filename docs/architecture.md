@@ -41,12 +41,16 @@ Architecture en couches : Controller → Service → Repository. Les entites JPA
 - Mots de passe hashes en BCrypt
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
 
-### Controle d'acces admin (KKS-232)
+### Controle d'acces admin (KKS-232 + KKS-233)
 
-- **`AdminEmailResolver`** : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)`. Emet `WARN` au boot si la liste est vide.
-- **`AdminAuthorizationFilter`** : `OncePerRequestFilter` declare via `@Bean` dans `SecurityConfig`. Matche `/admin/**` (via `servletPath`, context-path `/api` strippe). Pour un user authentifie non-admin → `response.sendError(403)`. Si non authentifie, laisse passer (401 natif via `HttpStatusEntryPoint`).
-- **Ordre des filters** : `JwtFilter` → `AdminAuthorizationFilter` (`.addFilterAfter(...)`). `JwtFilter` refuse aussi les users dont `disabledAt != null` (401 natif).
+- **`User.isAdmin`** (KKS-233) : flag boolean **autoritaire en DB** (`users.is_admin`, colonne ajoutee via migration V30, defaut `FALSE`). Remplace la resolution dynamique via `ADMIN_EMAILS` pour eviter qu'un self-hoster perde son acces admin apres un changement d'email.
+- **`AdminEmailResolver`** (KKS-232) : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)` + `listAdminEmails()`. Emet `WARN` au boot si la liste est vide. **Depuis KKS-233, il n'est plus utilise pour l'autorisation** — uniquement consomme par `AdminSyncRunner` et par les services d'invitation.
+- **`AdminSyncRunner`** (KKS-233) : `ApplicationRunner @Order(2)`, `@Transactional`. Au boot, pour chaque email de `ADMIN_EMAILS` : si le user existe avec `isAdmin=false`, passe a `true` (promotion). **Jamais de retrogradation** (`true → false`). Idempotent.
+- **`AdminAuthorizationFilter`** (KKS-232, refactor KKS-233) : `OncePerRequestFilter` declare via `@Bean` dans `SecurityConfig`. Matche `/admin/**` (via `servletPath`, context-path `/api` strippe). Resout le statut admin via `user.isAdmin()` (champ DB) depuis KKS-233. Pour un user authentifie non-admin → `response.sendError(403)`. Si non authentifie, laisse passer (401 natif via `HttpStatusEntryPoint`).
+- **`PasswordResetRequiredFilter`** (KKS-233) : `OncePerRequestFilter` declare apres `JwtFilter`. Si le JWT porte le claim `mustResetCredentials: true` et que le path n'est pas dans l'allowlist (`/auth/first-login-reset`, `/auth/logout`), renvoie `403 PASSWORD_RESET_REQUIRED`. Sinon laisse passer.
+- **Ordre des filters** (apres KKS-233) : `JwtFilter` → `PasswordResetRequiredFilter` → `AdminAuthorizationFilter`. `JwtFilter` refuse aussi les users dont `disabledAt != null` (401 natif).
 - **Onboarding controle** : l'inscription publique (`POST /auth/register`) a ete retiree. L'onboarding se fait uniquement via invitation admin : `POST /admin/invitations` (admin cree) → `GET /auth/invitations/:token` (invite verifie) → `POST /auth/accept-invite` (invite finalise son compte + auto-login). Conformite constitution principe VII.
+- **Bootstrap premier admin** (KKS-233) : `BootstrapSeedRunner` (`ApplicationRunner @Order(1)`) detecte `userRepository.count() == 0` au premier boot et cree un compte admin seed avec password aleatoire 32 chars (`SecureRandom`, alphanumerique) affiche dans les logs. Flag `passwordResetRequired=true` jusqu'au `POST /auth/first-login-reset`. Conformite principe VII : `docker compose up -d` suffit sur instance vierge.
 - **Garde-fou dernier admin** : `AdminUserService.disable` refuse de desactiver le dernier admin actif avec `ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")` → HTTP 409.
 
 ## Profils Spring
@@ -91,8 +95,10 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | name | String | Nom de l'utilisateur |
 | createdAt | LocalDateTime | Date de creation |
 | disabledAt | LocalDateTime | Soft-disable (nullable, NULL = actif). Si non null, `JwtFilter` bloque l'authentification |
+| isAdmin | boolean | (KKS-233) Statut administrateur autoritaire en DB. Defaut `false`. Mis a `true` au seed bootstrap et par `AdminSyncRunner` pour les users listes dans `ADMIN_EMAILS`. Jamais retrograde automatiquement |
+| passwordResetRequired | boolean | (KKS-233) Flag imposant le changement de credentials a la premiere connexion. Defaut `false`. Pose a `true` uniquement par `BootstrapSeedRunner` sur le compte admin seed. Remis a `false` apres `POST /auth/first-login-reset` |
 
-> Le flag admin n'est **pas** stocke en DB (YAGNI, principe III). Il est derive a chaque requete via `AdminEmailResolver` en comparant `user.email` avec la property `app.admin-emails` (env var `ADMIN_EMAILS`).
+> Depuis KKS-233, `isAdmin` est la **source autoritaire** du statut admin. `ADMIN_EMAILS` n'est plus consulte a chaque requete — il sert uniquement de source de promotion au demarrage via `AdminSyncRunner`.
 
 ### Invitation
 

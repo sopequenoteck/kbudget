@@ -150,8 +150,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
 
+- **KKS-233-bootstrap-premier-admin** : Bootstrap auto du premier admin sur DB vide (password 32 chars genere dans les logs, force reset 1ere connexion via `/first-login-reset`). Refactor admin : `users.is_admin` en DB, `ADMIN_EMAILS` devient source de promotion au boot uniquement (jamais de retrogradation). Nouveaux filtres/runners/endpoints/guards. 541 tests backend + 449 tests Angular, aucun impact Flutter.
 - **KKS-225-alignement-design-pages** : Summary cards harmonisees (typo xl, dots colores, press feedback, gradient), directive AutoFitText, conversion devise secondaire
 - **KKS-224-design-md-update** : DESIGN.md mis a jour (Hero Card, Glassmorphism, Variation Badges, Radial Gradient, Section Headers, regles de design, 11 tokens)
 - **100-register-currency-timezone** : RegisterRequest +currency/timezone ; compte/preferences crees eagerly
 - **099-csv-import** : Import CSV complet (15 endpoints, Commons CSV, Jaro-Winkler dedup, category rules)
-- **098-angular-settings-alignment** : Settings Angular aligne Flutter (3 groupes, About enrichi glassmorphism)

@@ -1,6 +1,5 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.dto.request.UserUpdateRequest;
 import fr.kksdev.budget.api.dto.response.UserResponse;
 import fr.kksdev.budget.api.model.User;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final AdminEmailResolver adminEmailResolver;
 
     public UserResponse getProfile(UUID userId) {
         User user = findById(userId);
@@ -50,7 +48,7 @@ public class UserService {
         return new UserResponse(
                 user.getName(),
                 user.getEmail(),
-                adminEmailResolver.isAdminEmail(user.getEmail())
+                user.isAdmin()
         );
     }
 }

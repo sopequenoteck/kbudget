@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { featureGuard } from './core/guards/feature.guard';
+import { notPasswordResetGuard } from './core/guards/not-password-reset.guard';
+import { passwordResetGuard } from './core/guards/password-reset.guard';
 import { Shell } from './shared/components/shell/shell';
 
 export const routes: Routes = [
@@ -10,9 +12,17 @@ export const routes: Routes = [
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
   {
+    path: 'first-login-reset',
+    canActivate: [authGuard, notPasswordResetGuard],
+    loadComponent: () =>
+      import('./features/auth/first-login-reset/first-login-reset.component').then(
+        (m) => m.FirstLoginResetComponent,
+      ),
+  },
+  {
     path: '',
     component: Shell,
-    canActivate: [authGuard],
+    canActivate: [authGuard, passwordResetGuard],
     children: [
       {
         path: '',

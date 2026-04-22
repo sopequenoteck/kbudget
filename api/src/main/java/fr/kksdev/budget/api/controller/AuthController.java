@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.AcceptInviteRequest;
+import fr.kksdev.budget.api.dto.request.FirstLoginResetRequest;
 import fr.kksdev.budget.api.dto.request.LoginRequest;
 import fr.kksdev.budget.api.dto.request.LogoutRequest;
 import fr.kksdev.budget.api.dto.request.RefreshRequest;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -66,5 +68,13 @@ public class AuthController {
     @PostMapping("/accept-invite")
     public ResponseEntity<AuthResponse> acceptInvite(@Valid @RequestBody AcceptInviteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(acceptInviteService.acceptInvite(request));
+    }
+
+    @Operation(summary = "Reset forcé des credentials à la première connexion")
+    @PostMapping("/first-login-reset")
+    public ResponseEntity<AuthResponse> firstLoginReset(
+            @AuthenticationPrincipal UUID userId,
+            @Valid @RequestBody FirstLoginResetRequest request) {
+        return ResponseEntity.ok(authService.firstLoginReset(userId, request));
     }
 }

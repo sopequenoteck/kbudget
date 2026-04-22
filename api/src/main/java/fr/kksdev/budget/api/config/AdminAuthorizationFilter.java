@@ -21,7 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
-    private final AdminEmailResolver adminEmailResolver;
     private final UserRepository userRepository;
 
     @Override
@@ -53,7 +52,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
         Optional<User> userOpt = userRepository.findById(userId);
         boolean isAdmin = userOpt
-                .map(u -> adminEmailResolver.isAdminEmail(u.getEmail()))
+                .map(User::isAdmin)
                 .orElse(false);
 
         if (!isAdmin) {

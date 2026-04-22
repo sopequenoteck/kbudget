@@ -4,6 +4,8 @@ import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
+import fr.kksdev.budget.api.exception.PasswordResetNotRequiredException;
+import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
 import fr.kksdev.budget.api.exception.TokenInvalidException;
 import fr.kksdev.budget.api.exception.TokenReusedException;
@@ -84,6 +86,7 @@ public class GlobalExceptionHandler {
     private String resolveConflictMessage(String errorCode) {
         return switch (errorCode) {
             case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "Impossible de désactiver le dernier admin actif.";
+            case "EMAIL_ALREADY_EXISTS" -> "Cet email est déjà utilisé par un autre utilisateur.";
             default -> errorCode;
         };
     }
@@ -117,6 +120,20 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 message
         ));
+    }
+
+    @ExceptionHandler(PasswordUnchangedException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordUnchanged(PasswordUnchangedException ex) {
+        log.warn("Password unchanged: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("PASSWORD_UNCHANGED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordResetNotRequiredException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordResetNotRequired(PasswordResetNotRequiredException ex) {
+        log.warn("Password reset not required: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("PASSWORD_RESET_NOT_REQUIRED", ex.getMessage()));
     }
 
     @ExceptionHandler(TokenExpiredException.class)

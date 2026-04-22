@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
 
 import { ApiService } from './api';
-import { AuthResponse, LoginRequest } from '../models/auth.model';
+import { AuthResponse, FirstLoginResetRequest, LoginRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
 import { DevLogger } from './dev-logger';
 
@@ -23,6 +23,7 @@ export class AuthService {
   readonly currentUser = signal<UserInfo | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isAdmin = computed(() => this.currentUser()?.isAdmin ?? false);
+  readonly mustResetCredentials = computed(() => this.currentUser()?.mustResetCredentials ?? false);
 
   constructor() {
     this.restoreSession();
@@ -52,6 +53,13 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.apiService.post<AuthResponse>('/auth/login', credentials).pipe(
+      tap((response) => this.saveAuth(response)),
+      catchError((error) => throwError(() => this.mapAuthError(error))),
+    );
+  }
+
+  firstLoginReset(payload: FirstLoginResetRequest): Observable<AuthResponse> {
+    return this.apiService.post<AuthResponse>('/auth/first-login-reset', payload).pipe(
       tap((response) => this.saveAuth(response)),
       catchError((error) => throwError(() => this.mapAuthError(error))),
     );
@@ -102,7 +110,11 @@ export class AuthService {
           return;
         }
         try {
-          const user: UserInfo = JSON.parse(userJson);
+          const parsed = JSON.parse(userJson);
+          const user: UserInfo = {
+            ...parsed,
+            mustResetCredentials: parsed.mustResetCredentials ?? false,
+          };
           this.currentUser.set(user);
         } catch {
           this.logger.error('budget_user corrompu');
@@ -136,12 +148,20 @@ export class AuthService {
       localStorage.setItem(STORAGE_REFRESH_TOKEN_KEY, response.refreshToken);
       localStorage.setItem(
         STORAGE_USER_KEY,
-        JSON.stringify({ name: response.name, email: response.email }),
+        JSON.stringify({
+          name: response.name,
+          email: response.email,
+          mustResetCredentials: response.mustResetCredentials,
+        }),
       );
     } catch {
       this.logger.error('localStorage indisponible');
     }
-    this.currentUser.set({ name: response.name, email: response.email });
+    this.currentUser.set({
+      name: response.name,
+      email: response.email,
+      mustResetCredentials: response.mustResetCredentials,
+    });
   }
 
   private clearAuth(): void {
@@ -179,7 +199,25 @@ export class AuthService {
 
   private mapAuthError(error: HttpErrorResponse): string {
     if (error.status === 400) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'PASSWORD_UNCHANGED') {
+        return 'Le nouveau mot de passe doit être différent de l\'actuel.';
+      }
       return error.error?.message ?? 'Une erreur est survenue';
+    }
+    if (error.status === 403) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'PASSWORD_RESET_REQUIRED') {
+        return 'Reset requis';
+      }
+      return error.error?.message ?? 'Accès refusé';
+    }
+    if (error.status === 409) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'EMAIL_ALREADY_EXISTS') {
+        return 'Email déjà utilisé';
+      }
+      return error.error?.message ?? 'Conflit de données';
     }
     if (error.status === 0) {
       this.logger.error('Erreur réseau', error);

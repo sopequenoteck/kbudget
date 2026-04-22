@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 public class JwtUtil {
@@ -24,12 +25,20 @@ public class JwtUtil {
     }
 
     public String generateToken(String email) {
-        return Jwts.builder()
+        return generateToken(email, Map.of());
+    }
+
+    public String generateToken(String email, Map<String, Object> extraClaims) {
+        var builder = Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(key)
-                .compact();
+                .expiration(new Date(System.currentTimeMillis() + expiration));
+        extraClaims.forEach(builder::claim);
+        return builder.signWith(key).compact();
+    }
+
+    public Object extractClaim(String token, String claimName) {
+        return extractClaims(token).get(claimName);
     }
 
     public String extractEmail(String token) {

@@ -23,6 +23,7 @@ cp .env.example .env
 | `DB_PASSWORD` | Mot de passe BDD | un mot de passe fort |
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
 | `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
+| `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
 
 ## Configuration admin
 
@@ -38,6 +39,62 @@ ADMIN_EMAILS=so-pequeno@live.fr,autre-admin@example.com
 - **Pas d'inscription publique** : l'onboarding se fait exclusivement via le flux d'invitation (`POST /api/admin/invitations` puis acceptation via `POST /api/auth/accept-invite`). L'admin transmet le lien manuellement (Signal, SMS, face-a-face) — l'application n'envoie pas d'email.
 - **Changement d'admin** : modifier `ADMIN_EMAILS` dans l'env puis redemarrer. Pas de rechargement a chaud.
 - **Garde-fou dernier admin** : un admin ne peut pas se desactiver s'il est le seul admin actif (HTTP 409 `LAST_ADMIN_CANNOT_BE_DISABLED`).
+- **Source d'autorite du role admin** : le statut admin est stocke directement en base (`users.is_admin`). `ADMIN_EMAILS` sert uniquement de source de promotion au demarrage : au boot, les users dont l'email figure dans la liste sont promus `isAdmin=true` s'ils ne le sont pas deja. `ADMIN_EMAILS` ne retrograde **jamais** un admin existant. Consequence : apres un changement d'email (via `/api/auth/first-login-reset`), le user conserve son acces admin meme si son nouvel email n'apparait pas dans `ADMIN_EMAILS`.
+
+## Premier demarrage sur instance vierge (self-hoster)
+
+Sur une instance avec une base PostgreSQL vide, l'app amorce automatiquement un compte admin au premier boot afin de permettre l'acces initial. Aucune commande manuelle n'est requise.
+
+### Procedure
+
+1. **Lancer l'application** :
+
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Recuperer le mot de passe initial** genere au premier boot :
+
+   ```bash
+   docker compose logs api | grep -A 5 "FIRST BOOT"
+   ```
+
+   Le log affiche une banniere encadree du type :
+
+   ```
+   ================================================
+    FIRST BOOT — Admin account created
+     Email:    admin@localhost
+     Password: xQ9mK3vP7nR2wL8t5sH4jD8fG1bN6cY3
+    CHANGE THESE CREDENTIALS IMMEDIATELY
+   ================================================
+   ```
+
+   Par defaut l'email est `admin@localhost`. Pour personnaliser, definir `BOOTSTRAP_EMAIL=votre@email.com` dans `.env` **avant le premier `docker compose up`** (apres le premier boot, la variable est sans effet — le compte est cree une seule fois dans la vie de l'instance).
+
+3. **Se connecter sur l'UI** : ouvrir l'URL publique (ex : `https://budget.kksdev.fr`) et saisir les credentials initiaux. L'application redirige automatiquement vers un ecran dedie de reset forcé.
+
+4. **Completer le formulaire de reset** : saisir l'email definitif, un nouveau mot de passe personnel (8 chars min) et un nom d'affichage. Apres validation, acces complet a l'application.
+
+5. **(Optionnel) Purger les logs du premier boot** si la sortie est persistee par un agent externe (Datadog, Loki, journalctl avec persistance, etc.) :
+
+   ```bash
+   docker compose logs --no-log-prefix api > /dev/null
+   ```
+
+   Les logs stdout ephemeres Docker n'ont pas besoin de purge explicite.
+
+### Proprietes de securite
+
+- Le mot de passe initial est aleatoire 32 chars alphanumeriques, genere via `SecureRandom` — jamais dans le code ni dans le repo.
+- Tant que le reset n'a pas ete effectue, le JWT emis par le login n'autorise que l'endpoint `POST /api/auth/first-login-reset` et `POST /api/auth/logout`. Tous les autres endpoints protegés renvoient **403 `PASSWORD_RESET_REQUIRED`**.
+- Apres le reset, le user conserve son role admin meme si le nouvel email n'est pas dans `ADMIN_EMAILS` (cf. "Configuration admin").
+- Si le container redemarre avant le reset : le meme mot de passe reste valide en base (pas de regeneration, condition `users.count() == 0` assure l'idempotence).
+- Aucun seed n'est effectue si des users existent deja en DB.
+
+### Restauration d'acces en cas de perte du mot de passe admin
+
+Si l'unique admin a perdu son mot de passe apres avoir complete le reset initial, la procedure de bootstrap ne s'applique plus (DB non vide). La recuperation se fait actuellement via intervention directe en base. Un ticket dedie pourra ajouter une commande CLI de reset ulterieurement.
 
 Generer un `JWT_SECRET` securise :
 

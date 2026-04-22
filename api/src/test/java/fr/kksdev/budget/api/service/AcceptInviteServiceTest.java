@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -24,7 +23,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,22 +35,13 @@ class AcceptInviteServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
     private JwtUtil jwtUtil;
-
-    @Mock
-    private CategoryService categoryService;
-
-    @Mock
-    private AccountService accountService;
 
     @Mock
     private RefreshTokenService refreshTokenService;
 
     @Mock
-    private PreferenceService preferenceService;
+    private UserOnboardingService userOnboardingService;
 
     @InjectMocks
     private AcceptInviteService acceptInviteService;
@@ -74,20 +63,17 @@ class AcceptInviteServiceTest {
     void should_create_user_with_all_dependencies_when_invitation_valid() {
         Invitation invitation = buildActiveInvitation("alice@example.com");
         AcceptInviteRequest request = buildRequest(invitation.getToken());
+        User provisioned = User.builder().email("alice@example.com").name("Alice").build();
 
         when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
         when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded");
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
         when(jwtUtil.generateToken("alice@example.com")).thenReturn("jwt-token");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
         acceptInviteService.acceptInvite(request);
 
-        verify(userRepository).save(any(User.class));
-        verify(categoryService).seedSystemCategories(any(User.class));
-        verify(accountService).createDefaultAccount(any(User.class), eq(Currency.EUR));
-        verify(preferenceService).createInitialPreference(any(User.class), eq(Currency.EUR), eq("Europe/Paris"));
+        verify(userOnboardingService).provisionUser(any());
         verify(invitationService).markUsed(invitation);
     }
 
@@ -95,19 +81,20 @@ class AcceptInviteServiceTest {
     void should_use_email_from_invitation_not_from_body() {
         Invitation invitation = buildActiveInvitation("real@example.com");
         AcceptInviteRequest request = buildRequest(invitation.getToken());
+        User provisioned = User.builder().email("real@example.com").name("Alice").build();
 
         when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
         when(userRepository.existsByEmail("real@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
         when(jwtUtil.generateToken("real@example.com")).thenReturn("jwt-token");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        when(userRepository.save(userCaptor.capture())).thenAnswer(i -> i.getArgument(0));
-
         AuthResponse response = acceptInviteService.acceptInvite(request);
 
-        assertThat(userCaptor.getValue().getEmail()).isEqualTo("real@example.com");
+        ArgumentCaptor<UserOnboardingService.UserProvisioningRequest> captor =
+                ArgumentCaptor.forClass(UserOnboardingService.UserProvisioningRequest.class);
+        verify(userOnboardingService).provisionUser(captor.capture());
+        assertThat(captor.getValue().email()).isEqualTo("real@example.com");
         assertThat(response.email()).isEqualTo("real@example.com");
     }
 
@@ -122,7 +109,7 @@ class AcceptInviteServiceTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Invitation invalide.");
 
-        verify(userRepository, never()).save(any());
+        verify(userOnboardingService, never()).provisionUser(any());
     }
 
     @Test
@@ -137,7 +124,7 @@ class AcceptInviteServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Email déjà utilisé");
 
-        verify(userRepository, never()).save(any());
+        verify(userOnboardingService, never()).provisionUser(any());
         verify(invitationService, never()).markUsed(any());
     }
 
@@ -145,11 +132,11 @@ class AcceptInviteServiceTest {
     void should_generate_jwt_and_refresh_token_when_success() {
         Invitation invitation = buildActiveInvitation("alice@example.com");
         AcceptInviteRequest request = buildRequest(invitation.getToken());
+        User provisioned = User.builder().email("alice@example.com").name("Alice").build();
 
         when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
         when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded");
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
         when(jwtUtil.generateToken("alice@example.com")).thenReturn("jwt-token");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
@@ -159,6 +146,7 @@ class AcceptInviteServiceTest {
         verify(refreshTokenService).generateRefreshToken(any(User.class));
         assertThat(response.token()).isEqualTo("jwt-token");
         assertThat(response.refreshToken()).isEqualTo("refresh-token");
+        assertThat(response.mustResetCredentials()).isFalse();
     }
 
     @Test
@@ -166,17 +154,20 @@ class AcceptInviteServiceTest {
         Invitation invitation = buildActiveInvitation("alice@example.com");
         AcceptInviteRequest request = new AcceptInviteRequest(
                 invitation.getToken(), "password123", "Alice", Currency.XOF, "Africa/Lome");
+        User provisioned = User.builder().email("alice@example.com").name("Alice").build();
 
         when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
         when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded");
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
         when(jwtUtil.generateToken("alice@example.com")).thenReturn("jwt-token");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
         acceptInviteService.acceptInvite(request);
 
-        verify(accountService).createDefaultAccount(any(User.class), eq(Currency.XOF));
-        verify(preferenceService).createInitialPreference(any(User.class), eq(Currency.XOF), eq("Africa/Lome"));
+        ArgumentCaptor<UserOnboardingService.UserProvisioningRequest> captor =
+                ArgumentCaptor.forClass(UserOnboardingService.UserProvisioningRequest.class);
+        verify(userOnboardingService).provisionUser(captor.capture());
+        assertThat(captor.getValue().currency()).isEqualTo(Currency.XOF);
+        assertThat(captor.getValue().timezone()).isEqualTo("Africa/Lome");
     }
 }

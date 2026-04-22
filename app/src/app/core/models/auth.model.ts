@@ -8,4 +8,11 @@ export interface AuthResponse {
   refreshToken: string;
   email: string;
   name: string;
+  mustResetCredentials: boolean;
+}
+
+export interface FirstLoginResetRequest {
+  email: string;
+  password: string;
+  displayName: string;
 }

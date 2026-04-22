@@ -33,4 +33,10 @@ public class User {
 
     @Column(name = "disabled_at")
     private LocalDateTime disabledAt;
+
+    @Column(name = "is_admin", nullable = false)
+    private boolean isAdmin;
+
+    @Column(name = "password_reset_required", nullable = false)
+    private boolean passwordResetRequired;
 }

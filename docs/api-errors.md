@@ -57,6 +57,17 @@ Declenchee explicitement dans les services. Messages connus :
 }
 ```
 
+#### Password inchange lors du first-login-reset (KKS-233)
+
+`PasswordUnchangedException` — le nouveau password soumis a `POST /auth/first-login-reset` est identique a celui en base (verification via `BCryptPasswordEncoder.matches`). Format `ErrorResponse` :
+
+```json
+{
+  "error": "PASSWORD_UNCHANGED",
+  "message": "Le nouveau mot de passe doit être différent de l'actuel."
+}
+```
+
 ### 401 Unauthorized
 
 Declenchee par les exceptions JWT dans `RefreshTokenService`. **Format different** du format standard — utilise le DTO `ErrorResponse` :
@@ -79,7 +90,7 @@ Declenchee par les exceptions JWT dans `RefreshTokenService`. **Format different
 
 ### 403 Forbidden
 
-Deux sources distinctes.
+Trois sources distinctes.
 
 #### Spring Security (access denied)
 
@@ -88,6 +99,22 @@ Declenchee quand le header `Authorization` est absent ou le token invalide sur u
 #### Feature desactivee (FeatureDisabledException)
 
 Declenchee par le `GlobalExceptionHandler` quand une feature optionnelle est desactivee dans les preferences utilisateur (ex: DEBTS). Le corps suit le format standard (`timestamp`, `status: 403`, `message`).
+
+#### Reset des credentials requis ou non requis (KKS-233)
+
+Declenchees dans le flow `POST /auth/first-login-reset`. Le corps utilise le DTO `ErrorResponse` (`error` + `message`).
+
+| Origine | Code erreur | Quand |
+|---------|-------------|-------|
+| `PasswordResetRequiredFilter` | `PASSWORD_RESET_REQUIRED` | JWT porte le claim `mustResetCredentials: true` et la requete cible un endpoint hors allowlist (`/auth/first-login-reset`, `/auth/logout`). Le user doit d'abord completer son reset. |
+| `PasswordResetNotRequiredException` | `PASSWORD_RESET_NOT_REQUIRED` | Le user authentifie a deja `password_reset_required = false` en DB. Neutralise egalement les anciens JWT qui auraient le claim mais dont la DB est desynchronisee. |
+
+```json
+{
+  "error": "PASSWORD_RESET_REQUIRED",
+  "message": "Credentials reset required before accessing this resource."
+}
+```
 
 Routes publiques (pas de JWT requis) :
 
@@ -118,6 +145,7 @@ Declenchee par `ConflictException` :
 - Un brouillon d'import actif (PENDING) existe deja pour le compte cible
 - Pattern de libelle de regle de categorisation deja existant pour l'utilisateur
 - Tentative de desactivation du dernier admin actif (via `PATCH /api/admin/users/{id}/disable`)
+- Email deja utilise par un autre utilisateur lors du `POST /auth/first-login-reset` (KKS-233, code `EMAIL_ALREADY_EXISTS`)
 
 ```json
 {

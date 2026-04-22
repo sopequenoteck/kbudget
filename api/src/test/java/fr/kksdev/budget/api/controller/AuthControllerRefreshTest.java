@@ -64,7 +64,7 @@ class AuthControllerRefreshTest {
     @Test
     void should_return_200_when_refresh_success() throws Exception {
         var request = new RefreshRequest("valid-refresh-token");
-        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User", false);
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 
@@ -75,7 +75,8 @@ class AuthControllerRefreshTest {
                 .andExpect(jsonPath("$.token").value("new-access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
                 .andExpect(jsonPath("$.email").value("test@mail.com"))
-                .andExpect(jsonPath("$.name").value("Test User"));
+                .andExpect(jsonPath("$.name").value("Test User"))
+                .andExpect(jsonPath("$.mustResetCredentials").value(false));
     }
 
     @Test
@@ -170,7 +171,7 @@ class AuthControllerRefreshTest {
     @Test
     void should_succeed_without_authorization_header() throws Exception {
         var request = new RefreshRequest("valid-refresh-token");
-        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User", false);
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 

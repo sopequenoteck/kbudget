@@ -41,8 +41,12 @@ export class Auth {
 
     try {
       await firstValueFrom(this.authService.login({ email, password }));
-      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
-      this.router.navigateByUrl(returnUrl);
+      if (this.authService.mustResetCredentials()) {
+        this.router.navigateByUrl('/first-login-reset');
+      } else {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.router.navigateByUrl(returnUrl);
+      }
     } catch (message) {
       this.errorMessage.set(message as string);
       this.loading.set(false);

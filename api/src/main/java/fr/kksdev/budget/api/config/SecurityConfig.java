@@ -30,15 +30,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final AdminEmailResolver adminEmailResolver;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:49228}")
     private List<String> allowedOrigins;
 
     @Bean
     public AdminAuthorizationFilter adminAuthorizationFilter() {
-        return new AdminAuthorizationFilter(adminEmailResolver, userRepository);
+        return new AdminAuthorizationFilter(userRepository);
+    }
+
+    @Bean
+    public PasswordResetRequiredFilter passwordResetRequiredFilter() {
+        return new PasswordResetRequiredFilter(jwtUtil);
     }
 
     @Bean
@@ -48,7 +53,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/error",
+                        // /auth/first-login-reset nécessite un JWT valide (user avec mustResetCredentials=true)
+                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/logout",
+                                "/auth/invitations/**", "/auth/accept-invite").permitAll()
+                        .requestMatchers("/error",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/actuator/health", "/banks", "/bank-logos/**").permitAll()
                         // WebSocket: auth déléguée au StompAuthInterceptor (CONNECT frame)
@@ -58,7 +66,8 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(adminAuthorizationFilter(), JwtFilter.class)
+                .addFilterAfter(passwordResetRequiredFilter(), JwtFilter.class)
+                .addFilterAfter(adminAuthorizationFilter(), PasswordResetRequiredFilter.class)
                 .build();
     }
 

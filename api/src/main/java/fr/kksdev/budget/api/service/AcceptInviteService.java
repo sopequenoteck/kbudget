@@ -9,7 +9,6 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +19,9 @@ public class AcceptInviteService {
 
     private final InvitationService invitationService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final CategoryService categoryService;
-    private final AccountService accountService;
     private final RefreshTokenService refreshTokenService;
-    private final PreferenceService preferenceService;
+    private final UserOnboardingService userOnboardingService;
 
     @Transactional
     public AuthResponse acceptInvite(AcceptInviteRequest request) {
@@ -37,21 +33,21 @@ public class AcceptInviteService {
             throw new IllegalArgumentException("Email déjà utilisé");
         }
 
-        User user = User.builder()
-                .email(invitation.getEmail())
-                .password(passwordEncoder.encode(request.password()))
-                .name(request.displayName())
-                .build();
+        User user = userOnboardingService.provisionUser(new UserOnboardingService.UserProvisioningRequest(
+                invitation.getEmail(),
+                request.password(),
+                request.displayName(),
+                request.currency(),
+                request.timezone(),
+                false,  // isAdmin
+                false   // passwordResetRequired
+        ));
 
-        userRepository.save(user);
-        categoryService.seedSystemCategories(user);
-        accountService.createDefaultAccount(user, request.currency());
-        preferenceService.createInitialPreference(user, request.currency(), request.timezone());
         invitationService.markUsed(invitation);
         log.info("User onboarded via invitation: {}", user.getEmail());
 
         String token = jwtUtil.generateToken(user.getEmail());
         String refreshToken = refreshTokenService.generateRefreshToken(user);
-        return new AuthResponse(token, refreshToken, user.getEmail(), user.getName());
+        return new AuthResponse(token, refreshToken, user.getEmail(), user.getName(), false);
     }
 }

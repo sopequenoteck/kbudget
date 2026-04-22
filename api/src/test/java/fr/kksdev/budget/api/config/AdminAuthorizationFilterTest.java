@@ -25,9 +25,6 @@ import static org.mockito.Mockito.*;
 class AdminAuthorizationFilterTest {
 
     @Mock
-    private AdminEmailResolver adminEmailResolver;
-
-    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -54,7 +51,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(adminEmailResolver, userRepository);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -64,7 +61,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(adminEmailResolver, userRepository);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -75,7 +72,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(adminEmailResolver, userRepository);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -86,9 +83,8 @@ class AdminAuthorizationFilterTest {
         var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        User user = User.builder().id(userId).email("user@mail.com").build();
+        User user = User.builder().id(userId).email("user@mail.com").isAdmin(false).build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(adminEmailResolver.isAdminEmail("user@mail.com")).thenReturn(false);
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -104,9 +100,8 @@ class AdminAuthorizationFilterTest {
         var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        User user = User.builder().id(userId).email("admin@mail.com").build();
+        User user = User.builder().id(userId).email("admin@mail.com").isAdmin(true).build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(adminEmailResolver.isAdminEmail("admin@mail.com")).thenReturn(true);
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -142,6 +137,6 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(adminEmailResolver, userRepository);
+        verifyNoInteractions(userRepository);
     }
 }

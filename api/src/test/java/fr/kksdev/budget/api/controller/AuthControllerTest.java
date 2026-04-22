@@ -87,7 +87,7 @@ class AuthControllerTest {
     @Test
     void should_return_200_when_login_success() throws Exception {
         var request = new LoginRequest("test@mail.com", "password123");
-        var response = new AuthResponse("jwt-token", "refresh-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("jwt-token", "refresh-token", "test@mail.com", "Test User", false);
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
@@ -96,7 +96,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("jwt-token"))
-                .andExpect(jsonPath("$.email").value("test@mail.com"));
+                .andExpect(jsonPath("$.email").value("test@mail.com"))
+                .andExpect(jsonPath("$.mustResetCredentials").value(false));
     }
 
     @Test
@@ -183,7 +184,7 @@ class AuthControllerTest {
     void should_return_201_when_accept_invite_success() throws Exception {
         var request = new AcceptInviteRequest(
                 UUID.randomUUID(), "password123", "Alice", Currency.EUR, "Europe/Paris");
-        var response = new AuthResponse("jwt-token", "refresh-token", "invitee@example.com", "Alice");
+        var response = new AuthResponse("jwt-token", "refresh-token", "invitee@example.com", "Alice", false);
 
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class))).thenReturn(response);
 
@@ -193,7 +194,8 @@ class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").value("jwt-token"))
                 .andExpect(jsonPath("$.email").value("invitee@example.com"))
-                .andExpect(jsonPath("$.name").value("Alice"));
+                .andExpect(jsonPath("$.name").value("Alice"))
+                .andExpect(jsonPath("$.mustResetCredentials").value(false));
     }
 
     @Test

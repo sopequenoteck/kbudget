@@ -1,7 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.CreateInvitationRequest;
@@ -51,16 +50,13 @@ class AdminInvitationControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
-    @MockitoBean
-    private AdminEmailResolver adminEmailResolver;
-
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private User adminUser;
 
     @BeforeEach
     void setUp() {
-        adminUser = User.builder().id(userId).email("admin@example.com").name("Admin").build();
+        adminUser = User.builder().id(userId).email("admin@example.com").name("Admin").isAdmin(true).build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("admin@example.com");
         when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(adminUser));

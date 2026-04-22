@@ -3,6 +3,7 @@ export interface UserInfo {
   email: string;
   defaultCurrency?: string;
   isAdmin?: boolean;
+  mustResetCredentials: boolean;
 }
 
 export interface AdminUser {

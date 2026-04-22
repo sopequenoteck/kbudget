@@ -45,7 +45,8 @@ Response `201` :
   "token": "eyJhbGciOi...",
   "refreshToken": "a1b2c3d4e5f6...",
   "email": "nouveau@example.com",
-  "name": "Kelly"
+  "name": "Kelly",
+  "mustResetCredentials": false
 }
 ```
 
@@ -69,9 +70,44 @@ Response `200` :
   "token": "eyJhbGciOi...",
   "refreshToken": "a1b2c3d4e5f6...",
   "email": "user@example.com",
-  "name": "Kelly"
+  "name": "Kelly",
+  "mustResetCredentials": false
 }
 ```
+
+> Le champ `mustResetCredentials` est `true` uniquement pour le compte admin bootstrappé (KKS-233) tant qu'il n'a pas complete son premier reset. Dans ce cas le JWT emis porte un claim `mustResetCredentials` et le filtre `PasswordResetRequiredFilter` bloque tous les endpoints sauf `POST /auth/first-login-reset` et `POST /auth/logout` avec `403 PASSWORD_RESET_REQUIRED`.
+
+### Premier reset des credentials `POST /api/auth/first-login-reset` (KKS-233)
+
+Endpoint utilise uniquement lors du premier demarrage d'une instance vierge, pour permettre a l'admin seed (cree par le `BootstrapSeedRunner` avec un mot de passe aleatoire affiche dans les logs) de definir ses credentials definitifs.
+
+Request (Authorization: Bearer avec JWT portant le claim `mustResetCredentials: true`) :
+
+```json
+{
+  "email": "kelly@exemple.com",
+  "password": "NouveauMotDePasseFort123",
+  "displayName": "Kelly"
+}
+```
+
+Response `200` — nouveau JWT sans le claim, flag `password_reset_required` remis a `false` en DB :
+
+```json
+{
+  "token": "eyJhbGciOi...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "email": "kelly@exemple.com",
+  "name": "Kelly",
+  "mustResetCredentials": false
+}
+```
+
+Response `400 PASSWORD_UNCHANGED` : le nouveau mot de passe est identique a celui actuellement en base.
+
+Response `403 PASSWORD_RESET_NOT_REQUIRED` : le user authentifie a deja `password_reset_required = false` (reset deja effectue ou user ordinaire). Neutralise egalement les anciens JWT encore porteurs du claim apres que le reset ait ete fait par une autre session.
+
+Response `409 EMAIL_ALREADY_EXISTS` : l'email cible est deja utilise par un autre user.
 
 ### Renouvellement `POST /api/auth/refresh`
 
