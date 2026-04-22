@@ -88,3 +88,22 @@ input[type='radio'] {
   accent-color: var(--color-primary);
   cursor: pointer;
 }
+
+// =============================================================================
+// Form layout patterns — bloc groupé + barre d'actions
+// =============================================================================
+
+.form-block {
+  padding: var(--space-5);
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}

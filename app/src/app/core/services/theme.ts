@@ -12,7 +12,7 @@ const VALID_THEMES: Theme[] = ['light', 'dark', 'auto'];
 export class ThemeService {
   private readonly logger = inject(DevLogger);
 
-  readonly currentTheme = signal<Theme>('light');
+  readonly currentTheme = signal<Theme>('dark');
 
   readonly effectiveTheme = computed<'light' | 'dark'>(() => {
     const theme = this.currentTheme();

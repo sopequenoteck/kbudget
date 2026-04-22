@@ -111,8 +111,8 @@ describe('AuthShell', () => {
     fixture.detectChanges();
 
     // Assert
-    const shellEl = fixture.debugElement.query(By.css('.auth-shell'));
-    expect(shellEl.classes['auth-shell--md']).toBe(true);
+    const mainEl = fixture.debugElement.query(By.css('.auth-shell__main'));
+    expect(mainEl.classes['auth-shell__main--md']).toBe(true);
   });
 
   it('should_default_to_sm_size_when_size_not_provided', () => {
@@ -124,8 +124,8 @@ describe('AuthShell', () => {
     fixture.detectChanges();
 
     // Assert
-    const shellEl = fixture.debugElement.query(By.css('.auth-shell'));
-    expect(shellEl.classes['auth-shell--md']).toBeFalsy();
+    const mainEl = fixture.debugElement.query(By.css('.auth-shell__main'));
+    expect(mainEl.classes['auth-shell__main--md']).toBeFalsy();
   });
 
   it('should_project_content_in_card', () => {

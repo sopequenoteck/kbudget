@@ -24,12 +24,6 @@
   }
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .input-error {
   border-color: var(--text-error);
 }

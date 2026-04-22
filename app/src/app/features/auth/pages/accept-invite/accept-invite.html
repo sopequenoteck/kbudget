@@ -14,83 +14,87 @@
 
   @if (email() && !error()) {
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <app-form-field
-        label="Adresse email"
-        fieldId="accept-email"
-        [showError]="false"
-      >
-        <input
-          id="accept-email"
-          type="email"
-          [value]="email()"
-          disabled
-          autocomplete="email"
-        />
-      </app-form-field>
+      <div class="form-block">
+        <app-form-field
+          label="Adresse email"
+          fieldId="accept-email"
+          [showError]="false"
+        >
+          <input
+            id="accept-email"
+            type="email"
+            [value]="email()"
+            disabled
+            autocomplete="email"
+          />
+        </app-form-field>
 
-      <app-form-field
-        label="Nom d'affichage"
-        fieldId="accept-displayname"
-        errorMessage="Nom requis (100 caractères max)"
-        [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
-      >
-        <input
-          id="accept-displayname"
-          type="text"
-          formControlName="displayName"
-          autocomplete="name"
-          placeholder="Votre prénom ou pseudo"
-          [class.input-error]="form.controls.displayName.touched && form.controls.displayName.invalid"
-        />
-      </app-form-field>
+        <app-form-field
+          label="Nom d'affichage"
+          fieldId="accept-displayname"
+          errorMessage="Nom requis (100 caractères max)"
+          [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
+        >
+          <input
+            id="accept-displayname"
+            type="text"
+            formControlName="displayName"
+            autocomplete="name"
+            placeholder="Votre prénom ou pseudo"
+            [class.input-error]="form.controls.displayName.touched && form.controls.displayName.invalid"
+          />
+        </app-form-field>
 
-      <app-form-field
-        label="Mot de passe"
-        fieldId="accept-password"
-        errorMessage="8 caractères minimum"
-        [showError]="form.controls.password.touched && form.controls.password.invalid"
-      >
-        <input
-          id="accept-password"
-          type="password"
-          formControlName="password"
-          autocomplete="new-password"
-          placeholder="Au moins 8 caractères"
-          [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
-        />
-      </app-form-field>
+        <app-form-field
+          label="Mot de passe"
+          fieldId="accept-password"
+          errorMessage="8 caractères minimum"
+          [showError]="form.controls.password.touched && form.controls.password.invalid"
+        >
+          <input
+            id="accept-password"
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+            placeholder="Au moins 8 caractères"
+            [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
+          />
+        </app-form-field>
 
-      <app-form-field
-        label="Devise"
-        fieldId="accept-currency"
-        [showError]="false"
-      >
-        <select id="accept-currency" formControlName="currency">
-          @for (curr of currencies; track curr.code) {
-            <option [value]="curr.code">{{ curr.label }}</option>
+        <app-form-field
+          label="Devise"
+          fieldId="accept-currency"
+          [showError]="false"
+        >
+          <select id="accept-currency" formControlName="currency">
+            @for (curr of currencies; track curr.code) {
+              <option [value]="curr.code">{{ curr.label }}</option>
+            }
+          </select>
+        </app-form-field>
+
+        <app-form-field
+          label="Fuseau horaire"
+          fieldId="accept-timezone"
+          [showError]="false"
+        >
+          <select id="accept-timezone" formControlName="timezone">
+            @for (tz of timezones; track tz) {
+              <option [value]="tz">{{ tz }}</option>
+            }
+          </select>
+        </app-form-field>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading()">
+          @if (loading()) {
+            Création du compte...
+          } @else {
+            Créer mon compte
           }
-        </select>
-      </app-form-field>
-
-      <app-form-field
-        label="Fuseau horaire"
-        fieldId="accept-timezone"
-        [showError]="false"
-      >
-        <select id="accept-timezone" formControlName="timezone">
-          @for (tz of timezones; track tz) {
-            <option [value]="tz">{{ tz }}</option>
-          }
-        </select>
-      </app-form-field>
-
-      <button type="submit" class="btn-primary btn-block" [disabled]="loading()">
-        @if (loading()) {
-          Création du compte...
-        } @else {
-          Créer mon compte
-        }
-      </button>
+        </button>
+      </div>
     </form>
   }
 </app-auth-shell>

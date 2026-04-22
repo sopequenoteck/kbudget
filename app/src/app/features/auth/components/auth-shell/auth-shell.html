@@ -1,19 +1,18 @@
-<div class="auth-shell" [class.auth-shell--md]="size() === 'md'">
-  <div class="auth-shell__card">
-    <div class="auth-shell__header">
-      <img src="icons/budget-icon-no-background.svg" alt="K-Budget" class="auth-shell__logo" />
-      <div class="auth-shell__header-text">
-        <h1 class="auth-shell__title">{{ title() }}</h1>
-        @if (tagline()) {
-          <p class="auth-shell__tagline">{{ tagline() }}</p>
-        }
-      </div>
+<div class="auth-shell">
+  <header class="auth-shell__header">
+    <img src="icons/budget-icon-no-background.svg" alt="K-Budget" class="auth-shell__logo" />
+    <div class="auth-shell__header-text">
+      <h1 class="auth-shell__title">{{ title() }}</h1>
+      @if (tagline()) {
+        <p class="auth-shell__tagline">{{ tagline() }}</p>
+      }
     </div>
+  </header>
 
+  <main class="auth-shell__main" [class.auth-shell__main--md]="size() === 'md'">
     @if (error()) {
       <div class="auth-shell__error" role="alert">{{ error() }}</div>
     }
-
     <ng-content />
-  </div>
+  </main>
 </div>
