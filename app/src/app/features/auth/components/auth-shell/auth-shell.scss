@@ -1,0 +1,62 @@
+.auth-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary);
+  padding: var(--space-4);
+}
+
+.auth-shell__card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-6);
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-shell--md .auth-shell__card {
+  max-width: 480px;
+}
+
+.auth-shell__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.auth-shell__logo {
+  width: var(--space-11);
+  height: var(--space-11);
+  flex-shrink: 0;
+}
+
+.auth-shell__header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-shell__title {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.auth-shell__tagline {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.auth-shell__error {
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
+  background-color: var(--bg-error);
+  color: var(--text-error);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
