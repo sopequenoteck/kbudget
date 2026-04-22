@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
+import { AuthShell } from '../../components/auth-shell/auth-shell';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const form = control.parent;
@@ -16,7 +17,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-first-login-reset',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, AuthShell],
   templateUrl: './first-login-reset.html',
   styleUrl: './first-login-reset.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -13,11 +13,12 @@ import { firstValueFrom } from 'rxjs';
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
+import { AuthShell } from '../../components/auth-shell/auth-shell';
 
 @Component({
   selector: 'app-accept-invite',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, AuthShell],
   templateUrl: './accept-invite.html',
   styleUrl: './accept-invite.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

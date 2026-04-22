@@ -1,63 +1,47 @@
-<div class="auth-page">
-  <div class="auth-card">
-    <div class="auth-header">
-      <img src="icons/budget-icon-no-background.svg" alt="K-Budget" class="auth-logo" />
-      <div class="auth-header-text">
-        <h1>K-Budget</h1>
-        <p>Connectez-vous à votre compte</p>
-      </div>
-    </div>
+<app-auth-shell title="K-Budget" tagline="Connectez-vous à votre compte" [error]="errorMessage()">
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    <app-form-field
+      label="Email"
+      fieldId="login-email"
+      [errorMessage]="
+        loginForm.controls.email.hasError('required') ? 'Email requis' : 'Email invalide'
+      "
+      [showError]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+    >
+      <input
+        id="login-email"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="votre@email.com"
+        [class.input-error]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+      />
+    </app-form-field>
 
-    @if (errorMessage()) {
-      <div class="auth-error">{{ errorMessage() }}</div>
-    }
-
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <app-form-field
-        label="Email"
-        fieldId="login-email"
-        [errorMessage]="
-          loginForm.controls.email.hasError('required') ? 'Email requis' : 'Email invalide'
+    <app-form-field
+      label="Mot de passe"
+      fieldId="login-password"
+      errorMessage="6 caractères minimum"
+      [showError]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
+    >
+      <input
+        id="login-password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        placeholder="Votre mot de passe"
+        [class.input-error]="
+          loginForm.controls.password.touched && loginForm.controls.password.invalid
         "
-        [showError]="loginForm.controls.email.touched && loginForm.controls.email.invalid"
-      >
-        <input
-          id="login-email"
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          placeholder="votre@email.com"
-          [class.input-error]="
-            loginForm.controls.email.touched && loginForm.controls.email.invalid
-          "
-        />
-      </app-form-field>
+      />
+    </app-form-field>
 
-      <app-form-field
-        label="Mot de passe"
-        fieldId="login-password"
-        errorMessage="6 caractères minimum"
-        [showError]="loginForm.controls.password.touched && loginForm.controls.password.invalid"
-      >
-        <input
-          id="login-password"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          placeholder="Votre mot de passe"
-          [class.input-error]="
-            loginForm.controls.password.touched && loginForm.controls.password.invalid
-          "
-        />
-      </app-form-field>
-
-      <button type="submit" class="btn-primary btn-block" [disabled]="loading()">
-        @if (loading()) {
-          Connexion...
-        } @else {
-          Se connecter
-        }
-      </button>
-    </form>
-  </div>
-</div>
+    <button type="submit" class="btn-primary btn-block" [disabled]="loading()">
+      @if (loading()) {
+        Connexion...
+      } @else {
+        Se connecter
+      }
+    </button>
+  </form>
+</app-auth-shell>

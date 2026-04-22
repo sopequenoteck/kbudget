@@ -5,11 +5,12 @@ import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth';
 import { FormField } from '../../shared/components/form-field/form-field';
+import { AuthShell } from './components/auth-shell/auth-shell';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, AuthShell],
   templateUrl: './auth.html',
   styleUrl: './auth.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
