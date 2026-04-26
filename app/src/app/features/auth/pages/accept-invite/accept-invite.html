@@ -1,4 +1,8 @@
-<app-auth-shell title="K-Budget" tagline="Finalisez votre inscription">
+<app-auth-shell
+  title="Créer votre compte"
+  tagline="Quelques informations pour finaliser l'inscription"
+  size="md"
+>
   @if (loading() && !email() && !error()) {
     <div class="accept-invite-loading">Vérification du lien...</div>
   }
@@ -14,10 +18,13 @@
 
   @if (email() && !error()) {
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-block">
+      <div class="form-section">
+        <span class="form-section__label">VOTRE IDENTITÉ</span>
+
         <app-form-field
           label="Adresse email"
           fieldId="accept-email"
+          prefixIcon="phosphorEnvelope"
           [showError]="false"
         >
           <input
@@ -32,6 +39,7 @@
         <app-form-field
           label="Nom d'affichage"
           fieldId="accept-displayname"
+          prefixIcon="phosphorUser"
           errorMessage="Nom requis (100 caractères max)"
           [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
         >
@@ -48,6 +56,7 @@
         <app-form-field
           label="Mot de passe"
           fieldId="accept-password"
+          prefixIcon="phosphorLock"
           errorMessage="8 caractères minimum"
           [showError]="form.controls.password.touched && form.controls.password.invalid"
         >
@@ -60,30 +69,38 @@
             [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
           />
         </app-form-field>
+      </div>
 
-        <app-form-field
-          label="Devise"
-          fieldId="accept-currency"
-          [showError]="false"
-        >
-          <select id="accept-currency" formControlName="currency">
-            @for (curr of currencies; track curr.code) {
-              <option [value]="curr.code">{{ curr.label }}</option>
-            }
-          </select>
-        </app-form-field>
+      <div class="form-section">
+        <span class="form-section__label">PRÉFÉRENCES</span>
 
-        <app-form-field
-          label="Fuseau horaire"
-          fieldId="accept-timezone"
-          [showError]="false"
-        >
-          <select id="accept-timezone" formControlName="timezone">
-            @for (tz of timezones; track tz) {
-              <option [value]="tz">{{ tz }}</option>
-            }
-          </select>
-        </app-form-field>
+        <div class="accept-invite-prefs-grid">
+          <app-form-field
+            label="Devise"
+            fieldId="accept-currency"
+            prefixIcon="phosphorCoin"
+            [showError]="false"
+          >
+            <select id="accept-currency" formControlName="currency">
+              @for (curr of currencies; track curr.code) {
+                <option [value]="curr.code">{{ curr.label }}</option>
+              }
+            </select>
+          </app-form-field>
+
+          <app-form-field
+            label="Fuseau horaire"
+            fieldId="accept-timezone"
+            prefixIcon="phosphorGlobe"
+            [showError]="false"
+          >
+            <select id="accept-timezone" formControlName="timezone">
+              @for (tz of timezones; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+              }
+            </select>
+          </app-form-field>
+        </div>
       </div>
 
       <div class="form-actions">

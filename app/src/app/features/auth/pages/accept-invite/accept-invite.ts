@@ -9,6 +9,14 @@ import {
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { provideIcons } from '@ng-icons/core';
+import {
+  phosphorEnvelope,
+  phosphorLock,
+  phosphorUser,
+  phosphorCoin,
+  phosphorGlobe,
+} from '@ng-icons/phosphor-icons/regular';
 
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
@@ -19,6 +27,7 @@ import { AuthShell } from '../../components/auth-shell/auth-shell';
   selector: 'app-accept-invite',
   standalone: true,
   imports: [ReactiveFormsModule, FormField, AuthShell],
+  viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser, phosphorCoin, phosphorGlobe })],
   templateUrl: './accept-invite.html',
   styleUrl: './accept-invite.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

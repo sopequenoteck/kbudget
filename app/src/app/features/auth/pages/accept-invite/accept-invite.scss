@@ -24,6 +24,35 @@
   }
 }
 
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  & + .form-section {
+    margin-top: var(--space-8);
+  }
+}
+
+.form-section__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin-bottom: calc(var(--space-3) - var(--space-4));
+}
+
+.accept-invite-prefs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+
+  @media (max-width: 360px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .input-error {
   border-color: var(--text-error);
 }

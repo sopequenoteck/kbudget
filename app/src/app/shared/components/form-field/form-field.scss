@@ -10,6 +10,21 @@ label {
   color: var(--text-secondary);
 }
 
+.form-field__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-field__prefix-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
 .form-error {
   font-size: var(--font-size-xs);
   color: var(--text-error);

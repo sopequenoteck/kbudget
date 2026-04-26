@@ -71,6 +71,20 @@ Fleche retour ronde 36px + titre aligne a droite. Utilise sur les pages detail e
 
 Classe : `.page-header`, `.page-header__back`, `.page-header__title`
 
+### Auth identity
+
+Bloc identite fort en haut des pages d'authentification. Composition :
+
+- Logo SVG 64px + wordmark 3xl bold / `--text-primary` + sous-titre sm / `--text-secondary`
+- Aligne a gauche, padding vertical genereux (`--space-8` en haut), pas de border-bottom separatrice
+- Formulaire rendu directement sur `--bg-primary` — pas de card ni de `.form-block` wrapper
+
+Composant : `<app-auth-shell>` (inputs : `title`, `tagline`, `error`, `size`) — footer discret en bas a gauche affichant la version (`vX.Y.Z`, xs/tertiary, sans bordure ni fond)
+
+Sections avec labels uppercase (accept-invite uniquement) : regroupement "VOTRE IDENTITE" et "PREFERENCES" via la classe `.form-section` + `.form-section__label` (xs/medium/uppercase/letter-spacing 0.05em/`--text-tertiary`). Spacing entre sections : `--space-8`. Devise et fuseau horaire en grille 2 colonnes (`grid-template-columns: 1fr 1fr`, retour 1 colonne sous 360px).
+
+Exception input prefix icon : les inputs des pages auth (login, accept-invite, first-login-reset) utilisent une icone prefix Phosphor 16px en `--text-tertiary` (envelope/lock/user/coin/globe) via l'input optionnel `prefixIcon` de `<app-form-field>`. Pattern non propage au reste de l'app.
+
 ### Section header (sticky)
 
 Titre + compteur + icones action. Sticky sous le header app. Fond dynamique quand colle (surface-raised).

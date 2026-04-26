@@ -2,6 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { AbstractControl, ReactiveFormsModule, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { provideIcons } from '@ng-icons/core';
+import {
+  phosphorEnvelope,
+  phosphorLock,
+  phosphorUser,
+} from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
@@ -18,6 +24,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   selector: 'app-first-login-reset',
   standalone: true,
   imports: [ReactiveFormsModule, FormField, AuthShell],
+  viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser })],
   templateUrl: './first-login-reset.html',
   styleUrl: './first-login-reset.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

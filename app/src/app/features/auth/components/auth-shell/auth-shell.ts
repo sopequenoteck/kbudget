@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
+import packageJson from '../../../../../../package.json';
+
 @Component({
   selector: 'app-auth-shell',
   standalone: true,
@@ -12,4 +14,6 @@ export class AuthShell {
   readonly title = input.required<string>();
   readonly tagline = input<string>('');
   readonly error = input<string>('');
+
+  protected readonly version = `v${packageJson.version}`;
 }

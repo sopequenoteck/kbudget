@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { provideIcons } from '@ng-icons/core';
+import { phosphorEnvelope, phosphorLock } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../core/services/auth';
 import { FormField } from '../../shared/components/form-field/form-field';
@@ -11,8 +13,8 @@ import { AuthShell } from './components/auth-shell/auth-shell';
   selector: 'app-auth',
   standalone: true,
   imports: [ReactiveFormsModule, FormField, AuthShell],
+  viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock })],
   templateUrl: './auth.html',
-  styleUrl: './auth.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Auth {
