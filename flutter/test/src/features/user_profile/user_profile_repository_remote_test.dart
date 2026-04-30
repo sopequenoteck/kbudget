@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/user_profile/data/user_profile_repository_remote.dart';
+import 'package:k_budget/src/features/user_profile/domain/models/delete_account_request.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -139,6 +140,94 @@ void main() {
 
       expect(file, isA<File>());
       expect(file.path, contains('.csv'));
+    });
+  });
+
+  group('UserProfileRepositoryRemote.deleteAccount', () {
+    test('should_completeWithoutError_when_serverReturns204', () async {
+      const req = DeleteAccountRequest(
+        currentPassword: 'correct_password',
+        confirmed: true,
+      );
+
+      when(
+        mockDio.delete<void>(
+          '/users/me',
+          data: anyNamed('data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response<void>(
+          statusCode: 204,
+          requestOptions: RequestOptions(path: '/users/me'),
+        ),
+      );
+
+      await expectLater(repository.deleteAccount(req), completes);
+
+      verify(
+        mockDio.delete<void>(
+          '/users/me',
+          data: req.toJson(),
+        ),
+      ).called(1);
+    });
+
+    test('should_throwDioException_when_serverReturns401', () async {
+      const req = DeleteAccountRequest(
+        currentPassword: 'wrong_password',
+        confirmed: true,
+      );
+
+      when(
+        mockDio.delete<void>(
+          '/users/me',
+          data: anyNamed('data'),
+        ),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/users/me'),
+          response: Response(
+            statusCode: 401,
+            data: {'error': 'PASSWORD_INCORRECT'},
+            requestOptions: RequestOptions(path: '/users/me'),
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      await expectLater(
+        repository.deleteAccount(req),
+        throwsA(isA<DioException>()),
+      );
+    });
+
+    test('should_throwDioException_when_serverReturns403LastAdmin', () async {
+      const req = DeleteAccountRequest(
+        currentPassword: 'correct_password',
+        confirmed: true,
+      );
+
+      when(
+        mockDio.delete<void>(
+          '/users/me',
+          data: anyNamed('data'),
+        ),
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/users/me'),
+          response: Response(
+            statusCode: 403,
+            data: {'error': 'LAST_ADMIN_DELETION_FORBIDDEN'},
+            requestOptions: RequestOptions(path: '/users/me'),
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      await expectLater(
+        repository.deleteAccount(req),
+        throwsA(isA<DioException>()),
+      );
     });
   });
 }

@@ -8,12 +8,15 @@ import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.dto.response.UserExportResponse;
 import fr.kksdev.budget.api.dto.response.UserResponse;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
+import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.InvalidImageFormatException;
+import fr.kksdev.budget.api.exception.LastAdminDeletionForbiddenException;
 import fr.kksdev.budget.api.exception.PasswordIncorrectException;
 import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import fr.kksdev.budget.api.service.AvatarStorageService;
+import fr.kksdev.budget.api.service.UserDeletionService;
 import fr.kksdev.budget.api.service.UserExportService;
 import fr.kksdev.budget.api.service.UserPasswordService;
 import fr.kksdev.budget.api.service.UserService;
@@ -40,6 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,6 +66,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserExportService userExportService;
+
+    @MockitoBean
+    private UserDeletionService userDeletionService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -337,6 +344,75 @@ class UserControllerTest {
 
     // Note : le format CSV utilise StreamingResponseBody qui n'est pas rendu nativement par MockMvc
     // Les tests CSV (BOM, traduction type, contenu) sont couverts par UserExportServiceTest
+
+    // ---- DELETE /users/me ----
+
+    @Test
+    void should_return_204_when_delete_account_success() throws Exception {
+        mockMvc.perform(delete("/users/me")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "CorrectPassword1!",
+                                  "confirmed": true
+                                }
+                                """))
+                .andExpect(status().isNoContent());
+
+        verify(userDeletionService).softDelete(any(User.class), any());
+    }
+
+    @Test
+    void should_return_400_when_not_confirmed() throws Exception {
+        // confirmed=false déclenche la validation Bean (@AssertTrue) avant le service
+        mockMvc.perform(delete("/users/me")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "CorrectPassword1!",
+                                  "confirmed": false
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Confirmation explicite requise")));
+    }
+
+    @Test
+    void should_return_401_when_password_incorrect() throws Exception {
+        doThrow(new PasswordIncorrectException()).when(userDeletionService).softDelete(any(User.class), any());
+
+        mockMvc.perform(delete("/users/me")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "WrongPassword1!",
+                                  "confirmed": true
+                                }
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("PASSWORD_INCORRECT"));
+    }
+
+    @Test
+    void should_return_403_when_last_admin() throws Exception {
+        doThrow(new LastAdminDeletionForbiddenException()).when(userDeletionService).softDelete(any(User.class), any());
+
+        mockMvc.perform(delete("/users/me")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "CorrectPassword1!",
+                                  "confirmed": true
+                                }
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("LAST_ADMIN_DELETION_FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("Au moins un administrateur actif doit exister."));
+    }
 
     // ---- Helpers ----
 

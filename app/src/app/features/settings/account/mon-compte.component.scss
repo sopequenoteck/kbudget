@@ -156,6 +156,12 @@
     cursor: default;
   }
 
+  &--danger {
+    .settings-row__title {
+      color: var(--color-expense);
+    }
+  }
+
   &__icon {
     display: flex;
     align-items: center;

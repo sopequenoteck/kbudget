@@ -2,12 +2,14 @@ package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
+import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.exception.FileTooLargeException;
 import fr.kksdev.budget.api.exception.InvalidExportFormatException;
 import fr.kksdev.budget.api.exception.InvalidImageFormatException;
+import fr.kksdev.budget.api.exception.LastAdminDeletionForbiddenException;
 import fr.kksdev.budget.api.exception.PasswordIncorrectException;
 import fr.kksdev.budget.api.exception.PasswordResetNotRequiredException;
 import fr.kksdev.budget.api.exception.PasswordUnchangedException;
@@ -198,6 +200,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTokenInvalid(TokenInvalidException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("TOKEN_INVALID", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConfirmationRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleConfirmationRequired(ConfirmationRequiredException ex) {
+        log.warn("Confirmation required: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("CONFIRMATION_REQUIRED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(LastAdminDeletionForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleLastAdminDeletionForbidden(LastAdminDeletionForbiddenException ex) {
+        log.warn("Last admin deletion forbidden: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("LAST_ADMIN_DELETION_FORBIDDEN", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

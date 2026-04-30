@@ -4,6 +4,7 @@ import { ApiService } from './api';
 import { AuthService } from './auth';
 import { UserInfo } from '../models/user.model';
 import { UpdateProfileRequest } from '../models/update-profile-request.model';
+import { DeleteAccountRequest } from '../models/delete-account-request.model';
 import { AuthResponse } from '../models/auth.model';
 
 export interface ChangePasswordRequest {
@@ -51,5 +52,9 @@ export class UserService {
         this.authService.saveAuthResponse(response);
       }),
     );
+  }
+
+  deleteAccount(req: DeleteAccountRequest): Observable<void> {
+    return this.api.deleteWithBody<void>('/users/me', req);
   }
 }

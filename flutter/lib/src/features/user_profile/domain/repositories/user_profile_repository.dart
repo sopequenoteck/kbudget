@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/avatar_metadata.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/change_password_request.dart';
+import 'package:k_budget/src/features/user_profile/domain/models/delete_account_request.dart';
 
 /// Repository server-only pour les opérations de profil avancées.
 /// Pas d'implémentation Local — décision RES-013.
@@ -29,4 +30,8 @@ abstract class UserProfileRepository {
   /// (GET /users/me/export?format=csv).
   /// Sauvegarde le fichier localement et retourne le [File].
   Future<File> exportCsv();
+
+  /// Supprime le compte utilisateur (DELETE /users/me).
+  /// [req] doit contenir le mot de passe actuel et confirmed = true.
+  Future<void> deleteAccount(DeleteAccountRequest req);
 }

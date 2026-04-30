@@ -194,16 +194,23 @@
         </div>
       </button>
 
-      <!-- Supprimer le compte (P3 — désactivé pour l'instant) -->
-      <div class="settings-row settings-row--last settings-row--disabled">
+      <!-- Supprimer le compte -->
+      <button
+        type="button"
+        class="settings-row settings-row--link settings-row--last settings-row--danger"
+        (click)="onDeleteAccount()"
+      >
         <div class="settings-row__content">
           <span class="settings-row__title">Supprimer mon compte</span>
-          <span class="settings-row__description">Disponible prochainement</span>
+          <span class="settings-row__description">Suppression définitive du compte et des données</span>
         </div>
-      </div>
+      </button>
     </div>
   </div>
 </div>
 
 <!-- Dialog changement de mot de passe (hors du flux pour le z-index) -->
 <app-change-password-dialog />
+
+<!-- Dialog suppression de compte (hors du flux pour le z-index) -->
+<app-delete-account-confirm-dialog />

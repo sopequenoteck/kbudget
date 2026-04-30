@@ -29,6 +29,7 @@ import { AvatarService } from '../../../core/services/avatar.service';
 import { UserExportService } from '../../../core/services/user-export.service';
 import { AvatarUploadComponent } from '../../../lib/avatar-upload/avatar-upload.component';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
+import { DeleteAccountConfirmDialogComponent } from './delete-account-confirm-dialog.component';
 
 @Component({
   selector: 'app-mon-compte',
@@ -38,6 +39,7 @@ import { ChangePasswordDialogComponent } from './change-password-dialog.componen
     NgIcon,
     AvatarUploadComponent,
     ChangePasswordDialogComponent,
+    DeleteAccountConfirmDialogComponent,
   ],
   providers: [
     provideIcons({
@@ -65,6 +67,7 @@ export class MonCompteComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly changePasswordDialog = viewChild.required(ChangePasswordDialogComponent);
+  readonly deleteAccountDialog = viewChild.required(DeleteAccountConfirmDialogComponent);
 
   readonly currentUser = computed(() => this.authService.currentUser());
   readonly avatarUrl = computed(() => this.avatarService.avatarUrl());
@@ -194,6 +197,13 @@ export class MonCompteComponent implements OnInit {
     } finally {
       this.isExportingCsv.set(false);
     }
+  }
+
+  // ===== Delete account =====
+
+  async onDeleteAccount(): Promise<void> {
+    await this.deleteAccountDialog().open();
+    // Redirect is handled by the dialog itself on success (authService.logout → /auth)
   }
 
   // ===== Logout =====

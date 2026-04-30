@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/avatar_metadata.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/change_password_request.dart';
+import 'package:k_budget/src/features/user_profile/domain/models/delete_account_request.dart';
 import 'package:k_budget/src/features/user_profile/domain/repositories/user_profile_repository.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -88,6 +89,14 @@ class UserProfileRepositoryRemote implements UserProfileRepository {
     await file.writeAsBytes(response.data!, flush: true);
 
     return file;
+  }
+
+  @override
+  Future<void> deleteAccount(DeleteAccountRequest req) async {
+    await _dio.delete<void>(
+      '/users/me',
+      data: req.toJson(),
+    );
   }
 
   /// Extrait le filename depuis l'en-tête Content-Disposition.

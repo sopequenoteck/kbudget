@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.ChangePasswordRequest;
+import fr.kksdev.budget.api.dto.request.DeleteAccountRequest;
 import fr.kksdev.budget.api.dto.request.UpdateProfileRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.dto.response.AvatarMetadataResponse;
@@ -9,6 +10,7 @@ import fr.kksdev.budget.api.dto.response.UserResponse;
 import fr.kksdev.budget.api.exception.InvalidExportFormatException;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.service.AvatarStorageService;
+import fr.kksdev.budget.api.service.UserDeletionService;
 import fr.kksdev.budget.api.service.UserExportService;
 import fr.kksdev.budget.api.service.UserPasswordService;
 import fr.kksdev.budget.api.service.UserService;
@@ -39,6 +41,7 @@ public class UserController {
     private final AvatarStorageService avatarStorageService;
     private final UserPasswordService userPasswordService;
     private final UserExportService userExportService;
+    private final UserDeletionService userDeletionService;
 
     @Operation(summary = "Consulter le profil de l'utilisateur connecté")
     @GetMapping("/me")
@@ -136,6 +139,16 @@ public class UserController {
         } else {
             throw new InvalidExportFormatException();
         }
+    }
+
+    @Operation(summary = "Supprimer le compte de l'utilisateur connecté (soft-delete)")
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAccount(
+            Authentication authentication,
+            @Valid @RequestBody DeleteAccountRequest request) {
+        User user = resolveUser(authentication);
+        userDeletionService.softDelete(user, request);
+        return ResponseEntity.noContent().build();
     }
 
     private User resolveUser(Authentication authentication) {

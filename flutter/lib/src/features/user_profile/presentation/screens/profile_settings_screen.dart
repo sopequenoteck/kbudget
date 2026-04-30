@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -10,6 +11,7 @@ import 'package:k_budget/src/features/user_profile/application/user_profile_noti
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/avatar_picker.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/change_password_sheet.dart';
+import 'package:k_budget/src/features/user_profile/presentation/widgets/delete_account_sheet.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/profile_settings_skeleton.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -76,6 +78,7 @@ class _ProfileSettingsScreenState
               ref.read(userProfileNotifierProvider.notifier).loadProfile(),
           onExportJson: _exportJson,
           onExportCsv: _exportCsv,
+          onDeleteAccount: _openDeleteAccount,
         ),
       ),
     );
@@ -124,6 +127,12 @@ class _ProfileSettingsScreenState
     if (!mounted) return;
     await ChangePasswordSheet.show(context);
     // Les tokens sont déjà mis à jour dans la sheet en cas de succès
+  }
+
+  Future<void> _openDeleteAccount() async {
+    if (!mounted) return;
+    // La redirection vers /login est gérée par la sheet en cas de succès
+    await DeleteAccountSheet.show(context);
   }
 
   Future<void> _exportJson() async {
@@ -188,6 +197,7 @@ class _ProfileContent extends StatelessWidget {
   final VoidCallback onAvatarChanged;
   final VoidCallback onExportJson;
   final VoidCallback onExportCsv;
+  final VoidCallback onDeleteAccount;
 
   const _ProfileContent({
     required this.user,
@@ -199,6 +209,7 @@ class _ProfileContent extends StatelessWidget {
     required this.onAvatarChanged,
     required this.onExportJson,
     required this.onExportCsv,
+    required this.onDeleteAccount,
   });
 
   String get _initials {
@@ -312,6 +323,14 @@ class _ProfileContent extends StatelessWidget {
           theme: theme,
           // Style neutre/gris (pas rouge — spec T-024)
           foregroundColor: theme.colorScheme.onSurfaceVariant,
+        ),
+
+        _ActionRow(
+          icon: PhosphorIconsRegular.trash,
+          label: 'Supprimer mon compte',
+          onTap: onDeleteAccount,
+          theme: theme,
+          foregroundColor: AppColors.error,
         ),
 
         const SizedBox(height: AppSpacing.space8),

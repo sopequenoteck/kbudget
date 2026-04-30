@@ -115,15 +115,15 @@
 
 > Couvre FR-018, FR-019, FR-020, FR-021, FR-022, SC-009, SC-010, W-004 (admin non-seul peut se supprimer)
 
-- [ ] [T-059] [P] [P3] [US5] Créer DTO `dto/request/DeleteAccountRequest.java` (`@NotBlank currentPassword` + `@AssertTrue boolean confirmed`) — Réf: FR-018
-- [ ] [T-060] [P3] [US5] Créer `service/UserDeletionService.java` méthode `softDelete(User, DeleteAccountRequest)` : check confirmed → BCrypt verify → check `countActiveAdmins() > 1` si admin → set `disabledAt = now()` → `revokeAllUserTokens` → log INFO — Réf: FR-018, FR-019, FR-020, FR-021, FR-022
-- [ ] [T-061] [P3] [US5] Ajouter endpoint `DELETE /api/users/me` dans `UserController` retournant 204 — Réf: FR-018
-- [ ] [T-062] [P3] [US5] Tests d'intégration soft-delete : `should_soft_delete_user_when_password_correct`, `should_reject_when_password_incorrect`, `should_reject_when_confirmed_false`, `should_reject_when_last_admin`, `should_succeed_when_admin_not_alone`, `should_block_login_after_soft_delete`, `should_revoke_all_refresh_tokens_on_soft_delete`, `should_keep_user_data_after_soft_delete` — Réf: SC-009, SC-010, **W-004 du review-spec** (admin non-seul OK)
-- [ ] [T-063] [P] [P3] [US5] Créer `features/settings/account/delete-account-confirm-dialog.component.ts` (form MDP + checkbox + bouton désactivé conditionnellement) — Réf: FR-018
-- [ ] [T-064] [P3] [US5] Étendre `core/services/user.service.ts` avec `deleteAccount(req)` + `authService.logout()` + redirect `/login` après succès — Réf: FR-018 (dépend T-063)
-- [ ] [T-065] [P] [P3] [US5] Créer `flutter/.../delete_account_sheet.dart` bottom sheet (parité Angular) — Réf: FR-018, NFR-005
-- [ ] [T-066] [P3] [US5] Étendre `UserProfileRepositoryRemote` Flutter avec `deleteAccount(req)` + redirection après succès — Réf: FR-018, NFR-005
-- [ ] [T-067] [P3] [US5] Test E2E suppression compte (Angular + Flutter) : confirmation → déconnexion → tentative login échoue — Réf: SC-009
+- [x] [T-059] [P] [P3] [US5] Créer DTO `dto/request/DeleteAccountRequest.java` (`@NotBlank currentPassword` + `@AssertTrue boolean confirmed`) — Réf: FR-018
+- [x] [T-060] [P3] [US5] Créer `service/UserDeletionService.java` méthode `softDelete(User, DeleteAccountRequest)` : check confirmed → BCrypt verify → check `countActiveAdmins() > 1` si admin → set `disabledAt = now()` → `revokeAllUserTokens` → log INFO — Réf: FR-018, FR-019, FR-020, FR-021, FR-022
+- [x] [T-061] [P3] [US5] Ajouter endpoint `DELETE /api/users/me` dans `UserController` retournant 204 — Réf: FR-018
+- [x] [T-062] [P3] [US5] Tests d'intégration soft-delete : `should_soft_delete_user_when_password_correct`, `should_reject_when_password_incorrect`, `should_reject_when_confirmed_false`, `should_reject_when_last_admin`, `should_succeed_when_admin_not_alone`, `should_block_login_after_soft_delete`, `should_revoke_all_refresh_tokens_on_soft_delete`, `should_keep_user_data_after_soft_delete` — Réf: SC-009, SC-010, **W-004 du review-spec** (admin non-seul OK)
+- [x] [T-063] [P] [P3] [US5] Créer `features/settings/account/delete-account-confirm-dialog.component.ts` (form MDP + checkbox + bouton désactivé conditionnellement) — Réf: FR-018
+- [x] [T-064] [P3] [US5] Étendre `core/services/user.service.ts` avec `deleteAccount(req)` + `authService.logout()` + redirect `/login` après succès — Réf: FR-018 (dépend T-063)
+- [x] [T-065] [P] [P3] [US5] Créer `flutter/.../delete_account_sheet.dart` bottom sheet (parité Angular) — Réf: FR-018, NFR-005
+- [x] [T-066] [P3] [US5] Étendre `UserProfileRepositoryRemote` Flutter avec `deleteAccount(req)` + redirection après succès — Réf: FR-018, NFR-005
+- [x] [T-067] [P3] [US5] Test E2E suppression compte (Angular + Flutter) : confirmation → déconnexion → tentative login échoue — Réf: SC-009
 
 **Checkpoint** : Tous les FR-001 à FR-025 ont au moins une tâche couverte. Tests d'intégration backend passent (nominal + erreurs). Tests E2E par US passent.
 
