@@ -4,9 +4,12 @@ import fr.kksdev.budget.api.dto.request.ChangePasswordRequest;
 import fr.kksdev.budget.api.dto.request.UpdateProfileRequest;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
 import fr.kksdev.budget.api.dto.response.AvatarMetadataResponse;
+import fr.kksdev.budget.api.dto.response.UserExportResponse;
 import fr.kksdev.budget.api.dto.response.UserResponse;
+import fr.kksdev.budget.api.exception.InvalidExportFormatException;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.service.AvatarStorageService;
+import fr.kksdev.budget.api.service.UserExportService;
 import fr.kksdev.budget.api.service.UserPasswordService;
 import fr.kksdev.budget.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,13 +17,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +38,7 @@ public class UserController {
     private final UserService userService;
     private final AvatarStorageService avatarStorageService;
     private final UserPasswordService userPasswordService;
+    private final UserExportService userExportService;
 
     @Operation(summary = "Consulter le profil de l'utilisateur connecté")
     @GetMapping("/me")
@@ -102,6 +109,33 @@ public class UserController {
         User user = resolveUser(authentication);
         AuthResponse response = userPasswordService.changePassword(user, request);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Exporter les données de l'utilisateur connecté (JSON ou CSV)")
+    @GetMapping("/me/export")
+    public ResponseEntity<?> exportData(
+            Authentication authentication,
+            @RequestParam("format") String format) {
+        User user = resolveUser(authentication);
+        String filenameDate = LocalDate.now().toString().replace("-", "");
+
+        if ("json".equalsIgnoreCase(format)) {
+            UserExportResponse response = userExportService.exportJson(user);
+            String filename = "kbudget-export-" + user.getId() + "-" + filenameDate + ".json";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
+        } else if ("csv".equalsIgnoreCase(format)) {
+            StreamingResponseBody stream = out -> userExportService.exportCsv(user, out);
+            String filename = "kbudget-transactions-" + user.getId() + "-" + filenameDate + ".csv";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType("text/csv;charset=utf-8"))
+                    .body(stream);
+        } else {
+            throw new InvalidExportFormatException();
+        }
     }
 
     private User resolveUser(Authentication authentication) {

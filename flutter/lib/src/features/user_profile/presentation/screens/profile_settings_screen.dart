@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_notifier.dart';
+import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/avatar_picker.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/change_password_sheet.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/profile_settings_skeleton.dart';
@@ -73,6 +74,8 @@ class _ProfileSettingsScreenState
           onChangePassword: _openChangePassword,
           onAvatarChanged: () =>
               ref.read(userProfileNotifierProvider.notifier).loadProfile(),
+          onExportJson: _exportJson,
+          onExportCsv: _exportCsv,
         ),
       ),
     );
@@ -122,6 +125,53 @@ class _ProfileSettingsScreenState
     await ChangePasswordSheet.show(context);
     // Les tokens sont déjà mis à jour dans la sheet en cas de succès
   }
+
+  Future<void> _exportJson() async {
+    await _runExport(
+      action: () async {
+        final repo =
+            await ref.read(userProfileRepositoryProvider.future);
+        return repo.exportJson();
+      },
+      successLabel: 'Export JSON téléchargé',
+    );
+  }
+
+  Future<void> _exportCsv() async {
+    await _runExport(
+      action: () async {
+        final repo =
+            await ref.read(userProfileRepositoryProvider.future);
+        return repo.exportCsv();
+      },
+      successLabel: 'Export CSV téléchargé',
+    );
+  }
+
+  Future<void> _runExport({
+    required Future<dynamic> Function() action,
+    required String successLabel,
+  }) async {
+    if (!mounted) return;
+    try {
+      final file = await action();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$successLabel\n${file.path}'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } on Exception catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de l\'export : $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -136,6 +186,8 @@ class _ProfileContent extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onChangePassword;
   final VoidCallback onAvatarChanged;
+  final VoidCallback onExportJson;
+  final VoidCallback onExportCsv;
 
   const _ProfileContent({
     required this.user,
@@ -145,6 +197,8 @@ class _ProfileContent extends StatelessWidget {
     required this.onLogout,
     required this.onChangePassword,
     required this.onAvatarChanged,
+    required this.onExportJson,
+    required this.onExportCsv,
   });
 
   String get _initials {
@@ -218,6 +272,28 @@ class _ProfileContent extends StatelessWidget {
           icon: PhosphorIconsRegular.lock,
           label: 'Changer le mot de passe',
           onTap: onChangePassword,
+          theme: theme,
+        ),
+
+        const SizedBox(height: AppSpacing.space8),
+        const Divider(),
+        const SizedBox(height: AppSpacing.space4),
+
+        // ── Section Données ──────────────────────────────────────────────
+        _SectionHeader(label: 'Données', theme: theme),
+        const SizedBox(height: AppSpacing.space3),
+
+        _ActionRow(
+          icon: PhosphorIconsRegular.database,
+          label: 'Exporter mes données (JSON)',
+          onTap: onExportJson,
+          theme: theme,
+        ),
+
+        _ActionRow(
+          icon: PhosphorIconsRegular.fileCsv,
+          label: 'Exporter mes transactions (CSV)',
+          onTap: onExportCsv,
           theme: theme,
         ),
 

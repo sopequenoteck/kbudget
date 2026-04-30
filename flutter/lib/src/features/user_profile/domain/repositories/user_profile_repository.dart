@@ -19,4 +19,14 @@ abstract class UserProfileRepository {
 
   /// Met à jour le nom de profil (PUT /users/me).
   Future<void> updateName(String name);
+
+  /// Exporte toutes les données utilisateur au format JSON
+  /// (GET /users/me/export?format=json).
+  /// Sauvegarde le fichier localement et retourne le [File].
+  Future<File> exportJson();
+
+  /// Exporte les transactions au format CSV
+  /// (GET /users/me/export?format=csv).
+  /// Sauvegarde le fichier localement et retourne le [File].
+  Future<File> exportCsv();
 }

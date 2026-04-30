@@ -17,12 +17,16 @@ import {
   phosphorPencil,
   phosphorCheck,
   phosphorX,
+  phosphorDownloadSimple,
+  phosphorFileCsv,
+  phosphorDatabase,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
 import { UserService } from '../../../core/services/user';
 import { AvatarService } from '../../../core/services/avatar.service';
+import { UserExportService } from '../../../core/services/user-export.service';
 import { AvatarUploadComponent } from '../../../lib/avatar-upload/avatar-upload.component';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 
@@ -44,6 +48,9 @@ import { ChangePasswordDialogComponent } from './change-password-dialog.componen
       phosphorPencil,
       phosphorCheck,
       phosphorX,
+      phosphorDownloadSimple,
+      phosphorFileCsv,
+      phosphorDatabase,
     }),
   ],
   templateUrl: './mon-compte.component.html',
@@ -54,6 +61,7 @@ export class MonCompteComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly avatarService = inject(AvatarService);
+  private readonly userExportService = inject(UserExportService);
   private readonly router = inject(Router);
 
   readonly changePasswordDialog = viewChild.required(ChangePasswordDialogComponent);
@@ -61,6 +69,8 @@ export class MonCompteComponent implements OnInit {
   readonly currentUser = computed(() => this.authService.currentUser());
   readonly avatarUrl = computed(() => this.avatarService.avatarUrl());
   readonly isUploadingAvatar = signal(false);
+  readonly isExportingJson = signal(false);
+  readonly isExportingCsv = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   // Inline name edition
@@ -155,6 +165,34 @@ export class MonCompteComponent implements OnInit {
       // AuthService.saveAuthResponse already called in UserService.changePassword
       // Show success feedback
       this.errorMessage.set(null);
+    }
+  }
+
+  // ===== Export =====
+
+  async onExportJson(): Promise<void> {
+    if (this.isExportingJson()) return;
+    this.isExportingJson.set(true);
+    this.errorMessage.set(null);
+    try {
+      await firstValueFrom(this.userExportService.exportJson());
+    } catch {
+      this.errorMessage.set('Erreur lors de l\'export JSON. Veuillez réessayer.');
+    } finally {
+      this.isExportingJson.set(false);
+    }
+  }
+
+  async onExportCsv(): Promise<void> {
+    if (this.isExportingCsv()) return;
+    this.isExportingCsv.set(true);
+    this.errorMessage.set(null);
+    try {
+      await firstValueFrom(this.userExportService.exportCsv());
+    } catch {
+      this.errorMessage.set('Erreur lors de l\'export CSV. Veuillez réessayer.');
+    } finally {
+      this.isExportingCsv.set(false);
     }
   }
 

@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface BudgetSnapshotRepository extends JpaRepository<BudgetSnapshot, UUID> {
 
     List<BudgetSnapshot> findByUserIdAndMois(UUID userId, String mois);
+
+    List<BudgetSnapshot> findByUserId(UUID userId);
 }

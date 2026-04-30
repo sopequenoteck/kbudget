@@ -38,8 +38,15 @@ void main() {
       expect(find.text('Identité'), findsOneWidget);
       // Section Sécurité
       expect(find.text('Sécurité'), findsOneWidget);
-      // Section Zone de danger (peut être hors écran, skipOffstage:false)
-      expect(find.text('Zone de danger', skipOffstage: false), findsOneWidget);
+      // Section Données (skipOffstage:false car peut être hors écran)
+      expect(find.text('Données', skipOffstage: false), findsOneWidget);
+      // Section Zone de danger — scroller pour rendre les items lazily
+      await tester.scrollUntilVisible(
+        find.text('Zone de danger'),
+        500,
+        scrollable: find.byType(Scrollable),
+      );
+      expect(find.text('Zone de danger'), findsOneWidget);
     });
 
     testWidgets('should_showLogoutRow_when_userLoaded', (tester) async {
@@ -67,7 +74,12 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('Déconnexion', skipOffstage: false), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Déconnexion'),
+        500,
+        scrollable: find.byType(Scrollable),
+      );
+      expect(find.text('Déconnexion'), findsOneWidget);
     });
 
     testWidgets('should_showChangePasswordRow_when_userLoaded', (tester) async {
@@ -95,7 +107,9 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('Changer le mot de passe', skipOffstage: false), findsOneWidget);
+      expect(
+          find.text('Changer le mot de passe', skipOffstage: false),
+          findsOneWidget);
     });
 
     testWidgets('should_showAdminLabel_when_emailDisplayed', (tester) async {
@@ -124,6 +138,96 @@ void main() {
       await tester.pump();
 
       expect(find.text('Géré par l\'administrateur'), findsOneWidget);
+    });
+
+    testWidgets('should_showDataSection_when_userLoaded', (tester) async {
+      const testUser = User(
+        id: 'test-id',
+        email: 'kelly@example.com',
+        name: 'Kelly',
+        defaultCurrency: Currency.eur,
+        isAdmin: false,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProfileNotifierProvider.overrideWith(
+              () => _MockUserProfileNotifier(testUser),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ProfileSettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Données', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('should_showExportJsonRow_when_userLoaded', (tester) async {
+      const testUser = User(
+        id: 'test-id',
+        email: 'kelly@example.com',
+        name: 'Kelly',
+        defaultCurrency: Currency.eur,
+        isAdmin: false,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProfileNotifierProvider.overrideWith(
+              () => _MockUserProfileNotifier(testUser),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ProfileSettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('Exporter mes données (JSON)', skipOffstage: false),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('should_showExportCsvRow_when_userLoaded', (tester) async {
+      const testUser = User(
+        id: 'test-id',
+        email: 'kelly@example.com',
+        name: 'Kelly',
+        defaultCurrency: Currency.eur,
+        isAdmin: false,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProfileNotifierProvider.overrideWith(
+              () => _MockUserProfileNotifier(testUser),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const ProfileSettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('Exporter mes transactions (CSV)', skipOffstage: false),
+        findsOneWidget,
+      );
     });
   });
 }

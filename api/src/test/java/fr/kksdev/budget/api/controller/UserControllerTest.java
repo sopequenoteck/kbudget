@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.response.AuthResponse;
+import fr.kksdev.budget.api.dto.response.UserExportResponse;
 import fr.kksdev.budget.api.dto.response.UserResponse;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
 import fr.kksdev.budget.api.exception.InvalidImageFormatException;
@@ -13,6 +14,7 @@ import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import fr.kksdev.budget.api.service.AvatarStorageService;
+import fr.kksdev.budget.api.service.UserExportService;
 import fr.kksdev.budget.api.service.UserPasswordService;
 import fr.kksdev.budget.api.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +30,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,6 +59,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserPasswordService userPasswordService;
+
+    @MockitoBean
+    private UserExportService userExportService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -286,6 +295,48 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("PASSWORD_UNCHANGED"));
     }
+
+    // ---- GET /users/me/export ----
+
+    @Test
+    void should_export_json_when_format_json() throws Exception {
+        UserExportResponse exportResponse = new UserExportResponse(
+                "1.0.0",
+                Instant.now(),
+                new UserExportResponse.UserDto(userId.toString(), "test@mail.com", "Test", false, false, null, null),
+                null,
+                List.of(), List.of(), List.of(), List.of(), List.of(),
+                List.of(), List.of(), List.of(), List.of(), List.of(), List.of()
+        );
+        when(userExportService.exportJson(any(User.class))).thenReturn(exportResponse);
+
+        mockMvc.perform(get("/users/me/export")
+                        .param("format", "json")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("kbudget-export-")))
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(".json")))
+                .andExpect(jsonPath("$.schemaVersion").value("1.0.0"));
+    }
+
+    @Test
+    void should_reject_when_format_invalid() throws Exception {
+        mockMvc.perform(get("/users/me/export")
+                        .param("format", "xml")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_EXPORT_FORMAT"));
+    }
+
+    @Test
+    void should_reject_when_unauthenticated_on_export() throws Exception {
+        mockMvc.perform(get("/users/me/export")
+                        .param("format", "json"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // Note : le format CSV utilise StreamingResponseBody qui n'est pas rendu nativement par MockMvc
+    // Les tests CSV (BOM, traduction type, contenu) sont couverts par UserExportServiceTest
 
     // ---- Helpers ----
 

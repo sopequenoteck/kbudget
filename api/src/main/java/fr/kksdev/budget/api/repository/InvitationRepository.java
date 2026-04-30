@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     Optional<Invitation> findByToken(UUID token);
     List<Invitation> findAllByOrderByCreatedAtDesc();
+
+    List<Invitation> findByInvitedById(UUID userId);
 }

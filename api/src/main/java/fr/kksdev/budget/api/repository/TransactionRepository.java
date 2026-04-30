@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
+    List<Transaction> findByUserIdOrderByDateDesc(UUID userId);
+
     List<Transaction> findByUserIdAndIsRecurringFalseOrderByDateDesc(UUID userId);
 
     List<Transaction> findByUserIdAndIsRecurringFalseAndDateBetweenOrderByDateDesc(UUID userId, LocalDate from, LocalDate to);

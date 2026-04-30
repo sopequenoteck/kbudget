@@ -97,6 +97,16 @@
     flex-shrink: 0;
     white-space: nowrap;
   }
+
+  &__export-spinner {
+    animation: spin 1s linear infinite;
+    display: flex;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 // Reprise locale des classes settings.scss pour éviter la dépendance aux styles globaux du parent

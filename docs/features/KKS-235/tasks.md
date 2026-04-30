@@ -99,15 +99,15 @@
 
 > Couvre FR-014, FR-015, FR-016, FR-017, FR-017a, NFR-004, SC-007, SC-008, W-003 (perf JSON), R-007 (no password leak), I-004 (inclure invitations)
 
-- [ ] [T-050] [P] [P2] [US4] Créer DTOs `dto/response/UserExportResponse.java` (record top-level avec `schemaVersion`, `exportedAt`, et tous les sous-DTOs) — Réf: FR-016, FR-017a, contracts.md, R-007 (DTO `UserDto` SANS password)
-- [ ] [T-051] [P2] [US4] Créer `service/UserExportService.java` méthode `exportJson(User) → UserExportResponse` (charge toutes entités via repositories existants, INCLUT `invitations` — résout I-004) — Réf: FR-014, FR-016, I-004
-- [ ] [T-052] [P2] [US4] Créer méthode `UserExportService.exportCsv(User, OutputStream)` (CSVPrinter + BOM UTF-8 + traduction Type français + streaming) — Réf: FR-015, FR-017
-- [ ] [T-053] [P] [P2] [US4] Ajouter endpoint `GET /api/users/me/export?format=json` dans `UserController` (Content-Disposition attachment) — Réf: FR-014
-- [ ] [T-054] [P] [P2] [US4] Ajouter endpoint `GET /api/users/me/export?format=csv` dans `UserController` (StreamingResponseBody) — Réf: FR-015
-- [ ] [T-055] [P2] [US4] Tests d'intégration export : `should_export_all_user_entities_when_format_json`, `should_export_transactions_only_when_format_csv`, `should_translate_transaction_type_in_csv`, `should_include_utf8_bom_in_csv`, `should_not_expose_password_hash_in_export`, `should_include_invitations_in_export` — Réf: SC-007, R-007, I-004
-- [ ] [T-056] [P] [P2] [US4] Créer `core/services/user-export.service.ts` Angular (méthodes `exportJson`/`exportCsv` avec déclenchement download via blob URL) + intégrer boutons dans MonCompte section Données — Réf: FR-014, FR-015 (dépend T-021)
-- [ ] [T-057] [P] [P2] [US4] Étendre `UserProfileRepositoryRemote` Flutter avec `exportJson`/`exportCsv` + intégrer boutons dans `ProfileSettingsScreen` section Données + sauvegarde locale via `path_provider`/`share_plus` — Réf: FR-014, FR-015, NFR-005
-- [ ] [T-058] [P2] [US4] Test de charge dédié export JSON sur 10 000 transactions (vérification SC-008 perf < 5 s) **et** SC additionnel ajouté pour export JSON ; documentation des résultats dans `docs/manual-test-plan.md` — Réf: NFR-004, SC-008, **W-003 du review-spec** (perf JSON)
+- [x] [T-050] [P] [P2] [US4] Créer DTOs `dto/response/UserExportResponse.java` (record top-level avec `schemaVersion`, `exportedAt`, et tous les sous-DTOs) — Réf: FR-016, FR-017a, contracts.md, R-007 (DTO `UserDto` SANS password)
+- [x] [T-051] [P2] [US4] Créer `service/UserExportService.java` méthode `exportJson(User) → UserExportResponse` (charge toutes entités via repositories existants, INCLUT `invitations` — résout I-004) — Réf: FR-014, FR-016, I-004
+- [x] [T-052] [P2] [US4] Créer méthode `UserExportService.exportCsv(User, OutputStream)` (CSVPrinter + BOM UTF-8 + traduction Type français + streaming) — Réf: FR-015, FR-017
+- [x] [T-053] [P] [P2] [US4] Ajouter endpoint `GET /api/users/me/export?format=json` dans `UserController` (Content-Disposition attachment) — Réf: FR-014
+- [x] [T-054] [P] [P2] [US4] Ajouter endpoint `GET /api/users/me/export?format=csv` dans `UserController` (StreamingResponseBody) — Réf: FR-015
+- [x] [T-055] [P2] [US4] Tests d'intégration export : `should_export_all_user_entities_when_format_json`, `should_export_transactions_only_when_format_csv`, `should_translate_transaction_type_in_csv`, `should_include_utf8_bom_in_csv`, `should_not_expose_password_hash_in_export`, `should_include_invitations_in_export` — Réf: SC-007, R-007, I-004
+- [x] [T-056] [P] [P2] [US4] Créer `core/services/user-export.service.ts` Angular (méthodes `exportJson`/`exportCsv` avec déclenchement download via blob URL) + intégrer boutons dans MonCompte section Données — Réf: FR-014, FR-015 (dépend T-021)
+- [x] [T-057] [P] [P2] [US4] Étendre `UserProfileRepositoryRemote` Flutter avec `exportJson`/`exportCsv` + intégrer boutons dans `ProfileSettingsScreen` section Données + sauvegarde locale via `path_provider`/`share_plus` — Réf: FR-014, FR-015, NFR-005
+- [x] [T-058] [P2] [US4] Test de charge dédié export JSON sur 10 000 transactions (vérification SC-008 perf < 5 s) **et** SC additionnel ajouté pour export JSON ; documentation des résultats dans `docs/manual-test-plan.md` — Réf: NFR-004, SC-008, **W-003 du review-spec** (perf JSON)
 
 ### P3 — Nice to have
 

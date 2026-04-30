@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.exception.FileTooLargeException;
+import fr.kksdev.budget.api.exception.InvalidExportFormatException;
 import fr.kksdev.budget.api.exception.InvalidImageFormatException;
 import fr.kksdev.budget.api.exception.PasswordIncorrectException;
 import fr.kksdev.budget.api.exception.PasswordResetNotRequiredException;
@@ -152,6 +153,13 @@ public class GlobalExceptionHandler {
         log.warn("Password incorrect: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("PASSWORD_INCORRECT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidExportFormatException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidExportFormat(InvalidExportFormatException ex) {
+        log.warn("Invalid export format: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_EXPORT_FORMAT", ex.getMessage()));
     }
 
     @ExceptionHandler(PasswordUnchangedException.class)
