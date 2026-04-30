@@ -1,9 +1,13 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.exception.AvatarNotFoundException;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
+import fr.kksdev.budget.api.exception.FileTooLargeException;
+import fr.kksdev.budget.api.exception.InvalidImageFormatException;
+import fr.kksdev.budget.api.exception.PasswordIncorrectException;
 import fr.kksdev.budget.api.exception.PasswordResetNotRequiredException;
 import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
@@ -120,6 +124,34 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 message
         ));
+    }
+
+    @ExceptionHandler(InvalidImageFormatException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidImageFormat(InvalidImageFormatException ex) {
+        log.warn("Invalid image format: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FileTooLargeException.class)
+    public ResponseEntity<ErrorResponse> handleFileTooLarge(FileTooLargeException ex) {
+        log.warn("File too large: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(new ErrorResponse("FILE_TOO_LARGE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundException ex) {
+        log.warn("Avatar not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("AVATAR_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordIncorrectException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordIncorrect(PasswordIncorrectException ex) {
+        log.warn("Password incorrect: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("PASSWORD_INCORRECT", ex.getMessage()));
     }
 
     @ExceptionHandler(PasswordUnchangedException.class)

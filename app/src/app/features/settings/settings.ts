@@ -24,7 +24,6 @@ import {
   phosphorBank,
   phosphorTag,
   phosphorCamera,
-  phosphorSignOut,
   phosphorChartPie,
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
@@ -86,7 +85,6 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
       phosphorBank,
       phosphorTag,
       phosphorCamera,
-      phosphorSignOut,
       phosphorChartPie,
       phosphorUsers,
     }),

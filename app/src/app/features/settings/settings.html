@@ -5,23 +5,26 @@
       <div class="settings-avatar__circle">
         <span class="settings-avatar__initials">{{ getInitials(user.name) }}</span>
       </div>
-      <button class="settings-avatar__camera" aria-label="Modifier la photo">
-        <ng-icon name="phosphorCamera" size="14" />
-      </button>
     </div>
     <span class="settings-account__name">{{ user.name }}</span>
     <span class="settings-account__email">{{ user.email }}</span>
   }
-  <button class="settings-account__signout">
-    <ng-icon name="phosphorSignOut" size="16" />
-    Déconnexion
-  </button>
 </div>
 
 <!-- ===== SECTION 2 : GESTION ===== -->
 <div class="settings-section">
   <div class="settings-section__label">GESTION</div>
   <div class="settings-section__container">
+    <a class="settings-row settings-row--link" routerLink="account">
+      <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+        <ng-icon name="phosphorCamera" size="20" />
+      </span>
+      <div class="settings-row__content">
+        <span class="settings-row__title">Mon compte</span>
+        <span class="settings-row__description">Profil, sécurité, déconnexion</span>
+      </div>
+      <span class="settings-row__chevron">›</span>
+    </a>
     <a class="settings-row settings-row--link" routerLink="accounts">
       <span class="settings-row__icon" style="background: #14b8a626; color: #14b8a6">
         <ng-icon name="phosphorBank" size="20" />

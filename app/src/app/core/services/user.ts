@@ -3,6 +3,13 @@ import { Observable, tap } from 'rxjs';
 import { ApiService } from './api';
 import { AuthService } from './auth';
 import { UserInfo } from '../models/user.model';
+import { UpdateProfileRequest } from '../models/update-profile-request.model';
+import { AuthResponse } from '../models/auth.model';
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -27,5 +34,22 @@ export class UserService {
     return this.api
       .put<UserInfo>('/users/me', { defaultCurrency: currency })
       .pipe(tap((profile) => this._profile.set(profile)));
+  }
+
+  updateProfile(req: UpdateProfileRequest): Observable<UserInfo> {
+    return this.api.put<UserInfo>('/users/me', req).pipe(
+      tap((profile) => {
+        this._profile.set(profile);
+        this.authService.patchUserInfo({ name: profile.name });
+      }),
+    );
+  }
+
+  changePassword(req: ChangePasswordRequest): Observable<AuthResponse> {
+    return this.api.post<AuthResponse>('/users/me/password', req).pipe(
+      tap((response) => {
+        this.authService.saveAuthResponse(response);
+      }),
+    );
   }
 }

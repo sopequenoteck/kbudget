@@ -1,6 +1,6 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.dto.request.UserUpdateRequest;
+import fr.kksdev.budget.api.dto.request.UpdateProfileRequest;
 import fr.kksdev.budget.api.dto.response.UserResponse;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
@@ -26,7 +26,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(UUID userId, UserUpdateRequest request) {
+    public UserResponse updateProfile(UUID userId, UpdateProfileRequest request) {
         User user = findById(userId);
         if (request.name() != null) {
             user.setName(request.name());
@@ -36,7 +36,7 @@ public class UserService {
         return toResponse(user);
     }
 
-    private User findById(UUID userId) {
+    public User findById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("Utilisateur non trouvé: userId={}", userId);

@@ -102,7 +102,7 @@ class AuthControllerFirstLoginResetIT {
         User user = createUserWithResetFlag("admin@test.com", "OldPass123!");
         String jwt = generateResetJwt(user.getEmail());
 
-        var request = new FirstLoginResetRequest("newadmin@test.com", "NewPass456!", "New Name");
+        var request = new FirstLoginResetRequest("newadmin@test.com", "NewPass4567890!", "New Name");
 
         mockMvc.perform(post("/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
@@ -186,7 +186,7 @@ class AuthControllerFirstLoginResetIT {
         // JWT sans le claim mustResetCredentials
         String jwt = generateNormalJwt(user.getEmail());
 
-        var request = new FirstLoginResetRequest("user@test.com", "NewPass456!", "User");
+        var request = new FirstLoginResetRequest("user@test.com", "NewPass4567890!", "User");
 
         mockMvc.perform(post("/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
@@ -205,7 +205,7 @@ class AuthControllerFirstLoginResetIT {
         createNormalUser("taken@test.com", "AnotherPass1!");
 
         String jwt = generateResetJwt(admin.getEmail());
-        var request = new FirstLoginResetRequest("taken@test.com", "NewPass456!", "Admin");
+        var request = new FirstLoginResetRequest("taken@test.com", "NewPass4567890!", "Admin");
 
         mockMvc.perform(post("/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
@@ -222,7 +222,7 @@ class AuthControllerFirstLoginResetIT {
         User user = createUserWithResetFlag("admin@test.com", "OldPass123!");
         String jwt = generateResetJwt(user.getEmail());
 
-        var request = new FirstLoginResetRequest("admin@test.com", "NewPass456!", "Admin");
+        var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
 
         mockMvc.perform(post("/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
@@ -249,7 +249,7 @@ class AuthControllerFirstLoginResetIT {
                 .andExpect(jsonPath("$.error").value("PASSWORD_RESET_REQUIRED"));
 
         // Reset endpoint → 200 OK malgré le claim
-        var request = new FirstLoginResetRequest("admin@test.com", "NewPass456!", "Admin");
+        var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
         mockMvc.perform(post("/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -261,7 +261,7 @@ class AuthControllerFirstLoginResetIT {
 
     @Test
     void should_return_401_when_no_jwt() throws Exception {
-        var request = new FirstLoginResetRequest("admin@test.com", "NewPass456!", "Admin");
+        var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
 
         mockMvc.perform(post("/auth/first-login-reset")
                         .contentType(MediaType.APPLICATION_JSON)

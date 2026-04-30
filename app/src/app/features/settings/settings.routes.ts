@@ -4,6 +4,11 @@ import { Settings } from './settings';
 export const SETTINGS_ROUTES: Routes = [
   { path: '', component: Settings },
   {
+    path: 'account',
+    loadComponent: () =>
+      import('./account/mon-compte.component').then((m) => m.MonCompteComponent),
+  },
+  {
     path: 'accounts',
     loadComponent: () => import('./components/accounts/accounts').then((m) => m.Accounts),
   },

@@ -52,46 +52,46 @@
 
 > Couvre FR-001, FR-002, FR-012, FR-013, NFR-001, NFR-005, NFR-009, SC-001, SC-002, SC-011
 
-- [ ] [T-020] [P] [P1] [US1] Créer route lazy-loaded `/settings/account` dans `app/src/app/features/settings/settings.routes.ts` — Réf: FR-001
-- [ ] [T-021] [P] [P1] [US1] Créer skeleton `MonCompteComponent` (HTML/SCSS standalone OnPush signals-first) avec 4 sections vides — Réf: FR-002
-- [ ] [T-022] [P1] [US1] Modifier `app/src/app/features/settings/settings.html` : ajouter ligne "Mon compte" → chevron vers `/settings/account` ; **retirer le bouton Déconnexion existant** (déplacé dans Mon compte) — Réf: FR-012 (bug fix)
-- [ ] [T-023] [P1] [US1] Brancher handler `logout()` dans `MonCompteComponent` (appel `authService.logout()` + `router.navigate(['/login'])` + résilience si `/auth/logout` échoue) — Réf: FR-012, FR-013
-- [ ] [T-024] [P] [P1] [US1] Ajouter row "Déconnexion" dans `flutter/lib/src/features/user_profile/presentation/screens/profile_settings_screen.dart` section "Zone de danger" — Réf: FR-012, NFR-005
-- [ ] [T-025] [P1] [US1] Test E2E Angular ciblé : login → settings → account → logout → redirect login (vérification SC-001, SC-011) — Réf: SC-001, SC-011
+- [x] [T-020] [P] [P1] [US1] Créer route lazy-loaded `/settings/account` dans `app/src/app/features/settings/settings.routes.ts` — Réf: FR-001
+- [x] [T-021] [P] [P1] [US1] Créer skeleton `MonCompteComponent` (HTML/SCSS standalone OnPush signals-first) avec 4 sections vides — Réf: FR-002
+- [x] [T-022] [P1] [US1] Modifier `app/src/app/features/settings/settings.html` : ajouter ligne "Mon compte" → chevron vers `/settings/account` ; **retirer le bouton Déconnexion existant** (déplacé dans Mon compte) — Réf: FR-012 (bug fix)
+- [x] [T-023] [P1] [US1] Brancher handler `logout()` dans `MonCompteComponent` (appel `authService.logout()` + `router.navigate(['/login'])` + résilience si `/auth/logout` échoue) — Réf: FR-012, FR-013
+- [x] [T-024] [P] [P1] [US1] Ajouter row "Déconnexion" dans `flutter/lib/src/features/user_profile/presentation/screens/profile_settings_screen.dart` section "Zone de danger" — Réf: FR-012, NFR-005
+- [x] [T-025] [P1] [US1] Test E2E Angular ciblé : login → settings → account → logout → redirect login (vérification SC-001, SC-011) — Réf: SC-001, SC-011
 - [ ] [T-026] [P] [P1] [US1] Documenter scénarios manuels US-001 dans `docs/manual-test-plan.md` — Réf: SC-001
 
 #### US-002 — Modifier identité (nom + avatar)
 
 > Couvre FR-003, FR-004, FR-005, FR-006, FR-007, NFR-002, NFR-006, NFR-008, SC-003, SC-004
 
-- [ ] [T-027] [P] [P1] [US2] Renommer `dto/request/UpdateUserRequest.java` → `UpdateProfileRequest.java` + ajouter commentaire de garde "Self-service profile fields ONLY. Email is admin-managed (cf. KKS-235 §FR-007)" — Réf: FR-003, FR-007, RES-007, I-001
-- [ ] [T-028] [P1] [US2] Adapter callsites de `UpdateProfileRequest` dans `UserController` et tests — Réf: FR-003 (dépend de T-027)
-- [ ] [T-029] [P] [P1] [US2] Créer DTO `dto/response/AvatarMetadataResponse.java` — Réf: contracts.md
-- [ ] [T-030] [P1] [US2] Créer `service/AvatarStorageService.java` : méthodes `store`, `read`, `delete`, `computeEtag` + `@PostConstruct` création dossier — Réf: FR-004, FR-005, FR-006, NFR-002, NFR-006, NFR-008, FR-022 (logs INFO)
-- [ ] [T-031] [P1] [US2] Ajouter endpoint `POST /api/users/me/avatar` dans `UserController` (multipart, validation MIME, redim Thumbnailator, stocker path, return AvatarMetadataResponse) — Réf: FR-004
-- [ ] [T-032] [P1] [US2] Ajouter endpoint `GET /api/users/me/avatar` dans `UserController` (lecture binaire + ETag SHA-256 + If-None-Match → 304) — Réf: FR-005, RES-004
-- [ ] [T-033] [P1] [US2] Ajouter endpoint `DELETE /api/users/me/avatar` dans `UserController` — Réf: FR-006
-- [ ] [T-034] [P1] [US2] Tests d'intégration avatar : `should_upload_avatar_when_valid_jpg`, `should_reject_when_invalid_mime`, `should_reject_when_file_too_large`, `should_serve_avatar_with_etag`, `should_return_304_when_etag_matches`, `should_delete_avatar_when_authenticated` — Réf: SC-004
-- [ ] [T-035] [P1] [US2] Tests unitaires `AvatarStorageService` (toutes orientations EXIF couvertes) + `ImageMimeValidator` (JPG, PNG, GIF rejeté, fichier maquillé rejeté) — Réf: R-003, NFR-002
-- [ ] [T-036] [P] [P1] [US2] Créer composant `lib/avatar-upload/avatar-upload.component.{ts,html,scss}` (signals-first, inputs `currentAvatarUrl`/`userInitials`, outputs `upload`/`delete`/`validationError`) — Réf: FR-004, FR-006, RES-010
-- [ ] [T-037] [P] [P1] [US2] Créer `core/services/avatar.service.ts` (méthodes `upload`, `delete`, `getUrl` + signals `avatarUrl`/`etag`) — Réf: FR-004, FR-005, FR-006
-- [ ] [T-038] [P1] [US2] Implémenter section Identité dans `MonCompteComponent` (intégration `<app-avatar-upload>` + champ nom inline éditable + champ email read-only avec mention "Géré par l'admin") — Réf: FR-003, FR-007 (dépend T-021, T-036, T-037)
-- [ ] [T-039] [P] [P1] [US2] Créer widget Flutter `flutter/lib/src/features/user_profile/presentation/widgets/avatar_picker.dart` (image_picker → flutter_image_compress → Dio upload) — Réf: FR-004, RES-012
-- [ ] [T-040] [P1] [US2] Étendre `ProfileSettingsScreen` Flutter section Identité + étendre `UserProfileRepositoryRemote` avec `uploadAvatar`/`deleteAvatar` — Réf: FR-003, FR-004, FR-006, NFR-005
+- [x] [T-027] [P] [P1] [US2] Renommer `dto/request/UpdateUserRequest.java` → `UpdateProfileRequest.java` + ajouter commentaire de garde "Self-service profile fields ONLY. Email is admin-managed (cf. KKS-235 §FR-007)" — Réf: FR-003, FR-007, RES-007, I-001
+- [x] [T-028] [P1] [US2] Adapter callsites de `UpdateProfileRequest` dans `UserController` et tests — Réf: FR-003 (dépend de T-027)
+- [x] [T-029] [P] [P1] [US2] Créer DTO `dto/response/AvatarMetadataResponse.java` — Réf: contracts.md
+- [x] [T-030] [P1] [US2] Créer `service/AvatarStorageService.java` : méthodes `store`, `read`, `delete`, `computeEtag` + `@PostConstruct` création dossier — Réf: FR-004, FR-005, FR-006, NFR-002, NFR-006, NFR-008, FR-022 (logs INFO)
+- [x] [T-031] [P1] [US2] Ajouter endpoint `POST /api/users/me/avatar` dans `UserController` (multipart, validation MIME, redim Thumbnailator, stocker path, return AvatarMetadataResponse) — Réf: FR-004
+- [x] [T-032] [P1] [US2] Ajouter endpoint `GET /api/users/me/avatar` dans `UserController` (lecture binaire + ETag SHA-256 + If-None-Match → 304) — Réf: FR-005, RES-004
+- [x] [T-033] [P1] [US2] Ajouter endpoint `DELETE /api/users/me/avatar` dans `UserController` — Réf: FR-006
+- [x] [T-034] [P1] [US2] Tests d'intégration avatar : `should_upload_avatar_when_valid_jpg`, `should_reject_when_invalid_mime`, `should_reject_when_file_too_large`, `should_serve_avatar_with_etag`, `should_return_304_when_etag_matches`, `should_delete_avatar_when_authenticated` — Réf: SC-004
+- [x] [T-035] [P1] [US2] Tests unitaires `AvatarStorageService` (toutes orientations EXIF couvertes) + `ImageMimeValidator` (JPG, PNG, GIF rejeté, fichier maquillé rejeté) — Réf: R-003, NFR-002
+- [x] [T-036] [P] [P1] [US2] Créer composant `lib/avatar-upload/avatar-upload.component.{ts,html,scss}` (signals-first, inputs `currentAvatarUrl`/`userInitials`, outputs `upload`/`delete`/`validationError`) — Réf: FR-004, FR-006, RES-010
+- [x] [T-037] [P] [P1] [US2] Créer `core/services/avatar.service.ts` (méthodes `upload`, `delete`, `getUrl` + signals `avatarUrl`/`etag`) — Réf: FR-004, FR-005, FR-006
+- [x] [T-038] [P1] [US2] Implémenter section Identité dans `MonCompteComponent` (intégration `<app-avatar-upload>` + champ nom inline éditable + champ email read-only avec mention "Géré par l'admin") — Réf: FR-003, FR-007 (dépend T-021, T-036, T-037)
+- [x] [T-039] [P] [P1] [US2] Créer widget Flutter `flutter/lib/src/features/user_profile/presentation/widgets/avatar_picker.dart` (image_picker → flutter_image_compress → Dio upload) — Réf: FR-004, RES-012
+- [x] [T-040] [P1] [US2] Étendre `ProfileSettingsScreen` Flutter section Identité + étendre `UserProfileRepositoryRemote` avec `uploadAvatar`/`deleteAvatar` — Réf: FR-003, FR-004, FR-006, NFR-005
 
 #### US-003 — Changer son mot de passe
 
 > Couvre FR-008, FR-009, FR-010, FR-011, FR-023, FR-024, FR-025, SC-005, SC-006, W-002
 
-- [ ] [T-041] [P] [P1] [US3] Créer DTO `dto/request/ChangePasswordRequest.java` (`@NotBlank currentPassword` + `@NotBlank @Size(min=12, max=100) newPassword`) — Réf: FR-008, FR-010
-- [ ] [T-042] [P] [P1] [US3] Modifier `dto/request/FirstLoginResetRequest.java` : passer `@Size(min=8)` à `@Size(min=12)` — Réf: FR-011
-- [ ] [T-043] [P1] [US3] Créer `service/UserPasswordService.java` avec méthode `changePassword(User, ChangePasswordRequest)` : BCrypt verify currentPassword → reject si identique → hash + persist → revoke refresh tokens → générer nouveau JWT + refresh + log INFO — Réf: FR-008, FR-009, FR-010, FR-022, FR-023, FR-024
-- [ ] [T-044] [P1] [US3] Ajouter endpoint `POST /api/users/me/password` dans `UserController` retournant `AuthResponse` — Réf: FR-008, FR-024
-- [ ] [T-045] [P1] [US3] Tests d'intégration change-password : `should_change_password_when_valid`, `should_reject_when_current_incorrect`, `should_reject_when_new_too_short`, `should_reject_when_new_equals_current`, `should_revoke_all_refresh_tokens_when_password_changed`, `should_return_new_jwt_when_password_changed`, `should_invalidate_old_refresh_token_after_change` — Réf: SC-005, SC-006, **W-002 du review-spec** (couverture nouveau JWT)
-- [ ] [T-046] [P] [P1] [US3] Créer `features/settings/account/change-password-dialog.component.ts` (form 3 champs + validation client min 12 + match) — Réf: FR-008
-- [ ] [T-047] [P1] [US3] Étendre `core/services/user.service.ts` avec `changePassword(req)` + appel mise à jour state Auth (nouveau JWT/refresh) — Réf: FR-008, FR-024 (dépend T-046)
-- [ ] [T-048] [P] [P1] [US3] Créer `flutter/lib/src/features/user_profile/presentation/widgets/change_password_sheet.dart` (bottom sheet) — Réf: FR-008
-- [ ] [T-049] [P1] [US3] Étendre `UserProfileRepositoryRemote` Flutter avec `changePassword(req)` + Notifier auth update — Réf: FR-008, NFR-005
+- [x] [T-041] [P] [P1] [US3] Créer DTO `dto/request/ChangePasswordRequest.java` (`@NotBlank currentPassword` + `@NotBlank @Size(min=12, max=100) newPassword`) — Réf: FR-008, FR-010
+- [x] [T-042] [P] [P1] [US3] Modifier `dto/request/FirstLoginResetRequest.java` : passer `@Size(min=8)` à `@Size(min=12)` — Réf: FR-011
+- [x] [T-043] [P1] [US3] Créer `service/UserPasswordService.java` avec méthode `changePassword(User, ChangePasswordRequest)` : BCrypt verify currentPassword → reject si identique → hash + persist → revoke refresh tokens → générer nouveau JWT + refresh + log INFO — Réf: FR-008, FR-009, FR-010, FR-022, FR-023, FR-024
+- [x] [T-044] [P1] [US3] Ajouter endpoint `POST /api/users/me/password` dans `UserController` retournant `AuthResponse` — Réf: FR-008, FR-024
+- [x] [T-045] [P1] [US3] Tests d'intégration change-password : `should_change_password_when_valid`, `should_reject_when_current_incorrect`, `should_reject_when_new_too_short`, `should_reject_when_new_equals_current`, `should_revoke_all_refresh_tokens_when_password_changed`, `should_return_new_jwt_when_password_changed`, `should_invalidate_old_refresh_token_after_change` — Réf: SC-005, SC-006, **W-002 du review-spec** (couverture nouveau JWT)
+- [x] [T-046] [P] [P1] [US3] Créer `features/settings/account/change-password-dialog.component.ts` (form 3 champs + validation client min 12 + match) — Réf: FR-008
+- [x] [T-047] [P1] [US3] Étendre `core/services/user.service.ts` avec `changePassword(req)` + appel mise à jour state Auth (nouveau JWT/refresh) — Réf: FR-008, FR-024 (dépend T-046)
+- [x] [T-048] [P] [P1] [US3] Créer `flutter/lib/src/features/user_profile/presentation/widgets/change_password_sheet.dart` (bottom sheet) — Réf: FR-008
+- [x] [T-049] [P1] [US3] Étendre `UserProfileRepositoryRemote` Flutter avec `changePassword(req)` + Notifier auth update — Réf: FR-008, NFR-005
 
 ### P2 — Importantes
 
