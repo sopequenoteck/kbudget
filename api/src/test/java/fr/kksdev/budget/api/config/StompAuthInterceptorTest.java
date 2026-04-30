@@ -57,7 +57,7 @@ class StompAuthInterceptorTest {
         var user = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("valid-token")).thenReturn(true);
         when(jwtUtil.extractEmail("valid-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(user));
 
         Message<?> result = interceptor.preSend(message, channel);
 

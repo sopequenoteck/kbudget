@@ -39,4 +39,7 @@ public class User {
 
     @Column(name = "password_reset_required", nullable = false)
     private boolean passwordResetRequired;
+
+    @Column(name = "avatar_path", length = 512)
+    private String avatarPath;
 }

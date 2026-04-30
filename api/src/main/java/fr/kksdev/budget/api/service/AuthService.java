@@ -30,7 +30,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findByEmailAndDisabledAtIsNull(request.email())
                 .orElseThrow(() -> {
                     log.error("Login failed for email: {}", request.email());
                     return new IllegalArgumentException("Email ou mot de passe incorrect");

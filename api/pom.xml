@@ -115,6 +115,12 @@
             <artifactId>commons-csv</artifactId>
             <version>1.11.0</version>
         </dependency>
+        <!-- Image processing (avatar resize + EXIF rotation) -->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>

@@ -43,14 +43,7 @@ class JwtFilterTest {
         String token = jwtUtil.generateToken(EMAIL);
         JwtFilter jwtFilter = new JwtFilter(jwtUtil, userRepository);
 
-        User disabledUser = User.builder()
-                .id(UUID.randomUUID())
-                .email(EMAIL)
-                .password("hashed")
-                .disabledAt(LocalDateTime.now().minusDays(1))
-                .build();
-
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(disabledUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull(EMAIL)).thenReturn(Optional.empty());
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);

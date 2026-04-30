@@ -59,7 +59,7 @@ class AdminInvitationControllerTest {
         adminUser = User.builder().id(userId).email("admin@example.com").name("Admin").isAdmin(true).build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("admin@example.com");
-        when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("admin@example.com")).thenReturn(Optional.of(adminUser));
         when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
     }
 

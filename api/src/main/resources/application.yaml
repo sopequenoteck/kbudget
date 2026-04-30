@@ -25,6 +25,9 @@ app:
   admin-emails: ${ADMIN_EMAILS:}
   bootstrap:
     email: ${BOOTSTRAP_EMAIL:admin@localhost}
+  storage:
+    avatars:
+      path: ${AVATAR_STORAGE_PATH:./data/avatars}
 
 server:
   port: 8080

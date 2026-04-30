@@ -61,7 +61,7 @@ class AuthServiceTest {
                 .passwordResetRequired(false)
                 .build();
 
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encoded")).thenReturn(true);
         when(jwtUtil.generateToken(eq("test@mail.com"), eq(Map.of()))).thenReturn("jwt-token");
         when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
@@ -85,7 +85,7 @@ class AuthServiceTest {
                 .passwordResetRequired(true)
                 .build();
 
-        when(userRepository.findByEmail("admin@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDisabledAtIsNull("admin@mail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("temp-password", "encoded")).thenReturn(true);
         when(jwtUtil.generateToken(eq("admin@mail.com"), eq(Map.of("mustResetCredentials", true))))
                 .thenReturn("jwt-with-claim");
@@ -102,7 +102,7 @@ class AuthServiceTest {
     void should_throw_when_email_not_found() {
         var request = new LoginRequest("unknown@mail.com", "password123");
 
-        when(userRepository.findByEmail("unknown@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDisabledAtIsNull("unknown@mail.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -119,7 +119,7 @@ class AuthServiceTest {
                 .password("encoded")
                 .build();
 
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongpassword", "encoded")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))

@@ -67,7 +67,7 @@ class TransactionControllerTest {
         testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     private AccountSummary buildAccountSummary() {
@@ -264,7 +264,7 @@ class TransactionControllerTest {
         // userA se connecte avec son propre token
         when(jwtUtil.isTokenValid("token-user-a")).thenReturn(true);
         when(jwtUtil.extractEmail("token-user-a")).thenReturn("usera@test.com");
-        when(userRepository.findByEmail("usera@test.com")).thenReturn(Optional.of(userA));
+        when(userRepository.findByEmailAndDisabledAtIsNull("usera@test.com")).thenReturn(Optional.of(userA));
 
         // Les libellés de userA
         List<String> libellesUserA = List.of("Salaire A", "Loyer A");

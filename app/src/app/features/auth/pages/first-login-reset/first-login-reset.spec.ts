@@ -150,10 +150,6 @@ describe('FirstLoginResetComponent', () => {
 
   it('should_set_isSubmitting_true_during_submit_and_false_on_error', async () => {
     // Arrange
-    let resolvePromise: () => void;
-    const pendingObs = new Promise<void>((resolve) => {
-      resolvePromise = resolve;
-    });
     authService.firstLoginReset.mockReturnValue(
       throwError(() => 'Une erreur est survenue'),
     );
