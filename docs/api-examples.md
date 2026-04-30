@@ -1329,9 +1329,13 @@ Response `200` :
 
 Le flag `isAdmin` est derive cote serveur via `AdminEmailResolver.isAdminEmail(user.email)`. Utilise par le frontend pour afficher conditionnellement la section `Settings > Utilisateurs`.
 
-### Modifier `PUT /api/users/me`
+## Mon compte (KKS-235)
 
-Request :
+> Endpoints proteges par JWT. Tous les endpoints operent sur le user authentifie (pas de path parameter `id`). Voir aussi [`api-errors.md`](api-errors.md) pour les codes d'erreur dedies (`INVALID_IMAGE_FORMAT`, `FILE_TOO_LARGE`, `AVATAR_NOT_FOUND`, `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`, `CONFIRMATION_REQUIRED`, `LAST_ADMIN_DELETION_FORBIDDEN`, `INVALID_EXPORT_FORMAT`).
+
+### Modifier le nom `PUT /api/users/me`
+
+Request (`UpdateProfileRequest`, header `Authorization: Bearer <token>`) :
 
 ```json
 {
@@ -1339,14 +1343,165 @@ Request :
 }
 ```
 
+> Seul le champ `name` est modifiable. L'email est en lecture seule cote backend (changement via flow dedie hors KKS-235).
+
 Response `200` :
 
 ```json
 {
   "name": "Kelly K.",
-  "email": "user@example.com"
+  "email": "user@example.com",
+  "isAdmin": true
 }
 ```
+
+Erreurs : `400` (validation Bean : `name` blank ou `> 100` chars).
+
+### Uploader un avatar `POST /api/users/me/avatar`
+
+Request (multipart/form-data, header `Authorization: Bearer <token>`) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `file` | File | Image JPG ou PNG (max 2 Mo) |
+
+Response `200` (`AvatarMetadataResponse`) :
+
+```json
+{
+  "url": "/api/users/me/avatar",
+  "etag": "9c1185a5",
+  "uploadedAt": "2026-04-27T10:30:00Z"
+}
+```
+
+Erreurs :
+- `400 INVALID_IMAGE_FORMAT` — type MIME non supporte (autre que `image/jpeg` ou `image/png`)
+- `413 FILE_TOO_LARGE` — fichier > 2 Mo
+
+### Recuperer l'avatar `GET /api/users/me/avatar`
+
+Headers requis :
+- `Authorization: Bearer <token>`
+- `If-None-Match: <etag>` (optionnel — pour le cache HTTP)
+
+Response `200` :
+- `Content-Type: image/jpeg` ou `image/png`
+- `ETag: <sha256-hex>` (calcule sur le binaire stocke)
+- Body : binaire de l'image
+
+Response `304 Not Modified` : si le header `If-None-Match` correspond a l'ETag courant. Pas de body.
+
+Response `404 AVATAR_NOT_FOUND` : aucun avatar configure pour ce user.
+
+### Supprimer l'avatar `DELETE /api/users/me/avatar`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `204` : avatar supprime cote disque + `users.avatar_path` remis a `null`.
+
+Response `404 AVATAR_NOT_FOUND` : aucun avatar a supprimer.
+
+### Changer de mot de passe `POST /api/users/me/password`
+
+Request (`ChangePasswordRequest`, header `Authorization: Bearer <token>`) :
+
+```json
+{
+  "currentPassword": "MotDePasseActuel123",
+  "newPassword": "NouveauMotDePasseFort456"
+}
+```
+
+> Le `currentPassword` est verifie via `BCryptPasswordEncoder.matches`. Le `newPassword` doit faire au moins 12 caracteres et etre different de l'actuel. La rotation invalide tous les refresh tokens existants et en emet de nouveaux.
+
+Response `200` (`AuthResponse` — meme format que `/api/auth/login`) :
+
+```json
+{
+  "token": "eyJhbGciOi...(nouveau)...",
+  "refreshToken": "a1b2c3d4...(nouveau)...",
+  "email": "user@example.com",
+  "name": "Kelly",
+  "mustResetCredentials": false
+}
+```
+
+Erreurs :
+- `400` — validation Bean (`newPassword` < 12 chars)
+- `400 PASSWORD_UNCHANGED` — le nouveau password est identique a l'actuel
+- `401 PASSWORD_INCORRECT` — le `currentPassword` ne correspond pas
+
+### Exporter ses donnees JSON `GET /api/users/me/export?format=json`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `200` :
+- `Content-Type: application/json; charset=utf-8`
+- `Content-Disposition: attachment; filename="k-budget-export-2026-04-27.json"`
+- Body (`UserExportResponse`) : backup complet des donnees du user.
+
+```json
+{
+  "exportedAt": "2026-04-27T10:30:00",
+  "user": {
+    "email": "user@example.com",
+    "name": "Kelly",
+    "createdAt": "2026-02-01T10:30:00"
+  },
+  "preferences": { "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"], "navOrder": ["..."], "currencies": ["EUR"] },
+  "accounts": [ { "id": "uuid", "nom": "Compte Principal", "...": "..." } ],
+  "categories": [ { "id": "uuid", "nom": "Alimentation", "...": "..." } ],
+  "transactions": [ { "id": "uuid", "montant": 42.50, "...": "..." } ],
+  "subscriptions": [ { "id": "uuid", "nom": "Netflix", "...": "..." } ],
+  "debts": [ { "id": "uuid", "personne": "Thomas", "...": "..." } ],
+  "budgets": [ { "id": "uuid", "montant": 400.00, "...": "..." } ],
+  "exchangeRates": [ { "baseCurrency": "EUR", "targetCurrency": "XOF", "rate": 655.957 } ]
+}
+```
+
+### Exporter ses transactions CSV `GET /api/users/me/export?format=csv`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `200` :
+- `Content-Type: text/csv; charset=utf-8`
+- `Content-Disposition: attachment; filename="k-budget-transactions-2026-04-27.csv"`
+- Body : transactions du user uniquement (pas les abonnements/dettes/budgets), prefixees du **BOM UTF-8** (`EF BB BF`) pour ouverture correcte dans Excel.
+
+Colonnes : `date,libelle,montant,type,devise,compte,categorie,note`.
+
+Exemple :
+
+```
+date,libelle,montant,type,devise,compte,categorie,note
+2026-04-15,Courses Carrefour,42.50,DEPENSE,EUR,Compte Principal,Alimentation,
+2026-04-10,Salaire,2500.00,RECETTE,EUR,Compte Principal,,
+```
+
+Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parametre `format` absent ou autre que `json`/`csv`.
+
+### Supprimer son compte `DELETE /api/users/me`
+
+Soft-delete : le compte est desactive (`disabled_at = now`), les budgets/snapshots/refresh_tokens sont supprimes en cascade en DB. Les transactions/comptes/abonnements/dettes sont conserves (anonymisation differee).
+
+Request (`DeleteAccountRequest`, header `Authorization: Bearer <token>`) :
+
+```json
+{
+  "password": "MotDePasseActuel123",
+  "confirmation": "SUPPRIMER"
+}
+```
+
+> Le `password` est verifie via BCrypt. Le `confirmation` doit valoir exactement la chaine `SUPPRIMER` (case-sensitive).
+
+Response `204` (corps vide). Tous les refresh tokens du user sont revoques.
+
+Erreurs :
+- `400 CONFIRMATION_REQUIRED` — `confirmation` differente de `SUPPRIMER`
+- `401 PASSWORD_INCORRECT` — mot de passe incorrect
+- `403 LAST_ADMIN_DELETION_FORBIDDEN` — le user est le dernier admin actif
 
 ## Devises
 

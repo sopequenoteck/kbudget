@@ -462,11 +462,76 @@
 
 ---
 
+## 22. KKS-235 — Page Mon compte (Angular + Flutter)
+
+> **Concerne** : Page `Settings > Mon compte` + bouton de deconnexion fixe.
+> **Mode serveur uniquement** (les endpoints `/api/users/me/*` ne sont pas dispo en mode local Drift).
+> **Prerequis** : compte de test, mot de passe connu, au moins 1 admin secondaire en DB pour le test "dernier admin".
+
+### 22.1 — US-001 : Navigation et deconnexion
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-1 | Acces depuis Settings | User connecte | Settings → tap "Mon compte" | Navigation vers `/settings/account` | -- |
+| MC-2 | Bouton deconnexion fixe | Page Mon compte ouverte | Scroller jusqu'en bas | Bouton "Se deconnecter" visible et accessible (pinned bas d'ecran ou en pied) | -- |
+| MC-3 | Deconnexion nominale | User connecte sur Mon compte | Tap "Se deconnecter" → confirmer si dialog | Redirect vers `/login`, refresh tokens revoques cote serveur (verifier impossible de refresh) | -- |
+
+### 22.2 — US-002 : Identite (nom, avatar, email)
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-4 | Email read-only | Page Mon compte | Inspecter le champ Email | Champ desactive, non editable, valeur correcte | -- |
+| MC-5 | Modifier le nom | Page Mon compte | Editer "Nom" → "Kelly K." → Enregistrer | Snackbar succes, GET /api/users/me retourne le nouveau nom | -- |
+| MC-6 | Nom vide | Page Mon compte | Vider le nom → Enregistrer | Erreur de validation client (champ requis) | -- |
+| MC-7 | Nom > 100 chars | Page Mon compte | Coller 101 caracteres dans nom | Bloque (maxLength) ou erreur 400 explicite | -- |
+| MC-8 | Upload avatar JPG | Page Mon compte | Tap zone avatar → choisir fichier .jpg < 2 Mo | Avatar affiche immediatement, ETag retourne | -- |
+| MC-9 | Upload avatar PNG | Page Mon compte | Choisir fichier .png < 2 Mo | Avatar affiche, content-type `image/png` | -- |
+| MC-10 | Upload format invalide | Page Mon compte | Choisir fichier .gif ou .pdf | Erreur "Format d'image non supporte" (`INVALID_IMAGE_FORMAT` 400) | -- |
+| MC-11 | Upload > 2 Mo | Page Mon compte | Choisir fichier image > 2 Mo | Erreur "L'image depasse 2 Mo" (`FILE_TOO_LARGE` 413) | -- |
+| MC-12 | Cache avatar (304) | Avatar configure | Recharger la page deux fois (DevTools) | Deuxieme requete `GET /api/users/me/avatar` retourne `304 Not Modified` (header `If-None-Match`) | -- |
+| MC-13 | Supprimer avatar | Avatar configure | Tap "Supprimer l'avatar" → confirmer | Avatar disparait, GET retourne `404 AVATAR_NOT_FOUND` | -- |
+| MC-14 | Supprimer sans avatar | Aucun avatar | Tenter suppression | Erreur `AVATAR_NOT_FOUND` 404 (ou bouton desactive cote UI) | -- |
+
+### 22.3 — US-003 : Changer le mot de passe
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-15 | Changement nominal | Page Mon compte | Saisir current valide + new (≥ 12 chars) different → Enregistrer | Succes, nouveaux tokens emis (refresh tokens precedents revoques), user reste connecte | -- |
+| MC-16 | Mot de passe actuel incorrect | Page Mon compte | Saisir current faux + new valide | Erreur `PASSWORD_INCORRECT` 401, message "Mot de passe actuel incorrect" | -- |
+| MC-17 | Nouveau MDP < 12 chars | Page Mon compte | Saisir current valide + new = "abc123" | Erreur de validation 400 (Bean Validation `@Size(min=12)`) | -- |
+| MC-18 | Nouveau MDP identique | Page Mon compte | Saisir current valide + new = current | Erreur `PASSWORD_UNCHANGED` 400 | -- |
+| MC-19 | Tokens precedents invalides | Apres MC-15 | Tenter un refresh avec l'ancien refreshToken | Erreur `TOKEN_REVOKED` (401) | -- |
+
+### 22.4 — US-004 : Export des donnees
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-20 | Export JSON | Compte avec donnees | Tap "Exporter (JSON)" | Telechargement `k-budget-export-YYYY-MM-DD.json`, `Content-Type: application/json; charset=utf-8` | -- |
+| MC-21 | Contenu JSON | Apres MC-20 | Ouvrir le fichier JSON | Backup complet : user, preferences, accounts, categories, transactions, subscriptions, debts, budgets, exchangeRates | -- |
+| MC-22 | Export CSV | Compte avec transactions | Tap "Exporter (CSV)" | Telechargement `k-budget-transactions-YYYY-MM-DD.csv` | -- |
+| MC-23 | BOM UTF-8 dans le CSV | Apres MC-22 | Inspecter les 3 premiers octets du fichier (hexdump) | `EF BB BF` au debut du fichier, ouverture correcte des accents dans Excel | -- |
+| MC-24 | Format invalide | URL directe | Appeler `GET /api/users/me/export?format=xml` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+| MC-25 | Format manquant | URL directe | Appeler `GET /api/users/me/export` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+
+### 22.5 — US-005 : Suppression du compte
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-26 | Suppression nominale | User non-admin OU admin avec ≥ 2 admins actifs | Tap "Supprimer mon compte" → saisir `password` + `SUPPRIMER` → confirmer | 204, redirect `/login`, tokens revoques, `users.disabled_at` rempli, budgets/snapshots/refresh_tokens supprimes en cascade | -- |
+| MC-27 | Confirmation incorrecte | Page Mon compte | Saisir `password` + `supprimer` (lowercase) | Erreur `CONFIRMATION_REQUIRED` 400 | -- |
+| MC-28 | Confirmation vide | Page Mon compte | Saisir `password` + chaine vide | Erreur de validation 400 (Bean `@NotBlank`) | -- |
+| MC-29 | MDP incorrect | Page Mon compte | Saisir mauvais password + `SUPPRIMER` | Erreur `PASSWORD_INCORRECT` 401 | -- |
+| MC-30 | Dernier admin bloque | User est seul admin actif (desactiver les autres en DB ou ADMIN_EMAILS reduit) | Tenter la suppression avec password + `SUPPRIMER` valides | Erreur `LAST_ADMIN_DELETION_FORBIDDEN` 403, compte non supprime | -- |
+| MC-31 | Reconnexion impossible | Apres MC-26 | Tenter `POST /api/auth/login` avec les credentials du compte supprime | Echec auth (compte `disabled_at` non null) | -- |
+
+---
+
 ## Notes d'execution
 
-1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19)
+1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19), puis les sections feature-specifiques (21, 22)
 2. **Modes a tester** : Chaque section (sauf exclusives) doit etre testee en **mode local** ET **mode serveur**
 3. **Devices** : Tester sur iOS + Android si possible (comportements natifs differents : back button, date picker, clavier)
 4. **Orientation** : Verifier au moins 1 ecran en mode paysage
 5. **Theme** : Tester au moins le dashboard + 1 formulaire en mode sombre
 6. **Multi-devises** : Creer au moins 1 compte en EUR et 1 en USD pour les tests de formatage
+7. **KKS-235** : Section 22 a executer en mode serveur uniquement, prevoir un compte admin secondaire pour pouvoir tester MC-26 et MC-30 distinctement

@@ -58,7 +58,7 @@
 - [x] [T-023] [P1] [US1] Brancher handler `logout()` dans `MonCompteComponent` (appel `authService.logout()` + `router.navigate(['/login'])` + résilience si `/auth/logout` échoue) — Réf: FR-012, FR-013
 - [x] [T-024] [P] [P1] [US1] Ajouter row "Déconnexion" dans `flutter/lib/src/features/user_profile/presentation/screens/profile_settings_screen.dart` section "Zone de danger" — Réf: FR-012, NFR-005
 - [x] [T-025] [P1] [US1] Test E2E Angular ciblé : login → settings → account → logout → redirect login (vérification SC-001, SC-011) — Réf: SC-001, SC-011
-- [ ] [T-026] [P] [P1] [US1] Documenter scénarios manuels US-001 dans `docs/manual-test-plan.md` — Réf: SC-001
+- [x] [T-026] [P] [P1] [US1] Documenter scénarios manuels US-001 dans `docs/manual-test-plan.md` — Réf: SC-001
 
 #### US-002 — Modifier identité (nom + avatar)
 
@@ -131,17 +131,17 @@
 
 ## Phase 4 : Polish
 
-- [ ] [T-068] [P2] Implémenter mode offline page Mon compte côté Flutter (server-only via `FutureProvider`, widget `_OfflineState` quand `connectivityProvider.isOffline`) — Réf: NFR-005, RES-013, I-005
-- [ ] [T-069] [P2] [P] Mettre à jour `docs/api-examples.md` avec les 7 endpoints (request/response complets + scénarios erreurs) — Réf: DoD spec
-- [ ] [T-070] [P2] [P] Mettre à jour `docs/api-errors.md` avec les 11 nouveaux codes d'erreur (`INVALID_IMAGE_FORMAT`, `FILE_TOO_LARGE`, `STORAGE_ERROR`, `AVATAR_NOT_FOUND`, `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`, `CONFIRMATION_REQUIRED`, `LAST_ADMIN_DELETION_FORBIDDEN`, `INVALID_EXPORT_FORMAT`) — Réf: DoD spec, contracts.md
-- [ ] [T-071] [P2] [P] Mettre à jour `docs/deployment.md` : variable d'env `AVATAR_STORAGE_PATH`, recommandations backup, permissions disque, monitoring espace — Réf: NFR-008, R-004
-- [ ] [T-072] [P3] [P] Mettre à jour `docs/manual-test-plan.md` avec scénarios complets Mon compte (4 sections × 5 US) — Réf: DoD spec
-- [ ] [T-073] [P2] [P] Lint + format Angular : `cd app && ng lint && npm run format` — Réf: DoD spec
-- [ ] [T-074] [P2] [P] Analyse statique Flutter : `cd flutter && flutter analyze` — Réf: DoD spec
-- [ ] [T-075] [P2] Test perf séparé upload+redim avatar vs service : ajouter SC-015 (upload+redim < 2s pour 2 MB) et SC-016 (service avatar avec ETag < 200 ms) dans `manual-test-plan.md` — Réf: NFR-006, **W-005 du review-spec** (séparation SC)
-- [ ] [T-076] [P1] Audit final agent `pre-commit-review` (code mort, duplication, secrets) avant commit — Réf: workflow CLAUDE.md
-- [ ] [T-077] [P1] Audit final agent `frontend-design-review` (cohérence DESIGN.md, tokens, patterns) — Réf: NFR-009, workflow CLAUDE.md
-- [ ] [T-078] [P2] Refactoring final si l'agent pre-commit identifie de la duplication (limité à la zone touchée) — Réf: workflow CLAUDE.md
+- [x] [T-068] [P2] Implémenter mode offline page Mon compte côté Flutter (server-only via `FutureProvider`, widget `_OfflineState` quand `connectivityProvider.isOffline`) — Réf: NFR-005, RES-013, I-005
+- [x] [T-069] [P2] [P] Mettre à jour `docs/api-examples.md` avec les 7 endpoints (request/response complets + scénarios erreurs) — Réf: DoD spec
+- [x] [T-070] [P2] [P] Mettre à jour `docs/api-errors.md` avec les 11 nouveaux codes d'erreur (`INVALID_IMAGE_FORMAT`, `FILE_TOO_LARGE`, `STORAGE_ERROR`, `AVATAR_NOT_FOUND`, `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`, `CONFIRMATION_REQUIRED`, `LAST_ADMIN_DELETION_FORBIDDEN`, `INVALID_EXPORT_FORMAT`) — Réf: DoD spec, contracts.md
+- [x] [T-071] [P2] [P] Mettre à jour `docs/deployment.md` : variable d'env `AVATAR_STORAGE_PATH`, recommandations backup, permissions disque, monitoring espace — Réf: NFR-008, R-004
+- [x] [T-072] [P3] [P] Mettre à jour `docs/manual-test-plan.md` avec scénarios complets Mon compte (4 sections × 5 US) — Réf: DoD spec
+- [x] [T-073] [P2] [P] Lint + format Angular : `cd app && ng lint && npm run format` — Réf: DoD spec
+- [x] [T-074] [P2] [P] Analyse statique Flutter : `cd flutter && flutter analyze` — Réf: DoD spec
+- [x] [T-075] [P2] Test perf séparé upload+redim avatar vs service : ajouter SC-015 (upload+redim < 2s pour 2 MB) et SC-016 (service avatar avec ETag < 200 ms) dans `manual-test-plan.md` — Réf: NFR-006, **W-005 du review-spec** (séparation SC)
+- [x] [T-076] [P1] Audit final agent `pre-commit-review` (code mort, duplication, secrets) avant commit — Réf: workflow CLAUDE.md
+- [x] [T-077] [P1] Audit final agent `frontend-design-review` (cohérence DESIGN.md, tokens, patterns) — Réf: NFR-009, workflow CLAUDE.md
+- [x] [T-078] [P2] Refactoring final si l'agent pre-commit identifie de la duplication (limité à la zone touchée) — Réf: workflow CLAUDE.md
 
 **Checkpoint** : Lint + analyze passent sans warning. Tests backend (`mvn test`) + Angular (`ng test`) + Flutter (`flutter test`) verts. Documentation à jour. Pas de `console.log`/`System.out.println` résiduels. Audits agents PASS.
 

@@ -24,6 +24,32 @@ cp .env.example .env
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
 | `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
 | `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
+| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production, recommandation : `/var/k-budget/avatars`. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
+
+### Avatars utilisateurs (KKS-235)
+
+Les avatars sont stockes en dehors de la base PostgreSQL, sur le filesystem indique par `AVATAR_STORAGE_PATH`. Un fichier par user, nomme via UUID (cf. `users.avatar_path` en DB). Limite : 2 Mo par image, formats JPG/PNG uniquement.
+
+**Permissions recommandees** (bare-metal) :
+
+```bash
+sudo mkdir -p /var/k-budget/avatars
+sudo chown -R k-budget:k-budget /var/k-budget/avatars
+sudo chmod 750 /var/k-budget/avatars
+```
+
+> Adapter `k-budget:k-budget` au user/groupe systeme reel (par defaut `budget` dans la procedure bare-metal ci-dessous, soit `chown -R budget:budget /var/k-budget/avatars`).
+
+**Docker** : monter le dossier en volume si `AVATAR_STORAGE_PATH=/var/k-budget/avatars` est defini dans `.env` :
+
+```yaml
+services:
+  api:
+    volumes:
+      - /var/k-budget/avatars:/var/k-budget/avatars
+```
+
+Sinon, le dossier `./data/avatars` reside dans le container et disparait avec lui — definir un volume nomme ou bind-mount pour la persistence.
 
 ## Configuration admin
 
@@ -294,6 +320,27 @@ crontab -e
 ```bash
 gunzip -c /opt/k-budget-api/backups/budget_db_2026-02-07_030000.sql.gz | psql -h localhost -U budget_u budget_db
 ```
+
+## Backup avatars (KKS-235)
+
+Les avatars utilisateurs sont stockes hors-DB sur le filesystem (cf. `AVATAR_STORAGE_PATH`). **Inclure ce dossier dans la strategie de backup** au meme titre que la DB — un dump PostgreSQL seul ne restaure que la reference (`users.avatar_path`), pas les binaires.
+
+### Backup quotidien (avatars + DB)
+
+```bash
+# Cron quotidien a 3h05 (apres le dump PostgreSQL de 3h)
+5 3 * * * tar czf /opt/k-budget-api/backups/avatars_$(date +\%F).tar.gz -C /var/k-budget avatars/ && find /opt/k-budget-api/backups/avatars_*.tar.gz -mtime +7 -delete
+```
+
+### Restauration
+
+```bash
+sudo tar xzf /opt/k-budget-api/backups/avatars_2026-04-27.tar.gz -C /var/k-budget/
+sudo chown -R budget:budget /var/k-budget/avatars
+sudo chmod 750 /var/k-budget/avatars
+```
+
+> Apres restauration, verifier que les chemins en DB (`users.avatar_path`) correspondent aux fichiers physiques. Tout `avatar_path` orphelin produit un `404 AVATAR_NOT_FOUND` cote API.
 
 ## Mise a jour
 

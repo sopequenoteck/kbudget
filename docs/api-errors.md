@@ -57,14 +57,47 @@ Declenchee explicitement dans les services. Messages connus :
 }
 ```
 
-#### Password inchange lors du first-login-reset (KKS-233)
+#### Password inchange lors du first-login-reset (KKS-233) ou du change-password (KKS-235)
 
-`PasswordUnchangedException` — le nouveau password soumis a `POST /auth/first-login-reset` est identique a celui en base (verification via `BCryptPasswordEncoder.matches`). Format `ErrorResponse` :
+`PasswordUnchangedException` — le nouveau password soumis est identique a celui en base (verification via `BCryptPasswordEncoder.matches`). Declenche par `POST /auth/first-login-reset` et `POST /api/users/me/password`. Format `ErrorResponse` :
 
 ```json
 {
   "error": "PASSWORD_UNCHANGED",
   "message": "Le nouveau mot de passe doit être différent de l'actuel."
+}
+```
+
+#### Format d'image invalide (KKS-235)
+
+`InvalidImageFormatException` — declenchee dans `POST /api/users/me/avatar` quand le `Content-Type` ou la signature binaire ne correspond pas a `image/jpeg` ou `image/png`. Format `ErrorResponse` :
+
+```json
+{
+  "error": "INVALID_IMAGE_FORMAT",
+  "message": "Format d'image non supporté. Utilisez JPG ou PNG."
+}
+```
+
+#### Confirmation requise (KKS-235)
+
+`ConfirmationRequiredException` — declenchee dans `DELETE /api/users/me` quand le champ `confirmation` n'est pas exactement la chaine `SUPPRIMER`. Format `ErrorResponse` :
+
+```json
+{
+  "error": "CONFIRMATION_REQUIRED",
+  "message": "Vous devez confirmer la suppression en saisissant SUPPRIMER."
+}
+```
+
+#### Format d'export invalide (KKS-235)
+
+`InvalidExportFormatException` — declenchee dans `GET /api/users/me/export` quand le parametre `format` est absent ou autre que `json`/`csv`. Format `ErrorResponse` :
+
+```json
+{
+  "error": "INVALID_EXPORT_FORMAT",
+  "message": "Format d'export invalide. Utilisez 'json' ou 'csv'."
 }
 ```
 
@@ -85,6 +118,17 @@ Declenchee par les exceptions JWT dans `RefreshTokenService`. **Format different
 | `TokenRevokedException` | `TOKEN_REVOKED` | Le refresh token a ete revoque. |
 | `TokenReusedException` | `TOKEN_REUSE_DETECTED` | Reutilisation de token detectee. Tous vos tokens ont ete revoques par securite. |
 | `TokenInvalidException` | `TOKEN_INVALID` | Refresh token invalide. |
+
+#### Password incorrect (KKS-235)
+
+`PasswordIncorrectException` — declenchee dans `POST /api/users/me/password` (verification du `currentPassword`) et `DELETE /api/users/me` (verification du `password` de confirmation). Format `ErrorResponse` :
+
+```json
+{
+  "error": "PASSWORD_INCORRECT",
+  "message": "Le mot de passe actuel est incorrect."
+}
+```
 
 > **Attention** : ces erreurs ne suivent pas le format standard (`timestamp`/`status`/`message`). Elles retournent un objet `ErrorResponse` avec les champs `error` et `message` uniquement.
 
@@ -108,6 +152,7 @@ Declenchees dans le flow `POST /auth/first-login-reset`. Le corps utilise le DTO
 |---------|-------------|-------|
 | `PasswordResetRequiredFilter` | `PASSWORD_RESET_REQUIRED` | JWT porte le claim `mustResetCredentials: true` et la requete cible un endpoint hors allowlist (`/auth/first-login-reset`, `/auth/logout`). Le user doit d'abord completer son reset. |
 | `PasswordResetNotRequiredException` | `PASSWORD_RESET_NOT_REQUIRED` | Le user authentifie a deja `password_reset_required = false` en DB. Neutralise egalement les anciens JWT qui auraient le claim mais dont la DB est desynchronisee. |
+| `LastAdminDeletionForbiddenException` | `LAST_ADMIN_DELETION_FORBIDDEN` | Le user authentifie tente de supprimer son compte (`DELETE /api/users/me`) alors qu'il est le dernier admin actif. Reponse au format `ErrorResponse`. Garde-fou symetrique a `LAST_ADMIN_CANNOT_BE_DISABLED` (409, desactivation par un autre admin). |
 
 ```json
 {
@@ -139,6 +184,17 @@ Declenchee via `EntityNotFoundException` quand :
 }
 ```
 
+#### Avatar absent (KKS-235)
+
+`AvatarNotFoundException` — declenchee dans `GET /api/users/me/avatar` et `DELETE /api/users/me/avatar` quand le user n'a pas d'avatar configure (`users.avatar_path IS NULL`). Format `ErrorResponse` :
+
+```json
+{
+  "error": "AVATAR_NOT_FOUND",
+  "message": "Aucun avatar configuré pour cet utilisateur."
+}
+```
+
 ### 409 Conflict
 
 Declenchee par `ConflictException` :
@@ -167,6 +223,19 @@ Pour le garde-fou dernier admin, la reponse contient un champ `error` en plus po
 ```
 
 Le frontend (Angular + Flutter) distingue ce cas via `error === 'LAST_ADMIN_CANNOT_BE_DISABLED'` pour afficher un message specifique.
+
+### 413 Payload Too Large
+
+#### Avatar trop volumineux (KKS-235)
+
+`FileTooLargeException` — declenchee dans `POST /api/users/me/avatar` quand le fichier depasse 2 Mo. Format `ErrorResponse` :
+
+```json
+{
+  "error": "FILE_TOO_LARGE",
+  "message": "L'image dépasse la taille maximale autorisée (2 Mo)."
+}
+```
 
 ### 422 Unprocessable Entity
 
@@ -255,6 +324,40 @@ Route retiree. L'onboarding se fait via invitation admin (voir `POST /api/admin/
 | `sens` | `@NotNull`, enum `DebtType` (EMPRUNT, PRET) | oui |
 | `date` | `@NotNull`, `LocalDate` | oui |
 | `rembourse` | `Boolean` | non |
+
+### PUT /api/users/me — `UpdateProfileRequest` (KKS-235)
+
+| Champ | Contraintes | Obligatoire |
+|-------|-------------|:-----------:|
+| `name` | `@NotBlank`, `@Size(max=100)` | oui |
+
+> Seul le `name` est modifiable. L'email est en lecture seule (changement hors scope KKS-235).
+
+### POST /api/users/me/password — `ChangePasswordRequest` (KKS-235)
+
+| Champ | Contraintes | Obligatoire |
+|-------|-------------|:-----------:|
+| `currentPassword` | `@NotBlank` | oui |
+| `newPassword` | `@NotBlank`, `@Size(min=12, max=100)` | oui |
+
+Erreurs metier : `PASSWORD_INCORRECT` (401), `PASSWORD_UNCHANGED` (400).
+
+### DELETE /api/users/me — `DeleteAccountRequest` (KKS-235)
+
+| Champ | Contraintes | Obligatoire |
+|-------|-------------|:-----------:|
+| `password` | `@NotBlank` | oui |
+| `confirmation` | `@NotBlank`, doit valoir exactement `SUPPRIMER` (case-sensitive) | oui |
+
+Erreurs metier : `CONFIRMATION_REQUIRED` (400), `PASSWORD_INCORRECT` (401), `LAST_ADMIN_DELETION_FORBIDDEN` (403).
+
+### POST /api/users/me/avatar — multipart (KKS-235)
+
+| Champ | Contraintes |
+|-------|-------------|
+| `file` | type MIME `image/jpeg` ou `image/png`, taille ≤ 2 Mo |
+
+Erreurs metier : `INVALID_IMAGE_FORMAT` (400), `FILE_TOO_LARGE` (413).
 
 ### PUT /api/users/me/preferences — `UserPreferenceRequest`
 
