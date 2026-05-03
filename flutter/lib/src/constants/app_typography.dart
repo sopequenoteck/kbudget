@@ -16,7 +16,8 @@ class AppTypography {
   static const double sizeXl = 20.0;
   static const double size2xl = 24.0;
   static const double size3xl = 30.0;
-  /// Hero font size — for patrimony amount on dashboard.
+  /// Hero font size — **réservé exclusivement au montant patrimoine total du dashboard**.
+  /// Pour tout autre contexte hero, utiliser [size3xl] (30px), conforme à `--font-size-3xl` Angular.
   /// Source: `_dark.scss` `--font-size-hero: 2.25rem`.
   static const double sizeHero = 36.0;
 

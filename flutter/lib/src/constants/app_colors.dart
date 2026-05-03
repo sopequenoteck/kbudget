@@ -133,7 +133,7 @@ class AppColors {
   static const Color highlightSubtleDark = Color(0x1AFFFFFF);
   /// Light overlay layer — rgba(255,255,255,0.15).
   /// Source: app/src/styles/themes/_dark.scss `--color-overlay-light`.
-  static const Color overlayLightDark = Color(0x26FFFFFF);
+  static const Color overlayLightOnDark = Color(0x26FFFFFF);
   /// Focus ring amber — rgba(amber-400 #FBBF24, 0.5).
   /// Source: app/src/styles/themes/_dark.scss `--color-focus-ring`.
   static const Color focusRingDark = Color(0x80FBBF24);
@@ -170,7 +170,7 @@ class AppColors {
   static const Color highlightSubtleLight = Color(0x0F000000);
   /// Light overlay layer — rgba(0,0,0,0.10).
   /// Source: app/src/styles/themes/_light.scss `--color-overlay-light`.
-  static const Color overlayLightLight = Color(0x1A000000);
+  static const Color overlayLightOnLight = Color(0x1A000000);
   /// Focus ring amber — rgba(amber-500 #F59E0B, 0.5).
   /// Source: app/src/styles/themes/_light.scss `--color-focus-ring`.
   static const Color focusRingLight = Color(0x80F59E0B);

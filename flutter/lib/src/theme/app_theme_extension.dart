@@ -60,7 +60,7 @@ final class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     primaryBorder: AppColors.primaryBorderLight,
     hoverSubtle: AppColors.hoverSubtleLight,
     highlightSubtle: AppColors.highlightSubtleLight,
-    overlayLight: AppColors.overlayLightLight,
+    overlayLight: AppColors.overlayLightOnLight,
     focusRing: AppColors.focusRingLight,
     iconCircleBg: AppColors.iconCircleBgLight,
   );
@@ -79,7 +79,7 @@ final class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     primaryBorder: AppColors.primaryBorderDark,
     hoverSubtle: AppColors.hoverSubtleDark,
     highlightSubtle: AppColors.highlightSubtleDark,
-    overlayLight: AppColors.overlayLightDark,
+    overlayLight: AppColors.overlayLightOnDark,
     focusRing: AppColors.focusRingDark,
     iconCircleBg: AppColors.iconCircleBgDark,
   );

@@ -79,7 +79,7 @@ void main() {
       );
       expect(
         AppThemeExtension.dark.overlayLight,
-        equals(AppColors.overlayLightDark),
+        equals(AppColors.overlayLightOnDark),
       );
       expect(
         AppThemeExtension.dark.focusRing,
