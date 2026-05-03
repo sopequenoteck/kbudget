@@ -15,6 +15,10 @@ import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
+@Deprecated(
+  'Gradient décoratif interdit en dark v5 — refonte hero flat dans KKS-240. '
+  'Token Angular équivalent neutralisé : --hero-gradient: none.',
+)
 class PatrimoineCard extends ConsumerWidget {
   final List<Account> accounts;
   final Currency activeCurrency;

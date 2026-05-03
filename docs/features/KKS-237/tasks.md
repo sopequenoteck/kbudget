@@ -53,29 +53,29 @@ Modifications de la couche primitive `AppColors` qui débloquent toutes les tâc
 
 #### AppShadows
 
-- [ ] [T-032] [P2] [US5] Refonte `AppShadows.md` en double-layer (`[BoxShadow(blur=6, spread=-1, offset=(0,4), 0x1A000000), BoxShadow(blur=4, spread=-2, offset=(0,2), 0x1A000000)]`) — Réf: FR-016
-- [ ] [T-033] [P] [P2] [US5] Refonte `AppShadows.lg` en double-layer (`[BoxShadow(blur=15, spread=-3, offset=(0,10), 0x1A000000), BoxShadow(blur=6, spread=-4, offset=(0,4), 0x1A000000)]`) — Réf: FR-017
-- [ ] [T-034] [P] [P2] [US5] Ajout `AppShadows.coloredPrimaryDark = [BoxShadow(blur=24, spread=-4, offset=(0,8), 0x66000000)]` et `coloredPrimaryLight = [BoxShadow(blur=24, spread=-4, offset=(0,8), 0x66F59E0B)]` const — Réf: FR-018
-- [ ] [T-035] [P2] [US5] Ajout helper `static List<BoxShadow> coloredPrimary(Brightness brightness) => brightness == Brightness.dark ? coloredPrimaryDark : coloredPrimaryLight;` — Réf: FR-018
-- [ ] [T-036] [P2] [US5] Marquage `@Deprecated('Utiliser AppShadows.coloredPrimary(brightness) ou les constantes coloredPrimaryDark/Light. Cette API sera supprimée en KKS-240+.')` sur `AppShadows.colored(Color, {alpha})` — Réf: FR-019
+- [x] [T-032] [P2] [US5] Refonte `AppShadows.md` en double-layer (`[BoxShadow(blur=6, spread=-1, offset=(0,4), 0x1A000000), BoxShadow(blur=4, spread=-2, offset=(0,2), 0x1A000000)]`) — Réf: FR-016
+- [x] [T-033] [P] [P2] [US5] Refonte `AppShadows.lg` en double-layer (`[BoxShadow(blur=15, spread=-3, offset=(0,10), 0x1A000000), BoxShadow(blur=6, spread=-4, offset=(0,4), 0x1A000000)]`) — Réf: FR-017
+- [x] [T-034] [P] [P2] [US5] Ajout `AppShadows.coloredPrimaryDark = [BoxShadow(blur=24, spread=-4, offset=(0,8), 0x66000000)]` et `coloredPrimaryLight = [BoxShadow(blur=24, spread=-4, offset=(0,8), 0x66F59E0B)]` const — Réf: FR-018
+- [x] [T-035] [P2] [US5] Ajout helper `static List<BoxShadow> coloredPrimary(Brightness brightness) => brightness == Brightness.dark ? coloredPrimaryDark : coloredPrimaryLight;` — Réf: FR-018
+- [x] [T-036] [P2] [US5] Marquage `@Deprecated('Utiliser AppShadows.coloredPrimary(brightness) ou les constantes coloredPrimaryDark/Light. Cette API sera supprimée en KKS-240+.')` sur `AppShadows.colored(Color, {alpha})` — Réf: FR-019
 
 #### AppThemeExtension
 
-- [ ] [T-037] [P2] [US3] [US4] Étendre la classe `AppThemeExtension` avec 10 nouvelles propriétés `final Color` (`textWarning`, `textInfo`, `primarySubtle`, `primaryMuted`, `primaryBorder`, `hoverSubtle`, `highlightSubtle`, `overlayLight`, `focusRing`, `iconCircleBg`) + paramètres `required` du constructeur — Réf: FR-009, FR-010, FR-011
-- [ ] [T-038] [P2] [US3] Mettre à jour `AppThemeExtension.dark` (instance const) pour pointer vers les nouvelles constantes `AppColors.{name}Dark` (16 propriétés au total) — Réf: FR-009, FR-010, FR-011
-- [ ] [T-039] [P2] [US3] Mettre à jour `AppThemeExtension.light` (instance const) pour pointer vers les nouvelles constantes `AppColors.{name}Light` (16 propriétés au total) — Réf: FR-012b, FR-012c, FR-012d
-- [ ] [T-040] [P2] [US3] Étendre les méthodes `copyWith()` et `lerp()` pour les 10 nouvelles propriétés (mécanique via `Color.lerp()`) — Réf: FR-009, FR-010, FR-011
+- [x] [T-037] [P2] [US3] [US4] Étendre la classe `AppThemeExtension` avec 10 nouvelles propriétés `final Color` (`textWarning`, `textInfo`, `primarySubtle`, `primaryMuted`, `primaryBorder`, `hoverSubtle`, `highlightSubtle`, `overlayLight`, `focusRing`, `iconCircleBg`) + paramètres `required` du constructeur — Réf: FR-009, FR-010, FR-011
+- [x] [T-038] [P2] [US3] Mettre à jour `AppThemeExtension.dark` (instance const) pour pointer vers les nouvelles constantes `AppColors.{name}Dark` (16 propriétés au total) — Réf: FR-009, FR-010, FR-011
+- [x] [T-039] [P2] [US3] Mettre à jour `AppThemeExtension.light` (instance const) pour pointer vers les nouvelles constantes `AppColors.{name}Light` (16 propriétés au total) — Réf: FR-012b, FR-012c, FR-012d
+- [x] [T-040] [P2] [US3] Étendre les méthodes `copyWith()` et `lerp()` pour les 10 nouvelles propriétés (mécanique via `Color.lerp()`) — Réf: FR-009, FR-010, FR-011
 
 #### AppTheme
 
-- [ ] [T-041] [P2] [US6] Refonte `AppTheme.dark` : `colorScheme.primary = AppColors.primaryAmberDark` (`#E0A820`), `colorScheme.onPrimary = gray900`, `colorScheme.surface = gray800` (`#141414`), `colorScheme.surfaceContainerHighest = gray700`, `colorScheme.background = gray900`. Vérifier `useMaterial3: true`. — Réf: FR-006, FR-007, FR-008, FR-020
-- [ ] [T-042] [P2] [US6] Refonte `AppTheme.light` : `colorScheme.primary = AppColors.amber600` (`#D97706`, conservé conforme `_light.scss`), `colorScheme.surface = #FFFFFF`, `colorScheme.surfaceContainerHighest = gray100`. Vérifier `useMaterial3: true`. **Séquentiel après T-041** (même fichier `app_theme.dart`). — Réf: FR-012a, FR-020
-- [ ] [T-043] [P2] [US6] Audit ligne par ligne des 14+ usages `AppColors.amber*` dans `app_theme.dart` (selectedItemColor, FAB.backgroundColor, focused border, etc.) — reclasser chaque usage : sémantique primary → `primaryAmberDark` (dark) / `amber600` (light) ; palette structurelle → conservé. — Réf: FR-020
+- [x] [T-041] [P2] [US6] Refonte `AppTheme.dark` : `colorScheme.primary = AppColors.primaryAmberDark` (`#E0A820`), `colorScheme.onPrimary = gray900`, `colorScheme.surface = gray800` (`#141414`), `colorScheme.surfaceContainerHighest = gray700`, `colorScheme.background = gray900`. Vérifier `useMaterial3: true`. — Réf: FR-006, FR-007, FR-008, FR-020
+- [x] [T-042] [P2] [US6] Refonte `AppTheme.light` : `colorScheme.primary = AppColors.amber600` (`#D97706`, conservé conforme `_light.scss`), `colorScheme.surface = #FFFFFF`, `colorScheme.surfaceContainerHighest = gray100`. Vérifier `useMaterial3: true`. **Séquentiel après T-041** (même fichier `app_theme.dart`). — Réf: FR-012a, FR-020
+- [x] [T-043] [P2] [US6] Audit ligne par ligne des 14+ usages `AppColors.amber*` dans `app_theme.dart` (selectedItemColor, FAB.backgroundColor, focused border, etc.) — reclasser chaque usage : sémantique primary → `primaryAmberDark` (dark) / `amber600` (light) ; palette structurelle → conservé. — Réf: FR-020
 
 #### Anti-patterns
 
-- [ ] [T-044] [P] [P2] [US6] Annotation `@Deprecated('Gradient décoratif interdit en dark v5 — refonte hero flat dans KKS-240. Token Angular équivalent neutralisé : --hero-gradient: none.')` sur la classe `PatrimoineCard` (`flutter/lib/src/features/dashboard/presentation/widgets/patrimoine_card.dart`) — Réf: FR-021
-- [ ] [T-045] [P] [P2] [US6] Audit `grep -rn "LinearGradient" flutter/lib/src/features/` pour détecter d'autres widgets gradient à marquer `@Deprecated`. Marquer ceux trouvés. — Réf: FR-021
+- [x] [T-044] [P] [P2] [US6] Annotation `@Deprecated('Gradient décoratif interdit en dark v5 — refonte hero flat dans KKS-240. Token Angular équivalent neutralisé : --hero-gradient: none.')` sur la classe `PatrimoineCard` (`flutter/lib/src/features/dashboard/presentation/widgets/patrimoine_card.dart`) — Réf: FR-021
+- [x] [T-045] [P] [P2] [US6] Audit `grep -rn "LinearGradient" flutter/lib/src/features/` pour détecter d'autres widgets gradient à marquer `@Deprecated`. Marquer ceux trouvés. — Réf: FR-021
 
 ### P3 — Nice to have
 
