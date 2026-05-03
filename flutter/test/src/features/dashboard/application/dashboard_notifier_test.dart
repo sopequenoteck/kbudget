@@ -111,18 +111,24 @@ void main() {
     date: DateTime(2026, 3, 5),
   );
 
-  const currentSummary = MonthlySummary(
-    month: 3,
-    year: 2026,
+  // Fixtures summary dynamiques pour rester alignées avec DateTime.now()
+  // (le notifier charge le mois courant et le mois précédent dynamiquement)
+  final _now = DateTime.now();
+  final _prevMonth = _now.month == 1 ? 12 : _now.month - 1;
+  final _prevYear = _now.month == 1 ? _now.year - 1 : _now.year;
+
+  final currentSummary = MonthlySummary(
+    month: _now.month,
+    year: _now.year,
     totalRecettes: 2000.0,
     totalDepenses: 225.0,
     bilan: 1775.0,
     currency: Currency.eur,
   );
 
-  const previousSummary = MonthlySummary(
-    month: 2,
-    year: 2026,
+  final previousSummary = MonthlySummary(
+    month: _prevMonth,
+    year: _prevYear,
     totalRecettes: 1800.0,
     totalDepenses: 600.0,
     bilan: 1200.0,

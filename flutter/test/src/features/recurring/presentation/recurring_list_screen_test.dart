@@ -23,7 +23,7 @@ void main() {
     libelle: 'Netflix',
     type: TransactionType.depense,
     frequency: Frequency.mensuel,
-    nextOccurrence: DateTime(2026, 3, 10),
+    nextOccurrence: DateTime.now().subtract(const Duration(days: 10)),
     recurringActive: true,
     categoryIcon: '🎬',
   );
@@ -34,7 +34,7 @@ void main() {
     libelle: 'Assurance',
     type: TransactionType.depense,
     frequency: Frequency.mensuel,
-    nextOccurrence: DateTime(2026, 3, 20),
+    nextOccurrence: DateTime.now().add(const Duration(days: 10)),
     recurringActive: true,
   );
 
