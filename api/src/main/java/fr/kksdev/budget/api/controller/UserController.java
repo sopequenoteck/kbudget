@@ -114,31 +114,36 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Exporter les données de l'utilisateur connecté (JSON ou CSV)")
-    @GetMapping("/me/export")
-    public ResponseEntity<?> exportData(
-            Authentication authentication,
-            @RequestParam("format") String format) {
+    @Operation(summary = "Exporter les données de l'utilisateur connecté au format JSON")
+    @GetMapping(value = "/me/export", params = "format=json")
+    public ResponseEntity<UserExportResponse> exportJson(Authentication authentication) {
         User user = resolveUser(authentication);
-        String filenameDate = LocalDate.now().toString().replace("-", "");
+        UserExportResponse response = userExportService.exportJson(user);
+        String filename = "kbudget-export-" + user.getId() + "-"
+                + LocalDate.now().toString().replace("-", "") + ".json";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
 
-        if ("json".equalsIgnoreCase(format)) {
-            UserExportResponse response = userExportService.exportJson(user);
-            String filename = "kbudget-export-" + user.getId() + "-" + filenameDate + ".json";
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(response);
-        } else if ("csv".equalsIgnoreCase(format)) {
-            StreamingResponseBody stream = out -> userExportService.exportCsv(user, out);
-            String filename = "kbudget-transactions-" + user.getId() + "-" + filenameDate + ".csv";
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                    .contentType(MediaType.parseMediaType("text/csv;charset=utf-8"))
-                    .body(stream);
-        } else {
-            throw new InvalidExportFormatException();
-        }
+    @Operation(summary = "Exporter les transactions de l'utilisateur connecté au format CSV")
+    @GetMapping(value = "/me/export", params = "format=csv")
+    public ResponseEntity<StreamingResponseBody> exportCsv(Authentication authentication) {
+        User user = resolveUser(authentication);
+        String filename = "kbudget-transactions-" + user.getId() + "-"
+                + LocalDate.now().toString().replace("-", "") + ".csv";
+        StreamingResponseBody stream = out -> userExportService.exportCsv(user, out);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("text/csv;charset=utf-8"))
+                .body(stream);
+    }
+
+    @Operation(summary = "Format d'export invalide — déclenche 400 INVALID_EXPORT_FORMAT")
+    @GetMapping("/me/export")
+    public ResponseEntity<Void> exportInvalidFormat(@RequestParam(value = "format", required = false) String format) {
+        throw new InvalidExportFormatException();
     }
 
     @Operation(summary = "Supprimer le compte de l'utilisateur connecté (soft-delete)")
