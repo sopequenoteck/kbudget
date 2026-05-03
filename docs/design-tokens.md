@@ -1,5 +1,15 @@
 # Design Tokens Reference
 
+> ⚠️ **OBSOLÈTE** — Ce document n'est plus maintenu.
+>
+> **Sources de vérité actuelles** :
+> 1. **Primitives (couche 1)** : [`app/src/styles/tokens/_primitives.scss`](../app/src/styles/tokens/_primitives.scss)
+> 2. **Tokens semantiques par thème (couche 2)** : [`app/src/styles/themes/_dark.scss`](../app/src/styles/themes/_dark.scss) et [`_light.scss`](../app/src/styles/themes/_light.scss)
+> 3. **Principes design** : [`DESIGN.md`](../DESIGN.md)
+> 4. **Flutter** : [`flutter/lib/src/constants/`](../flutter/lib/src/constants/) et [`flutter/lib/src/theme/`](../flutter/lib/src/theme/)
+>
+> Ce fichier sera supprimé en v3.0.x. Toute modification du contenu ci-dessous est à proscrire.
+
 **Source de verite unique** pour tous les design tokens partages entre Angular (SCSS) et Flutter (Dart).
 
 > Les implementations Angular et Flutter doivent correspondre **exactement** aux valeurs de ce document.

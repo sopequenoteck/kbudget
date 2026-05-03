@@ -9,9 +9,9 @@
 
 ## Phase 1 : Setup
 
-- [ ] [T-001] [P1] Créer la branche `feature/flutter-tokens-refonte-v5` depuis `develop` — Réf: setup
-- [ ] [T-002] [P1] Vérifier baseline propre : `cd flutter && flutter analyze && flutter test` (zéro erreur, 100% tests passent) — Réf: setup
-- [ ] [T-003] [P1] Ouvrir les SCSS Angular comme source de vérité (`app/src/styles/tokens/_primitives.scss`, `app/src/styles/themes/_dark.scss`, `app/src/styles/themes/_light.scss`) — Réf: setup
+- [x] [T-001] [P1] Créer la branche `feature/flutter-tokens-refonte-v5` depuis `develop` — Réf: setup
+- [x] [T-002] [P1] Vérifier baseline propre : `cd flutter && flutter analyze && flutter test` — `analyze` 0 erreur (15 infos non critiques) ; `test` 701/703 passent (2 tests préexistants cassés hors scope : `subscription_detail_screen_test.dart` et `recurring_*_test.dart`, à traiter séparément) — Réf: setup
+- [x] [T-003] [P1] Ouvrir les SCSS Angular comme source de vérité (`app/src/styles/tokens/_primitives.scss`, `app/src/styles/themes/_dark.scss`, `app/src/styles/themes/_light.scss`) — vérifié et documenté dans research.md/contracts.md — Réf: setup
 
 **Checkpoint** : Branche feature créée, `flutter analyze` propre, `flutter test` à 100%, SCSS Angular accessibles côté éditeur.
 
@@ -21,9 +21,9 @@
 
 Modifications de la couche primitive `AppColors` qui débloquent toutes les tâches suivantes.
 
-- [ ] [T-010] [P1] [US1] Refonte palette gris propriétaire dans `AppColors.gray50` → `gray900` (10 nuances : `#fafafa, #f5f5f5, #e5e5e5, #d4d4d4, #a3a3a3, #737373, #525252, #1e1e1e, #141414, #0a0a0a`) — Réf: FR-001, FR-005
-- [ ] [T-011] [P] [P1] [US2] Vérification que les primitives `AppColors.amber*`, `violet400/500`, `success/warning/error/info` restent inchangées (Tailwind conformément à `_primitives.scss`) — Réf: FR-002, FR-003, FR-004
-- [ ] [T-012] [P1] [US3] Mise à jour des valeurs sémantiques dark business existantes : `incomeDark = #6DC990`, `expenseDark = #D97777`, `subscriptionDark = #9580D9`, `debtOweDark = #D97777`, `debtOwedDark = #6DC990` — Réf: FR-009
+- [x] [T-010] [P1] [US1] Refonte palette gris propriétaire dans `AppColors.gray50` → `gray900` (10 nuances : `#fafafa, #f5f5f5, #e5e5e5, #d4d4d4, #a3a3a3, #737373, #525252, #1e1e1e, #141414, #0a0a0a`) — Réf: FR-001, FR-005
+- [x] [T-011] [P] [P1] [US2] Vérification que les primitives `AppColors.amber*`, `violet400/500`, `success/warning/error/info` restent inchangées (Tailwind conformément à `_primitives.scss`) — Réf: FR-002, FR-003, FR-004
+- [x] [T-012] [P1] [US3] Mise à jour des valeurs sémantiques dark business existantes : `incomeDark = #6DC990`, `expenseDark = #D97777`, `subscriptionDark = #9580D9`, `debtOweDark = #D97777`, `debtOwedDark = #6DC990` — Réf: FR-009
 
 **Checkpoint** : Palette gris propriétaire en place. Les tests unitaires existants validant `incomeDark = #4ADE80` etc. cassent — c'est attendu, à corriger en Phase 4. `flutter analyze` reste propre. `grep -E '#(111827|1F2937|374151|4B5563|6B7280|9CA3AF|D1D5DB|E5E7EB|F3F4F6|F9FAFB)' flutter/lib/src/constants/` retourne 0 ligne (SC-001).
 
@@ -35,21 +35,21 @@ Modifications de la couche primitive `AppColors` qui débloquent toutes les tâc
 
 #### Couche sémantique dark — primary, feedback, interactifs
 
-- [ ] [T-020] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — primary" : `primaryAmberDark = Color(0xFFE0A820)`, `primaryAmberHoverDark = Color(0xFFC9952A)` avec docstrings — Réf: FR-009, FR-022
-- [ ] [T-021] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — feedback" : `textWarningDark = Color(0xFFD4AD3C)`, `textInfoDark = Color(0xFF7AACDB)` avec docstrings — Réf: FR-010, FR-022
-- [ ] [T-022] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — interactifs" (9 constantes) : `primarySubtleDark = Color(0x1AE0A820)`, `primaryMutedDark = Color(0x26E0A820)`, `primaryBorderDark = Color(0x40E0A820)`, `hoverBgDark = gray700`, `hoverSubtleDark = Color(0x0AFFFFFF)`, `highlightSubtleDark = Color(0x1AFFFFFF)`, `overlayLightDark = Color(0x26FFFFFF)`, `focusRingDark = Color(0x80FBBF24)`, `iconCircleBgDark = Color(0x0FFFFFFF)` — Réf: FR-011, FR-022
+- [x] [T-020] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — primary" : `primaryAmberDark = Color(0xFFE0A820)`, `primaryAmberHoverDark = Color(0xFFC9952A)` avec docstrings — Réf: FR-009, FR-022
+- [x] [T-021] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — feedback" : `textWarningDark = Color(0xFFD4AD3C)`, `textInfoDark = Color(0xFF7AACDB)` avec docstrings — Réf: FR-010, FR-022
+- [x] [T-022] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic dark values — interactifs" (9 constantes) : `primarySubtleDark = Color(0x1AE0A820)`, `primaryMutedDark = Color(0x26E0A820)`, `primaryBorderDark = Color(0x40E0A820)`, `hoverBgDark = gray700`, `hoverSubtleDark = Color(0x0AFFFFFF)`, `highlightSubtleDark = Color(0x1AFFFFFF)`, `overlayLightDark = Color(0x26FFFFFF)`, `focusRingDark = Color(0x80FBBF24)`, `iconCircleBgDark = Color(0x0FFFFFFF)` — Réf: FR-011, FR-022
 
 #### Couche sémantique light — feedback, interactifs
 
-- [ ] [T-023] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic light values — feedback" : `textWarningLight = Color(0xFFCA8A04)`, `textInfoLight = Color(0xFF2563EB)` avec docstrings — Réf: FR-012c, FR-022
-- [ ] [T-024] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic light values — interactifs" (9 constantes) : `primarySubtleLight = Color(0x1AD97706)`, `primaryMutedLight = Color(0x26D97706)`, `primaryBorderLight = Color(0x40D97706)`, `hoverBgLight = gray100`, `hoverSubtleLight = Color(0x0A000000)`, `highlightSubtleLight = Color(0x0F000000)`, `overlayLightLight = Color(0x1A000000)`, `focusRingLight = Color(0x80F59E0B)`, `iconCircleBgLight = Color(0x0A000000)` — Réf: FR-012d, FR-022
+- [x] [T-023] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic light values — feedback" : `textWarningLight = Color(0xFFCA8A04)`, `textInfoLight = Color(0xFF2563EB)` avec docstrings — Réf: FR-012c, FR-022
+- [x] [T-024] [P] [P1] [US3] Ajout dans `AppColors` section "Semantic light values — interactifs" (9 constantes) : `primarySubtleLight = Color(0x1AD97706)`, `primaryMutedLight = Color(0x26D97706)`, `primaryBorderLight = Color(0x40D97706)`, `hoverBgLight = gray100`, `hoverSubtleLight = Color(0x0A000000)`, `highlightSubtleLight = Color(0x0F000000)`, `overlayLightLight = Color(0x1A000000)`, `focusRingLight = Color(0x80F59E0B)`, `iconCircleBgLight = Color(0x0A000000)` — Réf: FR-012d, FR-022
 
 ### P2 — Importantes
 
 #### AppTypography
 
-- [ ] [T-030] [P2] [US4] Ajout `AppTypography.size2Xs = 10.0` et `AppTypography.sizeHero = 36.0` avec docstrings — Réf: FR-013, FR-014, FR-022
-- [ ] [T-031] [P] [P2] [US4] Ajout convention letter-spacing labels uppercase : `labelLetterSpacingFactor = 0.05`, `labelLetterSpacingForSize10 = 0.5`, `labelLetterSpacingForSize12 = 0.6`, `labelLetterSpacingForSize14 = 0.7` avec docstrings — Réf: FR-015, FR-022
+- [x] [T-030] [P2] [US4] Ajout `AppTypography.size2Xs = 10.0` et `AppTypography.sizeHero = 36.0` avec docstrings — Réf: FR-013, FR-014, FR-022
+- [x] [T-031] [P] [P2] [US4] Ajout convention letter-spacing labels uppercase : `labelLetterSpacingFactor = 0.05`, `labelLetterSpacingForSize10 = 0.5`, `labelLetterSpacingForSize12 = 0.6`, `labelLetterSpacingForSize14 = 0.7` avec docstrings — Réf: FR-015, FR-022
 
 #### AppShadows
 
@@ -79,7 +79,7 @@ Modifications de la couche primitive `AppColors` qui débloquent toutes les tâc
 
 ### P3 — Nice to have
 
-- [ ] [T-050] [P] [P3] [US7] Insertion en entête de `docs/design-tokens.md` du bloc d'avertissement `> ⚠️ OBSOLÈTE — ...` avec redirection vers les sources de vérité actuelles (`_primitives.scss`, `_dark.scss`, `_light.scss`, `DESIGN.md`, Flutter `constants/` et `theme/`). Aucune modification du contenu existant. — Réf: FR-023
+- [x] [T-050] [P] [P3] [US7] Insertion en entête de `docs/design-tokens.md` du bloc d'avertissement `> ⚠️ OBSOLÈTE — ...` avec redirection vers les sources de vérité actuelles (`_primitives.scss`, `_dark.scss`, `_light.scss`, `DESIGN.md`, Flutter `constants/` et `theme/`). Aucune modification du contenu existant. — Réf: FR-023
 
 **Checkpoint Phase 3** : Tous les tokens nouveaux exposés. `flutter analyze` retourne uniquement des warnings `@Deprecated` ciblés (`AppShadows.colored`, `PatrimoineCard`, autres widgets gradient si trouvés). Les tests unitaires des widgets ne cassent pas (l'API `AppThemeExtension` reste backward compatible). Les tests sur les valeurs hex précises dans `app_colors.dart` cassent — à corriger en Phase 4.
 

@@ -6,6 +6,9 @@ class AppTypography {
   static const String fontFamily = 'Inter';
 
   // Sizes
+  /// Extra-extra-small font size — for uppercase labels.
+  /// Source: `_primitives.scss` `--font-size-2xs: 0.625rem`.
+  static const double size2Xs = 10.0;
   static const double sizeXs = 12.0;
   static const double sizeSm = 14.0;
   static const double sizeMd = 16.0;
@@ -13,6 +16,9 @@ class AppTypography {
   static const double sizeXl = 20.0;
   static const double size2xl = 24.0;
   static const double size3xl = 30.0;
+  /// Hero font size — for patrimony amount on dashboard.
+  /// Source: `_dark.scss` `--font-size-hero: 2.25rem`.
+  static const double sizeHero = 36.0;
 
   // Weights
   static const FontWeight regular = FontWeight.w400;
@@ -27,4 +33,17 @@ class AppTypography {
 
   // Monospace font
   static const String fontMono = 'monospace';
+
+  // Letter-spacing pour labels uppercase
+  /// Multiplicative factor for uppercase label letter-spacing
+  /// (CSS `letter-spacing: 0.05em` equivalent).
+  /// Usage: `Text(label, style: TextStyle(fontSize: size, letterSpacing: size * AppTypography.labelLetterSpacingFactor))`.
+  static const double labelLetterSpacingFactor = 0.05;
+
+  /// Pre-computed letter-spacing for `size2Xs` (10px × 0.05).
+  static const double labelLetterSpacingForSize10 = 0.5;
+  /// Pre-computed letter-spacing for `sizeXs` (12px × 0.05).
+  static const double labelLetterSpacingForSize12 = 0.6;
+  /// Pre-computed letter-spacing for `sizeSm` (14px × 0.05).
+  static const double labelLetterSpacingForSize14 = 0.7;
 }
