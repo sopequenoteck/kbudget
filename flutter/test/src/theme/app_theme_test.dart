@@ -6,10 +6,10 @@ import 'package:k_budget/src/theme/app_theme_extension.dart';
 
 void main() {
   group('AppTheme', () {
-    test('should_use_amber_500_as_primary_in_light_theme', () {
+    test('should_use_amber_600_as_primary_in_light_theme', () {
       final theme = AppTheme.light;
 
-      expect(theme.colorScheme.primary, AppColors.amber500);
+      expect(theme.colorScheme.primary, AppColors.amber600);
       expect(theme.brightness, Brightness.light);
     });
 
@@ -19,10 +19,10 @@ void main() {
       expect(theme.scaffoldBackgroundColor, AppColors.gray50);
     });
 
-    test('should_use_amber_400_as_primary_in_dark_theme', () {
+    test('should_use_primary_amber_dark_as_primary_in_dark_theme', () {
       final theme = AppTheme.dark;
 
-      expect(theme.colorScheme.primary, AppColors.amber400);
+      expect(theme.colorScheme.primary, AppColors.primaryAmberDark);
       expect(theme.brightness, Brightness.dark);
     });
 
