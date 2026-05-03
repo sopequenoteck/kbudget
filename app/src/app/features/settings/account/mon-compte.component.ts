@@ -95,6 +95,8 @@ export class MonCompteComponent implements OnInit {
     firstValueFrom(this.userService.getProfile()).catch(() => {
       // profile already loaded or network error — non-blocking
     });
+    // Charge l'avatar via HttpClient (JWT interceptor) puis le bind comme blob URL
+    firstValueFrom(this.avatarService.loadAvatarBlob());
   }
 
   // ===== Avatar handlers =====
