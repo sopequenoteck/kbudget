@@ -12,7 +12,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { trigger, transition, style, animate, query } from '@angular/animations';
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorGear,
@@ -32,6 +32,7 @@ import {
 } from '@ng-icons/phosphor-icons/fill';
 
 import { AuthService } from '../../../core/services/auth';
+import { AvatarService } from '../../../core/services/avatar.service';
 import { PreferenceService } from '../../../core/services/preference';
 import { NotificationService } from '../../../core/services/notification';
 import { StompService } from '../../../core/services/stomp';
@@ -116,6 +117,7 @@ export class Shell {
   readonly categoryFormSubmitting = computed(() => this.categoryFormRef()?.submitting() ?? false);
   readonly categoryFormIsEditMode = computed(() => this.categoryFormRef()?.isEditMode ?? false);
   private readonly authService = inject(AuthService);
+  private readonly avatarService = inject(AvatarService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
   private readonly stompService = inject(StompService);
@@ -128,6 +130,7 @@ export class Shell {
   );
 
   readonly userName = this.authService.currentUser;
+  readonly avatarUrl = this.avatarService.avatarUrl;
   readonly sidebarOpen = signal(false);
   readonly dropdownOpen = signal(false);
   readonly userInitials = computed(() => {
@@ -213,6 +216,8 @@ export class Shell {
       if (this.authService.isAuthenticated()) {
         this.notificationService.loadUnreadCount();
         this.stompService.connect();
+        // Charge l'avatar pour le rendre disponible globalement (header, settings, etc.)
+        firstValueFrom(this.avatarService.loadAvatarBlob());
       } else {
         this.stompService.disconnect();
       }

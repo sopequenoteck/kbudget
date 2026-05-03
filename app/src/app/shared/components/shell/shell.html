@@ -13,7 +13,13 @@
         aria-haspopup="true"
         aria-label="Menu utilisateur"
       >
-        <span class="shell-user-avatar">{{ userInitials() }}</span>
+        <span class="shell-user-avatar">
+          @if (avatarUrl(); as url) {
+            <img [src]="url" alt="Photo de profil" class="shell-user-avatar__img" />
+          } @else {
+            {{ userInitials() }}
+          }
+        </span>
       </button>
       @if (dropdownOpen()) {
         <div class="shell-dropdown" role="menu">

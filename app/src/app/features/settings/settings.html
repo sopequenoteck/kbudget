@@ -3,7 +3,11 @@
   @if (currentUser(); as user) {
     <div class="settings-avatar">
       <div class="settings-avatar__circle">
-        <span class="settings-avatar__initials">{{ getInitials(user.name) }}</span>
+        @if (avatarUrl(); as url) {
+          <img [src]="url" alt="Photo de profil" class="settings-avatar__img" />
+        } @else {
+          <span class="settings-avatar__initials">{{ getInitials(user.name) }}</span>
+        }
       </div>
     </div>
     <span class="settings-account__name">{{ user.name }}</span>

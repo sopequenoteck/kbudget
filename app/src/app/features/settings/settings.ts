@@ -32,6 +32,7 @@ import { firstValueFrom } from 'rxjs';
 import packageJson from '../../../../package.json';
 
 import { AuthService } from '../../core/services/auth';
+import { AvatarService } from '../../core/services/avatar.service';
 import { UserService } from '../../core/services/user';
 import { ThemeService, type Theme } from '../../core/services/theme';
 import { TextScaleService, type TextScale } from '../../core/services/text-scale';
@@ -95,6 +96,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
 })
 export class Settings implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly avatarService = inject(AvatarService);
   private readonly userService = inject(UserService);
   private readonly themeService = inject(ThemeService);
   readonly textScaleService = inject(TextScaleService);
@@ -104,6 +106,7 @@ export class Settings implements OnInit {
   private readonly healthService = inject(HealthService);
 
   readonly currentUser = this.authService.currentUser;
+  readonly avatarUrl = this.avatarService.avatarUrl;
   readonly isAdmin = this.authService.isAdmin;
   readonly currentTheme = this.themeService.currentTheme;
   readonly currentTextScale = this.textScaleService.currentTextScale;
