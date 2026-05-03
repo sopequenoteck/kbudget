@@ -148,13 +148,17 @@ describe('DebtForm', () => {
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    // Sélectionner le compte USD
+    // Pas de compte par défaut (isDefault=true sur acc-1) → on force acc-2 USD
     component.form.patchValue({ accountId: 'acc-2' });
+    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.form.getRawValue().currency).toBe('USD');
   });
 
   it('should_auto_set_include_in_balance_when_account_selected', async () => {
+    // Désactiver le compte par défaut pour partir d'un état sans sélection
+    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -166,26 +170,30 @@ describe('DebtForm', () => {
 
     // Sélectionner un compte
     component.form.patchValue({ accountId: 'acc-1' });
+    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.form.getRawValue().includeInBalance).toBe(true);
   });
 
   it('should_hide_patrimoine_toggle_when_account_selected', async () => {
+    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    // Sans compte, hasAccount est false
-    expect(component.hasAccount()).toBe(false);
+    // Sans compte, aucune sélection
+    expect(component.selectedAccount()).toBeNull();
 
     // Sélectionner un compte via setValue pour déclencher valueChanges
     component.form.get('accountId')!.setValue('acc-1');
-    // Le form a maintenant une valeur d'accountId
+    fixture.detectChanges();
+    await fixture.whenStable();
+
     expect(component.form.get('accountId')!.value).toBe('acc-1');
-    // On vérifie que l'expression de hasAccount est correctement définie
-    expect(!!component.form.get('accountId')?.value).toBe(true);
+    expect(component.selectedAccount()?.id).toBe('acc-1');
   });
 
   it('should_prefill_fields_when_editing', async () => {
@@ -204,7 +212,7 @@ describe('DebtForm', () => {
     const values = component.form.getRawValue();
 
     expect(values.personne).toBe('Charlie');
-    expect(values.montant).toBe('500');
+    expect(values.montant).toBe('500.00');
     expect(values.date).toBe('2026-02-10');
     expect(values.rembourse).toBe(false);
     expect(values.currency).toBe('EUR');
@@ -223,7 +231,7 @@ describe('DebtForm', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.isEditMode()).toBe(true);
+    expect(fixture.componentInstance.isEditing()).toBe(true);
   });
 
   it('should_be_in_create_mode_when_no_debt_provided', () => {
@@ -231,7 +239,7 @@ describe('DebtForm', () => {
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.isEditMode()).toBe(false);
+    expect(fixture.componentInstance.isEditing()).toBe(false);
   });
 
   it('should_call_create_when_no_editing_entity', async () => {
@@ -302,11 +310,14 @@ describe('DebtForm', () => {
     const component = fixture.componentInstance;
     // Sélectionner un compte USD
     component.form.patchValue({ accountId: 'acc-2' });
+    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.form.getRawValue().currency).toBe('USD');
 
-    // Vider le compte — aucune mise à jour de devise (logique onChangeAccountId seulement si truthy)
+    // Vider le compte — aucune mise à jour de devise (logique seulement si accountId truthy)
     component.form.patchValue({ accountId: '' });
-    // La devise reste USD car la logique ne s'applique que lorsque accountId est truthy
+    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.form.getRawValue().currency).toBe('USD');
   });
 });

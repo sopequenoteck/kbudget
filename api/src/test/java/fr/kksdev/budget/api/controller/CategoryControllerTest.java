@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.CategoryRequest;
@@ -46,6 +47,9 @@ class CategoryControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private final UUID categoryId = UUID.randomUUID();
@@ -55,7 +59,7 @@ class CategoryControllerTest {
         var testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     private String categoryJson(String nom, String icone, String couleur) {

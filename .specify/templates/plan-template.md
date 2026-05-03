@@ -1,9 +1,9 @@
 # Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Input**: Feature specification from `.specify/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Note**: This template is filled in by the `/devflow.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
@@ -38,13 +38,13 @@
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+.specify/specs/[###-feature]/
+├── plan.md              # This file (/devflow.plan command output)
+├── research.md          # Phase 0 output (/devflow.plan command)
+├── data-model.md        # Phase 1 output (/devflow.plan command)
+├── quickstart.md        # Phase 1 output (/devflow.plan command)
+├── contracts/           # Phase 1 output (/devflow.plan command)
+└── tasks.md             # Phase 2 output (/devflow.tasks command - NOT created by /devflow.plan)
 ```
 
 ### Source Code (repository root)

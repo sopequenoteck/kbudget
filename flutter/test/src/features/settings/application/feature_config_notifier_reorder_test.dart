@@ -106,13 +106,13 @@ void main() {
 
   group('reorderNavigation', () {
     test('should_update_navOrder_when_reorderNavigation_called', () async {
-      final newOrder = [Feature.shop, Feature.subscriptions, Feature.debts];
+      final newOrder = [Feature.subscriptions, Feature.debts, Feature.budgets];
       await notifier().reorderNavigation(newOrder);
       expect(state().navOrder, newOrder);
     });
 
     test('should_persist_navOrder_locally_when_reordering', () async {
-      final newOrder = [Feature.shop, Feature.subscriptions, Feature.debts];
+      final newOrder = [Feature.subscriptions, Feature.debts, Feature.budgets];
       await notifier().reorderNavigation(newOrder);
       expect(mockRepo.lastSavedNavOrder, newOrder);
     });
@@ -120,16 +120,16 @@ void main() {
     test(
         'should_preserve_disabled_features_position_when_reordering_enabled_only',
         () async {
-      // Only subscriptions and debts are enabled (shop disabled)
-      // Reorder: debts before subscriptions, shop keeps its position
-      final newOrder = [Feature.debts, Feature.subscriptions, Feature.shop];
+      // Only subscriptions and debts are enabled (budgets disabled)
+      // Reorder: debts before subscriptions, budgets keeps its position
+      final newOrder = [Feature.debts, Feature.subscriptions, Feature.budgets];
       await notifier().reorderNavigation(newOrder);
       expect(state().navOrder,
-          [Feature.debts, Feature.subscriptions, Feature.shop]);
+          [Feature.debts, Feature.subscriptions, Feature.budgets]);
     });
 
     test('should_reset_error_when_reordering', () async {
-      final newOrder = [Feature.debts, Feature.subscriptions, Feature.shop];
+      final newOrder = [Feature.debts, Feature.subscriptions, Feature.budgets];
       await notifier().reorderNavigation(newOrder);
       expect(state().error, isNull);
     });

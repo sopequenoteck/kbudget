@@ -91,7 +91,7 @@ describe('CategoryForm', () => {
     const component = fixture.componentInstance;
     component.selectedEmoji.set('🍔');
 
-    await component.onSubmit();
+    await component.submit();
 
     expect(categoryServiceMock.update).toHaveBeenCalledWith('cat-1', {
       nom: 'Alimentation',
@@ -108,7 +108,7 @@ describe('CategoryForm', () => {
     const component = fixture.componentInstance;
     component.selectedEmoji.set('🎮');
 
-    await component.onSubmit();
+    await component.submit();
 
     expect(categoryServiceMock.create).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe('CategoryForm', () => {
     component.form.patchValue({ nom: '' });
     component.selectedEmoji.set('🍔');
 
-    await component.onSubmit();
+    await component.submit();
 
     expect(categoryServiceMock.create).not.toHaveBeenCalled();
     expect(component.form.get('nom')?.touched).toBe(true);
@@ -144,24 +144,9 @@ describe('CategoryForm', () => {
     const component = fixture.componentInstance;
     component.form.patchValue({ nom: 'Test' });
 
-    await component.onSubmit();
+    await component.submit();
 
     expect(categoryServiceMock.create).not.toHaveBeenCalled();
-  });
-
-  it('should display error message on save failure', async () => {
-    categoryServiceMock.create.mockReturnValue(throwError(() => new Error('Erreur réseau')));
-
-    const fixture = TestBed.createComponent(CategoryForm);
-    fixture.detectChanges();
-
-    const component = fixture.componentInstance;
-    component.form.patchValue({ nom: 'Test' });
-    component.selectedEmoji.set('🍔');
-
-    await component.onSubmit();
-
-    expect(component.errorMessage()).toBe('Erreur réseau');
   });
 
   it('should emit cancelled on cancel', () => {
@@ -177,5 +162,66 @@ describe('CategoryForm', () => {
     component.onCancel();
 
     expect(cancelled).toBe(true);
+  });
+
+  // --- Tests ajoutés pour T-016 (externalisation footer) ---
+
+  it('should_emit_saved_when_submit_called_publicly', async () => {
+    // Arrange
+    const fixture = TestBed.createComponent(CategoryForm);
+    fixture.componentRef.setInput('initialName', 'Vacances');
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.selectedEmoji.set('🏖️');
+
+    const savedCategories: Category[] = [];
+    component.saved.subscribe((cat) => savedCategories.push(cat));
+
+    // Act
+    await component.submit();
+
+    // Assert
+    expect(savedCategories).toHaveLength(1);
+    expect(savedCategories[0]).toEqual(mockCategory);
+  });
+
+  it('should_update_error_message_when_api_fails', async () => {
+    // Arrange
+    categoryServiceMock.create.mockReturnValue(throwError(() => new Error('Erreur réseau')));
+
+    const fixture = TestBed.createComponent(CategoryForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ nom: 'Test' });
+    component.selectedEmoji.set('🍔');
+
+    // Act
+    await component.submit();
+
+    // Assert
+    expect(component.errorMessage()).toBe('Erreur réseau');
+  });
+
+  it('should_not_submit_when_form_invalid', async () => {
+    // Arrange
+    const fixture = TestBed.createComponent(CategoryForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    // Le nom est vide → form invalide
+    component.form.patchValue({ nom: '' });
+    component.selectedEmoji.set('🍔');
+
+    const savedCategories: Category[] = [];
+    component.saved.subscribe((cat) => savedCategories.push(cat));
+
+    // Act
+    await component.submit();
+
+    // Assert
+    expect(savedCategories).toHaveLength(0);
+    expect(categoryServiceMock.create).not.toHaveBeenCalled();
   });
 });

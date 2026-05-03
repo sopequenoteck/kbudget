@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.LogoutRequest;
@@ -11,7 +12,9 @@ import fr.kksdev.budget.api.exception.TokenInvalidException;
 import fr.kksdev.budget.api.exception.TokenReusedException;
 import fr.kksdev.budget.api.exception.TokenRevokedException;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.service.AcceptInviteService;
 import fr.kksdev.budget.api.service.AuthService;
+import fr.kksdev.budget.api.service.InvitationService;
 import fr.kksdev.budget.api.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +47,24 @@ class AuthControllerRefreshTest {
     private RefreshTokenService refreshTokenService;
 
     @MockitoBean
+    private AcceptInviteService acceptInviteService;
+
+    @MockitoBean
+    private InvitationService invitationService;
+
+    @MockitoBean
     private JwtUtil jwtUtil;
 
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     @Test
     void should_return_200_when_refresh_success() throws Exception {
         var request = new RefreshRequest("valid-refresh-token");
-        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User", false);
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 
@@ -63,7 +75,8 @@ class AuthControllerRefreshTest {
                 .andExpect(jsonPath("$.token").value("new-access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
                 .andExpect(jsonPath("$.email").value("test@mail.com"))
-                .andExpect(jsonPath("$.name").value("Test User"));
+                .andExpect(jsonPath("$.name").value("Test User"))
+                .andExpect(jsonPath("$.mustResetCredentials").value(false));
     }
 
     @Test
@@ -158,7 +171,7 @@ class AuthControllerRefreshTest {
     @Test
     void should_succeed_without_authorization_header() throws Exception {
         var request = new RefreshRequest("valid-refresh-token");
-        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User");
+        var response = new AuthResponse("new-access-token", "new-refresh-token", "test@mail.com", "Test User", false);
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 

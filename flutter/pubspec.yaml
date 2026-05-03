@@ -52,12 +52,14 @@ dependencies:
 
   # Image picker & file storage
   image_picker: ^1.1.2
+  flutter_image_compress: ^2.3.0
   path_provider: ^2.1.5
 
   # Utils
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   collection: ^1.19.1
+  diacritic: ^0.1.6
   stomp_dart_client: ^3.0.1
   flutter_local_notifications: ^21.0.0
 

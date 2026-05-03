@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, computed, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { APP_LOCALE } from '../../../core/constants/locale.constants';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -20,14 +21,14 @@ import { DebtService } from '../../../core/services/debt';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { ToastService } from '../toast/toast.service';
+import { ModalService } from '../../../core/services/modal.service';
 import { type Debt } from '../../../core/models/debt.model';
-import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
 import { SnoozeDialog } from '../../../features/debts/components/snooze-dialog/snooze-dialog';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, NgIcon, RepayDialog, SnoozeDialog],
+  imports: [DatePipe, NgIcon, SnoozeDialog],
   providers: [
     provideIcons({
       phosphorBellRinging,
@@ -51,6 +52,7 @@ export class NotificationPanel {
   private readonly recurringTransactionService = inject(RecurringTransactionService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
   readonly notificationService = inject(NotificationService);
   readonly isOpen = input(false);
@@ -58,7 +60,6 @@ export class NotificationPanel {
   readonly confirmDeleteAll = signal(false);
   readonly activeDebt = signal<Debt | null>(null);
   readonly activeNotification = signal<NotificationModel | null>(null);
-  readonly showRepayDialog = signal(false);
   readonly showSnoozeDialog = signal(false);
 
   readonly groupedNotifications = computed(() => {
@@ -72,7 +73,7 @@ export class NotificationPanel {
       const date = new Date(dateStr);
       if (date.toDateString() === today.toDateString()) return "Aujourd'hui";
       if (date.toDateString() === yesterday.toDateString()) return 'Hier';
-      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
     };
 
     for (const notification of notifications) {
@@ -143,9 +144,8 @@ export class NotificationPanel {
     if (!notification.entityId) return;
     try {
       const debt = await firstValueFrom(this.debtService.getById(notification.entityId));
-      this.activeDebt.set(debt);
       this.activeNotification.set(notification);
-      this.showRepayDialog.set(true);
+      this.modalService.openModal('repay', debt);
     } catch {
       this.toastService.error('Impossible de charger la dette');
     }
@@ -162,13 +162,6 @@ export class NotificationPanel {
     } catch {
       this.toastService.error('Impossible de charger la dette');
     }
-  }
-
-  onRepaid(_updatedDebt: Debt, notification: NotificationModel): void {
-    this.showRepayDialog.set(false);
-    this.activeDebt.set(null);
-    this.toastService.success('Remboursement enregistré');
-    this.notificationService.markAsRead(notification.id);
   }
 
   onSnoozed(_updatedDebt: Debt, notification: NotificationModel): void {

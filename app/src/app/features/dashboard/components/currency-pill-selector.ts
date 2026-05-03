@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
+import { CurrencyService } from '../../../core/services/currency';
 
 @Component({
   selector: 'app-currency-pill-selector',
@@ -23,24 +24,24 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
     `
       .pill-container {
         display: flex;
-        gap: var(--space-2);
+        gap: var(--space-1);
         overflow-x: auto;
-        padding: var(--space-1) 0;
       }
       .pill {
-        padding: var(--space-2) var(--space-4);
+        padding: var(--space-1) var(--space-3);
         border-radius: var(--radius-round);
-        border: none;
+        border: 1px solid var(--border-default);
         cursor: pointer;
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-xs);
         font-weight: var(--font-weight-medium);
-        background: var(--bg-tertiary);
+        background: none;
         color: var(--text-secondary);
         white-space: nowrap;
-        transition: all var(--duration-normal) var(--easing-default);
+        transition: all var(--duration-fast);
       }
       .pill.active {
-        background: var(--color-primary);
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
         color: var(--color-primary-contrast);
         font-weight: var(--font-weight-semibold);
       }
@@ -48,21 +49,16 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
   ],
 })
 export class CurrencyPillSelector {
+  private readonly currencyService = inject(CurrencyService);
+
   readonly currencies = input.required<string[]>();
   readonly activeCurrency = input.required<string>();
   readonly currencyChange = output<string>();
 
-  private readonly symbolMap: Record<string, string> = {
-    EUR: '€',
-    XOF: 'CFA',
-    USD: '$',
-    GBP: '£',
-    CHF: 'CHF',
-    CAD: 'CA$',
-    MAD: 'MAD',
-  };
+  private readonly _init = this.currencyService.loadIfEmpty();
 
-  getCurrencySymbol(currency: string): string {
-    return this.symbolMap[currency] ?? currency;
+  getCurrencySymbol(code: string): string {
+    const info = this.currencyService.currencies().find(c => c.code === code);
+    return info?.symbol ?? code;
   }
 }

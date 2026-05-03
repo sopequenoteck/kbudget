@@ -5,7 +5,7 @@
 :root,
 .theme-light {
   // -- Backgrounds --
-  --bg-primary: var(--gray-50);
+  --bg-primary: #f0f0f0;
   --bg-secondary: #fff;
   --bg-tertiary: var(--gray-100);
 
@@ -19,21 +19,16 @@
   --border-default: var(--gray-200);
   --border-strong: var(--gray-300);
 
-  // -- Primary --
-  --color-primary: var(--amber-500);
-  --color-primary-hover: var(--amber-600);
+  // -- Primary (amber-600/700 for contrast on white — amber-500 fails WCAG) --
+  --color-primary: var(--amber-600);
+  --color-primary-hover: var(--amber-700);
   --color-primary-light: var(--amber-100);
   --color-primary-contrast: #fff;
 
-  // -- Secondary --
-  --color-secondary: var(--indigo-600);
-  --color-secondary-hover: var(--indigo-700);
-  --color-secondary-light: var(--indigo-100);
-  --color-secondary-contrast: #fff;
-
   // -- Surfaces --
   --surface-default: #fff;
-  --surface-raised: #fff;
+  --surface-raised: var(--gray-100);
+  --surface-background: transparent;
   --surface-overlay: rgb(var(--gray-900-rgb) / 0.5);
 
   // -- Feedback backgrounds --
@@ -48,8 +43,17 @@
   --text-warning: #ca8a04;
   --text-info: #2563eb;
 
+  // -- Misc --
+  --icon-circle-bg: rgba(0, 0, 0, 0.04);
+
   // -- Interactive --
   --hover-bg: var(--gray-100);
+  --hover-subtle: rgba(0, 0, 0, 0.04);
+  --highlight-subtle: rgba(0, 0, 0, 0.06);
+  --overlay-light: rgba(0, 0, 0, 0.1);
+  --primary-subtle: rgba(217, 119, 6, 0.1);
+  --primary-muted: rgba(217, 119, 6, 0.15);
+  --primary-border: rgba(217, 119, 6, 0.25);
   --focus-ring: rgb(var(--amber-500-rgb) / 0.5);
 
   // -- Business tokens --
@@ -59,12 +63,12 @@
   --color-debt-owed: #16a34a;
   --color-subscription: #8b5cf6;
 
-  // -- Dashboard visual revamp --
-  --hero-gradient: linear-gradient(135deg, var(--amber-50) 0%, var(--indigo-50) 100%);
-  --glass-bg: var(--surface-raised);
+  // -- Dashboard (quiet utility — aligned with dark, no gradients) --
+  --hero-gradient: none;
+  --glass-bg: var(--surface-default);
   --glass-border: var(--border-default);
   --glass-blur: 0px;
-  --page-gradient-color: rgba(245, 158, 11, 0.05);
+  --page-gradient-color: transparent;
   --font-size-hero: 2.25rem;
   --shadow-hero-text: none;
   --nav-border-top: 1px solid var(--border-default);

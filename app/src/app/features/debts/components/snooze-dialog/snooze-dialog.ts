@@ -32,6 +32,7 @@ function futureDateValidator(control: AbstractControl): ValidationErrors | null 
 
 @Component({
   selector: 'app-snooze-dialog',
+  standalone: true,
   imports: [ReactiveFormsModule, FormField],
   templateUrl: './snooze-dialog.html',
   styleUrl: './snooze-dialog.scss',

@@ -1,0 +1,203 @@
+<div class="users-page">
+  <!-- Header (pattern partagé) -->
+  <div class="page-header">
+    <a class="page-header__back" routerLink="/settings" aria-label="Retour">
+      <ng-icon name="phosphorCaretLeft" size="20" />
+    </a>
+    <h1 class="page-header__title"><ng-icon name="phosphorUsers" size="20" /> Utilisateurs</h1>
+  </div>
+
+  <!-- Tabs -->
+  <div class="users-tabs">
+    <button
+      type="button"
+      class="users-tab"
+      [class.users-tab--active]="activeTab() === 'invitations'"
+      (click)="setTab('invitations')"
+    >
+      Invitations
+    </button>
+    <button
+      type="button"
+      class="users-tab"
+      [class.users-tab--active]="activeTab() === 'users'"
+      (click)="setTab('users')"
+    >
+      Utilisateurs
+    </button>
+  </div>
+
+  <!-- ===== INVITATIONS TAB ===== -->
+  @if (activeTab() === 'invitations') {
+    <div class="users-section">
+      <!-- Bouton Inviter -->
+      @if (!showInviteForm()) {
+        <button
+          type="button"
+          class="users-action-btn"
+          (click)="openInviteForm()"
+        >
+          <ng-icon name="phosphorPlus" size="16" />
+          Inviter un utilisateur
+        </button>
+      }
+
+      <!-- Formulaire invitation -->
+      @if (showInviteForm()) {
+        <div class="users-invite-form">
+          <form [formGroup]="inviteForm" (ngSubmit)="onInvite()">
+            <div class="users-invite-form__field">
+              <label for="invite-email" class="users-invite-form__label">Adresse email</label>
+              <input
+                id="invite-email"
+                type="email"
+                formControlName="email"
+                placeholder="nouveau@exemple.com"
+                class="users-invite-form__input"
+                [class.users-invite-form__input--error]="
+                  inviteForm.controls.email.touched && inviteForm.controls.email.invalid
+                "
+                autocomplete="off"
+              />
+              @if (inviteForm.controls.email.touched && inviteForm.controls.email.invalid) {
+                <span class="users-invite-form__error">Email valide requis</span>
+              }
+            </div>
+            <p class="users-invite-form__hint">
+              Le lien sera automatiquement copié dans votre presse-papiers.
+            </p>
+            <div class="users-invite-form__actions">
+              <button
+                type="button"
+                class="users-btn users-btn--ghost"
+                (click)="closeInviteForm()"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="users-btn users-btn--primary"
+                [disabled]="loading()"
+              >
+                @if (loading()) { Envoi... } @else { Créer et copier le lien }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Liste invitations -->
+      @if (invitations().length === 0) {
+        <div class="users-empty">
+          <ng-icon name="phosphorEnvelope" size="32" />
+          <span>Aucune invitation pour le moment</span>
+        </div>
+      } @else {
+        <div class="users-list">
+          @for (invitation of invitations(); track invitation.id) {
+            <div class="users-list-item">
+              <div class="users-list-item__main">
+                <span class="users-list-item__email">{{ invitation.email }}</span>
+                <span
+                  class="users-list-item__status"
+                  [class.users-list-item__status--active]="invitation.status === 'ACTIVE'"
+                  [class.users-list-item__status--used]="invitation.status === 'USED'"
+                  [class.users-list-item__status--expired]="invitation.status === 'EXPIRED'"
+                  [class.users-list-item__status--revoked]="invitation.status === 'REVOKED'"
+                >
+                  {{ statusLabel(invitation.status) }}
+                </span>
+              </div>
+              <span class="users-list-item__meta">
+                Par {{ invitation.invitedByEmail }}
+              </span>
+              @if (invitation.status === 'ACTIVE') {
+                <div class="users-list-item__actions">
+                  @if (invitation.token) {
+                    <button
+                      type="button"
+                      class="users-btn users-btn--ghost users-btn--sm"
+                      (click)="onCopyLink(invitation.token)"
+                      [disabled]="loading()"
+                    >
+                      <ng-icon name="phosphorCopy" size="14" />
+                      Copier le lien
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="users-btn users-btn--danger users-btn--sm"
+                    (click)="onRevoke(invitation.id)"
+                    [disabled]="loading()"
+                  >
+                    <ng-icon name="phosphorTrash" size="14" />
+                    Révoquer
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ===== USERS TAB ===== -->
+  @if (activeTab() === 'users') {
+    <div class="users-section">
+      @if (users().length === 0) {
+        <div class="users-empty">
+          <ng-icon name="phosphorUsers" size="32" />
+          <span>Aucun utilisateur trouvé</span>
+        </div>
+      } @else {
+        <div class="users-list">
+          @for (user of users(); track user.id) {
+            <div class="users-list-item" [class.users-list-item--disabled]="user.disabledAt !== null">
+              <div class="users-list-item__main">
+                <span class="users-list-item__email">{{ user.displayName }}</span>
+                @if (user.isAdmin) {
+                  <span class="users-list-item__badge">
+                    <ng-icon name="phosphorShieldCheck" size="12" />
+                    Admin
+                  </span>
+                }
+                <span
+                  class="users-list-item__status"
+                  [class.users-list-item__status--active]="user.disabledAt === null"
+                  [class.users-list-item__status--revoked]="user.disabledAt !== null"
+                >
+                  {{ user.disabledAt === null ? 'Actif' : 'Désactivé' }}
+                </span>
+              </div>
+              <span class="users-list-item__meta">{{ user.email }}</span>
+              <div class="users-list-item__actions">
+                @if (user.disabledAt === null) {
+                  <button
+                    type="button"
+                    class="users-btn users-btn--danger users-btn--sm"
+                    (click)="onDisable(user.id)"
+                    [disabled]="loading()"
+                  >
+                    <ng-icon name="phosphorLock" size="14" />
+                    Désactiver
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="users-btn users-btn--primary users-btn--sm"
+                    (click)="onEnable(user.id)"
+                    [disabled]="loading()"
+                  >
+                    <ng-icon name="phosphorLockSimpleOpen" size="14" />
+                    Réactiver
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

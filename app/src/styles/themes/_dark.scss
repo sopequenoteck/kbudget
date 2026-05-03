@@ -18,56 +18,60 @@
   --border-default: var(--gray-700);
   --border-strong: var(--gray-600);
 
-  // -- Primary (amber-400 for better contrast on dark) --
-  --color-primary: var(--amber-400);
-  --color-primary-hover: var(--amber-300);
-  --color-primary-light: var(--amber-900);
+  // -- Primary (amber muted for dark — less saturated) --
+  --color-primary: #e0a820;
+  --color-primary-hover: #c9952a;
+  --color-primary-light: rgba(255, 255, 255, 0.08);
   --color-primary-contrast: var(--gray-900);
-
-  // -- Secondary --
-  --color-secondary: var(--indigo-400);
-  --color-secondary-hover: var(--indigo-300);
-  --color-secondary-light: var(--indigo-900);
-  --color-secondary-contrast: var(--gray-900);
 
   // -- Surfaces --
   --surface-default: var(--gray-800);
   --surface-raised: var(--gray-700);
+  --surface-background: transparent;
   --surface-overlay: rgb(0 0 0 / 0.6);
 
-  // -- Feedback backgrounds --
-  --bg-success: rgb(34 197 94 / 0.15);
-  --bg-error: rgb(239 68 68 / 0.15);
-  --bg-warning: rgb(234 179 8 / 0.15);
-  --bg-info: rgb(59 130 246 / 0.15);
+  // -- Feedback backgrounds (very subtle on dark) --
+  --bg-success: rgb(34 197 94 / 0.10);
+  --bg-error: rgb(239 68 68 / 0.10);
+  --bg-warning: rgb(234 179 8 / 0.10);
+  --bg-info: rgb(59 130 246 / 0.10);
 
-  // -- Feedback text (400 variants for dark) --
-  --text-success: #4ade80;
-  --text-error: #f87171;
-  --text-warning: #facc15;
-  --text-info: #60a5fa;
+  // -- Feedback text (muted for dark — softer on black) --
+  --text-success: #6dc990;
+  --text-error: #d97777;
+  --text-warning: #d4ad3c;
+  --text-info: #7aacdb;
 
-  // -- Shadows --
-  --shadow-colored-primary: 0 8px 24px -4px rgb(251 191 36 / 0.35);
+  // -- Shadows (neutral, no colored glow) --
+  --shadow-colored-primary: 0 8px 24px -4px rgb(0 0 0 / 0.4);
+
+  // -- Misc --
+  --icon-circle-bg: rgba(255, 255, 255, 0.06);
 
   // -- Interactive --
   --hover-bg: var(--gray-700);
+  --hover-subtle: rgba(255, 255, 255, 0.04);
+  --highlight-subtle: rgba(255, 255, 255, 0.1);
+  --overlay-light: rgba(255, 255, 255, 0.15);
+  --primary-subtle: rgba(224, 168, 32, 0.1);
+  --primary-muted: rgba(224, 168, 32, 0.15);
+  --primary-border: rgba(224, 168, 32, 0.25);
   --focus-ring: rgb(var(--amber-400-rgb) / 0.5);
 
-  // -- Business tokens --
-  --color-income: #4ade80;
-  --color-expense: #f87171;
-  --color-debt-owe: #f87171;
-  --color-debt-owed: #4ade80;
-  --color-subscription: #a78bfa;
+  // -- Business tokens (muted for dark) --
+  --color-income: #6dc990;
+  --color-expense: #d97777;
+  --color-debt-owe: #d97777;
+  --color-debt-owed: #6dc990;
+  --color-subscription: #9580d9;
 
-  // -- Dashboard visual revamp --
-  --hero-gradient: linear-gradient(135deg, var(--amber-900) 0%, var(--indigo-900) 100%);
-  --glass-bg: rgba(31, 41, 55, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: 20px;
-  --page-gradient-color: rgba(251, 191, 36, 0.08);
+  // -- Dashboard (quiet utility — no gradients, no glass, no blur) --
+  --hero-gradient: none;
+  --glass-bg: var(--surface-default);
+  --glass-border: var(--border-default);
+  --glass-blur: 0px;
+  --page-gradient-color: transparent;
   --font-size-hero: 2.25rem;
-  --shadow-hero-text: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --nav-border-top: 1px solid rgba(255, 255, 255, 0.08);
+  --shadow-hero-text: none;
+  --nav-border-top: 1px solid var(--icon-circle-bg);
 }

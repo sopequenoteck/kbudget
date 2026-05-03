@@ -1,0 +1,99 @@
+package fr.kksdev.budget.api.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Set;
+
+@Slf4j
+@RequiredArgsConstructor
+public class PasswordResetRequiredFilter extends OncePerRequestFilter {
+
+    private static final Set<String> ALLOWED_PATHS = Set.of(
+            "/auth/first-login-reset",
+            "/auth/logout"
+    );
+
+    private final JwtUtil jwtUtil;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String token = extractBearerToken(request);
+        if (token == null) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        Object claim = jwtUtil.extractClaim(token, "mustResetCredentials");
+        boolean mustReset = Boolean.TRUE.equals(claim);
+
+        if (!mustReset) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // getServletPath() peut être vide dans certains contextes (MockMvc @SpringBootTest)
+        // On dérive le path depuis l'URI en retirant le context-path si nécessaire
+        String servletPath = request.getServletPath();
+        String path = (servletPath != null && !servletPath.isEmpty())
+                ? servletPath
+                : stripContextPath(request);
+
+        if (isAllowedPath(path)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        log.info("Request blocked by password-reset gate: path={}", path);
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(
+                "{\"error\":\"PASSWORD_RESET_REQUIRED\"," +
+                "\"message\":\"Credentials reset required before accessing this resource.\"}"
+        );
+    }
+
+    private String extractBearerToken(HttpServletRequest request) {
+        String h = request.getHeader("Authorization");
+        return (h != null && h.startsWith("Bearer ")) ? h.substring(7) : null;
+    }
+
+    /**
+     * Vérifie si le path est dans la liste des paths autorisés.
+     * Exact-match : le context-path est déjà retiré par stripContextPath si nécessaire.
+     */
+    private boolean isAllowedPath(String path) {
+        return ALLOWED_PATHS.contains(path);
+    }
+
+    /**
+     * Dérive le chemin de la requête depuis l'URI en retirant le context-path.
+     * Fallback quand getServletPath() retourne une chaîne vide.
+     */
+    private String stripContextPath(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+            return uri.substring(contextPath.length());
+        }
+        return uri != null ? uri : "";
+    }
+}

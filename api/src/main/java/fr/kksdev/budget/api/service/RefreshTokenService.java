@@ -79,11 +79,15 @@ public class RefreshTokenService {
 
         User user = refreshToken.getUser();
         String newRefreshTokenValue = generateRefreshToken(user);
-        String newAccessToken = jwtUtil.generateToken(user.getEmail());
+        java.util.Map<String, Object> extraClaims = user.isPasswordResetRequired()
+                ? java.util.Map.of("mustResetCredentials", true)
+                : java.util.Map.of();
+        String newAccessToken = jwtUtil.generateToken(user.getEmail(), extraClaims);
 
         log.info("Token refreshed for user: {}", user.getEmail());
 
-        return new AuthResponse(newAccessToken, newRefreshTokenValue, user.getEmail(), user.getName());
+        return new AuthResponse(newAccessToken, newRefreshTokenValue, user.getEmail(), user.getName(),
+                user.isPasswordResetRequired());
     }
 
     public void revokeAllUserTokens(User user) {

@@ -2,7 +2,7 @@
 // Buttons — Styles globaux pour les boutons
 // =============================================================================
 
-button {
+%btn-base {
   padding: var(--space-3) var(--space-5);
   border: 1px solid transparent;
   border-radius: var(--radius-xl);
@@ -25,6 +25,7 @@ button {
 }
 
 .btn-primary {
+  @extend %btn-base;
   background-color: var(--color-primary);
   color: var(--color-primary-contrast);
 
@@ -35,6 +36,7 @@ button {
 }
 
 .btn-outline {
+  @extend %btn-base;
   background-color: transparent;
   border-color: var(--border-default);
   color: var(--text-primary);
@@ -45,6 +47,7 @@ button {
 }
 
 .btn-danger {
+  @extend %btn-base;
   background-color: var(--text-error);
   color: var(--text-inverse);
 

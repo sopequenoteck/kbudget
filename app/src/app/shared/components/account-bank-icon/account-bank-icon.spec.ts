@@ -30,6 +30,7 @@ const makeAccount = (overrides: Partial<Account> = {}): Account => ({
 });
 
 @Component({
+    standalone: true,
   template: `<app-account-bank-icon [account]="account()" />`,
   imports: [AccountBankIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,

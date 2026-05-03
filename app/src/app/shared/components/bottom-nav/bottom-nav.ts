@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorHouse, phosphorCurrencyDollar, phosphorArrowsClockwise, phosphorHandshake, phosphorStorefront } from '@ng-icons/phosphor-icons/regular';
-import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseFill, phosphorHandshakeFill, phosphorStorefrontFill } from '@ng-icons/phosphor-icons/fill';
+import { phosphorHouse, phosphorCurrencyDollar, phosphorArrowsClockwise, phosphorHandshake } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseFill, phosphorHandshakeFill } from '@ng-icons/phosphor-icons/fill';
 
 @Component({
-  selector: 'bottom-nav',
+  selector: 'app-bottom-nav',
+  standalone: true,
   imports: [RouterLink, NgIcon],
   host: { '[attr.data-item-count]': 'items().length.toString()' },
   providers: [
@@ -18,8 +19,6 @@ import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseF
       phosphorArrowsClockwiseFill,
       phosphorHandshake,
       phosphorHandshakeFill,
-      phosphorStorefront,
-      phosphorStorefrontFill,
     }),
   ],
   template: `

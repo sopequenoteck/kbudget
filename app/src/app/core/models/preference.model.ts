@@ -1,6 +1,6 @@
 import { type NotificationType } from './notification.model';
 
-export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'SHOP' | 'BUDGETS';
+export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'BUDGETS';
 
 export interface FeatureMetadata {
   readonly value: Feature;
@@ -29,14 +29,6 @@ export const FEATURES: readonly FeatureMetadata[] = [
     route: '/debts',
   },
   {
-    value: 'SHOP',
-    label: 'Boutique',
-    icon: 'phosphorStorefront',
-    filledIcon: 'phosphorStorefrontFill',
-    description: 'Gérer vos ventes de produits',
-    route: '/shop',
-  },
-  {
     value: 'BUDGETS',
     label: 'Budgets',
     icon: 'phosphorChartPie',
@@ -49,8 +41,6 @@ export const FEATURES: readonly FeatureMetadata[] = [
 export interface UserPreference {
   enabledFeatures: Feature[];
   navOrder: Feature[];
-  shopAccountId: string | null;
-  includeShopInBalance: boolean;
   currencies?: string[];
   enabledNotificationTypes?: NotificationType[];
   timezone?: string;
@@ -60,8 +50,6 @@ export interface UserPreference {
 export interface UserPreferenceRequest {
   enabledFeatures: Feature[];
   navOrder?: Feature[] | null;
-  shopAccountId?: string | null;
-  includeShopInBalance?: boolean | null;
   currencies?: string[] | null;
   enabledNotificationTypes?: NotificationType[] | null;
   timezone?: string | null;

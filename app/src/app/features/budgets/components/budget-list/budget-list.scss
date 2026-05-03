@@ -1,0 +1,158 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+}
+
+// Budget list — styles specifiques uniquement
+// Hero, currency-toggle, section-header, date-label, states sont dans _list-patterns.scss
+
+// Hero: gap plus grand pour le doughnut
+.hero {
+  gap: var(--space-4);
+}
+
+// Hero body: layout horizontal avec doughnut
+.hero__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+// Hero amount: prend l'espace restant (doughnut a droite)
+.hero__amount {
+  flex: 1;
+  min-width: 0;
+}
+
+// Hero amount toujours expense
+.hero__amount-value {
+  color: var(--color-expense);
+}
+
+// =============================================================================
+// Budget group — conteneur avec dividers
+// =============================================================================
+
+.budget-group {
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+
+  .budget-row:not(:last-child) {
+    border-bottom: 1px solid var(--border-default);
+  }
+}
+
+// =============================================================================
+// Budget row — structure unique (body > header > name + amount + bar)
+// =============================================================================
+
+.budget-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  transition: background var(--duration-fast);
+
+  &.clickable {
+    cursor: pointer;
+    &:hover { background: var(--hover-bg); }
+  }
+
+  &.inactive { opacity: 0.5; }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--icon-circle-bg);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  &__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__amount {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &.over-budget {
+      color: var(--color-expense);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  &__amount-right {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+// =============================================================================
+// Budget bar
+// =============================================================================
+
+.budget-bar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background-color: var(--border-default);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+}
+
+.budget-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  background-color: var(--color-income);
+  opacity: 0.7;
+  transition: width var(--duration-slow) var(--easing-out);
+
+  &.budget-bar__fill--warning { background-color: var(--text-warning); }
+  &.budget-bar__fill--exceeded { background-color: var(--color-expense); }
+}
+
+.budget-bar__overflow-marker {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--color-expense);
+  border-radius: 0 var(--radius-round) var(--radius-round) 0;
+}

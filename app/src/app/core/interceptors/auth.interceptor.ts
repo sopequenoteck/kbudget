@@ -1,4 +1,4 @@
-import { inject, isDevMode } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpErrorResponse,
   HttpEvent,
@@ -9,8 +9,15 @@ import {
 import { BehaviorSubject, Observable, catchError, filter, switchMap, take, throwError } from 'rxjs';
 
 import { AuthService } from '../services/auth';
+import { DevLogger } from '../services/dev-logger';
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+const PUBLIC_PATHS = [
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/logout',
+  '/auth/invitations/',
+  '/auth/accept-invite',
+];
 
 let isRefreshing = false;
 let refreshSubject = new BehaviorSubject<boolean>(true);
@@ -31,6 +38,7 @@ function isExternalUrl(url: string): boolean {
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const logger = inject(DevLogger);
   const token = authService.getToken();
 
   let request = req;
@@ -48,7 +56,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         !isExternalUrl(req.url) &&
         !req.headers.has('_retry')
       ) {
-        return handle401(authService, req, next);
+        return handle401(authService, logger, req, next);
       }
       return throwError(() => error);
     }),
@@ -57,6 +65,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 function handle401(
   authService: AuthService,
+  logger: DevLogger,
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
@@ -64,13 +73,13 @@ function handle401(
     isRefreshing = true;
     refreshSubject.next(false);
 
-    if (isDevMode()) console.log('Refresh token: tentative de renouvellement');
+    logger.warn('Refresh token: tentative de renouvellement');
 
     return authService.refreshAccessToken().pipe(
       switchMap((response) => {
         isRefreshing = false;
         refreshSubject.next(true);
-        if (isDevMode()) console.log('Refresh token: renouvellement réussi');
+        logger.info('Refresh token: renouvellement réussi');
 
         return next(
           req.clone({
@@ -83,10 +92,10 @@ function handle401(
         refreshSubject.next(true);
 
         if (err instanceof HttpErrorResponse && err.status === 401) {
-          if (isDevMode()) console.error('Refresh token: échec (401) — déconnexion');
+          logger.error('Refresh token: échec (401) — déconnexion');
           authService.logout();
-        } else if (isDevMode()) {
-          console.error('Refresh token: erreur réseau — pas de déconnexion');
+        } else {
+          logger.error('Refresh token: erreur réseau — pas de déconnexion');
         }
 
         return throwError(() => err);

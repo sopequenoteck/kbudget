@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { APP_LOCALE } from '../../../core/constants/locale.constants';
 
 @Component({
   selector: 'app-month-selector',
@@ -61,7 +62,7 @@ export class MonthSelector {
   readonly monthChange = output<{ month: number; year: number }>();
 
   readonly monthLabel = computed(() =>
-    new Date(this.year(), this.month() - 1).toLocaleDateString('fr-FR', {
+    new Date(this.year(), this.month() - 1).toLocaleDateString(APP_LOCALE, {
       month: 'long',
       year: 'numeric',
     }),

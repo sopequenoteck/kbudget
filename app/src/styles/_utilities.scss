@@ -56,7 +56,7 @@
 }
 
 .state-success {
-  color: #10b981;
+  color: var(--text-success);
 }
 
 .sr-only {
@@ -73,15 +73,15 @@
 
 .amount-income {
   color: var(--color-income);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }
 
 .amount-expense {
-  color: var(--color-expense);
-  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .amount-adjustment {
   color: var(--text-secondary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }

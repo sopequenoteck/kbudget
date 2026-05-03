@@ -1,6 +1,14 @@
 <div class="form-field">
   <label [for]="fieldId()">{{ label() }}</label>
-  <ng-content />
+  <div
+    class="form-field__input-wrapper"
+    [class.form-field__input-wrapper--icon]="!!prefixIcon()"
+  >
+    @if (prefixIcon()) {
+      <ng-icon class="form-field__prefix-icon" [name]="prefixIcon()!" size="16" />
+    }
+    <ng-content />
+  </div>
   @if (showError()) {
     <span class="form-error">{{ errorMessage() }}</span>
   }

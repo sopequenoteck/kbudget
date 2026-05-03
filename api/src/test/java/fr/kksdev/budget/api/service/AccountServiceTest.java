@@ -69,8 +69,6 @@ class AccountServiceTest {
     @BeforeEach
     void setUp() {
         var prefs = UserPreference.builder()
-                .shopAccountId(null)
-                .includeShopInBalance(false)
                 .build();
         lenient().when(preferenceService.getOrCreatePreference(any(UUID.class))).thenReturn(prefs);
         lenient().when(bankService.resolveBank(any(Account.class))).thenReturn(

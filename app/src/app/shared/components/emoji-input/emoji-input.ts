@@ -10,6 +10,30 @@ import {
   signal,
 } from '@angular/core';
 
+const PICKER_HEIGHT = 435;
+const PICKER_SPACING = 8;
+
+const EMOJI_LOCALE = 'fr';
+
+const EMOJI_PICKER_THEME: Record<string, Record<string, string>> = {
+  dark: {
+    '--rgb-background': '31, 41, 55',
+    '--rgb-color': '249, 250, 251',
+    '--rgb-accent': '251, 191, 36',
+    '--rgb-input': '17, 24, 39',
+    '--color-border': 'rgba(255, 255, 255, 0.1)',
+    '--color-border-over': 'rgba(255, 255, 255, 0.2)',
+  },
+  light: {
+    '--rgb-background': '255, 255, 255',
+    '--rgb-color': '17, 24, 39',
+    '--rgb-accent': '245, 158, 11',
+    '--rgb-input': '255, 255, 255',
+    '--color-border': 'rgba(0, 0, 0, 0.08)',
+    '--color-border-over': 'rgba(0, 0, 0, 0.15)',
+  },
+};
+
 @Component({
   selector: 'app-emoji-input',
   templateUrl: './emoji-input.html',
@@ -75,12 +99,12 @@ export class EmojiInput implements AfterViewChecked {
     const trigger: HTMLElement | null = this.el.nativeElement.querySelector('.emoji-trigger');
     if (trigger) {
       const rect = trigger.getBoundingClientRect();
-      const pickerHeight = 435; // emoji-mart default height
-      const spaceBelow = window.innerHeight - rect.bottom - 8;
+      const pickerHeight = PICKER_HEIGHT;
+      const spaceBelow = window.innerHeight - rect.bottom - PICKER_SPACING;
       if (spaceBelow >= pickerHeight) {
-        host.style.top = `${rect.bottom + 8}px`;
+        host.style.top = `${rect.bottom + PICKER_SPACING}px`;
       } else {
-        host.style.top = `${rect.top - pickerHeight - 8}px`;
+        host.style.top = `${rect.top - pickerHeight - PICKER_SPACING}px`;
       }
       host.style.left = `${rect.left}px`;
     }
@@ -88,7 +112,7 @@ export class EmojiInput implements AfterViewChecked {
     const pickerEl = new Picker({
       data,
       theme,
-      locale: 'fr',
+      locale: EMOJI_LOCALE,
       onEmojiSelect: (emoji: { native: string }) => {
         if (emoji.native) {
           this.valueChange.emit(emoji.native);
@@ -100,20 +124,6 @@ export class EmojiInput implements AfterViewChecked {
     host.appendChild(el);
 
     // DS color tokens — CSS custom properties inherit through shadow DOM
-    if (theme === 'dark') {
-      el.style.setProperty('--rgb-background', '31, 41, 55'); // gray-800
-      el.style.setProperty('--rgb-color', '249, 250, 251'); // gray-50
-      el.style.setProperty('--rgb-accent', '251, 191, 36'); // amber-400
-      el.style.setProperty('--rgb-input', '17, 24, 39'); // gray-900
-      el.style.setProperty('--color-border', 'rgba(255, 255, 255, 0.1)');
-      el.style.setProperty('--color-border-over', 'rgba(255, 255, 255, 0.2)');
-    } else {
-      el.style.setProperty('--rgb-background', '255, 255, 255');
-      el.style.setProperty('--rgb-color', '17, 24, 39'); // gray-900
-      el.style.setProperty('--rgb-accent', '245, 158, 11'); // amber-500
-      el.style.setProperty('--rgb-input', '255, 255, 255');
-      el.style.setProperty('--color-border', 'rgba(0, 0, 0, 0.08)');
-      el.style.setProperty('--color-border-over', 'rgba(0, 0, 0, 0.15)');
-    }
+    Object.entries(EMOJI_PICKER_THEME[theme]).forEach(([k, v]) => el.style.setProperty(k, v));
   }
 }

@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -23,6 +22,8 @@ import {
 import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
+import { DevLogger } from '../../../../core/services/dev-logger';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ImportDraft, ImportDraftLine, ImportLineUpdate } from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
@@ -36,6 +37,7 @@ interface SuggestRuleBanner {
 
 @Component({
   selector: 'app-import-review',
+  standalone: true,
   imports: [RouterLink, NgIcon, AmountPipe, FormsModule],
   providers: [
     provideIcons({
@@ -58,6 +60,7 @@ export class ImportReview {
   private readonly importService = inject(ImportService);
   private readonly categoryService = inject(CategoryService);
   private readonly categoryRuleService = inject(CategoryRuleService);
+  private readonly logger = inject(DevLogger);
 
   readonly draft = signal<ImportDraft | null>(null);
   readonly categories = signal<Category[]>([]);
@@ -97,9 +100,7 @@ export class ImportReview {
       this.draft.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load draft', err);
-      }
+      this.logger.error('Failed to load draft', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -110,9 +111,7 @@ export class ImportReview {
       const data = await firstValueFrom(this.categoryService.getAll());
       this.categories.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load categories', err);
-      }
+      this.logger.error('Failed to load categories', err);
     }
   }
 
@@ -160,9 +159,7 @@ export class ImportReview {
         });
       }
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to update line', err);
-      }
+      this.logger.error('Failed to update line', err);
     }
   }
 
@@ -181,9 +178,7 @@ export class ImportReview {
         }),
       );
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to create rule', err);
-      }
+      this.logger.error('Failed to create rule', err);
     } finally {
       this.suggestRuleBanner.set(null);
     }
@@ -193,9 +188,7 @@ export class ImportReview {
     try {
       await this.updateDraftAfterLineChange(line.id, { status: 'READY' });
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to force import line', err);
-      }
+      this.logger.error('Failed to force import line', err);
     }
   }
 
@@ -203,9 +196,7 @@ export class ImportReview {
     try {
       await this.updateDraftAfterLineChange(line.id, { status: 'SKIPPED' });
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to skip line', err);
-      }
+      this.logger.error('Failed to skip line', err);
     }
   }
 
@@ -222,9 +213,7 @@ export class ImportReview {
         this.router.navigate(['/settings/import']);
       }, 500);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to confirm import', err);
-      }
+      this.logger.error('Failed to confirm import', err);
       this.confirmError.set("Erreur lors de la confirmation de l'import.");
       this.confirming.set(false);
     }
@@ -245,9 +234,7 @@ export class ImportReview {
       await firstValueFrom(this.importService.deleteDraft(d.id));
       this.router.navigate(['/settings/import']);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete draft', err);
-      }
+      this.logger.error('Failed to delete draft', err);
     }
   }
 
@@ -310,9 +297,7 @@ export class ImportReview {
       );
       this.applyBatchResult(updated);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to batch assign category', err);
-      }
+      this.logger.error('Failed to batch assign category', err);
     } finally {
       this.batchLoading.set(false);
     }
@@ -331,9 +316,7 @@ export class ImportReview {
       );
       this.applyBatchResult(updated);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to batch skip lines', err);
-      }
+      this.logger.error('Failed to batch skip lines', err);
     } finally {
       this.batchLoading.set(false);
     }
@@ -352,9 +335,7 @@ export class ImportReview {
       );
       this.applyBatchResult(updated);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to batch validate lines', err);
-      }
+      this.logger.error('Failed to batch validate lines', err);
     } finally {
       this.batchLoading.set(false);
     }
@@ -393,6 +374,6 @@ export class ImportReview {
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

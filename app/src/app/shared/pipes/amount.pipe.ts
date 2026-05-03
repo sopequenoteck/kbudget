@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 
 const POSITIVE_TYPES = ['RECETTE', 'PRET'];
 const NEGATIVE_TYPES = ['DEPENSE', 'EMPRUNT'];
@@ -8,7 +9,7 @@ const formatterCache = new Map<string, Intl.NumberFormat>();
 function getFormatter(currency: string): Intl.NumberFormat {
   let formatter = formatterCache.get(currency);
   if (!formatter) {
-    formatter = new Intl.NumberFormat('fr-FR', {
+    formatter = new Intl.NumberFormat(APP_LOCALE, {
       style: 'currency',
       currency,
       signDisplay: 'never',
@@ -18,7 +19,7 @@ function getFormatter(currency: string): Intl.NumberFormat {
   return formatter;
 }
 
-@Pipe({ name: 'amount', pure: true })
+@Pipe({ name: 'amount', standalone: true, pure: true })
 export class AmountPipe implements PipeTransform {
   transform(
     value: number | null | undefined,

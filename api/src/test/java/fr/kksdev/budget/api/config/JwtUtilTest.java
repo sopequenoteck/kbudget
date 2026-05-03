@@ -2,6 +2,8 @@ package fr.kksdev.budget.api.config;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtUtilTest {
@@ -69,5 +71,43 @@ class JwtUtilTest {
         String token2 = jwtUtil.generateToken("user2@mail.com");
 
         assertThat(token1).isNotEqualTo(token2);
+    }
+
+    // ---- T-034 : Tests extra claims (FR-008) ----
+
+    @Test
+    void should_include_extra_claims_when_generating_token() {
+        String token = jwtUtil.generateToken(EMAIL, Map.of("mustResetCredentials", true));
+
+        Object claim = jwtUtil.extractClaim(token, "mustResetCredentials");
+
+        assertThat(claim).isEqualTo(true);
+    }
+
+    @Test
+    void should_return_null_when_extracting_absent_claim() {
+        String token = jwtUtil.generateToken(EMAIL);
+
+        Object claim = jwtUtil.extractClaim(token, "unknown");
+
+        assertThat(claim).isNull();
+    }
+
+    @Test
+    void should_return_claim_value_when_extracting_present_claim() {
+        String token = jwtUtil.generateToken(EMAIL, Map.of("mustResetCredentials", true));
+
+        Object claim = jwtUtil.extractClaim(token, "mustResetCredentials");
+
+        assertThat(claim).isEqualTo(true);
+    }
+
+    @Test
+    void should_preserve_subject_when_adding_claims() {
+        String token = jwtUtil.generateToken(EMAIL, Map.of("mustResetCredentials", true));
+
+        String extracted = jwtUtil.extractEmail(token);
+
+        assertThat(extracted).isEqualTo(EMAIL);
     }
 }

@@ -47,131 +47,125 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
   template: `
     <!-- Section : Taux de conversion -->
     <div class="settings-section">
-      <h3 class="settings-section__title">Taux de conversion</h3>
-      <p class="settings-section__desc">
-        Devise de référence : <strong>{{ primaryCurrency() }}</strong>
-      </p>
+      <div class="settings-section__header">
+        <span class="settings-section__title">Taux de conversion</span>
+        @if (!showForm()) {
+          <button class="add-btn" (click)="openForm()">
+            <ng-icon name="phosphorPlus" size="16" />
+          </button>
+        }
+      </div>
+      <div class="section-content">
+        <div class="rate-row rate-row--info">
+          <span class="rate-row__label">Référence</span>
+          <span class="rate-row__value">{{ primaryCurrency() }}</span>
+        </div>
 
-      @if (loading()) {
-        <div class="loading-placeholder">Chargement des taux...</div>
-      }
+        @if (loading()) {
+          <div class="rate-row rate-row--info">
+            <span class="rate-row__label">Chargement...</span>
+          </div>
+        }
 
-      @if (!loading() && rates().length === 0 && !showForm()) {
-        <p class="empty-state">Aucun taux configuré.</p>
-      }
+        @if (!loading() && rates().length === 0 && !showForm()) {
+          <div class="rate-row rate-row--info">
+            <span class="rate-row__label">Aucun taux configuré</span>
+          </div>
+        }
 
-      @if (rates().length > 0) {
-        <ul class="rate-list">
-          @for (rate of rates(); track rate.id) {
-            <li class="rate-item">
-              <span class="rate-item__label">
-                {{ rate.baseCurrency }}
-                <ng-icon name="phosphorArrowRight" size="14" />
-                {{ rate.targetCurrency }}
-              </span>
-              <span class="rate-item__value">{{ rate.rate | number: '1.0-6' }}</span>
-              <div class="rate-item__actions">
-                <button
-                  class="icon-btn"
-                  title="Modifier"
-                  (click)="startEdit(rate)"
-                  aria-label="Modifier ce taux"
-                >
-                  <ng-icon name="phosphorPencilSimple" size="16" />
-                </button>
-                <button
-                  class="icon-btn icon-btn--danger"
-                  title="Supprimer"
-                  (click)="confirmDelete(rate)"
-                  aria-label="Supprimer ce taux"
-                >
-                  <ng-icon name="phosphorTrash" size="16" />
-                </button>
-              </div>
-            </li>
-          }
-        </ul>
-      }
-
-      @if (!showForm()) {
-        <button class="add-btn" (click)="openForm()">
-          <ng-icon name="phosphorPlus" size="16" />
-          Ajouter un taux
-        </button>
-      }
+        @for (rate of rates(); track rate.id) {
+          <div class="rate-row">
+            <span class="rate-row__pair">
+              {{ rate.baseCurrency }}
+              <ng-icon name="phosphorArrowRight" size="14" />
+              {{ rate.targetCurrency }}
+            </span>
+            <span class="rate-row__value">{{ rate.rate | number: '1.0-6' }}</span>
+            <button class="btn-action" (click)="startEdit(rate)" aria-label="Modifier">
+              <ng-icon name="phosphorPencilSimple" size="16" />
+            </button>
+            <button class="btn-action btn-action--danger" (click)="confirmDelete(rate)" aria-label="Supprimer">
+              <ng-icon name="phosphorTrash" size="16" />
+            </button>
+          </div>
+        }
+      </div>
     </div>
 
     <!-- Formulaire upsert -->
     @if (showForm()) {
-      <div class="settings-section settings-section--form">
+      <div class="settings-section">
         <h3 class="settings-section__title">
           {{ editingRate() ? 'Modifier le taux' : 'Ajouter un taux' }}
         </h3>
+        <div class="section-content section-content--padded">
+          <div class="form-grid">
+            <div class="form-field">
+              <span class="form-label">Devise de base</span>
+              <div class="form-readonly">{{ primaryCurrency() }}</div>
+            </div>
 
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="form-label">Devise de base</label>
-            <div class="form-readonly">{{ primaryCurrency() }}</div>
+            <div class="form-field">
+              <label class="form-label" for="targetCurrency">Devise cible</label>
+              @if (editingRate()) {
+                <div class="form-readonly">{{ formTargetCurrency() }}</div>
+              } @else {
+                <select
+                  id="targetCurrency"
+                  class="form-select"
+                  [ngModel]="formTargetCurrency()"
+                  (ngModelChange)="onTargetCurrencyChange($event)"
+                >
+                  <option value="" disabled>Choisir une devise</option>
+                  @for (currency of availableTargetCurrencies(); track currency) {
+                    <option [value]="currency">{{ currency }}</option>
+                  }
+                </select>
+              }
+            </div>
+
+            <div class="form-field form-field--full">
+              <label class="form-label" for="rateInput">Taux</label>
+              <input
+                id="rateInput"
+                type="number"
+                class="form-input"
+                [ngModel]="formRate()"
+                (ngModelChange)="formRate.set($event)"
+                min="0.000001"
+                step="0.000001"
+                placeholder="Ex: 655.957"
+              />
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="targetCurrency">Devise cible</label>
-            @if (editingRate()) {
-              <div class="form-readonly">{{ formTargetCurrency() }}</div>
-            } @else {
-              <select
-                id="targetCurrency"
-                class="form-select"
-                [ngModel]="formTargetCurrency()"
-                (ngModelChange)="onTargetCurrencyChange($event)"
-              >
-                <option value="" disabled>Choisir une devise</option>
-                @for (currency of availableTargetCurrencies(); track currency) {
-                  <option [value]="currency">{{ currency }}</option>
-                }
-              </select>
-            }
+          @if (formError()) {
+            <p class="form-error">{{ formError() }}</p>
+          }
+
+          <div class="form-actions">
+            <button class="btn btn--ghost" (click)="cancelForm()">
+              <ng-icon name="phosphorX" size="16" />
+              Annuler
+            </button>
+            <button
+              class="btn btn--primary"
+              [disabled]="isSaving()"
+              (click)="saveRate()"
+            >
+              <ng-icon name="phosphorFloppyDisk" size="16" />
+              {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
           </div>
-
-          <div class="form-field form-field--full">
-            <label class="form-label" for="rateInput">Taux</label>
-            <input
-              id="rateInput"
-              type="number"
-              class="form-input"
-              [ngModel]="formRate()"
-              (ngModelChange)="formRate.set($event)"
-              min="0.000001"
-              step="0.000001"
-              placeholder="Ex: 655.957"
-            />
-          </div>
-        </div>
-
-        @if (formError()) {
-          <p class="form-error">{{ formError() }}</p>
-        }
-
-        <div class="form-actions">
-          <button class="btn btn--ghost" (click)="cancelForm()">
-            <ng-icon name="phosphorX" size="16" />
-            Annuler
-          </button>
-          <button
-            class="btn btn--primary"
-            [disabled]="isSaving()"
-            (click)="saveRate()"
-          >
-            <ng-icon name="phosphorFloppyDisk" size="16" />
-            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
-          </button>
         </div>
       </div>
     }
 
     <!-- Dialog de confirmation de suppression -->
     @if (rateToDelete()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="cancelDelete()">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
           <p class="dialog__message">
             Supprimer le taux
@@ -189,99 +183,59 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
   `,
   styles: [
     `
-      .settings-section {
-        background: var(--surface-default);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-xl);
-        padding: var(--space-5);
-        margin-bottom: var(--space-4);
-
-        &__title {
-          display: flex;
-          align-items: center;
-          gap: var(--space-2);
-          font-size: var(--font-size-sm);
-          font-weight: var(--font-weight-semibold);
-          color: var(--text-primary);
-          margin-bottom: var(--space-2);
-        }
-
-        &__desc {
-          font-size: var(--font-size-sm);
-          color: var(--text-secondary);
-          margin-bottom: var(--space-4);
-        }
-
-        &--form {
-          border-color: var(--color-primary);
-          border-width: 2px;
-        }
+      .settings-section__header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 var(--space-4); margin-bottom: var(--space-2);
       }
 
-      .loading-placeholder {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-        padding: var(--space-3) 0;
+      .settings-section__title {
+        font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);
+        text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary);
       }
 
-      .empty-state {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-        font-style: italic;
-        margin-bottom: var(--space-3);
+      .add-btn {
+        display: flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; padding: 0;
+        border: 1px solid var(--border-default); border-radius: var(--radius-round);
+        background: transparent; color: var(--text-tertiary); cursor: pointer;
+        &:active { color: var(--text-primary); background-color: var(--hover-bg); }
       }
 
-      .rate-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 var(--space-4) 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
+      .section-content {
+        background: var(--surface-default); border-radius: var(--radius-xl); overflow: hidden;
+        &--padded { padding: var(--space-4); }
       }
 
-      .rate-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
+      .rate-row {
+        display: flex; align-items: center; gap: var(--space-3);
         padding: var(--space-3) var(--space-4);
-        background: var(--surface-raised);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-default);
+        &:last-child { border-bottom: none; }
 
-        &__label {
-          display: flex;
-          align-items: center;
-          gap: var(--space-1);
-          font-size: var(--font-size-sm);
-          font-weight: var(--font-weight-medium);
-          color: var(--text-primary);
-          flex: 1;
+        &--info { color: var(--text-tertiary); font-size: var(--font-size-xs); }
+
+        &__label { font-size: var(--font-size-sm); color: var(--text-tertiary); }
+        &__pair {
+          display: flex; align-items: center; gap: var(--space-1);
+          font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+          color: var(--text-secondary); flex: 1;
         }
-
         &__value {
-          font-size: var(--font-size-sm);
-          font-weight: var(--font-weight-semibold);
-          color: var(--color-primary);
-          font-variant-numeric: tabular-nums;
-        }
-
-        &__actions {
-          display: flex;
-          gap: var(--space-1);
+          font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);
+          color: var(--text-secondary); font-variant-numeric: tabular-nums; margin-left: auto;
         }
       }
 
-      .icon-btn {
+      .btn-action {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 32px;
         height: 32px;
         border: none;
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-round);
         background: transparent;
-        color: var(--text-secondary);
+        color: var(--text-tertiary);
         cursor: pointer;
         transition: background-color var(--duration-fast) var(--easing-default),
           color var(--duration-fast) var(--easing-default);
@@ -291,37 +245,20 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
           color: var(--text-primary);
         }
 
-        &--danger:hover {
-          background-color: var(--color-error-light, rgba(239, 68, 68, 0.1));
-          color: var(--color-error, #ef4444);
-        }
-      }
+        &--danger {
+          color: var(--color-expense);
 
-      .add-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2) var(--space-4);
-        border: 1px dashed var(--border-default);
-        border-radius: var(--radius-lg);
-        background: transparent;
-        color: var(--text-secondary);
-        font-size: var(--font-size-sm);
-        cursor: pointer;
-        transition: border-color var(--duration-fast) var(--easing-default),
-          color var(--duration-fast) var(--easing-default);
-
-        &:hover {
-          border-color: var(--color-primary);
-          color: var(--color-primary);
+          &:hover {
+            background-color: var(--bg-error);
+          }
         }
       }
 
       .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-4);
-        margin-bottom: var(--space-4);
+        gap: var(--space-3);
+        margin-bottom: var(--space-3);
       }
 
       .form-field {
@@ -342,8 +279,8 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
       .form-readonly {
         padding: var(--space-2) var(--space-3);
-        background: var(--surface-raised);
-        border: 1px solid var(--border-subtle);
+        background: transparent;
+        border: 1px solid var(--border-default);
         border-radius: var(--radius-md);
         font-size: var(--font-size-sm);
         color: var(--text-primary);
@@ -388,7 +325,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
       .form-error {
         font-size: var(--font-size-sm);
-        color: var(--color-error, #ef4444);
+        color: var(--color-expense);
         margin-bottom: var(--space-3);
       }
 
@@ -402,8 +339,8 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
         display: inline-flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-round);
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-medium);
         cursor: pointer;
@@ -437,7 +374,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
         }
 
         &--danger {
-          background-color: var(--color-error, #ef4444);
+          background-color: var(--color-expense);
           color: white;
 
           &:hover:not(:disabled) {
@@ -449,7 +386,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       .dialog-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--surface-overlay);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -463,7 +400,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
         padding: var(--space-6);
         max-width: 400px;
         width: 100%;
-        box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
+        box-shadow: var(--shadow-xl);
 
         &__message {
           font-size: var(--font-size-sm);

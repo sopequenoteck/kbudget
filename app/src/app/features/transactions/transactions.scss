@@ -1,242 +1,90 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
   padding: var(--space-4);
 }
 
-// -- Lien récurrences --
-.recurring-shortcut {
-  display: flex;
-  justify-content: flex-end;
+// Transactions — styles specifiques uniquement
+// Le reste est dans _list-patterns.scss
+
+// Section header: plus d'espace au-dessus sur cette page
+.section-header {
+  padding-top: var(--space-6);
 }
 
-.recurring-shortcut__link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: var(--surface-default);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  text-decoration: none;
-  transition: background-color var(--duration-fast);
-
-  &:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-  }
+// Premier date-label sans padding top
+.date-label:first-of-type {
+  padding-top: 0;
 }
 
-.recurring-shortcut__icon {
-  font-size: var(--font-size-base);
-  line-height: 1;
-}
-
-// -- Sélecteur de mois --
-.month-selector {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-
-  &__btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-round);
-    background-color: var(--surface-default);
-    color: var(--text-primary);
-    font-size: var(--font-size-base);
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    transition:
-      background-color var(--duration-normal) var(--easing-default),
-      box-shadow var(--duration-normal) var(--easing-default);
-
-    &:hover {
-      background-color: var(--hover-bg);
-      box-shadow: var(--shadow-md);
-    }
-  }
-
-  &__label {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    text-transform: capitalize;
-    min-width: 160px;
-    text-align: center;
-  }
-}
-
-// -- Résumé mensuel --
-.summary {
-  display: flex;
-  gap: var(--space-3);
-
-  &__card {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-4) var(--space-2);
-    border-radius: var(--radius-xl);
-    background-color: var(--surface-default);
-    box-shadow: var(--shadow-md);
-
-    &--income .summary__value {
-      color: var(--color-income);
-    }
-
-    &--expense .summary__value {
-      color: var(--color-expense);
-    }
-  }
-
-  &__label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  &__value {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    white-space: nowrap;
-  }
-
-  &__currency-label {
-    width: 100%;
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-}
-
-// -- Toggle filtre type → segmented control iOS --
-.type-filter {
-  display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border-radius: var(--radius-lg);
-  background-color: var(--bg-tertiary);
-
-  &__btn {
-    flex: 1;
-    padding: var(--space-2);
-    border: none;
-    border-radius: var(--radius-md);
-    background-color: transparent;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition:
-      background-color var(--duration-normal) var(--easing-default),
-      color var(--duration-normal) var(--easing-default),
-      box-shadow var(--duration-normal) var(--easing-default);
-
-    &.active {
-      background-color: var(--surface-default);
-      color: var(--text-primary);
-      box-shadow: var(--shadow-sm);
-    }
-  }
-}
-
-// -- Liste de transactions (dans card blanche arrondie) --
-.transaction-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+// --- Panneau filtres ---
+.filter-panel {
   display: flex;
   flex-direction: column;
-  background-color: var(--surface-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-default);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  margin-bottom: var(--space-2);
+  animation: filter-slide-down var(--duration-fast) ease-out;
 
-  li:not(:last-child) {
-    border-bottom: 1px solid var(--border-default);
+  &__row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+
+    &--scroll {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  &__reset {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    align-self: flex-start;
+    padding: 0;
   }
 }
 
-// -- Item transaction avec bouton récurrente --
-.transaction-item {
-  position: relative;
+.filter-chip {
   display: flex;
   align-items: center;
-
-  app-list-item {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-// -- Bouton "Rendre récurrente" --
-.btn-recurring {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  margin-right: var(--space-3);
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-md);
-  background-color: transparent;
-  color: var(--text-tertiary);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--easing-default),
-    color var(--duration-fast) var(--easing-default);
+  transition: all var(--duration-fast);
 
-  &:hover {
-    background-color: var(--hover-bg);
+  &.active {
+    background: var(--primary-subtle);
+    border-color: var(--color-primary);
     color: var(--color-primary);
   }
 }
 
-// -- États --
-.state-loading,
-.state-empty,
-.state-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-10) var(--space-4);
-  gap: var(--space-4);
-  color: var(--text-secondary);
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-default);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
+@keyframes filter-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }

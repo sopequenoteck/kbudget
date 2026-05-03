@@ -194,8 +194,6 @@ public class RecurringTransactionService {
                 t.getId(), t.getMontant(), t.getLibelle(), t.getType(),
                 t.getDate(), CategoryResponse.from(t.getCategory()), t.getNote(),
                 AccountSummary.from(t.getAccount()), t.getTransferId(),
-                t.getProduct() != null ? t.getProduct().getId() : null,
-                t.getProduct() != null ? t.getProduct().getNom() : null,
                 t.getDebt() != null ? t.getDebt().getId() : null
         );
     }

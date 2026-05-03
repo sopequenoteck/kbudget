@@ -72,6 +72,7 @@ public class DebtService {
                 .montant(request.montant())
                 .sens(request.sens())
                 .date(request.date())
+                .dueDate(request.dueDate())
                 .rembourse(request.rembourse() != null ? request.rembourse() : false)
                 .category(resolveCategory(request.categoryId(), userId))
                 .currency(currency)
@@ -122,6 +123,7 @@ public class DebtService {
         debt.setPersonne(request.personne());
         debt.setSens(request.sens());
         debt.setDate(request.date());
+        debt.setDueDate(request.dueDate());
         if (request.rembourse() != null) {
             debt.setRembourse(request.rembourse());
         }

@@ -1,13 +1,15 @@
-import { Injectable, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { ApiService } from './api';
 import { ExchangeRate } from '../models/exchange-rate.model';
+import { DevLogger } from './dev-logger';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExchangeRateService {
   private readonly api = inject(ApiService);
+  private readonly logger = inject(DevLogger);
 
   private readonly _rates = signal<ExchangeRate[]>([]);
   private readonly _loading = signal(false);
@@ -24,7 +26,7 @@ export class ExchangeRateService {
       this._rates.set(rates);
       this._error.set(null);
     } catch (e) {
-      if (isDevMode()) console.error('Failed to load exchange rates:', e);
+      this.logger.error('Failed to load exchange rates:', e);
       this._error.set('Impossible de charger les taux de change');
     } finally {
       this._loading.set(false);

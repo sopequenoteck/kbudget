@@ -5,13 +5,12 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { DecimalPipe, NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorWarningCircle } from '@ng-icons/phosphor-icons/regular';
+import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
@@ -20,6 +19,9 @@ import { ConversionService } from '../../core/services/conversion';
 import { PreferenceService } from '../../core/services/preference';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
+import { RecurringTransactionService } from '../../core/services/recurring-transaction';
+import { DevLogger } from '../../core/services/dev-logger';
+import { APP_LOCALE } from '../../core/constants/locale.constants';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -34,11 +36,13 @@ import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary],
-  providers: [provideIcons({ phosphorWarningCircle })],
+  standalone: true,
+  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
+  providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,9 +54,11 @@ export class Dashboard {
   readonly conversionService = inject(ConversionService);
   readonly preferenceService = inject(PreferenceService);
   private readonly exchangeRateService = inject(ExchangeRateService);
+  private readonly recurringService = inject(RecurringTransactionService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(DevLogger);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -142,13 +148,15 @@ export class Dashboard {
   readonly budgetOverview = signal<BudgetOverview | null>(null);
   readonly budgetLoading = signal(true);
   readonly budgetCurrentMonth = computed(() => {
-    return new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return new Date().toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
   });
 
   // -- Dernières transactions --
   readonly transactionsLoading = signal(true);
   readonly transactionsError = signal(false);
   readonly transactions = signal<Transaction[]>([]);
+
+  readonly skeletonItems = Array(3);
 
   readonly recentTransactions = computed(() =>
     [...this.transactions()]
@@ -186,10 +194,84 @@ export class Dashboard {
     return current - previous;
   });
 
+  // -- Montants summary convertis dans activeCurrency --
+  readonly convertedRecettes = computed(() => {
+    const summary = this.currentSummary();
+    if (!summary || summary.totalRecettes === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalRecettes, from, to) ?? summary.totalRecettes;
+  });
+
+  readonly convertedDepenses = computed(() => {
+    const summary = this.currentSummary();
+    if (!summary || summary.totalDepenses === 0) return 0;
+    const from = summary.currency || 'EUR';
+    const to = this.activeCurrency();
+    return this.conversionService.convert(summary.totalDepenses, from, to) ?? summary.totalDepenses;
+  });
+
+  readonly convertedNet = computed(() => {
+    return this.convertedRecettes() - this.convertedDepenses();
+  });
+
+  readonly convertedPatrimoineDebutMois = computed(() => {
+    return this.convertedTotalBalance().total - this.convertedNet();
+  });
+
+  readonly convertedVariationPct = computed(() => {
+    const debut = this.convertedPatrimoineDebutMois();
+    if (debut === 0) return null;
+    return (this.convertedNet() / debut) * 100;
+  });
+
+  // -- Budget overview converti dans activeCurrency --
+  readonly convertedBudgetOverview = computed<BudgetOverview | null>(() => {
+    const ov = this.budgetOverview();
+    if (!ov) return null;
+    const from = ov.currency || 'EUR';
+    const to = this.activeCurrency();
+    if (from === to) return ov;
+
+    const convert = (amount: number): number =>
+      this.conversionService.convert(amount, from, to) ?? amount;
+
+    return {
+      ...ov,
+      totalBudget: convert(ov.totalBudget),
+      totalSpent: convert(ov.totalSpent),
+      currency: to,
+      unbudgetedTotal: convert(ov.unbudgetedTotal),
+      unbudgetedItems: ov.unbudgetedItems.map(item => ({
+        ...item,
+        montantDepense: convert(item.montantDepense),
+      })),
+      items: ov.items.map(item => ({
+        ...item,
+        montantBudget: convert(item.montantBudget),
+        montantBudgetNormalise: convert(item.montantBudgetNormalise),
+        montantDepense: convert(item.montantDepense),
+        currency: to,
+      })),
+    };
+  });
+
+  readonly convertedSortedBudgetItems = computed(() => {
+    const items = this.convertedBudgetOverview()?.items ?? [];
+    return [...items]
+      .sort((a, b) => {
+        const aExceeded = a.percentage >= 100;
+        const bExceeded = b.percentage >= 100;
+        if (aExceeded !== bExceeded) return aExceeded ? -1 : 1;
+        return b.percentage - a.percentage;
+      })
+      .slice(0, 4);
+  });
+
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    return prev.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+    return prev.toLocaleDateString(APP_LOCALE, { month: 'short' }).replace('.', '');
   });
 
   readonly sortedBudgetItems = computed(() => {
@@ -202,6 +284,36 @@ export class Dashboard {
         return b.percentage - a.percentage;
       })
       .slice(0, 4);
+  });
+
+  readonly overdueCount = computed(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return this.recurringService.recurringTransactions()
+      .filter(r => r.recurringActive && r.nextOccurrence < today)
+      .length;
+  });
+
+  readonly exceededBudgetCount = computed(() => {
+    return (this.budgetOverview()?.items ?? []).filter(b => b.percentage > 100).length;
+  });
+
+  readonly greeting = computed(() => {
+    const hour = new Date().getHours();
+    const name = this.userName()?.name;
+    const salut = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+    const prefix = name ? `${salut} ${name}` : salut;
+
+    const overdue = this.overdueCount();
+    if (overdue > 0) return `${prefix} · ${overdue} charge${overdue > 1 ? 's' : ''} en retard`;
+
+    const exceeded = this.exceededBudgetCount();
+    if (exceeded > 0) return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
+
+    const net = this.netDuMois();
+    const hasTransactions = (this.currentSummary()?.totalRecettes ?? 0) > 0 || (this.currentSummary()?.totalDepenses ?? 0) > 0;
+    if (hasTransactions) return `${prefix} · Mois ${net >= 0 ? 'positif' : 'négatif'}`;
+
+    return `${prefix} · Mois calme`;
   });
 
   constructor() {
@@ -245,6 +357,7 @@ export class Dashboard {
       this.loadBudgetOverview(),
       this.loadTransactions(),
       this.exchangeRateService.loadRates(),
+      this.recurringService.loadActive(),
     ]);
   }
 
@@ -260,6 +373,7 @@ export class Dashboard {
         firstValueFrom(this.budgetService.getOverview()).then((data) => this.budgetOverview.set(data)),
         firstValueFrom(this.transactionService.getAll()).then((data) => this.transactions.set(data)),
         this.exchangeRateService.loadRates(),
+        this.recurringService.loadActive(),
       ]);
     } catch {
       // Silent fail — donnees existantes restent affichees
@@ -274,9 +388,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.accountService.getAll());
       this.accounts.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load accounts', err);
-      }
+      this.logger.error('Failed to load accounts', err);
       this.totalBalanceError.set(true);
     } finally {
       this.totalBalanceLoading.set(false);
@@ -299,9 +411,7 @@ export class Dashboard {
       this.currentSummary.set(current[0] ?? null);
       this.previousSummary.set(previous[0] ?? null);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load summaries', err);
-      }
+      this.logger.error('Failed to load summaries', err);
       this.summaryError.set(true);
     } finally {
       this.summaryLoading.set(false);
@@ -315,9 +425,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.budgetService.getOverview());
       this.budgetOverview.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load budget overview', err);
-      }
+      this.logger.error('Failed to load budget overview', err);
     } finally {
       this.budgetLoading.set(false);
     }
@@ -331,9 +439,7 @@ export class Dashboard {
       const data = await firstValueFrom(this.transactionService.getAll());
       this.transactions.set(data);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load transactions', err);
-      }
+      this.logger.error('Failed to load transactions', err);
       this.transactionsError.set(true);
     } finally {
       this.transactionsLoading.set(false);
@@ -348,13 +454,19 @@ export class Dashboard {
     const reordered = [currency, ...current.filter((c) => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
-    // Debounce persistance 2s
+    // Debounce persistance 2s + re-fetch summary/budget avec nouvelle devise principale
     if (this.persistTimeout) clearTimeout(this.persistTimeout);
-    this.persistTimeout = setTimeout(() => {
+    this.persistTimeout = setTimeout(async () => {
       this.persistTimeout = null;
       this.preferenceService.update({ currencies: reordered });
-      this.exchangeRateService.loadRates();
+      await this.exchangeRateService.loadRates();
+      this.loadSummaries();
+      this.loadBudgetOverview();
     }, 2000);
+  }
+
+  goToAccounts(): void {
+    this.router.navigate(['/settings/accounts']);
   }
 
   getTransactionIcon(t: Transaction): string {
@@ -373,7 +485,7 @@ export class Dashboard {
     const converted = this.conversionService.convert(t.montant, txCurrency, target);
     if (converted === null) return '';
 
-    const formatted = new Intl.NumberFormat('fr-FR', {
+    const formatted = new Intl.NumberFormat(APP_LOCALE, {
       style: 'currency',
       currency: target,
     }).format(Math.abs(converted));

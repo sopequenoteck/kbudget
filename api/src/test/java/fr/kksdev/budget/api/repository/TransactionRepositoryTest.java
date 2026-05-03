@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@Sql(scripts = "/h2-unaccent.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class TransactionRepositoryTest {
 
     @Autowired
@@ -128,5 +130,240 @@ class TransactionRepositoryTest {
 
         assertThat(transactions).hasSize(1);
         assertThat(transactions.getFirst().getLibelle()).isEqualTo("Courses");
+    }
+
+    // --- T-022 : libellés distincts par user ---
+
+    @Test
+    void should_return_distinct_libelles_for_user() {
+        // user1 a déjà "Salaire" et "Courses" en setUp, on ajoute un doublon "Courses"
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("30.00"))
+                .libelle("Courses")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> libelles = transactionRepository.findLibelleSuggestions(user1.getId(), null, 50);
+
+        assertThat(libelles).containsOnlyOnce("Courses");
+    }
+
+    // --- T-023 : tri par fréquence décroissante ---
+
+    @Test
+    void should_order_by_frequency_desc() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        // Ajouter 9 "Carrefour" supplémentaires (total 10) et 1 "Monoprix" supplémentaire (total 2)
+        for (int i = 0; i < 9; i++) {
+            transactionRepository.save(Transaction.builder()
+                    .montant(new BigDecimal("25.00"))
+                    .libelle("Carrefour")
+                    .type(TransactionType.DEPENSE)
+                    .date(LocalDate.of(2026, 1, i + 1))
+                    .account(account1)
+                    .user(user1)
+                    .build());
+        }
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("15.00"))
+                .libelle("Monoprix")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 1, 20))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("15.00"))
+                .libelle("Monoprix")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 1, 21))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> libelles = transactionRepository.findLibelleSuggestions(user1.getId(), null, 50);
+
+        assertThat(libelles).contains("Carrefour", "Monoprix");
+        assertThat(libelles.indexOf("Carrefour")).isLessThan(libelles.indexOf("Monoprix"));
+    }
+
+    // --- T-024 : tie-break par date la plus récente ---
+
+    @Test
+    void should_tiebreak_by_last_date_desc() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        // "Ancien" : 1 occurrence, date ancienne
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("10.00"))
+                .libelle("Ancien")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2025, 6, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        // "Recent" : 1 occurrence, date récente
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("10.00"))
+                .libelle("Recent")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 3, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> libelles = transactionRepository.findLibelleSuggestions(user1.getId(), null, 50);
+
+        assertThat(libelles).contains("Recent", "Ancien");
+        assertThat(libelles.indexOf("Recent")).isLessThan(libelles.indexOf("Ancien"));
+    }
+
+    // --- T-050 : filtre contains case-insensitive ---
+
+    @Test
+    void should_filter_contains_case_insensitive() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("45.00"))
+                .libelle("Carrefour Market")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("30.00"))
+                .libelle("Monoprix")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 2))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("10.00"))
+                .libelle("Carte bleue")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 3))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        // Filtre en minuscule : matche au milieu du libellé
+        List<String> resultatMinuscule = transactionRepository.findLibelleSuggestions(user1.getId(), "market", 20);
+        assertThat(resultatMinuscule).containsExactly("Carrefour Market");
+
+        // Filtre en majuscule : même résultat
+        List<String> resultatMajuscule = transactionRepository.findLibelleSuggestions(user1.getId(), "MARKET", 20);
+        assertThat(resultatMajuscule).containsExactly("Carrefour Market");
+
+        // Filtre casse mixte : même résultat
+        List<String> resultatMixte = transactionRepository.findLibelleSuggestions(user1.getId(), "Market", 20);
+        assertThat(resultatMixte).containsExactly("Carrefour Market");
+    }
+
+    // --- T-051 : filtre accent-insensitive ---
+
+    @Test
+    void should_filter_accent_insensitive() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("5.00"))
+                .libelle("Café du coin")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 1))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("20.00"))
+                .libelle("L'épicerie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 2))
+                .account(account1)
+                .user(user1)
+                .build());
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal("15.00"))
+                .libelle("Boulangerie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 2, 3))
+                .account(account1)
+                .user(user1)
+                .build());
+        entityManager.flush();
+        entityManager.clear();
+
+        // "cafe" sans accent doit matcher "Café du coin"
+        List<String> resultatCafe = transactionRepository.findLibelleSuggestions(user1.getId(), "cafe", 20);
+        assertThat(resultatCafe).containsExactly("Café du coin");
+
+        // "epicerie" sans accent doit matcher "L'épicerie"
+        List<String> resultatEpicerie = transactionRepository.findLibelleSuggestions(user1.getId(), "epicerie", 20);
+        assertThat(resultatEpicerie).containsExactly("L'épicerie");
+    }
+
+    // --- T-026 : performance < 100ms sur 10 000 transactions ---
+
+    @Test
+    void should_respond_under_100ms_on_10k_transactions() {
+        Account account1 = accountRepository.findAll().stream()
+                .filter(a -> a.getUser().getId().equals(user1.getId()))
+                .findFirst().orElseThrow();
+
+        // Seed 10 000 transactions avec 200 libellés distincts (~50 occurrences chacun)
+        String[] labels = new String[200];
+        for (int i = 0; i < 200; i++) {
+            labels[i] = "Libelle_" + i;
+        }
+        List<Transaction> batch = new java.util.ArrayList<>(10000);
+        for (int i = 0; i < 10000; i++) {
+            batch.add(Transaction.builder()
+                    .montant(new BigDecimal("10.00"))
+                    .libelle(labels[i % 200])
+                    .type(TransactionType.DEPENSE)
+                    .date(LocalDate.of(2026, 1, 1).plusDays(i % 365))
+                    .account(account1)
+                    .user(user1)
+                    .build());
+        }
+        transactionRepository.saveAll(batch);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Mesure uniquement la requête, pas le setup
+        long start = System.nanoTime();
+        List<String> libelles = transactionRepository.findLibelleSuggestions(user1.getId(), null, 20);
+        long durationMs = (System.nanoTime() - start) / 1_000_000;
+
+        assertThat(libelles).isNotEmpty();
+        assertThat(durationMs)
+                .as("La requête doit répondre en moins de 100ms, durée effective : %dms", durationMs)
+                .isLessThan(100);
     }
 }

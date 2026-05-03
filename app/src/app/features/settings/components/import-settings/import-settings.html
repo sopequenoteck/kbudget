@@ -20,7 +20,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (drafts().length === 0) {
-    <p class="state-empty">Aucun brouillon en cours.</p>
+    <p class="inline-empty">Aucun brouillon en cours.</p>
   } @else {
     <ul class="draft-list">
       @for (draft of drafts(); track draft.id) {
@@ -72,7 +72,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (history().length === 0) {
-    <p class="state-empty">Aucun import finalisé.</p>
+    <p class="inline-empty">Aucun import finalisé.</p>
   } @else {
     <ul class="history-list">
       @for (entry of history(); track entry.id) {
@@ -108,7 +108,7 @@
   </p>
 
   @if (rules().length === 0) {
-    <p class="state-empty">Aucune règle définie.</p>
+    <p class="inline-empty">Aucune règle définie.</p>
   } @else {
     <ul class="rule-list">
       @for (rule of rules(); track rule.id) {
@@ -209,7 +209,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (profiles().length === 0) {
-    <p class="state-empty">Aucun profil disponible.</p>
+    <p class="inline-empty">Aucun profil disponible.</p>
   } @else {
     <ul class="profile-list">
       @for (profile of profiles(); track (profile.id ?? profile.name)) {
@@ -269,7 +269,7 @@
       }
     </div>
 
-    <div class="upload-zone" (click)="triggerFileInput()" [class.upload-zone--disabled]="uploading()">
+    <div class="upload-zone" (click)="triggerFileInput()" (keydown.enter)="triggerFileInput()" tabindex="0" role="button" [class.upload-zone--disabled]="uploading()">
       <input
         id="csv-file-input"
         type="file"

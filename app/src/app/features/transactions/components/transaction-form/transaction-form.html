@@ -1,106 +1,152 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="transaction-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="form-error-banner">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
-  <div class="form-row form-row--label-amount">
-    <app-form-field
-      label="Libelle"
-      fieldId="libelle"
-      [showError]="isInvalid('libelle')"
-      [errorMessage]="
-        form.get('libelle')?.hasError('required') ? 'Libelle requis' : '255 caracteres maximum'
-      "
-    >
-      <input id="libelle" type="text" formControlName="libelle" />
-    </app-form-field>
 
-    <app-form-field
-      label="Montant"
-      fieldId="montant"
-      [showError]="isInvalid('montant')"
-      [errorMessage]="'Le montant doit etre superieur a 0'"
-    >
-      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-    </app-form-field>
+  <!-- ROW 1: Handle + titre à gauche + toggle type à droite -->
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
+      <ng-icon name="phosphorReceipt" size="16" />
+      <span>Transaction</span>
+    </div>
+    <div class="bsheet__type-toggle" role="group" aria-label="Type de transaction">
+      <button
+        type="button"
+        [class.active]="type() === TransactionType.DEPENSE"
+        (click)="onTypeChange(TransactionType.DEPENSE)"
+      >Dépense</button>
+      <button
+        type="button"
+        [class.active]="type() === TransactionType.RECETTE"
+        (click)="onTypeChange(TransactionType.RECETTE)"
+      >Recette</button>
+    </div>
   </div>
 
-  @if (!isEditing()) {
-    <div class="recurring-toggle">
-      <label class="recurring-toggle__label" for="isRecurring">
-        <input
-          id="isRecurring"
-          type="checkbox"
-          formControlName="isRecurring"
-          class="recurring-toggle__checkbox"
-        />
-        <span class="recurring-toggle__track"></span>
-        <span class="recurring-toggle__text">Transaction récurrente</span>
+  <!-- ROW 2: Montant + Libellé -->
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
+      <input
+        class="bsheet__amount input-naked"
+        [class.bsheet__amount--expense]="type() === TransactionType.DEPENSE"
+        [class.bsheet__amount--income]="type() === TransactionType.RECETTE"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="montant"
+        placeholder="0"
+        autocomplete="off"
+        #amountInput
+      />
+      <span class="bsheet__currency"
+        [class.bsheet__currency--expense]="type() === TransactionType.DEPENSE"
+        [class.bsheet__currency--income]="type() === TransactionType.RECETTE"
+      >{{ currencySymbol() }}</span>
+    </div>
+    <app-autocomplete
+      class="bsheet__libelle"
+      formControlName="libelle"
+      [suggestions]="libelleSuggestions()"
+      [minChars]="2"
+      [maxDisplay]="5"
+      placeholder="Libellé"
+      (queryChange)="onLibelleQuery($event)"
+    />
+  </div>
+
+  @if (form.get('note')?.value; as noteValue) {
+    <div class="bsheet__note-preview">{{ noteValue }}</div>
+  }
+
+  <!-- ROW 3: Note à gauche | Catégorie + Date + Compte à droite -->
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
+      <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'note'" [class.has-value]="!!form.get('note')?.value" (click)="toggleSection('note')" aria-label="Note">
+        <ng-icon name="phosphorNoteBlank" size="18" [style.color]="form.get('note')?.value ? 'var(--color-primary)' : 'var(--text-tertiary)'" [style.opacity]="form.get('note')?.value ? '0.7' : '1'" />
+      </button>
+      @if (!isEditing()) {
+        <button type="button" class="bsheet__icon-btn" [class.active]="expandedSection() === 'recurring'" (click)="toggleSection('recurring')" aria-label="Récurrence">
+          <ng-icon name="phosphorRepeat" size="18" style="color: var(--text-tertiary)" />
+        </button>
+      }
+    </div>
+    <div class="bsheet__meta-pills">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
+        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
+        <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
+      </button>
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+        <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
+        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+      </button>
+      @if (hasAccounts()) {
+        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+          <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
+          <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- EXPANDED SECTIONS -->
+  @if (expandedSection() === 'category') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-category-select
+        formControlName="categoryId"
+        [categories]="categories()"
+        (selected)="expandedSection.set(null)"
+        (isCreating)="categoryCreating.set($event)"
+        (created)="onCategoryCreated($event)"
+      />
+    </div>
+  }
+  @if (expandedSection() === 'recurring') {
+    <div class="bsheet__expand" @expandCollapse>
+      <label class="bsheet__toggle-row">
+        <span class="bsheet__toggle-text">Transaction récurrente</span>
+        <input type="checkbox" formControlName="isRecurring" class="bsheet__toggle-input" />
+        <span class="bsheet__toggle-track"></span>
       </label>
+      @if (form.get('isRecurring')?.value) {
+        <div class="bsheet__recurring-fields">
+          <app-select-picker formControlName="frequency" [items]="frequencyOptions" placeholder="Fréquence" [clearable]="false" />
+          <app-inline-date-picker [value]="nextOccurrenceSignal()" [min]="today" (valueChange)="onNextOccurrenceSelected($event)" />
+        </div>
+      }
+    </div>
+  }
+  @if (expandedSection() === 'note') {
+    <div class="bsheet__expand" @expandCollapse>
+      <textarea formControlName="note" rows="3" placeholder="Ajouter une note..." maxlength="500" class="bsheet__textarea input-naked"></textarea>
+    </div>
+  }
+  @if (expandedSection() === 'date') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-inline-date-picker [value]="dateSignal()" [originalValue]="transaction()?.date ?? ''" (valueChange)="onDateSelected($event)" />
+    </div>
+  }
+  @if (expandedSection() === 'account') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
     </div>
   }
 
-  @if (form.get('isRecurring')?.value) {
-    <app-form-field label="Fréquence" fieldId="frequency">
-      <app-select-picker
-        formControlName="frequency"
-        [items]="frequencyOptions"
-        placeholder="Sélectionner une fréquence"
-        [clearable]="false"
-      />
-    </app-form-field>
-
-    <app-form-field
-      label="Prochaine occurrence"
-      fieldId="nextOccurrence"
-      [showError]="isInvalid('nextOccurrence')"
-      [errorMessage]="'Date requise'"
-    >
-      <input id="nextOccurrence" type="date" formControlName="nextOccurrence" [min]="today" />
-    </app-form-field>
-  } @else {
-    <app-form-field
-      label="Date"
-      fieldId="date"
-      [showError]="isInvalid('date')"
-      [errorMessage]="'Date requise'"
-    >
-      <input id="date" type="date" formControlName="date" />
-    </app-form-field>
-  }
-
-  @if (hasAccounts()) {
-    <app-form-field label="Compte" fieldId="accountId">
-      <app-select-picker
-        formControlName="accountId"
-        [items]="accountItems()"
-        placeholder="Selectionner un compte"
-        [clearable]="!isEditing() || !!form.get('accountId')?.value"
-      />
-    </app-form-field>
-  } @else if (!isEditing()) {
-    <div class="form-info">Créez un compte dans les paramètres pour associer vos transactions</div>
-  }
-
-  <app-form-field label="Categorie" fieldId="categoryId">
-    <app-category-picker formControlName="categoryId" />
-  </app-form-field>
-
-  <app-form-field
-    label="Note"
-    fieldId="note"
-    [showError]="isInvalid('note')"
-    [errorMessage]="'500 caracteres maximum'"
-  >
-    <textarea id="note" formControlName="note" rows="2"></textarea>
-  </app-form-field>
-
-  <div class="form-actions">
-    @if (isEditing()) {
-      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-    }
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
+  <!-- ROW 4: Supprimer à gauche, Enregistrer/Modifier à droite -->
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
+      @if (isEditing()) {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
+          <ng-icon name="phosphorTrash" size="16" />
+        </button>
+      } @else {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
+          Annuler
+        </button>
+      }
+    </div>
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
+      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

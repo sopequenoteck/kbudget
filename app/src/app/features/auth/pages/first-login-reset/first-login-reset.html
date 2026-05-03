@@ -1,0 +1,112 @@
+<app-auth-shell
+  size="md"
+  title="Premier accès"
+  tagline="Configurez vos identifiants"
+  [error]="errorMessage() ?? ''"
+>
+  <div class="flr-notice">
+    <p>
+      Vous êtes connecté avec les identifiants initiaux générés par le système. Définissez dès
+      maintenant votre email définitif, un mot de passe personnel et votre nom d'affichage pour
+      accéder à l'application.
+    </p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-form-field
+      label="Email définitif"
+      fieldId="flr-email"
+      prefixIcon="phosphorEnvelope"
+      [errorMessage]="
+        form.controls.email.hasError('required')
+          ? 'Email requis'
+          : form.controls.email.hasError('maxlength')
+            ? '255 caractères maximum'
+            : 'Email invalide'
+      "
+      [showError]="form.controls.email.touched && form.controls.email.invalid"
+    >
+      <input
+        id="flr-email"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="votre@email.com"
+        [class.input-error]="form.controls.email.touched && form.controls.email.invalid"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Nom d'affichage"
+      fieldId="flr-displayname"
+      prefixIcon="phosphorUser"
+      errorMessage="Nom requis (100 caractères max)"
+      [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
+    >
+      <input
+        id="flr-displayname"
+        type="text"
+        formControlName="displayName"
+        autocomplete="name"
+        placeholder="Votre prénom ou pseudo"
+        [class.input-error]="
+          form.controls.displayName.touched && form.controls.displayName.invalid
+        "
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Nouveau mot de passe"
+      fieldId="flr-password"
+      prefixIcon="phosphorLock"
+      [errorMessage]="
+        form.controls.password.hasError('required')
+          ? 'Mot de passe requis'
+          : form.controls.password.hasError('minlength')
+            ? '8 caractères minimum'
+            : '100 caractères maximum'
+      "
+      [showError]="form.controls.password.touched && form.controls.password.invalid"
+    >
+      <input
+        id="flr-password"
+        type="password"
+        formControlName="password"
+        autocomplete="new-password"
+        placeholder="Au moins 8 caractères"
+        [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Confirmer le mot de passe"
+      fieldId="flr-password-confirm"
+      prefixIcon="phosphorLock"
+      errorMessage="Les mots de passe ne correspondent pas"
+      [showError]="
+        form.controls.passwordConfirm.touched && form.controls.passwordConfirm.invalid
+      "
+    >
+      <input
+        id="flr-password-confirm"
+        type="password"
+        formControlName="passwordConfirm"
+        autocomplete="new-password"
+        placeholder="Répétez votre mot de passe"
+        [class.input-error]="
+          form.controls.passwordConfirm.touched && form.controls.passwordConfirm.invalid
+        "
+      />
+    </app-form-field>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          Enregistrement...
+        } @else {
+          Valider mes identifiants
+        }
+      </button>
+    </div>
+  </form>
+</app-auth-shell>

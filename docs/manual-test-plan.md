@@ -409,11 +409,129 @@
 
 ---
 
+---
+
+## 21. Angular — Catégories (KKS-231)
+
+> **Concerne** : Application Angular uniquement. Tests non-régression Settings + nouveaux parcours inline.
+> **Prérequis** : `ng serve` lancé, API Spring Boot active (profil dev), au moins un compte existant.
+
+### 21.1 — Settings — Gestion des catégories (non-régression US4)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-1 | Créer une catégorie | Settings → Catégories → `+` → Renseigner nom, icône, couleur → Créer | Catégorie apparaît dans la liste Settings | -- |
+| CAT-2 | Modifier une catégorie existante | Settings → Catégories → clic sur une catégorie → Modifier nom → Modifier | Nom mis à jour dans la liste | -- |
+| CAT-3 | Supprimer une catégorie | Settings → Catégories → clic sur une catégorie → Supprimer → Confirmer | Catégorie disparaît de la liste | -- |
+| CAT-4 | Footer modal Settings fonctionnel | Settings → Catégories → `+` → Renseigner un champ → clic `Annuler` | Modal fermée, catégorie non créée | -- |
+| CAT-5 | Bouton Modifier dans le footer | Settings → Catégories → éditer une catégorie → footer affiche « Modifier » | Label correct selon mode create/edit | -- |
+
+### 21.2 — Sélection inline dans les formulaires (US1)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-6 | Sélection inline transaction | Nouveau bottom-sheet transaction → pill Catégorie → liste inline s'affiche (aucun overlay) | Aucun bottom-sheet supplémentaire | -- |
+| CAT-7 | Sélection confirme la valeur | Expand catégorie ouvert → clic sur une catégorie | Expand se referme, pill affiche la catégorie sélectionnée | -- |
+| CAT-8 | Sélection abonnement | Nouveau bottom-sheet abonnement → pill Catégorie → liste inline | Même comportement que CAT-6/CAT-7 | -- |
+| CAT-9 | Sélection dette | Nouveau bottom-sheet dette → pill Catégorie → liste inline | Même comportement | -- |
+| CAT-10 | Scroll liste (>10 catégories) | Avec >10 catégories créées → ouvrir expand → faire défiler | Liste scrolle jusqu'au max 60vh, footer du sheet reste accessible | -- |
+
+### 21.3 — Recherche inline (US3)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-11 | Recherche partielle | Expand catégorie → taper `ali` | Seul « Alimentation » affiché | -- |
+| CAT-12 | Insensibilité casse | Expand catégorie → taper `TRANSPORT` | « Transport » affiché | -- |
+| CAT-13 | Insensibilité accents | Expand catégorie → taper `cafe` | « Café » affiché (si existant) | -- |
+| CAT-14 | Aucun résultat | Taper un terme inexistant | Message « Aucune catégorie trouvée » + bouton « + Créer » | -- |
+| CAT-15 | Navigation clavier ArrowDown | Input search focusé → ArrowDown | Premier item highlighté | -- |
+| CAT-16 | Navigation clavier Enter | Item highlighté → Enter | Item sélectionné, expand fermé | -- |
+| CAT-17 | Escape en mode liste | Recherche active → Escape | Recherche vidée, liste complète | -- |
+
+### 21.4 — Création inline (US2)
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| CAT-18 | Bouton + Créer | Taper un terme sans correspondance exacte → bouton « + Créer "terme" » | Bouton visible | -- |
+| CAT-19 | Passage en mode création | Clic sur « + Créer "terme" » | Mode création s'affiche avec nom pré-rempli | -- |
+| CAT-20 | Création réussie auto-sélection | Remplir le form création → ✓ Créer | Catégorie créée + auto-sélectionnée + expand fermé | -- |
+| CAT-21 | Retour vers liste | Mode création → ← Retour | Retour vers liste, terme de recherche préservé | -- |
+| CAT-22 | Escape en mode création | Mode création → Escape | Retour vers liste (pas fermeture du sheet) | -- |
+| CAT-23 | Footer désactivé pendant création | Mode création actif | Boutons Annuler/Enregistrer du sheet grisés | -- |
+| CAT-24 | Catégorie créée visible dans Settings | Créer une catégorie depuis le bottom-sheet → aller dans Settings | Nouvelle catégorie visible dans la liste Settings | -- |
+
+---
+
+## 22. KKS-235 — Page Mon compte (Angular + Flutter)
+
+> **Concerne** : Page `Settings > Mon compte` + bouton de deconnexion fixe.
+> **Mode serveur uniquement** (les endpoints `/api/users/me/*` ne sont pas dispo en mode local Drift).
+> **Prerequis** : compte de test, mot de passe connu, au moins 1 admin secondaire en DB pour le test "dernier admin".
+
+### 22.1 — US-001 : Navigation et deconnexion
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-1 | Acces depuis Settings | User connecte | Settings → tap "Mon compte" | Navigation vers `/settings/account` | -- |
+| MC-2 | Bouton deconnexion fixe | Page Mon compte ouverte | Scroller jusqu'en bas | Bouton "Se deconnecter" visible et accessible (pinned bas d'ecran ou en pied) | -- |
+| MC-3 | Deconnexion nominale | User connecte sur Mon compte | Tap "Se deconnecter" → confirmer si dialog | Redirect vers `/login`, refresh tokens revoques cote serveur (verifier impossible de refresh) | -- |
+
+### 22.2 — US-002 : Identite (nom, avatar, email)
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-4 | Email read-only | Page Mon compte | Inspecter le champ Email | Champ desactive, non editable, valeur correcte | -- |
+| MC-5 | Modifier le nom | Page Mon compte | Editer "Nom" → "Kelly K." → Enregistrer | Snackbar succes, GET /api/users/me retourne le nouveau nom | -- |
+| MC-6 | Nom vide | Page Mon compte | Vider le nom → Enregistrer | Erreur de validation client (champ requis) | -- |
+| MC-7 | Nom > 100 chars | Page Mon compte | Coller 101 caracteres dans nom | Bloque (maxLength) ou erreur 400 explicite | -- |
+| MC-8 | Upload avatar JPG | Page Mon compte | Tap zone avatar → choisir fichier .jpg < 2 Mo | Avatar affiche immediatement, ETag retourne | -- |
+| MC-9 | Upload avatar PNG | Page Mon compte | Choisir fichier .png < 2 Mo | Avatar affiche, content-type `image/png` | -- |
+| MC-10 | Upload format invalide | Page Mon compte | Choisir fichier .gif ou .pdf | Erreur "Format d'image non supporte" (`INVALID_IMAGE_FORMAT` 400) | -- |
+| MC-11 | Upload > 2 Mo | Page Mon compte | Choisir fichier image > 2 Mo | Erreur "L'image depasse 2 Mo" (`FILE_TOO_LARGE` 413) | -- |
+| MC-12 | Cache avatar (304) | Avatar configure | Recharger la page deux fois (DevTools) | Deuxieme requete `GET /api/users/me/avatar` retourne `304 Not Modified` (header `If-None-Match`) | -- |
+| MC-13 | Supprimer avatar | Avatar configure | Tap "Supprimer l'avatar" → confirmer | Avatar disparait, GET retourne `404 AVATAR_NOT_FOUND` | -- |
+| MC-14 | Supprimer sans avatar | Aucun avatar | Tenter suppression | Erreur `AVATAR_NOT_FOUND` 404 (ou bouton desactive cote UI) | -- |
+
+### 22.3 — US-003 : Changer le mot de passe
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-15 | Changement nominal | Page Mon compte | Saisir current valide + new (≥ 12 chars) different → Enregistrer | Succes, nouveaux tokens emis (refresh tokens precedents revoques), user reste connecte | -- |
+| MC-16 | Mot de passe actuel incorrect | Page Mon compte | Saisir current faux + new valide | Erreur `PASSWORD_INCORRECT` 401, message "Mot de passe actuel incorrect" | -- |
+| MC-17 | Nouveau MDP < 12 chars | Page Mon compte | Saisir current valide + new = "abc123" | Erreur de validation 400 (Bean Validation `@Size(min=12)`) | -- |
+| MC-18 | Nouveau MDP identique | Page Mon compte | Saisir current valide + new = current | Erreur `PASSWORD_UNCHANGED` 400 | -- |
+| MC-19 | Tokens precedents invalides | Apres MC-15 | Tenter un refresh avec l'ancien refreshToken | Erreur `TOKEN_REVOKED` (401) | -- |
+
+### 22.4 — US-004 : Export des donnees
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-20 | Export JSON | Compte avec donnees | Tap "Exporter (JSON)" | Telechargement `k-budget-export-YYYY-MM-DD.json`, `Content-Type: application/json; charset=utf-8` | -- |
+| MC-21 | Contenu JSON | Apres MC-20 | Ouvrir le fichier JSON | Backup complet : user, preferences, accounts, categories, transactions, subscriptions, debts, budgets, exchangeRates | -- |
+| MC-22 | Export CSV | Compte avec transactions | Tap "Exporter (CSV)" | Telechargement `k-budget-transactions-YYYY-MM-DD.csv` | -- |
+| MC-23 | BOM UTF-8 dans le CSV | Apres MC-22 | Inspecter les 3 premiers octets du fichier (hexdump) | `EF BB BF` au debut du fichier, ouverture correcte des accents dans Excel | -- |
+| MC-24 | Format invalide | URL directe | Appeler `GET /api/users/me/export?format=xml` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+| MC-25 | Format manquant | URL directe | Appeler `GET /api/users/me/export` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+
+### 22.5 — US-005 : Suppression du compte
+
+| # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MC-26 | Suppression nominale | User non-admin OU admin avec ≥ 2 admins actifs | Tap "Supprimer mon compte" → saisir `password` + `SUPPRIMER` → confirmer | 204, redirect `/login`, tokens revoques, `users.disabled_at` rempli, budgets/snapshots/refresh_tokens supprimes en cascade | -- |
+| MC-27 | Confirmation incorrecte | Page Mon compte | Saisir `password` + `supprimer` (lowercase) | Erreur `CONFIRMATION_REQUIRED` 400 | -- |
+| MC-28 | Confirmation vide | Page Mon compte | Saisir `password` + chaine vide | Erreur de validation 400 (Bean `@NotBlank`) | -- |
+| MC-29 | MDP incorrect | Page Mon compte | Saisir mauvais password + `SUPPRIMER` | Erreur `PASSWORD_INCORRECT` 401 | -- |
+| MC-30 | Dernier admin bloque | User est seul admin actif (desactiver les autres en DB ou ADMIN_EMAILS reduit) | Tenter la suppression avec password + `SUPPRIMER` valides | Erreur `LAST_ADMIN_DELETION_FORBIDDEN` 403, compte non supprime | -- |
+| MC-31 | Reconnexion impossible | Apres MC-26 | Tenter `POST /api/auth/login` avec les credentials du compte supprime | Echec auth (compte `disabled_at` non null) | -- |
+
+---
+
 ## Notes d'execution
 
-1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19)
+1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19), puis les sections feature-specifiques (21, 22)
 2. **Modes a tester** : Chaque section (sauf exclusives) doit etre testee en **mode local** ET **mode serveur**
 3. **Devices** : Tester sur iOS + Android si possible (comportements natifs differents : back button, date picker, clavier)
 4. **Orientation** : Verifier au moins 1 ecran en mode paysage
 5. **Theme** : Tester au moins le dashboard + 1 formulaire en mode sombre
 6. **Multi-devises** : Creer au moins 1 compte en EUR et 1 en USD pour les tests de formatage
+7. **KKS-235** : Section 22 a executer en mode serveur uniquement, prevoir un compte admin secondaire pour pouvoir tester MC-26 et MC-30 distinctement

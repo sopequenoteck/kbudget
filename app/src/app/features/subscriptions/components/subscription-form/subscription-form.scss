@@ -1,46 +1,7 @@
-.subscription-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
+// Subscription form — styles specifiques uniquement
+// Le reste est dans _bottom-sheet.scss (classes .bsheet__*)
 
-// -- Lignes grille --
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-
-  &--name-amount {
-    grid-template-columns: 7fr 3fr;
-  }
-}
-
-// -- Checkbox actif --
-.checkbox-field {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-// -- Boutons d'action --
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
-
-  .btn-danger {
-    margin-right: auto;
-  }
-}
-
-// -- Responsive petit ecran --
-@media (max-width: 400px) {
-  .form-row,
-  .form-row--name-amount {
-    grid-template-columns: 1fr;
-  }
+// Focus du libelle en couleur expense (specifique abonnement)
+.bsheet__libelle:focus {
+  border-bottom-color: var(--color-expense);
 }

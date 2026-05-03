@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.response.AccountSummary;
@@ -49,6 +50,9 @@ class RecurringTransactionControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private final UUID recurringId = UUID.randomUUID();
@@ -58,11 +62,11 @@ class RecurringTransactionControllerTest {
         var testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     private RecurringTransactionResponse buildRecurringResponse() {
-        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR");
+        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
         return new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
                 Frequency.MENSUEL, LocalDate.of(2027, 3, 15), true, null, account);
@@ -143,10 +147,10 @@ class RecurringTransactionControllerTest {
 
     @Test
     void should_return201_when_validateRecurrence() throws Exception {
-        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR");
+        var account = new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
         var transactionResponse = new TransactionResponse(
                 UUID.randomUUID(), new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
-                LocalDate.now(), null, null, account, null, null, null, null);
+                LocalDate.now(), null, null, account, null, null);
 
         when(recurringTransactionService.validate(eq(recurringId), any(UUID.class))).thenReturn(transactionResponse);
 
@@ -202,7 +206,7 @@ class RecurringTransactionControllerTest {
         var deactivatedResponse = new RecurringTransactionResponse(
                 recurringId, new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
                 Frequency.MENSUEL, LocalDate.of(2027, 3, 15), false, null,
-                new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR"));
+                new AccountSummary(UUID.randomUUID(), "Compte Principal", "🏦", "#3b82f6", "EUR", null, null));
 
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class))).thenReturn(deactivatedResponse);
 

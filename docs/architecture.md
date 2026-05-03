@@ -1,6 +1,65 @@
 # Budget App — Architecture technique
 
-Ce document couvre les decisions techniques, le modele de donnees et la vision frontend. Pour la stack, les endpoints API et le quickstart, voir le [`README.md`](../README.md).
+Ce document couvre les decisions techniques, la securite, le modele de donnees et la vision frontend.
+
+## Structure du code
+
+### Backend (api/)
+
+```
+api/src/main/java/fr/kksdev/budget/api/
+├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
+├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Budget, ExchangeRate, Currency, Preference, Notification, Import, User, Dev)
+├── service/       # Logique metier
+├── repository/    # Spring Data JPA
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile) + Bank (record, non-persiste)
+├── dto/
+│   ├── request/   # DTOs d'entree (validation Bean Validation)
+│   └── response/  # DTOs de sortie
+└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType, ImportDraftStatus, ImportLineStatus, ImportProfileSource
+```
+
+### Frontend (app/)
+
+```
+app/src/
+├── app/
+│   ├── core/          # Services singleton, guards, interceptors
+│   ├── shared/        # Composants/pipes/directives reutilisables
+│   └── features/      # Modules lazy-loaded par feature
+├── environments/      # Config dev/prod (apiUrl)
+└── styles/            # SCSS globaux
+```
+
+Architecture en couches : Controller → Service → Repository. Les entites JPA ne sont jamais exposees directement — toujours via DTOs.
+
+## Securite
+
+- JWT stateless. Access token (15 min), refresh token (30 jours)
+- Toutes les routes protegees sauf `/api/auth/**`, `/api/actuator/health`, `/api/banks`, `/api/bank-logos/**` et `/ws/**` (auth WebSocket via StompAuthInterceptor)
+- Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
+- Mots de passe hashes en BCrypt
+- Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
+
+### Controle d'acces admin (KKS-232 + KKS-233)
+
+- **`User.isAdmin`** (KKS-233) : flag boolean **autoritaire en DB** (`users.is_admin`, colonne ajoutee via migration V30, defaut `FALSE`). Remplace la resolution dynamique via `ADMIN_EMAILS` pour eviter qu'un self-hoster perde son acces admin apres un changement d'email.
+- **`AdminEmailResolver`** (KKS-232) : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)` + `listAdminEmails()`. Emet `WARN` au boot si la liste est vide. **Depuis KKS-233, il n'est plus utilise pour l'autorisation** — uniquement consomme par `AdminSyncRunner` et par les services d'invitation.
+- **`AdminSyncRunner`** (KKS-233) : `ApplicationRunner @Order(2)`, `@Transactional`. Au boot, pour chaque email de `ADMIN_EMAILS` : si le user existe avec `isAdmin=false`, passe a `true` (promotion). **Jamais de retrogradation** (`true → false`). Idempotent.
+- **`AdminAuthorizationFilter`** (KKS-232, refactor KKS-233) : `OncePerRequestFilter` declare via `@Bean` dans `SecurityConfig`. Matche `/admin/**` (via `servletPath`, context-path `/api` strippe). Resout le statut admin via `user.isAdmin()` (champ DB) depuis KKS-233. Pour un user authentifie non-admin → `response.sendError(403)`. Si non authentifie, laisse passer (401 natif via `HttpStatusEntryPoint`).
+- **`PasswordResetRequiredFilter`** (KKS-233) : `OncePerRequestFilter` declare apres `JwtFilter`. Si le JWT porte le claim `mustResetCredentials: true` et que le path n'est pas dans l'allowlist (`/auth/first-login-reset`, `/auth/logout`), renvoie `403 PASSWORD_RESET_REQUIRED`. Sinon laisse passer.
+- **Ordre des filters** (apres KKS-233) : `JwtFilter` → `PasswordResetRequiredFilter` → `AdminAuthorizationFilter`. `JwtFilter` refuse aussi les users dont `disabledAt != null` (401 natif).
+- **Onboarding controle** : l'inscription publique (`POST /auth/register`) a ete retiree. L'onboarding se fait uniquement via invitation admin : `POST /admin/invitations` (admin cree) → `GET /auth/invitations/:token` (invite verifie) → `POST /auth/accept-invite` (invite finalise son compte + auto-login). Conformite constitution principe VII.
+- **Bootstrap premier admin** (KKS-233) : `BootstrapSeedRunner` (`ApplicationRunner @Order(1)`) detecte `userRepository.count() == 0` au premier boot et cree un compte admin seed avec password aleatoire 32 chars (`SecureRandom`, alphanumerique) affiche dans les logs. Flag `passwordResetRequired=true` jusqu'au `POST /auth/first-login-reset`. Conformite principe VII : `docker compose up -d` suffit sur instance vierge.
+- **Garde-fou dernier admin** : `AdminUserService.disable` refuse de desactiver le dernier admin actif avec `ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")` → HTTP 409.
+
+## Profils Spring
+
+| Profil | Usage | BDD | DDL |
+|--------|-------|-----|-----|
+| `dev` | Developpement local | PostgreSQL local, fallback config | `validate` |
+| `prod` | Production | Variables d'environnement obligatoires | `validate` |
+| `test` | Tests automatises | H2 en memoire | `create-drop` |
 
 ## Decisions architecturales
 
@@ -35,6 +94,26 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | password | String | Mot de passe (hashe, BCrypt) |
 | name | String | Nom de l'utilisateur |
 | createdAt | LocalDateTime | Date de creation |
+| disabledAt | LocalDateTime | Soft-disable (nullable, NULL = actif). Si non null, `JwtFilter` bloque l'authentification |
+| isAdmin | boolean | (KKS-233) Statut administrateur autoritaire en DB. Defaut `false`. Mis a `true` au seed bootstrap et par `AdminSyncRunner` pour les users listes dans `ADMIN_EMAILS`. Jamais retrograde automatiquement |
+| passwordResetRequired | boolean | (KKS-233) Flag imposant le changement de credentials a la premiere connexion. Defaut `false`. Pose a `true` uniquement par `BootstrapSeedRunner` sur le compte admin seed. Remis a `false` apres `POST /auth/first-login-reset` |
+
+> Depuis KKS-233, `isAdmin` est la **source autoritaire** du statut admin. `ADMIN_EMAILS` n'est plus consulte a chaque requete — il sert uniquement de source de promotion au demarrage via `AdminSyncRunner`.
+
+### Invitation
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | Long | Identifiant auto (BIGSERIAL) |
+| token | UUID | Token UUID v4 unique (indexe). Transmis dans le lien d'invitation |
+| email | String | Email du futur invite (normalise lowercase) |
+| invitedBy | User | FK → User (l'admin emetteur) |
+| expiresAt | Instant | `createdAt + 7 jours` |
+| usedAt | Instant | Timestamp d'acceptation (nullable) |
+| revokedAt | Instant | Timestamp de revocation admin (nullable) |
+| createdAt | Instant | Creation |
+
+> Statut derive (non stocke) via `InvitationService.deriveStatus` : REVOKED > USED > EXPIRED > ACTIVE. `usedAt` et `revokedAt` sont mutuellement exclusifs.
 
 ### Account
 
@@ -62,14 +141,13 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | id | UUID | Identifiant |
 | montant | BigDecimal | Montant |
 | libelle | String | Description courte |
-| type | Enum | DEPENSE / RECETTE |
+| type | Enum | DEPENSE / RECETTE / AJUSTEMENT |
 | date | LocalDate | Date de la transaction |
 | category | Category | FK → Category (nullable) |
 | note | String | Note libre (nullable) |
 | account | Account | FK → Account |
 | transferId | UUID | ID de virement (nullable, lie les 2 transactions d'un transfert) |
 | debt | Debt | FK → Debt (nullable, lie la transaction a un remboursement de dette) |
-| product | Product | FK → Product (nullable, lie la transaction a un produit) |
 | subscription | Subscription | FK → Subscription (nullable, paiement d'abonnement) |
 | isRecurring | Boolean | Transaction recurrente (default false) |
 | frequency | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL (nullable, si isRecurring) |
@@ -127,24 +205,6 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
-### Product
-
-| Champ | Type | Description |
-|-------|------|-------------|
-| id | UUID | Identifiant |
-| nom | String | Nom du produit (max 100) |
-| description | String | Description (nullable, max 500) |
-| icone | String | Emoji (nullable) |
-| imageUrl | String | Image en base64 data URI (nullable) — format partage Flutter/Angular |
-| prixAchat | BigDecimal | Prix d'achat |
-| prixVente | BigDecimal | Prix de vente |
-| stock | Integer | Stock disponible (>= 0) |
-| totalVendu | Integer | Total vendu (auto, default 0) |
-| actif | Boolean | Toggle de visibilite (default true) |
-| createdAt | LocalDateTime | Date de creation |
-| updatedAt | LocalDateTime | Date de mise a jour |
-| user | User | FK → User |
-
 ### RefreshToken
 
 | Champ | Type | Description |
@@ -163,8 +223,6 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | id | UUID | Identifiant |
 | enabledFeatures | List\<Feature\> | Features optionnelles activees (VARCHAR via converter) |
 | navOrder | List\<Feature\> | Ordre des onglets de navigation (VARCHAR via converter) |
-| shopAccountId | UUID | Compte associe a la boutique (nullable) |
-| includeShopInBalance | Boolean | Inclure le stock boutique dans le solde total (default false) |
 | currencies | List\<Currency\> | Ordre des devises — [0] = devise principale (VARCHAR via converter) |
 | enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
 | timezone | String | Fuseau horaire (default "Europe/Paris") |
@@ -172,7 +230,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
-Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `SHOP`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
+Enums : `Feature` — `SUBSCRIPTIONS`, `DEBTS`, `BUDGETS`. `Currency` — `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD`. `NotificationType` — `SUBSCRIPTION_DUE`, `DEBT_DUE`, `DEBT_REMINDER`, `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED`. `TextScale` — `SMALL`, `MEDIUM`, `LARGE`. Converters JPA : `FeatureListConverter`, `CurrencyListConverter`, `NotificationTypeListConverter`.
 
 ### ExchangeRate
 
@@ -202,72 +260,113 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | createdAt | LocalDateTime | Date de creation |
 | user | User | FK → User |
 
+### Budget
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| montant | BigDecimal | Montant du budget |
+| frequence | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL |
+| currency | Currency | Devise (default EUR) |
+| seuilNotification | Integer | Seuil d'alerte en % (default 80) |
+| actif | Boolean | Budget actif (default true) |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
+| category | Category | FK → Category. UNIQUE(user_id, category_id) |
+
+### BudgetSnapshot
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | UUID | Identifiant |
+| montantBudget | BigDecimal | Montant du budget au moment du snapshot |
+| currency | Currency | Devise |
+| tauxChange | BigDecimal | Taux de change applique (nullable) |
+| montantDepense | BigDecimal | Montant depense sur la periode |
+| mois | String | Periode au format yyyy-MM |
+| createdAt | LocalDateTime | Date de creation |
+| user | User | FK → User |
+| category | Category | FK → Category |
+
 ### ImportDraft
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| status | Enum | PENDING / CONFIRMED / CANCELLED |
-| originalFilename | String | Nom du fichier CSV uploade |
-| profileId | String | Identifiant du profil utilise (nullable) |
-| account | Account | FK → Account cible |
+| status | Enum | PENDING / COMPLETED / EXPIRED |
+| fileName | String | Nom du fichier CSV uploade |
+| totalLines | Integer | Nombre total de lignes |
+| readyCount | Integer | Lignes prates a importer |
+| reviewCount | Integer | Lignes a revoir |
+| duplicateCount | Integer | Doublons detectes |
+| skippedCount | Integer | Lignes ignorees |
+| profileId | UUID | Identifiant du profil utilise (nullable) |
+| profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
 | createdAt | LocalDateTime | Date de creation |
+| expiresAt | LocalDateTime | Date d'expiration |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+| account | Account | FK → Account cible. UNIQUE(user_id, account_id) WHERE status = 'PENDING' |
 
 ### ImportDraftLine
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| draft | ImportDraft | FK → ImportDraft |
+| draft | ImportDraft | FK → ImportDraft (CASCADE) |
 | lineNumber | Integer | Numero de ligne dans le CSV |
-| rawData | String | Donnee brute (JSON) |
-| date | LocalDate | Date parsee (nullable) |
-| libelle | String | Libelle parse (nullable) |
-| montant | BigDecimal | Montant parse (nullable) |
-| type | Enum | DEPENSE / RECETTE (nullable) |
-| category | Category | FK → Category (nullable, suggestion ou choix utilisateur) |
-| status | Enum | PENDING / IMPORTED / IGNORED / ERROR |
-| errorMessage | String | Message d'erreur de parsing (nullable) |
+| rawLabel | String | Libelle brut du CSV |
+| cleanLabel | String | Libelle nettoye |
+| amount | BigDecimal | Montant |
+| date | LocalDate | Date de la ligne |
+| transactionType | Enum | DEPENSE / RECETTE / AJUSTEMENT |
+| status | Enum | READY / NEEDS_REVIEW / DUPLICATE / SKIPPED |
+| statusMessage | String | Message de statut (nullable) |
+| duplicateTransactionId | UUID | ID de la transaction doublon (nullable) |
+| category | Category | FK → Category (nullable) |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
 
 ### CategoryRule
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| pattern | String | Motif de correspondance sur le libelle (insensible a la casse) |
+| pattern | String | Motif de correspondance (max 200, insensible a la casse) |
 | category | Category | FK → Category a appliquer |
-| priority | Integer | Priorite (plus grand = prioritaire) |
 | createdAt | LocalDateTime | Date de creation |
-| user | User | FK → User |
+| user | User | FK → User. UNIQUE(user_id, pattern) |
 
 ### ImportHistory
 
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| originalFilename | String | Nom du fichier source |
-| profileId | String | Profil utilise (nullable) |
-| totalLines | Integer | Nombre total de lignes CSV |
-| importedCount | Integer | Lignes importees en transactions |
-| ignoredCount | Integer | Lignes ignorees |
-| errorCount | Integer | Lignes en erreur |
-| account | Account | FK → Account cible |
-| confirmedAt | LocalDateTime | Date de confirmation |
+| transactionCount | Integer | Nombre de transactions importees |
+| fileName | String | Nom du fichier source (nullable) |
+| importedAt | LocalDateTime | Date d'import |
 | user | User | FK → User |
+| account | Account | FK → Account cible |
 
 ### ImportProfile
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| id | String | Identifiant (slug, ex: "bnp-particuliers") |
+| id | UUID | Identifiant |
 | name | String | Nom affiche |
-| source | Enum | BUILTIN / CUSTOM |
-| columnMapping | String | Mapping colonnes JSON (nullable pour profils custom) |
-| separator | Character | Separateur CSV (defaut ';') |
-| encoding | String | Encodage (defaut "UTF-8") |
-| user | User | FK → User (nullable pour les profils BUILTIN) |
+| separator | String | Separateur CSV |
+| dateFormat | String | Format de date |
+| dateColumn | Integer | Index colonne date |
+| amountColumn | Integer | Index colonne montant (nullable) |
+| debitColumn | Integer | Index colonne debit (nullable) |
+| creditColumn | Integer | Index colonne credit (nullable) |
+| labelColumn | Integer | Index colonne libelle |
+| encoding | String | Encodage du fichier |
+| decimalSeparator | String | Separateur decimal |
+| skipHeaderLines | Integer | Lignes d'en-tete a ignorer |
+| createdAt | LocalDateTime | Date de creation |
+| updatedAt | LocalDateTime | Date de mise a jour |
+| user | User | FK → User |
 
 ## Architecture frontend
 
@@ -286,12 +385,7 @@ app/src/app/
     ├── subscriptions/ # CRUD abonnements
     ├── debts/         # CRUD dettes
     ├── budgets/       # Module Budgets (liste mensuelle, historique camembert, formulaire)
-    ├── settings/      # Parametres (categories, comptes, fonctionnalites)
-    └── shop/          # Module Boutique (liste, detail, formulaire, sell/restock)
-        ├── shop-list/         # Grille produits + filtres actifs/inactifs
-        ├── shop-detail/       # Detail produit + historique ventes
-        ├── components/        # ProductForm, SellDialog, RestockDialog
-        └── shop.routes.ts     # Routing lazy-loaded
+    └── settings/      # Parametres (categories, comptes, fonctionnalites)
 ```
 
 ### Principes
@@ -318,8 +412,6 @@ app/src/app/
 | Dettes/Prets | `/debts` | Liste, resume, filtres |
 | Detail dette | `/debts/:id` | Montant restant, historique paiements, rembourser, snooze |
 | Parametres | `/settings` | Parametres utilisateur |
-| Boutique | `/shop` | Grille produits, filtres actifs/inactifs |
-| Detail produit | `/shop/:id` | Infos, vente, restock, historique |
 | Budgets | `/budgets` | Vue mensuelle, historique camembert, CRUD budgets (guard BUDGETS) |
 
 ### Bouton flottant (FAB speed-dial)
@@ -329,7 +421,6 @@ app/src/app/
   - `/dashboard` : Transaction, Abonnement*, Dette*, Virement**
   - `/transactions`, `/subscriptions`, `/debts` (+ pages detail) : Transaction, Abonnement*, Dette*
   - `/budgets` : Budget (tap direct)
-  - `/shop`, `/shop/:id` : Nouveau produit, Vente rapide (si SHOP actif)
 - *si feature activee | **si ≥ 2 comptes actifs
 - Saisie en 2-3 taps
 

@@ -3,7 +3,6 @@ import {
   Component,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -11,26 +10,41 @@ import { firstValueFrom } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  phosphorStar,
+  phosphorBank,
+  phosphorCaretLeft,
   phosphorPencilSimple,
+  phosphorPlus,
+  phosphorStar,
   phosphorTrash,
   phosphorUploadSimple,
+  phosphorWarning,
 } from '@ng-icons/phosphor-icons/regular';
 import { AccountService } from '../../../../core/services/account';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
+import { DevLogger } from '../../../../core/services/dev-logger';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
+import { CurrencyList } from '../currency-settings/currency-list';
+import { ExchangeRateManager } from '../currency-settings/exchange-rate-manager';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-accounts',
-  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon],
+  standalone: true,
+  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager, EmptyState],
   providers: [
     provideIcons({
-      phosphorStar,
+      phosphorBank,
+      phosphorCaretLeft,
       phosphorPencilSimple,
+      phosphorPlus,
+      phosphorStar,
       phosphorTrash,
       phosphorUploadSimple,
+      phosphorWarning,
     }),
   ],
   templateUrl: './accounts.html',
@@ -41,17 +55,31 @@ export class Accounts {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
+  private readonly logger = inject(DevLogger);
+  readonly rateService = inject(ExchangeRateService);
+  private readonly prefService = inject(PreferenceService);
+
+  readonly skeletonItems = Array(3);
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly confirmDeleteId = signal<string | null>(null);
   readonly deleteError = signal<string | null>(null);
+  readonly currencies = signal<string[]>(['EUR']);
+  readonly primaryCurrency = this.prefService.primaryCurrency;
 
   constructor() {
     effect(() => {
       this.accountService.refreshTrigger();
       this.loadAccounts();
+    });
+    this.rateService.loadRates();
+    effect(() => {
+      const c = this.prefService.currencies();
+      if (c.length > 0) {
+        this.currencies.set(c);
+      }
     });
   }
 
@@ -64,9 +92,7 @@ export class Accounts {
       this.accounts.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load accounts', err);
-      }
+      this.logger.error('Failed to load accounts', err);
       this.error.set(true);
       this.loading.set(false);
     }
@@ -84,9 +110,7 @@ export class Accounts {
     try {
       await firstValueFrom(this.accountService.setDefault(account.id));
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to set default account', err);
-      }
+      this.logger.error('Failed to set default account', err);
     }
   }
 
@@ -112,13 +136,16 @@ export class Accounts {
       const httpErr = err as { error?: { message?: string } };
       const message = httpErr?.error?.message ?? 'Erreur lors de la suppression';
       this.deleteError.set(message);
-      if (isDevMode()) {
-        console.error('Failed to delete account', err);
-      }
+      this.logger.error('Failed to delete account', err);
     }
   }
 
   triggerImport(accountId: string): void {
     this.router.navigate(['/settings/import'], { queryParams: { accountId } });
+  }
+
+  onCurrenciesChange(currencies: string[]): void {
+    this.currencies.set(currencies);
+    this.prefService.update({ currencies });
   }
 }

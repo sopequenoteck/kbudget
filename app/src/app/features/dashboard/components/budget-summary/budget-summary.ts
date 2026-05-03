@@ -18,14 +18,25 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 
     @if (isLoading()) {
       <div class="budget-summary__state">
-        <div class="spinner"></div>
+        @for (item of skeletonItems; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line skeleton-line--title"></div>
+              <div class="skeleton-line skeleton-line--subtitle"></div>
+            </div>
+            <div class="skeleton-lines skeleton-lines--right">
+              <div class="skeleton-line skeleton-line--value"></div>
+            </div>
+          </div>
+        }
       </div>
     } @else {
       <ul class="budget-summary__list">
         @for (item of items(); track item.budgetId) {
           <li class="budget-item">
             <div class="budget-item__header">
-              <span class="budget-item__icon" [style.backgroundColor]="item.categoryCouleur + '26'">{{ item.categoryIcone }}</span>
+              <span class="budget-item__icon">{{ item.categoryIcone }}</span>
               <span class="budget-item__name">{{ item.categoryNom }}</span>
               <span
                 class="budget-item__amounts"
@@ -74,24 +85,8 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 
     .budget-summary__state {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-6) var(--space-4);
-    }
-
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border-default);
-      border-top-color: var(--color-primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      flex-direction: column;
+      gap: 0;
     }
 
     .budget-summary__list {
@@ -100,17 +95,16 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      background-color: var(--surface-default);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
     }
 
     .budget-item {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
-      padding: var(--space-3);
-      background-color: var(--surface-default);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      padding: var(--space-3) var(--space-4);
     }
 
     .budget-item__header {
@@ -125,11 +119,11 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       justify-content: center;
       width: var(--space-8);
       height: var(--space-8);
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-lg);
+      background-color: var(--icon-circle-bg);
+      border-radius: var(--radius-round);
       line-height: 1;
       flex-shrink: 0;
-      background-color: var(--color-primary-light);
-      border-radius: var(--radius-round);
     }
 
     .budget-item__name {
@@ -143,8 +137,8 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     }
 
     .budget-item__amounts {
-      font-size: var(--font-size-sm);
-      color: var(--text-secondary);
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
       white-space: nowrap;
       flex-shrink: 0;
 
@@ -157,7 +151,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
     .budget-bar {
       position: relative;
       width: 100%;
-      height: 10px;
+      height: 4px;
       background-color: var(--border-default);
       border-radius: var(--radius-round);
       overflow: hidden;
@@ -167,6 +161,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
       height: 100%;
       border-radius: var(--radius-round);
       background-color: var(--color-income);
+      opacity: 0.7;
       transition: width var(--duration-slow) var(--easing-out);
       min-width: 0;
 
@@ -199,6 +194,7 @@ export class BudgetSummary {
   readonly overview = input<BudgetOverview | null>(null);
   readonly isLoading = input<boolean>(false);
   readonly animated = signal(false);
+  readonly skeletonItems = Array(3);
 
   constructor() {
     effect(() => {

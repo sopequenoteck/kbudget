@@ -5,170 +5,76 @@ import {
   effect,
   inject,
   output,
+  Signal,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorChartPie,
+  phosphorTag,
+  phosphorRepeat,
+  phosphorCoins,
+  phosphorWarning,
+  phosphorTrash,
+  phosphorCheckCircle,
+  phosphorCircle,
+} from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { BudgetService } from '../../../../core/services/budget';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
-import { FormField } from '../../../../shared/components/form-field/form-field';
-import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { expandCollapse } from '../../../../shared/animations/expand-collapse';
+import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+
+type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | null;
 
 @Component({
   selector: 'app-budget-form',
-  imports: [ReactiveFormsModule, FormField],
-  template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="budget-form">
-      @if (errorMessage()) {
-        <div class="form-error-banner">{{ errorMessage() }}</div>
-      }
-
-      @if (noAvailableCategories() && !isEditMode()) {
-        <p class="budget-form__empty">Toutes les categories ont deja un budget.</p>
-      } @else {
-        <app-form-field
-          label="Categorie"
-          fieldId="categoryId"
-          [showError]="isInvalid('categoryId')"
-          [errorMessage]="'Categorie requise'"
-        >
-          <select id="categoryId" formControlName="categoryId">
-            <option value="" disabled>Choisir une categorie</option>
-            @for (cat of availableCategories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
-            }
-          </select>
-        </app-form-field>
-
-        <div class="form-row">
-          <app-form-field
-            label="Montant"
-            fieldId="montant"
-            [showError]="isInvalid('montant')"
-            [errorMessage]="'Montant requis (> 0)'"
-          >
-            <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-          </app-form-field>
-
-          <app-form-field label="Devise" fieldId="currency">
-            <select id="currency" formControlName="currency">
-              @for (cur of currencies(); track cur) {
-                <option [value]="cur">{{ cur }}</option>
-              }
-            </select>
-          </app-form-field>
-        </div>
-
-        <app-form-field label="Frequence" fieldId="frequence">
-          <select id="frequence" formControlName="frequence">
-            @for (freq of frequencies; track freq.value) {
-              <option [value]="freq.value">{{ freq.label }}</option>
-            }
-          </select>
-        </app-form-field>
-
-        <app-form-field label="Seuil d'alerte (%)" fieldId="seuilNotification">
-          <input
-            id="seuilNotification"
-            type="number"
-            formControlName="seuilNotification"
-            min="0"
-            max="100"
-          />
-        </app-form-field>
-
-        <label class="checkbox-field">
-          <input type="checkbox" formControlName="actif" />
-          Budget actif
-        </label>
-
-        <div class="form-actions">
-          @if (isEditMode()) {
-            <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-          }
-          <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-          <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
-            {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
-          </button>
-        </div>
-      }
-    </form>
-  `,
-  styles: `
-    .budget-form {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-4);
-    }
-
-    .budget-form__empty {
-      color: var(--text-secondary);
-      font-size: var(--font-size-sm);
-      text-align: center;
-      padding: var(--space-4) 0;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-3);
-    }
-
-    .checkbox-field {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-size: var(--font-size-sm);
-      color: var(--text-primary);
-      cursor: pointer;
-    }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-3);
-      padding-top: var(--space-3);
-
-      .btn-danger {
-        margin-right: auto;
-      }
-    }
-
-    .form-error-banner {
-      background: var(--bg-danger, #fef2f2);
-      color: var(--text-danger, #dc2626);
-      padding: var(--space-3);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-sm);
-    }
-
-    @media (max-width: 400px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-  `,
+  standalone: true,
+  imports: [ReactiveFormsModule, NgIcon],
+  providers: [
+    provideIcons({
+      phosphorChartPie,
+      phosphorTag,
+      phosphorRepeat,
+      phosphorCoins,
+      phosphorWarning,
+      phosphorTrash,
+      phosphorCheckCircle,
+      phosphorCircle,
+    }),
+  ],
+  templateUrl: './budget-form.html',
+  styleUrl: './budget-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapse],
 })
 export class BudgetForm {
   private readonly categoryService = inject(CategoryService);
   private readonly budgetService = inject(BudgetService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly modalService = inject(ModalService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly budget = computed(() => this.modalService.editingEntity() as Budget | null);
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
-  readonly isEditMode = computed(() => this.budget() !== null);
+  readonly isEditing = computed(() => this.budget() !== null);
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
+  readonly expandedSection = signal<ExpandableSection>(null);
+  readonly amountWidth: Signal<string>;
 
   readonly categories = signal<Category[]>([]);
   readonly existingBudgets = signal<Budget[]>([]);
@@ -192,12 +98,11 @@ export class BudgetForm {
   readonly noAvailableCategories = computed(() => this.availableCategories().length === 0);
 
   readonly currencies = this.preferenceService.currencies;
-
   readonly frequencies = FREQUENCIES;
 
   readonly form = new FormGroup({
     categoryId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    montant: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    montant: new FormControl('', { nonNullable: true, validators: [Validators.required, decimalMin(0.01)] }),
     frequence: new FormControl('MENSUEL', { nonNullable: true, validators: [Validators.required] }),
     currency: new FormControl('EUR', { nonNullable: true }),
     seuilNotification: new FormControl(80, {
@@ -207,16 +112,46 @@ export class BudgetForm {
     actif: new FormControl(true, { nonNullable: true }),
   });
 
+  readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
+
+  readonly selectedCategory = computed(() => {
+    const categoryId = this.form.get('categoryId')?.value;
+    if (!categoryId) return null;
+    return this.categories().find((c) => c.id === categoryId) ?? null;
+  });
+
+  readonly selectedCategoryName = computed(() => {
+    const cat = this.selectedCategory();
+    if (!cat) return null;
+    return `${cat.icone} ${cat.nom}`;
+  });
+
+  readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
+
+  readonly frequencyLabel = computed(() => {
+    const val = this.form.get('frequence')?.value ?? 'MENSUEL';
+    return this.frequencies.find((f) => f.value === val)?.label ?? val;
+  });
+
+  readonly currencySymbol = computed(() => {
+    const currency = this.form.get('currency')?.value || 'EUR';
+    return (0)
+      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .replace('0', '')
+      .trim();
+  });
+
   constructor() {
     this.loadCategories();
     this.loadExistingBudgets();
+    this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     effect(() => {
       const b = this.budget();
       if (b) {
         this.form.patchValue({
           categoryId: b.category.id,
-          montant: b.montant,
+          montant: b.montant.toFixed(2),
           frequence: b.frequence,
           currency: b.currency,
           seuilNotification: b.seuilNotification,
@@ -227,6 +162,15 @@ export class BudgetForm {
     });
   }
 
+  toggleSection(section: ExpandableSection): void {
+    this.expandedSection.update((current) => (current === section ? null : section));
+  }
+
+  toggleActif(): void {
+    const current = this.form.get('actif')?.value ?? true;
+    this.form.patchValue({ actif: !current });
+  }
+
   async onSubmit(): Promise<void> {
     if (!validateForm(this.form)) return;
 
@@ -234,9 +178,17 @@ export class BudgetForm {
     this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
+    const montant = normalizeDecimal(raw.montant);
+
+    if (isNaN(montant) || montant < 0.01) {
+      this.errorMessage.set('Montant invalide');
+      this.submitting.set(false);
+      return;
+    }
+
     const request: BudgetRequest = {
       categoryId: raw.categoryId,
-      montant: Number(raw.montant),
+      montant,
       frequence: raw.frequence,
       currency: raw.currency || undefined,
       seuilNotification: raw.seuilNotification,
@@ -268,7 +220,15 @@ export class BudgetForm {
   async onDelete(): Promise<void> {
     const b = this.budget();
     if (!b) return;
-    if (!confirm('Supprimer ce budget ?')) return;
+    const amount = b.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency: b.currency });
+    const ok = await this.confirmService.confirm({
+      title: `${b.category.nom} — ${amount}`,
+      message: 'Voulez-vous vraiment supprimer ce budget ?',
+      confirmLabel: 'Supprimer',
+      variant: 'danger',
+      icon: 'phosphorChartPie',
+    });
+    if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(b.id));
       this.modalService.closeModal();

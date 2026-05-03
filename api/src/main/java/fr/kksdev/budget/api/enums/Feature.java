@@ -1,5 +1,5 @@
 package fr.kksdev.budget.api.enums;
 
 public enum Feature {
-    SUBSCRIPTIONS, DEBTS, SHOP, BUDGETS
+    SUBSCRIPTIONS, DEBTS, BUDGETS
 }

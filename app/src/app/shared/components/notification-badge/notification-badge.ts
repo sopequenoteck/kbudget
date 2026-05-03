@@ -31,7 +31,7 @@ import { NotificationService } from '../../../core/services/notification';
       transition: background-color 0.15s;
     }
     .notification-badge:hover {
-      background-color: var(--bg-hover, rgba(0,0,0,0.05));
+      background-color: var(--hover-bg);
     }
     .badge {
       position: absolute;
@@ -41,9 +41,9 @@ import { NotificationService } from '../../../core/services/notification';
       height: 18px;
       padding: 0 5px;
       border-radius: 9px;
-      background-color: var(--color-danger, #ef4444);
+      background-color: var(--text-error);
       color: white;
-      font-size: 11px;
+      font-size: var(--font-size-2xs);
       font-weight: 600;
       display: flex;
       align-items: center;

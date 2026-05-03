@@ -52,7 +52,7 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--bg-warning, rgba(245, 158, 11, 0.1));
+  background: var(--bg-warning);
   border: 1px solid var(--color-primary);
   color: var(--color-primary);
   font-size: var(--font-size-sm);
@@ -88,7 +88,7 @@
   padding: var(--space-4);
 }
 
-.state-empty {
+.inline-empty {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
@@ -97,9 +97,9 @@
 .mapping-error {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--bg-error, rgba(239, 68, 68, 0.1));
-  border: 1px solid var(--text-error, #ef4444);
-  color: var(--text-error, #ef4444);
+  background: var(--bg-error);
+  border: 1px solid var(--text-error);
+  color: var(--text-error);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-4);
 }
@@ -178,7 +178,7 @@
 }
 
 .required {
-  color: var(--text-error, #ef4444);
+  color: var(--text-error);
   margin-left: 2px;
 }
 

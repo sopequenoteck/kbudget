@@ -1,4 +1,5 @@
-import { Injectable, computed, effect, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { DevLogger } from './dev-logger';
 
 export type Theme = 'light' | 'dark' | 'auto';
 
@@ -9,7 +10,9 @@ const VALID_THEMES: Theme[] = ['light', 'dark', 'auto'];
   providedIn: 'root',
 })
 export class ThemeService {
-  readonly currentTheme = signal<Theme>('light');
+  private readonly logger = inject(DevLogger);
+
+  readonly currentTheme = signal<Theme>('dark');
 
   readonly effectiveTheme = computed<'light' | 'dark'>(() => {
     const theme = this.currentTheme();
@@ -39,7 +42,7 @@ export class ThemeService {
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 
@@ -50,7 +53,7 @@ export class ThemeService {
         this.currentTheme.set(stored as Theme);
       }
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 
@@ -62,7 +65,7 @@ export class ThemeService {
         this.systemPrefersDark.set(e.matches);
       });
     } catch {
-      if (isDevMode()) console.error('matchMedia indisponible');
+      this.logger.error('matchMedia indisponible');
     }
   }
 }

@@ -1,0 +1,89 @@
+@if (mode() === 'list') {
+  <!-- Mode liste : recherche + listbox -->
+  <div class="cs__search-wrapper">
+    <input
+      class="cs__search"
+      type="text"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-expanded="true"
+      [attr.aria-controls]="listboxId"
+      [attr.aria-activedescendant]="activeDescendantId()"
+      [value]="searchTerm()"
+      placeholder="Rechercher une catégorie..."
+      autocomplete="off"
+      [disabled]="disabled()"
+      (input)="onSearchInput($event)"
+      (keydown)="onKeydown($event)"
+    />
+  </div>
+
+  @if (categories().length === 0 && searchTerm() === '') {
+    <!-- Empty state premier usage (CL-006) -->
+    <div class="cs__empty-state">
+      <span class="cs__empty-message">Aucune catégorie — créez-en une</span>
+      <button type="button" class="cs__create-btn" (click)="pushToCreate()">
+        + Créer
+      </button>
+    </div>
+  } @else {
+    <div
+      class="cs__list"
+      [id]="listboxId"
+      role="listbox"
+      aria-label="Catégories"
+    >
+      @for (item of filteredCategories(); track item.id; let i = $index) {
+        <button
+          type="button"
+          class="cs__item"
+          [class.highlighted]="activeIndex() === i"
+          [class.selected]="value() === item.id"
+          role="option"
+          [id]="listboxId + '-option-' + i"
+          [attr.aria-selected]="value() === item.id"
+          (click)="selectCategory(item)"
+          (mouseenter)="activeIndex.set(i)"
+        >
+          <span
+            class="cs__item-icon"
+            [style.background-color]="item.couleur + '26'"
+          >{{ item.icone }}</span>
+          <span class="cs__item-name">{{ item.nom }}</span>
+        </button>
+      }
+
+      @if (filteredCategories().length === 0 && searchTerm()) {
+        <div class="cs__no-results">Aucune catégorie trouvée</div>
+      }
+    </div>
+
+    @if (showCreateButton()) {
+      <button type="button" class="cs__create-btn" (click)="pushToCreate()">
+        + Créer « {{ searchTerm() }} »
+      </button>
+    }
+  }
+} @else {
+  <!-- Mode création -->
+  <div class="cs__create-header">
+    <button type="button" class="cs__back-btn" (click)="popToList()" aria-label="Retour">
+      ← Retour
+    </button>
+    <button
+      type="button"
+      class="cs__submit-btn bsheet__action-pill bsheet__action-pill--primary"
+      (click)="submitCategoryForm()"
+      [disabled]="categoryForm()?.submitting()"
+    >
+      ✓ Créer
+    </button>
+  </div>
+
+  <app-category-form
+    #formRef
+    [initialName]="searchTerm()"
+    (saved)="onCategoryCreated($event)"
+    (cancelled)="popToList()"
+  />
+}

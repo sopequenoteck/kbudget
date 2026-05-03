@@ -38,19 +38,12 @@ public class UserPreference {
     @Convert(converter = FeatureListConverter.class)
     @Column(name = "enabled_features", nullable = false)
     @Builder.Default
-    private List<Feature> enabledFeatures = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
+    private List<Feature> enabledFeatures = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS);
 
     @Convert(converter = FeatureListConverter.class)
     @Column(name = "nav_order", nullable = false)
     @Builder.Default
-    private List<Feature> navOrder = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
-
-    @Column(name = "shop_account_id")
-    private UUID shopAccountId;
-
-    @Column(name = "include_shop_in_balance", nullable = false)
-    @Builder.Default
-    private Boolean includeShopInBalance = false;
+    private List<Feature> navOrder = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS);
 
     @Convert(converter = CurrencyListConverter.class)
     @Column(name = "currencies", nullable = false, length = 100)

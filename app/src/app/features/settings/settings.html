@@ -1,35 +1,251 @@
-<h2 class="settings-title">Paramètres</h2>
-
-@for (group of groups; track group) {
-  <section class="settings-group">
-    <h3 class="settings-group__title">{{ groupLabels[group] }}</h3>
-    <nav class="settings-group__list">
-      @for (section of groupedSections()[group]; track section.id) {
-        @if (section.status === 'active') {
-          <a class="settings-card" [routerLink]="section.route">
-            <span class="settings-card__icon" [style.background]="section.iconColor + '1a'">
-              <ng-icon [name]="section.icon" size="24" [style.color]="section.iconColor" />
-            </span>
-            <div class="settings-card__content">
-              <span class="settings-card__title">{{ section.title }}</span>
-              <span class="settings-card__description">{{ section.description }}</span>
-            </div>
-            <span class="settings-card__arrow">&#9654;</span>
-          </a>
+<!-- ===== SECTION 1 : MON COMPTE ===== -->
+<div class="settings-account">
+  @if (currentUser(); as user) {
+    <div class="settings-avatar">
+      <div class="settings-avatar__circle">
+        @if (avatarUrl(); as url) {
+          <img [src]="url" alt="Photo de profil" class="settings-avatar__img" />
         } @else {
-          <a class="settings-card settings-card--placeholder" [routerLink]="section.route">
-            <span class="settings-card__icon" [style.background]="section.iconColor + '1a'">
-              <ng-icon [name]="section.icon" size="24" [style.color]="section.iconColor" />
-            </span>
-            <div class="settings-card__content">
-              <span class="settings-card__title">{{ section.title }}</span>
-              <span class="settings-card__description">{{ section.description }}</span>
-            </div>
-            <span class="settings-card__badge">À venir</span>
-            <span class="settings-card__arrow">&#9654;</span>
-          </a>
+          <span class="settings-avatar__initials">{{ getInitials(user.name) }}</span>
         }
-      }
-    </nav>
-  </section>
+      </div>
+    </div>
+    <span class="settings-account__name">{{ user.name }}</span>
+    <span class="settings-account__email">{{ user.email }}</span>
+  }
+</div>
+
+<!-- ===== SECTION 2 : GESTION ===== -->
+<div class="settings-section">
+  <div class="settings-section__label">GESTION</div>
+  <div class="settings-section__container">
+    <a class="settings-row settings-row--link" routerLink="account">
+      <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+        <ng-icon name="phosphorCamera" size="20" />
+      </span>
+      <div class="settings-row__content">
+        <span class="settings-row__title">Mon compte</span>
+        <span class="settings-row__description">Profil, sécurité, déconnexion</span>
+      </div>
+      <span class="settings-row__chevron">›</span>
+    </a>
+    <a class="settings-row settings-row--link" routerLink="accounts">
+      <span class="settings-row__icon" style="background: #14b8a626; color: #14b8a6">
+        <ng-icon name="phosphorBank" size="20" />
+      </span>
+      <div class="settings-row__content">
+        <span class="settings-row__title">Comptes & Devises</span>
+        <span class="settings-row__description">Comptes, devises et taux de conversion</span>
+      </div>
+      <span class="settings-row__chevron">›</span>
+    </a>
+    <a class="settings-row settings-row--link settings-row--last" routerLink="categories">
+      <span class="settings-row__icon" style="background: #f9731626; color: #f97316">
+        <ng-icon name="phosphorTag" size="20" />
+      </span>
+      <div class="settings-row__content">
+        <span class="settings-row__title">Catégories</span>
+        <span class="settings-row__description">Gérer les catégories</span>
+      </div>
+      <span class="settings-row__chevron">›</span>
+    </a>
+  </div>
+</div>
+
+<!-- ===== SECTION 3 : ADMINISTRATION (admin uniquement) ===== -->
+@if (isAdmin()) {
+  <div class="settings-section">
+    <div class="settings-section__label">ADMINISTRATION</div>
+    <div class="settings-section__container">
+      <a class="settings-row settings-row--link settings-row--last" routerLink="users">
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+          <ng-icon name="phosphorUsers" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Utilisateurs</span>
+          <span class="settings-row__description">Invitations et gestion des accès</span>
+        </div>
+        <span class="settings-row__chevron">›</span>
+      </a>
+    </div>
+  </div>
 }
+
+<!-- ===== SECTION 4 : APPARENCE ===== -->
+<div class="settings-section">
+  <div class="settings-section__label">APPARENCE</div>
+  <div class="settings-section__container">
+    <div class="settings-appearance-inner">
+      <div class="segmented-control">
+        <button
+          class="segmented-control__option"
+          [class.segmented-control__option--active]="currentTheme() === 'light'"
+          (click)="setTheme('light')"
+        >
+          <ng-icon name="phosphorSun" size="16" />
+          Clair
+        </button>
+        <button
+          class="segmented-control__option"
+          [class.segmented-control__option--active]="currentTheme() === 'dark'"
+          (click)="setTheme('dark')"
+        >
+          <ng-icon name="phosphorMoon" size="16" />
+          Sombre
+        </button>
+        <button
+          class="segmented-control__option"
+          [class.segmented-control__option--active]="currentTheme() === 'auto'"
+          (click)="setTheme('auto')"
+        >
+          <ng-icon name="phosphorCircleHalf" size="16" />
+          Auto
+        </button>
+      </div>
+    </div>
+    <div class="settings-row settings-row--no-border">
+      <div class="settings-row__content">
+        <div class="segmented-control">
+          <button
+            class="segmented-control__option"
+            [class.segmented-control__option--active]="currentTextScale() === 'small'"
+            (click)="setTextScale('small')"
+          >
+            <span class="segmented-control__text-sample segmented-control__text-sample--small">A</span>
+            Petit
+          </button>
+          <button
+            class="segmented-control__option"
+            [class.segmented-control__option--active]="currentTextScale() === 'medium'"
+            (click)="setTextScale('medium')"
+          >
+            <span class="segmented-control__text-sample">A</span>
+            Normal
+          </button>
+          <button
+            class="segmented-control__option"
+            [class.segmented-control__option--active]="currentTextScale() === 'large'"
+            (click)="setTextScale('large')"
+          >
+            <span class="segmented-control__text-sample segmented-control__text-sample--large">A</span>
+            Grand
+          </button>
+        </div>
+        <div class="text-preview" [style.fontSize.%]="textScaleService.scaleFactor() * 100">
+          Voici un aperçu de la taille du texte choisie.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 4 : NOTIFICATIONS ===== -->
+<div class="settings-section">
+  <div class="settings-section__label">NOTIFICATIONS</div>
+  <div class="settings-section__container">
+    @for (config of notificationTypes; track config.type) {
+      <div class="settings-row">
+        <ng-icon class="settings-row__icon-simple" [name]="config.icon" size="16" />
+        <div class="settings-row__content">
+          <span class="settings-row__title">{{ config.label }}</span>
+          <span class="settings-row__description">{{ config.description }}</span>
+        </div>
+        <label class="settings-toggle">
+          <input
+            type="checkbox"
+            [checked]="isTypeEnabled(config.type)"
+            (change)="toggleType(config.type)"
+          />
+          <span class="settings-toggle__slider"></span>
+        </label>
+      </div>
+    }
+    <div class="settings-row settings-row--last">
+      <ng-icon class="settings-row__icon-simple" name="phosphorGlobe" size="16" />
+      <span class="settings-row__title">Zone</span>
+      <select
+        class="settings-select"
+        [value]="timezone()"
+        (change)="onTimezoneChange($event)"
+      >
+        @for (tz of timezones; track tz) {
+          <option [value]="tz">{{ tz }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 5 : NAVIGATION ===== -->
+<div class="settings-section">
+  <div class="settings-section__label">NAVIGATION</div>
+  <div class="settings-section__container">
+    <div class="settings-nav-row settings-nav-row--locked">
+      <ng-icon class="settings-nav-row__icon" name="phosphorHouse" size="20" />
+      <span class="settings-nav-row__label">Accueil</span>
+      <ng-icon class="settings-nav-row__lock" name="phosphorLock" size="14" />
+    </div>
+    <div class="settings-nav-row settings-nav-row--locked">
+      <ng-icon class="settings-nav-row__icon" name="phosphorCurrencyDollar" size="20" />
+      <span class="settings-nav-row__label">Transactions</span>
+      <ng-icon class="settings-nav-row__lock" name="phosphorLock" size="14" />
+    </div>
+    <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="settings-nav-drop-list">
+      @for (item of enabledNavItems(); track item.value) {
+        <div cdkDrag class="settings-nav-row settings-nav-row--draggable">
+          <ng-icon cdkDragHandle class="settings-nav-row__handle" name="phosphorDotsSixVertical" size="18" />
+          <ng-icon class="settings-nav-row__icon" [name]="item.icon" size="20" />
+          <span class="settings-nav-row__label">{{ item.label }}</span>
+          <label class="settings-toggle">
+            <input
+              type="checkbox"
+              checked
+              (change)="toggleFeature(item.value)"
+            />
+            <span class="settings-toggle__slider"></span>
+          </label>
+        </div>
+      }
+    </div>
+    @for (item of disabledNavItems(); track item.value) {
+      <div class="settings-nav-row settings-nav-row--disabled">
+        <ng-icon class="settings-nav-row__icon" [name]="item.icon" size="20" />
+        <span class="settings-nav-row__label">{{ item.label }}</span>
+        <label class="settings-toggle">
+          <input
+            type="checkbox"
+            (change)="toggleFeature(item.value)"
+          />
+          <span class="settings-toggle__slider"></span>
+        </label>
+      </div>
+    }
+  </div>
+</div>
+
+@if (confirmDisableFeature(); as feature) {
+  <div class="settings-confirm">
+    <p class="settings-confirm__message">Vos données seront masquées mais pas supprimées.</p>
+    <div class="settings-confirm__actions">
+      <button class="settings-confirm__cancel" (click)="cancelDisable()">Annuler</button>
+      <button class="settings-confirm__confirm" (click)="confirmDisable()">Désactiver</button>
+    </div>
+  </div>
+}
+
+<!-- ===== FOOTER ===== -->
+<div class="settings-footer">
+  <span>K-Budget v{{ version }} · {{ serverInfo.environment === 'production' ? 'Prod' : 'Dev' }}</span>
+  <span class="settings-footer__dot">·</span>
+  @if (healthResult().status === 'checking') {
+    <span>...</span>
+  } @else if (healthResult().status === 'online') {
+    <span class="settings-footer__online">En ligne</span>
+    @if (healthResult().responseTimeMs !== null) {
+      <span class="settings-footer__dot">·</span>
+      <span>{{ healthResult().responseTimeMs }}ms</span>
+    }
+  } @else {
+    <span class="settings-footer__offline">Hors ligne</span>
+  }
+</div>

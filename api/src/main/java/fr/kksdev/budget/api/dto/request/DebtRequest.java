@@ -17,6 +17,7 @@ public record DebtRequest(
         @NotNull @Positive BigDecimal montant,
         @NotNull DebtType sens,
         @NotNull LocalDate date,
+        LocalDate dueDate,
         Boolean rembourse,
         UUID categoryId,
         Currency currency,

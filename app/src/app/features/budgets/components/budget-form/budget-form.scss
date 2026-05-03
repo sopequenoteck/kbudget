@@ -1,0 +1,68 @@
+// Budget form — styles specifiques uniquement
+// Le reste est dans _bottom-sheet.scss (classes .bsheet__*)
+
+// Category pill (specifique budget — pas un libelle standard)
+.budget-form__category-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  margin-left: auto;
+
+  ::ng-deep ng-icon { min-width: 18px; }
+  &:active { transform: scale(0.96); }
+  &.active { color: var(--color-primary); border-color: var(--color-primary); }
+  &.has-value { color: var(--text-secondary); }
+
+  span {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--locked {
+    opacity: 0.5;
+    cursor: default;
+    &:active { transform: none; }
+  }
+}
+
+// Empty state (specifique budget)
+.budget-form__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) 0 var(--space-4);
+}
+
+.budget-form__empty-text {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+// Select natif dans expand (specifique budget)
+.budget-form__select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-xl);
+  box-shadow: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  outline: none;
+  color-scheme: dark;
+
+  &:focus { background: var(--surface-raised); }
+}

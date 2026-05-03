@@ -30,6 +30,10 @@ export class ApiService {
     return this.http.delete<T>(`${this.baseUrl}${path}`);
   }
 
+  deleteWithBody<T>(path: string, body: unknown): Observable<T> {
+    return this.http.delete<T>(`${this.baseUrl}${path}`, { body });
+  }
+
   // FormData must be posted without an explicit Content-Type header so the
   // browser can set the multipart boundary automatically.
   postFormData<T>(url: string, formData: FormData): Observable<T> {

@@ -18,6 +18,7 @@ import { EmojiInput } from '../emoji-input/emoji-input';
 
 @Component({
   selector: 'app-category-form',
+  standalone: true,
   imports: [ReactiveFormsModule, EmojiInput],
   templateUrl: './category-form.html',
   styleUrl: './category-form.scss',
@@ -70,7 +71,7 @@ export class CategoryForm implements OnInit {
     this.selectedColor.set(color);
   }
 
-  async onSubmit(): Promise<void> {
+  async submit(): Promise<void> {
     if (this.form.invalid || !this.selectedEmoji()) {
       this.form.markAllAsTouched();
       return;

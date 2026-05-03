@@ -1,11 +1,13 @@
-import { Injectable, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api';
 import { BankResponse } from '../models/bank.model';
+import { DevLogger } from './dev-logger';
 
 @Injectable({ providedIn: 'root' })
 export class BankService {
   private readonly apiService = inject(ApiService);
+  private readonly logger = inject(DevLogger);
 
   readonly banks = signal<BankResponse[]>([]);
   readonly error = signal<string | null>(null);
@@ -21,7 +23,7 @@ export class BankService {
       this.error.set(null);
       this.loaded = true;
     } catch (e) {
-      if (isDevMode()) console.error('BankService.loadBanks error', e);
+      this.logger.error('BankService.loadBanks error', e);
       this.error.set('Impossible de charger les banques');
     }
   }

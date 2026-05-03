@@ -1,8 +1,11 @@
-<!-- Zone solde total -->
-<section class="accounts-zone">
+<!-- Hero: patrimoine + résumé mensuel (une seule section) -->
+<section class="hero">
   @if (totalBalanceLoading()) {
-    <div class="state-loading state-loading--accounts">
-      <div class="spinner"></div>
+    <div class="skeleton-hero">
+      <div class="skeleton-bar skeleton-bar--xs"></div>
+      <div class="skeleton-bar skeleton-bar--lg"></div>
+      <div class="skeleton-bar skeleton-bar--sm"></div>
+      <div class="skeleton-bar skeleton-bar--sm"></div>
     </div>
   } @else if (totalBalanceError()) {
     <div class="state-error">
@@ -10,130 +13,110 @@
       <button class="btn-outline" (click)="loadAccounts()">Réessayer</button>
     </div>
   } @else if (accounts().length === 0) {
-    <div class="state-empty state-empty--accounts">
-      <p>Aucun compte</p>
-      <a class="btn-outline" routerLink="/settings/accounts">Créer mon premier compte</a>
-    </div>
+    <app-empty-state
+      icon="phosphorWarningCircle"
+      message="Aucun compte"
+      ctaLabel="Créer mon premier compte"
+      (ctaClick)="goToAccounts()"
+    />
   } @else {
-    @if (isOnDashboard()) {
-      <span class="shell-greeting">Bonjour{{ userName()?.name ? ' ' + userName()!.name : '' }}</span>
-    }
-    @if (currencies().length > 1) {
-      <app-currency-pill-selector
-        [currencies]="currencies()"
-        [activeCurrency]="activeCurrency()"
-        (currencyChange)="onCurrencyChange($event)"
-      />
-    }
-    <div class="accounts-zone__totals">
-      <div class="accounts-zone__total">
-        <span class="accounts-zone__total-label">Patrimoine total</span>
-        <span class="accounts-zone__total-value-row">
-          <span
-            class="accounts-zone__total-value"
-            [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
-          >
-            {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
-          </span>
-          @if (convertedTotalBalance().hasMissingRate) {
-            <ng-icon
-              name="phosphorWarningCircle"
-              size="18"
-              class="missing-rate-icon"
-              title="Certains montants n'ont pas pu être convertis"
-            />
-          }
-        </span>
-        @if (netDuMois() !== 0 || variationPatrimoinePct() !== null) {
-          <span class="variation-badge"
-            [ngClass]="{
-              'variation-badge--positive': netDuMois() > 0,
-              'variation-badge--negative': netDuMois() < 0,
-              'variation-badge--neutral': netDuMois() === 0
-            }"
-          >
-            {{ netDuMois() >= 0 ? '+' : '' }}{{ netDuMois() | amount: null : preferenceService.primaryCurrency() }} ce mois
-            @if (variationPatrimoinePct() !== null) {
-              ({{ variationPatrimoinePct()! >= 0 ? '+' : '' }}{{ variationPatrimoinePct()! | number:'1.1-1' }}%)
-            }
-          </span>
-        }
-        @if (secondaryCurrency() !== null) {
-          @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
-          @if (converted !== null) {
-            <span class="patrimoine-converted">
-              ≈ {{ converted | amount: null : secondaryCurrency()! }}
-            </span>
-          }
-        }
-      </div>
+    <div class="hero__top-row">
+      <span class="hero__greeting">{{ greeting() }}</span>
+      @if (currencies().length > 1) {
+        <app-currency-pill-selector
+          [currencies]="currencies()"
+          [activeCurrency]="activeCurrency()"
+          (currencyChange)="onCurrencyChange($event)"
+        />
+      }
     </div>
-  }
-</section>
 
-<!-- Cartes Revenus / Depenses -->
-<section class="summary-section">
-  @if (summaryLoading()) {
-    <div class="state-loading state-loading--summary">
-      <div class="spinner"></div>
-    </div>
-  } @else if (summaryError()) {
-    <div class="state-error">
-      <p>Erreur de chargement du bilan</p>
-      <button class="btn-outline" (click)="loadSummaries()">Réessayer</button>
-    </div>
-  } @else {
-    <div class="summary-cards">
-      <div class="summary-card summary-card--income">
-        <div class="summary-card__dot summary-card__dot--income"></div>
-        <span class="summary-card__label">Revenus</span>
-        <span class="summary-card__value">
-          {{ (currentSummary()?.totalRecettes ?? 0) | amount: 'RECETTE' : preferenceService.primaryCurrency() }}
-        </span>
-        <span class="variation-badge"
-          [ngClass]="variationRevenus() >= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+    <!-- Montant principal -->
+    <div class="hero__amount">
+      <span class="hero__amount-label">Patrimoine total</span>
+      <span class="hero__amount-value-row">
+        <span
+          class="hero__amount-value"
+          [ngClass]="convertedTotalBalance().total >= 0 ? 'amount-income' : 'amount-expense'"
         >
-          {{ variationRevenus() >= 0 ? '↑' : '↓' }} {{ variationRevenus() >= 0 ? '+' : '' }}{{ variationRevenus() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
+          {{ convertedTotalBalance().total | amount: null : activeCurrency() }}
         </span>
-        @if (secondaryCurrency() !== null) {
-          @let convertedRecettes = conversionService.convert(currentSummary()?.totalRecettes ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
-          @if (convertedRecettes !== null) {
-            <span class="summary-card__converted">≈ {{ convertedRecettes | amount: null : secondaryCurrency()! }}</span>
-          }
+        @if (convertedTotalBalance().hasMissingRate) {
+          <ng-icon
+            name="phosphorWarningCircle"
+            size="18"
+            class="missing-rate-icon"
+            title="Certains montants n'ont pas pu être convertis"
+          />
         }
-      </div>
-      <div class="summary-card summary-card--expense">
-        <div class="summary-card__dot summary-card__dot--expense"></div>
-        <span class="summary-card__label">Dépenses</span>
-        <span class="summary-card__value">
-          {{ (currentSummary()?.totalDepenses ?? 0) | amount: 'DEPENSE' : preferenceService.primaryCurrency() }}
-        </span>
+      </span>
+      @if (convertedNet() !== 0 || convertedVariationPct() !== null) {
         <span class="variation-badge"
-          [ngClass]="variationDepenses() <= 0 ? 'variation-badge--positive' : 'variation-badge--negative'"
+          [ngClass]="{
+            'variation-badge--positive': convertedNet() > 0,
+            'variation-badge--negative': convertedNet() < 0,
+            'variation-badge--neutral': convertedNet() === 0
+          }"
         >
-          {{ variationDepenses() > 0 ? '↑' : '↓' }} {{ variationDepenses() >= 0 ? '+' : '' }}{{ variationDepenses() | amount: null : preferenceService.primaryCurrency() }} vs {{ previousMonthName() }}
-        </span>
-        @if (secondaryCurrency() !== null) {
-          @let convertedDepenses = conversionService.convert(currentSummary()?.totalDepenses ?? 0, preferenceService.primaryCurrency(), secondaryCurrency()!);
-          @if (convertedDepenses !== null) {
-            <span class="summary-card__converted">≈ {{ convertedDepenses | amount: null : secondaryCurrency()! }}</span>
+          {{ convertedNet() >= 0 ? '+' : '' }}{{ convertedNet() | amount: null : activeCurrency() }} ce mois
+          @if (convertedVariationPct() !== null) {
+            ({{ convertedVariationPct()! >= 0 ? '+' : '' }}{{ convertedVariationPct()! | number:'1.1-1' }}%)
           }
+        </span>
+      }
+      @if (secondaryCurrency() !== null) {
+        @let converted = conversionService.convert(convertedTotalBalance().total, activeCurrency(), secondaryCurrency()!);
+        @if (converted !== null) {
+          <span class="hero__converted">
+            ≈ {{ converted | amount: null : secondaryCurrency()! }}
+          </span>
         }
-      </div>
+      }
     </div>
+
+    <!-- Revenus / Dépenses — meta-lines Phosphor -->
+    @if (!summaryLoading() && !summaryError()) {
+      <div class="hero__meta-row">
+        <div class="hero__meta-group">
+          <div class="hero__meta-line">
+            <ng-icon name="phosphorTrendUp" size="14" />
+            @if (convertedRecettes() > 0) {
+              <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
+            } @else {
+              <span>0 revenus</span>
+            }
+          </div>
+        </div>
+        <div class="hero__meta-group">
+          <div class="hero__meta-line">
+            <ng-icon name="phosphorTrendDown" size="14" />
+            @if (convertedDepenses() > 0) {
+              <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
+            } @else {
+              <span>0 dépenses</span>
+            }
+          </div>
+        </div>
+      </div>
+    } @else if (summaryLoading()) {
+      <div class="skeleton-hero">
+        <div class="skeleton-bar skeleton-bar--md"></div>
+        <div class="skeleton-bar skeleton-bar--md"></div>
+      </div>
+    }
   }
 </section>
 
 <!-- Section Budgets -->
-@if (preferenceService.isEnabled('BUDGETS') && (sortedBudgetItems().length > 0 || budgetLoading())) {
+@if (preferenceService.isEnabled('BUDGETS') && (convertedSortedBudgetItems().length > 0 || budgetLoading())) {
   <section class="dashboard-section">
     <div class="dashboard-section__header">
       <h2 class="dashboard-section__title">Budgets · {{ budgetCurrentMonth() }}</h2>
       <a class="dashboard-section__link" routerLink="/budgets">Voir tout</a>
     </div>
     <app-budget-summary
-      [items]="sortedBudgetItems()"
-      [overview]="budgetOverview()"
+      [items]="convertedSortedBudgetItems()"
+      [overview]="convertedBudgetOverview()"
       [isLoading]="budgetLoading()"
     />
   </section>
@@ -147,8 +130,19 @@
   </div>
 
   @if (transactionsLoading()) {
-    <div class="state-loading">
-      <div class="spinner"></div>
+    <div class="list-group">
+      @for (item of skeletonItems; track $index) {
+        <div class="skeleton-item">
+          <div class="skeleton-circle"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line skeleton-line--subtitle"></div>
+          </div>
+          <div class="skeleton-lines skeleton-lines--right">
+            <div class="skeleton-line skeleton-line--value"></div>
+          </div>
+        </div>
+      }
     </div>
   } @else if (transactionsError()) {
     <div class="state-error">
@@ -156,9 +150,10 @@
       <button class="btn-outline" (click)="loadTransactions()">Réessayer</button>
     </div>
   } @else if (recentTransactions().length === 0) {
-    <div class="state-empty">
-      <p>Aucune transaction</p>
-    </div>
+    <app-empty-state
+      icon="phosphorReceipt"
+      message="Aucune transaction"
+    />
   } @else {
     <ul class="dashboard-list">
       @for (transaction of recentTransactions(); track transaction.id) {

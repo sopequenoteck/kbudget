@@ -3,6 +3,7 @@ import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-list-item',
+  standalone: true,
   imports: [NgClass],
   templateUrl: './list-item.html',
   styleUrl: './list-item.scss',

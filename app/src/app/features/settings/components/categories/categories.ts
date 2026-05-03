@@ -4,25 +4,31 @@ import {
   computed,
   effect,
   inject,
-  isDevMode,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorPencilSimple, phosphorTrash } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, phosphorTrash, phosphorWarning } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryService } from '../../../../core/services/category';
 import { ModalService } from '../../../../core/services/modal.service';
+import { DevLogger } from '../../../../core/services/dev-logger';
 import { Category } from '../../../../core/models/category.model';
+import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-categories',
-  imports: [RouterLink, NgIcon],
+  standalone: true,
+  imports: [RouterLink, NgIcon, EmptyState],
   providers: [
     provideIcons({
+      phosphorCaretLeft,
       phosphorPencilSimple,
+      phosphorPlus,
+      phosphorTag,
       phosphorTrash,
+      phosphorWarning,
     }),
   ],
   templateUrl: './categories.html',
@@ -32,6 +38,9 @@ import { Category } from '../../../../core/models/category.model';
 export class Categories {
   private readonly categoryService = inject(CategoryService);
   private readonly modalService = inject(ModalService);
+  private readonly logger = inject(DevLogger);
+
+  readonly skeletonItems = Array(3);
 
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(true);
@@ -56,12 +65,14 @@ export class Categories {
       this.categories.set(data);
       this.loading.set(false);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to load categories', err);
-      }
+      this.logger.error('Failed to load categories', err);
       this.error.set(true);
       this.loading.set(false);
     }
+  }
+
+  createCategory(): void {
+    this.modalService.openModal('category');
   }
 
   editCategory(category: Category): void {
@@ -84,9 +95,7 @@ export class Categories {
       await firstValueFrom(this.categoryService.delete(id));
       this.confirmDeleteId.set(null);
     } catch (err) {
-      if (isDevMode()) {
-        console.error('Failed to delete category', err);
-      }
+      this.logger.error('Failed to delete category', err);
     }
   }
 }

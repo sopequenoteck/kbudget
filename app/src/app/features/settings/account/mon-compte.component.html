@@ -1,0 +1,216 @@
+<div class="mon-compte">
+  <!-- ===== HEADER ===== -->
+  <div class="page-header">
+    <a class="page-header__back" routerLink="/settings" aria-label="Retour">
+      <ng-icon name="phosphorCaretLeft" size="20" />
+    </a>
+    <h1 class="page-header__title">Mon compte</h1>
+  </div>
+
+  <!-- ===== ERREUR GLOBALE ===== -->
+  @if (errorMessage()) {
+    <div class="mon-compte__alert" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <!-- ===== SECTION IDENTITÉ ===== -->
+  <div class="settings-section">
+    <div class="settings-section__label">IDENTITÉ</div>
+    <div class="settings-section__container">
+      <!-- Avatar -->
+      <div class="mon-compte__avatar-row">
+        <app-avatar-upload
+          [currentAvatarUrl]="avatarUrl()"
+          [userInitials]="initials()"
+          [isUploading]="isUploadingAvatar()"
+          (upload)="onAvatarUpload($event)"
+          (delete)="onAvatarDelete()"
+          (validationError)="onAvatarError($event)"
+        />
+      </div>
+
+      @if (currentUser(); as user) {
+        <!-- Nom (inline éditable) -->
+        <div class="settings-row settings-row--no-border">
+          <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+            <ng-icon name="phosphorUser" size="20" />
+          </span>
+          <div class="settings-row__content">
+            <span class="settings-row__title">Nom</span>
+            @if (isEditingName()) {
+              <div class="mon-compte__name-edit">
+                <input
+                  type="text"
+                  class="mon-compte__name-input"
+                  [value]="editedName()"
+                  (input)="onNameInput($event)"
+                  (keydown.enter)="onSaveName()"
+                  (keydown.escape)="cancelEditName()"
+                  maxlength="100"
+                  autocomplete="name"
+                  aria-label="Modifier le nom"
+                  #nameInput
+                />
+                <button
+                  type="button"
+                  class="mon-compte__edit-btn mon-compte__edit-btn--save"
+                  (click)="onSaveName()"
+                  aria-label="Enregistrer"
+                >
+                  <ng-icon name="phosphorCheck" size="14" />
+                </button>
+                <button
+                  type="button"
+                  class="mon-compte__edit-btn mon-compte__edit-btn--cancel"
+                  (click)="cancelEditName()"
+                  aria-label="Annuler"
+                >
+                  <ng-icon name="phosphorX" size="14" />
+                </button>
+              </div>
+            } @else {
+              <span class="settings-row__description">{{ user.name }}</span>
+            }
+          </div>
+          @if (!isEditingName()) {
+            <button
+              type="button"
+              class="mon-compte__edit-trigger"
+              (click)="startEditName()"
+              aria-label="Modifier le nom"
+            >
+              <ng-icon name="phosphorPencil" size="16" />
+            </button>
+          }
+        </div>
+
+        <!-- Email (read-only) -->
+        <div class="settings-row settings-row--last">
+          <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+            <ng-icon name="phosphorUser" size="20" />
+          </span>
+          <div class="settings-row__content">
+            <span class="settings-row__title">Email</span>
+            <span class="settings-row__description">{{ user.email }}</span>
+          </div>
+          <span class="mon-compte__badge">Géré par l'admin</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== SECTION SÉCURITÉ ===== -->
+  <div class="settings-section">
+    <div class="settings-section__label">SÉCURITÉ</div>
+    <div class="settings-section__container">
+      <button
+        type="button"
+        class="settings-row settings-row--link settings-row--last"
+        (click)="onChangePassword()"
+      >
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+          <ng-icon name="phosphorLock" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Changer le mot de passe</span>
+          <span class="settings-row__description">Modifiez votre mot de passe</span>
+        </div>
+        <span class="settings-row__chevron">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION DONNÉES ===== -->
+  <div class="settings-section">
+    <div class="settings-section__label">DONNÉES</div>
+    <div class="settings-section__container">
+      <button
+        type="button"
+        class="settings-row settings-row--link"
+        (click)="onExportJson()"
+        [disabled]="isExportingJson() || isExportingCsv()"
+        [attr.aria-busy]="isExportingJson()"
+      >
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
+          <ng-icon name="phosphorDatabase" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Exporter mes données (JSON)</span>
+          <span class="settings-row__description">
+            @if (isExportingJson()) { Téléchargement en cours… } @else { Toutes mes données en format JSON }
+          </span>
+        </div>
+        <span class="settings-row__chevron">
+          @if (isExportingJson()) {
+            <ng-icon name="phosphorDownloadSimple" size="16" class="mon-compte__export-spinner" />
+          } @else {
+            ›
+          }
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="settings-row settings-row--link settings-row--last"
+        (click)="onExportCsv()"
+        [disabled]="isExportingJson() || isExportingCsv()"
+        [attr.aria-busy]="isExportingCsv()"
+      >
+        <span class="settings-row__icon" style="background: color-mix(in srgb, var(--color-income) 15%, transparent); color: var(--color-income)">
+          <ng-icon name="phosphorFileCsv" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Exporter mes transactions (CSV)</span>
+          <span class="settings-row__description">
+            @if (isExportingCsv()) { Téléchargement en cours… } @else { Mes transactions au format tableur }
+          </span>
+        </div>
+        <span class="settings-row__chevron">
+          @if (isExportingCsv()) {
+            <ng-icon name="phosphorDownloadSimple" size="16" class="mon-compte__export-spinner" />
+          } @else {
+            ›
+          }
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== SECTION ZONE DE DANGER ===== -->
+  <div class="settings-section">
+    <div class="settings-section__label">ZONE DE DANGER</div>
+    <div class="settings-section__container">
+      <!-- Déconnexion -->
+      <button
+        type="button"
+        class="settings-row settings-row--link"
+        (click)="onLogout()"
+      >
+        <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+          <ng-icon name="phosphorSignOut" size="20" />
+        </span>
+        <div class="settings-row__content">
+          <span class="settings-row__title">Déconnexion</span>
+          <span class="settings-row__description">Quitter cette session</span>
+        </div>
+      </button>
+
+      <!-- Supprimer le compte -->
+      <button
+        type="button"
+        class="settings-row settings-row--link settings-row--last settings-row--danger"
+        (click)="onDeleteAccount()"
+      >
+        <div class="settings-row__content">
+          <span class="settings-row__title">Supprimer mon compte</span>
+          <span class="settings-row__description">Suppression définitive du compte et des données</span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog changement de mot de passe (hors du flux pour le z-index) -->
+<app-change-password-dialog />
+
+<!-- Dialog suppression de compte (hors du flux pour le z-index) -->
+<app-delete-account-confirm-dialog />

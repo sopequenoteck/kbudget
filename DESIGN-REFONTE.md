@@ -1,0 +1,1180 @@
+# Refonte Design — Quiet Utility Dark-First
+
+## Objectif
+
+Transformer l'interface de K-Budget d'un style "dashboard corporate" vers un style **quiet utility dark-first**, inspire par TickTick, Stoic et Apple Journal. L'app doit etre calme, sobre, et laisser les donnees parler d'elles-memes.
+
+## Direction validee
+
+- **Dark-first** : tous les appareils de Kelly sont en dark mode. C'est l'experience primaire.
+- **Quiet utility** : pas d'effets decoratifs. Pas de gradients. Pas de glass. L'interface s'efface derriere le contenu.
+- **Couleur = information** : vert = revenu, rouge = depense, amber = action/CTA. Jamais de couleur decorative.
+- **Typographie + spacing font tout le travail** : la hierarchie visuelle vient des tailles, graisses et espacements, pas des bordures ni des ombres.
+- **Elevation par luminosite** : en dark mode, les surfaces plus claires sont plus "elevees". 3 niveaux : fond noir (#0a0a0a) > surface default (#141414) > surface raised (#1e1e1e).
+
+## Processus
+
+**Validation visuelle iterative**, pas de formalisation prealable. On change, on regarde, on reagit, on ajuste. Le DESIGN.md sera reecrit APRES que le resultat soit valide visuellement.
+
+## Ce qui a ete fait (session 1)
+
+### Primitives
+- Palette gray remplacee : Tailwind (bleu-teinte) -> gris neutres purs (#0a0a0a a #fafafa)
+- Plus aucun sous-ton bleu dans les fonds
+
+### Theme dark — tokens
+- Hero gradient : supprime (surface plate)
+- Glassmorphism : supprime (glass-bg, glass-border, glass-blur -> surfaces solides)
+- Radial gradient fond de page : supprime sur toutes les pages (dashboard, transactions, abonnements, dettes)
+- Ombre coloree FAB : neutralisee (noir au lieu d'amber)
+- Shadow hero text : supprime
+- Couleurs metier attenuees : vert #4ade80 -> #6dc990, rouge #f87171 -> #d97777 (moins saturees)
+- Couleurs feedback attenuees dans la meme logique
+- Primary amber adouci : #fbbf24 -> #e0a820
+- Sidebar active : rgba(255,255,255,0.08) au lieu d'amber-900
+
+### Dashboard — structure
+- **Hero section** : greeting + patrimoine + revenus/depenses fusionnes en une seule section (etaient 2 sections separees)
+- Greeting passe de titre dominant a texte secondaire discret (sm, text-secondary)
+- Revenus/Depenses : plus de cards separees avec dots/variation bars. Maintenant inline dans un conteneur arrondi avec divider
+- Variation badges : plus de fond colore (etaient des barres full-width). Maintenant texte simple
+- Gap entre hero et sections detail : space-8 (32px) au lieu de space-5 (20px) — le hero respire
+
+### Dashboard — composants
+- **Budget items** : plus de cards individuelles. Un seul conteneur arrondi (surface-default), items separes par border-bottom. Emojis sans cercle colore.
+- **Operations** : meme traitement — un conteneur arrondi, items plats avec separateurs
+- **Progress bars budgets** : 4px au lieu de 10px, opacity 0.7
+
+### Typographie — hierarchie
+- Hero amount : 3xl (30px) bold — LE chiffre dominant
+- Section titles : base (16px) semibold, text-secondary — fonctionnels, pas imposants
+- Summary values : sm (14px) semibold — secondaires
+- List titles : sm (14px) medium
+- List amounts : sm (14px) semibold
+- Labels : xs (12px) medium
+- Tertiary (dates, converted) : xs (12px) normal, text-tertiary
+
+### Shell — header et bottom nav
+- Header : 56px -> 64px, logo 28px -> 34px, nom xl, padding space-5, surface-raised
+- Bottom nav : 64px -> 72px, icones 1.625rem, surface-raised
+- Les deux utilisent border (pas shadow) et surface-raised pour se detacher du fond
+
+### List item (composant partage)
+- Cercles emoji : plus de fond color-primary-light. Maintenant rgba(255,255,255,0.06), taille reduite
+- Titres : sm au lieu de base
+- Sous-titres : xs, text-tertiary
+
+## Ce qui a ete fait (session 2)
+
+### Dashboard — polish
+- Icones budgets : uniformisees en cercles (comme operations)
+- Bordures entre budget items : supprimees (progress bar suffit)
+- Montants budgets : reduits en xs + text-tertiary
+- Bottom nav active : juste couleur amber, plus de pill M3
+
+### Header dynamique (shell)
+- Dashboard : logo K-Budget + cloche + avatar (inchange)
+- Autres pages : avatar + titre page + icones contextuelles a droite
+- Icones changent selon la route (recherche/filtre/recurrences sur Transactions)
+
+### Page Transactions — redesign complet
+- Hero centre : solde dominant (3xl bold), revenus/depenses inline, toggle devise
+- Transactions groupees par periode (Aujourd'hui, Hier, Cette semaine, etc.)
+- Conteneurs arrondis par groupe avec dividers (coherent dashboard)
+- Labels date discrets, rows plates (icone cercle + titre + categorie + montant)
+- Conversion devise secondaire affichee sous le montant
+- Supprime : 3 summary cards, tabs filtre, bouton recurrences emoji
+
+## Ce qui a ete fait (session 3)
+
+### Header uniforme (shell)
+- Header identique sur toutes les pages : logo + "K-Budget" + cloche + avatar
+- Plus de header dynamique (avatar a gauche + titre + actions contextuelles)
+- Padding header aligne sur le contenu (space-4)
+- Supprime : shell-header__left, shell-page-title, pageActions pour transactions
+
+### Page Transactions — hero + section header
+- Hero aligne a gauche (plus centre)
+- Selecteur mois : "Mars 2026 (◀)(▶)" label a gauche, fleches apres, toggle devise a droite
+- Fleches avec border-radius round + border (coherent avec toggle devise)
+- Labels "SOLDE", "Recettes", "Depenses" avec style dashboard (uppercase, letter-spacing, text-secondary)
+- Conteneur arrondi surface-default autour Recettes/Depenses (comme dashboard)
+- Conversion devise secondaire (CFA) sous recettes et depenses via computed signals
+- ExchangeRateService.loadRates() ajoute pour charger les taux
+
+### Section header "Transactions" (sticky)
+- Titre "Transactions" + icones recherche/filtre/recurrences
+- Separateur visuel (pipe) avant l'icone recurrences (navigation)
+- Sticky sous le header app (top: header-height)
+- Fond dynamique : surface-background normal → surface-raised + pleine largeur quand colle
+- Detection via IntersectionObserver sur un sentinel element
+
+### Hierarchie visuelle (global)
+- Montants rows : xs (12px) + medium (etait sm + semibold)
+- Titres rows : text-secondary (etait text-primary)
+- Depenses : text-secondary neutre (plus de rouge) — seules les recettes gardent le vert
+- Couleurs de categorie en fond d'icone (hex + 26 = 15% opacite)
+
+## Ce qui a ete fait (session 4)
+
+### Page Transactions recurrentes — refonte complete
+- Supprime : header custom (double header), cards individuelles par item, boutons d'action inline (Valider/Passer/Desactiver), badges de statut, emoji brut comme icone
+- Alignement sur le vocabulaire visuel du reste : conteneur groupe avec dividers, icones cercle colorees, rows plates
+- Titre "Recurrences" aligne a droite, separe de la fleche retour, visible (lg/bold/primary)
+- Groupement par statut : En retard (label rouge), Aujourd'hui (label amber), A venir (label neutre)
+- Dates relatives : "aujourd'hui", "dans 4 j.", "dans 18 j." (seuil 30j, au-dela date absolue)
+- Montants : amount-expense (text-secondary) pour depenses, amount-income (vert) pour recettes uniquement
+- Bottom sheet actions au tap sur un item (progressive disclosure) : Marquer comme payee, Passer, Desactiver
+- Bouton "Tout paye" sur le groupe En retard (action groupee)
+
+### Resume mensuel (2 lignes)
+- Ligne 1 : "BILAN MENSUEL" + net (recettes - charges) en vert/rouge selon signe
+- Ligne 2 : "X CHARGES" + total mensuel depenses uniquement
+- Distinction conceptuelle : recurrences = obligations (loyer, electricite), abonnements = optionnels (Netflix)
+- Le bilan repond a "mes revenus recurrents couvrent-ils mes charges fixes ?"
+
+### Conversion multi-devise
+- Montants en devise etrangere affichent la conversion en italique (~ XX €)
+- Bilan mensuel convertit tous les montants en devise primaire avant calcul
+- Chargement des taux de change (ExchangeRateService.loadRates) a l'ouverture de la page
+- Normalisation frequence : hebdo x4.33, annuel /12 pour calcul mensuel
+
+## Ce qui a ete fait (session 5)
+
+### Page Abonnements — refonte complete
+- Supprime : summary cards (box-shadow, style ancien), segmented control filtre (Tous/Actifs/Inactifs), badge "Inactif" rouge positionne en absolu, composant ListItem (remplace par rows custom)
+- Hero : total mensuel dominant (3xl bold, color-expense) + "≈ XX CFA" conversion + "1 395 €/an · 8 abonnements" en sous-ligne expense color
+- Section header sticky : "Abonnements" + "8 actifs" (meme pattern que Transactions)
+- Groupement par periode de renouvellement : Cette semaine, Mois prochain, Plus tard, Inactifs (meme vocabulaire que Transactions/Recurrences)
+- Dates relatives dans le subtitle : "dans 4 j.", "dans 12 j.", "20 sept." (seuil 30j)
+- Rows custom : icone cercle avec couleur categorie (15% opacite), titre text-secondary, subtitle text-tertiary, montant amount-expense
+- Conversion multi-devise : chargement ExchangeRateService.loadRates(), affichage "~ 22,86 €" en italique sous les montants XOF
+- Inactifs : opacity 50%, groupes en bas sous label "Inactifs"
+- Signal financier : hero en color-expense (rouge attenue) pour communiquer "ca coute de l'argent" — les rows restent neutres (text-secondary)
+
+### Decisions de design (session 5)
+- Pas de summary row redondante (le hero dit deja le total mensuel, pas besoin de le repeter)
+- Le cout annuel est derive mais utile — affiche en sous-ligne, pas dans une carte separee
+- Les compteurs (nombre d'abonnements) sont secondaires par rapport aux montants
+- Sur une page 100% depenses, le hero DOIT porter la couleur expense sinon la page parait neutre/sans consequence
+- Filtre Tous/Actifs/Inactifs supprime : le groupement par periode + section Inactifs en bas suffit
+
+## Ce qui a ete fait (session 6)
+
+### Page detail abonnement — refonte complete
+- Supprime : header avec bouton edit inline (back + titre + edit cote a cote), info card separee (Montant/Frequence/Date/Categorie/Compte en rows), total card isolee, bouton "Payer" full-width
+- Header aligne sur le pattern recurrences : fleche retour ronde transparente + titre aligne a droite (sans emoji categorie)
+- Hero condense : premiere ligne MENSUEL + badge Actif + categorie + date de debut, montant dominant 3xl, conversion devise secondaire, equivalent annuel/mensuel, total paye + nombre de paiements, logo banque + nom du compte
+- Plus de card info separee : toutes les metadonnees vivent dans le hero
+- Actions en pills compactes : 🗑️ (icone seule, danger) a gauche | spacer | Desactiver · Modifier · Payer (primaire) a droite
+- Bouton Payer desactive sur les abonnements inactifs
+- Ajout actions manquantes : Desactiver/Activer (toggle via update API), Supprimer (avec confirm)
+- Historique paiements : emoji/logo banque devant chaque item, montants en xs/medium/text-secondary (neutres, pas de vert)
+
+### AccountSummary — enrichissement backend
+- Ajout `bankLogoUrl` resolu via BankRegistry (logos SVG des banques connues)
+- Ajout `bankCustomLogo` (logos uploades manuellement)
+- Frontend AccountSummary aligne avec les 2 nouveaux champs
+- Helper `getAccountLogo()` : priorite bankCustomLogo > bankLogoUrl > fallback emoji
+
+### Fix pre-existant : SubscriptionService.getTotalPaid
+- Le type Angular disait `{ total, count }` mais l'API retourne `{ totalPaid, paymentCount }`
+- Corrige dans le service, le composant et le template
+
+### Hierarchie typographique alignee DESIGN.md
+- Captions (categorie hero, date hero) : xs/normal/tertiary (etait medium)
+- Total paye hero : sm/semibold/text-secondary (etait xs/medium/success)
+- Compte hero : sm/normal/secondary
+- Payment account : sm/medium/text-secondary (etait text-primary)
+- Payment date : xs/tertiary (etait secondary)
+- Payment amount : xs/medium/text-secondary (etait base/semibold/success)
+- Suppression du vert sur tous les montants de la page (hero total + historique) — couleur = information, pas decoration
+
+### Fix ng-icon width 0px
+- ng-icon dans un conteneur flex sans texte collapse a width:0 malgre le CSS variable --ng-icon__size
+- Fix via `::ng-deep ng-icon { min-width: Xpx }` dans les boutons concernes
+- Bug pre-existant egalement present sur la page dettes (meme pattern btn-icon)
+
+## Ce qui a ete fait (session 7)
+
+### Page Dettes — refonte complete
+- Supprime : 3 summary cards (Emprunts/Prets/Solde net) avec dots colores et box-shadow, segmented control filtre (Tous/En cours/Rembourse), border-left coloree 3px sur les sections, composant app-list-item partage, sections separees "Prets" / "Emprunts" avec totaux colores
+- Hero : solde net dominant (3xl bold), couleur dynamique selon signe (income si positif, expense si negatif), conversion devise secondaire, sous-ligne "X prets · Y emprunts · Z en cours" + toggle devise
+- Section header sticky : "Dettes" + "X en cours" (meme pattern abonnements/transactions)
+- Groupement par echeance (dueDate) : En retard (label rouge), Aujourd'hui (label amber), Cette semaine, Ce mois-ci, Plus tard, Sans echeance, Remboursees
+- Rows custom : icone cercle avec couleur categorie (15% opacite), personne (titre text-secondary), subtitle (categorie · type · date relative), montant restant (vert pour prets, neutre pour emprunts)
+- Remboursees : opacity 50%, groupees en bas sous label "Remboursees"
+- Conversion multi-devise : chargement ExchangeRateService.loadRates(), affichage italique sous les montants en devise etrangere
+- Plus de liste separee prets/emprunts : tout dans une liste unique groupee par echeance temporelle — le sens est communique par la couleur du montant
+
+### Decisions de design (session 7)
+- Le hero montre le solde net = "est-ce qu'on me doit plus que je dois ?" — reponse immediate sans calcul mental
+- Le montantRestant est affiche (pas montant initial) — c'est ce qui reste a recuperer/rembourser, plus actionnable
+- Pas de segmented control : le groupement temporel + section Remboursees en bas suffit (meme decision que pour les abonnements)
+- Le type (pret/emprunt) est secondaire — le nom de la personne est le titre, le type vit dans le subtitle en texte plat (pas de badge pill)
+- Le solde net hero change de couleur : positif = vert (on me doit plus), negatif = rouge (je dois plus) — signal financier immediat
+- Dates relatives a droite (sous le montant) : "14 j. en retard" en rouge, "dans 4 j." en tertiary — separation claire du subtitle a gauche
+- Badges pills testes puis retires des rows de liste : ils cassaient le rythme visuel par rapport aux autres pages (abonnements/transactions qui utilisent du texte plat). Badge conserve uniquement sur la page detail.
+- dueDate ajoutee au DebtRequest backend (champ manquant) pour supporter le groupement par echeance
+
+### Page detail dette — refonte complete
+- Supprime : header avec back + titre + edit cote a cote, 2 amount cards (initial + restant) en grille, section progress bar isolee, section info-rows (date/devise/echeance/categorie/compte/rappel en lignes), boutons Rembourser/Reporter full-width
+- Header aligne sur le pattern abonnement : fleche retour + nom personne aligne a droite
+- Hero condense : badge type neutre (bordure, pas de couleur) + badge Rembourse + categorie + date, montant restant dominant 3xl (vert=pret, neutre=emprunt), conversion devise, "Initial X € · Y € rembourse · Z paiements", echeance avec icone calendrier (rouge si en retard), rappel avec icone cloche, logo banque + compte
+- Progress bar deplacee du hero vers la section paiements — le hero etait surcharge, la progress bar a plus de sens en contexte avec l'historique
+- Actions pills compactes : corbeille (danger) a gauche | spacer | Reporter · Modifier · Rembourser (primary amber) a droite
+- Ajout action Supprimer (avec confirm) — manquait sur l'ancienne page
+- Historique paiements : logo banque devant chaque item, montants en xs/medium/text-secondary (neutres)
+- Ordre hero : tags → montant → secondary → echeance → rappel → compte (echeance et rappel avant le compte)
+
+## Ce qui a ete fait (session 8)
+
+### Page Budgets — liste — refonte complete
+- Supprime : row "Non budgete" intercalee dans la liste (📦 Autre), hero affichant le total global (budgete + non budgete)
+- Hero : montant "Depense" = total budgete uniquement (3xl bold, color-expense), conversion devise secondaire
+- Hero meta-lines avec icones Phosphor 14px : ⚠ X en depassement · 🥧 Y budgets (ligne 1), 📥 Z € non budgete (ligne 2, cliquable → page dediee)
+- Doughnut chart SVG pur dans le hero : a droite du bloc texte (layout flex row), segments = depenses par categorie, couleurs categories, opacite 0.7, ~130px, stroke 22px, bords francs (butt)
+- Section header : ajout pipe separator + icone Phosphor `phosphorTray` pour naviguer vers la page Non budgete (pattern identique aux recurrences sur Transactions)
+- Budget items inactifs rendus cliquables → navigation vers la page detail (bouton Activer disponible)
+- Fix : double attribut `class` sur budget-row
+- Templates et styles extraits en fichiers separes (etaient inline)
+
+### Page Non budgete — nouveau composant dedie
+- Route `/budgets/unbudgeted` avec composant `BudgetUnbudgeted` (etait un mode dans budget-detail, reverte car couplage inapproprie)
+- Header pattern recurrences : fleche retour + "Non budgete" aligne a droite
+- Hero : total depense (3xl bold, color-expense), conversion devise secondaire, meta-line "X categories sans budget"
+- Doughnut chart SVG dans le hero (meme composant que la liste) : visualise le poids relatif de chaque categorie non budgetee
+- Section header sticky "Par categorie" + compteur transactions
+- Groupement par categorie (triees par montant decroissant) : icone emoji + couleur, nom, montant, bouton + pour creer un budget
+- Transactions listees sous chaque categorie avec conversion multi-devise
+
+### Page Budget detail — refonte complete
+- Templates et styles extraits en fichiers separes (etaient inline)
+- Header pattern recurrences/abonnements : fleche retour + icone categorie + nom aligne a droite
+- Hero condense : label "DEPENSE" uppercase, montant 3xl, conversion devise, meta-line avec icones (🎯 budget · 🥧/⚠ reste/depassement)
+- Actions pills compactes : corbeille (danger) a gauche | spacer | Desactiver/Activer · Modifier
+- Section header sticky "Transactions" + compteur
+- Progress bar entre section header et transactions (warning amber >=80%, exceeded rouge >100%)
+- Transactions groupees par date (Aujourd'hui, Hier, date absolue) avec conversion devise
+- Support des budgets inactifs : chargement via getAll(true) quand non trouve dans l'overview
+- Ajout `TransactionService.getByMonth()` pour charger les transactions du mois
+
+### Composant DoughnutMini — nouveau composant partage
+- SVG pur (pas de librairie chart.js), composant Angular standalone
+- Inputs : segments (value + color), size (defaut 130), strokeWidth (defaut 22), gap (defaut 3)
+- Arcs calcules via stroke-dasharray/dashoffset sur des cercles SVG
+- Opacite 0.7 pour s'aligner avec les couleurs attenuees du dark mode
+- Bords francs (stroke-linecap: butt), gaps entre segments
+- Utilise sur la page budget liste et la page Non budgete
+
+### Hero meta-lines — pattern propage globalement
+- Remplacement de `hero__secondary` (texte plat) par `hero__meta` (lignes avec icones Phosphor 14px, text-tertiary)
+- Pages modifiees : budget liste, budget detail, budget unbudgeted, dettes liste, abonnements liste
+- Icones par page :
+  - Budgets : phosphorWarning (depassement), phosphorChartPie (budgets), phosphorTray (non budgete)
+  - Budget detail : phosphorTarget (objectif), phosphorChartPie/phosphorWarning (reste/depassement)
+  - Dettes : phosphorHandCoins (prets), phosphorHandshake (emprunts), phosphorClock (en cours)
+  - Abonnements : phosphorCalendar (cout annuel), phosphorRepeat (nombre)
+  - Non budgete : phosphorSquaresFour (categories)
+- Variante `--clickable` avec hover pour les lignes interactives
+
+### Decisions de design (session 8)
+- Le hero budget liste montre le total budgete uniquement, pas le total global — la sous-ligne "dont X € non budgete" fait le pont
+- "Non budgete" n'est pas un sous-cas du budget detail, c'est une page a part entiere avec sa propre logique (groupement par categorie, CTA creation)
+- Le doughnut chart est de l'information visuelle, pas de la decoration — il repond a "quelle proportion ?" que la liste seule ne montre pas
+- Le doughnut dans la page Non budgete sert a la priorisation : visualiser quelle categorie budgeter en premier
+- Le pattern navigation (pipe + icone Phosphor dans le section header) est repris des Transactions/Recurrences
+- Les icones Phosphor 14px dans les meta-lines sont des reperes visuels discrets, pas du bruit — elles facilitent le scan
+
+## Direction validee — Surfaces modales
+
+Deux types de surfaces, deux roles distincts :
+
+### Bottom sheet — formulaires et saisie
+
+Le bottom sheet est le conteneur unique pour toute creation et edition. Pas de modal empile par-dessus, pas de navigation multi-step. Tout vit dans le sheet, qui grandit/retrecit via inline expand.
+
+**Pattern creation :**
+1. **Montant en hero** — clavier numerique immediat a l'ouverture, montant affiche en 3xl (meme langage que les pages detail). C'est le champ dominant.
+2. **Label** — input discret en dessous, fond surface-raised, pas de bordure visible
+3. **3 categories les plus utilisees** (30 derniers jours) affichees en chips. Tap = selectionne. Si aucune ne convient → inline expand : barre de recherche + suggestions live (max 3 resultats affiches)
+4. **Barre d'icones Phosphor** pour les champs secondaires — chaque icone declenche un inline expand dans le sheet (le sheet grandit, pas de deuxieme surface) :
+   - Calendrier → date picker
+   - Wallet → selecteur compte
+   - Repeat → toggle recurrence + frequence
+   - Note → champ texte
+5. **Bouton validation** en bas
+
+**Pattern edition :**
+1. **Zone lecture** (haut du sheet) — infos non modifiables affichees comme dans les heroes : label uppercase xs/tertiary, valeur sm/semibold/secondary. Pas de champ, pas de bordure.
+2. **Zone action** (en dessous) — champs modifiables derriere les memes icones Phosphor. Champs pre-remplis avec les valeurs actuelles. Meme principe d'inline expand.
+
+**Contrainte iPhone :** Le clavier iOS prend ~50% du viewport (466px restants sur iPhone 14 Pro). Le montant hero + label doivent rester visibles au-dessus du clavier. Les categories et la barre d'icones scrollent sous le fold quand le clavier est ouvert.
+
+**Regle :** Un seul niveau de profondeur. Jamais deux surfaces empilees. Le bottom sheet est l'unique conteneur actif.
+
+### Modal centre — confirmations et alertes
+
+Reserve aux actions qui demandent une interruption volontaire du flux :
+- Suppression (irreversible)
+- Desactivation
+- Confirmation d'action groupee ("Tout marquer comme paye")
+
+Court, focalise, deux boutons max. Le modal centre bloque le flux — c'est voulu.
+
+## Direction validee — Realignement heroes
+
+Les heroes du dashboard et des transactions datent des sessions 1-3 et divergent du pattern qui s'est cristallise ensuite (sessions 5-9). A realigner sur la grammaire commune :
+
+- Label uppercase xs/letter-spacing/text-secondary
+- Montant dominant 3xl bold
+- Conversion devise secondaire
+- Meta-lines avec icones Phosphor 14px/text-tertiary
+
+### Dashboard — a reprendre
+- Supprimer le greeting "Bonjour Kelly SOSSOE" ou le reduire a un element minimal
+- "PATRIMOINE TOTAL" → label uppercase xs (deja fait mais le greeting prend trop de place au-dessus)
+- Revenus/Depenses → meta-lines avec icones Phosphor (comme dettes/abonnements)
+- Gagner de l'espace vertical — chaque pixel compte sur iPhone 14 Pro
+
+### Transactions — a reprendre
+- "SOLDE" → label uppercase xs (deja fait)
+- Recettes/Depenses → meta-lines avec icones Phosphor au lieu du conteneur arrondi inline
+- Aligner le selecteur mois sur le style des autres pages
+
+## Direction validee — Settings (session 10)
+
+### Diagnostic
+
+Les Settings existants (11 sous-pages) souffrent de 3 problemes :
+1. Aucun lien visuel avec les pages principales de l'app (pas de vocabulaire partage)
+2. Chaque sous-page reinvente sa structure (profile-section, accounts-section, cat-section, about-section, notif-section — meme pattern copie 6 fois avec des noms differents)
+3. L'organisation en 3 groupes (General / Gestion / Autre) est un heritage d'avant la refonte
+
+### Decision : casser et reconstruire
+
+**De 11 pages → 1 hub + 2 sous-pages.**
+
+### Structure finale
+
+**Hub Settings — page unique scrollable, tout inline :**
+
+1. **Mon compte** (ancrage visuel, haut de page)
+   - Avatar centre + nom + email en dessous
+   - Deconnexion dans ce meme conteneur
+   - Pas de hero 3xl — la zone avatar fait ancrage sans forcer un chiffre
+
+2. **Apparence** (inline)
+   - Segmented control theme (Clair / Sombre / Auto)
+   - Segmented control taille texte (Petit / Normal / Grand)
+   - Preview texte
+
+3. **Notifications** (inline)
+   - Toggles par type de notification
+   - Timezone
+
+4. **Navigation** (inline)
+   - 3 lignes : Abonnements, Dettes, Budgets
+   - Chaque ligne = toggle active/desactive + drag handle pour l'ordre nav
+   - Un seul controle fait les deux jobs (activer + ordonner)
+   - Accueil et Transactions implicitement toujours la, pas affiches (locked)
+
+5. **Gestion** (liens vers sous-pages)
+   - Comptes → sous-page CRUD (+ acces Import depuis un compte)
+   - Categories → sous-page CRUD
+   - Rows avec chevron (navigation)
+
+6. **Footer**
+   - Version, environnement, sante serveur
+   - Texte xs/tertiary, discret, pas une page
+
+**Sous-pages (2 seulement) :**
+- **Comptes** : header (fleche retour + titre droite) → section header avec compteur + bouton add → conteneur arrondi avec rows CRUD. Import accessible depuis un compte.
+- **Categories** : meme pattern que Comptes.
+
+### Ce qui disparait
+
+- **7 sous-pages supprimees** : Profil, Apparence, Notifications, Fonctionnalites & Navigation, Donnees, A propos, Securite (placeholder)
+- **Page Devises & Taux** : automatisee a la creation de compte avec devise differente. La devise est portee par le compte, le taux se resout automatiquement. Pas besoin de page dediee.
+- **Import** : sort des Settings. Accessible depuis la page Comptes (on importe dans un compte, pas dans les parametres).
+
+### Vocabulaire visuel du hub
+
+- Label section : uppercase xs / letter-spacing / text-tertiary
+- Conteneurs arrondis : surface-default / radius-xl
+- Rows : padding space-3 space-4 / dividers border-default
+- Controles a droite : toggles, segmented controls, drag handles, chevrons
+- Pas de hero financier. La zone Mon Compte fait ancrage visuel.
+
+Le vocabulaire est identique aux listes groupees des pages financieres (abonnements par periode, dettes par echeance), sauf que le contenu des rows est des controles au lieu de donnees.
+
+### Vocabulaire visuel des sous-pages (Comptes, Categories)
+
+Alignees sur le pattern des pages principales :
+- Header : fleche retour + titre aligne a droite
+- Section header : label avec compteur + bouton add
+- Conteneur arrondi : surface-default, rows avec dividers
+- Actions CRUD : boutons pills compactes (pattern detail abonnement/dette)
+
+### Justification (recherche UX)
+
+Les apps de reference (TickTick, Stoic, Copilot Money) et les guidelines iOS/Material Design convergent sur le meme pattern pour les settings :
+- **Single-page quand possible** : si < 15-20 controles, tout sur un ecran scrollable
+- **Groupement par contexte** : pas par type de controle
+- **Controles inline montrent l'etat actuel** : toggle = on/off visible, segmented = selection visible
+- **Chevrons = navigation vers contenu dynamique** (listes CRUD)
+- **Priorite visuelle** : qui (compte) en haut, comment (preferences) au milieu, quoi (gestion) en bas
+
+## Ce qui a ete fait (session 10)
+
+### Hero Dashboard — realignement grammaire commune
+- Supprime : greeting statique "Bonjour Kelly SOSSOE" (sm/medium/secondary)
+- Ajoute : greeting dynamique contextuel (sm/normal/secondary) — salutation temporelle (Bonjour/Bon apres-midi/Bonsoir) + signal financier (charges en retard > budgets depasses > mois positif/negatif > mois calme)
+- Greeting = futur composant a part (logique propre, dependencies propres)
+- Revenus/Depenses : conteneur arrondi surface-default avec divider → meta-lines Phosphor (TrendUp/TrendDown 14px), deux groupes cote a cote
+- Currency pills : de space-between (avec greeting) a flex-end quand seul, puis space-between avec le nouveau greeting
+- Zero state : "0,00 €" rouge → "0 revenus" / "0 depenses" en tertiary neutre — le zero n'est pas une depense
+
+### Hero Transactions — realignement grammaire commune
+- Recettes/Depenses : conteneur arrondi surface-default avec divider → meta-lines Phosphor (TrendUp/TrendDown 14px), deux groupes cote a cote
+- Conversions devise secondaire : sous chaque montant (pas inline), alignees verticalement
+- Hero toujours visible : ne disparait plus quand le summary est null (mois sans transactions). Affiche SOLDE 0,00 € + "0 revenus" / "0 depenses"
+- Solde colore : vert si positif, rouge si negatif, neutre si zero (comme le hero dettes)
+
+### Empty state Transactions — contextuel + incitatif
+- Icone phosphorReceipt 48px + "Aucune transaction en [mois annee]" + lien "Ajouter une transaction" (xs/medium/primary, ouvre le formulaire creation)
+- Remplacement du texte generique "Aucune transaction"
+
+### Toggle devise — harmonisation globale
+- Abonnements et Dettes : toggle deplace de hero__top-row isolee (flex-end) vers la meme ligne que le label uppercase (hero__amount-top : label a gauche, toggle a droite)
+- Supprime : hero__top-row sur abonnements et dettes (devenue inutile)
+
+Cartographie finale du toggle devise :
+
+| Page | Gauche | Droite |
+|------|--------|--------|
+| Dashboard | Greeting dynamique | Currency pills |
+| Transactions | Nav mois | Toggle devise |
+| Abonnements | TOTAL MENSUEL (label) | Toggle devise |
+| Dettes | SOLDE NET (label) | Toggle devise |
+| Budgets | Nav mois | Toggle devise |
+
+### Decisions de design (session 10)
+- Le greeting dynamique justifie sa place parce qu'il dit quelque chose de nouveau a chaque ouverture — un greeting statique ne le justifie pas
+- "0 revenus" au lieu de "0,00 €" : le texte est plus honnete quand il ne s'est rien passe. "Couleur = information" : pas de rouge sur un zero
+- Le hero ne doit jamais disparaitre — la structure reste stable quel que soit l'etat des donnees
+- Le toggle devise doit toujours etre ancre a un element existant (label, nav mois, greeting), jamais flotter seul
+- Les empty states sont un moment de design important — a traiter page par page avant d'extraire un composant partage
+
+## Ce qui a ete fait (session 11)
+
+### Settings — refonte complete (hub unique)
+- Supprime : 11 sous-pages (Profil, Apparence, Notifications, Fonctionnalites & Navigation, Donnees, A propos, Securite placeholder, Devises & Taux, Rate Calculator) + routing settings.routes.ts entier
+- 9 composants orphelins supprimes : about, appearance, data-settings, features, notification-settings, placeholder, profile, currency-settings, rate-calculator (-2794 lignes)
+- **Hub scrollable unique** remplace les 3 groupes (General / Gestion / Autre) et leurs sous-pages :
+
+1. **Mon compte** (ancrage visuel, haut de page)
+   - Avatar cercle avec initiales + bouton camera overlay
+   - Nom + email en dessous
+   - Bouton Deconnexion dans le meme conteneur (phosphorSignOut)
+   - Pas de hero 3xl — la zone avatar fait ancrage
+
+2. **Gestion** (liens vers sous-pages)
+   - Comptes & Devises → sous-page CRUD (phosphorBank, teal)
+   - Categories → sous-page CRUD (phosphorTag, orange)
+   - Rows avec icone cercle coloree + description + chevron
+
+3. **Apparence** (inline)
+   - Segmented control theme (Clair / Sombre / Auto) avec icones Phosphor (phosphorSun, phosphorMoon, phosphorDevices)
+   - Segmented control taille texte (Petit / Normal / Grand)
+   - Preview texte en temps reel
+
+4. **Notifications** (inline)
+   - Toggles par type : rappels recurrentes, rappels dettes, alertes budgets
+   - Selecteur timezone
+
+5. **Navigation** (inline)
+   - 3 rows : Abonnements, Dettes, Budgets
+   - Chaque row = toggle active/desactive + drag handle (phosphorDotsSixVertical)
+   - Drag & drop reordonnancement (CdkDragDrop)
+   - Accueil et Transactions implicitement toujours la (locked)
+
+6. **Footer** (inline, discret)
+   - Version + environnement + sante serveur sur une ligne
+   - Texte xs/tertiary
+
+### Sous-pages conservees (2 seulement)
+- **Comptes & Devises** : header (fleche retour + "Comptes & Devises" + icone Phosphor) → conteneur arrondi rows CRUD. Devises & taux integres (plus de page separee)
+- **Categories** : meme pattern. Icone Phosphor dans le header
+
+### Vocabulaire visuel du hub
+- Label section : uppercase xs / letter-spacing / text-tertiary (identique aux hero labels)
+- Conteneurs arrondis : surface-default / radius-xl
+- Rows : padding space-3 space-4 / dividers border-default
+- Controles a droite : toggles, segmented controls, drag handles, chevrons
+- Meme vocabulaire que les listes groupees des pages financieres, sauf contenu = controles au lieu de donnees
+
+### Shell — adaptation pour Settings
+- FAB cache sur toutes les routes `/settings/**` via `isOnSettingsRoute` computed signal
+
+### Modal — refonte bottom sheet / dialog adaptatif
+- Mobile (< 768px) : panel ancre en bas (bottom sheet), arrondi uniquement en haut (radius-xl radius-xl 0 0), animation slide-up
+- Desktop (>= 768px) : dialog centre, border-radius full, animation scale-in
+- Ajout input `hideHeader` : permet aux formulaires de gerer leur propre header (handle bar + toggle au lieu du titre modal)
+- Gestion focus : sauvegarde `previouslyFocusedElement` a l'ouverture, restauration a la fermeture
+- Slot `ng-content select="[modal-header-actions]"` dans le header pour controles additionnels
+
+### Confirm Dialog — nouveau composant global
+- Composant standalone separe du Modal (plus compact, toujours centre, pas de bottom sheet)
+- `ConfirmService` singleton (signals) : `confirm()` retourne `Promise<boolean>`, pattern imperatif sans abonnement
+- Panel max-width 320px, padding space-4, surface-raised, animations modal-fade-in + modal-scale-in
+- Deux variantes : `default` (bouton amber) et `danger` (bouton rouge)
+- Focus trap (CdkTrapFocus), fermeture Escape, restoration focus, overflow hidden body
+- Accessibilite : `role="alertdialog"`, `aria-labelledby`, `aria-describedby`
+- Integre dans shell.html (apres toast, hors stacking context)
+
+### Confirm Dialog — structure visuelle
+- **Header** : icone metier + titre en row, aligne a gauche, separe par border-bottom
+- **Titre** = element concret (nom + montant/info), pas "Supprimer le X" generique
+- **Message** = question de confirmation ("Voulez-vous vraiment supprimer..."), aligne sous le titre (padding-left = icone 20px + gap), font-size xs, text-secondary
+- **Actions** : alignees a droite, separees par border-top. Boutons pills compacts (space-1 space-3), sans bordure visible, texte + icone uniquement
+- **Bouton cancel** : text-secondary, icone phosphorX
+- **Bouton confirm** : color-primary (default) ou color-expense (danger), icone phosphorCheck ou phosphorTrash selon variante
+
+### Migration ConfirmService — toutes les pages
+- Remplacement de `window.confirm()` natif par `confirmService.confirm()` avec config contextuelle
+- Pattern uniforme : titre = element concret, message = question de confirmation
+- Pages migrees avec icone metier : TransactionForm (phosphorReceipt), BudgetForm (phosphorChartPie), BudgetDetail (phosphorChartPie), DebtDetail (phosphorHandCoins), SubscriptionDetail (phosphorRepeat)
+
+### Transaction Form — refonte bottom sheet
+- Supprime : formulaire classique champs empiles, header modal standard
+- **Handle bar** centree (36px x 4px, radius round) — indicateur visuel bottom sheet
+- **Toggle depense/recette** a droite du handle. Actif = color-primary, inactif = text-tertiary. Pas de border, juste la couleur du texte
+- **Row 2 — Montant + Libelle** : montant hero (40px, bold) a gauche, couleur contextuelle rouge/vert selon type. Libelle aligne a droite avec underline seul. `inputmode="decimal"` pour clavier numerique iPhone
+- **Note preview** : si une note existe, affichee en italique xs/tertiary sous la row montant+libelle, alignee a droite, max 2 lignes avec troncature
+- **Row 3 — Icones + Pills** : icone note (gauche, tertiary si vide, color-secondary opacity 0.7 si remplie) + icone recurrence (gauche, masquee en edition) | pills date + categorie + compte (droite)
+- **Pills meta** : icone calendrier (color-secondary 0.7) + "Aujourd'hui/Hier/15 avr.", icone tag (couleur categorie 0.7) + nom categorie, icone wallet (couleur compte 0.7) + nom compte tronque
+- **Sections expandables** : une seule active a la fois via signal. S'affichent inline entre row 3 et row 4
+- **Row 4 — Actions** : bouton Annuler (text-secondary, mode creation) ou corbeille (danger, mode edition) a gauche | bouton Enregistrer/Modifier (primary) a droite
+- ShortDatePipe inline : "Aujourd'hui", "Hier", "Demain", "15 avr."
+- CategoryService injecte pour afficher le nom et la couleur de la categorie selectionnee
+- AccountService : couleur du compte propagee a l'icone wallet
+
+### Fix date locale
+- `new Date().toISOString().split('T')[0]` retournait la date UTC — affichait "Hier" apres minuit en Europe
+- Remplace par `getFullYear()/getMonth()/getDate()` (fuseau local) pour `today` et la valeur initiale du champ date
+
+### Utilitaires formulaire — extraction
+- `form.utils.ts` : `normalizeDecimal()` (virgule → point iPhone), `decimalMin()` validateur custom, `isFieldInvalid()`, `validateForm()`
+- Utilise dans TransactionForm, BudgetForm — supprime la duplication
+
+### CategoryService — refreshTrigger
+- Signal `refreshTrigger` pour notifier les composants dependants apres create/update/delete
+- Les formulaires qui affichent des categories reagissent au changement sans polling
+
+### Decisions de design (session 11)
+- Le hub Settings est un ecran scrollable unique parce qu'il y a < 15 controles — pas besoin de navigation
+- Devises & Taux integres dans Comptes parce qu'une devise est portee par un compte, pas par un setting global
+- Le confirm dialog est separe du modal : deux surfaces, deux roles. Le modal = conteneur formulaire (bottom sheet). Le confirm = interruption volontaire (toujours centre, compact)
+- Le bottom sheet transaction form gere son propre header (handle bar + toggle) parce que le header modal standard ne convient pas — le formulaire a besoin d'un toggle type, pas d'un titre
+- Montant hero 40px dans le formulaire = meme langage que les pages detail (montant dominant), continuite visuelle
+- Les sections expandables (une seule a la fois) evitent le formulaire-qui-expose-tout-d'un-coup
+- `window.confirm()` remplace par le confirm dialog partage : coherence visuelle, icones metier, variante danger
+- Le titre du confirm dialog doit etre l'element concret (nom + montant), pas une action generique ("Supprimer le budget") — l'utilisateur voit immediatement CE qu'il supprime
+- Le message pose la question de confirmation — c'est le role du message, pas du titre
+- L'icone metier et le titre sont en row (pas empiles) : lecture horizontale naturelle, plus compact
+- Le message est aligne sous le titre (pas sous l'icone) pour creer une hierarchie visuelle claire : icone = repere, titre = info, message = question
+- Boutons sans bordure visible, compacts — le separator border-top suffit a delimiter la zone actions
+- Les icones du formulaire suivent le pattern doughnut (opacity 0.7) : couleurs attenueees, pas les valeurs Tailwind 400 brutes
+- Icones fixes (note, calendrier) en color-secondary 0.7 — marque l'etat "il y a une valeur" sans etre criard. Icone note tertiary quand vide
+- Icones dynamiques (categorie, compte) portent la couleur de l'entite a opacity 0.7 — coherence avec le doughnut chart
+- La note en preview (italique, xs, tertiary, alignee droite) vit sous la row montant+libelle — pas dans les pills, c'est du contenu secondaire
+- Bouton Annuler en mode creation (a gauche) — remplace le vide. En edition, la corbeille prend cette place
+- La date initiale doit utiliser le fuseau local, pas UTC — important pour les utilisateurs apres minuit
+
+### Propagation bottom sheet — 4 formulaires (session 11)
+
+Tous les formulaires alignes sur le meme pattern bottom sheet en 4 rows.
+
+#### Pattern commun a tous les formulaires
+- **Row 1** : handle bar centree (position absolute) + titre entite a gauche (icone Phosphor + nom, base/bold/secondary) + toggle a droite (si applicable)
+- **Row 2** : montant hero (40px bold, largeur adaptative canvas measureText) + libelle/nom aligne a droite (border-bottom)
+- **Row 3** : icones secondaires a gauche | pills meta a droite (10px, 14px icones, padding 3px 8px, scrollable horizontal)
+- **Row 4** : actions a gauche (Supprimer/Annuler) | Enregistrer/Modifier a droite, border-top separator
+- Sections expandables : une seule a la fois via signal
+- Shell : `hideHeader` active sur tous les formulaires (handle bar remplace le header modal)
+
+#### Subscription form
+- Row 1 : `[phosphorRepeat] Abonnement` + toggle Mensuel/Annuel (migre du shell vers le form)
+- Row 2 : montant color-expense + nom
+- Row 3 : toggle actif/inactif a gauche (edition, toSignal sur valueChanges) | pills date debut, categorie, compte
+- Frequence geree par `currentFrequency` signal interne (initialisee depuis input en creation, depuis sub.frequence en edition)
+
+#### Debt form
+- Row 1 : `[phosphorHandCoins] Dette` + toggle Emprunt/Pret (migre du shell vers le form)
+- Row 2 : montant colore par sens (color-income pret, color-expense emprunt) + personne
+- Row 3 : icone rappel (phosphorBell, tertiary si vide, secondary si rempli) | pills date, categorie, compte
+- Row 4 : pill status rembourse (icone CheckCircle/Circle, texte gris, icone seule coloree en vert) apres le bouton supprimer
+- Sections expand : date, categorie, compte, rappel (date + heure conditionnelle), devise (si pas de compte)
+- `currentSens` signal interne, meme pattern que currentFrequency
+
+#### Budget form
+- Row 1 : `[phosphorChartPie] Budget` (pas de toggle)
+- Row 2 : montant color-expense + pill categorie a droite (base/semibold, locked en edition avec opacity reduite)
+- Row 3 : pill actif/inactif a gauche (edition) | pills frequence, devise, seuil d'alerte
+- Template et styles extraits en fichiers separes (etaient inline dans le .ts)
+- Montant converti en string-based pour canvas measureText
+- Select natif conserve pour les categories (filtre les categories deja budgetees)
+
+### Decisions de design — propagation formulaires
+- Le titre entite (icone + nom) a gauche de la row 1 donne du contexte immediat — l'utilisateur sait quel type d'entite il edite sans lire le header modal
+- Les toggles (type transaction, frequence abonnement, sens dette) migres du shell vers le form : le formulaire est autonome, pas besoin du header modal
+- Pill status (rembourse, actif) avec texte gris + icone coloree : l'etat est lisible mais discret, pas de toggle binaire anonyme
+- Le toggle rembourse dans la row actions (pres de Supprimer) plutot que dans les pills meta : c'est une action de changement d'etat, pas une metadonnee
+- Le pill actif/inactif sur budget vit dans la row 3 (c'est un filtre, pas une action)
+
+## Ce qui a ete fait (session 12)
+
+### Composant partage EmptyState
+- Composant `shared/components/empty-state/` : icone phosphor (48px, opacity 0.5), message principal, hint optionnel, CTA optionnel (text link amber)
+- Propage a toutes les pages : Transactions, Abonnements, Dettes, Budgets, Recurrentes, Dashboard (comptes + transactions)
+- Chaque page a maintenant une icone contextuelle + un CTA vers la creation (sauf pages sans formulaire propre)
+- Supprime les `.state-empty` dupliques de 7 fichiers SCSS — le composant gere son propre style
+- Ajout methodes CTA manquantes : `onAddDebt()`, `onAddSubscription()`, `goToAccounts()`
+
+### Decisions de design — empty states
+- Quiet utility : pas d'illustration, pas d'emoji, juste icone + texte + action
+- Icone a 50% opacity pour ne pas attirer l'attention plus que necessaire
+- CTA en text link amber (pas un bouton plein) : coherent avec le pattern valide sur Transactions
+- Pas de hint/sous-message par defaut — les messages sont assez explicites seuls
+
+## Ce qui a ete fait (session 13)
+
+### RepayDialog — migration bottom sheet
+- Supprime : overlay custom fixe (z-index 1000, card centree, animations propres), inputs classiques (select + number), outputs `closed`/`repaid`, composant local dans debt-detail
+- Integre dans le ModalService : type `'repay'` ajoute, dette passee via `editingEntity`
+- Bottom sheet pattern 4 rows : handle bar + titre "Remboursement" + "Restant : X €" (row 1), nom personne lg/bold a gauche + montant 30px editable a droite (row 2), pill compte expandable (row 3), Annuler + Rembourser (row 4)
+- Devise reactive : change selon le compte selectionne (fallback devise de la dette)
+- Format montant intelligent : pas de decimales sur les montants entiers (200 au lieu de 200.00)
+- Pre-remplissage montant et compte via effects avec allowSignalWrites
+- Toast de succes integre dans le composant (plus dans debt-detail)
+- Debt-detail : `showRepayDialog` supprime, bouton appelle `modalService.openModal('repay', d)`
+- Notification-panel : meme migration vers modalService
+
+### Decisions de design (session 13)
+- Le nom de la personne (RepayDialog) est l'entite principale — il vit dans la row 2 en lg/bold, pas dans une pill
+- L'input montant a 30px (pas 40px) : c'est un champ editable, pas un hero de page
+
+## Inventaire des inputs
+
+Cartographie de tous les types d'inputs utilises dans l'app. Sert de reference pour la refonte composant par composant.
+
+### Montant hero (7 occurrences) — PRIORITE
+
+Input `text` avec `inputmode="decimal"`, taille 30-40px bold, largeur dynamique via canvas measureText. Probleme identifie : le rendu visuel ne fonctionne pas bien en dark mode.
+
+| Formulaire | Taille | Couleur | Fichier |
+|------------|--------|---------|---------|
+| Transaction | 40px | rouge/vert (type) | transaction-form |
+| Dette | 40px | vert (pret) / rouge (emprunt) | debt-form |
+| Abonnement | 40px | color-expense | subscription-form |
+| Budget | 40px | color-expense | budget-form |
+| Remboursement | 30px | neutre | repay-dialog |
+
+### Texte libre (~12 occurrences)
+
+Input `text` standard. Noms, libelles, personnes.
+
+| Champ | Formulaire | Max | Notes |
+|-------|------------|-----|-------|
+| Libelle | Transaction | - | Aligne a droite, underline |
+| Nom | Abonnement | - | Aligne a droite, underline |
+| Personne | Dette | - | Aligne a droite, underline |
+| Nom | Compte | 100 | Form classique |
+| Nom banque | Compte | 100 | Form classique |
+| Nom | Categorie | 30 | Form classique |
+| Nom profil | CSV import | - | Conditionnel |
+| Pattern | CSV import | - | Regles categorisation |
+
+### Date natif (~8 occurrences)
+
+Input `date` HTML natif. A remplacer par un date picker inline custom (priorite moyenne).
+
+| Champ | Formulaire |
+|-------|------------|
+| Date | Transaction |
+| Prochaine occurrence | Transaction (recurrence) |
+| Date | Dette |
+| Date rappel | Dette |
+| Date debut | Abonnement |
+| Date rappel | Snooze dialog |
+
+### Time natif (2 occurrences)
+
+Input `time` HTML natif. Couple avec les dates de rappel.
+
+| Champ | Formulaire |
+|-------|------------|
+| Heure rappel | Dette |
+| Heure rappel | Snooze dialog |
+
+### Number natif (~3 occurrences)
+
+Input `number` avec min/max.
+
+| Champ | Formulaire | Contraintes |
+|-------|------------|-------------|
+| Montant transfert | Transfer form | step=0.01, min=0.01 |
+| Seuil alerte | Budget | 0-100% |
+| Taux de change | Exchange rate | step=0.000001 |
+
+### Textarea (3 occurrences)
+
+| Champ | Formulaire | Max |
+|-------|------------|-----|
+| Note | Transaction | 500 |
+| Note | Transfert | 500 |
+
+### Select natif (~15 occurrences)
+
+Utilise dans les formulaires non-bottom-sheet (budget, settings, CSV import).
+
+| Contexte | Nombre |
+|----------|--------|
+| Budget form (categorie, frequence, devise) | 3 |
+| Settings (timezone) | 1 |
+| Exchange rate (devise cible) | 1 |
+| CSV import (parsing + mapping) | ~8 |
+| Auth register (devise) | 1 |
+
+### app-select-picker (~15 occurrences)
+
+Composant custom avec recherche, bottom sheet mobile, dropdown desktop.
+
+| Usage | Formulaires |
+|-------|-------------|
+| Compte | Transaction, Dette, Abo, Repay, Transfer (x2) |
+| Devise | Dette, Abo, Compte |
+| Frequence | Transaction (recurrence) |
+| Categorie | Via app-category-picker (Transaction, Dette, Abo) |
+
+### app-category-picker (4 occurrences)
+
+Wrapper autour de select-picker + bouton creation inline.
+
+| Formulaire |
+|------------|
+| Transaction |
+| Dette |
+| Abonnement |
+| CSV import (review) |
+
+### Composants custom (comptes/categories)
+
+| Composant | Usage | Contexte |
+|-----------|-------|----------|
+| app-emoji-input | Selection emoji | Compte, Categorie |
+| app-bank-select | Selection banque | Compte |
+| Swatches couleur | Boutons radio custom | Compte, Categorie |
+
+### Checkbox/Toggle (~10 occurrences)
+
+| Contexte | Nombre |
+|----------|--------|
+| Settings (notifications x3, navigation x4) | 7 |
+| Transaction (recurrence on/off) | 1 |
+| Compte (actif/inactif) | 1 |
+| CSV import (selection lignes) | N |
+
+### File (2 occurrences)
+
+| Usage | Formulaire | Accept |
+|-------|------------|--------|
+| Logo banque | Account form | image/* |
+| Fichier CSV | Import settings | .csv,.txt |
+
+## Ce qui a ete fait (session 14)
+
+### Consolidation SCSS — classes partagees
+- Extraction de `_bottom-sheet.scss` : classes `.bsheet__*` pour les 7 formulaires bottom sheet (container, handle, top, main-row, amount, currency, libelle, meta-row, pills, expand, actions)
+- Extraction de `_list-patterns.scss` : classes partagees pour les pages liste (hero, hero meta-lines, currency-toggle, section-header sticky, date-label, list-group, list-row, group-label collapsible, states)
+- Migration des 5 formulaires : transaction, dette, abonnement, budget, repay
+- Migration des 3 pages liste : transactions, abonnements, dettes + budget (partiel — hero + section-header, pas budget-row)
+- Budget-row conserve sa structure locale (body > header > name + amount + progress bar — trop different de list-row)
+- Reduction ~3350 → ~1350 lignes SCSS (-60%), chaque pattern modifiable a un seul endroit
+- Ajout `.input-naked` dans `_forms.scss` pour empecher les styles globaux d'ecraser les inputs bottom sheet
+- Route `/dev/design-lab` ajoutee pour iterer visuellement sur les composants atomiques
+
+### Input montant hero — refonte
+- Tailles reduites : 40px → 30px (defaut), 30px → 22px (repay `--sm`). Devise 24px → 18px, `--sm` 14px
+- Wrap automatique : `flex-wrap: wrap` sur `.bsheet__main-row` — quand le montant est trop large (FCFA avec 6+ chiffres), le libelle passe automatiquement a la ligne en dessous
+- `.bsheet__amount-group` passe a `max-width: 100%` au lieu de `max-width: 70%`
+- Utilitaire `createAmountWidth()` extrait dans `shared/utils/amount-width.utils.ts` — supprime la duplication canvas/measureText dans les formulaires
+
+### Devise dynamique — correction reactivite
+- `selectedAccount` etait un `computed()` lisant `form.get('accountId')?.value` — non reactif (Angular computed ne track que les signals, pas les FormControl)
+- Fix : `accountIdSignal = toSignal(form.get('accountId')!.valueChanges)` converti en signal, puis utilise dans le computed
+- Corrige sur : transaction-form, debt-form, subscription-form, repay-dialog
+### Decisions de design (session 14)
+- La consolidation SCSS ne change rien visuellement — c'est du refactoring structurel pour que chaque modification future se fasse a un seul endroit
+- 30px est le bon compromis pour le montant hero : assez grand pour etre dominant, assez petit pour accueillir des montants FCFA a 6+ chiffres
+- Le wrap automatique est plus robuste qu'un seuil arbitraire : le navigateur gere le point de rupture naturellement via flexbox
+- La reactivite de la devise est un bug pre-existant corrige — l'utilisateur doit voir la devise changer immediatement quand il selectionne un compte
+
+## Ce qui a ete fait (session 15)
+
+### Date picker inline — nouveau composant partage
+- Supprime : `<input type="date">` natif dans toutes les sections expandables des bottom sheets (6 occurrences)
+- Composant `InlineDatePicker` (`shared/components/inline-date-picker/`) : calendrier grille inline, SVG/HTML pur, zero dependance externe
+- Grille 7 colonnes (L M M J V S D), semaine commencant le lundi (convention francaise)
+- Navigation mois via boutons ‹ › (border circle, meme vocabulaire que les fleches nav mois sur Transactions)
+- Clic sur le label du mois = retour au mois actuel (raccourci)
+- Noms de mois en francais, capitalises
+
+### Etats visuels des jours
+- **Jour selectionne** : cercle `color-primary` (amber), texte noir — reperage immediat
+- **Jour original (edition)** : cercle `color-secondary` (indigo, 20% opacite), texte `color-secondary` — coherent avec l'icone calendrier des pills
+- **Aujourd'hui (non selectionne)** : outline `border-default` subtil
+- **Jours hors mois courant** : `text-tertiary`, opacity 0.3, non cliquables
+- **Jours hors plage min/max** : meme traitement disabled
+
+### Comportement edition (original vs nouvelle selection)
+- Sans `originalValue` (creation) : jour selectionne = primary (amber)
+- Avec `originalValue` et pas de changement : jour original = secondary (indigo) — pas de primary
+- Avec `originalValue` et changement : original = secondary (indigo), nouvelle selection = primary (amber)
+- Feedback visuel "d'ou je viens → ou je vais" sans texte explicatif
+
+### API du composant
+- `value = model<string>('')` — two-way binding, ISO date string
+- `originalValue = input<string>()` — date originale en edition (optionnel)
+- `min = input<string>()` — date minimum (optionnel, utilise pour nextOccurrence)
+- `max = input<string>()` — date maximum (optionnel)
+
+### Propagation a tous les formulaires
+- Transaction form : date principale + nextOccurrence (section recurrence, avec `[min]="today"`)
+- Debt form : date + reminderDate (2 date pickers dans le meme formulaire)
+- Subscription form : dateDebut
+- Bridge FormControl → signal via `toSignal(valueChanges)` + handler `patchValue`
+- Snooze dialog : conserve l'input natif (contexte different — modal overlay dans le notification panel, usage mineur)
+
+### Decisions de design (session 15)
+- Le date picker vit dans la section expand du bottom sheet — respecte "un seul niveau de profondeur"
+- Pas de librairie externe (meme approche que DoughnutMini) — controle total du style
+- Le `color-secondary` (indigo) pour le jour original cree un lien visuel avec l'icone calendrier des pills (meme couleur, meme opacite 0.7)
+- Cellules 36px pour un bon compromis taille/densite sur mobile
+- La grille est naturellement compacte (~250px de haut) — pas de scroll necessaire
+- Pas de header "today" explicite — l'outline discret suffit, quiet utility
+
+## Ce qui a ete fait (session 16)
+
+### Sections expand — animation ouverture + fermeture
+- Animation Angular `expandCollapse` (shared/animations/expand-collapse.ts) : `:enter` fade + translateY(-8px) → 0 (200ms, easing-out), `:leave` fade + translateY(0 → -8px) + maxHeight collapse (150ms, easing-in)
+- Remplace l'animation CSS-only (qui ne pouvait gerer que l'ouverture)
+- Propagee aux 7 formulaires bottom sheet via `animations: [expandCollapse]` + `@expandCollapse` sur chaque `.bsheet__expand`
+- Le switch entre sections (ex: date → categorie) anime la fermeture de l'une ET l'ouverture de l'autre simultanement
+
+### Fermeture modal — animation slide-down
+- `ModalService.closeModal()` : signal `isClosing`, delai 200ms avant destruction du DOM, timer annulable
+- `ModalService.resetModal()` : fermeture instantanee sans animation (utilisee par l'effect de navigation)
+- Classes `.is-closing` sur overlay et panel : keyframes `modal-fade-out`, `modal-slide-down` (mobile), `modal-scale-out` (desktop)
+- Fix bug : l'effect de navigation dans le shell appelait `closeModal()` qui fermait le modal immediatement apres ouverture — remplace par `resetModal()`
+
+### Transitions de page — fade entre routes
+- `@angular/animations` installe (peer dependency manquant)
+- `provideAnimations()` dans `app.config.ts`
+- Trigger `@routeAnimation` sur le `<router-outlet>` dans `shell.html`
+- Fade-out 100ms + fade-in 100ms (200ms total) sur chaque changement de route
+- `data: { animation: '...' }` sur chaque route enfant du Shell
+
+### Skeleton loading — remplacement des spinners
+- Styles skeleton mutualises dans `_list-patterns.scss` : `.skeleton-item`, `.skeleton-circle`, `.skeleton-lines`, `.skeleton-line`, `.skeleton-hero`, `.skeleton-bar`, `@keyframes skeleton-pulse`
+- Pages liste migrees (spinner → skeleton list) : Transactions, Abonnements, Dettes, Budgets, Recurrentes
+- Pages detail migrees (spinner → skeleton hero + list) : Subscription detail, Debt detail, Budget detail
+- Dashboard : 3 zones migrees (hero, summary, transactions) + budget-summary (composant inline)
+- Settings : Accounts et Categories migrees
+- Suppression des `@keyframes spin` locaux dans les SCSS des composants migres
+
+### Decisions de design (session 16)
+- L'animation expand est un fade+slide subtil (translateY -8px), pas un slide pleine hauteur — coherent avec quiet utility
+- La fermeture du modal doit etre animee pour que l'ouverture/fermeture soient symetriques
+- `resetModal()` vs `closeModal()` : la navigation n'a pas besoin d'animation (la page a deja change), seule la fermeture explicite (Annuler, overlay click, Escape) anime
+- Le fade entre pages est volontairement court (200ms) : perceptible mais pas genant sur un usage intensif
+- Les skeletons imitent la forme reelle du contenu (cercle + lignes) pour reduire le saut visuel au chargement
+
+## Ce qui a ete fait (session 17)
+
+### FAB Menu — alignement quiet utility
+- Supprime : shadow-colored-primary (glow amber en light mode), scale(1.05) au hover, box-shadow sur les items, staggered animation delays (nth-child)
+- FAB button : 56px → 48px, box-shadow → shadow-sm neutre, icone font-size-xl
+- Speed dial : items individuels flottants → conteneur unique arrondi (surface-raised + border-default) avec dividers, style iOS action sheet
+- Items : label a gauche + icone a droite (justify-content: space-between), icone en text-tertiary
+- Animation sur le conteneur (un seul fade-in uniforme), plus sur chaque item
+- Font sm pour les labels, icones 18px, padding compact (space-3 space-4)
+
+### Notification Panel — alignement quiet utility
+- Supprime : box-shadow (-4px 0 24px), fond bleu unread (rgba(59,130,246,0.05)), fallbacks hardcodes (#fff, #e5e7eb, etc.), anciens noms de tokens (--bg-primary, --border-primary, --font-lg), z-index hardcodes (999, 1000), boutons action amber plein
+- Panel : surface-raised + border-left (pas de shadow), z-index via var(--z-overlay)
+- Header : h2 en base/semibold/text-secondary (plus discret, style section-header)
+- Items dans conteneur groupe (surface-default, radius-lg) + dividers (meme pattern que toutes les listes)
+- Unread : dot amber 8px sur l'icone (position absolute, border surface-default) au lieu du fond bleu
+- Icones : cercle rgba(255,255,255,0.06) (meme pattern que le reste de l'app)
+- Boutons action : pills discretes (border-default, transparent, text-primary) au lieu d'amber plein
+- Tous les tokens remplaces par les vrais noms (--font-size-sm, --text-primary, --surface-raised, etc.)
+
+### Decisions de design (session 17)
+- Le FAB en conteneur unique iOS est plus coherent avec le vocabulaire "conteneur arrondi + dividers" utilise partout dans l'app
+- Le label a gauche + icone a droite sur les items FAB est le pattern iOS natif (action sheet)
+- Le notification panel utilise le meme vocabulaire que les pages liste (conteneur groupe, dividers, surface-default)
+- Le dot amber pour les unread est de l'information pure (couleur = information), le fond bleu etait decoratif
+- Les boutons d'action en pills discretes sont coherents avec les boutons pills des pages detail
+
+## Ce qui a ete fait (session 18)
+
+### Empty states — nettoyage final
+- Migration des 6 derniers fichiers utilisant `.state-empty` vers le composant partage `<app-empty-state>`
+- **budget-detail** : "Budget introuvable" (phosphorMagnifyingGlass) + "Aucune transaction ce mois" (phosphorReceipt)
+- **budget-unbudgeted** : "Toutes vos categories ont un budget" (phosphorCheckCircle)
+- **categories** : erreur de chargement (phosphorWarning + CTA "Reessayer") + "Aucune categorie" (phosphorTag + CTA "Creer une categorie")
+- **accounts** : erreur de chargement (phosphorWarning + CTA "Reessayer") + "Aucun compte" (phosphorBank + hint + CTA "Creer un compte")
+- **import-settings** / **csv-mapping** : `.state-empty` renomme en `.inline-empty` (messages inline simples, pas de composant partage — contexte different)
+- Suppression de 6 blocs `.state-empty` SCSS + 2 `.btn-retry` orphelins
+- Test `recurring-list.spec.ts` mis a jour (selecteur `.state-empty` → `app-empty-state`)
+- **0 occurrence** de `.state-empty` restante dans le projet
+
+### rgba() hardcodes — remplacement par tokens semantiques
+- 3 valeurs rgba repetees dans les partials SCSS remplacees par des tokens existants ou nouveaux
+- `rgba(255,255,255,0.06)` (17 occurrences, 12 fichiers) → nouveau token `--icon-circle-bg` (dark: `rgba(255,255,255,0.06)`, light: `rgba(0,0,0,0.04)`)
+- `rgba(217,119,119,0.08/0.1)` (bottom-sheet + confirm-dialog) → `--bg-error` (existant)
+- `rgba(224,168,32,0.08/0.1)` (bottom-sheet + confirm-dialog) → `--color-primary-light` (existant)
+- `--nav-border-top` dans le theme dark utilise maintenant `--icon-circle-bg` au lieu du rgba hardcode
+
+### .page-header — extraction dans _list-patterns.scss
+- 8 copies locales identiques supprimees (6 `.page-header` + 2 `.detail-header`) → 1 definition unique dans `_list-patterns.scss`
+- Fichiers nettoyes : subscription-detail, debt-detail, recurring-list, categories, accounts, budget-detail, budget-unbudgeted
+- `.detail-header` renomme en `.page-header` dans les 2 HTML budget (detail + unbudgeted)
+- La version partagee inclut `__back` (hover primary + transition), `__title` (flex-end + gap), `__icon` (cercle 32px pour budget-detail)
+- **-277 lignes nettes**
+
+### Decisions de design (session 18)
+- Les empty states riches (pleine page, centres) utilisent le composant partage — coherence visuelle garantie
+- Les messages inline (import-settings, csv-mapping) restent des `<p>` simples — le composant partage avec son padding space-10 serait disproportionne dans une section de formulaire
+- Les CTA "Creer une categorie" / "Creer un compte" sur les empty states vides encouragent l'action sans etre intrusifs (text link amber, pas bouton plein)
+- Les rgba hardcodes dans les partials sont un anti-pattern : ils cassent le theming light/dark et rendent le changement global impossible. Chaque valeur repetee merite un token
+- Le `.page-header` est le meme pattern partout (back + titre aligne droite) — une seule source de verite evite les derives entre pages
+
+## Ce qui a ete fait (session 19)
+
+### Theme light — fondations surfaces et elevation
+
+**Objectif** : creer 3 niveaux d'elevation distinguables en light mode (etaient identiques #fff/#fff).
+
+- `--bg-primary` : `var(--gray-50)` (#fafafa) → `#f0f0f0` — fond de page notablement gris pour que les cards blanches ressortent
+- `--surface-raised` : `#fff` → `var(--gray-200)` (#e5e5e5) — chrome (header, bottom nav, sticky headers, FAB, dialogs) distinguable du fond et des cards
+- `--surface-default` : reste `#fff` — cards et conteneurs de contenu blancs = elements les plus lumineux
+- `--surface-background: transparent` ajoute dans les 2 themes (etait utilise mais jamais defini)
+
+Hierarchie light resultante :
+```
+#f0f0f0  fond page (bg-primary)
+#e5e5e5  chrome : header, bottom nav, sticky, FAB (surface-raised)
+#ffffff  cards, conteneurs de contenu (surface-default)
+```
+
+### Theme light — suppression gradients/glass decoratifs
+
+Alignement sur le dark mode (quiet utility) :
+- `--hero-gradient` : `linear-gradient(135deg, amber-50, indigo-50)` → `none`
+- `--page-gradient-color` : `rgba(245,158,11,0.05)` → `transparent`
+- `--glass-bg` : `var(--surface-raised)` → `var(--surface-default)` (aligne sur dark)
+
+### Theme light — couleur primaire amber (contraste)
+
+- `--color-primary` : `var(--amber-500)` (#f59e0b, ratio 2.8:1 sur blanc = echec WCAG) → `var(--amber-600)` (#d97706, ratio 3.9:1)
+- `--color-primary-hover` : `var(--amber-600)` → `var(--amber-700)` (#b45309, ratio 5.6:1)
+- Income/expense/feedback : conserves en Tailwind 600 (contraste OK sur blanc, pas de "glow" comme en dark)
+
+### Extraction rgba() en tokens themes — composants primaires
+
+3 tokens crees dans les 2 themes pour remplacer les `rgba(255,255,255,x)` hardcodes :
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--hover-subtle` | `rgba(255,255,255,0.04)` | `rgba(0,0,0,0.04)` | fonds discrets, hover notifications |
+| `--highlight-subtle` | `rgba(255,255,255,0.1)` | `rgba(0,0,0,0.06)` | press feedback (date picker :active) |
+| `--overlay-light` | `rgba(255,255,255,0.15)` | `rgba(0,0,0,0.1)` | toggle slider OFF (settings) |
+
+Fichiers nettoyes : inline-date-picker (2), settings (2), notification-panel (1).
+
+### Extraction rgba() en tokens themes — composants secondaires
+
+4 tokens supplementaires crees pour les tints indigo/amber :
+
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--primary-subtle` | `rgba(224,168,32,0.1)` | `rgba(217,119,6,0.1)` | hover bouton primary icon, fond bouton amber |
+| `--secondary-subtle` | `rgba(129,140,248,0.06)` | `rgba(79,70,229,0.06)` | fond selection, batch bar import |
+| `--secondary-muted` | `rgba(129,140,248,0.15)` | `rgba(79,70,229,0.15)` | fond bouton secondaire |
+| `--secondary-border` | `rgba(129,140,248,0.25)` | `rgba(79,70,229,0.25)` | bordure batch bar, hover bouton |
+
+12 fichiers nettoyes :
+- `import-review.scss` : 12 rgba + 5 hex bruts (#10b981, #4f46e5) → tokens semantiques (--bg-success, --text-success, --color-secondary, --secondary-*)
+- `import-settings.scss` : 2 rgba + 1 fallback hex → tokens
+- `csv-mapping.scss` : 2 fallbacks rgba retires (tokens deja en place)
+- `settings.scss` : 1 shadow rgba → --shadow-lg
+- `snooze-dialog.scss` : 1 overlay → --surface-overlay
+- `account-form.scss` : 1 overlay → --surface-overlay
+- `toast.scss` : 1 shadow fallback retire
+- `notification-badge.ts` : 1 hover fallback → --hover-bg
+- `currency-list.ts` : 1 overlay + 1 shadow → tokens
+- `exchange-rate-manager.ts` : 1 overlay + 1 shadow + 1 danger hover → tokens
+- `emoji-input.scss` : 1 shadow → --shadow-lg
+
+**Resultat** : 0 rgba() dans les SCSS composants. 4 restants dans emoji-input.ts (shadow DOM tiers emoji-mart, deja correctement branche dark/light — intouchable).
+
+### Decisions de design (session 19)
+
+- En light, l'elevation n'est pas "plus clair = plus eleve" (comme en dark) — c'est "blanc = contenu, gris = chrome". Les cards blanches attirent l'oeil, le chrome gris s'efface
+- L'amber-500 (#f59e0b) echoue comme texte sur blanc (2.8:1). Amber-600 (#d97706, 3.9:1) est le bon compromis light. Le dark garde son amber attenue (#e0a820)
+- L'inversion primary/secondary (indigo en primary light) a ete envisagee puis ecartee : l'amber est l'identite de K-Budget, changer de couleur primaire entre themes creerait une dissonance. L'indigo sera explore pour un role semantique propre (navigation, wayfinding) dans une session future
+- Les couleurs income/expense (green-600, red-600) ne sont pas attenuees en light contrairement au dark : sur fond blanc elles ne "glowent" pas, l'attenuation dark corrigeait un probleme specifique au fond sombre
+- Chaque rgba() hardcode dans un composant est un bug de theming en attente : il casse en light ou en dark. Remplacer par un token = correction preventive
+
+## Ce qui a ete fait (session 20)
+
+### Suppression de l'indigo comme couleur semantique du design system
+
+Le systeme de couleurs se simplifie a 4 canaux : **amber (action/CTA)**, **vert (revenu)**, **rouge (depense)**, **gris (structure)**. L'indigo n'avait pas de role semantique clair — il existait par convention (couleur secondaire) sans porter d'information.
+
+### Tokens supprimes
+- 4 tokens semantiques dans chaque theme : `--color-secondary`, `--color-secondary-hover`, `--color-secondary-light`, `--color-secondary-contrast`
+- 3 tokens interactifs dans chaque theme : `--secondary-subtle`, `--secondary-muted`, `--secondary-border`
+- Palette CSS `--indigo-*` (10 vars) supprimee de `_tokens.scss` (plus de consommateur)
+- Variable SCSS `$indigo-600-rgb` supprimee de `_primitives.scss`
+- Palette SCSS `$indigo-*` conservee dans `_primitives.scss` (utilisee par les palettes utilisateur categories/comptes)
+
+### Tokens crees
+- `--primary-muted` : rgba amber a 15% opacite (remplace `--secondary-muted`)
+- `--primary-border` : rgba amber a 25% opacite (remplace `--secondary-border`)
+
+### Migrations par usage
+
+**Icones formulaires (9 usages HTML)** — `var(--color-secondary)` → `var(--color-primary)` :
+- transaction-form (note, calendrier), debt-form (rappel, calendrier), subscription-form (calendrier), budget-form (frequence, devise, seuil)
+- L'amber a opacity 0.7 dit "ce champ est rempli et interactif" — coherent avec amber = action
+
+**Bottom sheet reminder border (1 usage SCSS)** — `var(--color-secondary)` → `var(--color-primary)`
+
+**Date picker jour original (2 usages SCSS)** — `color-mix(--color-secondary, 20%)` → `var(--hover-subtle)` + `var(--text-secondary)` :
+- Le jour original en edition devient un fond subtil neutre au lieu d'indigo. L'amber reste seul pour la selection active
+
+**Import review (7 usages SCSS)** — mapping token par token :
+- `--secondary-subtle` → `--primary-subtle` (batch bar bg, selected item bg)
+- `--secondary-border` → `--primary-border` (batch bar border)
+- `--color-secondary` → `--color-primary` (compteur, bouton, bordure selection, texte regle)
+- `--secondary-muted` → `--primary-muted` (bouton regle bg)
+
+**Import settings (2 usages SCSS)** — icone et badge registry : `--color-secondary` → `--color-primary`, `--color-secondary-light` → `--primary-subtle`
+
+### Palettes utilisateur (inchangees)
+- `#6366f1` reste dans `CATEGORY_COLORS` et `ACCOUNT_COLORS` — c'est une couleur assignable, pas un token semantique
+
+### Decisions de design (session 20)
+- L'indigo n'avait pas de role semantique propre — il existait parce que les design systems ont conventionnellement une couleur secondaire, pas parce que K-Budget en avait besoin
+- La question "quel role pour l'indigo ?" a ete testee en sparring (/alter) — aucun cas concret ou l'amber seul ne suffisait pas
+- Le remplacement est mecanique, pas un redesign : chaque usage d'indigo avait un equivalent amber evident
+- Les icones de formulaires en amber a 0.7 sont plus coherentes : "champ rempli" = meme couleur que "action possible"
+- Le date picker n'a plus besoin d'une couleur dediee pour le jour original — fond subtil + texte secondary suffit, quiet utility
+- L'import review en amber renforce le message "selectionne = pret a agir"
+- Supprimer une couleur du design system est plus courageux que d'en ajouter — c'est un acte de simplification qui renforce la lisibilite de celles qui restent
+
+## Ce qui a ete fait (session 21)
+
+### KKS-231 — Selecteur de categorie inline expand
+
+Correction d'une violation majeure du **principe #4** de `DESIGN.md` (« un seul niveau de surface modale : bottom sheet OU dialog centre. Jamais deux empilés. »). L'ancien `app-category-picker` ouvrait un `app-select-picker` en second bottom-sheet par-dessus les formulaires `transaction-form`, `subscription-form` et `debt-form`. Le bouton « + Creer » ouvrait encore une `Modal` centree par-dessus — potentiellement 3 surfaces modales empilees.
+
+### Decisions de design (session 21)
+
+- **Refonte, pas polish** — la violation est architecturale, la correction aussi. Nouveau composant dedie `app-category-select` symetrique a `app-autocomplete` (KKS-230). L'ancien `SelectPicker` est conserve pour les contextes hors bottom-sheet (Settings, filtres).
+- **Dumb component** — `CategorySelect` n'a aucune logique d'ouverture/fermeture. C'est le form parent qui pilote l'expansion via son signal `expandedSection` existant (pattern identique a `InlineDatePicker`). Le composant se contente de rendre son contenu (liste + recherche + bouton creer, ou form de creation en mode push).
+- **Creation inline push/pop** — quand l'utilisateur tape un nom inexistant et clique « + Creer », le contenu de l'expand est remplace par le formulaire de creation avec le nom pre-rempli. En-tete `← Retour` + `✓ Creer` a gauche/droite. Au retour, la recherche est conservee (respect de l'intention utilisateur). Apres creation reussie, la nouvelle categorie est automatiquement selectionnee et l'expand se collapse.
+- **Footer du sheet parent desactive, pas masque** — pendant le mode creation, les boutons `Annuler`/`Enregistrer` du sheet restent visibles mais `[disabled]`. Signale l'etat transitoire sans faire bouger le layout.
+- **Scroll interne 60vh** — la liste est contrainte `max-height: 60vh` + `overflow-y: auto`. Le sheet garde une hauteur predictible, le footer reste accessible. Pattern Revolut-like.
+- **Refonte globale du CategoryForm** — le footer interne du `CategoryForm` (boutons `Annuler`/`Modifier`) est supprime. Les deux consommateurs (`shell.html` en mode Settings, `CategorySelect` en mode bottom-sheet) cablent leur propre footer. Methode publique `submit()` appelable via `viewChild`.
+- **Sprint-helper partage** — le helper `normalize(s)` (NFD + suppression diacritiques) est extrait de `autocomplete.ts` vers `shared/utils/string.utils.ts`. Utilisable par tout composant avec filtre insensible a la casse/accents.
+
+### Migrations par usage
+
+- **3 formulaires** (transaction, subscription, debt) : remplacement `<app-category-picker>` par `<app-category-select>` avec binding signals-first (`[categories]`, `(selected)`, `(isCreating)`, `(created)`). Ajout d'un `categoryIdSignal = toSignal(valueChanges)` pour rendre `selectedCategory` computed reactif (bug d'affichage decouvert et corrige pendant le test manuel). Pattern identique a `accountIdSignal`/`dateSignal` deja en place.
+- **shell.html** (gestion des categories depuis Settings) : footer custom `<div class="modal__actions">` avec 2 boutons, cables sur `categoryFormRef()?.submit()` via `viewChild`.
+- **category-picker** supprime : 4 fichiers (`.ts`, `.html`, `.scss`, `.spec.ts`). Plus aucun consommateur apres migration.
+
+### Ce qui change visuellement
+
+- Avant : un clic sur la pill catégorie ouvrait un second bottom-sheet qui recouvrait le premier. La liste apparaissait dans une surface empilee avec son propre header, son propre champ de recherche, son propre `cdkTrapFocus`.
+- Apres : un clic declenche l'expansion inline du `bsheet__expand` sous la row des pills. La liste coule dans le meme sheet, les pills restent visibles en haut, le footer reste accessible en bas. Cree une categorie met a jour la liste dans la foulee — aucun reload, aucune fermeture-reouverture du sheet.
+
+## Ce qui reste a faire
+
+### Priorite haute
+- [x] Propager le style aux pages Abonnements (session 5)
+- [x] Page detail abonnement (session 6)
+- [x] Page Dettes — liste (session 7)
+- [x] Page detail dette (session 7)
+- [x] Propager le style a la page Budgets (session 8)
+- [x] Page Transactions recurrentes (session 4)
+- [x] Realigner hero Dashboard (session 10)
+- [x] Realigner hero Transactions (session 10)
+- [x] Settings — refonte hub unique + 2 sous-pages (session 11)
+- [x] Modal centre — confirmations via ConfirmDialog + ConfirmService (session 11)
+- [x] Bottom sheet formulaires — creation transaction (montant hero + toggle + icones + expand) (session 11)
+- [x] Empty states — composant partage EmptyState (icone + message + CTA), propage a toutes les pages (session 12, nettoyage final session 18)
+- [x] Bottom sheet formulaires — propager le pattern transaction aux autres formulaires (budget, dette, abonnement) (session 11)
+- [x] Migrer RepayDialog vers le bottom sheet partage (session 13)
+
+### Priorite moyenne
+- [x] Revoir les inputs de tous les formulaires bottom sheet — tailles reduites, wrap automatique, devise reactive, utilitaire partage (session 14)
+- [x] Date picker inline custom — composant InlineDatePicker, propage a 5 formulaires (session 15)
+- [x] Micro-interactions — sections expand animees, fermeture modal animee, transitions de page fade (session 16)
+- [x] Skeleton loading — spinners remplaces par skeleton pulse sur toutes les pages (session 16)
+- [x] FAB Menu — aligner sur quiet utility, style iOS action sheet (session 17)
+- [x] Notification Panel — aligner vocabulaire visuel, conteneur groupe, dot unread, pills discretes (session 17)
+- [x] Theme light — fondations surfaces, elevation 3 niveaux, suppression gradients/glass (session 19)
+- [x] Theme light — amber primary contraste WCAG (amber-600/700) (session 19)
+- [x] Extraction rgba() hardcodes — tokens themes (7 nouveaux tokens, 0 rgba dans composants SCSS) (session 19)
+- [x] Theme light — validation visuelle page par page (ajustements fins couleurs, contrastes, ombres)
+- [x] Recherche & filtres Transactions — designer et implementer la UX (icones placeholder sans handler)
+- [x] Role de l'indigo — supprime comme couleur semantique, simplifie a amber+vert+rouge+gris (session 20)
+
+### A faire en dernier
+- [ ] Reecrire DESIGN.md a partir du resultat valide
+- [ ] Aligner les tokens Flutter (DESIGN.md Flutter) avec les nouvelles valeurs
+- [ ] Appliquer la meme direction a Kassist
+
+## References visuelles
+
+- **TickTick** : clean, utilitaire, listes propres, accent discret
+- **Stoic** : calme, minimal, couleurs douces
+- **Apple Journal** : natif iOS, invisible, contenu-first
+- **Apple Wallet** : montant dominant a la saisie, clavier numerique immediat
+- **Apple Reminders** : bottom sheet unique, champs qui se deploient inline
+
+## Anti-patterns identifies
+
+Ce qu'on a retire et qu'il ne faut PAS reintroduire :
+- Gradients decoratifs (hero card amber->indigo)
+- Glassmorphism / backdrop-filter blur
+- Ombres colorees (FAB amber glow)
+- Radial gradients en fond de page
+- Couleurs saturees Tailwind 400 en dark mode
+- Cards individuelles par item de liste (preferer un conteneur groupe)
+- Variation badges avec fond colore full-width
+- Badge pills repetes dans les rows de liste (preferer texte plat tertiary — badges reserves aux pages detail)
+- Empiler deux surfaces modales (bottom sheet + modal par-dessus)
+- Formulaires qui exposent tous les champs d'un coup
+- Segmented controls pour filtrer (preferer groupement + sections en bas)
+- `<input type="date">` natif dans les bottom sheets (preferer InlineDatePicker inline)
+- Spinners CSS tournants (preferer skeleton pulse qui imite la forme du contenu)
+- rgba() hardcodes dans les composants (preferer tokens semantiques themes — chaque rgba brut est un bug de theming en attente)
+- Hex bruts de couleurs metier (#10b981, #ef4444) dans les composants (preferer --text-success, --text-error, --color-primary)
+- Couleur secondaire sans role semantique clair — le design system n'a que 4 canaux : amber (action), vert (revenu), rouge (depense), gris (structure)

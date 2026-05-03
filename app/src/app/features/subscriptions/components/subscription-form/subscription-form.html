@@ -1,78 +1,117 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="subscription-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="form-error-banner">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
-  <div class="form-row form-row--name-amount">
-    <app-form-field
-      label="Nom"
-      fieldId="nom"
-      [showError]="isInvalid('nom')"
-      [errorMessage]="
-        form.get('nom')?.hasError('required') ? 'Nom requis' : '255 caracteres maximum'
-      "
-    >
-      <input id="nom" type="text" formControlName="nom" />
-    </app-form-field>
 
-    <app-form-field
-      label="Montant"
-      fieldId="montant"
-      [showError]="isInvalid('montant')"
-      [errorMessage]="'Le montant doit etre superieur a 0'"
-    >
-      <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-    </app-form-field>
+  <!-- ROW 1: Handle bar + titre + toggle fréquence -->
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
+      <ng-icon name="phosphorRepeat" size="16" />
+      <span>Abonnement</span>
+    </div>
+    <div class="bsheet__type-toggle" role="group" aria-label="Fréquence">
+      <button type="button" [class.active]="currentFrequency() === Frequency.MENSUEL" (click)="onFrequencyChange(Frequency.MENSUEL)">Mensuel</button>
+      <button type="button" [class.active]="currentFrequency() === Frequency.ANNUEL" (click)="onFrequencyChange(Frequency.ANNUEL)">Annuel</button>
+    </div>
   </div>
 
-  <div class="form-row">
-    <app-form-field
-      label="Date de debut"
-      fieldId="dateDebut"
-      [showError]="isInvalid('dateDebut')"
-      [errorMessage]="'Date de debut requise'"
-    >
-      <input id="dateDebut" type="date" formControlName="dateDebut" />
-    </app-form-field>
-
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
+  <!-- ROW 2: Montant + Nom -->
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
+      <input
+        class="bsheet__amount bsheet__amount--expense input-naked"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="montant"
+        placeholder="0"
+        autocomplete="off"
+      />
+      <span class="bsheet__currency bsheet__currency--expense">{{ currencySymbol() }}</span>
+    </div>
+    <input
+      class="bsheet__libelle input-naked"
+      type="text"
+      formControlName="nom"
+      placeholder="Nom"
+      autocomplete="off"
+      maxlength="255"
+    />
   </div>
 
-  @if (activeAccounts().length > 0) {
-    <app-form-field label="Compte (optionnel)" fieldId="accountId">
-      <app-select-picker
-        formControlName="accountId"
-        [items]="accountItems()"
-        placeholder="Aucun compte"
-        [clearable]="true"
+  <!-- ROW 3: Actif (édition) à gauche | Pills meta à droite -->
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
+      @if (isEditing()) {
+        <button type="button" class="bsheet__icon-btn" [class.active]="actif()" (click)="toggleActif()" aria-label="Actif">
+          <ng-icon
+            [name]="actif() ? 'phosphorToggleRight' : 'phosphorToggleLeft'"
+            size="18"
+            [style.color]="actif() ? 'var(--color-primary)' : 'var(--text-tertiary)'"
+          />
+        </button>
+      }
+    </div>
+    <div class="bsheet__meta-pills">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date de début">
+        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
+        <span>{{ (form.get('dateDebut')?.value ?? '') | shortDate }}</span>
+      </button>
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+        <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
+        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+      </button>
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+        <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
+        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- EXPANDED SECTIONS -->
+  @if (expandedSection() === 'date') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-inline-date-picker [value]="dateDebutSignal()" [originalValue]="subscription()?.dateDebut ?? ''" (valueChange)="onDateSelected($event)" />
+    </div>
+  }
+  @if (expandedSection() === 'category') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-category-select
+        formControlName="categoryId"
+        [categories]="categories()"
+        (selected)="expandedSection.set(null)"
+        (isCreating)="categoryCreating.set($event)"
+        (created)="onCategoryCreated($event)"
       />
-    </app-form-field>
+    </div>
+  }
+  @if (expandedSection() === 'account') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
+    </div>
+  }
+  @if (expandedSection() === 'currency' && showCurrencyPicker()) {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
+    </div>
   }
 
-  @if (showCurrencyPicker()) {
-    <app-form-field label="Devise (optionnel)" fieldId="currency">
-      <app-select-picker
-        formControlName="currency"
-        [items]="currencyItems()"
-        placeholder="Devise par défaut"
-        [clearable]="true"
-      />
-    </app-form-field>
-  }
-
-  <label class="checkbox-field">
-    <input type="checkbox" formControlName="actif" />
-    Abonnement actif
-  </label>
-
-  <div class="form-actions">
-    @if (isEditMode()) {
-      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-    }
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
+  <!-- ROW 4: Actions -->
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
+      @if (isEditing()) {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
+          <ng-icon name="phosphorTrash" size="16" />
+        </button>
+      } @else {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
+          Annuler
+        </button>
+      }
+    </div>
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
+      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

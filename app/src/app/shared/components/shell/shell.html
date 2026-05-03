@@ -1,49 +1,40 @@
 <header class="shell-header">
-  <button class="shell-hamburger" (click)="toggleSidebar()" aria-label="Menu">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-  </button>
   <a routerLink="/dashboard" class="shell-brand">
     <img src="icons/budget-icon-no-background.svg" alt="" class="shell-brand-logo" />
     <span class="shell-brand-name">K-Budget</span>
   </a>
-
   <div class="shell-header__actions">
     <app-notification-badge (clicked)="toggleNotificationPanel()" />
     <div class="shell-user-menu">
-    <button
-      class="shell-user-trigger"
-      (click)="toggleDropdown()"
-      [attr.aria-expanded]="dropdownOpen()"
-      aria-haspopup="true"
-      aria-label="Menu utilisateur"
-    >
-      <span class="shell-user-avatar">{{ userInitials() }}</span>
-    </button>
-    @if (dropdownOpen()) {
-      <div class="shell-dropdown" role="menu">
-        @if (userName(); as user) {
-          <div class="shell-dropdown-name">{{ user.name }}</div>
-        }
-        <a
-          class="shell-dropdown-item"
-          routerLink="/settings"
-          role="menuitem"
-          (click)="closeDropdown()"
-        >
-          <ng-icon name="phosphorGear" size="20" /> Paramètres
-        </a>
-        <button
-          class="shell-dropdown-item shell-dropdown-logout"
-          role="menuitem"
-          (click)="onLogout()"
-        >
-          <ng-icon name="phosphorSignOut" size="20" /> Déconnexion
-        </button>
-      </div>
-    }
-  </div>
+      <button
+        class="shell-user-trigger"
+        (click)="toggleDropdown()"
+        [attr.aria-expanded]="dropdownOpen()"
+        aria-haspopup="true"
+        aria-label="Menu utilisateur"
+      >
+        <span class="shell-user-avatar">
+          @if (avatarUrl(); as url) {
+            <img [src]="url" alt="Photo de profil" class="shell-user-avatar__img" />
+          } @else {
+            {{ userInitials() }}
+          }
+        </span>
+      </button>
+      @if (dropdownOpen()) {
+        <div class="shell-dropdown" role="menu">
+          @if (userName(); as user) {
+            <div class="shell-dropdown-name">{{ user.name }}</div>
+          }
+          <a class="shell-dropdown-item" routerLink="/settings" role="menuitem" (click)="closeDropdown()">
+            <ng-icon name="phosphorGear" size="20" /> Paramètres
+          </a>
+          <button class="shell-dropdown-item shell-dropdown-logout" role="menuitem" (click)="onLogout()">
+            <ng-icon name="phosphorSignOut" size="20" /> Déconnexion
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
 
@@ -69,10 +60,12 @@
 </nav>
 
 <main class="shell-content">
-  <router-outlet />
+  <div [@routeAnimation]="getRouteAnimationData()">
+    <router-outlet />
+  </div>
 </main>
 
-<bottom-nav [items]="navItems()" [activeRoute]="currentRoute()" />
+<app-bottom-nav [items]="navItems()" [activeRoute]="currentRoute()" />
 
 <app-fab
   [isOpen]="speedDialOpen()"
@@ -85,74 +78,16 @@
 <app-modal
   [isOpen]="modalService.modalOpen()"
   [title]="modalService.modalTitle()"
+  [hideHeader]="modalService.activeModal() === 'transaction' || modalService.activeModal() === 'subscription' || modalService.activeModal() === 'debt' || modalService.activeModal() === 'budget' || modalService.activeModal() === 'repay'"
   (closed)="onModalClose()"
 >
-  @if (modalService.activeModal() === 'transaction') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Type de transaction">
-      <button
-        type="button"
-        [class.active]="transactionType() === TransactionType.DEPENSE"
-        [attr.aria-pressed]="transactionType() === TransactionType.DEPENSE"
-        (click)="onTransactionTypeChange(TransactionType.DEPENSE)"
-      >
-        Depense
-      </button>
-      <button
-        type="button"
-        [class.active]="transactionType() === TransactionType.RECETTE"
-        [attr.aria-pressed]="transactionType() === TransactionType.RECETTE"
-        (click)="onTransactionTypeChange(TransactionType.RECETTE)"
-      >
-        Recette
-      </button>
-    </div>
-  }
-  @if (modalService.activeModal() === 'subscription') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Frequence">
-      <button
-        type="button"
-        [class.active]="subscriptionFrequency() === Frequency.MENSUEL"
-        [attr.aria-pressed]="subscriptionFrequency() === Frequency.MENSUEL"
-        (click)="onFrequencyChange(Frequency.MENSUEL)"
-      >
-        Mensuel
-      </button>
-      <button
-        type="button"
-        [class.active]="subscriptionFrequency() === Frequency.ANNUEL"
-        [attr.aria-pressed]="subscriptionFrequency() === Frequency.ANNUEL"
-        (click)="onFrequencyChange(Frequency.ANNUEL)"
-      >
-        Annuel
-      </button>
-    </div>
-  }
-  @if (modalService.activeModal() === 'debt') {
-    <div modal-header-actions class="type-toggle" role="group" aria-label="Type de dette">
-      <button
-        type="button"
-        [class.active]="debtType() === DebtType.EMPRUNT"
-        [attr.aria-pressed]="debtType() === DebtType.EMPRUNT"
-        (click)="onDebtTypeChange(DebtType.EMPRUNT)"
-      >
-        Emprunt
-      </button>
-      <button
-        type="button"
-        [class.active]="debtType() === DebtType.PRET"
-        [attr.aria-pressed]="debtType() === DebtType.PRET"
-        (click)="onDebtTypeChange(DebtType.PRET)"
-      >
-        Pret
-      </button>
-    </div>
-  }
-  @switch (modalService.activeModal()) {
+@switch (modalService.activeModal()) {
     @case ('transaction') {
       <app-transaction-form
         [type]="transactionType()"
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
+        (typeChanged)="onTransactionTypeChange($event)"
       />
     }
     @case ('subscription') {
@@ -171,10 +106,22 @@
     }
     @case ('category') {
       <app-category-form
+        #categoryFormRef
         [category]="$any(modalService.editingEntity())"
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
+      <div class="modal__actions">
+        <button type="button" class="btn-outline" (click)="onModalClose()">Annuler</button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="triggerCategorySubmit()"
+          [disabled]="categoryFormSubmitting()"
+        >
+          {{ categoryFormIsEditMode() ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
     }
     @case ('account') {
       <app-account-form
@@ -185,20 +132,14 @@
     @case ('transfer') {
       <app-transfer-form (saved)="onModalClose()" (cancelled)="onModalClose()" />
     }
-    @case ('product') {
-      <app-product-form
+    @case ('budget') {
+      <app-budget-form
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
     }
-    @case ('sell') {
-      <app-sell-dialog
-        (confirmed)="onModalClose()"
-        (cancelled)="onModalClose()"
-      />
-    }
-    @case ('budget') {
-      <app-budget-form
+    @case ('repay') {
+      <app-repay-dialog
         (saved)="onModalClose()"
         (cancelled)="onModalClose()"
       />
@@ -212,3 +153,5 @@
 />
 
 <app-toast />
+
+<app-confirm-dialog />

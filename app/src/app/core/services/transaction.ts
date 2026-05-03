@@ -38,6 +38,10 @@ export class TransactionService {
     return this.api.delete<void>(`/transactions/${id}`).pipe(tap(() => this.refresh()));
   }
 
+  getByMonth(month: number, year: number): Observable<Transaction[]> {
+    return this.api.get<Transaction[]>(`/transactions?month=${month}&year=${year}`);
+  }
+
   getSummary(month?: number, year?: number): Observable<MonthlySummary[]> {
     const params: string[] = [];
     if (month !== undefined) params.push(`month=${month}`);

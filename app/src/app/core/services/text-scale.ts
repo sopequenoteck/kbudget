@@ -1,6 +1,7 @@
-import { Injectable, computed, effect, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 
 import { PreferenceService } from './preference';
+import { DevLogger } from './dev-logger';
 
 export type TextScale = 'small' | 'medium' | 'large';
 
@@ -30,6 +31,7 @@ const LOCAL_TO_API: Record<TextScale, string> = {
 })
 export class TextScaleService {
   private readonly preferenceService = inject(PreferenceService);
+  private readonly logger = inject(DevLogger);
 
   readonly currentTextScale = signal<TextScale>('medium');
 
@@ -69,7 +71,7 @@ export class TextScaleService {
         this.currentTextScale.set(stored as TextScale);
       }
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 
@@ -77,7 +79,7 @@ export class TextScaleService {
     try {
       localStorage.setItem(STORAGE_KEY, scale);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 }

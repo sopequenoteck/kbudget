@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/settings/domain/settings_section.dart';
 import 'package:k_budget/src/features/settings/presentation/widgets/settings_item.dart';
+import 'package:k_budget/src/features/user_profile/application/user_profile_notifier.dart';
+import 'package:k_budget/src/routing/route_names.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SettingsHubScreen extends ConsumerWidget {
   const SettingsHubScreen({super.key});
@@ -12,6 +15,8 @@ class SettingsHubScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final grouped = groupedSettingsSections;
+    final userAsync = ref.watch(userProfileNotifierProvider);
+    final isAdmin = userAsync.valueOrNull?.isAdmin ?? false;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Réglages')),
@@ -39,6 +44,15 @@ class SettingsHubScreen extends ConsumerWidget {
                 onTap: section.isPlaceholder || section.route == null
                     ? null
                     : () => context.push(section.route!),
+              ),
+            // Tuile Utilisateurs — visible uniquement pour les admins
+            if (group == SettingsGroup.management && isAdmin)
+              SettingsItem(
+                icon: PhosphorIconsRegular.users,
+                iconColor: Colors.indigo,
+                title: 'Utilisateurs',
+                description: 'Invitations et gestion des comptes',
+                onTap: () => context.push(RouteNames.adminUsers),
               ),
           ],
         ],

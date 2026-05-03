@@ -7,10 +7,8 @@ import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.NotificationType;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
-import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.UserPreferenceRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -28,11 +26,10 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PreferenceService {
 
-    private static final List<Feature> DEFAULT_FEATURES = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP);
+    private static final List<Feature> DEFAULT_FEATURES = List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS);
 
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
     private final ExchangeRateService exchangeRateService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -57,15 +54,6 @@ public class PreferenceService {
 
         preference.setEnabledFeatures(enabledFeatures);
         preference.setNavOrder(navOrder);
-        if (request.shopAccountId() != null) {
-            accountRepository.findById(request.shopAccountId())
-                    .filter(a -> a.getUser().getId().equals(userId))
-                    .orElseThrow(() -> new EntityNotFoundException("Compte non trouvé"));
-            preference.setShopAccountId(request.shopAccountId());
-        }
-        if (request.includeShopInBalance() != null) {
-            preference.setIncludeShopInBalance(request.includeShopInBalance());
-        }
         if (request.currencies() != null) {
             validateCurrencies(request.currencies());
             Currency oldPrimary = preference.getCurrencies().isEmpty() ? null : preference.getCurrencies().get(0);
@@ -132,7 +120,6 @@ public class PreferenceService {
                             .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
                             .navOrder(new ArrayList<>(DEFAULT_FEATURES))
                             .currencies(new ArrayList<>(List.of(Currency.EUR)))
-                            .includeShopInBalance(false)
                             .build();
                     return userPreferenceRepository.save(newPreference);
                 });
@@ -186,7 +173,6 @@ public class PreferenceService {
                 .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
                 .navOrder(new ArrayList<>(DEFAULT_FEATURES))
                 .currencies(new ArrayList<>(List.of(currency)))
-                .includeShopInBalance(false)
                 .build();
         preference.setTimezone(validTimezone);
         userPreferenceRepository.save(preference);
@@ -214,8 +200,6 @@ public class PreferenceService {
         return new UserPreferenceResponse(
                 preference.getEnabledFeatures(),
                 preference.getNavOrder(),
-                preference.getShopAccountId(),
-                preference.getIncludeShopInBalance(),
                 preference.getCurrencies(),
                 preference.getEnabledNotificationTypes(),
                 preference.getTimezone(),

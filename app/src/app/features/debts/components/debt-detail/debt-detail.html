@@ -1,6 +1,23 @@
 @if (loading()) {
-  <div class="state-loading">
-    <div class="spinner"></div>
+  <div class="skeleton-hero">
+    <div class="skeleton-bar skeleton-bar--xs"></div>
+    <div class="skeleton-bar skeleton-bar--lg"></div>
+    <div class="skeleton-bar skeleton-bar--md"></div>
+    <div class="skeleton-bar skeleton-bar--sm"></div>
+  </div>
+  <div class="list-group" style="margin-top: var(--space-4)">
+    @for (item of skeletonItems; track $index) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+        </div>
+      </div>
+    }
   </div>
 } @else if (error()) {
   <div class="state-error">
@@ -8,136 +25,86 @@
     <button class="btn-outline" (click)="retry()">Réessayer</button>
   </div>
 } @else if (debt(); as d) {
-  <header class="detail-header">
-    <div class="detail-header__top">
-      <button class="btn-icon" (click)="onBack()" aria-label="Retour">
-        <ng-icon name="phosphorArrowLeft" size="24" />
-      </button>
-      <div class="detail-header__title-block">
-        <h1>{{ d.personne }}</h1>
-        <span
-          class="badge-sens"
-          [ngClass]="d.sens === DebtType.EMPRUNT ? 'badge-sens--emprunt' : 'badge-sens--pret'"
-        >
-          {{ d.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt' }}
-        </span>
+  <div class="page-header">
+    <button class="page-header__back" (click)="onBack()" aria-label="Retour">
+      <ng-icon name="phosphorArrowLeft" size="20" />
+    </button>
+    <h1 class="page-header__title">{{ d.personne }}</h1>
+  </div>
+
+  <section class="hero">
+    <div class="hero__top">
+      <div class="hero__tags">
+        <span class="badge-type">{{ d.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt' }}</span>
         @if (d.rembourse) {
-          <span class="badge-rembourse">Remboursé</span>
+          <span class="badge-status">Remboursé</span>
+        }
+        @if (d.category) {
+          <span class="hero__category">{{ d.category.icone }} {{ d.category.nom }}</span>
         }
       </div>
-      <button class="btn-icon" (click)="onEdit()" aria-label="Modifier">
-        <ng-icon name="phosphorPencilSimple" size="24" />
-      </button>
-    </div>
-  </header>
-
-  <section class="detail-amounts">
-    <div class="amount-card amount-card--initial">
-      <span class="amount-label">Montant initial</span>
-      <span
-        class="amount-value"
-        [ngClass]="d.sens === DebtType.EMPRUNT ? 'amount-owe' : 'amount-owed'"
-      >
-        {{ d.montant | amount: null : (d.currency || 'EUR') }}
-      </span>
-    </div>
-    <div class="amount-card amount-card--remaining" [class.amount-card--done]="d.rembourse">
-      <span class="amount-label">Montant restant</span>
-      <span
-        class="amount-value amount-value--lg"
-        [ngClass]="d.rembourse ? 'amount-zero' : (d.sens === DebtType.EMPRUNT ? 'amount-owe' : 'amount-owed')"
-      >
-        {{ d.montantRestant | amount: null : (d.currency || 'EUR') }}
-      </span>
-    </div>
-  </section>
-
-  <section class="detail-progress">
-    <div class="progress-header">
-      <span class="progress-label">Remboursement</span>
-      <span class="progress-percent">{{ progressPercent() }} %</span>
-    </div>
-    <div class="progress-bar-track">
-      <div
-        class="progress-bar-fill"
-        [style.width.%]="progressPercent()"
-        [ngClass]="d.sens === DebtType.EMPRUNT ? 'progress-bar-fill--emprunt' : 'progress-bar-fill--pret'"
-      ></div>
-    </div>
-  </section>
-
-  <section class="detail-info">
-    <div class="info-row">
-      <span class="info-label">Date</span>
-      <span class="info-value">{{ formatDate(d.date) }}</span>
+      <span class="hero__date">{{ formatDate(d.date) }}</span>
     </div>
 
-    <div class="info-row">
-      <span class="info-label">Devise</span>
-      <span class="info-value">{{ d.currency || 'EUR' }}</span>
-    </div>
+    <span class="hero__amount" [class]="d.sens === DebtType.PRET ? 'hero__amount--pret' : 'hero__amount--emprunt'">
+      {{ d.montantRestant | amount: null : (d.currency || 'EUR') }}
+    </span>
+    @if ((d.currency || 'EUR') !== preferenceService.primaryCurrency()) {
+      <span class="hero__converted">{{ d.montantRestant | convertAmount: (d.currency || 'EUR') : preferenceService.primaryCurrency() }}</span>
+    }
+
+    <span class="hero__secondary">
+      Initial {{ d.montant | amount: null : (d.currency || 'EUR') }}
+      @if (payments().length > 0) {
+        · {{ paymentsTotal() | amount: null : (d.currency || 'EUR') }} remboursé · {{ payments().length }} paiement{{ payments().length > 1 ? 's' : '' }}
+      }
+    </span>
 
     @if (d.dueDate) {
-      <div class="info-row">
-        <span class="info-label">
-          <ng-icon name="phosphorCalendar" size="16" />
-          Échéance
-        </span>
-        <span class="info-value">{{ formatDate(d.dueDate) }}</span>
-      </div>
-    }
-
-    @if (d.category) {
-      <div class="info-row">
-        <span class="info-label">Catégorie</span>
-        <span class="info-value">{{ d.category.icone }} {{ d.category.nom }}</span>
-      </div>
-    }
-
-    @if (d.account) {
-      <div class="info-row">
-        <span class="info-label">
-          <ng-icon name="phosphorBank" size="16" />
-          Compte
-        </span>
-        <span class="info-value">{{ d.account.icone }} {{ d.account.nom }}</span>
-      </div>
-    }
-
-    @if (d.includeInBalance) {
-      <div class="info-row">
-        <span class="info-label">Solde</span>
-        <span class="info-value info-value--highlight">Inclus dans le solde</span>
+      <div class="hero__due" [class.hero__due--overdue]="isOverdue()">
+        <ng-icon name="phosphorCalendar" size="14" />
+        <span>Échéance {{ formatDate(d.dueDate) }}</span>
       </div>
     }
 
     @if (d.reminderDate) {
-      <div class="info-row">
-        <span class="info-label">
-          <ng-icon name="phosphorBell" size="16" />
-          Rappel
-        </span>
-        <span class="info-value">
-          {{ formatDate(d.reminderDate) }}
-          @if (d.reminderTime) {
-            à {{ d.reminderTime }}
-          }
-        </span>
+      <div class="hero__reminder">
+        <ng-icon name="phosphorBell" size="14" />
+        <span>{{ formatDate(d.reminderDate) }}@if (d.reminderTime) { à {{ d.reminderTime }}}</span>
+      </div>
+    }
+
+    @if (d.account) {
+      <div class="hero__account">
+        @if (getAccountLogo(d.account); as logo) {
+          <img class="bank-logo" [src]="logo" [alt]="d.account.nom" />
+        } @else {
+          <span class="bank-emoji">{{ d.account.icone }}</span>
+        }
+        <span>{{ d.account.nom }}</span>
       </div>
     }
   </section>
 
   <div class="detail-actions">
-    @if (!d.rembourse) {
-      <button class="btn-repay" (click)="showRepayDialog.set(true)">
-        <ng-icon name="phosphorArrowCircleDown" size="20" />
-        Rembourser
+    <button class="action-btn action-btn--danger action-btn--icon-only" (click)="onDelete()" aria-label="Supprimer">
+      <ng-icon name="phosphorTrash" size="18" />
+    </button>
+    <div class="detail-actions__spacer"></div>
+    @if (d.reminderDate) {
+      <button class="action-btn" (click)="showSnoozeDialog.set(true)">
+        <ng-icon name="phosphorBell" size="18" />
+        Reporter
       </button>
     }
-    @if (d.reminderDate) {
-      <button class="btn-snooze" (click)="showSnoozeDialog.set(true)">
-        <ng-icon name="phosphorBell" size="20" />
-        Reporter le rappel
+    <button class="action-btn" (click)="onEdit()">
+      <ng-icon name="phosphorPencilSimple" size="18" />
+      Modifier
+    </button>
+    @if (!d.rembourse) {
+      <button class="action-btn action-btn--primary" (click)="onRepay()">
+        <ng-icon name="phosphorArrowCircleDown" size="18" />
+        Rembourser
       </button>
     }
   </div>
@@ -146,14 +113,31 @@
     <div class="payments-header">
       <h2>Paiements</h2>
       @if (payments().length > 0) {
-        <span class="payments-total">
-          {{ paymentsTotal() | amount: null : (d.currency || 'EUR') }}
-        </span>
+        <span class="payments-count">{{ payments().length }}</span>
       }
     </div>
+    @if (progressPercent() > 0) {
+      <div class="payments-progress">
+        <div class="payments-progress__track">
+          <div class="payments-progress__fill" [style.width.%]="progressPercent()"></div>
+        </div>
+        <span class="payments-progress__label">{{ progressPercent() }}%</span>
+      </div>
+    }
     @if (paymentsLoading()) {
-      <div class="payments-loading">
-        <div class="spinner"></div>
+      <div class="list-group">
+        @for (item of skeletonItems; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line skeleton-line--title"></div>
+              <div class="skeleton-line skeleton-line--subtitle"></div>
+            </div>
+            <div class="skeleton-lines skeleton-lines--right">
+              <div class="skeleton-line skeleton-line--value"></div>
+            </div>
+          </div>
+        }
       </div>
     } @else if (payments().length === 0) {
       <p class="payments-empty">Aucun paiement enregistré</p>
@@ -161,6 +145,13 @@
       <ul class="payments-list">
         @for (payment of payments(); track payment.id) {
           <li class="payment-item">
+            @if (d.account) {
+              @if (getAccountLogo(d.account); as logo) {
+                <img class="bank-logo bank-logo--sm" [src]="logo" [alt]="payment.accountName" />
+              } @else {
+                <span class="bank-emoji bank-emoji--sm">{{ d.account.icone }}</span>
+              }
+            }
             <div class="payment-info">
               <span class="payment-account">{{ payment.accountName }}</span>
               <span class="payment-date">{{ formatDate(payment.date) }}</span>
@@ -171,14 +162,6 @@
       </ul>
     }
   </section>
-
-  @if (showRepayDialog()) {
-    <app-repay-dialog
-      [debt]="d"
-      (closed)="showRepayDialog.set(false)"
-      (repaid)="onRepaid($event)"
-    />
-  }
 
   @if (showSnoozeDialog()) {
     <app-snooze-dialog

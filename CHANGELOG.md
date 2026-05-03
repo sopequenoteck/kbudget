@@ -5,6 +5,61 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-05-03
+
+> Release MAJOR — 3 BREAKING changes : suppression du module shop, refonte de l'onboarding (KKS-232), refacto architecture admin (KKS-233). Inclut également les features non-breaking KKS-234 (refonte design pages auth) et KKS-235 (page Mon compte).
+
+### Added — KKS-234 Refonte design pages auth
+
+- **Shell auth `<app-auth-shell>`** factorisé pour les 3 pages d'authentification (`login`, `accept-invite`, `first-login-reset`) — bloc identité commun, sections homogènes, icônes prefix dans les inputs. Suppression du code SCSS dupliqué entre les 3 pages, normalisation de l'arborescence `features/auth/pages/first-login-reset/`.
+- Le shell auth aligne le rendu des 3 pages sur les patterns réels de l'app (tokens DESIGN.md, hiérarchie typographique, espacements `--space-*`) et améliore la cohérence visuelle de l'expérience d'onboarding/connexion.
+
+### Added — KKS-235 Page Mon compte
+
+- **Page Mon compte** (`/settings/account` Angular, `/settings/profile` Flutter) — 4 sections : Identité (avatar uploadable JPG/PNG ≤ 2 MB, nom éditable, email read-only), Sécurité (changement MDP — min 12 chars, révocation refresh tokens + nouveau JWT device courant), Données (export JSON full backup + CSV transactions UTF-8 BOM), Zone de danger (déconnexion + suppression soft-delete avec garde dernier admin actif).
+- **Avatars** : stockés sur disque local (`AVATAR_STORAGE_PATH`, défaut `./data/avatars`), validation MIME via magic numbers (JPEG `FF D8 FF` / PNG `89 50 4E 47…`), redimensionnés en 256×256 JPEG 85% via Thumbnailator avec gestion EXIF auto-rotation, servis avec ETag SHA-256 + `Cache-Control: must-revalidate`. Affichés dans le header, le hub Settings et la page Mon compte (binding réactif via `AvatarService.avatarUrl` signal + blob URL).
+- **Politique MDP** harmonisée à 12 caractères dans tous les flows (`ChangePasswordRequest` + `FirstLoginResetRequest`).
+- **Soft-delete user** : `users.disabled_at` (V29 préexistant), `AuthService.login` + `JwtFilter` + `StompAuthInterceptor` filtrent `disabled_at IS NULL`. Suppression de compte via `DELETE /api/users/me` avec confirmation MDP + checkbox.
+- **Endpoints REST** : `PUT /users/me`, `POST/GET/DELETE /users/me/avatar`, `POST /users/me/password`, `GET /users/me/export?format=json|csv`, `DELETE /users/me`.
+- **Codes d'erreur** : `INVALID_IMAGE_FORMAT` (400), `FILE_TOO_LARGE` (413), `AVATAR_NOT_FOUND` (404), `PASSWORD_INCORRECT` (401), `PASSWORD_UNCHANGED` (400), `CONFIRMATION_REQUIRED` (400), `LAST_ADMIN_DELETION_FORBIDDEN` (403), `INVALID_EXPORT_FORMAT` (400). Voir `docs/api-errors.md`.
+- **Migrations Flyway** : V32 (`users.avatar_path VARCHAR(512)`), V33/V34 (patches FK `budgets.user_id` + `budget_snapshots.user_id` → `ON DELETE CASCADE`, filet de sécurité), V35 (no-op documentaire — `refresh_tokens.user_id` avait déjà CASCADE depuis V6).
+- **Dépendances** : `net.coobird:thumbnailator:0.4.20` (backend Maven, redimensionnement + EXIF), `flutter_image_compress:^2.3.0` (Flutter, pré-compression client avant upload).
+- **DTOs** : `UpdateProfileRequest` (renommage de `UpdateUserRequest`, anti privilege escalation — pas de champ email), `ChangePasswordRequest`, `DeleteAccountRequest`, `AvatarMetadataResponse`, `UserExportResponse` (record top-level + 13 sub-records, `password` JAMAIS sérialisé).
+- **Documentation** : `docs/api-examples.md`, `docs/api-errors.md`, `docs/deployment.md` (variable `AVATAR_STORAGE_PATH` + procédure backup avatars), `docs/manual-test-plan.md` (section 22, 31 scénarios MC-1 à MC-31).
+
+### Fixed — KKS-235
+
+- **Bouton Déconnexion** sur la page Settings Angular : n'avait aucun handler (bug introduit en phase design KKS-234). Branché sur `authService.logout()` avec résilience en cas d'échec backend.
+- **Export CSV** : `HttpMessageNotWritableException: No converter for [...Lambda...] with preset Content-Type 'text/csv'`. `ResponseEntity<?>` + `StreamingResponseBody` ne fonctionne pas — Spring tente de sérialiser la lambda comme un objet. Résolu en séparant en 2 endpoints typés (`params="format=json"` retournant `ResponseEntity<UserExportResponse>` et `params="format=csv"` retournant `ResponseEntity<StreamingResponseBody>`).
+- **Avatar 401 sur `<img src>`** : le navigateur ne transmet pas le header `Authorization` JWT sur les requêtes déclenchées par `<img src>`. Résolu en chargeant le binaire via `HttpClient` (interceptor JWT actif) + `URL.createObjectURL(blob)` puis bind sur `<img [src]="blobUrl">`. Gestion du cycle de vie (`URL.revokeObjectURL`) avant chaque rechargement et au delete.
+- **Lint Angular** : 2 erreurs `no-unused-vars` préexistantes dans `first-login-reset.spec.ts` (héritées de KKS-233) — corrigées en passant.
+
+### Added
+- **KKS-233 Bootstrap du premier admin sur DB vide** — sur instance vierge (`users.count() == 0`), au premier boot Spring post-Flyway, création automatique d'un compte admin seed avec password aléatoire 32 chars (`SecureRandom`, alphanumérique) affiché dans les logs WARN avec bannière encadrée. L'utilisateur est forcé de changer ses credentials via un écran Angular `/first-login-reset` avant tout autre accès. Pattern inspiré de Jenkins `initialAdminPassword` / GitLab `root_password`. Conformité constitution v2.1.2 principe VII "Self-Hosted Ready" (zero config, `docker compose up -d` suffit). Nouvel endpoint `POST /auth/first-login-reset` protégé par JWT avec claim `mustResetCredentials`, validation Bean sur email/password/displayName, codes d'erreur structurés `400 PASSWORD_UNCHANGED`, `403 PASSWORD_RESET_REQUIRED`, `403 PASSWORD_RESET_NOT_REQUIRED`, `409 EMAIL_ALREADY_EXISTS`. `AuthResponse` enrichi d'un champ `mustResetCredentials` (toujours présent). Filtre HTTP dédié `PasswordResetRequiredFilter` (allowlist : `/auth/first-login-reset` + `/auth/logout`). Nouveau service `UserOnboardingService` mutualise `User + Categories + Account + Preferences` entre `accept-invite` et bootstrap. Deux `ApplicationRunner` Spring (`BootstrapSeedRunner` `@Order(1)`, `AdminSyncRunner` `@Order(2)`). Config typée `BootstrapProperties @ConfigurationProperties @Validated @Email` — fail-fast si `BOOTSTRAP_EMAIL` invalide. UI Angular : composant standalone `FirstLoginResetComponent` + guards composables `passwordResetGuard` / `notPasswordResetGuard`. Client Flutter non impacté (indépendant). Migrations Flyway V30 + V31. `docs/deployment.md` enrichi section "Premier démarrage sur instance vierge".
+
+### Changed
+- **BREAKING KKS-233 (architecture admin)** — Le statut administrateur est désormais stocké en base (`users.is_admin BOOLEAN NOT NULL DEFAULT FALSE`, V30) au lieu d'être dérivé dynamiquement de `ADMIN_EMAILS` à chaque requête. `AdminAuthorizationFilter` et `UserService.toResponse` lisent `user.isAdmin()`. `ADMIN_EMAILS` devient une source de promotion au démarrage uniquement (jamais de rétrogradation) via `AdminSyncRunner`. **Impact déploiement instance existante** : au prochain boot post-merge, `AdminSyncRunner` promeut automatiquement à `isAdmin=true` tous les users dont l'email figure déjà dans `ADMIN_EMAILS`. Aucune action manuelle requise pour Kelly. **Impact self-hoster après reset** : après un changement d'email via `/auth/first-login-reset`, l'utilisateur conserve son accès admin sans besoin de mettre à jour `.env`.
+
+- **KKS-232 Onboarding controle par invitation admin** — nouveau flux d'onboarding remplacant l'inscription publique (conformite constitution v2.1.2 principe VII "Self-Hosted Ready" + Contexte d'usage). Entite `Invitation(token UUID v4, email, invitedBy, expiresAt, usedAt, revokedAt)` avec TTL 7 jours. Admin designe par env var `ADMIN_EMAILS` (CSV), pas de colonne `role` (YAGNI). Colonne `users.disabled_at` pour soft-disable. Endpoints : `POST /admin/invitations`, `GET /admin/invitations`, `DELETE /admin/invitations/:id`, `GET /admin/users`, `PATCH /admin/users/:id/disable|enable`, `GET /auth/invitations/:token` (public), `POST /auth/accept-invite` (public, remplace register). Protection via `AdminAuthorizationFilter` (403 pour non-admin). Garde-fou dernier admin : `409 LAST_ADMIN_CANNOT_BE_DISABLED`. `JwtFilter` refuse les users desactives (401). `GET /users/me` enrichi avec `isAdmin` (derive cote serveur, non stocke). UI Angular + Flutter : page `Settings > Utilisateurs` (conditionnelle isAdmin) avec tabs Invitations / Users, bouton `+ Inviter` (copie auto du lien), bouton `Copier le lien` par ligne sur invitations actives. Page publique `/accept-invite/:token` sur les 2 fronts avec auto-login post-acceptation. Migrations Flyway V28 + V29.
+
+### Removed
+- **BREAKING KKS-232** — Route `POST /api/auth/register` supprimee. DTO `RegisterRequest` supprime. Methode `AuthService.register` supprimee. L'onboarding se fait desormais exclusivement via le flux d'invitation admin. Migration des instances existantes : ajouter `ADMIN_EMAILS=<email-admin>` dans l'env prod — le compte existant correspondant devient admin automatiquement. Composants frontend `RegisterScreen` (Flutter) et `features/auth/pages/register` (Angular) supprimes, ainsi que les liens "Creer un compte" sur les pages de login.
+
+### Fixed
+- Suite de tests Angular (Vitest) realignee avec l'API actuelle des composants — 55 tests corriges sur 8 fichiers (`debt-form`, `debt-detail`, `repay-dialog`, `transaction-form`, `subscriptions`, `subscription-detail`, `autocomplete`, `notification-panel`) : mocks de services manquants (`ModalService`, `CurrencyService`, `ToastService`, `PreferenceService`, etc.), stub `IntersectionObserver` pour jsdom, `provideNoopAnimations()` pour les composants avec animations, suppression des assertions sur methodes renommees/disparues (`isEditMode`→`isEditing`, `showRepayDialog()`→`modalService.openModal('repay')`, `hasAccount()`→`selectedAccount()`), alignement sur les selecteurs DOM actuels
+- `createAmountWidth` (shared/utils) — guard `if (ctx)` pour tolerer l'absence de canvas 2d context en environnement jsdom/SSR (valeur de largeur estimee en fallback)
+
+
+
+### Removed
+- **BREAKING** — Module shop (gestion de produits et ventes) entièrement extrait de l'app. Endpoints `/api/products`, `/api/products/*/sell`, `/api/products/*/restock` supprimés. Champs DTO retirés : `TransactionResponse.productId/productName`, `AccountResponse.isShopAccount`, `UserPreferenceResponse/Request.shopAccountId/includeShopInBalance`. Entités JPA `Product` et relation `Transaction.product` supprimées. Feature toggle `SHOP` retirée de l'enum `Feature`. Le code du module est préservé dans le tag git `archive/shop-v0` et les specs devflow correspondantes sont archivées dans `.specify/specs/_archived/`. Une refonte séparée sera faite dans un projet `kshop` dédié à partir des vrais besoins de l'utilisatrice active.
+
+### Changed
+- Modèle de données : 19 → 17 entités JPA persistées
+- Enum `Feature` : `SUBSCRIPTIONS, DEBTS, SHOP, BUDGETS` → `SUBSCRIPTIONS, DEBTS, BUDGETS`
+- Catégorie système "Boutique" retirée du seeding à l'inscription ; les transactions existantes qui y étaient liées ont leur `category_id` mis à NULL via `ON DELETE SET NULL`
+- Migration `V26__drop_shop.sql` : DROP FK/colonnes/table `products`, nettoyage `enabled_features` et `nav_order` des users existants
+
 ## [4.2.4] - 2026-03-22
 
 ### Changed

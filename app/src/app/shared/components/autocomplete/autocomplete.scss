@@ -1,0 +1,58 @@
+// Autocomplete — composant partagé
+// Tokens DESIGN.md uniquement, zéro valeur hex/rgba hardcodée
+
+.autocomplete {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+
+  &--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  // Input neutre : structure seulement, le style visuel est porté par le contexte
+  // parent (ex : .bsheet__libelle input) pour permettre la réutilisabilité du composant.
+  &__input {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    margin: var(--space-1) 0 0 0;
+    padding: var(--space-1) 0;
+    background: var(--surface-raised);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+    max-height: 14rem;
+  }
+
+  &__item {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--easing-default);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover,
+    &--active {
+      background: var(--hover-bg);
+    }
+  }
+}

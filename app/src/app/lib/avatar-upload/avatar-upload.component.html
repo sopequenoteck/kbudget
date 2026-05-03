@@ -1,0 +1,68 @@
+<div class="avatar-upload">
+  <div class="avatar-upload__wrapper">
+    <button
+      type="button"
+      class="avatar-upload__circle"
+      [class.avatar-upload__circle--loading]="isUploading()"
+      (click)="currentAvatarUrl() ? toggleMenu($event) : onAvatarClick()"
+      [attr.aria-label]="currentAvatarUrl() ? 'Modifier la photo de profil' : 'Ajouter une photo de profil'"
+    >
+      @if (currentAvatarUrl()) {
+        <img
+          class="avatar-upload__img"
+          [src]="currentAvatarUrl()"
+          alt="Photo de profil"
+        />
+      } @else {
+        <span class="avatar-upload__initials">{{ userInitials() }}</span>
+      }
+
+      @if (isUploading()) {
+        <div class="avatar-upload__spinner" aria-hidden="true"></div>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="avatar-upload__camera-btn"
+      (click)="onAvatarClick()"
+      [disabled]="isUploading()"
+      aria-label="Changer la photo"
+    >
+      <ng-icon name="phosphorCamera" size="14" />
+    </button>
+  </div>
+
+  @if (showMenu() && currentAvatarUrl()) {
+    <div class="avatar-upload__menu" role="menu">
+      <button
+        type="button"
+        class="avatar-upload__menu-item"
+        role="menuitem"
+        (click)="onChangePhoto($event)"
+      >
+        <ng-icon name="phosphorCamera" size="14" />
+        Changer la photo
+      </button>
+      <button
+        type="button"
+        class="avatar-upload__menu-item avatar-upload__menu-item--danger"
+        role="menuitem"
+        (click)="onDeletePhoto($event)"
+      >
+        <ng-icon name="phosphorTrash" size="14" />
+        Supprimer la photo
+      </button>
+    </div>
+  }
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/png"
+    class="avatar-upload__input"
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="onFileSelected($event)"
+  />
+</div>

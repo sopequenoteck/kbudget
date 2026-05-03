@@ -14,13 +14,15 @@ import { type BudgetItem } from '../../../core/models/budget.model';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
 
+const UNBUDGETED_COLOR = '#9ca3af';
+
 @Component({
   selector: 'app-budget-chart',
   standalone: true,
   imports: [BaseChartDirective],
   template: `
     @if (hasExpenses()) {
-      <section class="chart-section" [class.clickable]="clickable()" (click)="onClick()">
+      <section class="chart-section" [class.clickable]="clickable()" (click)="onClick()" (keydown.enter)="onClick()" [attr.tabindex]="clickable() ? 0 : null" [attr.role]="clickable() ? 'button' : null">
         <h3 class="chart-section__title">Répartition des dépenses</h3>
         <div class="chart-container">
           <canvas baseChart type="doughnut" [data]="chartData()" [options]="chartOptions()"></canvas>
@@ -93,7 +95,7 @@ export class BudgetChart {
     if (this.unbudgetedTotal() > 0) {
       labels.push('Autre');
       data.push(this.unbudgetedTotal());
-      colors.push('#9ca3af');
+      colors.push(UNBUDGETED_COLOR);
     }
 
     if (labels.length === 0) {

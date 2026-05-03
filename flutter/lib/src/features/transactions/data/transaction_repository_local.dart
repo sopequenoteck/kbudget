@@ -1,3 +1,4 @@
+import 'package:diacritic/diacritic.dart';
 import 'package:k_budget/src/data/local/daos/transaction_dao.dart';
 import 'package:k_budget/src/data/local/mappers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -51,6 +52,23 @@ class TransactionRepositoryLocal implements TransactionRepository {
   Future<void> delete(String id) async {
     await _dao.deleteTransaction(id);
   }
+
+  @override
+  Future<List<String>> getLibelleSuggestions(
+    String query, {
+    int limit = 20,
+  }) async {
+    final libelles = await _dao.getLibelleSuggestions(limit: limit);
+
+    if (query.isEmpty) return libelles;
+
+    final normalizedQuery = _normalize(query);
+    return libelles
+        .where((l) => _normalize(l).contains(normalizedQuery))
+        .toList();
+  }
+
+  String _normalize(String s) => removeDiacritics(s.toLowerCase());
 
   @override
   Future<List<MonthlySummary>> getMonthlySummary(int month, int year) async {

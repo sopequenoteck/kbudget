@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.TransactionRequest;
@@ -52,6 +53,9 @@ class TransactionControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private final UUID transactionId = UUID.randomUUID();
@@ -63,11 +67,11 @@ class TransactionControllerTest {
         testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     private AccountSummary buildAccountSummary() {
-        return new AccountSummary(accountId, "Compte Principal", "🏦", "#3b82f6", "EUR");
+        return new AccountSummary(accountId, "Compte Principal", "🏦", "#3b82f6", "EUR", null, null);
     }
 
     private String transactionJson(String montant, String libelle, String type, String date) {
@@ -85,7 +89,7 @@ class TransactionControllerTest {
     void should_return_201_when_create_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -104,7 +108,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_all_transactions() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -119,7 +123,7 @@ class TransactionControllerTest {
     void should_return_200_when_get_transaction_by_id() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 7), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.getById(transactionId, userId)).thenReturn(response);
 
@@ -133,7 +137,7 @@ class TransactionControllerTest {
     void should_return_200_when_update_transaction() throws Exception {
         var response = new TransactionResponse(
                 transactionId, new BigDecimal("75.00"), "Courses modifiées", TransactionType.DEPENSE,
-                LocalDate.of(2026, 2, 8), null, null, buildAccountSummary(), null, null, null, null);
+                LocalDate.of(2026, 2, 8), null, null, buildAccountSummary(), null, null);
 
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenReturn(response);
@@ -238,5 +242,48 @@ class TransactionControllerTest {
                         .content(transactionJson("250.00", "Ajustement", "AJUSTEMENT", "2026-02-19")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
+    }
+
+    // --- T-020 [US5] : 401 sans JWT ---
+
+    @Test
+    void should_return_401_when_unauthenticated() throws Exception {
+        mockMvc.perform(get("/transactions/libelles"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // --- T-021 [US5] : isolation des libellés par user ---
+
+    @Test
+    void should_isolate_libelles_by_user() throws Exception {
+        UUID userAId = UUID.randomUUID();
+        UUID userBId = UUID.randomUUID();
+        User userA = User.builder().id(userAId).email("usera@test.com").name("User A").build();
+        User userB = User.builder().id(userBId).email("userb@test.com").name("User B").build();
+
+        // userA se connecte avec son propre token
+        when(jwtUtil.isTokenValid("token-user-a")).thenReturn(true);
+        when(jwtUtil.extractEmail("token-user-a")).thenReturn("usera@test.com");
+        when(userRepository.findByEmailAndDisabledAtIsNull("usera@test.com")).thenReturn(Optional.of(userA));
+
+        // Les libellés de userA
+        List<String> libellesUserA = List.of("Salaire A", "Loyer A");
+        when(transactionService.getLibelleSuggestions(eq(userAId), any(), any()))
+                .thenReturn(libellesUserA);
+
+        // Les libellés de userB (ne doivent pas apparaître pour userA)
+        List<String> libellesUserB = List.of("Salaire B", "Loyer B");
+        when(transactionService.getLibelleSuggestions(eq(userBId), any(), any()))
+                .thenReturn(libellesUserB);
+
+        // Appel en tant que userA → doit retourner uniquement les libellés de A
+        mockMvc.perform(get("/transactions/libelles")
+                        .header("Authorization", "Bearer token-user-a"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("Salaire A"))
+                .andExpect(jsonPath("$[1]").value("Loyer A"))
+                // Assertions croisées : aucun libellé de userB ne doit apparaître
+                .andExpect(jsonPath("$[?(@=='Salaire B')]").isEmpty())
+                .andExpect(jsonPath("$[?(@=='Loyer B')]").isEmpty());
     }
 }

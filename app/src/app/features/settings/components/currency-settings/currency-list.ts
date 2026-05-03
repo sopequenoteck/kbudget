@@ -39,46 +39,59 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
   template: `
     <!-- Section : Mes devises -->
     <div class="settings-section">
-      <h3 class="settings-section__title">Mes devises</h3>
-      <div class="currencies-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-        @for (currency of currencies(); track currency; let i = $index) {
-          <div class="currency-item" cdkDrag>
-            <div class="currency-item__handle" cdkDragHandle>
-              <ng-icon name="phosphorDotsSixVertical" size="20" />
-            </div>
-            <span class="currency-item__symbol">{{ CURRENCY_SYMBOLS[currency] || currency }}</span>
-            <span class="currency-item__name">{{ CURRENCY_NAMES[currency] || currency }}</span>
-            @if (i === 0) {
-              <span class="currency-item__badge">Principale</span>
-            }
-            @if (i > 0) {
-              <button class="currency-item__delete icon-btn icon-btn--danger" (click)="removeCurrency(currency)" aria-label="Supprimer cette devise">
-                <ng-icon name="phosphorTrash" size="18" />
-              </button>
-            }
-          </div>
+      <div class="settings-section__header">
+        <span class="settings-section__title">Mes devises</span>
+        @if (availableCurrenciesToAdd().length > 0) {
+          <button class="add-btn" (click)="showAddSheet.set(true)">
+            <ng-icon name="phosphorPlus" size="16" />
+          </button>
         }
       </div>
-
-      @if (availableCurrenciesToAdd().length > 0) {
-        <div class="add-currency">
-          <select class="add-currency__select form-select" #currencySelect>
-            <option value="" disabled selected>Ajouter une devise...</option>
-            @for (c of availableCurrenciesToAdd(); track c) {
-              <option [value]="c">{{ CURRENCY_SYMBOLS[c] }} — {{ CURRENCY_NAMES[c] }}</option>
-            }
-          </select>
-          <button class="btn btn--primary" (click)="addCurrency(currencySelect.value); currencySelect.value = ''">
-            <ng-icon name="phosphorPlus" size="18" />
-            Ajouter
-          </button>
+      <div class="section-content">
+        <div class="currencies-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+          @for (currency of currencies(); track currency; let i = $index) {
+            <div class="currency-item" cdkDrag>
+              <div class="currency-item__handle" cdkDragHandle>
+                <ng-icon name="phosphorDotsSixVertical" size="18" />
+              </div>
+              <span class="currency-item__symbol">{{ CURRENCY_SYMBOLS[currency] || currency }}</span>
+              <span class="currency-item__name">{{ CURRENCY_NAMES[currency] || currency }}</span>
+              @if (i === 0) {
+                <span class="currency-item__badge">Principale</span>
+              }
+              @if (i > 0) {
+                <button class="btn-action btn-action--danger" (click)="removeCurrency(currency)" aria-label="Supprimer cette devise">
+                  <ng-icon name="phosphorTrash" size="16" />
+                </button>
+              }
+            </div>
+          }
         </div>
-      }
+      </div>
     </div>
+
+    <!-- Sélection devise -->
+    @if (showAddSheet()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+      <div class="dialog-overlay" (click)="showAddSheet.set(false)">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
+        <div class="dialog" (click)="$event.stopPropagation()">
+          <p class="dialog__title">Ajouter une devise</p>
+          @for (c of availableCurrenciesToAdd(); track c) {
+            <button class="dialog__option" (click)="addCurrency(c); showAddSheet.set(false)">
+              <span class="dialog__option-symbol">{{ CURRENCY_SYMBOLS[c] }}</span>
+              <span>{{ CURRENCY_NAMES[c] }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
 
     <!-- Warning : devise utilisée par des comptes -->
     @if (showRemoveWarning()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="showRemoveWarning.set(false)">
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
           <p class="dialog__message">
             La devise <strong>{{ CURRENCY_NAMES[currencyToRemove()!] || currencyToRemove() }}</strong>
@@ -92,209 +105,116 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       </div>
     }
   `,
-  styles: [
-    `
-      .settings-section {
-        background: var(--surface-default);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-xl);
-        padding: var(--space-5);
-        margin-bottom: var(--space-4);
+  styles: [`
+    .settings-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      margin-bottom: var(--space-2);
+    }
 
-        &__title {
-          display: flex;
-          align-items: center;
-          gap: var(--space-2);
-          font-size: var(--font-size-sm);
-          font-weight: var(--font-weight-semibold);
-          color: var(--text-primary);
-          margin-bottom: var(--space-2);
-        }
+    .settings-section__title {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+    }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-round);
+      background: transparent;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      &:active { color: var(--text-primary); background-color: var(--hover-bg); }
+    }
+
+    .section-content {
+      background: var(--surface-default);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .currencies-list { display: flex; flex-direction: column; }
+
+    .currency-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-default);
+
+      &__handle { color: var(--text-tertiary); cursor: grab; display: flex; align-items: center; }
+      &__symbol { font-weight: var(--font-weight-semibold); min-width: 40px; color: var(--text-secondary); font-size: var(--font-size-sm); }
+      &__name { flex: 1; font-size: var(--font-size-sm); color: var(--text-tertiary); }
+      &__badge {
+        font-size: var(--font-size-2xs); color: var(--text-tertiary); background: transparent;
+        border: 1px solid var(--border-default); padding: var(--space-1) var(--space-2);
+        border-radius: var(--radius-round); font-weight: var(--font-weight-medium);
       }
+    }
 
-      .currencies-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-1);
-        margin-bottom: var(--space-3);
+    .btn-action {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border: none; border-radius: var(--radius-round);
+      background: transparent; color: var(--text-tertiary); cursor: pointer;
+
+      &--danger { color: var(--color-expense); }
+      &:active { background-color: var(--hover-bg); }
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-1-5);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-round);
+      font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+      font-family: inherit; cursor: pointer; border: none;
+
+      &--ghost { background: transparent; border: 1px solid var(--border-default); color: var(--text-secondary); }
+      &--danger { background-color: var(--color-expense); color: white; }
+    }
+
+    .dialog-overlay {
+      position: fixed; inset: 0; background: var(--surface-overlay);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4);
+    }
+    .dialog {
+      background: var(--surface-default); border-radius: var(--radius-xl);
+      padding: var(--space-5); max-width: 400px; width: 100%;
+
+      &__title {
+        font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);
+        color: var(--text-primary); margin-bottom: var(--space-3);
       }
-
-      .currency-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: var(--space-3);
-        background: var(--surface-raised);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-subtle);
-        cursor: grab;
-
-        &__handle {
-          color: var(--text-secondary);
-          cursor: grab;
-          display: flex;
-          align-items: center;
-        }
-
-        &__symbol {
-          font-weight: var(--font-weight-semibold);
-          min-width: 40px;
-          color: var(--text-primary);
-        }
-
-        &__name {
-          flex: 1;
-          font-size: var(--font-size-sm);
-          color: var(--text-secondary);
-        }
-
-        &__badge {
-          font-size: var(--font-size-xs);
-          color: var(--color-primary);
-          background: var(--color-primary-container, rgba(245, 158, 11, 0.12));
-          padding: 2px 8px;
-          border-radius: var(--radius-round, 9999px);
-          font-weight: var(--font-weight-medium);
-        }
-
-        &__delete {
-          width: 32px;
-          height: 32px;
-        }
+      &__message { font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: var(--space-4); line-height: 1.5; }
+      &__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+      &__option {
+        display: flex; align-items: center; gap: var(--space-3);
+        width: 100%; padding: var(--space-3) 0; border: none; border-bottom: 1px solid var(--border-default);
+        background: transparent; color: var(--text-secondary); font-size: var(--font-size-sm);
+        font-family: inherit; cursor: pointer; text-align: left;
+        &:last-child { border-bottom: none; }
+        &:active { color: var(--text-primary); }
       }
-
-      .add-currency {
-        display: flex;
-        gap: var(--space-2);
-
-        &__select {
-          flex: 1;
-        }
+      &__option-symbol {
+        font-weight: var(--font-weight-semibold); min-width: 40px; color: var(--text-tertiary);
       }
+    }
 
-      .icon-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: var(--radius-md);
-        background: transparent;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: background-color var(--duration-fast) var(--easing-default),
-          color var(--duration-fast) var(--easing-default);
-
-        &:hover {
-          background-color: var(--hover-bg);
-          color: var(--text-primary);
-        }
-
-        &--danger:hover {
-          background-color: var(--color-error-light, rgba(239, 68, 68, 0.1));
-          color: var(--color-error, #ef4444);
-        }
-      }
-
-      .form-select {
-        padding: var(--space-2) var(--space-3);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
-        background: var(--surface-default);
-        color: var(--text-primary);
-        font-size: var(--font-size-sm);
-        cursor: pointer;
-        appearance: auto;
-
-        &:focus {
-          outline: 2px solid var(--color-primary);
-          outline-offset: 2px;
-        }
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-medium);
-        cursor: pointer;
-        transition: opacity var(--duration-fast) var(--easing-default),
-          background-color var(--duration-fast) var(--easing-default);
-        border: none;
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        &--primary {
-          background-color: var(--color-primary);
-          color: var(--text-inverse);
-
-          &:hover:not(:disabled) {
-            opacity: 0.85;
-          }
-        }
-
-        &--ghost {
-          background: transparent;
-          border: 1px solid var(--border-default);
-          color: var(--text-secondary);
-
-          &:hover:not(:disabled) {
-            background-color: var(--hover-bg);
-            color: var(--text-primary);
-          }
-        }
-
-        &--danger {
-          background-color: var(--color-error, #ef4444);
-          color: white;
-
-          &:hover:not(:disabled) {
-            opacity: 0.85;
-          }
-        }
-      }
-
-      .dialog-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: var(--space-4);
-      }
-
-      .dialog {
-        background: var(--surface-default);
-        border-radius: var(--radius-xl);
-        padding: var(--space-6);
-        max-width: 400px;
-        width: 100%;
-        box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
-
-        &__message {
-          font-size: var(--font-size-sm);
-          color: var(--text-primary);
-          margin-bottom: var(--space-5);
-          line-height: 1.5;
-        }
-
-        &__actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: var(--space-2);
-        }
-      }
-    `,
-  ],
+    .cdk-drag-preview {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4); background-color: var(--surface-raised);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); font-size: var(--font-size-sm);
+    }
+    .cdk-drag-placeholder { opacity: 0.3; }
+  `],
 })
 export class CurrencyList {
   readonly currencies = input.required<string[]>();
@@ -306,6 +226,7 @@ export class CurrencyList {
   readonly CURRENCY_NAMES = CURRENCY_NAMES;
   readonly AVAILABLE_CURRENCIES = AVAILABLE_CURRENCIES;
 
+  readonly showAddSheet = signal(false);
   readonly showRemoveWarning = signal(false);
   readonly currencyToRemove = signal<string | null>(null);
 

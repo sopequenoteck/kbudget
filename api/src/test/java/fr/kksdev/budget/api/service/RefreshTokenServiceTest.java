@@ -25,7 +25,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,7 +88,7 @@ class RefreshTokenServiceTest {
         when(refreshTokenRepository.findByToken("valid-token")).thenReturn(Optional.of(existingToken));
         when(refreshTokenRepository.save(any(RefreshToken.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(jwtUtil.generateToken("test@mail.com")).thenReturn("new-access-token");
+        when(jwtUtil.generateToken(eq("test@mail.com"), eq(Map.of()))).thenReturn("new-access-token");
 
         var response = refreshTokenService.refreshAccessToken("valid-token");
 
@@ -108,7 +111,7 @@ class RefreshTokenServiceTest {
         when(refreshTokenRepository.findByToken("old-token")).thenReturn(Optional.of(existingToken));
         when(refreshTokenRepository.save(any(RefreshToken.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(jwtUtil.generateToken("test@mail.com")).thenReturn("new-access-token");
+        when(jwtUtil.generateToken(eq("test@mail.com"), eq(Map.of()))).thenReturn("new-access-token");
 
         refreshTokenService.refreshAccessToken("old-token");
 

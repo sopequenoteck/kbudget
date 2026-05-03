@@ -1,0 +1,49 @@
+<div class="idp">
+  <!-- Header: nav + month label -->
+  <div class="idp__header">
+    <button
+      class="idp__nav-btn"
+      type="button"
+      (click)="prevMonth()"
+      aria-label="Mois précédent"
+    >‹</button>
+
+    <button
+      class="idp__month-label"
+      type="button"
+      (click)="goToToday()"
+      title="Revenir au mois actuel"
+    >{{ monthLabel() }}</button>
+
+    <button
+      class="idp__nav-btn"
+      type="button"
+      (click)="nextMonth()"
+      aria-label="Mois suivant"
+    >›</button>
+  </div>
+
+  <!-- Day headers: L M M J V S D -->
+  <div class="idp__grid">
+    @for (header of dayHeaders; track $index) {
+      <div class="idp__day-header">{{ header }}</div>
+    }
+
+    <!-- Calendar days -->
+    @for (day of calendarDays(); track day.isoDate) {
+      <button
+        class="idp__day"
+        type="button"
+        [class.idp__day--selected]="day.isSelected"
+        [class.idp__day--original]="day.isOriginal"
+        [class.idp__day--today]="day.isToday && !day.isSelected && !day.isOriginal"
+        [class.idp__day--outside]="!day.isCurrentMonth"
+        [class.idp__day--disabled]="day.isDisabled"
+        [disabled]="day.isDisabled"
+        (click)="selectDay(day)"
+        [attr.aria-label]="day.isoDate"
+        [attr.aria-pressed]="day.isSelected"
+      >{{ day.dayNumber }}</button>
+    }
+  </div>
+</div>

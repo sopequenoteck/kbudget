@@ -1,315 +1,94 @@
 # K-Budget
 
-Application personnelle de gestion de budget : transactions (depenses/recettes), abonnements recurrents et suivi de dettes. Single-user, self-hosted.
+Application de gestion de budget personnel. Self-hosted, single-user, mobile-first.
 
-Monorepo avec trois modules :
+Gérez vos finances au quotidien : transactions, abonnements, dettes, budgets. Multi-devises (EUR, XOF, USD, GBP, CHF, CAD, MAD), multi-comptes, import CSV bancaire.
 
-- `api/` — Backend Spring Boot (API REST)
-- `app/` — Frontend Angular PWA (mobile-first)
-- `flutter/` — App mobile native Flutter (`k_budget`)
+> *English version coming soon*
 
-## Stack technique
+<p>
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="383" height="829">
+  <img src="docs/screenshots/transactions.png" alt="Transactions" width="386" height="831">
+  <img src="docs/screenshots/budget.png" alt="Budgets" width="383" height="921">
+</p>
 
-| Couche | Technologie |
-|--------|-------------|
-| Backend | Java 21, Spring Boot 4.0.2, Maven |
-| Frontend | Angular 21, TypeScript 5.9, SCSS |
-| Base de donnees | PostgreSQL 15+ |
-| Auth | Spring Security + JWT (jjwt 0.12.6) |
-| Migrations | Flyway |
-| Reverse proxy | Caddy (auto-HTTPS) |
+## Fonctionnalités
 
-## Prerequis
+- **Transactions** — Dépenses et recettes, saisie rapide en 2-3 taps, bilan mensuel, transactions récurrentes, virements entre comptes
+- **Abonnements** — Vue centralisée, total mensuel, paiement en un clic, historique et cumul
+- **Dettes & prêts** — Suivi des remboursements (partiels ou totaux), rappels configurables, multi-devises, inclusion optionnelle dans le solde
+- **Budgets** — Par catégorie (hebdo/mensuel/annuel), seuil d'alerte configurable, historique avec snapshots mensuels, detection des dépenses hors budget
+- **Import CSV** — Detection automatique du profil bancaire, preview, dedup Jaro-Winkler, règles de categorisation par pattern
+- **Multi-comptes** — Courant, épargné, espèces. 29 banques supportées (FR/TG/International). Solde total agrégé par devise
+- **Personnalisation** — Features activables, ordre de navigation, devise principale, taille de texte, notifications
 
-- Java 21+, Maven 3.9+, PostgreSQL 15+
-- Node.js 20+, npm 10+
-- Flutter >= 3.27, Dart >= 3.6
+## Stack
 
-## Installation
+| Couche          | Technologie                                   |
+|-----------------|-----------------------------------------------|
+| Backend         | Java 21, Spring Boot 4.0.2, Maven, Flyway     |
+| Frontend        | Angular 21, TypeScript 5.9, SCSS              |
+| Mobile          | Flutter >= 3.27, Dart >= 3.6, Riverpod, Drift |
+| Base de donnees | PostgreSQL 15+                                |
+| Auth            | Spring Security + JWT                         |
+| Infra           | Docker + Caddy (auto-HTTPS)                   |
 
-### 1. Base de donnees
+## Quickstart
 
-Creer la base et l'utilisateur PostgreSQL :
-
-```sql
-CREATE USER budget_u WITH PASSWORD 'changeme';
-CREATE DATABASE budget_db OWNER budget_u;
-```
-
-Les tables sont creees automatiquement par Flyway au premier demarrage.
-
-### 2. Configuration
-
-Copier le fichier d'environnement et adapter les valeurs :
+### Docker (recommande)
 
 ```bash
-cp .env.example .env
+git clone https://github.com/kksdev/k-budget.git
+cd k-budget
+cp .env.example .env   # Éditer avec vos valeurs (DB_USERNAME, DB_PASSWORD, JWT_SECRET)
+docker compose up -d
 ```
 
-Variables requises :
+L'API démarre sur `http://localhost:8080/api`. Le frontend sur `http://localhost:4200`.
 
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `DB_URL` | URL JDBC PostgreSQL | `jdbc:postgresql://localhost:5432/budget_db` |
-| `DB_USERNAME` | Utilisateur BDD | `budget_u` |
-| `DB_PASSWORD` | Mot de passe BDD | `changeme` |
-| `JWT_SECRET` | Cle secrete JWT (min 256 bits) | une chaine aleatoire longue |
-
-### 3. Lancement
+### Manuel
 
 ```bash
-# Lancement (profil prod par defaut, ajouter -Dspring-boot.run.profiles=dev pour le dev)
+# 1. PostgresSQL
+psql -c "CREATE USER budget_u WITH PASSWORD 'changeme';"
+psql -c "CREATE DATABASE budget_db OWNER budget_u;"
+
+# 2. Configuration
+cp .env.example .env   # Éditer les 4 variables (DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET)
+
+# 3. Backend
 cd api && mvn spring-boot:run
 
-# Ou avec variables d'environnement explicites
-DB_URL=jdbc:postgresql://localhost:5432/budget_db \
-DB_USERNAME=budget_u \
-DB_PASSWORD=changeme \
-JWT_SECRET=ma-cle-secrete-256-bits \
-cd api && mvn spring-boot:run
+# 4. Frontend
+cd app && npm ci && ng serve
 ```
 
-L'API demarre sur `http://localhost:8080/api`.
+> Pour le déploiement en production (bare-metal, Caddy, backups), voir [`docs/deployment.md`](docs/deployment.md).
 
-## Commandes
-
-### Backend (api/)
-
-```bash
-cd api
-
-mvn clean compile          # Compilation
-mvn test                   # Tests
-mvn test -Dtest=NomDuTest  # Test unique
-mvn clean install          # Build complet
-mvn spring-boot:run        # Lancement
-```
-
-### Frontend (app/)
-
-```bash
-cd app
-
-ng serve                   # Dev server (http://localhost:4200)
-ng build                   # Build
-ng test                    # Tests unitaires
-ng build --configuration production  # Build prod
-```
-
-## Endpoints API
-
-Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <token>`.
-
-### Authentification
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/auth/register` | Inscription |
-| POST | `/api/auth/login` | Connexion |
-| POST | `/api/auth/refresh` | Renouvellement des tokens |
-| POST | `/api/auth/logout` | Deconnexion (revocation du refresh token) |
-
-### Transactions
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/transactions` | Creer une transaction |
-| GET | `/api/transactions` | Lister les transactions |
-| GET | `/api/transactions/{id}` | Detail d'une transaction |
-| PUT | `/api/transactions/{id}` | Modifier une transaction |
-| DELETE | `/api/transactions/{id}` | Supprimer une transaction |
-| GET | `/api/transactions/summary?month=X&year=Y` | Bilan mensuel |
-
-### Abonnements
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/subscriptions` | Creer un abonnement |
-| GET | `/api/subscriptions` | Lister (filtre `?actif=true`) |
-| GET | `/api/subscriptions/{id}` | Detail |
-| PUT | `/api/subscriptions/{id}` | Modifier |
-| DELETE | `/api/subscriptions/{id}` | Supprimer |
-| POST | `/api/subscriptions/{id}/pay` | Payer un abonnement (cree une transaction) |
-| GET | `/api/subscriptions/{id}/payments` | Historique des paiements |
-| GET | `/api/subscriptions/{id}/payments/total` | Cumul des paiements |
-
-### Transactions recurrentes
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/transactions/recurring` | Creer une transaction recurrente |
-| GET | `/api/transactions/recurring` | Lister les recurrences actives |
-| POST | `/api/transactions/recurring/{id}/validate` | Valider une occurrence (cree une transaction) |
-| PATCH | `/api/transactions/recurring/{id}/skip` | Passer une occurrence |
-| PATCH | `/api/transactions/recurring/{id}/deactivate` | Desactiver une recurrence |
-
-### Dettes
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/debts` | Creer une dette |
-| GET | `/api/debts` | Lister (filtre `?rembourse=false`) |
-| GET | `/api/debts/{id}` | Detail |
-| PUT | `/api/debts/{id}` | Modifier |
-| DELETE | `/api/debts/{id}` | Supprimer |
-| POST | `/api/debts/{id}/repay` | Rembourser (partiel ou total) |
-| GET | `/api/debts/{id}/payments` | Historique des remboursements |
-| POST | `/api/debts/{id}/snooze` | Reporter le rappel |
-
-### Comptes
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/accounts` | Creer un compte |
-| GET | `/api/accounts` | Lister les comptes (filtre `?includeInactive=true`) |
-| GET | `/api/accounts/{id}` | Detail |
-| PUT | `/api/accounts/{id}` | Modifier |
-| DELETE | `/api/accounts/{id}` | Supprimer |
-| POST | `/api/accounts/transfer` | Virement entre deux comptes |
-| PUT | `/api/accounts/{id}/default` | Definir comme compte par defaut |
-| GET | `/api/accounts/total-balance` | Solde total (comptes + dettes) par devise |
-
-### Banques
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/banks` | Lister les 29 banques supportees (public, sans auth) |
-
-### Categories
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/categories` | Creer une categorie |
-| GET | `/api/categories` | Lister les categories |
-| GET | `/api/categories/{id}` | Detail |
-| PUT | `/api/categories/{id}` | Modifier |
-| DELETE | `/api/categories/{id}` | Supprimer |
-
-### Produits
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/products` | Creer un produit |
-| GET | `/api/products` | Lister les produits (`?includeInactive=true` pour inclure les inactifs) |
-| GET | `/api/products/{id}` | Detail d'un produit |
-| PUT | `/api/products/{id}` | Modifier un produit |
-| DELETE | `/api/products/{id}` | Supprimer un produit |
-| POST | `/api/products/{id}/sell` | Vendre N unites (body `{"quantity": N}` optionnel, defaut 1) |
-| POST | `/api/products/{id}/restock` | Réapprovisionner (stock +qty, transaction DEPENSE) |
-| GET | `/api/products/{id}/sales` | Historique des transactions liées au produit |
-
-### Preferences utilisateur
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/users/me/preferences` | Consulter les preferences (features activees + ordre nav) |
-| PUT | `/api/users/me/preferences` | Mettre a jour les preferences |
-
-### Taux de conversion
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/exchange-rates` | Lister les taux de l'utilisateur |
-| PUT | `/api/exchange-rates` | Creer ou mettre a jour un taux (upsert) |
-| DELETE | `/api/exchange-rates/{base}/{target}` | Supprimer un taux |
-
-### Import CSV
-
-| Methode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/imports/upload` | Upload CSV et creation brouillon (auto-detection profil) |
-| POST | `/api/imports/upload-with-mapping` | Upload CSV avec mapping manuel des colonnes |
-| POST | `/api/imports/preview` | Preview CSV (headers, separateur, encoding) |
-| GET | `/api/imports/drafts` | Lister les brouillons PENDING |
-| GET | `/api/imports/drafts/{draftId}` | Detail d'un brouillon avec lignes |
-| PUT | `/api/imports/drafts/{draftId}/lines/{lineId}` | Mettre a jour une ligne (categorie, statut) |
-| PUT | `/api/imports/drafts/{draftId}/lines/batch` | Actions groupees sur plusieurs lignes |
-| POST | `/api/imports/drafts/{draftId}/confirm` | Confirmer et creer les transactions |
-| DELETE | `/api/imports/drafts/{draftId}` | Supprimer un brouillon |
-| GET | `/api/imports/history` | Historique pagine des imports finalises |
-| GET | `/api/imports/profiles` | Profils pre-configures et personnalises |
-| DELETE | `/api/imports/profiles/{profileId}` | Supprimer un profil personnalise |
-| GET | `/api/imports/rules` | Regles de categorisation |
-| POST | `/api/imports/rules` | Creer une regle de categorisation |
-| PUT | `/api/imports/rules/{ruleId}` | Modifier une regle |
-| DELETE | `/api/imports/rules/{ruleId}` | Supprimer une regle |
-
-Pour les exemples de payloads (request/response), voir [`docs/api-examples.md`](docs/api-examples.md).
-
-## Architecture
-
-### Structure monorepo
+## Structure du projet
 
 ```
-budget/
-├── api/           # Backend Spring Boot
-├── app/           # Frontend Angular PWA (k-budget-app)
-├── flutter/       # App mobile native Flutter (k_budget)
-├── scripts/       # Scripts utilitaires (Python, maintenance)
+k-budget/
+├── api/           # Backend Spring Boot (API REST)
+├── app/           # Frontend Angular PWA
+├── flutter/       # App mobile native Flutter
 ├── deploy/        # Caddyfile, systemd, scripts
-└── docs/          # Documentation
+├── docs/          # Documentation technique
+└── scripts/       # Scripts utilitaires
 ```
 
-### Backend (api/)
+## Documentation
 
-```
-api/src/main/java/fr/kksdev/budget/api/
-├── config/        # SecurityConfig, JwtFilter, JwtUtil, GlobalExceptionHandler, WebSocketConfig, StompAuthInterceptor, SchedulingConfig
-├── controller/    # REST endpoints (Auth, Transaction, RecurringTransaction, Subscription, Debt, Category, Account, Bank, Product, ExchangeRate, Preference, Notification, Import)
-├── service/       # Logique metier
-├── repository/    # Spring Data JPA
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, Product, ExchangeRate, UserPreference, Notification)
-├── dto/
-│   ├── request/   # DTOs d'entree (validation Bean Validation)
-│   └── response/  # DTOs de sortie
-└── enums/         # TransactionType, Frequency, DebtType, TokenStatus, AccountType, Feature, Currency, NotificationType, EntityType, ImportDraftStatus, ImportLineStatus, ImportProfileSource
-```
+| Document                                         | Contenu                                                                  |
+|--------------------------------------------------|--------------------------------------------------------------------------|
+| [`docs/vision.md`](docs/vision.md)               | Vision produit, modules fonctionnels, principes UX                       |
+| [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (17 entites), structure frontend |
+| [`docs/api-examples.md`](docs/api-examples.md)   | Exemples de requetes et reponses pour chaque endpoint                    |
+| [`docs/api-errors.md`](docs/api-errors.md)       | Contrat d'erreurs HTTP et guide d'integration                            |
+| [`docs/deployment.md`](docs/deployment.md)       | Deploiement Docker, bare-metal, reverse proxy, backup                    |
+| [`docs/design-tokens.md`](docs/design-tokens.md) | Couleurs, typographie, spacing, radius, ombres, animations               |
+| **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (quand l'app tourne)         |
 
-### Frontend (app/)
+## Licence
 
-```
-app/src/
-├── app/
-│   ├── core/          # Services singleton, guards, interceptors
-│   ├── shared/        # Composants/pipes/directives reutilisables
-│   └── features/      # Modules lazy-loaded par feature
-├── environments/      # Config dev/prod (apiUrl)
-└── styles/            # SCSS globaux
-```
-
-Architecture en couches : Controller -> Service -> Repository. Les entites JPA ne sont jamais exposees directement — toujours via DTOs.
-
-## Securite
-
-- JWT stateless, access token valide 15 minutes, refresh token valide 30 jours
-- Toutes les routes protegees sauf `/api/auth/**`, `/api/actuator/health`, `/api/banks` et `/api/bank-logos/**`
-- Chaque requete filtre les donnees par l'utilisateur authentifie (isolation)
-- Mots de passe hashes en BCrypt
-- Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`, `@Positive`)
-
-## Profils Spring
-
-| Profil | Usage | BDD | DDL |
-|--------|-------|-----|-----|
-| `dev` | Developpement local | PostgreSQL local, fallback config | `validate` |
-| `prod` | Production | Variables d'environnement obligatoires | `validate` |
-| `test` | Tests automatises | H2 en memoire | `create-drop` |
-
-## Tests
-
-```bash
-cd api && mvn test
-```
-
-442 tests couvrant services, controllers, repositories et configuration. Nommage : `should_[resultat]_when_[condition]`.
-
-## Documentation complementaire
-
-- **Swagger UI** : [http://localhost:8080/api/swagger-ui.html](http://localhost:8080/api/swagger-ui.html) — Documentation interactive de l'API (disponible quand l'application tourne)
-- **Spec OpenAPI JSON** : [http://localhost:8080/api/v3/api-docs](http://localhost:8080/api/v3/api-docs)
-- [`docs/vision.md`](docs/vision.md) — Vision produit et modules fonctionnels
-- [`docs/architecture.md`](docs/architecture.md) — Decisions techniques, modele de donnees et ecrans frontend
-- [`docs/api-examples.md`](docs/api-examples.md) — Exemples de requetes et reponses pour chaque endpoint
-- [`docs/api-errors.md`](docs/api-errors.md) — Contrat d'erreurs HTTP et guide d'integration frontend
-- [`docs/deployment.md`](docs/deployment.md) — Guide de deploiement (Docker, bare-metal, reverse proxy, backup)
-- [`docs/design-tokens.md`](docs/design-tokens.md) — Reference unique des design tokens partages (couleurs, typographie, spacing, radius, ombres, animations)
+<!-- TODO: définir la licence -->

@@ -4,32 +4,53 @@ Exemples de payloads (request/response) pour chaque endpoint. Toutes les routes 
 
 ## Authentification
 
-### Inscription `POST /api/auth/register`
+### Inscription publique
 
-Request :
+**Route supprimee** depuis KKS-232 (conformite constitution principe VII). L'onboarding se fait via invitation admin — voir `POST /api/auth/accept-invite` ci-dessous.
 
-```json
-{
-  "email": "user@example.com",
-  "password": "secret123",
-  "name": "Kelly",
-  "currency": "XOF",
-  "timezone": "Africa/Lome"
-}
-```
+### Valider un token d'invitation `GET /api/auth/invitations/{token}` (public)
 
-> `currency` et `timezone` sont optionnels. Defauts : `EUR` et `Europe/Paris`.
+Request : aucun body. Exemple : `GET /api/auth/invitations/8b3f7c2a-...`
 
 Response `200` :
 
 ```json
 {
-  "token": "eyJhbGciOi...",
-  "refreshToken": "a1b2c3d4e5f6...",
-  "email": "user@example.com",
-  "name": "Kelly"
+  "email": "nouveau@example.com"
 }
 ```
+
+Response `404` : token invalide, expire, utilise ou revoque (indifferencie).
+
+### Accepter une invitation `POST /api/auth/accept-invite` (public)
+
+Request :
+
+```json
+{
+  "token": "8b3f7c2a-4d5e-...",
+  "password": "secret123",
+  "displayName": "Kelly",
+  "currency": "XOF",
+  "timezone": "Africa/Lome"
+}
+```
+
+> `email` n'est **pas** dans le body — l'email vient de l'invitation (verrouille cote serveur).
+
+Response `201` :
+
+```json
+{
+  "token": "eyJhbGciOi...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "email": "nouveau@example.com",
+  "name": "Kelly",
+  "mustResetCredentials": false
+}
+```
+
+Response `404` : token invalide/expire/utilise/revoque.
 
 ### Connexion `POST /api/auth/login`
 
@@ -49,9 +70,44 @@ Response `200` :
   "token": "eyJhbGciOi...",
   "refreshToken": "a1b2c3d4e5f6...",
   "email": "user@example.com",
-  "name": "Kelly"
+  "name": "Kelly",
+  "mustResetCredentials": false
 }
 ```
+
+> Le champ `mustResetCredentials` est `true` uniquement pour le compte admin bootstrappé (KKS-233) tant qu'il n'a pas complete son premier reset. Dans ce cas le JWT emis porte un claim `mustResetCredentials` et le filtre `PasswordResetRequiredFilter` bloque tous les endpoints sauf `POST /auth/first-login-reset` et `POST /auth/logout` avec `403 PASSWORD_RESET_REQUIRED`.
+
+### Premier reset des credentials `POST /api/auth/first-login-reset` (KKS-233)
+
+Endpoint utilise uniquement lors du premier demarrage d'une instance vierge, pour permettre a l'admin seed (cree par le `BootstrapSeedRunner` avec un mot de passe aleatoire affiche dans les logs) de definir ses credentials definitifs.
+
+Request (Authorization: Bearer avec JWT portant le claim `mustResetCredentials: true`) :
+
+```json
+{
+  "email": "kelly@exemple.com",
+  "password": "NouveauMotDePasseFort123",
+  "displayName": "Kelly"
+}
+```
+
+Response `200` — nouveau JWT sans le claim, flag `password_reset_required` remis a `false` en DB :
+
+```json
+{
+  "token": "eyJhbGciOi...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "email": "kelly@exemple.com",
+  "name": "Kelly",
+  "mustResetCredentials": false
+}
+```
+
+Response `400 PASSWORD_UNCHANGED` : le nouveau mot de passe est identique a celui actuellement en base.
+
+Response `403 PASSWORD_RESET_NOT_REQUIRED` : le user authentifie a deja `password_reset_required = false` (reset deja effectue ou user ordinaire). Neutralise egalement les anciens JWT encore porteurs du claim apres que le reset ait ete fait par une autre session.
+
+Response `409 EMAIL_ALREADY_EXISTS` : l'email cible est deja utilise par un autre user.
 
 ### Renouvellement `POST /api/auth/refresh`
 
@@ -85,6 +141,91 @@ Request :
 ```
 
 Response `200` : (corps vide)
+
+## Administration
+
+> Endpoints proteges par `AdminAuthorizationFilter`. Requiert un JWT dont l'email figure dans `ADMIN_EMAILS` (env var). Sinon 403 Forbidden.
+
+### Creer une invitation `POST /api/admin/invitations`
+
+Request :
+
+```json
+{
+  "email": "nouveau@example.com"
+}
+```
+
+Response `201` :
+
+```json
+{
+  "token": "8b3f7c2a-4d5e-...",
+  "expiresAt": "2026-04-26T14:30:00Z"
+}
+```
+
+Le front compose le lien : `${origin}/auth/accept-invite/${token}` (TTL 7 jours). L'admin transmet le lien hors bande (Signal, SMS).
+
+### Lister les invitations `GET /api/admin/invitations`
+
+Response `200` : tri `createdAt DESC`, statut derive. Le champ `token` est expose uniquement pour les invitations `ACTIVE` (null pour EXPIRED/USED/REVOKED).
+
+```json
+[
+  {
+    "id": 42,
+    "email": "new@example.com",
+    "invitedByEmail": "admin@example.com",
+    "status": "ACTIVE",
+    "token": "8b3f7c2a-4d5e-...",
+    "createdAt": "2026-04-19T12:00:00Z",
+    "expiresAt": "2026-04-26T12:00:00Z",
+    "usedAt": null,
+    "revokedAt": null
+  }
+]
+```
+
+### Revoquer une invitation `DELETE /api/admin/invitations/{id}`
+
+Response `204` No Content. Positionne `revokedAt = now`. Le `GET /api/auth/invitations/{token}` retourne ensuite 404.
+
+### Lister les users `GET /api/admin/users`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "9fc3-...-uuid",
+    "email": "user@example.com",
+    "displayName": "Alice",
+    "createdAt": "2026-02-01T10:30:00",
+    "disabledAt": null,
+    "isAdmin": false
+  }
+]
+```
+
+### Desactiver un user `PATCH /api/admin/users/{id}/disable`
+
+Response `204` No Content. Positionne `disabledAt = now`. Le user ne peut plus s'authentifier (401 sur requetes authentifiees via `JwtFilter`).
+
+Erreur `409` si l'user cible est le dernier admin actif :
+
+```json
+{
+  "timestamp": "2026-04-19T14:30:25.123",
+  "status": 409,
+  "error": "LAST_ADMIN_CANNOT_BE_DISABLED",
+  "message": "Impossible de desactiver le dernier admin actif."
+}
+```
+
+### Reactiver un user `PATCH /api/admin/users/{id}/enable`
+
+Response `204` No Content. Remet `disabledAt = null`. Le user peut a nouveau se connecter.
 
 ## Transactions
 
@@ -131,6 +272,43 @@ Response `200` :
 }
 ```
 
+### Lister `GET /api/transactions?month=2&year=2026`
+
+Parametres optionnels : `month` et `year` pour filtrer par mois.
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "montant": 42.50,
+    "libelle": "Courses Carrefour",
+    "type": "DEPENSE",
+    "date": "2026-02-07",
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false },
+    "note": null,
+    "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" },
+    "transferId": null,
+    "debtId": null
+  }
+]
+```
+
+### Consulter `GET /api/transactions/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/transactions/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : la transaction mise a jour.
+
+### Supprimer `DELETE /api/transactions/{id}`
+
+Response `204` (corps vide).
+
 ### Bilan mensuel `GET /api/transactions/summary?month=2&year=2026`
 
 Response `200` :
@@ -144,6 +322,23 @@ Response `200` :
   "solde": 1299.50
 }
 ```
+
+### Libelles autocomplete `GET /api/transactions/libelles?q=car&limit=20`
+
+Retourne les libelles distincts de l'utilisateur authentifie, tries par frequence decroissante puis par date de derniere utilisation decroissante. Filtre `q` optionnel `contains` case-insensitive et accent-insensible. `limit` optionnel clampe a `[1, 50]` (defaut `20`).
+
+Response `200` :
+
+```json
+["Carrefour", "Carrefour Market", "Carte bleue"]
+```
+
+Exemples :
+- `GET /api/transactions/libelles` → tous les libelles tries par frequence
+- `GET /api/transactions/libelles?q=cafe` → "Cafe du coin" (accent-insensible)
+- `GET /api/transactions/libelles?q=market&limit=5` → max 5 libelles contenant "market"
+
+Erreur `401` si JWT absent ou invalide.
 
 ## Abonnements
 
@@ -249,6 +444,54 @@ Response `200` :
     "account": null
   }
 ]
+```
+
+### Consulter `GET /api/subscriptions/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Supprimer `DELETE /api/subscriptions/{id}`
+
+Response `204` (corps vide).
+
+### Payer `POST /api/subscriptions/{id}/pay`
+
+Response `201` :
+
+```json
+{
+  "id": "uuid-transaction",
+  "montant": 15.99,
+  "date": "2026-03-30",
+  "subscriptionName": "Netflix",
+  "accountName": "Compte Principal"
+}
+```
+
+### Historique paiements `GET /api/subscriptions/{id}/payments`
+
+Response `200` :
+
+```json
+[
+  {
+    "id": "uuid-transaction",
+    "montant": 15.99,
+    "date": "2026-03-01",
+    "subscriptionName": "Netflix",
+    "accountName": "Compte Principal"
+  }
+]
+```
+
+### Cumul paiements `GET /api/subscriptions/{id}/payments/total`
+
+Response `200` :
+
+```json
+{
+  "total": 191.88
+}
 ```
 
 ## Dettes
@@ -401,6 +644,14 @@ Request :
 
 Response `200` : la dette mise a jour avec les nouveaux `reminderDate` et `reminderTime`.
 
+### Consulter `GET /api/debts/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Supprimer `DELETE /api/debts/{id}`
+
+Response `204` (corps vide).
+
 ### Solde total `GET /api/accounts/total-balance`
 
 Response `200` :
@@ -448,7 +699,6 @@ Response `201` :
   "isDefault": false,
   "actif": true,
   "currency": "EUR",
-  "isShopAccount": false,
   "bankCode": "OTHER",
   "bankName": "Autre",
   "bankCountry": null,
@@ -476,7 +726,6 @@ Response `200` :
     "isDefault": true,
     "actif": true,
     "currency": "EUR",
-    "isShopAccount": false,
     "bankCode": "OTHER",
     "bankName": "Autre",
     "bankCountry": null,
@@ -496,7 +745,6 @@ Response `200` :
     "isDefault": false,
     "actif": true,
     "currency": "EUR",
-    "isShopAccount": false,
     "bankCode": "OTHER",
     "bankName": "Autre",
     "bankCountry": null,
@@ -547,6 +795,32 @@ Response `201` :
 }
 ```
 
+### Consulter `GET /api/accounts/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/accounts/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : le compte mis a jour.
+
+### Supprimer `DELETE /api/accounts/{id}`
+
+Response `204` (corps vide).
+
+### Ajuster le solde `POST /api/accounts/{id}/adjust-balance`
+
+Request :
+
+```json
+{
+  "newBalance": 1500.00
+}
+```
+
+Response `200` : le compte mis a jour avec le nouveau solde.
+
 ### Definir par defaut `PUT /api/accounts/{id}/default`
 
 Response `200` :
@@ -563,7 +837,6 @@ Response `200` :
   "isDefault": true,
   "actif": true,
   "currency": "EUR",
-  "isShopAccount": false,
   "bankCode": "OTHER",
   "bankName": "Autre",
   "bankCountry": null,
@@ -600,6 +873,20 @@ Response `200` :
 }
 ```
 
+### Consulter `GET /api/categories/{id}`
+
+Response `200` : meme format qu'un element de la liste.
+
+### Modifier `PUT /api/categories/{id}`
+
+Request : meme format que la creation.
+
+Response `200` : la categorie mise a jour.
+
+### Supprimer `DELETE /api/categories/{id}`
+
+Response `204` (corps vide). Erreur `409` si categorie systeme.
+
 ### Lister `GET /api/categories`
 
 Response `200` :
@@ -622,101 +909,6 @@ Response `200` :
   }
 ]
 ```
-
-## Produits
-
-### Creer `POST /api/products`
-
-Request :
-
-```json
-{
-  "nom": "T-shirt personnalise",
-  "description": "T-shirt 100% coton, impression personnalisee",
-  "icone": "👕",
-  "imageUrl": "https://example.com/tshirt.jpg",
-  "prixAchat": 8.50,
-  "prixVente": 15.00,
-  "stock": 25
-}
-```
-
-Response `201` :
-
-```json
-{
-  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "nom": "T-shirt personnalise",
-  "description": "T-shirt 100% coton, impression personnalisee",
-  "icone": "👕",
-  "imageUrl": "https://example.com/tshirt.jpg",
-  "prixAchat": 8.50,
-  "prixVente": 15.00,
-  "stock": 25,
-  "totalVendu": 0,
-  "actif": true,
-  "createdAt": "2026-02-28T10:30:00",
-  "updatedAt": "2026-02-28T10:30:00"
-}
-```
-
-### Lister `GET /api/products`
-
-Parametre optionnel : `?includeInactive=true` pour inclure les produits desactives (defaut `false`).
-
-Response `200` (tries par date de creation decroissante) :
-
-```json
-[
-  {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "nom": "T-shirt personnalise",
-    "description": "T-shirt 100% coton",
-    "icone": "👕",
-    "imageUrl": null,
-    "prixAchat": 8.50,
-    "prixVente": 15.00,
-    "stock": 25,
-    "totalVendu": 3,
-    "actif": true,
-    "createdAt": "2026-02-28T10:30:00",
-    "updatedAt": "2026-02-28T12:00:00"
-  }
-]
-```
-
-### Modifier `PUT /api/products/{id}`
-
-Request (remplacement complet, champ `actif` obligatoire) :
-
-```json
-{
-  "nom": "T-shirt personnalise v2",
-  "description": "T-shirt bio",
-  "icone": "👕",
-  "imageUrl": "https://example.com/tshirt-v2.jpg",
-  "prixAchat": 9.00,
-  "prixVente": 18.00,
-  "stock": 50,
-  "actif": true
-}
-```
-
-### Vendre `POST /api/products/{id}/sell`
-
-Request (body optionnel, defaut `quantity: 1`) :
-
-```json
-{
-  "quantity": 3
-}
-```
-
-Response `200` : le produit mis a jour (stock decremente, totalVendu incremente).
-
-### Supprimer `DELETE /api/products/{id}`
-
-Response `204` (corps vide, suppression physique).
 
 ## Taux de conversion
 
@@ -772,10 +964,8 @@ Response `200` (valeurs par defaut) :
 
 ```json
 {
-  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "shopAccountId": null,
-  "includeShopInBalance": false,
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"],
+  "navOrder": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"],
   "currencies": ["EUR"]
 }
 ```
@@ -786,7 +976,7 @@ Request (desactiver les dettes, navOrder auto-gere) :
 
 ```json
 {
-  "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"]
+  "enabledFeatures": ["SUBSCRIPTIONS", "BUDGETS"]
 }
 ```
 
@@ -794,10 +984,8 @@ Response `200` :
 
 ```json
 {
-  "enabledFeatures": ["SUBSCRIPTIONS", "SHOP"],
-  "navOrder": ["SUBSCRIPTIONS", "SHOP"],
-  "shopAccountId": null,
-  "includeShopInBalance": false,
+  "enabledFeatures": ["SUBSCRIPTIONS", "BUDGETS"],
+  "navOrder": ["SUBSCRIPTIONS", "BUDGETS"],
   "currencies": ["EUR"]
 }
 ```
@@ -806,8 +994,8 @@ Request (reordonner avec navOrder explicite + changer devise principale) :
 
 ```json
 {
-  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"],
+  "navOrder": ["BUDGETS", "DEBTS", "SUBSCRIPTIONS"],
   "currencies": ["XOF", "EUR"]
 }
 ```
@@ -816,10 +1004,8 @@ Response `200` :
 
 ```json
 {
-  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"],
-  "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"],
-  "shopAccountId": null,
-  "includeShopInBalance": false,
+  "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"],
+  "navOrder": ["BUDGETS", "DEBTS", "SUBSCRIPTIONS"],
   "currencies": ["XOF", "EUR"]
 }
 ```
@@ -1016,6 +1202,330 @@ Response `200` :
 
 > 29 entrees au total. Extraits ci-dessus pour illustration.
 
+## Transactions recurrentes
+
+### Creer `POST /api/transactions/recurring`
+
+Request :
+
+```json
+{
+  "montant": 950.00,
+  "libelle": "Loyer",
+  "type": "DEPENSE",
+  "frequency": "MENSUEL",
+  "nextOccurrence": "2026-04-01",
+  "categoryId": "uuid-category",
+  "accountId": "uuid-account",
+  "note": null
+}
+```
+
+Response `201` :
+
+```json
+{
+  "id": "uuid",
+  "montant": 950.00,
+  "libelle": "Loyer",
+  "type": "DEPENSE",
+  "frequency": "MENSUEL",
+  "nextOccurrence": "2026-04-01",
+  "recurringActive": true,
+  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false },
+  "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" }
+}
+```
+
+### Lister les actives `GET /api/transactions/recurring`
+
+Response `200` : liste de `RecurringTransactionResponse`.
+
+### Valider une occurrence `POST /api/transactions/recurring/{id}/validate`
+
+Cree la transaction pour l'occurrence courante et avance `nextOccurrence`.
+
+Response `201` : `TransactionResponse` (la transaction creee).
+
+### Passer une occurrence `PATCH /api/transactions/recurring/{id}/skip`
+
+Avance `nextOccurrence` sans creer de transaction.
+
+Response `200` : `RecurringTransactionResponse` mise a jour.
+
+### Desactiver `PATCH /api/transactions/recurring/{id}/deactivate`
+
+Response `200` : `RecurringTransactionResponse` avec `recurringActive: false`.
+
+## Notifications
+
+### Lister `GET /api/notifications?page=0&size=20&unread=true`
+
+Parametres optionnels : `page` (defaut 0), `size` (defaut 20, max 100), `unread` (filtre optionnel).
+
+Response `200` :
+
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "type": "SUBSCRIPTION_DUE",
+      "title": "Echeance abonnement",
+      "message": "Netflix arrive a echeance dans 3 jours",
+      "entityType": "SUBSCRIPTION",
+      "entityId": "uuid-subscription",
+      "read": false,
+      "readAt": null,
+      "createdAt": "2026-03-27T08:00:00"
+    }
+  ],
+  "number": 0,
+  "size": 20,
+  "totalElements": 5,
+  "totalPages": 1
+}
+```
+
+### Compteur non lues `GET /api/notifications/unread-count`
+
+Response `200` :
+
+```json
+{
+  "count": 3
+}
+```
+
+### Marquer comme lue `PUT /api/notifications/{id}/read`
+
+Response `200` : `NotificationResponse` avec `read: true` et `readAt` renseigne.
+
+### Tout marquer comme lu `PUT /api/notifications/read-all`
+
+Response `204` (corps vide).
+
+### Supprimer `DELETE /api/notifications/{id}`
+
+Response `204` (corps vide).
+
+### Tout supprimer `DELETE /api/notifications`
+
+Response `204` (corps vide).
+
+## Profil utilisateur
+
+### Consulter `GET /api/users/me`
+
+Response `200` :
+
+```json
+{
+  "name": "Kelly",
+  "email": "user@example.com",
+  "isAdmin": true
+}
+```
+
+Le flag `isAdmin` est derive cote serveur via `AdminEmailResolver.isAdminEmail(user.email)`. Utilise par le frontend pour afficher conditionnellement la section `Settings > Utilisateurs`.
+
+## Mon compte (KKS-235)
+
+> Endpoints proteges par JWT. Tous les endpoints operent sur le user authentifie (pas de path parameter `id`). Voir aussi [`api-errors.md`](api-errors.md) pour les codes d'erreur dedies (`INVALID_IMAGE_FORMAT`, `FILE_TOO_LARGE`, `AVATAR_NOT_FOUND`, `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`, `CONFIRMATION_REQUIRED`, `LAST_ADMIN_DELETION_FORBIDDEN`, `INVALID_EXPORT_FORMAT`).
+
+### Modifier le nom `PUT /api/users/me`
+
+Request (`UpdateProfileRequest`, header `Authorization: Bearer <token>`) :
+
+```json
+{
+  "name": "Kelly K."
+}
+```
+
+> Seul le champ `name` est modifiable. L'email est en lecture seule cote backend (changement via flow dedie hors KKS-235).
+
+Response `200` :
+
+```json
+{
+  "name": "Kelly K.",
+  "email": "user@example.com",
+  "isAdmin": true
+}
+```
+
+Erreurs : `400` (validation Bean : `name` blank ou `> 100` chars).
+
+### Uploader un avatar `POST /api/users/me/avatar`
+
+Request (multipart/form-data, header `Authorization: Bearer <token>`) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `file` | File | Image JPG ou PNG (max 2 Mo) |
+
+Response `200` (`AvatarMetadataResponse`) :
+
+```json
+{
+  "url": "/api/users/me/avatar",
+  "etag": "9c1185a5",
+  "uploadedAt": "2026-04-27T10:30:00Z"
+}
+```
+
+Erreurs :
+- `400 INVALID_IMAGE_FORMAT` — type MIME non supporte (autre que `image/jpeg` ou `image/png`)
+- `413 FILE_TOO_LARGE` — fichier > 2 Mo
+
+### Recuperer l'avatar `GET /api/users/me/avatar`
+
+Headers requis :
+- `Authorization: Bearer <token>`
+- `If-None-Match: <etag>` (optionnel — pour le cache HTTP)
+
+Response `200` :
+- `Content-Type: image/jpeg` ou `image/png`
+- `ETag: <sha256-hex>` (calcule sur le binaire stocke)
+- Body : binaire de l'image
+
+Response `304 Not Modified` : si le header `If-None-Match` correspond a l'ETag courant. Pas de body.
+
+Response `404 AVATAR_NOT_FOUND` : aucun avatar configure pour ce user.
+
+### Supprimer l'avatar `DELETE /api/users/me/avatar`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `204` : avatar supprime cote disque + `users.avatar_path` remis a `null`.
+
+Response `404 AVATAR_NOT_FOUND` : aucun avatar a supprimer.
+
+### Changer de mot de passe `POST /api/users/me/password`
+
+Request (`ChangePasswordRequest`, header `Authorization: Bearer <token>`) :
+
+```json
+{
+  "currentPassword": "MotDePasseActuel123",
+  "newPassword": "NouveauMotDePasseFort456"
+}
+```
+
+> Le `currentPassword` est verifie via `BCryptPasswordEncoder.matches`. Le `newPassword` doit faire au moins 12 caracteres et etre different de l'actuel. La rotation invalide tous les refresh tokens existants et en emet de nouveaux.
+
+Response `200` (`AuthResponse` — meme format que `/api/auth/login`) :
+
+```json
+{
+  "token": "eyJhbGciOi...(nouveau)...",
+  "refreshToken": "a1b2c3d4...(nouveau)...",
+  "email": "user@example.com",
+  "name": "Kelly",
+  "mustResetCredentials": false
+}
+```
+
+Erreurs :
+- `400` — validation Bean (`newPassword` < 12 chars)
+- `400 PASSWORD_UNCHANGED` — le nouveau password est identique a l'actuel
+- `401 PASSWORD_INCORRECT` — le `currentPassword` ne correspond pas
+
+### Exporter ses donnees JSON `GET /api/users/me/export?format=json`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `200` :
+- `Content-Type: application/json; charset=utf-8`
+- `Content-Disposition: attachment; filename="k-budget-export-2026-04-27.json"`
+- Body (`UserExportResponse`) : backup complet des donnees du user.
+
+```json
+{
+  "exportedAt": "2026-04-27T10:30:00",
+  "user": {
+    "email": "user@example.com",
+    "name": "Kelly",
+    "createdAt": "2026-02-01T10:30:00"
+  },
+  "preferences": { "enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"], "navOrder": ["..."], "currencies": ["EUR"] },
+  "accounts": [ { "id": "uuid", "nom": "Compte Principal", "...": "..." } ],
+  "categories": [ { "id": "uuid", "nom": "Alimentation", "...": "..." } ],
+  "transactions": [ { "id": "uuid", "montant": 42.50, "...": "..." } ],
+  "subscriptions": [ { "id": "uuid", "nom": "Netflix", "...": "..." } ],
+  "debts": [ { "id": "uuid", "personne": "Thomas", "...": "..." } ],
+  "budgets": [ { "id": "uuid", "montant": 400.00, "...": "..." } ],
+  "exchangeRates": [ { "baseCurrency": "EUR", "targetCurrency": "XOF", "rate": 655.957 } ]
+}
+```
+
+### Exporter ses transactions CSV `GET /api/users/me/export?format=csv`
+
+Header requis : `Authorization: Bearer <token>`.
+
+Response `200` :
+- `Content-Type: text/csv; charset=utf-8`
+- `Content-Disposition: attachment; filename="k-budget-transactions-2026-04-27.csv"`
+- Body : transactions du user uniquement (pas les abonnements/dettes/budgets), prefixees du **BOM UTF-8** (`EF BB BF`) pour ouverture correcte dans Excel.
+
+Colonnes : `date,libelle,montant,type,devise,compte,categorie,note`.
+
+Exemple :
+
+```
+date,libelle,montant,type,devise,compte,categorie,note
+2026-04-15,Courses Carrefour,42.50,DEPENSE,EUR,Compte Principal,Alimentation,
+2026-04-10,Salaire,2500.00,RECETTE,EUR,Compte Principal,,
+```
+
+Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parametre `format` absent ou autre que `json`/`csv`.
+
+### Supprimer son compte `DELETE /api/users/me`
+
+Soft-delete : le compte est desactive (`disabled_at = now`), les budgets/snapshots/refresh_tokens sont supprimes en cascade en DB. Les transactions/comptes/abonnements/dettes sont conserves (anonymisation differee).
+
+Request (`DeleteAccountRequest`, header `Authorization: Bearer <token>`) :
+
+```json
+{
+  "password": "MotDePasseActuel123",
+  "confirmation": "SUPPRIMER"
+}
+```
+
+> Le `password` est verifie via BCrypt. Le `confirmation` doit valoir exactement la chaine `SUPPRIMER` (case-sensitive).
+
+Response `204` (corps vide). Tous les refresh tokens du user sont revoques.
+
+Erreurs :
+- `400 CONFIRMATION_REQUIRED` — `confirmation` differente de `SUPPRIMER`
+- `401 PASSWORD_INCORRECT` — mot de passe incorrect
+- `403 LAST_ADMIN_DELETION_FORBIDDEN` — le user est le dernier admin actif
+
+## Devises
+
+### Lister `GET /api/currencies`
+
+Response `200` :
+
+```json
+[
+  {
+    "code": "EUR",
+    "symbol": "€",
+    "name": "Euro",
+    "decimalPlaces": 2
+  },
+  {
+    "code": "XOF",
+    "symbol": "CFA",
+    "name": "Franc CFA",
+    "decimalPlaces": 0
+  }
+]
+```
+
 ## Valeurs des enums
 
 | Enum | Valeurs |
@@ -1025,7 +1535,7 @@ Response `200` :
 | `DebtType` | `EMPRUNT`, `PRET` |
 | `TokenStatus` | `ACTIVE`, `CONSUMED`, `REVOKED` |
 | `AccountType` | `COURANT`, `EPARGNE`, `ESPECES` |
-| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `SHOP`, `BUDGETS` |
+| `Feature` | `SUBSCRIPTIONS`, `DEBTS`, `BUDGETS` |
 | `Currency` | `EUR`, `XOF`, `USD`, `GBP`, `CHF`, `CAD`, `MAD` |
 
 
@@ -1165,6 +1675,20 @@ Response `200` :
 ### Upload avec mapping `POST /api/imports/upload-with-mapping`
 
 Request (multipart/form-data) : `file`, `accountId`, `mapping` (JSON string)
+
+### Consulter un brouillon `GET /api/imports/drafts/{draftId}`
+
+Response `200` : meme format que la reponse de l'upload (avec toutes les lignes).
+
+### Supprimer un brouillon `DELETE /api/imports/drafts/{draftId}`
+
+Response `204` (corps vide).
+
+### Modifier une regle `PUT /api/imports/rules/{ruleId}`
+
+Request : meme format que la creation (`pattern`, `categoryId`).
+
+Response `200` : la regle mise a jour.
 
 ### Lister brouillons `GET /api/imports/drafts` — liste des brouillons PENDING
 

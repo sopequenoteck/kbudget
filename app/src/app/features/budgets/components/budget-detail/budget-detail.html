@@ -1,0 +1,148 @@
+<div class="page-header">
+  <button class="page-header__back" (click)="goBack()">
+    <ng-icon name="phosphorArrowLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">
+    @if (budgetItem(); as item) {
+      <span
+        class="page-header__icon"
+        [style.background-color]="item.categoryCouleur ? item.categoryCouleur + '26' : null"
+      >{{ item.categoryIcone }}</span>
+    }
+    {{ budgetItem()?.categoryNom ?? 'Budget' }}
+  </h1>
+</div>
+
+@if (loading()) {
+  <div class="skeleton-hero">
+    <div class="skeleton-bar skeleton-bar--xs"></div>
+    <div class="skeleton-bar skeleton-bar--lg"></div>
+    <div class="skeleton-bar skeleton-bar--md"></div>
+    <div class="skeleton-bar skeleton-bar--sm"></div>
+  </div>
+  <div class="list-group" style="margin-top: var(--space-4)">
+    @for (item of skeletonItems; track $index) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (!budgetItem()) {
+  <app-empty-state
+    icon="phosphorMagnifyingGlass"
+    message="Budget introuvable"
+  />
+} @else {
+  <div class="hero">
+    <span class="hero__label">DÉPENSÉ</span>
+    <span class="hero__value" [class.over-budget]="budgetItem()!.percentage > 100">
+      {{ budgetItem()!.montantDepense | amount: null : currency() }}
+    </span>
+    @if (heroConverted(); as converted) {
+      <span class="hero__converted">&asymp; {{ converted.amount | amount: null : converted.currency }}</span>
+    }
+    <div class="hero__meta">
+      <div class="hero__meta-line">
+        <ng-icon name="phosphorTarget" size="14" />
+        <span>{{ budgetAmount(budgetItem()!) | amount: null : currency() }}</span>
+        <span class="hero__meta-dot">&middot;</span>
+        <ng-icon [name]="remaining() >= 0 ? 'phosphorChartPie' : 'phosphorWarning'" size="14" />
+        <span>{{ remaining() >= 0 ? 'reste' : 'dépassement' }} {{ Math.abs(remaining()) | amount: null : currency() }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (isCurrentMonth() && overviewBudgetId()) {
+    <div class="actions">
+      <button class="action-pill action-pill--danger" (click)="onDelete()" aria-label="Supprimer">
+        <ng-icon name="phosphorTrash" size="16" />
+      </button>
+      <div class="actions__spacer"></div>
+      <button class="action-pill" (click)="onToggleActive()">
+        <ng-icon [name]="isActive() ? 'phosphorPause' : 'phosphorPlay'" size="16" />
+        <span>{{ isActive() ? 'Désactiver' : 'Activer' }}</span>
+      </button>
+      <button class="action-pill" (click)="onEdit()">
+        <ng-icon name="phosphorPencilSimple" size="16" />
+        <span>Modifier</span>
+      </button>
+    </div>
+  }
+
+  <div class="sticky-sentinel" #stickySentinel></div>
+  <div class="section-header" [class.stuck]="isStuck()">
+    <h2 class="section-header__title">Transactions</h2>
+    <span class="section-header__count">{{ categoryTransactions().length }}</span>
+  </div>
+
+  @if (budgetItem()!.percentage > 0) {
+    <div class="progress-row">
+      <div class="progress-row__track">
+        <div
+          class="progress-row__fill"
+          [style.width.%]="Math.min(budgetItem()!.percentage, 100)"
+          [class.progress-row__fill--warning]="budgetItem()!.percentage >= 80 && budgetItem()!.percentage <= 100"
+          [class.progress-row__fill--exceeded]="budgetItem()!.percentage > 100"
+        ></div>
+      </div>
+      <span class="progress-row__label">{{ budgetItem()!.percentage.toFixed(0) }}%</span>
+    </div>
+  }
+
+  @if (transactionsLoading()) {
+    <div class="list-group">
+      @for (item of skeletonItems; track $index) {
+        <div class="skeleton-item">
+          <div class="skeleton-circle"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line skeleton-line--subtitle"></div>
+          </div>
+          <div class="skeleton-lines skeleton-lines--right">
+            <div class="skeleton-line skeleton-line--value"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (categoryTransactions().length === 0) {
+    <app-empty-state
+      icon="phosphorReceipt"
+      message="Aucune transaction ce mois"
+    />
+  } @else {
+    @for (group of groupedTransactions(); track group.label) {
+      <div class="date-label">{{ group.label }}</div>
+      <div class="transaction-group">
+        @for (tx of group.transactions; track tx.id) {
+          <div class="transaction-row">
+            <span
+              class="transaction-row__icon"
+              [style.background-color]="budgetItem()!.categoryCouleur ? budgetItem()!.categoryCouleur + '26' : null"
+            >{{ budgetItem()!.categoryIcone }}</span>
+            <div class="transaction-row__content">
+              <span class="transaction-row__title">{{ tx.libelle }}</span>
+              <span class="transaction-row__subtitle">{{ formatDate(tx.date) }}</span>
+            </div>
+            <div class="transaction-row__right">
+              <span class="transaction-row__amount amount-expense">
+                {{ tx.montant | amount: 'DEPENSE' : (tx.account?.currency || currency()) }}
+              </span>
+              @if (tx.account?.currency && tx.account!.currency !== preferenceService.primaryCurrency()) {
+                <span class="transaction-row__converted">
+                  {{ tx.montant | convertAmount: tx.account!.currency! : preferenceService.primaryCurrency() }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+}

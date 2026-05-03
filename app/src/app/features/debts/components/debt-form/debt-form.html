@@ -1,98 +1,141 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="debt-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="bsheet">
   @if (errorMessage()) {
-    <div class="form-error-banner">{{ errorMessage() }}</div>
+    <div class="bsheet__error">{{ errorMessage() }}</div>
   }
-  <div class="form-row form-row--person-amount">
-    <app-form-field
-      label="Personne"
-      fieldId="personne"
-      [showError]="isInvalid('personne')"
-      [errorMessage]="
-        form.get('personne')?.hasError('required') ? 'Personne requise' : '255 caracteres maximum'
-      "
-    >
-      <input id="personne" type="text" formControlName="personne" />
-    </app-form-field>
 
-    <app-form-field
-      label="Montant"
-      fieldId="montant"
-      [showError]="isInvalid('montant')"
-      [errorMessage]="'Le montant doit etre superieur a 0'"
-    >
-      <div class="amount-input-wrapper">
-        <input id="montant" type="number" formControlName="montant" step="0.01" min="0.01" />
-        <span class="amount-input-wrapper__suffix">{{ selectedCurrency() }}</span>
-      </div>
-    </app-form-field>
+  <!-- ROW 1: Handle bar + titre + toggle Emprunt/Prêt -->
+  <div class="bsheet__top">
+    <div class="bsheet__handle"></div>
+    <div class="bsheet__top-title">
+      <ng-icon name="phosphorHandCoins" size="16" />
+      <span>Dette</span>
+    </div>
+    <div class="bsheet__type-toggle" role="group" aria-label="Sens de la dette">
+      <button type="button" [class.active]="currentSens() === DebtType.EMPRUNT" (click)="onSensChange(DebtType.EMPRUNT)">Emprunt</button>
+      <button type="button" [class.active]="currentSens() === DebtType.PRET" (click)="onSensChange(DebtType.PRET)">Prêt</button>
+    </div>
   </div>
 
-  <div class="form-row">
-    <app-form-field label="Compte bancaire" fieldId="accountId">
-      <app-select-picker
-        formControlName="accountId"
-        [items]="accountItems()"
-        placeholder="Aucun compte"
+  <!-- ROW 2: Montant hero + Personne -->
+  <div class="bsheet__main-row">
+    <div class="bsheet__amount-group">
+      <input
+        class="bsheet__amount input-naked"
+        [class.bsheet__amount--income]="currentSens() === DebtType.PRET"
+        [class.bsheet__amount--expense]="currentSens() === DebtType.EMPRUNT"
+        [style.width]="amountWidth()"
+        type="text"
+        inputmode="decimal"
+        formControlName="montant"
+        placeholder="0"
+        autocomplete="off"
       />
-    </app-form-field>
+      <span
+        class="bsheet__currency"
+        [class.bsheet__currency--income]="currentSens() === DebtType.PRET"
+        [class.bsheet__currency--expense]="currentSens() === DebtType.EMPRUNT"
+      >{{ currencySymbol() }}</span>
+    </div>
+    <input
+      class="bsheet__libelle input-naked"
+      type="text"
+      formControlName="personne"
+      placeholder="Personne"
+      autocomplete="off"
+      maxlength="255"
+    />
+  </div>
 
-    @if (!hasAccount()) {
-      <app-form-field label="Devise" fieldId="currency">
-        <app-select-picker
-          formControlName="currency"
-          [items]="currencyItems()"
-          placeholder="Devise par defaut"
+  <!-- ROW 3: Icons à gauche | Pills meta à droite -->
+  <div class="bsheet__meta-row">
+    <div class="bsheet__icons">
+      <button
+        type="button"
+        class="bsheet__icon-btn"
+        [class.active]="expandedSection() === 'reminder'"
+        [class.has-reminder]="hasReminderDate()"
+        (click)="toggleSection('reminder')"
+        aria-label="Rappel"
+      >
+        <ng-icon
+          name="phosphorBell"
+          size="18"
+          [style.color]="hasReminderDate() ? 'var(--color-primary)' : 'var(--text-tertiary)'"
+          [style.opacity]="hasReminderDate() ? '0.7' : '1'"
         />
-      </app-form-field>
-    }
-
-    <app-form-field label="Categorie" fieldId="categoryId">
-      <app-category-picker formControlName="categoryId" />
-    </app-form-field>
-
-    <app-form-field
-      label="Date"
-      fieldId="date"
-      [showError]="isInvalid('date')"
-      [errorMessage]="'Date requise'"
-    >
-      <input id="date" type="date" formControlName="date" />
-    </app-form-field>
+      </button>
+    </div>
+    <div class="bsheet__meta-pills">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
+        <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
+        <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
+      </button>
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+        <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
+        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+      </button>
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+        <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
+        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+      </button>
+    </div>
   </div>
 
-  <div class="form-row form-row--reminder">
-    <app-form-field label="Date de rappel" fieldId="reminderDate">
-      <input id="reminderDate" type="date" formControlName="reminderDate" />
-    </app-form-field>
+  <!-- EXPANDED SECTIONS -->
+  @if (expandedSection() === 'date') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-inline-date-picker [value]="dateSignal()" [originalValue]="debt()?.date ?? ''" (valueChange)="onDateFieldChanged('date', $event)" />
+    </div>
+  }
+  @if (expandedSection() === 'category') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-category-select
+        formControlName="categoryId"
+        [categories]="categories()"
+        (selected)="expandedSection.set(null)"
+        (isCreating)="categoryCreating.set($event)"
+        (created)="onCategoryCreated($event)"
+      />
+    </div>
+  }
+  @if (expandedSection() === 'account') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
+    </div>
+  }
+  @if (expandedSection() === 'reminder') {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-inline-date-picker [value]="reminderDateSignal()" [originalValue]="debt()?.reminderDate ?? ''" (valueChange)="onDateFieldChanged('reminderDate', $event)" />
+      @if (hasReminderDate()) {
+        <input type="time" formControlName="reminderTime" class="bsheet__input bsheet__input--time input-naked" />
+      }
+    </div>
+  }
+  @if (expandedSection() === 'currency' && showCurrencyPicker()) {
+    <div class="bsheet__expand" @expandCollapse>
+      <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
+    </div>
+  }
 
-    @if (hasReminderDate()) {
-      <app-form-field label="Heure de rappel" fieldId="reminderTime">
-        <input id="reminderTime" type="time" formControlName="reminderTime" />
-      </app-form-field>
-    }
-  </div>
-
-  <div class="checkboxes">
-    <label class="checkbox-field">
-      <input type="checkbox" formControlName="rembourse" />
-      Rembourse
-    </label>
-
-    @if (!hasAccount()) {
-      <label class="checkbox-field">
-        <input type="checkbox" formControlName="includeInBalance" />
-        Inclure dans le patrimoine
-      </label>
-    }
-  </div>
-
-  <div class="form-actions">
-    @if (isEditMode()) {
-      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
-    }
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
-    <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Enregistrer' }}
+  <!-- ROW 4: Actions -->
+  <div class="bsheet__bottom-row">
+    <div class="bsheet__bottom-left">
+      @if (isEditing()) {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--danger" [disabled]="categoryCreating()" (click)="onDelete()">
+          <ng-icon name="phosphorTrash" size="16" />
+        </button>
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="rembourse()" [disabled]="categoryCreating()" (click)="toggleRembourse()">
+          <ng-icon [name]="rembourse() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
+          {{ rembourse() ? 'Remboursé' : 'Non remboursé' }}
+        </button>
+      } @else {
+        <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
+          Annuler
+        </button>
+      }
+    </div>
+    <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
+      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
     </button>
   </div>
 </form>

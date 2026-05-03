@@ -3,45 +3,42 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i18;
+import 'dart:async' as _i17;
 
-import 'package:k_budget/src/domain/enums/enums.dart' as _i19;
+import 'package:k_budget/src/domain/enums/enums.dart' as _i18;
 import 'package:k_budget/src/domain/models/account.dart' as _i10;
 import 'package:k_budget/src/domain/models/app_config.dart' as _i2;
-import 'package:k_budget/src/domain/models/budget.dart' as _i13;
-import 'package:k_budget/src/domain/models/budget_history.dart' as _i15;
-import 'package:k_budget/src/domain/models/budget_overview.dart' as _i14;
+import 'package:k_budget/src/domain/models/budget.dart' as _i12;
+import 'package:k_budget/src/domain/models/budget_history.dart' as _i14;
+import 'package:k_budget/src/domain/models/budget_overview.dart' as _i13;
 import 'package:k_budget/src/domain/models/category.dart' as _i9;
 import 'package:k_budget/src/domain/models/debt.dart' as _i8;
-import 'package:k_budget/src/domain/models/debt_payment.dart' as _i24;
-import 'package:k_budget/src/domain/models/exchange_rate.dart' as _i12;
-import 'package:k_budget/src/domain/models/monthly_summary.dart' as _i21;
-import 'package:k_budget/src/domain/models/product.dart' as _i11;
-import 'package:k_budget/src/domain/models/recurring_transaction.dart' as _i16;
+import 'package:k_budget/src/domain/models/debt_payment.dart' as _i23;
+import 'package:k_budget/src/domain/models/exchange_rate.dart' as _i11;
+import 'package:k_budget/src/domain/models/monthly_summary.dart' as _i20;
+import 'package:k_budget/src/domain/models/recurring_transaction.dart' as _i15;
 import 'package:k_budget/src/domain/models/subscription.dart' as _i5;
 import 'package:k_budget/src/domain/models/subscription_payment.dart' as _i6;
 import 'package:k_budget/src/domain/models/subscription_total_paid.dart' as _i7;
 import 'package:k_budget/src/domain/models/transaction.dart' as _i4;
 import 'package:k_budget/src/domain/repositories/account_repository.dart'
-    as _i26;
+    as _i25;
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart'
-    as _i17;
+    as _i16;
 import 'package:k_budget/src/domain/repositories/auth_repository.dart' as _i3;
 import 'package:k_budget/src/domain/repositories/budget_repository.dart'
-    as _i29;
-import 'package:k_budget/src/domain/repositories/category_repository.dart'
-    as _i25;
-import 'package:k_budget/src/domain/repositories/debt_repository.dart' as _i23;
-import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart'
-    as _i28;
-import 'package:k_budget/src/domain/repositories/product_repository.dart'
     as _i27;
+import 'package:k_budget/src/domain/repositories/category_repository.dart'
+    as _i24;
+import 'package:k_budget/src/domain/repositories/debt_repository.dart' as _i22;
+import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart'
+    as _i26;
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart'
-    as _i30;
+    as _i28;
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart'
-    as _i22;
+    as _i21;
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart'
-    as _i20;
+    as _i19;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -105,36 +102,31 @@ class _FakeAccount_8 extends _i1.SmartFake implements _i10.Account {
     : super(parent, parentInvocation);
 }
 
-class _FakeProduct_9 extends _i1.SmartFake implements _i11.Product {
-  _FakeProduct_9(Object parent, Invocation parentInvocation)
+class _FakeExchangeRate_9 extends _i1.SmartFake implements _i11.ExchangeRate {
+  _FakeExchangeRate_9(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeExchangeRate_10 extends _i1.SmartFake implements _i12.ExchangeRate {
-  _FakeExchangeRate_10(Object parent, Invocation parentInvocation)
+class _FakeBudget_10 extends _i1.SmartFake implements _i12.Budget {
+  _FakeBudget_10(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBudget_11 extends _i1.SmartFake implements _i13.Budget {
-  _FakeBudget_11(Object parent, Invocation parentInvocation)
+class _FakeBudgetOverview_11 extends _i1.SmartFake
+    implements _i13.BudgetOverview {
+  _FakeBudgetOverview_11(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBudgetOverview_12 extends _i1.SmartFake
-    implements _i14.BudgetOverview {
-  _FakeBudgetOverview_12(Object parent, Invocation parentInvocation)
+class _FakeBudgetHistory_12 extends _i1.SmartFake
+    implements _i14.BudgetHistory {
+  _FakeBudgetHistory_12(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeBudgetHistory_13 extends _i1.SmartFake
-    implements _i15.BudgetHistory {
-  _FakeBudgetHistory_13(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeRecurringTransaction_14 extends _i1.SmartFake
-    implements _i16.RecurringTransaction {
-  _FakeRecurringTransaction_14(Object parent, Invocation parentInvocation)
+class _FakeRecurringTransaction_13 extends _i1.SmartFake
+    implements _i15.RecurringTransaction {
+  _FakeRecurringTransaction_13(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -142,197 +134,197 @@ class _FakeRecurringTransaction_14 extends _i1.SmartFake
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAppConfigRepository extends _i1.Mock
-    implements _i17.AppConfigRepository {
+    implements _i16.AppConfigRepository {
   @override
-  _i18.Future<_i2.AppConfig> getConfig() =>
+  _i17.Future<_i2.AppConfig> getConfig() =>
       (super.noSuchMethod(
             Invocation.method(#getConfig, []),
-            returnValue: _i18.Future<_i2.AppConfig>.value(
+            returnValue: _i17.Future<_i2.AppConfig>.value(
               _FakeAppConfig_0(this, Invocation.method(#getConfig, [])),
             ),
-            returnValueForMissingStub: _i18.Future<_i2.AppConfig>.value(
+            returnValueForMissingStub: _i17.Future<_i2.AppConfig>.value(
               _FakeAppConfig_0(this, Invocation.method(#getConfig, [])),
             ),
           )
-          as _i18.Future<_i2.AppConfig>);
+          as _i17.Future<_i2.AppConfig>);
 
   @override
-  _i18.Future<void> saveConfig(_i2.AppConfig? config) =>
+  _i17.Future<void> saveConfig(_i2.AppConfig? config) =>
       (super.noSuchMethod(
             Invocation.method(#saveConfig, [config]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<bool> isOnboardingCompleted() =>
+  _i17.Future<bool> isOnboardingCompleted() =>
       (super.noSuchMethod(
             Invocation.method(#isOnboardingCompleted, []),
-            returnValue: _i18.Future<bool>.value(false),
-            returnValueForMissingStub: _i18.Future<bool>.value(false),
+            returnValue: _i17.Future<bool>.value(false),
+            returnValueForMissingStub: _i17.Future<bool>.value(false),
           )
-          as _i18.Future<bool>);
+          as _i17.Future<bool>);
 
   @override
-  _i18.Future<void> setOnboardingCompleted(bool? completed) =>
+  _i17.Future<void> setOnboardingCompleted(bool? completed) =>
       (super.noSuchMethod(
             Invocation.method(#setOnboardingCompleted, [completed]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i19.DataMode> getDataMode() =>
+  _i17.Future<_i18.DataMode> getDataMode() =>
       (super.noSuchMethod(
             Invocation.method(#getDataMode, []),
-            returnValue: _i18.Future<_i19.DataMode>.value(_i19.DataMode.local),
-            returnValueForMissingStub: _i18.Future<_i19.DataMode>.value(
-              _i19.DataMode.local,
+            returnValue: _i17.Future<_i18.DataMode>.value(_i18.DataMode.local),
+            returnValueForMissingStub: _i17.Future<_i18.DataMode>.value(
+              _i18.DataMode.local,
             ),
           )
-          as _i18.Future<_i19.DataMode>);
+          as _i17.Future<_i18.DataMode>);
 
   @override
-  _i18.Future<void> setDataMode(_i19.DataMode? mode) =>
+  _i17.Future<void> setDataMode(_i18.DataMode? mode) =>
       (super.noSuchMethod(
             Invocation.method(#setDataMode, [mode]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<void> setServerUrl(String? url) =>
+  _i17.Future<void> setServerUrl(String? url) =>
       (super.noSuchMethod(
             Invocation.method(#setServerUrl, [url]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<String?> getServerUrl() =>
+  _i17.Future<String?> getServerUrl() =>
       (super.noSuchMethod(
             Invocation.method(#getServerUrl, []),
-            returnValue: _i18.Future<String?>.value(),
-            returnValueForMissingStub: _i18.Future<String?>.value(),
+            returnValue: _i17.Future<String?>.value(),
+            returnValueForMissingStub: _i17.Future<String?>.value(),
           )
-          as _i18.Future<String?>);
+          as _i17.Future<String?>);
 
   @override
-  _i18.Future<void> setTheme(_i19.AppTheme? theme) =>
+  _i17.Future<void> setTheme(_i18.AppTheme? theme) =>
       (super.noSuchMethod(
             Invocation.method(#setTheme, [theme]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i19.AppTheme> getTheme() =>
+  _i17.Future<_i18.AppTheme> getTheme() =>
       (super.noSuchMethod(
             Invocation.method(#getTheme, []),
-            returnValue: _i18.Future<_i19.AppTheme>.value(_i19.AppTheme.light),
-            returnValueForMissingStub: _i18.Future<_i19.AppTheme>.value(
-              _i19.AppTheme.light,
+            returnValue: _i17.Future<_i18.AppTheme>.value(_i18.AppTheme.light),
+            returnValueForMissingStub: _i17.Future<_i18.AppTheme>.value(
+              _i18.AppTheme.light,
             ),
           )
-          as _i18.Future<_i19.AppTheme>);
+          as _i17.Future<_i18.AppTheme>);
 
   @override
-  _i18.Future<void> setTextScale(_i19.TextScale? textScale) =>
+  _i17.Future<void> setTextScale(_i18.TextScale? textScale) =>
       (super.noSuchMethod(
             Invocation.method(#setTextScale, [textScale]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i19.TextScale> getTextScale() =>
+  _i17.Future<_i18.TextScale> getTextScale() =>
       (super.noSuchMethod(
             Invocation.method(#getTextScale, []),
-            returnValue: _i18.Future<_i19.TextScale>.value(
-              _i19.TextScale.small,
+            returnValue: _i17.Future<_i18.TextScale>.value(
+              _i18.TextScale.small,
             ),
-            returnValueForMissingStub: _i18.Future<_i19.TextScale>.value(
-              _i19.TextScale.small,
+            returnValueForMissingStub: _i17.Future<_i18.TextScale>.value(
+              _i18.TextScale.small,
             ),
           )
-          as _i18.Future<_i19.TextScale>);
+          as _i17.Future<_i18.TextScale>);
 
   @override
-  _i18.Future<void> setLockEnabled(bool? enabled) =>
+  _i17.Future<void> setLockEnabled(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#setLockEnabled, [enabled]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<void> setLockMethod(_i19.LockMethod? method) =>
+  _i17.Future<void> setLockMethod(_i18.LockMethod? method) =>
       (super.noSuchMethod(
             Invocation.method(#setLockMethod, [method]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<void> setHashedPin(String? pin) =>
+  _i17.Future<void> setHashedPin(String? pin) =>
       (super.noSuchMethod(
             Invocation.method(#setHashedPin, [pin]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<List<_i19.Feature>> getEnabledFeatures() =>
+  _i17.Future<List<_i18.Feature>> getEnabledFeatures() =>
       (super.noSuchMethod(
             Invocation.method(#getEnabledFeatures, []),
-            returnValue: _i18.Future<List<_i19.Feature>>.value(
-              <_i19.Feature>[],
+            returnValue: _i17.Future<List<_i18.Feature>>.value(
+              <_i18.Feature>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i19.Feature>>.value(
-              <_i19.Feature>[],
+            returnValueForMissingStub: _i17.Future<List<_i18.Feature>>.value(
+              <_i18.Feature>[],
             ),
           )
-          as _i18.Future<List<_i19.Feature>>);
+          as _i17.Future<List<_i18.Feature>>);
 
   @override
-  _i18.Future<void> setEnabledFeatures(List<_i19.Feature>? features) =>
+  _i17.Future<void> setEnabledFeatures(List<_i18.Feature>? features) =>
       (super.noSuchMethod(
             Invocation.method(#setEnabledFeatures, [features]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<List<_i19.Feature>> getNavOrder() =>
+  _i17.Future<List<_i18.Feature>> getNavOrder() =>
       (super.noSuchMethod(
             Invocation.method(#getNavOrder, []),
-            returnValue: _i18.Future<List<_i19.Feature>>.value(
-              <_i19.Feature>[],
+            returnValue: _i17.Future<List<_i18.Feature>>.value(
+              <_i18.Feature>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i19.Feature>>.value(
-              <_i19.Feature>[],
+            returnValueForMissingStub: _i17.Future<List<_i18.Feature>>.value(
+              <_i18.Feature>[],
             ),
           )
-          as _i18.Future<List<_i19.Feature>>);
+          as _i17.Future<List<_i18.Feature>>);
 
   @override
-  _i18.Future<void> setNavOrder(List<_i19.Feature>? order) =>
+  _i17.Future<void> setNavOrder(List<_i18.Feature>? order) =>
       (super.noSuchMethod(
             Invocation.method(#setNavOrder, [order]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 }
 
 /// A class which mocks [AuthRepository].
@@ -340,26 +332,26 @@ class MockAppConfigRepository extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
   @override
-  _i18.Future<_i3.AuthResult> login(String? email, String? password) =>
+  _i17.Future<_i3.AuthResult> login(String? email, String? password) =>
       (super.noSuchMethod(
             Invocation.method(#login, [email, password]),
-            returnValue: _i18.Future<_i3.AuthResult>.value(
+            returnValue: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
                 Invocation.method(#login, [email, password]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i3.AuthResult>.value(
+            returnValueForMissingStub: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
                 Invocation.method(#login, [email, password]),
               ),
             ),
           )
-          as _i18.Future<_i3.AuthResult>);
+          as _i17.Future<_i3.AuthResult>);
 
   @override
-  _i18.Future<_i3.AuthResult> register(
+  _i17.Future<_i3.AuthResult> register(
     String? email,
     String? password,
     String? name, {
@@ -372,7 +364,7 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
               [email, password, name],
               {#currency: currency, #timezone: timezone},
             ),
-            returnValue: _i18.Future<_i3.AuthResult>.value(
+            returnValue: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
                 Invocation.method(
@@ -382,7 +374,7 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
                 ),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i3.AuthResult>.value(
+            returnValueForMissingStub: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(
                 this,
                 Invocation.method(
@@ -393,778 +385,687 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
               ),
             ),
           )
-          as _i18.Future<_i3.AuthResult>);
+          as _i17.Future<_i3.AuthResult>);
 
   @override
-  _i18.Future<_i3.AuthResult> refresh() =>
+  _i17.Future<_i3.AuthResult> refresh() =>
       (super.noSuchMethod(
             Invocation.method(#refresh, []),
-            returnValue: _i18.Future<_i3.AuthResult>.value(
+            returnValue: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(this, Invocation.method(#refresh, [])),
             ),
-            returnValueForMissingStub: _i18.Future<_i3.AuthResult>.value(
+            returnValueForMissingStub: _i17.Future<_i3.AuthResult>.value(
               _FakeAuthResult_1(this, Invocation.method(#refresh, [])),
             ),
           )
-          as _i18.Future<_i3.AuthResult>);
+          as _i17.Future<_i3.AuthResult>);
 
   @override
-  _i18.Future<void> logout() =>
+  _i17.Future<void> logout() =>
       (super.noSuchMethod(
             Invocation.method(#logout, []),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<String?> getAccessToken() =>
+  _i17.Future<String?> getAccessToken() =>
       (super.noSuchMethod(
             Invocation.method(#getAccessToken, []),
-            returnValue: _i18.Future<String?>.value(),
-            returnValueForMissingStub: _i18.Future<String?>.value(),
+            returnValue: _i17.Future<String?>.value(),
+            returnValueForMissingStub: _i17.Future<String?>.value(),
           )
-          as _i18.Future<String?>);
+          as _i17.Future<String?>);
 
   @override
-  _i18.Future<String?> getRefreshToken() =>
+  _i17.Future<String?> getRefreshToken() =>
       (super.noSuchMethod(
             Invocation.method(#getRefreshToken, []),
-            returnValue: _i18.Future<String?>.value(),
-            returnValueForMissingStub: _i18.Future<String?>.value(),
+            returnValue: _i17.Future<String?>.value(),
+            returnValueForMissingStub: _i17.Future<String?>.value(),
           )
-          as _i18.Future<String?>);
+          as _i17.Future<String?>);
 
   @override
-  _i18.Future<void> saveTokens(String? accessToken, String? refreshToken) =>
+  _i17.Future<void> saveTokens(String? accessToken, String? refreshToken) =>
       (super.noSuchMethod(
             Invocation.method(#saveTokens, [accessToken, refreshToken]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<void> clearTokens() =>
+  _i17.Future<void> clearTokens() =>
       (super.noSuchMethod(
             Invocation.method(#clearTokens, []),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<bool> hasValidToken() =>
+  _i17.Future<bool> hasValidToken() =>
       (super.noSuchMethod(
             Invocation.method(#hasValidToken, []),
-            returnValue: _i18.Future<bool>.value(false),
-            returnValueForMissingStub: _i18.Future<bool>.value(false),
+            returnValue: _i17.Future<bool>.value(false),
+            returnValueForMissingStub: _i17.Future<bool>.value(false),
           )
-          as _i18.Future<bool>);
+          as _i17.Future<bool>);
 }
 
 /// A class which mocks [TransactionRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockTransactionRepository extends _i1.Mock
-    implements _i20.TransactionRepository {
+    implements _i19.TransactionRepository {
   @override
-  _i18.Future<List<_i4.Transaction>> getAll() =>
+  _i17.Future<List<_i4.Transaction>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i4.Transaction>>.value(
+            returnValue: _i17.Future<List<_i4.Transaction>>.value(
               <_i4.Transaction>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i4.Transaction>>.value(
+            returnValueForMissingStub: _i17.Future<List<_i4.Transaction>>.value(
               <_i4.Transaction>[],
             ),
           )
-          as _i18.Future<List<_i4.Transaction>>);
+          as _i17.Future<List<_i4.Transaction>>);
 
   @override
-  _i18.Future<List<_i4.Transaction>> getByMonth(int? month, int? year) =>
+  _i17.Future<List<_i4.Transaction>> getByMonth(int? month, int? year) =>
       (super.noSuchMethod(
             Invocation.method(#getByMonth, [month, year]),
-            returnValue: _i18.Future<List<_i4.Transaction>>.value(
+            returnValue: _i17.Future<List<_i4.Transaction>>.value(
               <_i4.Transaction>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i4.Transaction>>.value(
+            returnValueForMissingStub: _i17.Future<List<_i4.Transaction>>.value(
               <_i4.Transaction>[],
             ),
           )
-          as _i18.Future<List<_i4.Transaction>>);
+          as _i17.Future<List<_i4.Transaction>>);
 
   @override
-  _i18.Stream<List<_i4.Transaction>> watchAll() =>
+  _i17.Stream<List<_i4.Transaction>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
-            returnValue: _i18.Stream<List<_i4.Transaction>>.empty(),
+            returnValue: _i17.Stream<List<_i4.Transaction>>.empty(),
             returnValueForMissingStub:
-                _i18.Stream<List<_i4.Transaction>>.empty(),
+                _i17.Stream<List<_i4.Transaction>>.empty(),
           )
-          as _i18.Stream<List<_i4.Transaction>>);
+          as _i17.Stream<List<_i4.Transaction>>);
 
   @override
-  _i18.Future<_i4.Transaction> getById(String? id) =>
+  _i17.Future<_i4.Transaction> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i4.Transaction>.value(
+            returnValue: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i4.Transaction>.value(
+            returnValueForMissingStub: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i4.Transaction>);
+          as _i17.Future<_i4.Transaction>);
 
   @override
-  _i18.Future<_i4.Transaction> create(_i4.Transaction? transaction) =>
+  _i17.Future<_i4.Transaction> create(_i4.Transaction? transaction) =>
       (super.noSuchMethod(
             Invocation.method(#create, [transaction]),
-            returnValue: _i18.Future<_i4.Transaction>.value(
+            returnValue: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(
                 this,
                 Invocation.method(#create, [transaction]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i4.Transaction>.value(
+            returnValueForMissingStub: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(
                 this,
                 Invocation.method(#create, [transaction]),
               ),
             ),
           )
-          as _i18.Future<_i4.Transaction>);
+          as _i17.Future<_i4.Transaction>);
 
   @override
-  _i18.Future<_i4.Transaction> update(_i4.Transaction? transaction) =>
+  _i17.Future<_i4.Transaction> update(_i4.Transaction? transaction) =>
       (super.noSuchMethod(
             Invocation.method(#update, [transaction]),
-            returnValue: _i18.Future<_i4.Transaction>.value(
+            returnValue: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(
                 this,
                 Invocation.method(#update, [transaction]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i4.Transaction>.value(
+            returnValueForMissingStub: _i17.Future<_i4.Transaction>.value(
               _FakeTransaction_2(
                 this,
                 Invocation.method(#update, [transaction]),
               ),
             ),
           )
-          as _i18.Future<_i4.Transaction>);
+          as _i17.Future<_i4.Transaction>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<List<_i21.MonthlySummary>> getMonthlySummary(
+  _i17.Future<List<_i20.MonthlySummary>> getMonthlySummary(
     int? month,
     int? year,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getMonthlySummary, [month, year]),
-            returnValue: _i18.Future<List<_i21.MonthlySummary>>.value(
-              <_i21.MonthlySummary>[],
+            returnValue: _i17.Future<List<_i20.MonthlySummary>>.value(
+              <_i20.MonthlySummary>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i21.MonthlySummary>>.value(
-                  <_i21.MonthlySummary>[],
+                _i17.Future<List<_i20.MonthlySummary>>.value(
+                  <_i20.MonthlySummary>[],
                 ),
           )
-          as _i18.Future<List<_i21.MonthlySummary>>);
+          as _i17.Future<List<_i20.MonthlySummary>>);
+
+  @override
+  _i17.Future<List<String>> getLibelleSuggestions(
+    String? query, {
+    int? limit = 20,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLibelleSuggestions, [query], {#limit: limit}),
+            returnValue: _i17.Future<List<String>>.value(<String>[]),
+            returnValueForMissingStub: _i17.Future<List<String>>.value(
+              <String>[],
+            ),
+          )
+          as _i17.Future<List<String>>);
 }
 
 /// A class which mocks [SubscriptionRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSubscriptionRepository extends _i1.Mock
-    implements _i22.SubscriptionRepository {
+    implements _i21.SubscriptionRepository {
   @override
-  _i18.Future<List<_i5.Subscription>> getAll() =>
+  _i17.Future<List<_i5.Subscription>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i5.Subscription>>.value(
+            returnValue: _i17.Future<List<_i5.Subscription>>.value(
               <_i5.Subscription>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i5.Subscription>>.value(<_i5.Subscription>[]),
+                _i17.Future<List<_i5.Subscription>>.value(<_i5.Subscription>[]),
           )
-          as _i18.Future<List<_i5.Subscription>>);
+          as _i17.Future<List<_i5.Subscription>>);
 
   @override
-  _i18.Stream<List<_i5.Subscription>> watchAll() =>
+  _i17.Stream<List<_i5.Subscription>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
-            returnValue: _i18.Stream<List<_i5.Subscription>>.empty(),
+            returnValue: _i17.Stream<List<_i5.Subscription>>.empty(),
             returnValueForMissingStub:
-                _i18.Stream<List<_i5.Subscription>>.empty(),
+                _i17.Stream<List<_i5.Subscription>>.empty(),
           )
-          as _i18.Stream<List<_i5.Subscription>>);
+          as _i17.Stream<List<_i5.Subscription>>);
 
   @override
-  _i18.Future<_i5.Subscription> getById(String? id) =>
+  _i17.Future<_i5.Subscription> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i5.Subscription>.value(
+            returnValue: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i5.Subscription>.value(
+            returnValueForMissingStub: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i5.Subscription>);
+          as _i17.Future<_i5.Subscription>);
 
   @override
-  _i18.Future<_i5.Subscription> create(_i5.Subscription? subscription) =>
+  _i17.Future<_i5.Subscription> create(_i5.Subscription? subscription) =>
       (super.noSuchMethod(
             Invocation.method(#create, [subscription]),
-            returnValue: _i18.Future<_i5.Subscription>.value(
+            returnValue: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(
                 this,
                 Invocation.method(#create, [subscription]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i5.Subscription>.value(
+            returnValueForMissingStub: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(
                 this,
                 Invocation.method(#create, [subscription]),
               ),
             ),
           )
-          as _i18.Future<_i5.Subscription>);
+          as _i17.Future<_i5.Subscription>);
 
   @override
-  _i18.Future<_i5.Subscription> update(_i5.Subscription? subscription) =>
+  _i17.Future<_i5.Subscription> update(_i5.Subscription? subscription) =>
       (super.noSuchMethod(
             Invocation.method(#update, [subscription]),
-            returnValue: _i18.Future<_i5.Subscription>.value(
+            returnValue: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(
                 this,
                 Invocation.method(#update, [subscription]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i5.Subscription>.value(
+            returnValueForMissingStub: _i17.Future<_i5.Subscription>.value(
               _FakeSubscription_3(
                 this,
                 Invocation.method(#update, [subscription]),
               ),
             ),
           )
-          as _i18.Future<_i5.Subscription>);
+          as _i17.Future<_i5.Subscription>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i6.SubscriptionPayment> pay(String? id) =>
+  _i17.Future<_i6.SubscriptionPayment> pay(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#pay, [id]),
-            returnValue: _i18.Future<_i6.SubscriptionPayment>.value(
+            returnValue: _i17.Future<_i6.SubscriptionPayment>.value(
               _FakeSubscriptionPayment_4(this, Invocation.method(#pay, [id])),
             ),
             returnValueForMissingStub:
-                _i18.Future<_i6.SubscriptionPayment>.value(
+                _i17.Future<_i6.SubscriptionPayment>.value(
                   _FakeSubscriptionPayment_4(
                     this,
                     Invocation.method(#pay, [id]),
                   ),
                 ),
           )
-          as _i18.Future<_i6.SubscriptionPayment>);
+          as _i17.Future<_i6.SubscriptionPayment>);
 
   @override
-  _i18.Future<List<_i6.SubscriptionPayment>> getPayments(String? id) =>
+  _i17.Future<List<_i6.SubscriptionPayment>> getPayments(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getPayments, [id]),
-            returnValue: _i18.Future<List<_i6.SubscriptionPayment>>.value(
+            returnValue: _i17.Future<List<_i6.SubscriptionPayment>>.value(
               <_i6.SubscriptionPayment>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i6.SubscriptionPayment>>.value(
+                _i17.Future<List<_i6.SubscriptionPayment>>.value(
                   <_i6.SubscriptionPayment>[],
                 ),
           )
-          as _i18.Future<List<_i6.SubscriptionPayment>>);
+          as _i17.Future<List<_i6.SubscriptionPayment>>);
 
   @override
-  _i18.Future<_i7.SubscriptionTotalPaid> getTotalPaid(String? id) =>
+  _i17.Future<_i7.SubscriptionTotalPaid> getTotalPaid(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getTotalPaid, [id]),
-            returnValue: _i18.Future<_i7.SubscriptionTotalPaid>.value(
+            returnValue: _i17.Future<_i7.SubscriptionTotalPaid>.value(
               _FakeSubscriptionTotalPaid_5(
                 this,
                 Invocation.method(#getTotalPaid, [id]),
               ),
             ),
             returnValueForMissingStub:
-                _i18.Future<_i7.SubscriptionTotalPaid>.value(
+                _i17.Future<_i7.SubscriptionTotalPaid>.value(
                   _FakeSubscriptionTotalPaid_5(
                     this,
                     Invocation.method(#getTotalPaid, [id]),
                   ),
                 ),
           )
-          as _i18.Future<_i7.SubscriptionTotalPaid>);
+          as _i17.Future<_i7.SubscriptionTotalPaid>);
 }
 
 /// A class which mocks [DebtRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDebtRepository extends _i1.Mock implements _i23.DebtRepository {
+class MockDebtRepository extends _i1.Mock implements _i22.DebtRepository {
   @override
-  _i18.Future<List<_i8.Debt>> getAll() =>
+  _i17.Future<List<_i8.Debt>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i8.Debt>>.value(<_i8.Debt>[]),
-            returnValueForMissingStub: _i18.Future<List<_i8.Debt>>.value(
+            returnValue: _i17.Future<List<_i8.Debt>>.value(<_i8.Debt>[]),
+            returnValueForMissingStub: _i17.Future<List<_i8.Debt>>.value(
               <_i8.Debt>[],
             ),
           )
-          as _i18.Future<List<_i8.Debt>>);
+          as _i17.Future<List<_i8.Debt>>);
 
   @override
-  _i18.Stream<List<_i8.Debt>> watchAll() =>
+  _i17.Stream<List<_i8.Debt>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
-            returnValue: _i18.Stream<List<_i8.Debt>>.empty(),
-            returnValueForMissingStub: _i18.Stream<List<_i8.Debt>>.empty(),
+            returnValue: _i17.Stream<List<_i8.Debt>>.empty(),
+            returnValueForMissingStub: _i17.Stream<List<_i8.Debt>>.empty(),
           )
-          as _i18.Stream<List<_i8.Debt>>);
+          as _i17.Stream<List<_i8.Debt>>);
 
   @override
-  _i18.Future<_i8.Debt> getById(String? id) =>
+  _i17.Future<_i8.Debt> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i8.Debt>.value(
+            returnValue: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i8.Debt>.value(
+            returnValueForMissingStub: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i8.Debt>);
+          as _i17.Future<_i8.Debt>);
 
   @override
-  _i18.Future<_i8.Debt> create(_i8.Debt? debt) =>
+  _i17.Future<_i8.Debt> create(_i8.Debt? debt) =>
       (super.noSuchMethod(
             Invocation.method(#create, [debt]),
-            returnValue: _i18.Future<_i8.Debt>.value(
+            returnValue: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#create, [debt])),
             ),
-            returnValueForMissingStub: _i18.Future<_i8.Debt>.value(
+            returnValueForMissingStub: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#create, [debt])),
             ),
           )
-          as _i18.Future<_i8.Debt>);
+          as _i17.Future<_i8.Debt>);
 
   @override
-  _i18.Future<_i8.Debt> update(_i8.Debt? debt) =>
+  _i17.Future<_i8.Debt> update(_i8.Debt? debt) =>
       (super.noSuchMethod(
             Invocation.method(#update, [debt]),
-            returnValue: _i18.Future<_i8.Debt>.value(
+            returnValue: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#update, [debt])),
             ),
-            returnValueForMissingStub: _i18.Future<_i8.Debt>.value(
+            returnValueForMissingStub: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(this, Invocation.method(#update, [debt])),
             ),
           )
-          as _i18.Future<_i8.Debt>);
+          as _i17.Future<_i8.Debt>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i8.Debt> repay(String? id, String? accountId, double? amount) =>
+  _i17.Future<_i8.Debt> repay(String? id, String? accountId, double? amount) =>
       (super.noSuchMethod(
             Invocation.method(#repay, [id, accountId, amount]),
-            returnValue: _i18.Future<_i8.Debt>.value(
+            returnValue: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
                 Invocation.method(#repay, [id, accountId, amount]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i8.Debt>.value(
+            returnValueForMissingStub: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
                 Invocation.method(#repay, [id, accountId, amount]),
               ),
             ),
           )
-          as _i18.Future<_i8.Debt>);
+          as _i17.Future<_i8.Debt>);
 
   @override
-  _i18.Future<List<_i24.DebtPayment>> getPayments(String? id) =>
+  _i17.Future<List<_i23.DebtPayment>> getPayments(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getPayments, [id]),
-            returnValue: _i18.Future<List<_i24.DebtPayment>>.value(
-              <_i24.DebtPayment>[],
+            returnValue: _i17.Future<List<_i23.DebtPayment>>.value(
+              <_i23.DebtPayment>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i24.DebtPayment>>.value(<_i24.DebtPayment>[]),
+                _i17.Future<List<_i23.DebtPayment>>.value(<_i23.DebtPayment>[]),
           )
-          as _i18.Future<List<_i24.DebtPayment>>);
+          as _i17.Future<List<_i23.DebtPayment>>);
 
   @override
-  _i18.Future<_i8.Debt> snooze(
+  _i17.Future<_i8.Debt> snooze(
     String? id,
     String? reminderDate,
     String? reminderTime,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#snooze, [id, reminderDate, reminderTime]),
-            returnValue: _i18.Future<_i8.Debt>.value(
+            returnValue: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
                 Invocation.method(#snooze, [id, reminderDate, reminderTime]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i8.Debt>.value(
+            returnValueForMissingStub: _i17.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
                 Invocation.method(#snooze, [id, reminderDate, reminderTime]),
               ),
             ),
           )
-          as _i18.Future<_i8.Debt>);
+          as _i17.Future<_i8.Debt>);
 }
 
 /// A class which mocks [CategoryRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCategoryRepository extends _i1.Mock
-    implements _i25.CategoryRepository {
+    implements _i24.CategoryRepository {
   @override
-  _i18.Stream<List<_i9.Category>> watchAll() =>
+  _i17.Stream<List<_i9.Category>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
-            returnValue: _i18.Stream<List<_i9.Category>>.empty(),
-            returnValueForMissingStub: _i18.Stream<List<_i9.Category>>.empty(),
+            returnValue: _i17.Stream<List<_i9.Category>>.empty(),
+            returnValueForMissingStub: _i17.Stream<List<_i9.Category>>.empty(),
           )
-          as _i18.Stream<List<_i9.Category>>);
+          as _i17.Stream<List<_i9.Category>>);
 
   @override
-  _i18.Future<_i9.Category> getById(String? id) =>
+  _i17.Future<_i9.Category> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i9.Category>.value(
+            returnValue: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i9.Category>.value(
+            returnValueForMissingStub: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i9.Category>);
+          as _i17.Future<_i9.Category>);
 
   @override
-  _i18.Future<List<_i9.Category>> getAll() =>
+  _i17.Future<List<_i9.Category>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i9.Category>>.value(
+            returnValue: _i17.Future<List<_i9.Category>>.value(
               <_i9.Category>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i9.Category>>.value(
+            returnValueForMissingStub: _i17.Future<List<_i9.Category>>.value(
               <_i9.Category>[],
             ),
           )
-          as _i18.Future<List<_i9.Category>>);
+          as _i17.Future<List<_i9.Category>>);
 
   @override
-  _i18.Future<_i9.Category> create(_i9.Category? item) =>
+  _i17.Future<_i9.Category> create(_i9.Category? item) =>
       (super.noSuchMethod(
             Invocation.method(#create, [item]),
-            returnValue: _i18.Future<_i9.Category>.value(
+            returnValue: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#create, [item])),
             ),
-            returnValueForMissingStub: _i18.Future<_i9.Category>.value(
+            returnValueForMissingStub: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#create, [item])),
             ),
           )
-          as _i18.Future<_i9.Category>);
+          as _i17.Future<_i9.Category>);
 
   @override
-  _i18.Future<_i9.Category> update(_i9.Category? item) =>
+  _i17.Future<_i9.Category> update(_i9.Category? item) =>
       (super.noSuchMethod(
             Invocation.method(#update, [item]),
-            returnValue: _i18.Future<_i9.Category>.value(
+            returnValue: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#update, [item])),
             ),
-            returnValueForMissingStub: _i18.Future<_i9.Category>.value(
+            returnValueForMissingStub: _i17.Future<_i9.Category>.value(
               _FakeCategory_7(this, Invocation.method(#update, [item])),
             ),
           )
-          as _i18.Future<_i9.Category>);
+          as _i17.Future<_i9.Category>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 }
 
 /// A class which mocks [AccountRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAccountRepository extends _i1.Mock implements _i26.AccountRepository {
+class MockAccountRepository extends _i1.Mock implements _i25.AccountRepository {
   @override
-  _i18.Stream<List<_i10.Account>> watchAll() =>
+  _i17.Stream<List<_i10.Account>> watchAll() =>
       (super.noSuchMethod(
             Invocation.method(#watchAll, []),
-            returnValue: _i18.Stream<List<_i10.Account>>.empty(),
-            returnValueForMissingStub: _i18.Stream<List<_i10.Account>>.empty(),
+            returnValue: _i17.Stream<List<_i10.Account>>.empty(),
+            returnValueForMissingStub: _i17.Stream<List<_i10.Account>>.empty(),
           )
-          as _i18.Stream<List<_i10.Account>>);
+          as _i17.Stream<List<_i10.Account>>);
 
   @override
-  _i18.Future<_i10.Account> getById(String? id) =>
+  _i17.Future<_i10.Account> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i10.Account>.value(
+            returnValue: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i10.Account>.value(
+            returnValueForMissingStub: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i10.Account>);
+          as _i17.Future<_i10.Account>);
 
   @override
-  _i18.Future<_i10.Account> setDefault(String? id) =>
+  _i17.Future<_i10.Account> setDefault(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#setDefault, [id]),
-            returnValue: _i18.Future<_i10.Account>.value(
+            returnValue: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#setDefault, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i10.Account>.value(
+            returnValueForMissingStub: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#setDefault, [id])),
             ),
           )
-          as _i18.Future<_i10.Account>);
+          as _i17.Future<_i10.Account>);
 
   @override
-  _i18.Future<_i10.Account> adjustBalance(String? id, double? newBalance) =>
+  _i17.Future<_i10.Account> adjustBalance(String? id, double? newBalance) =>
       (super.noSuchMethod(
             Invocation.method(#adjustBalance, [id, newBalance]),
-            returnValue: _i18.Future<_i10.Account>.value(
+            returnValue: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(
                 this,
                 Invocation.method(#adjustBalance, [id, newBalance]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i10.Account>.value(
+            returnValueForMissingStub: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(
                 this,
                 Invocation.method(#adjustBalance, [id, newBalance]),
               ),
             ),
           )
-          as _i18.Future<_i10.Account>);
+          as _i17.Future<_i10.Account>);
 
   @override
-  _i18.Future<List<_i10.Account>> getAll() =>
+  _i17.Future<List<_i10.Account>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i10.Account>>.value(
+            returnValue: _i17.Future<List<_i10.Account>>.value(
               <_i10.Account>[],
             ),
-            returnValueForMissingStub: _i18.Future<List<_i10.Account>>.value(
+            returnValueForMissingStub: _i17.Future<List<_i10.Account>>.value(
               <_i10.Account>[],
             ),
           )
-          as _i18.Future<List<_i10.Account>>);
+          as _i17.Future<List<_i10.Account>>);
 
   @override
-  _i18.Future<_i10.Account> create(_i10.Account? item) =>
+  _i17.Future<_i10.Account> create(_i10.Account? item) =>
       (super.noSuchMethod(
             Invocation.method(#create, [item]),
-            returnValue: _i18.Future<_i10.Account>.value(
+            returnValue: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#create, [item])),
             ),
-            returnValueForMissingStub: _i18.Future<_i10.Account>.value(
+            returnValueForMissingStub: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#create, [item])),
             ),
           )
-          as _i18.Future<_i10.Account>);
+          as _i17.Future<_i10.Account>);
 
   @override
-  _i18.Future<_i10.Account> update(_i10.Account? item) =>
+  _i17.Future<_i10.Account> update(_i10.Account? item) =>
       (super.noSuchMethod(
             Invocation.method(#update, [item]),
-            returnValue: _i18.Future<_i10.Account>.value(
+            returnValue: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#update, [item])),
             ),
-            returnValueForMissingStub: _i18.Future<_i10.Account>.value(
+            returnValueForMissingStub: _i17.Future<_i10.Account>.value(
               _FakeAccount_8(this, Invocation.method(#update, [item])),
             ),
           )
-          as _i18.Future<_i10.Account>);
+          as _i17.Future<_i10.Account>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
-}
-
-/// A class which mocks [ProductRepository].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockProductRepository extends _i1.Mock implements _i27.ProductRepository {
-  @override
-  _i18.Future<List<_i11.Product>> getAll() =>
-      (super.noSuchMethod(
-            Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i11.Product>>.value(
-              <_i11.Product>[],
-            ),
-            returnValueForMissingStub: _i18.Future<List<_i11.Product>>.value(
-              <_i11.Product>[],
-            ),
-          )
-          as _i18.Future<List<_i11.Product>>);
-
-  @override
-  _i18.Future<_i11.Product> getById(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#getById, [id])),
-            ),
-            returnValueForMissingStub: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#getById, [id])),
-            ),
-          )
-          as _i18.Future<_i11.Product>);
-
-  @override
-  _i18.Future<_i11.Product> create(_i11.Product? product) =>
-      (super.noSuchMethod(
-            Invocation.method(#create, [product]),
-            returnValue: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#create, [product])),
-            ),
-            returnValueForMissingStub: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#create, [product])),
-            ),
-          )
-          as _i18.Future<_i11.Product>);
-
-  @override
-  _i18.Future<_i11.Product> update(_i11.Product? product) =>
-      (super.noSuchMethod(
-            Invocation.method(#update, [product]),
-            returnValue: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#update, [product])),
-            ),
-            returnValueForMissingStub: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#update, [product])),
-            ),
-          )
-          as _i18.Future<_i11.Product>);
-
-  @override
-  _i18.Future<void> delete(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
-          )
-          as _i18.Future<void>);
-
-  @override
-  _i18.Future<_i11.Product> sell(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#sell, [id]),
-            returnValue: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#sell, [id])),
-            ),
-            returnValueForMissingStub: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#sell, [id])),
-            ),
-          )
-          as _i18.Future<_i11.Product>);
-
-  @override
-  _i18.Future<_i11.Product> restock(String? id, int? quantity) =>
-      (super.noSuchMethod(
-            Invocation.method(#restock, [id, quantity]),
-            returnValue: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#restock, [id, quantity])),
-            ),
-            returnValueForMissingStub: _i18.Future<_i11.Product>.value(
-              _FakeProduct_9(this, Invocation.method(#restock, [id, quantity])),
-            ),
-          )
-          as _i18.Future<_i11.Product>);
-
-  @override
-  _i18.Future<List<_i4.Transaction>> getSales(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#getSales, [id]),
-            returnValue: _i18.Future<List<_i4.Transaction>>.value(
-              <_i4.Transaction>[],
-            ),
-            returnValueForMissingStub: _i18.Future<List<_i4.Transaction>>.value(
-              <_i4.Transaction>[],
-            ),
-          )
-          as _i18.Future<List<_i4.Transaction>>);
+          as _i17.Future<void>);
 }
 
 /// A class which mocks [ExchangeRateRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockExchangeRateRepository extends _i1.Mock
-    implements _i28.ExchangeRateRepository {
+    implements _i26.ExchangeRateRepository {
   @override
-  _i18.Future<List<_i12.ExchangeRate>> getAll() =>
+  _i17.Future<List<_i11.ExchangeRate>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i18.Future<List<_i12.ExchangeRate>>.value(
-              <_i12.ExchangeRate>[],
+            returnValue: _i17.Future<List<_i11.ExchangeRate>>.value(
+              <_i11.ExchangeRate>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i12.ExchangeRate>>.value(
-                  <_i12.ExchangeRate>[],
+                _i17.Future<List<_i11.ExchangeRate>>.value(
+                  <_i11.ExchangeRate>[],
                 ),
           )
-          as _i18.Future<List<_i12.ExchangeRate>>);
+          as _i17.Future<List<_i11.ExchangeRate>>);
 
   @override
-  _i18.Future<_i12.ExchangeRate> upsert(
-    _i19.Currency? baseCurrency,
-    _i19.Currency? targetCurrency,
+  _i17.Future<_i11.ExchangeRate> upsert(
+    _i18.Currency? baseCurrency,
+    _i18.Currency? targetCurrency,
     double? rate,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#upsert, [baseCurrency, targetCurrency, rate]),
-            returnValue: _i18.Future<_i12.ExchangeRate>.value(
-              _FakeExchangeRate_10(
+            returnValue: _i17.Future<_i11.ExchangeRate>.value(
+              _FakeExchangeRate_9(
                 this,
                 Invocation.method(#upsert, [
                   baseCurrency,
@@ -1173,8 +1074,8 @@ class MockExchangeRateRepository extends _i1.Mock
                 ]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i12.ExchangeRate>.value(
-              _FakeExchangeRate_10(
+            returnValueForMissingStub: _i17.Future<_i11.ExchangeRate>.value(
+              _FakeExchangeRate_9(
                 this,
                 Invocation.method(#upsert, [
                   baseCurrency,
@@ -1184,182 +1085,182 @@ class MockExchangeRateRepository extends _i1.Mock
               ),
             ),
           )
-          as _i18.Future<_i12.ExchangeRate>);
+          as _i17.Future<_i11.ExchangeRate>);
 
   @override
-  _i18.Future<void> delete(
-    _i19.Currency? baseCurrency,
-    _i19.Currency? targetCurrency,
+  _i17.Future<void> delete(
+    _i18.Currency? baseCurrency,
+    _i18.Currency? targetCurrency,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [baseCurrency, targetCurrency]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 }
 
 /// A class which mocks [BudgetRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBudgetRepository extends _i1.Mock implements _i29.BudgetRepository {
+class MockBudgetRepository extends _i1.Mock implements _i27.BudgetRepository {
   @override
-  _i18.Future<List<_i13.Budget>> getAll({bool? includeInactive = false}) =>
+  _i17.Future<List<_i12.Budget>> getAll({bool? includeInactive = false}) =>
       (super.noSuchMethod(
             Invocation.method(#getAll, [], {#includeInactive: includeInactive}),
-            returnValue: _i18.Future<List<_i13.Budget>>.value(<_i13.Budget>[]),
-            returnValueForMissingStub: _i18.Future<List<_i13.Budget>>.value(
-              <_i13.Budget>[],
+            returnValue: _i17.Future<List<_i12.Budget>>.value(<_i12.Budget>[]),
+            returnValueForMissingStub: _i17.Future<List<_i12.Budget>>.value(
+              <_i12.Budget>[],
             ),
           )
-          as _i18.Future<List<_i13.Budget>>);
+          as _i17.Future<List<_i12.Budget>>);
 
   @override
-  _i18.Future<_i13.Budget> getById(String? id) =>
+  _i17.Future<_i12.Budget> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#getById, [id])),
+            returnValue: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#getById, [id])),
             ),
-            returnValueForMissingStub: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#getById, [id])),
+            returnValueForMissingStub: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#getById, [id])),
             ),
           )
-          as _i18.Future<_i13.Budget>);
+          as _i17.Future<_i12.Budget>);
 
   @override
-  _i18.Future<_i13.Budget> create(_i13.Budget? budget) =>
+  _i17.Future<_i12.Budget> create(_i12.Budget? budget) =>
       (super.noSuchMethod(
             Invocation.method(#create, [budget]),
-            returnValue: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#create, [budget])),
+            returnValue: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#create, [budget])),
             ),
-            returnValueForMissingStub: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#create, [budget])),
+            returnValueForMissingStub: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#create, [budget])),
             ),
           )
-          as _i18.Future<_i13.Budget>);
+          as _i17.Future<_i12.Budget>);
 
   @override
-  _i18.Future<_i13.Budget> update(_i13.Budget? budget) =>
+  _i17.Future<_i12.Budget> update(_i12.Budget? budget) =>
       (super.noSuchMethod(
             Invocation.method(#update, [budget]),
-            returnValue: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#update, [budget])),
+            returnValue: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#update, [budget])),
             ),
-            returnValueForMissingStub: _i18.Future<_i13.Budget>.value(
-              _FakeBudget_11(this, Invocation.method(#update, [budget])),
+            returnValueForMissingStub: _i17.Future<_i12.Budget>.value(
+              _FakeBudget_10(this, Invocation.method(#update, [budget])),
             ),
           )
-          as _i18.Future<_i13.Budget>);
+          as _i17.Future<_i12.Budget>);
 
   @override
-  _i18.Future<void> delete(String? id) =>
+  _i17.Future<void> delete(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#delete, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i14.BudgetOverview> getOverview() =>
+  _i17.Future<_i13.BudgetOverview> getOverview() =>
       (super.noSuchMethod(
             Invocation.method(#getOverview, []),
-            returnValue: _i18.Future<_i14.BudgetOverview>.value(
-              _FakeBudgetOverview_12(this, Invocation.method(#getOverview, [])),
+            returnValue: _i17.Future<_i13.BudgetOverview>.value(
+              _FakeBudgetOverview_11(this, Invocation.method(#getOverview, [])),
             ),
-            returnValueForMissingStub: _i18.Future<_i14.BudgetOverview>.value(
-              _FakeBudgetOverview_12(this, Invocation.method(#getOverview, [])),
+            returnValueForMissingStub: _i17.Future<_i13.BudgetOverview>.value(
+              _FakeBudgetOverview_11(this, Invocation.method(#getOverview, [])),
             ),
           )
-          as _i18.Future<_i14.BudgetOverview>);
+          as _i17.Future<_i13.BudgetOverview>);
 
   @override
-  _i18.Future<_i15.BudgetHistory> getHistory(String? month) =>
+  _i17.Future<_i14.BudgetHistory> getHistory(String? month) =>
       (super.noSuchMethod(
             Invocation.method(#getHistory, [month]),
-            returnValue: _i18.Future<_i15.BudgetHistory>.value(
-              _FakeBudgetHistory_13(
+            returnValue: _i17.Future<_i14.BudgetHistory>.value(
+              _FakeBudgetHistory_12(
                 this,
                 Invocation.method(#getHistory, [month]),
               ),
             ),
-            returnValueForMissingStub: _i18.Future<_i15.BudgetHistory>.value(
-              _FakeBudgetHistory_13(
+            returnValueForMissingStub: _i17.Future<_i14.BudgetHistory>.value(
+              _FakeBudgetHistory_12(
                 this,
                 Invocation.method(#getHistory, [month]),
               ),
             ),
           )
-          as _i18.Future<_i15.BudgetHistory>);
+          as _i17.Future<_i14.BudgetHistory>);
 }
 
 /// A class which mocks [RecurringTransactionRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockRecurringTransactionRepository extends _i1.Mock
-    implements _i30.RecurringTransactionRepository {
+    implements _i28.RecurringTransactionRepository {
   @override
-  _i18.Future<List<_i16.RecurringTransaction>> listActive() =>
+  _i17.Future<List<_i15.RecurringTransaction>> listActive() =>
       (super.noSuchMethod(
             Invocation.method(#listActive, []),
-            returnValue: _i18.Future<List<_i16.RecurringTransaction>>.value(
-              <_i16.RecurringTransaction>[],
+            returnValue: _i17.Future<List<_i15.RecurringTransaction>>.value(
+              <_i15.RecurringTransaction>[],
             ),
             returnValueForMissingStub:
-                _i18.Future<List<_i16.RecurringTransaction>>.value(
-                  <_i16.RecurringTransaction>[],
+                _i17.Future<List<_i15.RecurringTransaction>>.value(
+                  <_i15.RecurringTransaction>[],
                 ),
           )
-          as _i18.Future<List<_i16.RecurringTransaction>>);
+          as _i17.Future<List<_i15.RecurringTransaction>>);
 
   @override
-  _i18.Future<void> validate(String? id) =>
+  _i17.Future<void> validate(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#validate, [id]),
-            returnValue: _i18.Future<void>.value(),
-            returnValueForMissingStub: _i18.Future<void>.value(),
+            returnValue: _i17.Future<void>.value(),
+            returnValueForMissingStub: _i17.Future<void>.value(),
           )
-          as _i18.Future<void>);
+          as _i17.Future<void>);
 
   @override
-  _i18.Future<_i16.RecurringTransaction> skip(String? id) =>
+  _i17.Future<_i15.RecurringTransaction> skip(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#skip, [id]),
-            returnValue: _i18.Future<_i16.RecurringTransaction>.value(
-              _FakeRecurringTransaction_14(
+            returnValue: _i17.Future<_i15.RecurringTransaction>.value(
+              _FakeRecurringTransaction_13(
                 this,
                 Invocation.method(#skip, [id]),
               ),
             ),
             returnValueForMissingStub:
-                _i18.Future<_i16.RecurringTransaction>.value(
-                  _FakeRecurringTransaction_14(
+                _i17.Future<_i15.RecurringTransaction>.value(
+                  _FakeRecurringTransaction_13(
                     this,
                     Invocation.method(#skip, [id]),
                   ),
                 ),
           )
-          as _i18.Future<_i16.RecurringTransaction>);
+          as _i17.Future<_i15.RecurringTransaction>);
 
   @override
-  _i18.Future<_i16.RecurringTransaction> deactivate(String? id) =>
+  _i17.Future<_i15.RecurringTransaction> deactivate(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#deactivate, [id]),
-            returnValue: _i18.Future<_i16.RecurringTransaction>.value(
-              _FakeRecurringTransaction_14(
+            returnValue: _i17.Future<_i15.RecurringTransaction>.value(
+              _FakeRecurringTransaction_13(
                 this,
                 Invocation.method(#deactivate, [id]),
               ),
             ),
             returnValueForMissingStub:
-                _i18.Future<_i16.RecurringTransaction>.value(
-                  _FakeRecurringTransaction_14(
+                _i17.Future<_i15.RecurringTransaction>.value(
+                  _FakeRecurringTransaction_13(
                     this,
                     Invocation.method(#deactivate, [id]),
                   ),
                 ),
           )
-          as _i18.Future<_i16.RecurringTransaction>);
+          as _i17.Future<_i15.RecurringTransaction>);
 }

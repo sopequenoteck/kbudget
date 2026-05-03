@@ -154,8 +154,9 @@ describe('DebtDetail', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    // Le bouton repay ne doit pas être visible → showRepayDialog est false par défaut
-    expect(fixture.componentInstance.showRepayDialog()).toBe(false);
+    // Le bouton repay ne doit pas être visible quand la dette est remboursée
+    const repayButton = fixture.nativeElement.querySelector('.action-btn--primary');
+    expect(repayButton).toBeNull();
     // La dette est remboursée
     expect(fixture.componentInstance.debt()?.rembourse).toBe(true);
   });

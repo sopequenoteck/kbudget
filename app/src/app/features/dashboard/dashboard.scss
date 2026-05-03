@@ -1,79 +1,137 @@
+// =============================================================================
+// Dashboard — quiet utility, dark-first
+// Hierarchy: hero (primary) → sections (secondary)
+// =============================================================================
+
 :host {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
   padding: var(--space-4);
   position: relative;
-
-  &::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 40vh;
-    background: radial-gradient(ellipse at top center, var(--page-gradient-color) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
+  // Intentional spacing: hero breathes more than detail sections
+  gap: var(--space-8);
 }
 
-// -- Zone solde total --
-.accounts-zone {
+// =============================================================================
+// Hero section — patrimoine + résumé mensuel
+// =============================================================================
+
+.hero {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
 
-  .shell-greeting {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+.hero__top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero__greeting {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-secondary);
+}
+
+// -- Montant principal --
+.hero__amount {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.hero__amount-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero__amount-value-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero__amount-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.hero__converted {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.hero__meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-1);
+}
+
+.hero__meta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hero__meta-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+
+  ::ng-deep ng-icon {
+    min-width: 14px;
   }
 
-  &__totals {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+  &--expense {
+    color: var(--color-expense);
   }
 
-  &__total {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-    padding: var(--space-4);
-    background: var(--hero-gradient);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    transition: transform var(--duration-fast) var(--easing-default);
+  &--clickable {
+    cursor: pointer;
 
-    &:active {
-      transform: scale(0.97);
+    &:hover {
+      color: var(--text-secondary);
     }
-
-  }
-
-  &__total-label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  &__total-value-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  &__total-value {
-    font-size: var(--font-size-hero);
-    font-weight: var(--font-weight-bold);
-    text-shadow: var(--shadow-hero-text);
   }
 }
+
+// =============================================================================
+// Variation badges — text only, no background
+// =============================================================================
+
+.variation-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  padding: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+
+  &--positive {
+    color: var(--text-success);
+  }
+
+  &--negative {
+    color: var(--text-error);
+  }
+
+  &--neutral {
+    color: var(--text-secondary);
+  }
+}
+
+// =============================================================================
+// Utilities
+// =============================================================================
 
 .missing-rate-icon {
   color: var(--text-warning);
@@ -81,130 +139,14 @@
   cursor: default;
 }
 
-// -- Badges variation --
-.variation-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-round);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-
-  &--positive {
-    background: var(--bg-success);
-    color: var(--text-success);
-  }
-
-  &--negative {
-    background: var(--bg-error);
-    color: var(--text-error);
-  }
-
-  &--neutral {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-  }
-}
-
-.patrimoine-converted {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-}
-
 .state-loading--accounts {
   padding: var(--space-4);
 }
 
-.state-empty--accounts {
-  padding: var(--space-6) var(--space-4);
 
-  .btn-outline {
-    text-decoration: none;
-  }
-}
-
-// -- Cartes revenus / depenses --
-.summary-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.summary-cards {
-  display: flex;
-  gap: var(--space-3);
-}
-
-.summary-card {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border-radius: var(--radius-xl);
-  background-color: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: none;
-  transition: transform var(--duration-fast) var(--easing-default);
-
-  @supports (backdrop-filter: blur(1px)) {
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
-
-  &__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-
-    &--income {
-      background-color: var(--color-income);
-    }
-
-    &--expense {
-      background-color: var(--color-expense);
-    }
-  }
-
-  &__label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  &__value {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    white-space: nowrap;
-  }
-
-  &__converted {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-  }
-
-  &--income .summary-card__value {
-    color: var(--color-income);
-  }
-
-  &--expense .summary-card__value {
-    color: var(--color-expense);
-  }
-}
-
-@media (max-width: 360px) {
-  .summary-cards {
-    flex-direction: column;
-  }
-}
+// =============================================================================
+// Detail sections (budgets, opérations)
+// =============================================================================
 
 .dashboard-section {
   display: flex;
@@ -218,9 +160,9 @@
   }
 
   &__title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     margin: 0;
   }
 
@@ -236,23 +178,31 @@
   }
 }
 
+// Grouped list in subtle container (iOS Settings style)
 .dashboard-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 
   li {
-    background-color: var(--surface-default);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--border-default);
+
+    &:last-child {
+      border-bottom: none;
+    }
   }
 }
 
+// =============================================================================
+// States
+// =============================================================================
+
 .state-loading,
-.state-empty,
 .state-error {
   display: flex;
   flex-direction: column;
@@ -267,17 +217,3 @@
   padding: var(--space-4);
 }
 
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-default);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}

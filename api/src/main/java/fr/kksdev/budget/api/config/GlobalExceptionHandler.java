@@ -1,9 +1,18 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.exception.AvatarNotFoundException;
+import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
+import fr.kksdev.budget.api.exception.FileTooLargeException;
+import fr.kksdev.budget.api.exception.InvalidExportFormatException;
+import fr.kksdev.budget.api.exception.InvalidImageFormatException;
+import fr.kksdev.budget.api.exception.LastAdminDeletionForbiddenException;
+import fr.kksdev.budget.api.exception.PasswordIncorrectException;
+import fr.kksdev.budget.api.exception.PasswordResetNotRequiredException;
+import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.exception.TokenExpiredException;
 import fr.kksdev.budget.api.exception.TokenInvalidException;
 import fr.kksdev.budget.api.exception.TokenReusedException;
@@ -73,10 +82,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
         log.warn("Conflict: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", HttpStatus.CONFLICT.value(),
+                "error", ex.getMessage(),
+                "message", resolveConflictMessage(ex.getMessage())
         ));
+    }
+
+    private String resolveConflictMessage(String errorCode) {
+        return switch (errorCode) {
+            case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "Impossible de désactiver le dernier admin actif.";
+            case "EMAIL_ALREADY_EXISTS" -> "Cet email est déjà utilisé par un autre utilisateur.";
+            default -> errorCode;
+        };
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -110,6 +129,55 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(InvalidImageFormatException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidImageFormat(InvalidImageFormatException ex) {
+        log.warn("Invalid image format: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FileTooLargeException.class)
+    public ResponseEntity<ErrorResponse> handleFileTooLarge(FileTooLargeException ex) {
+        log.warn("File too large: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(new ErrorResponse("FILE_TOO_LARGE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundException ex) {
+        log.warn("Avatar not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("AVATAR_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordIncorrectException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordIncorrect(PasswordIncorrectException ex) {
+        log.warn("Password incorrect: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("PASSWORD_INCORRECT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidExportFormatException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidExportFormat(InvalidExportFormatException ex) {
+        log.warn("Invalid export format: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_EXPORT_FORMAT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordUnchangedException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordUnchanged(PasswordUnchangedException ex) {
+        log.warn("Password unchanged: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("PASSWORD_UNCHANGED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordResetNotRequiredException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordResetNotRequired(PasswordResetNotRequiredException ex) {
+        log.warn("Password reset not required: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("PASSWORD_RESET_NOT_REQUIRED", ex.getMessage()));
+    }
+
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<ErrorResponse> handleTokenExpired(TokenExpiredException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -132,6 +200,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTokenInvalid(TokenInvalidException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("TOKEN_INVALID", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConfirmationRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleConfirmationRequired(ConfirmationRequiredException ex) {
+        log.warn("Confirmation required: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("CONFIRMATION_REQUIRED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(LastAdminDeletionForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleLastAdminDeletionForbidden(LastAdminDeletionForbiddenException ex) {
+        log.warn("Last admin deletion forbidden: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("LAST_ADMIN_DELETION_FORBIDDEN", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

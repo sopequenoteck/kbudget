@@ -1,9 +1,10 @@
-import { Injectable, inject, isDevMode, DestroyRef } from '@angular/core';
+import { Injectable, inject, DestroyRef } from '@angular/core';
 import { Client } from '@stomp/stompjs';
 import { NotificationService } from './notification';
 import { AuthService } from './auth';
 import { ExchangeRateService } from './exchange-rate';
 import { type NotificationModel } from '../models/notification.model';
+import { DevLogger } from './dev-logger';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,7 @@ export class StompService {
   private readonly authService = inject(AuthService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(DevLogger);
 
   private client: Client | null = null;
 
@@ -40,7 +42,7 @@ export class StompService {
         }
       },
       onConnect: () => {
-        if (isDevMode()) console.log('STOMP connected');
+        this.logger.error('STOMP connected');
         this.notificationService.stopPolling();
 
         this.client!.subscribe('/user/queue/notifications', (message) => {
@@ -56,10 +58,10 @@ export class StompService {
         });
       },
       onDisconnect: () => {
-        if (isDevMode()) console.log('STOMP disconnected');
+        this.logger.error('STOMP disconnected');
       },
       onStompError: (frame) => {
-        if (isDevMode()) console.error('STOMP error:', frame.headers['message']);
+        this.logger.error('STOMP error:', frame.headers['message']);
       },
       onWebSocketClose: () => {
         this.notificationService.startPolling();

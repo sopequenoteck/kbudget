@@ -1,7 +1,7 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { RecurringList } from './recurring-list';
@@ -215,7 +215,7 @@ describe('RecurringList', () => {
     expect(component.sortedRecurringTransactions().length).toBe(0);
 
     const nativeEl: HTMLElement = fixture.nativeElement;
-    const emptyState = nativeEl.querySelector('.state-empty');
+    const emptyState = nativeEl.querySelector('app-empty-state');
     expect(emptyState).not.toBeNull();
   });
 

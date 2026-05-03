@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
+import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public CategoryResponse create(CategoryRequest request, UUID userId) {
@@ -119,15 +122,6 @@ public class CategoryService {
                     .build();
             categoryRepository.save(virement);
 
-            Category boutique = Category.builder()
-                    .nom("Boutique")
-                    .icone("🛍️")
-                    .couleur("#f59e0b")
-                    .isSystem(true)
-                    .user(user)
-                    .build();
-            categoryRepository.save(boutique);
-
             log.info("Catégories système créées pour userId {}", user.getId());
         } catch (Exception e) {
             log.error("Échec du seeding des catégories système pour userId {}: {}", user.getId(), e.getMessage());
@@ -154,23 +148,18 @@ public class CategoryService {
         return ajustement;
     }
 
-    @Transactional
-    public Category findOrCreateShopCategory(UUID userId) {
-        Category existing = findSystemCategoryByNom("Boutique", userId);
-        if (existing != null) {
-            return existing;
-        }
-
-        Category boutique = Category.builder()
-                .nom("Boutique")
-                .icone("🛍️")
-                .couleur("#f59e0b")
-                .isSystem(true)
-                .user(userRepository.getReferenceById(userId))
-                .build();
-        boutique = categoryRepository.save(boutique);
-        log.info("Catégorie système 'Boutique' créée pour userId {}", userId);
-        return boutique;
+    public List<CategoryResponse> getMostUsed(UUID userId, int days, int limit) {
+        LocalDate since = LocalDate.now().minusDays(days);
+        List<Object[]> rows = transactionRepository.findMostUsedCategories(userId, since, limit);
+        return rows.stream()
+                .map(row -> new CategoryResponse(
+                        (UUID) row[0],
+                        (String) row[1],
+                        (String) row[2],
+                        (String) row[3],
+                        (Boolean) row[4]
+                ))
+                .toList();
     }
 
     public Category findSystemCategoryByNom(String nom, UUID userId) {

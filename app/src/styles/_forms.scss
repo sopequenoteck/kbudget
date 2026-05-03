@@ -2,7 +2,7 @@
 // Forms — Styles globaux pour inputs, textarea, select
 // =============================================================================
 
-input:not([type='checkbox']):not([type='radio']),
+input:not([type='checkbox']):not([type='radio']):not(.input-naked),
 textarea,
 select {
   width: 100%;
@@ -42,8 +42,8 @@ select {
   }
 }
 
-// appearance: none uniquement sur input et textarea (sauf color)
-input:not([type='checkbox']):not([type='radio']):not([type='color']),
+// appearance: none uniquement sur input et textarea (sauf color, sauf naked)
+input:not([type='checkbox']):not([type='radio']):not([type='color']):not(.input-naked),
 textarea {
   appearance: none;
 }
@@ -87,4 +87,25 @@ input[type='radio'] {
   width: auto;
   accent-color: var(--color-primary);
   cursor: pointer;
+}
+
+// =============================================================================
+// Form layout patterns — barre d'actions
+// =============================================================================
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}
+
+// =============================================================================
+// Form field prefix icon — ajustement padding quand icône présente
+// Exception : pages auth uniquement (voir DESIGN.md "Auth identity")
+// =============================================================================
+
+.form-field__input-wrapper--icon
+  input:not([type='checkbox']):not([type='radio']):not(.input-naked),
+.form-field__input-wrapper--icon select {
+  padding-left: var(--space-9);
 }

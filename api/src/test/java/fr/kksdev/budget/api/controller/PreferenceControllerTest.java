@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.config.SecurityConfig;
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.response.UserPreferenceResponse;
 import fr.kksdev.budget.api.enums.Currency;
@@ -44,6 +45,9 @@ class PreferenceControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
 
@@ -52,7 +56,7 @@ class PreferenceControllerTest {
         var testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     // === US1: GET /users/me/preferences ===
@@ -60,29 +64,9 @@ class PreferenceControllerTest {
     @Test
     void should_return200WithDefaultPreferences_when_noCustomPreferences() throws Exception {
         var response = new UserPreferenceResponse(
-                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
-        );
-        when(preferenceService.getPreferences(userId)).thenReturn(response);
-
-        mockMvc.perform(get("/users/me/preferences")
-                        .header("Authorization", BEARER_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.enabledFeatures.length()").value(3))
-                .andExpect(jsonPath("$.enabledFeatures[0]").value("SUBSCRIPTIONS"))
-                .andExpect(jsonPath("$.enabledFeatures[1]").value("DEBTS"))
-                .andExpect(jsonPath("$.enabledFeatures[2]").value("SHOP"))
-                .andExpect(jsonPath("$.navOrder.length()").value(3))
-                .andExpect(jsonPath("$.navOrder[0]").value("SUBSCRIPTIONS"));
-    }
-
-    @Test
-    void should_return200WithCustomPreferences_when_preferencesExist() throws Exception {
-        var response = new UserPreferenceResponse(
-                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                List.of(Feature.SHOP, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -91,8 +75,27 @@ class PreferenceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabledFeatures.length()").value(2))
                 .andExpect(jsonPath("$.enabledFeatures[0]").value("SUBSCRIPTIONS"))
-                .andExpect(jsonPath("$.enabledFeatures[1]").value("SHOP"))
-                .andExpect(jsonPath("$.navOrder[0]").value("SHOP"))
+                .andExpect(jsonPath("$.enabledFeatures[1]").value("DEBTS"))
+                .andExpect(jsonPath("$.navOrder.length()").value(2))
+                .andExpect(jsonPath("$.navOrder[0]").value("SUBSCRIPTIONS"));
+    }
+
+    @Test
+    void should_return200WithCustomPreferences_when_preferencesExist() throws Exception {
+        var response = new UserPreferenceResponse(
+                List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
+                List.of(Feature.BUDGETS, Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+        );
+        when(preferenceService.getPreferences(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/users/me/preferences")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enabledFeatures.length()").value(2))
+                .andExpect(jsonPath("$.enabledFeatures[0]").value("SUBSCRIPTIONS"))
+                .andExpect(jsonPath("$.enabledFeatures[1]").value("BUDGETS"))
+                .andExpect(jsonPath("$.navOrder[0]").value("BUDGETS"))
                 .andExpect(jsonPath("$.navOrder[1]").value("SUBSCRIPTIONS"));
     }
 
@@ -107,9 +110,9 @@ class PreferenceControllerTest {
     @Test
     void should_return200_when_toggleFeaturesWithoutNavOrder() throws Exception {
         var response = new UserPreferenceResponse(
-                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                List.of(Feature.SUBSCRIPTIONS, Feature.SHOP),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -118,7 +121,7 @@ class PreferenceControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"enabledFeatures": ["SUBSCRIPTIONS", "SHOP"]}
+                                {"enabledFeatures": ["SUBSCRIPTIONS", "BUDGETS"]}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabledFeatures.length()").value(2))
@@ -127,7 +130,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return200_when_disableAllFeatures() throws Exception {
-        var response = new UserPreferenceResponse(List.of(), List.of(), null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM);
+        var response = new UserPreferenceResponse(List.of(), List.of(), List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM);
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
@@ -168,9 +171,9 @@ class PreferenceControllerTest {
     @Test
     void should_return200_when_validNavOrderProvided() throws Exception {
         var response = new UserPreferenceResponse(
-                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.SHOP),
-                List.of(Feature.SHOP, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                null, false, List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.BUDGETS),
+                List.of(Feature.BUDGETS, Feature.DEBTS, Feature.SUBSCRIPTIONS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -179,10 +182,10 @@ class PreferenceControllerTest {
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "SHOP"], "navOrder": ["SHOP", "DEBTS", "SUBSCRIPTIONS"]}
+                                {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"], "navOrder": ["BUDGETS", "DEBTS", "SUBSCRIPTIONS"]}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.navOrder[0]").value("SHOP"))
+                .andExpect(jsonPath("$.navOrder[0]").value("BUDGETS"))
                 .andExpect(jsonPath("$.navOrder[1]").value("DEBTS"))
                 .andExpect(jsonPath("$.navOrder[2]").value("SUBSCRIPTIONS"));
     }

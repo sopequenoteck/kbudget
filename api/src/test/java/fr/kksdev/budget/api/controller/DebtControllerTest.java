@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.controller;
 
+import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.config.SecurityConfig;
 import fr.kksdev.budget.api.dto.request.DebtRepayRequest;
@@ -52,6 +53,9 @@ class DebtControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private AdminEmailResolver adminEmailResolver;
+
     private static final String BEARER_TOKEN = "Bearer test-token";
     private final UUID userId = UUID.randomUUID();
     private final UUID debtId = UUID.randomUUID();
@@ -61,7 +65,7 @@ class DebtControllerTest {
         var testUser = User.builder().id(userId).email("test@mail.com").name("Test").build();
         when(jwtUtil.isTokenValid("test-token")).thenReturn(true);
         when(jwtUtil.extractEmail("test-token")).thenReturn("test@mail.com");
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(testUser));
     }
 
     private String debtJson(String personne, String montant, String sens, String date) {

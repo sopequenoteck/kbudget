@@ -9,8 +9,6 @@ class UserPreferenceRequest with _$UserPreferenceRequest {
   const factory UserPreferenceRequest({
     required List<Feature> enabledFeatures,
     List<Feature>? navOrder,
-    String? shopAccountId,
-    bool? includeShopInBalance,
     List<String>? currencies,
     List<NotificationType>? enabledNotificationTypes,
     String? timezone,

@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.kksdev.budget</groupId>
     <artifactId>api</artifactId>
-    <version>4.2.4</version>
+    <version>5.0.0</version>
     <name>k-budget-api</name>
     <description>K-Budget API — Gestion de budget personnel</description>
     <url/>
@@ -114,6 +114,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.11.0</version>
+        </dependency>
+        <!-- Image processing (avatar resize + EXIF rotation) -->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

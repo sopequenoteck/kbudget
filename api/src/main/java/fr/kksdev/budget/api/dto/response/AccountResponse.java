@@ -16,7 +16,6 @@ public record AccountResponse(
         boolean isDefault,
         boolean actif,
         String currency,
-        boolean isShopAccount,
         String bankCode,
         String bankName,
         String bankCountry,

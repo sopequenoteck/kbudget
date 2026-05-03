@@ -1,12 +1,14 @@
 @if (isOpen()) {
   <div
     class="modal-overlay"
+    [class.is-closing]="modalService.isClosing()"
     (click)="onOverlayClick()"
     (keydown)="onKeydown($event)"
     role="presentation"
   >
     <div
       class="modal-panel"
+      [class.is-closing]="modalService.isClosing()"
       role="dialog"
       aria-modal="true"
       [attr.aria-labelledby]="'modal-title'"
@@ -15,19 +17,21 @@
       (click)="$event.stopPropagation()"
       (keydown)="onKeydown($event)"
     >
-      <div class="modal-header">
-        <h2 id="modal-title" class="modal-title">{{ title() }}</h2>
-        <ng-content select="[modal-header-actions]" />
-        <button
-          #closeBtn
-          type="button"
-          class="modal-close"
-          aria-label="Fermer"
-          (click)="closed.emit()"
-        >
-          &times;
-        </button>
-      </div>
+      @if (!hideHeader()) {
+        <div class="modal-header">
+          <h2 id="modal-title" class="modal-title">{{ title() }}</h2>
+          <ng-content select="[modal-header-actions]" />
+          <button
+            #closeBtn
+            type="button"
+            class="modal-close"
+            aria-label="Fermer"
+            (click)="closed.emit()"
+          >
+            &times;
+          </button>
+        </div>
+      }
       <div class="modal-body">
         <ng-content />
       </div>

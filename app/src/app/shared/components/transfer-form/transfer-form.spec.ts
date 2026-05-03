@@ -1,6 +1,6 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
-import { of, signal } from 'rxjs';
+import { of } from 'rxjs';
 
 import { TransferForm } from './transfer-form';
 import { AccountService } from '../../../core/services/account';

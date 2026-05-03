@@ -1,69 +1,94 @@
-@if (hasActiveSubscriptions()) {
-  <section class="summary">
-    @for (ct of monthlyTotalsByCurrency(); track ct.currency) {
-      <div class="summary__card">
-        <span class="summary__label"
-          >Total mensuel{{ monthlyTotalsByCurrency().length > 1 ? ' ' + ct.currency : '' }}</span
-        >
-        <span class="summary__value">{{ ct.total | amount: null : ct.currency }}</span>
+<div class="hero">
+  @if (hasActiveSubscriptions()) {
+    <div class="hero__amount">
+      <div class="hero__amount-top">
+        <span class="hero__amount-label">Total mensuel</span>
+        <app-currency-pill-selector
+          [currencies]="preferenceService.currencies()"
+          [activeCurrency]="activeCurrency()"
+          (currencyChange)="setActiveCurrency($event)"
+        />
       </div>
-    }
-  </section>
-}
+      <span class="hero__amount-value">
+        {{ activeCurrencyTotal() | amount: null : activeCurrency() }}
+      </span>
+      @if (heroConverted(); as converted) {
+        <span class="hero__converted">≈ {{ converted.amount | amount: null : converted.currency }}</span>
+      }
+      <div class="hero__meta">
+        <div class="hero__meta-line">
+          <ng-icon name="phosphorCalendar" size="14" />
+          <span>{{ activeCurrencyAnnual() | amount: null : activeCurrency() }}/an</span>
+          <span class="hero__meta-dot">&middot;</span>
+          <ng-icon name="phosphorRepeat" size="14" />
+          <span>{{ activeCount() }} abonnements</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>
 
-<section class="status-filter" role="group" aria-label="Filtrer par statut">
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'ALL'"
-    (click)="setStatusFilter('ALL')"
-  >
-    Tous
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'ACTIF'"
-    (click)="setStatusFilter('ACTIF')"
-  >
-    Actifs
-  </button>
-  <button
-    class="status-filter__btn"
-    [class.active]="statusFilter() === 'INACTIF'"
-    (click)="setStatusFilter('INACTIF')"
-  >
-    Inactifs
-  </button>
-</section>
+<div class="sticky-sentinel" #stickySentinel></div>
+<div class="section-header" [class.stuck]="isStuck()">
+  <h2 class="section-header__title">Abonnements</h2>
+  <span class="section-header__count">{{ activeCount() }} actifs</span>
+</div>
 
 @if (loading()) {
-  <div class="state-loading">
-    <div class="spinner"></div>
+  <div class="list-group">
+    @for (item of skeletonItems; track $index) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+          <div class="skeleton-line skeleton-line--small"></div>
+        </div>
+      </div>
+    }
   </div>
 } @else if (error()) {
   <div class="state-error">
     <p>Erreur de chargement</p>
     <button class="btn-outline" (click)="loadData()">Réessayer</button>
   </div>
-} @else if (sortedSubscriptions().length === 0) {
-  <div class="state-empty">
-    <p>Aucun abonnement</p>
-  </div>
+} @else if (groupedSubscriptions().length === 0) {
+  <app-empty-state
+    icon="phosphorRepeat"
+    message="Aucun abonnement"
+    ctaLabel="Ajouter un abonnement"
+    (ctaClick)="onAddSubscription()"
+  />
 } @else {
-  <ul class="subscription-list">
-    @for (subscription of sortedSubscriptions(); track subscription.id) {
-      <li class="subscription-item">
-        @if (!subscription.actif) {
-          <span class="badge-inactive">Inactif</span>
-        }
-        <app-list-item
-          [icon]="subscription.category?.icone ?? '🔄'"
-          [title]="subscription.nom"
-          [value]="formatAmount(subscription)"
-          [valueSubtitle]="subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency()"
-          [subtitle]="getNextRenewalDate(subscription)"
-          (pressed)="onSubscriptionPressed(subscription)"
-        />
-      </li>
-    }
-  </ul>
+  @for (group of groupedSubscriptions(); track group.label) {
+    <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
+    <div class="list-group">
+      @for (subscription of group.items; track subscription.id) {
+        <button type="button" class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
+          <span
+            class="list-row__icon"
+            [style.background-color]="subscription.category?.couleur ? subscription.category!.couleur + '26' : null"
+          >{{ subscription.category?.icone ?? '🔄' }}</span>
+          <div class="list-row__content">
+            <span class="list-row__title">{{ subscription.nom }}</span>
+            <span class="list-row__subtitle">
+              {{ getRelativeDate(subscription) }}
+              · {{ subscription.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel' }}
+            </span>
+          </div>
+          <div class="list-row__right">
+            <span class="list-row__amount amount-expense">{{ formatAmount(subscription) }}</span>
+            @if (subscription.actif && (subscription.currency || 'EUR') !== preferenceService.primaryCurrency()) {
+              <span class="list-row__converted">
+                {{ subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency() }}
+              </span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
 }

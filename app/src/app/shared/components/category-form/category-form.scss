@@ -75,11 +75,4 @@
     color: var(--text-error);
     font-size: var(--font-size-sm);
   }
-
-  &__actions {
-    display: flex;
-    gap: var(--space-3);
-    justify-content: flex-end;
-    padding-top: var(--space-3);
-  }
 }

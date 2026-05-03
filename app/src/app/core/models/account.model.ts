@@ -32,6 +32,8 @@ export interface AccountSummary {
   icone: string;
   couleur: string;
   currency: string;
+  bankLogoUrl: string | null;
+  bankCustomLogo: string | null;
 }
 
 export interface AccountRequest {

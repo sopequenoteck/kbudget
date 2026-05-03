@@ -1,11 +1,12 @@
-import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, firstValueFrom, of, tap, throwError } from 'rxjs';
 
 import { ApiService } from './api';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
+import { AuthResponse, FirstLoginResetRequest, LoginRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
+import { DevLogger } from './dev-logger';
 
 const STORAGE_TOKEN_KEY = 'budget_token';
 const STORAGE_REFRESH_TOKEN_KEY = 'budget_refresh_token';
@@ -17,9 +18,12 @@ const STORAGE_USER_KEY = 'budget_user';
 export class AuthService {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly logger = inject(DevLogger);
 
   readonly currentUser = signal<UserInfo | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
+  readonly isAdmin = computed(() => this.currentUser()?.isAdmin ?? false);
+  readonly mustResetCredentials = computed(() => this.currentUser()?.mustResetCredentials ?? false);
 
   constructor() {
     this.restoreSession();
@@ -33,7 +37,7 @@ export class AuthService {
       }
       return token;
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
       return null;
     }
   }
@@ -42,7 +46,7 @@ export class AuthService {
     try {
       return localStorage.getItem(STORAGE_REFRESH_TOKEN_KEY);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
       return null;
     }
   }
@@ -54,8 +58,8 @@ export class AuthService {
     );
   }
 
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>('/auth/register', data).pipe(
+  firstLoginReset(payload: FirstLoginResetRequest): Observable<AuthResponse> {
+    return this.apiService.post<AuthResponse>('/auth/first-login-reset', payload).pipe(
       tap((response) => this.saveAuth(response)),
       catchError((error) => throwError(() => this.mapAuthError(error))),
     );
@@ -71,6 +75,17 @@ export class AuthService {
     return this.apiService
       .post<AuthResponse>('/auth/refresh', { refreshToken })
       .pipe(tap((response) => this.saveAuth(response)));
+  }
+
+  saveAuthResponse(response: AuthResponse): void {
+    this.saveAuth(response);
+  }
+
+  patchUserInfo(patch: Partial<UserInfo>): void {
+    const current = this.currentUser();
+    if (current) {
+      this.currentUser.set({ ...current, ...patch });
+    }
   }
 
   logout(): void {
@@ -95,10 +110,14 @@ export class AuthService {
           return;
         }
         try {
-          const user: UserInfo = JSON.parse(userJson);
+          const parsed = JSON.parse(userJson);
+          const user: UserInfo = {
+            ...parsed,
+            mustResetCredentials: parsed.mustResetCredentials ?? false,
+          };
           this.currentUser.set(user);
         } catch {
-          if (isDevMode()) console.error('budget_user corrompu');
+          this.logger.error('budget_user corrompu');
           this.clearAuth();
         }
         return;
@@ -106,7 +125,7 @@ export class AuthService {
 
       const refreshToken = this.getRefreshToken();
       if (refreshToken) {
-        if (isDevMode()) console.log('restoreSession: access token expiré, tentative de refresh');
+        this.logger.error('restoreSession: access token expiré, tentative de refresh');
         this.refreshAccessToken().subscribe({
           error: () => {
             this.clearAuth();
@@ -119,7 +138,7 @@ export class AuthService {
         this.clearAuth();
       }
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
   }
 
@@ -129,12 +148,20 @@ export class AuthService {
       localStorage.setItem(STORAGE_REFRESH_TOKEN_KEY, response.refreshToken);
       localStorage.setItem(
         STORAGE_USER_KEY,
-        JSON.stringify({ name: response.name, email: response.email }),
+        JSON.stringify({
+          name: response.name,
+          email: response.email,
+          mustResetCredentials: response.mustResetCredentials,
+        }),
       );
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
-    this.currentUser.set({ name: response.name, email: response.email });
+    this.currentUser.set({
+      name: response.name,
+      email: response.email,
+      mustResetCredentials: response.mustResetCredentials,
+    });
   }
 
   private clearAuth(): void {
@@ -143,7 +170,7 @@ export class AuthService {
       localStorage.removeItem(STORAGE_REFRESH_TOKEN_KEY);
       localStorage.removeItem(STORAGE_USER_KEY);
     } catch {
-      if (isDevMode()) console.error('localStorage indisponible');
+      this.logger.error('localStorage indisponible');
     }
     this.currentUser.set(null);
   }
@@ -157,7 +184,7 @@ export class AuthService {
       const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(atob(payload));
     } catch {
-      if (isDevMode()) console.error('Token corrompu');
+      this.logger.error('Token corrompu');
       return null;
     }
   }
@@ -172,10 +199,28 @@ export class AuthService {
 
   private mapAuthError(error: HttpErrorResponse): string {
     if (error.status === 400) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'PASSWORD_UNCHANGED') {
+        return 'Le nouveau mot de passe doit être différent de l\'actuel.';
+      }
       return error.error?.message ?? 'Une erreur est survenue';
     }
+    if (error.status === 403) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'PASSWORD_RESET_REQUIRED') {
+        return 'Reset requis';
+      }
+      return error.error?.message ?? 'Accès refusé';
+    }
+    if (error.status === 409) {
+      const errorCode = error.error?.error;
+      if (errorCode === 'EMAIL_ALREADY_EXISTS') {
+        return 'Email déjà utilisé';
+      }
+      return error.error?.message ?? 'Conflit de données';
+    }
     if (error.status === 0) {
-      if (isDevMode()) console.error('Erreur réseau', error);
+      this.logger.error('Erreur réseau', error);
       return 'Impossible de contacter le serveur';
     }
     return 'Une erreur est survenue';

@@ -1,7 +1,8 @@
-import { Injectable, inject, signal, computed, isDevMode, DestroyRef } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api';
 import { type NotificationModel, type NotificationPage } from '../models/notification.model';
+import { DevLogger } from './dev-logger';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +10,7 @@ import { type NotificationModel, type NotificationPage } from '../models/notific
 export class NotificationService {
   private readonly apiService = inject(ApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(DevLogger);
 
   readonly notifications = signal<NotificationModel[]>([]);
   readonly unreadCount = signal(0);
@@ -33,7 +35,7 @@ export class NotificationService {
       this.currentPage.set(0);
       this.hasMore.set(page.number < page.totalPages - 1);
     } catch (e) {
-      if (isDevMode()) console.error('Failed to load notifications:', e);
+      this.logger.error('Failed to load notifications:', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -51,7 +53,7 @@ export class NotificationService {
       this.currentPage.set(page.number);
       this.hasMore.set(page.number < page.totalPages - 1);
     } catch (e) {
-      if (isDevMode()) console.error('Failed to load more notifications:', e);
+      this.logger.error('Failed to load more notifications:', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -64,7 +66,7 @@ export class NotificationService {
       );
       this.unreadCount.set(result.count);
     } catch (e) {
-      if (isDevMode()) console.error('Failed to load unread count:', e);
+      this.logger.error('Failed to load unread count:', e);
     }
   }
 
@@ -82,7 +84,7 @@ export class NotificationService {
     } catch (e) {
       this.notifications.set(previousNotifications);
       this.unreadCount.set(previousUnreadCount);
-      if (isDevMode()) console.error('Failed to mark as read:', e);
+      this.logger.error('Failed to mark as read:', e);
     }
   }
 
@@ -98,7 +100,7 @@ export class NotificationService {
     } catch (e) {
       this.notifications.set(previousNotifications);
       this.unreadCount.set(previousUnreadCount);
-      if (isDevMode()) console.error('Failed to mark all as read:', e);
+      this.logger.error('Failed to mark all as read:', e);
     }
   }
 
@@ -115,7 +117,7 @@ export class NotificationService {
     } catch (e) {
       this.notifications.set(previousNotifications);
       this.unreadCount.set(previousUnreadCount);
-      if (isDevMode()) console.error('Failed to delete notification:', e);
+      this.logger.error('Failed to delete notification:', e);
     }
   }
 
@@ -129,7 +131,7 @@ export class NotificationService {
     } catch (e) {
       this.notifications.set(previousNotifications);
       this.unreadCount.set(previousUnreadCount);
-      if (isDevMode()) console.error('Failed to delete all notifications:', e);
+      this.logger.error('Failed to delete all notifications:', e);
     }
   }
 

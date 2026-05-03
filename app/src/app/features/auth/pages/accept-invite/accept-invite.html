@@ -1,0 +1,117 @@
+<app-auth-shell
+  title="Créer votre compte"
+  tagline="Quelques informations pour finaliser l'inscription"
+  size="md"
+>
+  @if (loading() && !email() && !error()) {
+    <div class="accept-invite-loading">Vérification du lien...</div>
+  }
+
+  @if (error()) {
+    <div class="accept-invite-error">
+      <p>{{ error() }}</p>
+      <p class="accept-invite-error__hint">
+        Demandez à un administrateur de vous envoyer un nouveau lien.
+      </p>
+    </div>
+  }
+
+  @if (email() && !error()) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <span class="form-section__label">VOTRE IDENTITÉ</span>
+
+        <app-form-field
+          label="Adresse email"
+          fieldId="accept-email"
+          prefixIcon="phosphorEnvelope"
+          [showError]="false"
+        >
+          <input
+            id="accept-email"
+            type="email"
+            [value]="email()"
+            disabled
+            autocomplete="email"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Nom d'affichage"
+          fieldId="accept-displayname"
+          prefixIcon="phosphorUser"
+          errorMessage="Nom requis (100 caractères max)"
+          [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
+        >
+          <input
+            id="accept-displayname"
+            type="text"
+            formControlName="displayName"
+            autocomplete="name"
+            placeholder="Votre prénom ou pseudo"
+            [class.input-error]="form.controls.displayName.touched && form.controls.displayName.invalid"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Mot de passe"
+          fieldId="accept-password"
+          prefixIcon="phosphorLock"
+          errorMessage="8 caractères minimum"
+          [showError]="form.controls.password.touched && form.controls.password.invalid"
+        >
+          <input
+            id="accept-password"
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+            placeholder="Au moins 8 caractères"
+            [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
+          />
+        </app-form-field>
+      </div>
+
+      <div class="form-section">
+        <span class="form-section__label">PRÉFÉRENCES</span>
+
+        <div class="accept-invite-prefs-grid">
+          <app-form-field
+            label="Devise"
+            fieldId="accept-currency"
+            prefixIcon="phosphorCoin"
+            [showError]="false"
+          >
+            <select id="accept-currency" formControlName="currency">
+              @for (curr of currencies; track curr.code) {
+                <option [value]="curr.code">{{ curr.label }}</option>
+              }
+            </select>
+          </app-form-field>
+
+          <app-form-field
+            label="Fuseau horaire"
+            fieldId="accept-timezone"
+            prefixIcon="phosphorGlobe"
+            [showError]="false"
+          >
+            <select id="accept-timezone" formControlName="timezone">
+              @for (tz of timezones; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+              }
+            </select>
+          </app-form-field>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="loading()">
+          @if (loading()) {
+            Création du compte...
+          } @else {
+            Créer mon compte
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-auth-shell>

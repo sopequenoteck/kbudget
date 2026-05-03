@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
-import 'package:k_budget/src/features/shop/application/product_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
@@ -231,7 +230,6 @@ class _FeatureSettingsScreenState extends ConsumerState<FeatureSettingsScreen> {
       Feature.subscriptions =>
         ref.read(subscriptionNotifierProvider).items.isNotEmpty,
       Feature.debts => ref.read(debtNotifierProvider).items.isNotEmpty,
-      Feature.shop => ref.read(productNotifierProvider).items.isNotEmpty,
       Feature.budgets => ref.read(budgetNotifierProvider).items.isNotEmpty,
     };
   }

@@ -7,10 +7,12 @@ import {
   HostListener,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter } from 'rxjs';
+import { trigger, transition, style, animate, query } from '@angular/animations';
+import { filter, firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorGear,
@@ -19,19 +21,18 @@ import {
   phosphorCurrencyDollar,
   phosphorArrowsClockwise,
   phosphorHandshake,
-  phosphorStorefront,
   phosphorChartPie,
 } from '@ng-icons/phosphor-icons/regular';
 import {
   phosphorArrowsClockwiseFill,
   phosphorHandshakeFill,
-  phosphorStorefrontFill,
   phosphorHouseFill,
   phosphorCurrencyDollarFill,
   phosphorChartPieFill,
 } from '@ng-icons/phosphor-icons/fill';
 
 import { AuthService } from '../../../core/services/auth';
+import { AvatarService } from '../../../core/services/avatar.service';
 import { PreferenceService } from '../../../core/services/preference';
 import { NotificationService } from '../../../core/services/notification';
 import { StompService } from '../../../core/services/stomp';
@@ -49,16 +50,17 @@ import { DebtForm } from '../../../features/debts/components/debt-form/debt-form
 import { CategoryForm } from '../category-form/category-form';
 import { AccountForm } from '../account-form/account-form';
 import { TransferForm } from '../transfer-form/transfer-form';
-import { ProductForm } from '../../../features/shop/components/product-form/product-form';
-import { SellDialog } from '../../../features/shop/components/sell-dialog/sell-dialog';
 import { BudgetForm } from '../../../features/budgets/components/budget-form/budget-form';
+import { RepayDialog } from '../../../features/debts/components/repay-dialog/repay-dialog';
 import { BottomNav } from '../bottom-nav/bottom-nav';
 import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 import { Toast } from '../toast/toast';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-shell',
+  standalone: true,
   imports: [
     RouterOutlet,
     RouterLink,
@@ -73,12 +75,12 @@ import { Toast } from '../toast/toast';
     CategoryForm,
     AccountForm,
     TransferForm,
-    ProductForm,
-    SellDialog,
     BudgetForm,
+    RepayDialog,
     NotificationBadge,
     NotificationPanel,
     Toast,
+    ConfirmDialog,
   ],
   providers: [
     provideIcons({
@@ -92,18 +94,30 @@ import { Toast } from '../toast/toast';
       phosphorArrowsClockwiseFill,
       phosphorHandshake,
       phosphorHandshakeFill,
-      phosphorStorefront,
-      phosphorStorefrontFill,
       phosphorChartPie,
       phosphorChartPieFill,
     }),
+  ],
+  animations: [
+    trigger('routeAnimation', [
+      transition('* <=> *', [
+        query(':enter', [style({ opacity: 0 })], { optional: true }),
+        query(':leave', [animate('100ms ease-out', style({ opacity: 0 }))], { optional: true }),
+        query(':enter', [animate('100ms ease-in', style({ opacity: 1 }))], { optional: true }),
+      ]),
+    ]),
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Shell {
+  private readonly outlet = viewChild(RouterOutlet);
+  readonly categoryFormRef = viewChild<CategoryForm>('categoryFormRef');
+  readonly categoryFormSubmitting = computed(() => this.categoryFormRef()?.submitting() ?? false);
+  readonly categoryFormIsEditMode = computed(() => this.categoryFormRef()?.isEditMode ?? false);
   private readonly authService = inject(AuthService);
+  private readonly avatarService = inject(AvatarService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
   private readonly stompService = inject(StompService);
@@ -116,6 +130,7 @@ export class Shell {
   );
 
   readonly userName = this.authService.currentUser;
+  readonly avatarUrl = this.avatarService.avatarUrl;
   readonly sidebarOpen = signal(false);
   readonly dropdownOpen = signal(false);
   readonly userInitials = computed(() => {
@@ -162,7 +177,7 @@ export class Shell {
       this.navigationEnd();
       this.speedDialOpen.set(false);
       this.dropdownOpen.set(false);
-      this.modalService.closeModal();
+      this.modalService.resetModal();
     });
 
     // Sync type toggles when editing existing entities
@@ -201,6 +216,8 @@ export class Shell {
       if (this.authService.isAuthenticated()) {
         this.notificationService.loadUnreadCount();
         this.stompService.connect();
+        // Charge l'avatar pour le rendre disponible globalement (header, settings, etc.)
+        firstValueFrom(this.avatarService.loadAvatarBlob());
       } else {
         this.stompService.disconnect();
       }
@@ -268,6 +285,10 @@ export class Shell {
     this.closeDropdown();
   }
 
+  getRouteAnimationData(): string | undefined {
+    return this.outlet()?.activatedRouteData?.['animation'];
+  }
+
   onLogout(): void {
     this.closeDropdown();
     this.authService.logout();
@@ -281,10 +302,6 @@ export class Shell {
     this.subscriptionFrequency.set(freq);
   }
 
-  onDebtTypeChange(type: DebtType): void {
-    this.debtType.set(type);
-  }
-
   onFabToggle(): void {
     this.speedDialOpen.update((open) => !open);
   }
@@ -296,5 +313,9 @@ export class Shell {
 
   onModalClose(): void {
     this.modalService.closeModal();
+  }
+
+  triggerCategorySubmit(): void {
+    this.categoryFormRef()?.submit();
   }
 }

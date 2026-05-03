@@ -22,6 +22,7 @@ import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
 import { ModalService } from '../../../core/services/modal.service';
+import { PALETTE_COLORS } from '../../../core/constants/palette.constants';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 import { compressImage } from '../../utils/image.utils';
 
@@ -43,28 +44,15 @@ const DEFAULT_ICONS: Record<AccountType, string> = {
 };
 
 const DEFAULT_COLORS: Record<AccountType, string> = {
-  [AccountType.COURANT]: '#3b82f6',
-  [AccountType.EPARGNE]: '#10b981',
-  [AccountType.ESPECES]: '#f59e0b',
+  [AccountType.COURANT]: PALETTE_COLORS[8],  // bleu
+  [AccountType.EPARGNE]: PALETTE_COLORS[5],  // vert
+  [AccountType.ESPECES]: PALETTE_COLORS[2],  // ambre
 };
 
-const ACCOUNT_COLORS: string[] = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#f97316',
-  '#84cc16',
-  '#22c55e',
-  '#06b6d4',
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#78716c',
-];
 
 @Component({
   selector: 'app-account-form',
+  standalone: true,
   imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker, BankSelect],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
@@ -89,7 +77,7 @@ export class AccountForm {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly selectedEmoji = signal('🏦');
-  readonly selectedColor = signal('#3b82f6');
+  readonly selectedColor = signal(DEFAULT_COLORS[AccountType.COURANT]);
   readonly selectedBankCode = signal('OTHER');
   readonly bankCustomName = signal('');
   readonly bankCustomLogo = signal<string | null>(null);
@@ -99,7 +87,7 @@ export class AccountForm {
   readonly AccountType = AccountType;
   readonly typeLabels = ACCOUNT_TYPE_LABELS;
   readonly defaultIcons = DEFAULT_ICONS;
-  readonly accountColors = ACCOUNT_COLORS;
+  readonly accountColors = PALETTE_COLORS;
   readonly currencyItems = this.currencyService.currencyItems;
 
   readonly canDeactivate = computed(() => {
@@ -119,7 +107,7 @@ export class AccountForm {
     nom: ['', [Validators.required, Validators.maxLength(50)]],
     type: [AccountType.COURANT as AccountType, [Validators.required]],
     soldeInitial: ['0'],
-    couleur: ['#3b82f6'],
+    couleur: [DEFAULT_COLORS[AccountType.COURANT]],
     actif: [true],
     currency: [''],
     newBalance: [''],

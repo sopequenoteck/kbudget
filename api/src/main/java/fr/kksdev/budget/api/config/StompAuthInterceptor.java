@@ -42,7 +42,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
             }
 
             String email = jwtUtil.extractEmail(token);
-            var user = userRepository.findByEmail(email)
+            var user = userRepository.findByEmailAndDisabledAtIsNull(email)
                     .orElseThrow(() -> new MessagingException("Utilisateur non trouvé"));
 
             var auth = new UsernamePasswordAuthenticationToken(user.getId(), null, List.of());

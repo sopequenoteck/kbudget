@@ -30,4 +30,16 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "disabled_at")
+    private LocalDateTime disabledAt;
+
+    @Column(name = "is_admin", nullable = false)
+    private boolean isAdmin;
+
+    @Column(name = "password_reset_required", nullable = false)
+    private boolean passwordResetRequired;
+
+    @Column(name = "avatar_path", length = 512)
+    private String avatarPath;
 }

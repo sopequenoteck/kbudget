@@ -34,6 +34,7 @@ const mockAuthResponse: AuthResponse = {
   refreshToken: 'mock-refresh-token',
   email: 'test@test.com',
   name: 'Test User',
+  mustResetCredentials: false,
 };
 
 describe('AuthService', () => {
@@ -82,8 +83,13 @@ describe('AuthService', () => {
       expect(JSON.parse(localStorage.getItem('budget_user')!)).toEqual({
         name: 'Test User',
         email: 'test@test.com',
+        mustResetCredentials: false,
       });
-      expect(service.currentUser()).toEqual({ name: 'Test User', email: 'test@test.com' });
+      expect(service.currentUser()).toEqual({
+        name: 'Test User',
+        email: 'test@test.com',
+        mustResetCredentials: false,
+      });
       expect(service.isAuthenticated()).toBe(true);
     });
 
@@ -124,88 +130,6 @@ describe('AuthService', () => {
 
       // Act & Assert
       service.login({ email: 'test@test.com', password: 'pass' }).subscribe({
-        error: (msg: string) => {
-          expect(msg).toBe('Une erreur est survenue');
-        },
-      });
-    });
-  });
-
-  describe('register()', () => {
-    it('should_store_token_and_refresh_token_when_register_succeeds', () => {
-      // Arrange
-      const response: AuthResponse = { ...mockAuthResponse, token: validToken() };
-      apiService.post.mockReturnValue(of(response));
-
-      // Act
-      service
-        .register({ name: 'New User', email: 'new@test.com', password: 'password123' })
-        .subscribe();
-
-      // Assert
-      expect(localStorage.getItem('budget_token')).toBe(response.token);
-      expect(localStorage.getItem('budget_refresh_token')).toBe(response.refreshToken);
-      expect(JSON.parse(localStorage.getItem('budget_user')!)).toEqual({
-        name: 'Test User',
-        email: 'test@test.com',
-      });
-      expect(service.currentUser()).toEqual({ name: 'Test User', email: 'test@test.com' });
-      expect(service.isAuthenticated()).toBe(true);
-    });
-
-    it('should_return_email_taken_message_when_register_returns_400', () => {
-      // Arrange
-      const httpError = new HttpErrorResponse({
-        status: 400,
-        error: { message: 'Email déjà utilisé' },
-      });
-      apiService.post.mockReturnValue(throwError(() => httpError));
-
-      // Act & Assert
-      service.register({ email: 'taken@test.com', password: 'password123' }).subscribe({
-        error: (msg: string) => {
-          expect(msg).toBe('Email déjà utilisé');
-        },
-      });
-    });
-
-    it('should_return_validation_message_when_register_returns_bean_validation_error', () => {
-      // Arrange
-      const httpError = new HttpErrorResponse({
-        status: 400,
-        error: { message: 'password: size must be between 6 and 2147483647' },
-      });
-      apiService.post.mockReturnValue(throwError(() => httpError));
-
-      // Act & Assert
-      service.register({ email: 'new@test.com', password: '123' }).subscribe({
-        error: (msg: string) => {
-          expect(msg).toBe('password: size must be between 6 and 2147483647');
-        },
-      });
-    });
-
-    it('should_return_network_error_when_register_status_is_0', () => {
-      // Arrange
-      const httpError = new HttpErrorResponse({ status: 0 });
-      apiService.post.mockReturnValue(throwError(() => httpError));
-      vi.spyOn(console, 'error').mockReturnValue(undefined);
-
-      // Act & Assert
-      service.register({ email: 'new@test.com', password: 'password123' }).subscribe({
-        error: (msg: string) => {
-          expect(msg).toBe('Impossible de contacter le serveur');
-        },
-      });
-    });
-
-    it('should_return_generic_error_when_register_status_is_500', () => {
-      // Arrange
-      const httpError = new HttpErrorResponse({ status: 500 });
-      apiService.post.mockReturnValue(throwError(() => httpError));
-
-      // Act & Assert
-      service.register({ email: 'new@test.com', password: 'password123' }).subscribe({
         error: (msg: string) => {
           expect(msg).toBe('Une erreur est survenue');
         },
@@ -354,6 +278,7 @@ describe('AuthService', () => {
         refreshToken: 'new-refresh-token',
         email: 'test@test.com',
         name: 'Test User',
+        mustResetCredentials: false,
       };
       apiService.post.mockReturnValue(of(response));
 
@@ -366,7 +291,11 @@ describe('AuthService', () => {
       });
       expect(localStorage.getItem('budget_token')).toBe(newToken);
       expect(localStorage.getItem('budget_refresh_token')).toBe('new-refresh-token');
-      expect(service.currentUser()).toEqual({ name: 'Test User', email: 'test@test.com' });
+      expect(service.currentUser()).toEqual({
+        name: 'Test User',
+        email: 'test@test.com',
+        mustResetCredentials: false,
+      });
     });
 
     it('should_throw_401_when_no_refresh_token', () => {
@@ -401,7 +330,7 @@ describe('AuthService', () => {
       localStorage.setItem('budget_token', token);
       localStorage.setItem(
         'budget_user',
-        JSON.stringify({ name: 'Restored User', email: 'restored@test.com' }),
+        JSON.stringify({ name: 'Restored User', email: 'restored@test.com', mustResetCredentials: false }),
       );
 
       // Act — recreate service to trigger constructor
@@ -419,6 +348,7 @@ describe('AuthService', () => {
       expect(newService.currentUser()).toEqual({
         name: 'Restored User',
         email: 'restored@test.com',
+        mustResetCredentials: false,
       });
       expect(newService.isAuthenticated()).toBe(true);
     });
@@ -455,6 +385,7 @@ describe('AuthService', () => {
         refreshToken: 'rotated-refresh',
         email: 'restored@test.com',
         name: 'Restored User',
+        mustResetCredentials: false,
       };
       apiService.post.mockReturnValue(of(refreshResponse));
       vi.spyOn(console, 'log').mockReturnValue(undefined);
@@ -477,6 +408,7 @@ describe('AuthService', () => {
       expect(newService.currentUser()).toEqual({
         name: 'Restored User',
         email: 'restored@test.com',
+        mustResetCredentials: false,
       });
       expect(newService.isAuthenticated()).toBe(true);
       expect(localStorage.getItem('budget_refresh_token')).toBe('rotated-refresh');
@@ -511,7 +443,7 @@ describe('AuthService', () => {
       // Arrange
       localStorage.setItem('budget_token', validToken());
       localStorage.setItem('budget_refresh_token', 'some-refresh');
-      localStorage.setItem('budget_user', JSON.stringify({ name: 'User', email: 'user@test.com' }));
+      localStorage.setItem('budget_user', JSON.stringify({ name: 'User', email: 'user@test.com', mustResetCredentials: false }));
 
       // Act
       TestBed.resetTestingModule();
@@ -577,6 +509,79 @@ describe('AuthService', () => {
       expect(newService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('budget_token')).toBeNull();
       expect(localStorage.getItem('budget_user')).toBeNull();
+    });
+  });
+
+  describe('mustResetCredentials — persistance localStorage (T-049)', () => {
+    it('should_persist_must_reset_credentials_in_localStorage_after_saveAuth', () => {
+      // Arrange
+      const response: AuthResponse = {
+        token: validToken(),
+        refreshToken: 'mock-refresh-token',
+        email: 'admin@localhost',
+        name: 'Admin',
+        mustResetCredentials: true,
+      };
+      apiService.post.mockReturnValue(of(response));
+
+      // Act
+      service.login({ email: 'admin@localhost', password: 'temp-pass' }).subscribe();
+
+      // Assert
+      const stored = JSON.parse(localStorage.getItem('budget_user')!);
+      expect(stored.mustResetCredentials).toBe(true);
+      expect(service.mustResetCredentials()).toBe(true);
+    });
+
+    it('should_restore_must_reset_credentials_from_localStorage_on_restoreSession', () => {
+      // Arrange
+      localStorage.setItem('budget_token', validToken());
+      localStorage.setItem(
+        'budget_user',
+        JSON.stringify({
+          name: 'Admin',
+          email: 'admin@localhost',
+          mustResetCredentials: true,
+        }),
+      );
+
+      // Act — recreate service to trigger restoreSession
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      const newService = TestBed.inject(AuthService);
+
+      // Assert
+      expect(newService.mustResetCredentials()).toBe(true);
+      expect(newService.currentUser()?.mustResetCredentials).toBe(true);
+    });
+
+    it('should_default_must_reset_credentials_to_false_when_absent_from_localStorage', () => {
+      // Arrange — legacy localStorage entry without mustResetCredentials
+      localStorage.setItem('budget_token', validToken());
+      localStorage.setItem(
+        'budget_user',
+        JSON.stringify({ name: 'Legacy User', email: 'legacy@test.com' }),
+      );
+
+      // Act
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      const newService = TestBed.inject(AuthService);
+
+      // Assert — fallback to false for retro-compatibility
+      expect(newService.mustResetCredentials()).toBe(false);
     });
   });
 });

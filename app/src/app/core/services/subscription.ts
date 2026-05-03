@@ -48,7 +48,7 @@ export class SubscriptionService {
     return this.api.get<SubscriptionPaymentResponse[]>(`/subscriptions/${id}/payments`);
   }
 
-  getTotalPaid(id: string): Observable<{ total: number; count: number }> {
-    return this.api.get<{ total: number; count: number }>(`/subscriptions/${id}/payments/total`);
+  getTotalPaid(id: string): Observable<{ totalPaid: number; paymentCount: number }> {
+    return this.api.get<{ totalPaid: number; paymentCount: number }>(`/subscriptions/${id}/payments/total`);
   }
 }

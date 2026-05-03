@@ -1,0 +1,328 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+}
+
+// =============================================================================
+// Header — page-header étendu avec icône catégorie
+// =============================================================================
+
+// =============================================================================
+// Hero — montant dépensé dominant + reste
+// =============================================================================
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--space-6);
+}
+
+.hero__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero__value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+
+  &.over-budget {
+    color: var(--color-expense);
+  }
+}
+
+.hero__converted {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.hero__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-1);
+}
+
+.hero__meta-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+
+  ::ng-deep ng-icon {
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+  }
+
+  &--clickable {
+    cursor: pointer;
+    transition: color var(--duration-fast);
+
+    &:hover {
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.hero__meta-dot {
+  margin: 0 2px;
+}
+
+
+// =============================================================================
+// Actions pills — pattern abonnements/dettes
+// =============================================================================
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+}
+
+.actions__spacer {
+  flex: 1;
+}
+
+.action-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+
+  ::ng-deep ng-icon {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-tertiary);
+  }
+
+  &--danger {
+    color: var(--text-error);
+    border-color: transparent;
+
+    &:hover {
+      background: var(--bg-error);
+    }
+  }
+}
+
+// =============================================================================
+// Section header — sticky
+// =============================================================================
+
+.sticky-sentinel {
+  height: 1px;
+  margin: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 10;
+  background-color: var(--surface-background);
+  transition:
+    background-color var(--duration-fast),
+    margin var(--duration-fast),
+    padding var(--duration-fast);
+
+  &.stuck {
+    background-color: var(--surface-raised);
+    margin-left: calc(-1 * var(--space-4));
+    margin-right: calc(-1 * var(--space-4));
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  &__title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__count {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+  }
+}
+
+// =============================================================================
+// Date labels — groupement par date
+// =============================================================================
+
+.date-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  padding: var(--space-4) var(--space-1) var(--space-2);
+
+  &:first-of-type {
+    padding-top: var(--space-2);
+  }
+}
+
+// =============================================================================
+// Transaction list — même pattern que page transactions
+// =============================================================================
+
+.transaction-group {
+  background-color: var(--surface-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+
+  .transaction-row:not(:last-child) {
+    border-bottom: 1px solid var(--border-default);
+  }
+}
+
+.transaction-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--icon-circle-bg);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+  }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+
+  &__amount {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+  }
+
+  &__converted {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    font-style: italic;
+    white-space: nowrap;
+  }
+}
+
+// =============================================================================
+// Progress row — entre section header et transactions (pattern dettes)
+// =============================================================================
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+
+  &__track {
+    flex: 1;
+    height: 4px;
+    background-color: var(--bg-tertiary, var(--border-default));
+    border-radius: var(--radius-round);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: var(--radius-round);
+    background-color: var(--color-primary);
+    opacity: 0.7;
+    transition: width var(--duration-normal) var(--easing-default);
+
+    &--warning {
+      background-color: var(--text-warning);
+    }
+
+    &--exceeded {
+      background-color: var(--color-expense);
+    }
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+  }
+}
+
+// =============================================================================
+// States
+// =============================================================================
+
+.state-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10) var(--space-4);
+  gap: var(--space-4);
+  color: var(--text-secondary);
+
+  &--small {
+    padding: var(--space-6) var(--space-4);
+  }
+}
+
