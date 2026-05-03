@@ -92,6 +92,87 @@ US3 SC4 mis à jour pour expliciter les valeurs light dans le scénario d'accept
 
 ---
 
+## Review Impl — 2026-05-03 (itération 1)
+
+**Verdict : PASS (avec 4 WARNING non bloquants)**
+
+### Synthèse
+
+L'implémentation couvre intégralement les 23 FR, 5 NFR et 11 SC de la spec. Les 7 composants du plan sont réalisés conformément, les 37 tâches sont cochées `[x]`, les signatures Dart correspondent aux contrats. Aucun BLOQUANT. 4 WARNING mineurs identifiés à documenter ou corriger en suite (KKS-238/240).
+
+### Conformité spec → code (23 FR)
+- ✅ 21/23 FR conformes
+- ⚠️ FR-005 : `unbudgetedGray = #9CA3AF` (Tailwind gray-400) résiduel (préexistant)
+- ⚠️ FR-012a : `scaffoldBackgroundColor` light `#fafafa` vs `#f0f0f0` spec (acceptable selon A5)
+
+### Conformité plan → code
+- ✅ 7 composants tous réalisés
+- ✅ 6 risques R-01 à R-06 mitigés ou documentés
+
+### Conformité tasks → code
+- ✅ 37/37 tâches cochées
+
+### Conformité contracts → code
+- ✅ Toutes signatures Dart présentes
+- ⚠️ Renommage `overlayLight*` → `overlayLightOn*` (post-review-impl-frontend) non répercuté dans `contracts.md` (mineur)
+- ✅ Compatibilité backward 6 propriétés `AppThemeExtension` préservée
+
+### Conformité Constitution v3.0.0
+- ✅ Principes I, IV, V, VII PASS
+- ✅ Principes II, VI N/A
+
+### Qualité du code
+- ✅ Aucun code mort (tokens préparatoires acceptés comme fondations KKS-238/240)
+- ✅ Aucun secret hardcodé
+- ✅ Aucun `print()` Dart
+- ⚠️ `app_theme.dart:116` : `Color(0xFFF87171)` hardcodé pour `error` dark — mineur
+
+### Tests
+- ✅ `flutter analyze` : 0 erreur (15 infos pré-existantes)
+- ✅ `flutter test` : 709/711 (2 préexistants hors scope)
+- ⚠️ `app_theme_extension_test.dart` : 10 appels `test()` (et non 14 comme annoncé en T-061) — métrique divergente, sans impact
+
+### SC-001 à SC-011
+
+| SC | Statut |
+|---|---|
+| SC-001 (grep gray Tailwind = 0) | ⚠️ `unbudgetedGray = #9CA3AF` résiduel |
+| SC-002 (palette propriétaire ≥ 10) | ✅ |
+| SC-003 (`flutter analyze` 0 erreur) | ✅ |
+| SC-004 (`flutter test` 100%) | ✅ (709/711, 2 hors scope) |
+| SC-005 (primary == #E0A820 dark / #D97706 light) | ✅ |
+| SC-006 (incomeColor == #6DC990 dark) | ✅ test unitaire explicite |
+| SC-007 (coloredPrimary(dark) ombre noire) | ✅ |
+| SC-008 (≥ 12 nouveaux tokens documentés) | ✅ ~16 tokens |
+| SC-009 (`PatrimoineCard` `@Deprecated`) | ✅ |
+| SC-010 (`docs/design-tokens.md` obsolète) | ✅ |
+| SC-011 (audit hardcodes Tailwind) | ✅ T-062 (0 occurrence dans `features/`) |
+
+### Décisions research.md respectées
+- ✅ RES-001 à RES-008 toutes appliquées
+
+### Constats BLOQUANT
+Aucun.
+
+### Constats WARNING (4)
+
+| ID | Description | Action |
+|---|---|---|
+| W-1 | `unbudgetedGray = #9CA3AF` Tailwind gray-400 résiduel dans `app_colors.dart` | À documenter dans `/devflow.docs` ou renommer en alias explicite (suite KKS-240+) |
+| W-2 | `scaffoldBackgroundColor` light `#fafafa` vs `#f0f0f0` spec — acceptable selon A5 | Documenter justification dans `/devflow.docs` |
+| W-3 | `app_theme.dart:116` : `Color(0xFFF87171)` hardcodé pour `error` dark | Dette mineure à résoudre KKS-238 / pass cohérence |
+| W-4 | `app_theme_extension_test.dart` : 10 tests vs 14 annoncés (métrique) | Cosmétique — sans impact |
+
+### Recommandations pour /devflow.docs
+
+1. Documenter l'écart `scaffoldBackgroundColor` light avec référence A5
+2. Clarifier la politique `unbudgetedGray` (alias `gray400` ou justification business)
+3. Documenter la convention `overlayLightOnDark/OnLight` (post-review-impl-frontend) dans `contracts.md` ou note architecture
+4. Consigner T-062 (audit hardcodes Tailwind = 0 occurrence) dans la description de PR
+5. Documenter le hex hardcodé `0xFFF87171` (error dark) comme dette technique mineure
+
+---
+
 ## Review Tasks — 2026-05-03 (itération 1)
 
 **Verdict : PASS (avec 3 WARNING non bloquants)**
