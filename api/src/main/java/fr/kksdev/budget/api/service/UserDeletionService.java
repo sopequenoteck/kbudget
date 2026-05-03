@@ -26,14 +26,17 @@ public class UserDeletionService {
     @Transactional
     public void softDelete(User user, DeleteAccountRequest request) {
         if (!request.confirmed()) {
+            log.warn("Account deletion rejected: confirmation required (userId={})", user.getId());
             throw new ConfirmationRequiredException();
         }
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            log.warn("Account deletion rejected: incorrect password (userId={})", user.getId());
             throw new PasswordIncorrectException();
         }
 
         if (user.isAdmin() && userRepository.countActiveAdmins() <= 1) {
+            log.warn("Account deletion rejected: last active admin (userId={})", user.getId());
             throw new LastAdminDeletionForbiddenException();
         }
 

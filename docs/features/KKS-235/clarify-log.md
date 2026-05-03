@@ -14,7 +14,7 @@
 | CL-002 | spec.md US-5 §scénario 1 + Edge Case "Admin se supprime lui-même" | Pattern de confirmation pour la suppression de compte : MDP seul ou MDP + saisie email (pattern GitHub) ? | 3 UX/Interaction | H | M | HAUT | MDP seul + checkbox "Je comprends que cette action est définitive". Bottom-sheet sur mobile. Pattern GitHub jugé sur-dimensionné pour 16 users self-hosted | Auto |
 | CL-003 | spec.md US-4 §scénario 1 | Export JSON : structure du payload (groupé/flat) et stratégie de versionning du schéma | 1 Scope fonctionnel | M | H | HAUT | Structure groupée par entité avec metadata top-level (`schemaVersion`, `exportedAt`, `user`, `accounts`, etc.). Versionning via clé `schemaVersion` SemVer (initial "1.0.0") | Auto |
 | CL-004 | spec.md Edge Cases "Utilisateur change son MDP puis ferme l'app" | Stratégie de révocation des sessions au changement de MDP : invalidation totale, attente expiration, ou hybride ? | 11 Sécurité | H | M | HAUT | Révocation immédiate de tous les RefreshToken du user + émission nouveau JWT pour le device courant + JWT autres devices expire naturellement (TTL ≤ 15 min). Pas de blocklist | Auto |
-| CL-005 | spec.md FR-017 (CSV Type) | Format de la colonne `Type` dans l'export CSV : valeur brute de l'enum `TransactionType` ou traduction française ? Encodage du fichier ? | 8 Terminologie | B | M | BAS | Traduction française "Revenu" / "Dépense" / "Transfert". Encodage UTF-8 avec BOM pour compatibilité Excel | Auto |
+| CL-005 | spec.md FR-017 (CSV Type) | Format de la colonne `Type` dans l'export CSV : valeur brute de l'enum `TransactionType` ou traduction française ? Encodage du fichier ? | 8 Terminologie | B | M | BAS | Traduction française : "Revenu" pour `RECETTE`, "Dépense" pour `DEPENSE`, "Ajustement" pour `AJUSTEMENT`. Encodage UTF-8 avec BOM pour compatibilité Excel | Auto |
 
 ---
 
@@ -113,7 +113,7 @@
   - **Encodage Excel** : UTF-8 sans BOM est mal interprété par Excel sur Windows (caractères accentués cassés). UTF-8 avec BOM est l'encodage canonique pour les CSV destinés à Excel. LibreOffice et Google Sheets gèrent les deux.
 - **Décision** :
   - Entêtes CSV en français : `Date`, `Libellé`, `Montant`, `Devise`, `Compte`, `Catégorie`, `Type`.
-  - Colonne `Type` : valeurs traduites — `Revenu` / `Dépense` / `Transfert`.
+  - Colonne `Type` : valeurs traduites — `Revenu` pour `RECETTE`, `Dépense` pour `DEPENSE`, `Ajustement` pour `AJUSTEMENT`. **Note** : l'enum `TransactionType` du domaine ne contient pas de valeur `TRANSFERT` (clarification post-implémentation, l'audit research-impl a relevé cette divergence).
   - Encodage : UTF-8 avec BOM (`﻿` en début de fichier).
 - **Impact sur spec.md** :
   - FR-017 : précise traduction française des valeurs Type + encodage UTF-8 BOM.

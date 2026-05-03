@@ -26,10 +26,12 @@ public class UserPasswordService {
     @Transactional
     public AuthResponse changePassword(User user, ChangePasswordRequest req) {
         if (!passwordEncoder.matches(req.currentPassword(), user.getPassword())) {
+            log.warn("Password change rejected: incorrect current password (userId={})", user.getId());
             throw new PasswordIncorrectException();
         }
 
         if (passwordEncoder.matches(req.newPassword(), user.getPassword())) {
+            log.warn("Password change rejected: new password identical to current (userId={})", user.getId());
             throw new PasswordUnchangedException();
         }
 

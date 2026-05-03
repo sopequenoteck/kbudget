@@ -22,7 +22,7 @@
 | disabledAt | `LocalDateTime` | NULL | **Soft-delete** : si non-null, le user est désactivé (existant V29) |
 | **avatarPath** | `String` | NULL, max 512 | **NOUVEAU (V32)** : chemin disque vers l'avatar (relatif à `app.storage.avatars.path`). NULL si user utilise les initiales générées. |
 | createdAt | `LocalDateTime` | NOT NULL | Existant |
-| updatedAt | `LocalDateTime` | NOT NULL | Existant |
+<!-- Note : `User` n'a pas de champ `updatedAt` actuellement. Ajout possible via `@UpdateTimestamp` dans une feature future si nécessaire. -->
 
 **Invariants** :
 - Si `disabledAt IS NOT NULL` → le user ne peut pas se connecter (filtre dans `AuthService.login` + `JwtFilter`).

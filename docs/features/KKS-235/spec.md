@@ -161,7 +161,7 @@ En tant qu'utilisateur authentifié, je veux pouvoir supprimer mon compte de man
 - **FR-014** : L'utilisateur DOIT pouvoir exporter l'intégralité de ses données via `GET /users/me/export?format=json` (téléchargement direct synchrone).
 - **FR-015** : L'utilisateur DOIT pouvoir exporter ses transactions via `GET /users/me/export?format=csv` (téléchargement direct synchrone).
 - **FR-016** : L'export JSON DOIT inclure toutes les entités liées au user : transactions, comptes, catégories, budgets, abonnements, dettes, préférences, règles d'import, profils d'import, historique d'import.
-- **FR-017** : L'export CSV DOIT contenir les transactions avec entêtes en français : `Date`, `Libellé`, `Montant`, `Devise`, `Compte`, `Catégorie`, `Type`. La colonne `Type` expose l'enum `TransactionType` traduit ("Revenu" / "Dépense" / "Transfert"). Encodage UTF-8 avec BOM pour compatibilité Excel.
+- **FR-017** : L'export CSV DOIT contenir les transactions avec entêtes en français : `Date`, `Libellé`, `Montant`, `Devise`, `Compte`, `Catégorie`, `Type`. La colonne `Type` expose l'enum `TransactionType` traduit ("Revenu" pour `RECETTE`, "Dépense" pour `DEPENSE`, "Ajustement" pour `AJUSTEMENT`). Encodage UTF-8 avec BOM pour compatibilité Excel.
 
 - **FR-017a** : L'export JSON DOIT respecter la structure groupée par entité avec metadata top-level :
   ```json
@@ -298,7 +298,7 @@ En tant qu'utilisateur authentifié, je veux pouvoir supprimer mon compte de man
 | Q2 | Format avatar : taille, formats, redimensionnement | ✅ Résolu | JPG/PNG only, max 2 MB, redim serveur 256x256 JPEG ~85% (cf. CL-001) |
 | Q3 | Export JSON : structure et versionning | ✅ Résolu | Groupé par entité, clé `schemaVersion` SemVer top-level "1.0.0" (cf. CL-003) |
 | Q4 | JWT après changement MDP : révocation ou expiration naturelle ? | ✅ Résolu | Révocation refresh tokens + nouveau JWT device courant + JWT autres devices expire naturellement (cf. CL-004) |
-| Q5 | Format CSV entête `Type` : valeur brute enum ou traduit ? | ✅ Résolu | Traduction française "Revenu" / "Dépense" / "Transfert" + UTF-8 BOM (cf. CL-005) |
+| Q5 | Format CSV entête `Type` : valeur brute enum ou traduit ? | ✅ Résolu | Traduction française "Revenu" / "Dépense" / "Ajustement" + UTF-8 BOM (cf. CL-005) |
 
 ---
 

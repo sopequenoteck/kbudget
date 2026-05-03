@@ -112,7 +112,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Cette action est irréversible. Toutes vos données seront supprimées.',
+              'Votre compte sera désactivé. Vous ne pourrez plus vous connecter avec ces identifiants. Vos données restent conservées en base pour traçabilité.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

@@ -117,7 +117,6 @@ public record UserExportResponse(
         boolean isAdmin,
         boolean passwordResetRequired,
         Instant createdAt,
-        Instant updatedAt,
         String avatarPath
     ) {}
 }
@@ -245,7 +244,6 @@ export interface UserExportProfile {
   isAdmin: boolean;
   passwordResetRequired: boolean;
   createdAt: string;
-  updatedAt: string;
   avatarPath: string | null;
 }
 ```
@@ -491,7 +489,7 @@ class AvatarMetadata with _$AvatarMetadata {
 **Response 200 (format=csv)** :
 - `Content-Type: text/csv; charset=utf-8`
 - `Content-Disposition: attachment; filename="kbudget-transactions-{userId}-{yyyyMMdd}.csv"`
-- Body : CSV streamé via `StreamingResponseBody`. UTF-8 avec BOM. Entêtes : `Date,Libellé,Montant,Devise,Compte,Catégorie,Type`. Type traduit : `Revenu` / `Dépense` / `Transfert`.
+- Body : CSV streamé via `StreamingResponseBody`. UTF-8 avec BOM. Entêtes : `Date,Libellé,Montant,Devise,Compte,Catégorie,Type`. Type traduit : `Revenu` (RECETTE) / `Dépense` (DEPENSE) / `Ajustement` (AJUSTEMENT).
 
 **Erreurs** :
 
