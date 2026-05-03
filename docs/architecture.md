@@ -141,7 +141,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | id | UUID | Identifiant |
 | montant | BigDecimal | Montant |
 | libelle | String | Description courte |
-| type | Enum | DEPENSE / RECETTE |
+| type | Enum | DEPENSE / RECETTE / AJUSTEMENT |
 | date | LocalDate | Date de la transaction |
 | category | Category | FK → Category (nullable) |
 | note | String | Note libre (nullable) |
@@ -319,7 +319,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | cleanLabel | String | Libelle nettoye |
 | amount | BigDecimal | Montant |
 | date | LocalDate | Date de la ligne |
-| transactionType | Enum | DEPENSE / RECETTE |
+| transactionType | Enum | DEPENSE / RECETTE / AJUSTEMENT |
 | status | Enum | READY / NEEDS_REVIEW / DUPLICATE / SKIPPED |
 | statusMessage | String | Message de statut (nullable) |
 | duplicateTransactionId | UUID | ID de la transaction doublon (nullable) |

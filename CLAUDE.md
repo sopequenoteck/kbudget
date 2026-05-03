@@ -25,8 +25,9 @@ cd api && mvn clean install       # Build complet avec tests
 ```bash
 cd app && ng serve                # Dev server (http://localhost:4200)
 cd app && ng build                # Build
-cd app && ng test                 # Tests unitaires
+cd app && npm test                # Tests unitaires (vitest)
 cd app && ng build --configuration production  # Build prod
+cd app && ng lint                 # ESLint
 ```
 
 > Toutes les commandes Angular CLI depuis `app/`.
@@ -150,8 +151,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
 
+- **KKS-235-page-mon-compte** : Page Mon compte dediee (`/settings/account` Angular + `/settings/profile` Flutter) avec 4 sections : Identite (avatar uploadable JPG/PNG ≤ 2 MB, nom editable, email read-only), Securite (change MDP min 12 chars + revocation refresh tokens), Donnees (export JSON full + CSV BOM UTF-8), Zone de danger (deconnexion + suppression soft-delete avec garde dernier admin). Avatars stockes sur disque local (`AVATAR_STORAGE_PATH`), redim 256x256 JPEG via Thumbnailator + ETag SHA-256. Affichage avatar global (header + settings hub + Mon compte) via `AvatarService.avatarUrl` signal + blob URL. 7 nouveaux endpoints `/users/me/*`, migrations V32-V35, 592 tests backend + 475 tests Angular + 30 tests Flutter. Fix bug bouton deconnexion Angular sans handler.
+- **KKS-234-refonte-design-pages-auth** : Refonte design pages auth (bloc identite, sections, icones prefix). Shell auth `<app-auth-shell>` factorise pour les 3 pages auth (login, register, first-login-reset). Normalisation arborescence `first-login-reset`.
 - **KKS-233-bootstrap-premier-admin** : Bootstrap auto du premier admin sur DB vide (password 32 chars genere dans les logs, force reset 1ere connexion via `/first-login-reset`). Refactor admin : `users.is_admin` en DB, `ADMIN_EMAILS` devient source de promotion au boot uniquement (jamais de retrogradation). Nouveaux filtres/runners/endpoints/guards. 541 tests backend + 449 tests Angular, aucun impact Flutter.
 - **KKS-225-alignement-design-pages** : Summary cards harmonisees (typo xl, dots colores, press feedback, gradient), directive AutoFitText, conversion devise secondaire
 - **KKS-224-design-md-update** : DESIGN.md mis a jour (Hero Card, Glassmorphism, Variation Badges, Radial Gradient, Section Headers, regles de design, 11 tokens)
-- **100-register-currency-timezone** : RegisterRequest +currency/timezone ; compte/preferences crees eagerly
-- **099-csv-import** : Import CSV complet (15 endpoints, Commons CSV, Jaro-Winkler dedup, category rules)
