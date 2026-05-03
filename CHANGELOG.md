@@ -5,6 +5,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-05-03
+
+> Release MAJOR — 3 BREAKING changes : suppression du module shop, refonte de l'onboarding (KKS-232), refacto architecture admin (KKS-233). Inclut également les features non-breaking KKS-234 (refonte design pages auth) et KKS-235 (page Mon compte).
+
+### Added — KKS-234 Refonte design pages auth
+
+- **Shell auth `<app-auth-shell>`** factorisé pour les 3 pages d'authentification (`login`, `accept-invite`, `first-login-reset`) — bloc identité commun, sections homogènes, icônes prefix dans les inputs. Suppression du code SCSS dupliqué entre les 3 pages, normalisation de l'arborescence `features/auth/pages/first-login-reset/`.
+- Le shell auth aligne le rendu des 3 pages sur les patterns réels de l'app (tokens DESIGN.md, hiérarchie typographique, espacements `--space-*`) et améliore la cohérence visuelle de l'expérience d'onboarding/connexion.
+
 ### Added — KKS-235 Page Mon compte
 
 - **Page Mon compte** (`/settings/account` Angular, `/settings/profile` Flutter) — 4 sections : Identité (avatar uploadable JPG/PNG ≤ 2 MB, nom éditable, email read-only), Sécurité (changement MDP — min 12 chars, révocation refresh tokens + nouveau JWT device courant), Données (export JSON full backup + CSV transactions UTF-8 BOM), Zone de danger (déconnexion + suppression soft-delete avec garde dernier admin actif).
