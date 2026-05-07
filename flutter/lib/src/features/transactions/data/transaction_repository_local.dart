@@ -1,10 +1,10 @@
-import 'package:diacritic/diacritic.dart';
 import 'package:k_budget/src/data/local/daos/transaction_dao.dart';
 import 'package:k_budget/src/data/local/mappers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
+import 'package:k_budget/src/utils/string_utils.dart';
 
 class TransactionRepositoryLocal implements TransactionRepository {
   final TransactionDao _dao;
@@ -62,13 +62,11 @@ class TransactionRepositoryLocal implements TransactionRepository {
 
     if (query.isEmpty) return libelles;
 
-    final normalizedQuery = _normalize(query);
+    final normalizedQuery = normalizeForSearch(query);
     return libelles
-        .where((l) => _normalize(l).contains(normalizedQuery))
+        .where((l) => normalizeForSearch(l).contains(normalizedQuery))
         .toList();
   }
-
-  String _normalize(String s) => removeDiacritics(s.toLowerCase());
 
   @override
   Future<List<MonthlySummary>> getMonthlySummary(int month, int year) async {
