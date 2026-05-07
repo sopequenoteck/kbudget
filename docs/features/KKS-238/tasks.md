@@ -31,20 +31,20 @@
 
 #### US-003 — `SectionHeaderSticky` (à prototyper en premier — le plus complexe)
 
-- [ ] [T-020] [P] [P1] [US3] Créer `flutter/lib/src/common_widgets/section_header_sticky.dart` : public `SectionHeaderSticky` (`StatelessWidget` retournant `SliverPersistentHeader.pinned`) + private `_SectionHeaderDelegate extends SliverPersistentHeaderDelegate` (minExtent == maxExtent == 48.0, `AnimatedContainer` 300ms basculant fond `Colors.transparent` → `colorScheme.surfaceContainerHighest` quand `shrinkOffset > 0`) — Réf: FR-007, FR-017, FR-018, RES-001
-- [ ] [T-021] [P] [P1] [US3] Créer `flutter/test/src/common_widgets/section_header_sticky_test.dart` (5 tests via `forEachTheme` : rendu nominal, count affiché, actions affichées, scroll → fond stuck, `shouldRebuild` correct) — Réf: NFR-001, SC-005
+- [x] [T-020] [P] [P1] [US3] Créer `flutter/lib/src/common_widgets/section_header_sticky.dart` : public `SectionHeaderSticky` (`StatelessWidget` retournant `SliverPersistentHeader.pinned`) + private `_SectionHeaderDelegate extends SliverPersistentHeaderDelegate` (minExtent == maxExtent == 48.0, `AnimatedContainer` 300ms basculant fond `Colors.transparent` → `colorScheme.surfaceContainerHighest` quand `shrinkOffset > 0`) — Réf: FR-007, FR-017, FR-018, RES-001
+- [x] [T-021] [P] [P1] [US3] Créer `flutter/test/src/common_widgets/section_header_sticky_test.dart` (5 tests via `forEachTheme` : rendu nominal, count affiché, actions affichées, scroll → fond stuck, `shouldRebuild` correct) — Réf: NFR-001, SC-005
 
 #### US-004 — `ListGroup`
 
-- [ ] [T-022] [P] [P1] [US4] Créer `flutter/lib/src/common_widgets/list_group.dart` (`StatelessWidget` avec helper privé `_intersperse<Widget>` insérant `Divider(height: 1, color: colorScheme.outlineVariant)` entre enfants, `Container(clipBehavior: antiAlias, borderRadius: AppRadius.xl, color: colorScheme.surfaceContainer)`) — Réf: FR-008, FR-009, RES-009, RES-013
-- [ ] [T-023] [P] [P1] [US4] Créer `flutter/test/src/common_widgets/list_group_test.dart` (3 tests via `forEachTheme` : `n - 1` dividers pour `n` enfants, BorderRadius parent unique, couleur dividers `outlineVariant`) — Réf: NFR-001, SC-006
+- [x] [T-022] [P] [P1] [US4] Créer `flutter/lib/src/common_widgets/list_group.dart` (`StatelessWidget` avec helper privé `_intersperse<Widget>` insérant `Divider(height: 1, color: colorScheme.outlineVariant)` entre enfants, `Container(clipBehavior: antiAlias, borderRadius: AppRadius.xl, color: colorScheme.surfaceContainer)`) — Réf: FR-008, FR-009, RES-009, RES-013
+- [x] [T-023] [P] [P1] [US4] Créer `flutter/test/src/common_widgets/list_group_test.dart` (3 tests via `forEachTheme` : `n - 1` dividers pour `n` enfants, BorderRadius parent unique, couleur dividers `outlineVariant`) — Réf: NFR-001, SC-006
 
 #### US-001 — `InlineDatePicker`
 
-- [ ] [T-024] [P] [P1] [US1] Créer model privé `_CalendarDay` + helpers privés `_toIsoDate(DateTime)`, `_isoToDate(String)`, `_normalizeStartOffset` (lundi-first hardcodé) dans `inline_date_picker.dart` — Réf: FR-001, RES-002, DC-004
-- [ ] [T-025] [P1] [US1] Créer sub-widgets privés `_CalendarHeader` (`[‹] [Mai 2026 cliquable] [›]`), `_CalendarGrid` (7 colonnes, gap 2px), `_DayCell` (36×36 cercle avec états sélectionné / aujourd'hui / original / disabled / hors-mois) dans `inline_date_picker.dart` — Réf: FR-003, RES-002
-- [ ] [T-026] [P1] [US1] Créer public `InlineDatePicker` `StatefulWidget` (`value: String`, `onChanged: ValueChanged<String>`, `originalValue?`, `minDate?`, `maxDate?`) avec state local `_currentMonth`, `_currentYear` + méthodes `_prevMonth`, `_nextMonth`, `_goToToday`, `_selectDay` ; `_computeDays()` calcule la liste de `_CalendarDay` selon FR-003 — Réf: FR-001, FR-002, RES-002
-- [ ] [T-027] [P1] [US1] Créer `flutter/test/src/common_widgets/inline_date_picker_test.dart` (8+ tests via `forEachTheme` : rendu mois courant, navigation prev/next, tap label = goToToday, tap jour → `onChanged('2026-05-15')` ISO, originalValue mode édition, minDate/maxDate disabled, frontière mois 1er = dimanche, février bissextile 2024) — Réf: NFR-001, SC-001, SC-002, R-4
+- [x] [T-024] [P] [P1] [US1] Créer model privé `_CalendarDay` + helpers privés `_toIsoDate(DateTime)`, `_isoToDate(String)`, `_normalizeStartOffset` (lundi-first hardcodé) dans `inline_date_picker.dart` — Réf: FR-001, RES-002, DC-004
+- [x] [T-025] [P1] [US1] Créer sub-widgets privés `_CalendarHeader` (`[‹] [Mai 2026 cliquable] [›]`), `_CalendarGrid` (7 colonnes, gap 2px), `_DayCell` (36×36 cercle avec états sélectionné / aujourd'hui / original / disabled / hors-mois) dans `inline_date_picker.dart` — Réf: FR-003, RES-002
+- [x] [T-026] [P1] [US1] Créer public `InlineDatePicker` `StatefulWidget` (`value: String`, `onChanged: ValueChanged<String>`, `originalValue?`, `minDate?`, `maxDate?`) avec state local `_currentMonth`, `_currentYear` + méthodes `_prevMonth`, `_nextMonth`, `_goToToday`, `_selectDay` ; `_computeDays()` calcule la liste de `_CalendarDay` selon FR-003 — Réf: FR-001, FR-002, RES-002
+- [x] [T-027] [P1] [US1] Créer `flutter/test/src/common_widgets/inline_date_picker_test.dart` (8+ tests via `forEachTheme` : rendu mois courant, navigation prev/next, tap label = goToToday, tap jour → `onChanged('2026-05-15')` ISO, originalValue mode édition, minDate/maxDate disabled, frontière mois 1er = dimanche, février bissextile 2024) — Réf: NFR-001, SC-001, SC-002, R-4
 
 > Note parallélisme intra-US-001 : T-024/T-025/T-026/T-027 sont **séquentielles entre elles** (modèle → sub-widgets → widget public → tests) mais **parallélisables avec d'autres US P1** (US-003, US-004) et avec US-002. Le marqueur `[P]` sur T-024 indique cette parallélisabilité inter-US, pas intra-US.
 
