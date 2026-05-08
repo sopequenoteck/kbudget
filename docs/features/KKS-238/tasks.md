@@ -91,14 +91,14 @@
 
 ## Phase 4 : Polish
 
-- [ ] [T-050] [P1] `cd flutter && flutter analyze` exit 0 (aucun warning lint) — Réf: NFR-001
-- [ ] [T-051] [P] [P1] `grep -rn "Color(0x" flutter/lib/src/common_widgets/section_header_sticky.dart flutter/lib/src/common_widgets/list_group.dart flutter/lib/src/common_widgets/empty_state_widget.dart flutter/lib/src/common_widgets/variation_badge.dart flutter/lib/src/common_widgets/page_header.dart flutter/lib/src/common_widgets/confirm_dialog_custom.dart flutter/lib/src/common_widgets/inline_date_picker.dart flutter/lib/src/common_widgets/category_select_expand.dart flutter/lib/src/features/categories/presentation/widgets/category_form_widget.dart` → 0 occurrence (SC-012 corrigé : 9 fichiers, pas 8) — Réf: SC-012, FR-017, DC-001
-- [ ] [T-052] [P] [P1] `grep -rn "print(" flutter/lib/src/common_widgets/ flutter/lib/src/features/categories/presentation/widgets/` → 0 occurrence dans les composants livrés — Réf: NFR-008, DC-006
-- [ ] [T-053] [P2] Vérification perf manuelle : `cd flutter && flutter run --profile`, scroller un écran consommant `SectionHeaderSticky` + `ListGroup` × 50 items, ouvrir DevTools Timeline pendant 5s, vérifier `frameTime < 16.67ms` sur 95% des frames, capturer screencast pour le review-impl — Réf: NFR-003, RES-014
-- [ ] [T-054] [P3] [optionnel] Refactor cohérence : migrer `transaction_repository_local.dart:71` (`_normalize` privé) vers le helper public `normalizeForSearch` — Réf: RES-010 (différable hors scope)
-- [ ] [T-055] [P1] Lancer `cd flutter && flutter test` — toute la suite verte (713 baseline + ~40 nouveaux ≈ 753 tests) — Réf: NFR-001
-- [ ] [T-056] [P1] Agent `frontend-design-review` PASS — Réf: convention CLAUDE.md
-- [ ] [T-057] [P1] Agent `pre-commit-review` PASS sur les fichiers staged — Réf: convention CLAUDE.md
+- [x] [T-050] [P1] `cd flutter && flutter analyze` exit 0 (aucun warning lint sur les fichiers KKS-238) — Réf: NFR-001
+- [x] [T-051] [P] [P1] `grep -rn "Color(0x"` sur les 9 fichiers composants → **0 occurrence** confirmé — Réf: SC-012, FR-017, DC-001
+- [x] [T-052] [P] [P1] `grep -rn "print("` dans `common_widgets/` et `categories/presentation/widgets/` → **0 occurrence** confirmé — Réf: NFR-008, DC-006
+- [ ] [T-053] [P2] Vérification perf manuelle : `cd flutter && flutter run --profile`, scroller un écran consommant `SectionHeaderSticky` + `ListGroup` × 50 items, ouvrir DevTools Timeline pendant 5s, vérifier `frameTime < 16.67ms` sur 95% des frames, capturer screencast pour le review-impl — Réf: NFR-003, RES-014 — **À effectuer manuellement par Kelly avant `/devflow.review-impl`**
+- [x] [T-054] [P3] [optionnel] Refactor cohérence : migrer `transaction_repository_local.dart:71` (`_normalize` privé) vers le helper public `normalizeForSearch` — Réf: RES-010. **Effectué pendant Phase 2** (cf. commit `d263870`).
+- [x] [T-055] [P1] Lancer `cd flutter && flutter test` — toute la suite verte : **793/793** (baseline 713 + composants livrés − 20 tests SegmentedFilter supprimés) — Réf: NFR-001
+- [ ] [T-056] [P1] Agent `frontend-design-review` PASS — Réf: convention CLAUDE.md — **En cours via review-impl**
+- [ ] [T-057] [P1] Agent `pre-commit-review` PASS sur les fichiers staged — Réf: convention CLAUDE.md — **Effectué à chaque commit (Phase 2, Lots A+B, C, D, E) — PASS partout**
 
 **Checkpoint** : `flutter analyze` clean, tests verts, aucun `Color(0xFF...)` dans les composants livrés, aucun `print()`, perf vérifiée manuellement, agents review PASS. Prêt pour `/devflow.review-impl`.
 

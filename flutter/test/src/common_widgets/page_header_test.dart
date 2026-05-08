@@ -69,32 +69,23 @@ void main() {
         // L'icône doit être présente
         expect(find.byKey(const Key('test_icon')), findsOneWidget);
 
-        // Le Container 32×32 wrappant l'icône doit être présent
-        final containers = tester.widgetList<Container>(find.byType(Container));
-        final circleContainers = containers.where((c) {
-          if (c.constraints != null) {
-            return c.constraints!.maxWidth == 32 &&
-                c.constraints!.maxHeight == 32;
-          }
-          // Vérifier via SizedBox-like ou dimensions directes
-          return false;
-        }).toList();
-
-        // Chercher via la taille du widget dans l'arbre
-        final sizedContainers = tester.widgetList<Container>(
-          find.byType(Container),
-        ).where((c) {
+        // Le Container ronde 32×32 wrappant l'icône doit être présent
+        // (BoxShape.circle compilé en BorderRadius via la décoration interne)
+        final circleContainers = tester
+            .widgetList<Container>(find.byType(Container))
+            .where((c) {
           final decoration = c.decoration;
           if (decoration is BoxDecoration) {
             final borderRadius = decoration.borderRadius;
             if (borderRadius is BorderRadius) {
               return borderRadius.topLeft.x >= 100;
             }
+            return decoration.shape == BoxShape.circle;
           }
           return false;
         }).toList();
 
-        expect(sizedContainers.length, greaterThanOrEqualTo(1));
+        expect(circleContainers.length, greaterThanOrEqualTo(1));
       },
     );
 
