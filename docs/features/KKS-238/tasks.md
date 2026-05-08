@@ -60,23 +60,23 @@
 
 #### US-005 — `PageHeader`
 
-- [ ] [T-031] [P] [P2] [US5] Créer `flutter/lib/src/common_widgets/page_header.dart` (`StatelessWidget`, layout `Row` : back rond 36×36 + `Spacer` + icône optionnelle 32×32 wrappée + titre flex-end `titleLarge` bold, **pas de trailing**) — Réf: FR-010, RES-008
-- [ ] [T-032] [P] [P2] [US5] Créer `flutter/test/src/common_widgets/page_header_test.dart` (4 tests via `forEachTheme` : rendu titre, tap back → callback invoqué, icône optionnelle wrappée 32×32, sans icône) — Réf: NFR-001, SC-007
+- [x] [T-031] [P] [P2] [US5] Créer `flutter/lib/src/common_widgets/page_header.dart` (`StatelessWidget`, layout `Row` : back rond 36×36 + `Spacer` + icône optionnelle 32×32 wrappée + titre flex-end `titleLarge` bold, **pas de trailing**) — Réf: FR-010, RES-008
+- [x] [T-032] [P] [P2] [US5] Créer `flutter/test/src/common_widgets/page_header_test.dart` (4 tests via `forEachTheme` : rendu titre, tap back → callback invoqué, icône optionnelle wrappée 32×32, sans icône) — Réf: NFR-001, SC-007
 
 #### US-006 — `EmptyStateWidget`
 
-- [ ] [T-033] [P] [P2] [US6] Créer `flutter/lib/src/common_widgets/empty_state_widget.dart` (`StatelessWidget`, paramètres `icon?`, `message`, `hint?`, `ctaLabel?`, `onCtaTap?` ; `Center > Column` avec icône 48px opacity 0.5, message `bodyMedium` `onSurfaceVariant`, hint `bodySmall` tertiary, CTA `TextButton` text-link amber souligné) — Réf: FR-011, RES-007
-- [ ] [T-034] [P] [P2] [US6] Créer `flutter/test/src/common_widgets/empty_state_widget_test.dart` (4 tests via `forEachTheme` : rendu sans CTA, rendu avec CTA, tap CTA → callback, sans icône) — Réf: NFR-001, SC-008
+- [x] [T-033] [P] [P2] [US6] Créer `flutter/lib/src/common_widgets/empty_state_widget.dart` (`StatelessWidget`, paramètres `icon?`, `message`, `hint?`, `ctaLabel?`, `onCtaTap?` ; `Center > Column` avec icône 48px opacity 0.5, message `bodyMedium` `onSurfaceVariant`, hint `bodySmall` tertiary, CTA `TextButton` text-link amber souligné) — Réf: FR-011, RES-007
+- [x] [T-034] [P] [P2] [US6] Créer `flutter/test/src/common_widgets/empty_state_widget_test.dart` (4 tests via `forEachTheme` : rendu sans CTA, rendu avec CTA, tap CTA → callback, sans icône) — Réf: NFR-001, SC-008
 
 #### US-007 — `ConfirmDialogCustom`
 
-- [ ] [T-035] [P] [P2] [US7] Créer `flutter/lib/src/common_widgets/confirm_dialog_custom.dart` : enum public `ConfirmVariant { primary, danger }` + classe `ConfirmDialogCustom` (constructeur privé `_()` + méthode statique `Future<bool?> show({context, icon?, title, message?, confirmLabel, cancelLabel, variant})` qui appelle `showDialog<bool>` avec `barrierDismissible: true` et un widget privé `_ConfirmDialogContent`) ; bouton Annuler `OutlinedButton.icon` (X 14px) ; bouton Confirmer `FilledButton.icon` (Check ou Trash 14px selon variant, couleur primary ou error) — Réf: FR-012, FR-013, RES-005, DC-005, NFR-007
-- [ ] [T-036] [P] [P2] [US7] Créer `flutter/test/src/common_widgets/confirm_dialog_custom_test.dart` (5 tests via `forEachTheme` : `show()` → `true` au tap Confirmer, `show()` → `false` au tap Annuler, `show()` → `null` au tap scrim, variant danger → couleur error + icône Trash, back button Android → `null`) — Réf: NFR-001, NFR-007, SC-009, SC-010
+- [x] [T-035] [P] [P2] [US7] Créer `flutter/lib/src/common_widgets/confirm_dialog_custom.dart` : enum public `ConfirmVariant { primary, danger }` + classe `ConfirmDialogCustom` (constructeur privé `_()` + méthode statique `Future<bool?> show({context, icon?, title, message?, confirmLabel, cancelLabel, variant})` qui appelle `showDialog<bool>` avec `barrierDismissible: true` et un widget privé `_ConfirmDialogContent`) ; bouton Annuler `OutlinedButton.icon` (X 14px) ; bouton Confirmer `FilledButton.icon` (Check ou Trash 14px selon variant, couleur primary ou error) — Réf: FR-012, FR-013, RES-005, DC-005, NFR-007
+- [x] [T-036] [P] [P2] [US7] Créer `flutter/test/src/common_widgets/confirm_dialog_custom_test.dart` (5 tests via `forEachTheme` : `show()` → `true` au tap Confirmer, `show()` → `false` au tap Annuler, `show()` → `null` au tap scrim, variant danger → couleur error + icône Trash, back button Android → `null`) — Réf: NFR-001, NFR-007, SC-009, SC-010
 
 #### US-008 — `VariationBadge`
 
-- [ ] [T-037] [P] [P2] [US8] Créer `flutter/lib/src/common_widgets/variation_badge.dart` (`StatelessWidget`, paramètres `delta`, `currency?`, `percentage?`, `suffix='ce mois'` ; helper privé `_formatVariation` utilisant `intl.NumberFormat.currency(locale: 'fr_FR')` pour le montant + format manuel signe/pourcentage 1 décimale ; couleur via `themeExt.incomeColor` / `expenseColor` / `colorScheme.onSurfaceVariant` ; rendu `SizedBox.shrink()` si `delta == 0 && percentage == null`) — Réf: FR-014, RES-006, CL-005
-- [ ] [T-038] [P] [P2] [US8] Créer `flutter/test/src/common_widgets/variation_badge_test.dart` (5 tests via `forEachTheme` : delta > 0 → vert + `+`, delta < 0 → rouge + `-`, `delta == 0 && percentage == null` → masqué, `delta == 0 && percentage != null` → neutral, format pourcentage `+12,5%`) — Réf: NFR-001, SC-011
+- [x] [T-037] [P] [P2] [US8] Créer `flutter/lib/src/common_widgets/variation_badge.dart` (`StatelessWidget`, paramètres `delta`, `currency?`, `percentage?`, `suffix='ce mois'` ; helper privé `_formatVariation` utilisant `intl.NumberFormat.currency(locale: 'fr_FR')` pour le montant + format manuel signe/pourcentage 1 décimale ; couleur via `themeExt.incomeColor` / `expenseColor` / `colorScheme.onSurfaceVariant` ; rendu `SizedBox.shrink()` si `delta == 0 && percentage == null`) — Réf: FR-014, RES-006, CL-005
+- [x] [T-038] [P] [P2] [US8] Créer `flutter/test/src/common_widgets/variation_badge_test.dart` (5 tests via `forEachTheme` : delta > 0 → vert + `+`, delta < 0 → rouge + `-`, `delta == 0 && percentage == null` → masqué, `delta == 0 && percentage != null` → neutral, format pourcentage `+12,5%`) — Réf: NFR-001, SC-011
 
 ### Cleanup transversal — Suppression `SegmentedFilter`
 
