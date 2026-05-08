@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
-import 'package:k_budget/src/common_widgets/segmented_filter.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -192,24 +191,35 @@ class _SubscriptionListScreenState
               horizontal: AppSpacing.space4,
               vertical: AppSpacing.space2,
             ),
-            child: SegmentedFilter<SubscriptionStatusFilter>(
-              items: [
-                SegmentedFilterItem(
-                  value: SubscriptionStatusFilter.all,
-                  label: l10n.subscriptionsFilterAll,
+            // TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)
+            child: Wrap(
+              spacing: AppSpacing.space2,
+              children: [
+                ChoiceChip(
+                  label: Text(l10n.subscriptionsFilterAll),
+                  selected:
+                      state.activeFilter == SubscriptionStatusFilter.all,
+                  onSelected: (_) => ref
+                      .read(subscriptionNotifierProvider.notifier)
+                      .setFilter(SubscriptionStatusFilter.all),
                 ),
-                SegmentedFilterItem(
-                  value: SubscriptionStatusFilter.actif,
-                  label: l10n.subscriptionsFilterActifs,
+                ChoiceChip(
+                  label: Text(l10n.subscriptionsFilterActifs),
+                  selected:
+                      state.activeFilter == SubscriptionStatusFilter.actif,
+                  onSelected: (_) => ref
+                      .read(subscriptionNotifierProvider.notifier)
+                      .setFilter(SubscriptionStatusFilter.actif),
                 ),
-                SegmentedFilterItem(
-                  value: SubscriptionStatusFilter.inactif,
-                  label: l10n.subscriptionsFilterInactifs,
+                ChoiceChip(
+                  label: Text(l10n.subscriptionsFilterInactifs),
+                  selected:
+                      state.activeFilter == SubscriptionStatusFilter.inactif,
+                  onSelected: (_) => ref
+                      .read(subscriptionNotifierProvider.notifier)
+                      .setFilter(SubscriptionStatusFilter.inactif),
                 ),
               ],
-              selectedValue: state.activeFilter,
-              onChanged: (f) =>
-                  ref.read(subscriptionNotifierProvider.notifier).setFilter(f),
             ),
           ),
         ),
@@ -258,24 +268,35 @@ class _SubscriptionListScreenState
             horizontal: AppSpacing.space4,
             vertical: AppSpacing.space2,
           ),
-          child: SegmentedFilter<SubscriptionStatusFilter>(
-            items: [
-              SegmentedFilterItem(
-                value: SubscriptionStatusFilter.all,
-                label: l10n.subscriptionsFilterAll,
+          // TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)
+          child: Wrap(
+            spacing: AppSpacing.space2,
+            children: [
+              ChoiceChip(
+                label: Text(l10n.subscriptionsFilterAll),
+                selected:
+                    state.activeFilter == SubscriptionStatusFilter.all,
+                onSelected: (_) => ref
+                    .read(subscriptionNotifierProvider.notifier)
+                    .setFilter(SubscriptionStatusFilter.all),
               ),
-              SegmentedFilterItem(
-                value: SubscriptionStatusFilter.actif,
-                label: l10n.subscriptionsFilterActifs,
+              ChoiceChip(
+                label: Text(l10n.subscriptionsFilterActifs),
+                selected:
+                    state.activeFilter == SubscriptionStatusFilter.actif,
+                onSelected: (_) => ref
+                    .read(subscriptionNotifierProvider.notifier)
+                    .setFilter(SubscriptionStatusFilter.actif),
               ),
-              SegmentedFilterItem(
-                value: SubscriptionStatusFilter.inactif,
-                label: l10n.subscriptionsFilterInactifs,
+              ChoiceChip(
+                label: Text(l10n.subscriptionsFilterInactifs),
+                selected:
+                    state.activeFilter == SubscriptionStatusFilter.inactif,
+                onSelected: (_) => ref
+                    .read(subscriptionNotifierProvider.notifier)
+                    .setFilter(SubscriptionStatusFilter.inactif),
               ),
             ],
-            selectedValue: state.activeFilter,
-            onChanged: (f) =>
-                ref.read(subscriptionNotifierProvider.notifier).setFilter(f),
           ),
         ),
       ),

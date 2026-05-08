@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
-import 'package:k_budget/src/common_widgets/segmented_filter.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -288,24 +287,32 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
           horizontal: AppSpacing.space4,
           vertical: AppSpacing.space2,
         ),
-        child: SegmentedFilter<DebtStatusFilter>(
-          items: [
-            SegmentedFilterItem(
-              value: DebtStatusFilter.all,
-              label: l10n.debtsFilterAll,
+        // TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)
+        child: Wrap(
+          spacing: AppSpacing.space2,
+          children: [
+            ChoiceChip(
+              label: Text(l10n.debtsFilterAll),
+              selected: state.activeFilter == DebtStatusFilter.all,
+              onSelected: (_) => ref
+                  .read(debtNotifierProvider.notifier)
+                  .setFilter(DebtStatusFilter.all),
             ),
-            SegmentedFilterItem(
-              value: DebtStatusFilter.enCours,
-              label: l10n.debtsFilterEnCours,
+            ChoiceChip(
+              label: Text(l10n.debtsFilterEnCours),
+              selected: state.activeFilter == DebtStatusFilter.enCours,
+              onSelected: (_) => ref
+                  .read(debtNotifierProvider.notifier)
+                  .setFilter(DebtStatusFilter.enCours),
             ),
-            SegmentedFilterItem(
-              value: DebtStatusFilter.rembourse,
-              label: l10n.debtsFilterRembourse,
+            ChoiceChip(
+              label: Text(l10n.debtsFilterRembourse),
+              selected: state.activeFilter == DebtStatusFilter.rembourse,
+              onSelected: (_) => ref
+                  .read(debtNotifierProvider.notifier)
+                  .setFilter(DebtStatusFilter.rembourse),
             ),
           ],
-          selectedValue: state.activeFilter,
-          onChanged: (f) =>
-              ref.read(debtNotifierProvider.notifier).setFilter(f),
         ),
       ),
     );

@@ -80,10 +80,10 @@
 
 ### Cleanup transversal — Suppression `SegmentedFilter`
 
-- [ ] [T-040] [P] [P1] Supprimer `flutter/lib/src/common_widgets/segmented_filter.dart` et son test associé `segmented_filter_test.dart` (s'il existe) — Réf: FR-015
-- [ ] [T-041] [P] [P1] Adapter `flutter/lib/src/features/debts/presentation/debt_list_screen.dart` : retirer l'import `SegmentedFilter`, remplacer par `Wrap(spacing: AppSpacing.s2, children: items.map((i) => ChoiceChip(label: ..., selected: ..., onSelected: ...)).toList())` avec commentaire `// TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)` — Réf: FR-016, RES-011
-- [ ] [T-042] [P] [P1] Adapter `flutter/lib/src/features/subscriptions/presentation/subscription_list_screen.dart` : même remplacement que T-041 (`ChoiceChip` + TODO) — Réf: FR-016, RES-011
-- [ ] [T-043] [P] [P1] Adapter ou supprimer les tests `debt_list_screen_test.dart` et `subscription_list_screen_test.dart` qui dépendent de `SegmentedFilter` ; s'assurer que `flutter test` reste vert — Réf: A-004, R-5
+- [x] [T-040] [P] [P1] Supprimer `flutter/lib/src/common_widgets/segmented_filter.dart` et son test associé `segmented_filter_test.dart` (s'il existe) — Réf: FR-015
+- [x] [T-041] [P] [P1] Adapter `flutter/lib/src/features/debts/presentation/debt_list_screen.dart` : retirer l'import `SegmentedFilter`, remplacer par `Wrap(spacing: AppSpacing.s2, children: items.map((i) => ChoiceChip(label: ..., selected: ..., onSelected: ...)).toList())` avec commentaire `// TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)` — Réf: FR-016, RES-011
+- [x] [T-042] [P] [P1] Adapter `flutter/lib/src/features/subscriptions/presentation/subscription_list_screen.dart` : même remplacement que T-041 (`ChoiceChip` + TODO) — Réf: FR-016, RES-011
+- [x] [T-043] [P] [P1] Adapter ou supprimer les tests `debt_list_screen_test.dart` et `subscription_list_screen_test.dart` qui dépendent de `SegmentedFilter` ; s'assurer que `flutter test` reste vert — Réf: A-004, R-5
 
 **Checkpoint** : Tous les composants livrés (`section_header_sticky.dart`, `list_group.dart`, `inline_date_picker.dart`, `category_select_expand.dart`, `page_header.dart`, `empty_state_widget.dart`, `confirm_dialog_custom.dart`, `variation_badge.dart`, `category_form_widget.dart`). `SegmentedFilter` supprimé, sites consommateurs adaptés. `flutter test` passe (≥ 713 baseline + ~40 nouveaux tests).
 

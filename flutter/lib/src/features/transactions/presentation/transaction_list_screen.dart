@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/month_selector.dart';
-import 'package:k_budget/src/common_widgets/segmented_filter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -120,30 +119,40 @@ class _TransactionListScreenState
             ),
           ),
 
-          // Filtre segmenté
+          // TODO KKS-240 : remplacer par groupement + sections (DESIGN.md anti-pattern segmented control)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.space4,
                 vertical: AppSpacing.space2,
               ),
-              child: SegmentedFilter<TransactionTypeFilter>(
-                items: [
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.all,
-                    label: l10n.transactionsFilterAll,
+              child: Wrap(
+                spacing: AppSpacing.space2,
+                children: [
+                  ChoiceChip(
+                    label: Text(l10n.transactionsFilterAll),
+                    selected: state.activeFilter == TransactionTypeFilter.all,
+                    onSelected: (_) => ref
+                        .read(transactionListNotifierProvider.notifier)
+                        .setFilter(TransactionTypeFilter.all),
                   ),
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.depense,
-                    label: l10n.transactionsFilterDepenses,
+                  ChoiceChip(
+                    label: Text(l10n.transactionsFilterDepenses),
+                    selected:
+                        state.activeFilter == TransactionTypeFilter.depense,
+                    onSelected: (_) => ref
+                        .read(transactionListNotifierProvider.notifier)
+                        .setFilter(TransactionTypeFilter.depense),
                   ),
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.recette,
-                    label: l10n.transactionsFilterRecettes,
+                  ChoiceChip(
+                    label: Text(l10n.transactionsFilterRecettes),
+                    selected:
+                        state.activeFilter == TransactionTypeFilter.recette,
+                    onSelected: (_) => ref
+                        .read(transactionListNotifierProvider.notifier)
+                        .setFilter(TransactionTypeFilter.recette),
                   ),
                 ],
-                selectedValue: state.activeFilter,
-                onChanged: (f) => ref.read(transactionListNotifierProvider.notifier).setFilter(f),
               ),
             ),
           ),
