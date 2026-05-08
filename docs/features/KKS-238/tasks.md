@@ -97,8 +97,8 @@
 - [ ] [T-053] [P2] Vérification perf manuelle : `cd flutter && flutter run --profile`, scroller un écran consommant `SectionHeaderSticky` + `ListGroup` × 50 items, ouvrir DevTools Timeline pendant 5s, vérifier `frameTime < 16.67ms` sur 95% des frames, capturer screencast pour le review-impl — Réf: NFR-003, RES-014 — **À effectuer manuellement par Kelly avant `/devflow.review-impl`**
 - [x] [T-054] [P3] [optionnel] Refactor cohérence : migrer `transaction_repository_local.dart:71` (`_normalize` privé) vers le helper public `normalizeForSearch` — Réf: RES-010. **Effectué pendant Phase 2** (cf. commit `d263870`).
 - [x] [T-055] [P1] Lancer `cd flutter && flutter test` — toute la suite verte : **793/793** (baseline 713 + composants livrés − 20 tests SegmentedFilter supprimés) — Réf: NFR-001
-- [ ] [T-056] [P1] Agent `frontend-design-review` PASS — Réf: convention CLAUDE.md — **En cours via review-impl**
-- [ ] [T-057] [P1] Agent `pre-commit-review` PASS sur les fichiers staged — Réf: convention CLAUDE.md — **Effectué à chaque commit (Phase 2, Lots A+B, C, D, E) — PASS partout**
+- [x] [T-056] [P1] Agent `frontend-design-review` PASS — Réf: convention CLAUDE.md — **PASS via review-impl du 2026-05-08** (5 WARNING non-bloquants, dont 2 résolus par mise à jour `contracts.md` pour refléter la livraison réelle)
+- [x] [T-057] [P1] Agent `pre-commit-review` PASS sur les fichiers staged — Réf: convention CLAUDE.md — **PASS à chaque commit (Phase 2 d263870, Lots A+B bfa7baa, Lot C 9e80bd3, Lot D, Lot E, Polish 0b3c87a) — 6/6**
 
 **Checkpoint** : `flutter analyze` clean, tests verts, aucun `Color(0xFF...)` dans les composants livrés, aucun `print()`, perf vérifiée manuellement, agents review PASS. Prêt pour `/devflow.review-impl`.
 

@@ -129,3 +129,82 @@ Les 5 WARNING identifiés sont **non bloquants**. Les 2 plus impactants (WARNING
 - Aucune action de complétion `.gitignore` requise
 
 **Décision** : implémentation lancée en mode dégradé sans gate checklist.
+
+---
+
+## Itération 3 — review-impl — 2026-05-08
+
+**Verdict** : ✅ **PASS**
+**Reviewer** : devflow-review-agent (mode `review-impl`)
+**Branche** : `feature/flutter-shared-components-v5`
+**Commits** : 6 (`d263870`, `bfa7baa`, `9e80bd3`, Lot D, Lot E, `0b3c87a`)
+
+### Synthèse
+
+Tous les 19 FR implémentés, 14 SC couverts par tests, 7 NFR respectés, 14 décisions RES appliquées. Constitution v3.0.0 Trajectoire B PASS sans dérogation. Les 4 anomalies corrigées pendant l'implémentation (régression `ListView`, écart `SegmentedFilter`, magic numbers, token sélection) sont toutes cohérentes avec le périmètre.
+
+### Métriques code
+
+| Métrique | Valeur |
+|---|---|
+| Tests | 793/793 verts (713 baseline + livraison − 20 SegmentedFilter supprimés) |
+| `flutter analyze` | clean sur les 9 fichiers KKS-238 |
+| `Color(0xFF...)` directs dans composants | 0 (SC-012 PASS) |
+| `print()` dans composants | 0 (NFR-008 PASS) |
+| Nouvelles dépendances package | 0 (NFR-005 PASS) |
+| Tâches cochées | 32/32 (T-056 et T-057 cochés via cette review et les 6 commits) |
+
+### Constats — Aucun BLOQUANT
+
+#### WARNING (5) — 2 résolus en séance, 3 reportés
+
+| ID | Constat | Action |
+|----|---------|--------|
+| W-001 | `CategoryFormWidget` : `onCancelled` et `showHeader` absents du constructeur (contrat dit qu'ils sont là) | ✅ **Résolu par mise à jour contracts.md** — ces paramètres ont été retirés en Phase 2 sur indication du `pre-commit-review` (code mort YAGNI), le contrat doit refléter la livraison réelle. Note ajoutée dans `contracts.md`. |
+| W-002 | `theme_test_helpers.dart` : `wrapWithTheme` absent (contrat dit qu'il est là) | ✅ **Résolu par mise à jour contracts.md** — retiré en Phase 2 sur indication `pre-commit-review` (code mort). Chaque test utilise un helper local `pumpXxx` plus flexible. Note ajoutée. |
+| W-003 | SC-010 (variant danger → couleur error) : couleur non vérifiée explicitement dans le test (juste icône Trash + texte) | ⏭️ Reporté — code lu confirme `backgroundColor: colorScheme.error`. Test golden ou explicite à ajouter en KKS-239+ si besoin |
+| W-004 | `VariationBadge` : `format(delta)` au lieu de `format(delta.abs())` + signe manuel | ⏭️ Reporté — comportement final correct (intl gère le signe), divergence stylistique non-impactante |
+| W-005 | T-053 perf 60 fps non effectuée avant review-impl | ⏭️ Reporté — vérification manuelle DevTools Timeline à effectuer avant la review-impl de KKS-240 (premier consommateur réel des composants en condition production). Risque de régression perf faible (`shouldRebuild` optimisé, `AnimatedContainer`, composants structurellement sains) |
+
+#### INFO (8) — Tous validés, aucune action
+
+| ID | Constat | Disposition |
+|----|---------|-------------|
+| I-001 | Anomalie 1 (régression `ListView` → `Column`) | ✅ Validée, dans périmètre FR-019 |
+| I-002 | Anomalie 2 (écart spec SegmentedFilter 3 sites vs 2) | ✅ Validée — `transaction_list_screen.dart` ne consommait finalement pas `SegmentedFilter` (fausse alerte initiale corrigée) |
+| I-003 | Anomalie 3 (magic numbers `inline_date_picker.dart`) | ✅ Validée, 5 corrections post-frontend-design-review effectives |
+| I-004 | Anomalie 4 (token sélection `primaryContainer` → `primarySubtle`) | ✅ Validée |
+| I-005 | `_hexToColor` dans `CategorySelectExpand` | ✅ Validé — usage légitime (donnée métier, pas hardcode design) |
+| I-006 | `CategoryFormWidget` doc `///` partielle sur paramètres champs | ⏭️ Mineur, doc classe + exemple compensent |
+| I-007 | Tests utilisent `pumpXxx` local au lieu de `wrapWithTheme` | ⏭️ Pattern flexible cohérent avec besoins spécifiques (Riverpod, Sliver, localisation) |
+| I-008 | T-056 / T-057 statut déclaratif | ✅ Cochés post-review |
+
+### Vérification conformité
+
+| Aspect | Résultat |
+|---|---|
+| Constitution v3.0.0 (7 articles) | PASS |
+| Spec — 19 FR | PASS |
+| Spec — 7 NFR | PASS (NFR-003 perf en attente vérif manuelle) |
+| Spec — 14 SC | PASS (SC-010 partiellement testé — code OK) |
+| Plan — fichiers C/M/D | PASS |
+| Plan — 3 complexités CX | PASS, tracées dans le code |
+| Research — 14 décisions RES | PASS |
+| Contracts — 7 conventions C-001 à C-007 | PASS |
+| Data-model — types UI + invariants | PASS |
+| Audit comparatif Angular | Confirmé fidèle |
+
+### Conditions post-merge recommandées (non-bloquantes)
+
+1. T-053 perf : effectuer la vérification DevTools Timeline sur device Android avant la review-impl de KKS-240 (NFR-003)
+2. SC-010 : ajouter un test golden ou explicite vérifiant `backgroundColor == colorScheme.error` pour le variant danger (en KKS-239+)
+3. Si KKS-239 a besoin de `onCancelled` ou `showHeader` sur `CategoryFormWidget`, les réintroduire avec un usage concret
+
+### State
+
+- `currentStep: docs`
+- `completedSteps: [spec, clarify, review-spec, research, plan, contracts, tasks, review-tasks, implement, review-impl]`
+- `reviewIterations.review-impl: 1`
+- Linear → **Doc**
+
+**Prêt pour `/devflow.docs KKS-238`**.

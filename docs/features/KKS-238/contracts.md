@@ -455,8 +455,6 @@ const CategoryFormWidget({
   this.category,
   this.initialName,
   this.onSaved,
-  this.onCancelled,
-  this.showHeader = true,
 });
 ```
 
@@ -467,8 +465,11 @@ const CategoryFormWidget({
 | `category` | `Category?` | Non | `null` = mode création ; non-null = mode édition |
 | `initialName` | `String?` | Non | Pré-remplissage du champ nom (utilisé par `CategorySelectExpand` qui passe le `searchTerm`) |
 | `onSaved` | `ValueChanged<Category>?` | Non | Callback après save réussi (POST/PUT). Reçoit la `Category` finale |
-| `onCancelled` | `VoidCallback?` | Non | Callback au tap sur retour / annuler dans le widget |
-| `showHeader` | `bool` | Non (défaut `true`) | Si `false`, le widget ne rend pas son header interne (utilisé en mode embed sous `CategorySelectExpand`) |
+
+> **Note livraison** : les paramètres `onCancelled: VoidCallback?` et `showHeader: bool = true` initialement spécifiés ont été **retirés en Phase 2** sur indication du `pre-commit-review` (code mort YAGNI) :
+> - `onCancelled` n'est jamais appelé : le retour mode `'list'` dans `CategorySelectExpand` est géré par le bouton externe `[← Retour]` du parent qui appelle son propre `_backToList`, pas par un callback du sous-widget.
+> - `showHeader` ne contrôlait rien (les deux branches `if/!if` rendaient la même chose). Suppression du flag, la preview card est rendue inconditionnellement.
+> Si un futur consommateur (KKS-239+) a un besoin réel d'annuler depuis le sous-widget ou de masquer la preview, ces paramètres pourront être réintroduits avec un usage concret.
 
 **State class publique** :
 
@@ -550,7 +551,6 @@ String normalizeForSearch(String input);
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 
 /// Itère [body] sur les thèmes [AppTheme.dark] et [AppTheme.light].
@@ -559,21 +559,17 @@ import 'package:k_budget/src/theme/app_theme.dart';
 /// ```dart
 /// forEachTheme((theme, themeName) {
 ///   testWidgets('should_render_correctly_when_$themeName', (tester) async {
-///     await tester.pumpWidget(wrapWithTheme(theme, MyWidget()));
-///     // ...
+///     // pumpWidget avec un MaterialApp(theme: theme, ...)
 ///   });
 /// });
 /// ```
 void forEachTheme(void Function(ThemeData theme, String themeName) body);
-
-/// Wrap un widget dans un `MaterialApp` minimal avec le thème fourni,
-/// pour widget tests.
-Widget wrapWithTheme(ThemeData theme, Widget child);
 ```
 
 **Contrat** :
 - `forEachTheme` invoque `body` exactement 2 fois : `(AppTheme.dark, 'dark')` puis `(AppTheme.light, 'light')`.
-- `wrapWithTheme` retourne un `MaterialApp` configuré avec `theme: theme` et un `Scaffold(body: child)`.
+
+> **Note livraison** : `Widget wrapWithTheme(ThemeData theme, Widget child)` initialement spécifié a été **retiré en Phase 2** sur indication du `pre-commit-review` (code mort YAGNI). Chaque fichier de test livré utilise un helper local `pumpXxx(tester, theme, ...)` adapté à ses besoins spécifiques (`CustomScrollView` pour `SectionHeaderSticky`, `ProviderScope` pour `CategorySelectExpand`, `localizationsDelegates` pour `CategoryFormWidget`). Ces helpers locaux sont plus flexibles qu'un `wrapWithTheme` générique pour des widgets avec contexte Riverpod, Sliver ou localisation. Si KKS-239+ identifie un consommateur réel d'un wrapper minimal, `wrapWithTheme` pourra être ajouté à ce moment.
 
 ---
 
