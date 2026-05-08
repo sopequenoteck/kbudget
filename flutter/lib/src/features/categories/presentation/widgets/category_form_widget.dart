@@ -196,63 +196,65 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
 
     final nomError = _showErrors ? _validateNom(_nameController.text) : null;
 
-    return ListView(
+    return Padding(
       padding: const EdgeInsets.all(AppSpacing.space4),
-      children: [
-        CategoryPreviewCard(
-          emoji: _selectedEmoji,
-          name: _nameController.text,
-          colorHex: _selectedColor,
-        ),
-        const SizedBox(height: AppSpacing.space6),
-
-        // Emoji + Color row
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EmojiInput(
-              label: l10n.categoryFormIconField,
-              initialValue: _selectedEmoji.isNotEmpty ? _selectedEmoji : null,
-              onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
-              validator: (_) => _showErrors ? _validateEmoji() : null,
-              autovalidateMode: _showErrors
-                  ? AutovalidateMode.always
-                  : AutovalidateMode.disabled,
-            ),
-            const SizedBox(width: AppSpacing.space4),
-            Expanded(
-              child: ColorPalettePicker(
-                label: l10n.categoryFormColorField,
-                selectedColor: _selectedColor,
-                onChanged: (color) => setState(() => _selectedColor = color),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.space6),
-
-        // Name field
-        AppFormField(
-          label: l10n.categoryFormNameField,
-          showError: nomError != null,
-          errorMessage: nomError ?? '',
-          child: TextField(
-            controller: _nameController,
-            decoration: const InputDecoration.collapsed(hintText: ''),
-            style: TextStyle(
-              fontSize: AppTypography.sizeMd,
-              color: colorScheme.onSurface,
-            ),
-            maxLength: 30,
-            maxLengthEnforcement: MaxLengthEnforcement.enforced,
-            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
-            onChanged: (_) => setState(() {}),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CategoryPreviewCard(
+            emoji: _selectedEmoji,
+            name: _nameController.text,
+            colorHex: _selectedColor,
           ),
-        ),
-        const SizedBox(height: AppSpacing.space6),
+          const SizedBox(height: AppSpacing.space6),
 
-        const SizedBox(height: AppSpacing.space12),
-      ],
+          // Emoji + Color row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              EmojiInput(
+                label: l10n.categoryFormIconField,
+                initialValue: _selectedEmoji.isNotEmpty ? _selectedEmoji : null,
+                onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
+                validator: (_) => _showErrors ? _validateEmoji() : null,
+                autovalidateMode: _showErrors
+                    ? AutovalidateMode.always
+                    : AutovalidateMode.disabled,
+              ),
+              const SizedBox(width: AppSpacing.space4),
+              Expanded(
+                child: ColorPalettePicker(
+                  label: l10n.categoryFormColorField,
+                  selectedColor: _selectedColor,
+                  onChanged: (color) => setState(() => _selectedColor = color),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.space6),
+
+          // Name field
+          AppFormField(
+            label: l10n.categoryFormNameField,
+            showError: nomError != null,
+            errorMessage: nomError ?? '',
+            child: TextField(
+              controller: _nameController,
+              decoration: const InputDecoration.collapsed(hintText: ''),
+              style: TextStyle(
+                fontSize: AppTypography.sizeMd,
+                color: colorScheme.onSurface,
+              ),
+              maxLength: 30,
+              maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space6),
+        ],
+      ),
     );
   }
 }

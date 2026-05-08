@@ -104,39 +104,39 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: CategoryFormWidget(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            CategoryFormWidget(
               key: _formKey,
               category: widget.category,
               onSaved: (_) => context.pop(),
             ),
-          ),
-          if (_isEditMode) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.space4,
-                vertical: AppSpacing.space2,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _onDelete,
-                  icon: PhosphorIcon(
-                    PhosphorIconsRegular.trash,
-                    color: colorScheme.error,
-                    size: 20,
-                  ),
-                  label: Text(
-                    l10n.delete,
-                    style: TextStyle(color: colorScheme.error),
+            if (_isEditMode) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.space4,
+                  vertical: AppSpacing.space2,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _onDelete,
+                    icon: PhosphorIcon(
+                      PhosphorIconsRegular.trash,
+                      color: colorScheme.error,
+                      size: 20,
+                    ),
+                    label: Text(
+                      l10n.delete,
+                      style: TextStyle(color: colorScheme.error),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
