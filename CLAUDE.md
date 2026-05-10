@@ -46,7 +46,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v2.1.1) est le document de reference. 7 principes :
+Le fichier `.specify/memory/constitution.md` (v3.0.0) est le document de reference. 7 principes :
 
 1. **API-First** : toute feature via REST avant frontend. DTOs obligatoires, jamais d'entite JPA exposee.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
@@ -140,7 +140,6 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
-| [`docs/design-tokens.md`](docs/design-tokens.md) | Design tokens legacy (obsolete — voir DESIGN.md) |
 | [`docs/roadmap-v2.md`](docs/roadmap-v2.md) | Roadmap V2 : features, phases, decisions |
 | [`docs/dette-technique.md`](docs/dette-technique.md) | Registre des dettes techniques identifiees |
 | [`docs/pwa-install.md`](docs/pwa-install.md) | Guide d'installation PWA (Android/iOS) |
@@ -151,8 +150,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
 
-- **KKS-235-page-mon-compte** : Page Mon compte dediee (`/settings/account` Angular + `/settings/profile` Flutter) avec 4 sections : Identite (avatar uploadable JPG/PNG ≤ 2 MB, nom editable, email read-only), Securite (change MDP min 12 chars + revocation refresh tokens), Donnees (export JSON full + CSV BOM UTF-8), Zone de danger (deconnexion + suppression soft-delete avec garde dernier admin). Avatars stockes sur disque local (`AVATAR_STORAGE_PATH`), redim 256x256 JPEG via Thumbnailator + ETag SHA-256. Affichage avatar global (header + settings hub + Mon compte) via `AvatarService.avatarUrl` signal + blob URL. 7 nouveaux endpoints `/users/me/*`, migrations V32-V35, 592 tests backend + 475 tests Angular + 30 tests Flutter. Fix bug bouton deconnexion Angular sans handler.
-- **KKS-234-refonte-design-pages-auth** : Refonte design pages auth (bloc identite, sections, icones prefix). Shell auth `<app-auth-shell>` factorise pour les 3 pages auth (login, register, first-login-reset). Normalisation arborescence `first-login-reset`.
-- **KKS-233-bootstrap-premier-admin** : Bootstrap auto du premier admin sur DB vide (password 32 chars genere dans les logs, force reset 1ere connexion via `/first-login-reset`). Refactor admin : `users.is_admin` en DB, `ADMIN_EMAILS` devient source de promotion au boot uniquement (jamais de retrogradation). Nouveaux filtres/runners/endpoints/guards. 541 tests backend + 449 tests Angular, aucun impact Flutter.
-- **KKS-225-alignement-design-pages** : Summary cards harmonisees (typo xl, dots colores, press feedback, gradient), directive AutoFitText, conversion devise secondaire
-- **KKS-224-design-md-update** : DESIGN.md mis a jour (Hero Card, Glassmorphism, Variation Badges, Radial Gradient, Section Headers, regles de design, 11 tokens)
+- **KKS-240 — Refonte 4 écrans liste Flutter** : Refonte `Dashboard`, `Transactions`, `Abonnements`, `Dettes` pour conformite DESIGN.md v5. Suppression gradients, `SegmentedFilter`/`ChoiceChips` et summary cards non conformes. Remplacement par 4 heroes flat (`DashboardHeroWidget`, `TransactionHeroWidget`, `SubscriptionHeroWidget`, `DebtHeroWidget`) + `SectionHeaderSticky` global + groupements semantiques/temporels. Aucun notifier/couche data modifie.
+- **KKS-239 — BottomSheet4RowsWidget composable** : Squelette commun pour les 3 formulaires bottom sheet (Transaction, Abonnement, Dette). Structure visuelle 4-rows alignee sur le pattern Angular `_bottom-sheet.scss`, API par slots types, gestion etat loading/erreur/footer desactive.
+- **KKS-238 — Composants shared Flutter (8 widgets)** : `SectionHeaderSticky`, `ListGroup`, `EmptyStateWidget`, `PageHeader`, `ConfirmDialog`, `VariationBadge`, `InlineDatePicker`, `CategorySelectExpand` + extraction `CategoryFormWidget`. Suppression anti-pattern `SegmentedFilter`. 100% UI, pas de dependance reseau.
+- **KKS-237 — Refonte tokens design Flutter v5** : Alignement complet `AppColors`, `AppTypography`, `AppShadows`, `AppTheme`, `AppThemeExtension` sur palette proprietaire Angular v5 (2 couches : primitives + semantiques). `PatrimoineCard` marque `@Deprecated`. Compatibilite backward stricte sur 14+ widgets. Constitution bump v2.1.2 → v3.0.0 (bifurcation trajectoire Flutter standalone commercial).
+- **KKS-235-page-mon-compte** : Page Mon compte dediee (`/settings/account` Angular + `/settings/profile` Flutter) avec 4 sections : Identite (avatar uploadable JPG/PNG ≤ 2 MB, nom editable, email read-only), Securite (change MDP min 12 chars + revocation refresh tokens), Donnees (export JSON full + CSV BOM UTF-8), Zone de danger (deconnexion + suppression soft-delete avec garde dernier admin). Avatars stockes sur disque local (`AVATAR_STORAGE_PATH`), redim 256x256 JPEG via Thumbnailator + ETag SHA-256. Affichage avatar global via `AvatarService.avatarUrl` signal + blob URL. 7 nouveaux endpoints `/users/me/*`, migrations V32-V35.
