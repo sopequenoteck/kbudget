@@ -90,3 +90,31 @@
 **I-004** : W-004 (itération 1) résolu — FR-003 mapping liste T-020 et T-021.
 
 **I-005** : I-001 (itération 1) résolu — T-026 référence CL-006.
+
+---
+
+## Itération 1 — 2026-05-10 — review-impl
+
+**Verdict : PASS**
+
+17 FR implémentés. 12 SC vérifiés. 4 `StatelessWidget` hero sans Riverpod. `PatrimoineCard` + `IncomeExpenseCards` + `TransactionSummaryCard` supprimés. 0 ChoiceChip, 0 LinearGradient, 0 hex, 0 TODO KKS-240. `SectionHeaderSticky` présent dans les 3 screens. Toutes les 17 tâches cochées. 836 tests, 0 échec.
+
+### Warnings (non bloquants)
+
+**W-001** : NFR-005 — Documentation `///` absente sur `DashboardHeroWidget`, `SubscriptionHeroWidget` et `DebtHeroWidget`. Seul `TransactionHeroWidget` dispose d'une doc avec exemple. Les 3 autres fichiers peuvent être complétés post-merge.
+
+**W-002** : SC-012 — Tests de navigation `GoRouter` absents pour `TransactionListScreen` (la navigation ouvre une modal, pas un push) et `DashboardScreen` (pas de navigation par item). `SubscriptionListScreen` et `DebtListScreen` ont leurs groupes `navigation` avec `lastPushedLocation`. La couverture SC-012 est donc partielle (2/4 screens) — les 2 restants n'ont pas de `context.push()` sur items.
+
+**W-003** : Key doublonnée dans `DashboardHeroWidget` — `Key('dashboard_hero')` présente à la fois dans `dashboard_screen.dart` (instanciation) et dans le `Padding` racine du widget. Les 3 autres heros n'ont pas ce doublon. Risque d'ambiguïté dans `find.byKey()` en tests.
+
+**W-004** : `forEachTheme` absent des 3 tests screens (`transaction_list_screen_test.dart`, `subscription_list_screen_test.dart`, `debt_list_screen_test.dart`). Uniquement `AppTheme.light` testé pour les screens.
+
+**W-005** : `SectionHeaderSticky` absent du bloc `isLoading` dans `DebtListScreen._buildContent()`. `SubscriptionListScreen` l'inclut dans son état loading. Incohérence visuelle mineure au chargement.
+
+### Informations
+
+**I-001** : `DebtHeroWidget` affiche `net.abs()` — montant toujours positif, couleur encode le signe. Cohérent avec le pattern Angular existant.
+
+**I-002** : `_groupBySemantics` et `_groupByDueDate` utilisent des map literals Dart (qui sont des `_InternalLinkedHashMap`) plutôt qu'un `LinkedHashMap` explicite. Comportement conforme en pratique.
+
+**I-003** : Label xs/uppercase utilise `onSurface.withValues(alpha: 0.6)` au lieu de `onSurfaceVariant` (spec FR-002). Pattern existant dans 20+ fichiers du projet, visuellement équivalent.
