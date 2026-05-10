@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:k_budget/src/constants/app_spacing.dart';
-import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -12,12 +10,10 @@ import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
-import 'package:k_budget/src/utils/day_header_formatter.dart';
 
 class TransactionDayGroup extends StatelessWidget {
   const TransactionDayGroup({
     super.key,
-    required this.date,
     required this.transactions,
     required this.categories,
     this.onTransactionTap,
@@ -26,7 +22,6 @@ class TransactionDayGroup extends StatelessWidget {
     this.primaryCurrency,
   });
 
-  final DateTime date;
   final List<Transaction> transactions;
   final Map<String, Category> categories;
   final void Function(Transaction)? onTransactionTap;
@@ -43,20 +38,6 @@ class TransactionDayGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.space4,
-            vertical: AppSpacing.space2,
-          ),
-          child: Text(
-            DayHeaderFormatter.format(date),
-            style: TextStyle(
-              fontSize: AppTypography.sizeSm,
-              fontWeight: AppTypography.semiBold,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
         ...transactions.map((tx) {
           final category = tx.categoryId != null
               ? categories[tx.categoryId]

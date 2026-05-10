@@ -1,0 +1,45 @@
+{
+  "issueId": "KKS-240",
+  "currentStep": "implement",
+  "completedSteps": ["spec", "clarify", "review-spec", "research", "plan", "contracts", "tasks", "review-tasks"],
+  "stepTimestamps": {
+    "spec": {
+      "startedAt": "2026-05-10T00:00:00Z",
+      "completedAt": "2026-05-10T00:00:00Z"
+    },
+    "clarify": {
+      "startedAt": "2026-05-10T00:00:00Z",
+      "completedAt": "2026-05-10T12:00:00Z"
+    },
+    "review-spec": {
+      "startedAt": "2026-05-10T12:00:00Z",
+      "completedAt": "2026-05-10T12:30:00Z"
+    },
+    "research": {
+      "startedAt": "2026-05-10T12:30:00Z",
+      "completedAt": "2026-05-10T13:00:00Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-10T13:00:00Z",
+      "completedAt": "2026-05-10T13:30:00Z"
+    },
+    "contracts": {
+      "startedAt": "2026-05-10T13:30:00Z",
+      "completedAt": "2026-05-10T14:00:00Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-10T14:00:00Z",
+      "completedAt": "2026-05-10T14:30:00Z"
+    },
+    "review-tasks": {
+      "startedAt": "2026-05-10T14:30:00Z",
+      "completedAt": "2026-05-10T15:00:00Z"
+    }
+  },
+  "reviewIterations": {
+    "review-spec": 1,
+    "review-tasks": 2
+  },
+  "createdAt": "2026-05-10T00:00:00Z",
+  "updatedAt": "2026-05-10T15:00:00Z"
+}

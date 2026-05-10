@@ -10,8 +10,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/currency_pill_selector.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/dashboard_header.dart';
-import 'package:k_budget/src/features/dashboard/presentation/widgets/patrimoine_card.dart';
-import 'package:k_budget/src/features/dashboard/presentation/widgets/income_expense_cards.dart';
+import 'package:k_budget/src/features/dashboard/presentation/widgets/dashboard_hero_widget.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/budget_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
@@ -130,23 +129,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: AppSpacing.space4),
                 ],
 
-                // Carte patrimoine total
-                PatrimoineCard(
+                // Hero patrimoine total + revenus/dépenses
+                DashboardHeroWidget(
+                  key: const Key('dashboard_hero'),
                   accounts: state.accounts,
                   activeCurrency: state.activeCurrency,
                   exchangeRates: state.exchangeRates,
                   currencies: state.currencies,
                   currentSummary: state.currentSummary,
-                ),
-                const SizedBox(height: AppSpacing.space4),
-
-                // Cards revenus / dépenses
-                IncomeExpenseCards(
-                  currentSummary: state.currentSummary,
-                  previousSummary: state.previousSummary,
-                  currencies: state.currencies,
-                  exchangeRates: state.exchangeRates,
-                  activeCurrency: state.activeCurrency,
+                  isLoading: state.isLoading,
                 ),
                 const SizedBox(height: AppSpacing.space5),
 
