@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -131,7 +132,8 @@ void main() {
       expect(find.text('Réessayer'), findsOneWidget);
     });
 
-    testWidgets('should_display_summary_card_labels', (tester) async {
+    testWidgets('should_display_section_header_when_data_loaded',
+        (tester) async {
       when(mockRepo.getByMonth(any, any))
           .thenAnswer((_) async => [tx1, tx2]);
       when(mockRepo.getMonthlySummary(any, any))
@@ -142,25 +144,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // Les labels du summary card sont présents
-      expect(find.text('Bilan'), findsOneWidget);
-      // "Recettes" et "Dépenses" apparaissent dans le summary ET le filtre
-      expect(find.text('Recettes'), findsWidgets);
-      expect(find.text('Dépenses'), findsWidgets);
-    });
-
-    testWidgets('should_display_filter_segments', (tester) async {
-      when(mockRepo.getByMonth(any, any))
-          .thenAnswer((_) async => [tx1, tx2]);
-      when(mockRepo.getMonthlySummary(any, any))
-          .thenAnswer((_) async => [summary]);
-      when(mockCatRepo.getAll())
-          .thenAnswer((_) async => [category1, category2]);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Tous'), findsOneWidget);
+      expect(find.byType(SectionHeaderSticky), findsOneWidget);
     });
   });
 }

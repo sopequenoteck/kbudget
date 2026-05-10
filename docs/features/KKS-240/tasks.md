@@ -61,17 +61,17 @@
 
 ## Phase 4 : Polish
 
-- [ ] [T-050] [P] [P1] Tests `dashboard_hero_widget_test.dart` via `forEachTheme` : présence `Key('dashboard_hero')` (SC-005), skeleton `Key('dashboard_hero_skeleton')` quand `isLoading: true` (SC-006), aucun `LinearGradient` dans le widget (SC-002), couleur montant `incomeColor` si patrimoine ≥ 0 / `expenseColor` si < 0, dark + light (SC-010) — Réf: NFR-001, SC-002, SC-005, SC-006, SC-010
+- [x] [T-050] [P] [P1] Tests `dashboard_hero_widget_test.dart` via `forEachTheme` : présence `Key('dashboard_hero')` (SC-005), skeleton `Key('dashboard_hero_skeleton')` quand `isLoading: true` (SC-006), aucun `LinearGradient` dans le widget (SC-002), couleur montant `incomeColor` si patrimoine ≥ 0 / `expenseColor` si < 0, dark + light (SC-010) — Réf: NFR-001, SC-002, SC-005, SC-006, SC-010
 
-- [ ] [T-051] [P] [P1] Tests `transaction_hero_widget_test.dart` via `forEachTheme` : présence `Key('transaction_hero')` (SC-005), skeleton (SC-006), montant bilan correct incomeColor|expenseColor, dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-010
+- [x] [T-051] [P] [P1] Tests `transaction_hero_widget_test.dart` via `forEachTheme` : présence `Key('transaction_hero')` (SC-005), skeleton (SC-006), montant bilan correct incomeColor|expenseColor, dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-010
 
-- [ ] [T-052] [P] [P1] Tests `subscription_hero_widget_test.dart` via `forEachTheme` : présence `Key('subscription_hero')` (SC-005), skeleton (SC-006), `monthlyTotals.isEmpty → SizedBox.shrink()`, dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-010
+- [x] [T-052] [P] [P1] Tests `subscription_hero_widget_test.dart` via `forEachTheme` : présence `Key('subscription_hero')` (SC-005), skeleton (SC-006), `monthlyTotals.isEmpty → SizedBox.shrink()`, dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-010
 
-- [ ] [T-053] [P] [P1] Tests `debt_hero_widget_test.dart` via `forEachTheme` : présence `Key('debt_hero')` (SC-005), skeleton (SC-006), date-label "En retard" couleur `expenseColor` + date-label "Aujourd'hui" couleur `AppColors.amber` (SC-007), dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-007, SC-010
+- [x] [T-053] [P] [P1] Tests `debt_hero_widget_test.dart` via `forEachTheme` : présence `Key('debt_hero')` (SC-005), skeleton (SC-006), date-label "En retard" couleur `expenseColor` + date-label "Aujourd'hui" couleur `AppColors.amber` (SC-007), dark + light (SC-010) — Réf: NFR-001, SC-005, SC-006, SC-007, SC-010
 
-- [ ] [T-054] [P1] Validation finale : `flutter test` exit 0 (≥ 10 tests) (NFR-001) ; `flutter analyze lib/src/features/` exit 0 (SC-008) ; grep no-hex exit 0 (SC-009) ; `grep -rn "ChoiceChip" flutter/lib/src/features/` → 0 (SC-003) ; `grep -rn "TODO KKS-240" flutter/lib/` → 0 (SC-011) ; `grep -rn "SectionHeaderSticky" flutter/lib/src/features/{transactions,subscriptions,debts}/` → ≥ 1 par feature (SC-004) — Réf: NFR-001, NFR-002, SC-001, SC-003, SC-004, SC-008, SC-009, SC-011
+- [x] [T-054] [P1] Validation finale : `flutter test` exit 0 (≥ 10 tests) (NFR-001) ; `flutter analyze lib/src/features/` exit 0 (SC-008) ; grep no-hex exit 0 (SC-009) ; `grep -rn "ChoiceChip" flutter/lib/src/features/` → 0 (SC-003) ; `grep -rn "TODO KKS-240" flutter/lib/` → 0 (SC-011) ; `grep -rn "SectionHeaderSticky" flutter/lib/src/features/{transactions,subscriptions,debts}/` → ≥ 1 par feature (SC-004) — Réf: NFR-001, NFR-002, SC-001, SC-003, SC-004, SC-008, SC-009, SC-011
 
-- [ ] [T-055] [P] [P1] Tests screens (SectionHeaderSticky runtime + navigation) : pour `transaction_list_screen_test.dart`, `subscription_list_screen_test.dart`, `debt_list_screen_test.dart` — via `ProviderScope` + overrides, `forEachTheme` obligatoire — vérifier que `SectionHeaderSticky` est rendu dans l'arbre de widgets (SC-004) ; pour les 4 screens (incl. `dashboard_screen_test.dart`) vérifier que le tap sur un item déclenche `GoRouter.push()` via `MockGoRouter` (SC-012) — Réf: NFR-001, SC-004, SC-012
+- [x] [T-055] [P] [P1] Tests screens (SectionHeaderSticky runtime + navigation) : pour `transaction_list_screen_test.dart`, `subscription_list_screen_test.dart`, `debt_list_screen_test.dart` — via `ProviderScope` + overrides, `forEachTheme` obligatoire — vérifier que `SectionHeaderSticky` est rendu dans l'arbre de widgets (SC-004) ; pour les 4 screens (incl. `dashboard_screen_test.dart`) vérifier que le tap sur un item déclenche `GoRouter.push()` via `MockGoRouter` (SC-012) — Réf: NFR-001, SC-004, SC-012
 
 **Checkpoint** : `flutter test` exit 0, ≥ 10 tests passés. `flutter analyze` exit 0. 0 ChoiceChip, 0 TODO KKS-240, 0 hex hardcodé, 0 LinearGradient dans dashboard_hero_widget.dart. SC-012 couvert dans 4 screen tests.
 

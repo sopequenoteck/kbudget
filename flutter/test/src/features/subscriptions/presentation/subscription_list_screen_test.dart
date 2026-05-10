@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -120,20 +122,6 @@ void main() {
       expect(find.text('Aucun abonnement'), findsOneWidget);
     });
 
-    testWidgets(
-        'should_display_summary_card_when_active_subscriptions_exist',
-        (tester) async {
-      when(mockSubRepo.getAll()).thenAnswer((_) async => [sub1, sub2]);
-      when(mockCatRepo.getAll())
-          .thenAnswer((_) async => [category1, category2]);
-      when(mockAccRepo.getAll()).thenAnswer((_) async => []);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Total mensuel'), findsOneWidget);
-    });
-
     testWidgets('should_hide_summary_card_when_no_active_subscriptions',
         (tester) async {
       when(mockSubRepo.getAll()).thenAnswer((_) async => [subInactive]);
@@ -146,7 +134,21 @@ void main() {
       expect(find.text('Total mensuel'), findsNothing);
     });
 
-    testWidgets('should_display_filter_segments', (tester) async {
+    testWidgets('should_display_actifs_inactifs_labels_when_mixed_data',
+        (tester) async {
+      when(mockSubRepo.getAll()).thenAnswer((_) async => [sub1, subInactive]);
+      when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
+      when(mockAccRepo.getAll()).thenAnswer((_) async => []);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Actifs'), findsOneWidget);
+      expect(find.text('Inactifs'), findsOneWidget);
+    });
+
+    testWidgets('should_display_section_header_when_data_loaded',
+        (tester) async {
       when(mockSubRepo.getAll()).thenAnswer((_) async => [sub1, sub2]);
       when(mockCatRepo.getAll())
           .thenAnswer((_) async => [category1, category2]);
@@ -155,26 +157,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Tous'), findsOneWidget);
-      expect(find.text('Actifs'), findsOneWidget);
-      expect(find.text('Inactifs'), findsOneWidget);
-    });
-
-    testWidgets(
-        'should_display_filter_aware_empty_message_when_filter_active',
-        (tester) async {
-      when(mockSubRepo.getAll()).thenAnswer((_) async => [sub1]);
-      when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
-      when(mockAccRepo.getAll()).thenAnswer((_) async => []);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      // Tap sur le filtre "Inactifs"
-      await tester.tap(find.text('Inactifs'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Aucun abonnement inactif'), findsOneWidget);
+      expect(find.byType(SectionHeaderSticky), findsOneWidget);
     });
 
     testWidgets('should_display_skeleton_when_loading', (tester) async {
@@ -190,6 +173,70 @@ void main() {
       // Skeleton items should be visible (ListItem.skeleton)
       expect(find.text('Aucun abonnement'), findsNothing);
       expect(find.text('Netflix'), findsNothing);
+    });
+  });
+
+  group('SubscriptionListScreen navigation', () {
+    late GoRouter router;
+    late String lastPushedLocation;
+
+    setUp(() {
+      lastPushedLocation = '';
+      router = GoRouter(
+        initialLocation: '/subscriptions',
+        routes: [
+          GoRoute(
+            path: '/subscriptions',
+            builder: (_, __) => ProviderScope(
+              overrides: [
+                subscriptionRepositoryProvider
+                    .overrideWithValue(mockSubRepo),
+                categoryRepositoryProvider
+                    .overrideWithValue(mockCatRepo),
+                accountRepositoryProvider
+                    .overrideWithValue(mockAccRepo),
+                exchangeRateRepositoryProvider
+                    .overrideWith((_) async => mockExchangeRateRepo),
+              ],
+              child: const Scaffold(
+                body: SubscriptionListScreen(),
+                floatingActionButton: SizedBox.shrink(),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/subscriptions/:id',
+            builder: (context, state) {
+              lastPushedLocation =
+                  '/subscriptions/${state.pathParameters['id']}';
+              return const Scaffold(body: Text('Detail'));
+            },
+          ),
+        ],
+      );
+    });
+
+    Widget buildAppWithRouter() => MaterialApp.router(
+          routerConfig: router,
+          theme: theme.AppTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        );
+
+    testWidgets(
+        'should_navigate_to_subscription_detail_on_item_tap',
+        (tester) async {
+      when(mockSubRepo.getAll()).thenAnswer((_) async => [sub1]);
+      when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
+      when(mockAccRepo.getAll()).thenAnswer((_) async => []);
+
+      await tester.pumpWidget(buildAppWithRouter());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Netflix'));
+      await tester.pumpAndSettle();
+
+      expect(lastPushedLocation, '/subscriptions/1');
     });
   });
 }
