@@ -25,6 +25,7 @@ class AppTheme {
           onSurface: AppColors.gray900,
           error: AppColors.error,
           onError: Colors.white,
+          errorContainer: AppColors.errorLight,
           outline: AppColors.gray300,
           outlineVariant: AppColors.gray200,
           // surfaceContainerHighest: gray100 (#f5f5f5) — palette propriétaire v5
@@ -115,6 +116,7 @@ class AppTheme {
           onSurface: AppColors.gray50,
           error: Color(0xFFF87171),
           onError: Colors.white,
+          errorContainer: Color(0x1AEF4444),
           outline: AppColors.gray600,
           outlineVariant: AppColors.gray700,
           // surfaceContainerHighest: gray700 (#1e1e1e) — palette propriétaire v5
