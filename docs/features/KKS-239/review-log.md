@@ -2,6 +2,29 @@
 
 ---
 
+## Itération 1 — 2026-05-10 — review-impl
+
+**Verdict : PASS**
+
+16/16 FR, 14/14 SC, 7/7 NFR, 33 tests, 3/3 sous-widgets privés, Constitution conforme Trajectoire B.
+
+### Warnings (non bloquants)
+
+**W-001** : FR-003 — spec stipule "pas d'AnimatedSize à hauteur 0" mais le code place `AnimatedSize { SizedBox.shrink() }` quand `expandedContent == null`. Plan T-5 documente ce pattern explicitement → dérogation acceptée au niveau plan. Comportement fonctionnel correct (hauteur 0 visible).
+
+**W-002** : `Flexible` vs `Expanded` (plan RES-001) pour la zone scrollable. Le code utilise `Flexible` (fit.loose) au lieu de `Expanded` — variante intentionnelle compatible avec `mainAxisSize.min`, footer pinned fonctionnel. Non documenté dans le plan.
+
+**W-003** : SC-012 (3 hauteurs) ne couvre qu'AppTheme.dark. SC-010 (dark+light) couvert par les autres groupes via `forEachTheme`. Impact minimal.
+
+### Informations
+
+**I-001** : `_BSheetErrorBanner` — `fontSize: AppTypography.sizeSm` direct au lieu de `AppTypography.bodySmall.copyWith(...)` (plan). "ou équivalent sm" dans spec couvre ce cas.
+**I-002** : `padding vertical: 5` dans `_BSheetActionPill` — magic number documenté dans plan T-3 ("5-8px"). Hors AppSpacing mais intentionnel.
+**I-003** : `// ignore: unused_element_parameter` sur `icon` — légitimé par l'usage conditionnel dans `build`.
+**I-004** : `cs` déclaré dans `build` mais utilisé uniquement dans `_buildFooter` — redondance mineure.
+
+---
+
 ## Itération 1 — 2026-05-10 — review-tasks
 
 **Verdict : PASS**
