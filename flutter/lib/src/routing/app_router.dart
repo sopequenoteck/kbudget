@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/adaptive_scaffold.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
 import 'package:k_budget/src/common_widgets/app_toggle.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/common_widgets/fab_menu.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
@@ -546,40 +547,62 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
     return const SizedBox.shrink();
   }
 
-  void _showModal(BuildContext context, ModalOpen state) {
-    _isModalShowing = true;
-    final notifier = ref.read(modalNotifierProvider.notifier);
-
-    Widget? headerActions;
-    if (state.type.hasToggle) {
-      final values = state.type.toggleValues!;
-      final selectedIndex = values.indexOf(state.subType);
-
-      headerActions = _ModalToggle(
-        type: state.type,
-        initialIndex: selectedIndex.clamp(0, 1),
-      );
-    }
-
-    final child = _buildModalChild(state);
-
-    AppModal.show(
-      context,
-      title: state.type.title(state.mode),
-      headerActions: headerActions,
-      inlineHeaderActions: state.type.hasToggle,
-      onClose: () {
-        _isModalShowing = false;
-        notifier.close();
-      },
-      child: child,
+  void _showFormBottomSheet(BuildContext context, Widget child) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: child,
+      ),
     ).then((_) {
-      // Modal dismissed via swipe/overlay tap
       if (_isModalShowing) {
         _isModalShowing = false;
-        notifier.close();
+        ref.read(modalNotifierProvider.notifier).close();
       }
     });
+  }
+
+  void _showModal(BuildContext context, ModalOpen state) {
+    _isModalShowing = true;
+    final child = _buildModalChild(state);
+
+    if (state.type == ModalType.transaction ||
+        state.type == ModalType.subscription ||
+        state.type == ModalType.debt) {
+      _showFormBottomSheet(context, child);
+    } else {
+      // budget, transfer — AppModal inchangé
+      Widget? headerActions;
+      if (state.type.hasToggle) {
+        final values = state.type.toggleValues!;
+        final selectedIndex = values.indexOf(state.subType);
+        headerActions = _ModalToggle(
+          type: state.type,
+          initialIndex: selectedIndex.clamp(0, 1),
+        );
+      }
+      AppModal.show(
+        context,
+        title: state.type.title(state.mode),
+        headerActions: headerActions,
+        inlineHeaderActions: state.type.hasToggle,
+        onClose: () {
+          _isModalShowing = false;
+          ref.read(modalNotifierProvider.notifier).close();
+        },
+        child: child,
+      ).then((_) {
+        if (_isModalShowing) {
+          _isModalShowing = false;
+          ref.read(modalNotifierProvider.notifier).close();
+        }
+      });
+    }
   }
 }
 

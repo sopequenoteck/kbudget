@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
@@ -31,6 +32,17 @@ class RecurringListNotifier
         isLoading: false,
         error: 'Impossible de charger les récurrences: $e',
       );
+    }
+  }
+
+  Future<void> create(RecurringTransactionCreateRequest req) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final repo = await ref.read(recurringTransactionRepositoryProvider.future);
+      await repo.create(req);
+      await _refreshList();
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
 

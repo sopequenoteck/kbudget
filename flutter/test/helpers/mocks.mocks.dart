@@ -5,6 +5,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i17;
 
+import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart'
+    as _i29;
 import 'package:k_budget/src/domain/enums/enums.dart' as _i18;
 import 'package:k_budget/src/domain/models/account.dart' as _i10;
 import 'package:k_budget/src/domain/models/app_config.dart' as _i2;
@@ -1214,6 +1216,28 @@ class MockRecurringTransactionRepository extends _i1.Mock
                 ),
           )
           as _i17.Future<List<_i15.RecurringTransaction>>);
+
+  @override
+  _i17.Future<_i15.RecurringTransaction> create(
+    _i29.RecurringTransactionCreateRequest? req,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#create, [req]),
+            returnValue: _i17.Future<_i15.RecurringTransaction>.value(
+              _FakeRecurringTransaction_13(
+                this,
+                Invocation.method(#create, [req]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i17.Future<_i15.RecurringTransaction>.value(
+                  _FakeRecurringTransaction_13(
+                    this,
+                    Invocation.method(#create, [req]),
+                  ),
+                ),
+          )
+          as _i17.Future<_i15.RecurringTransaction>);
 
   @override
   _i17.Future<void> validate(String? id) =>
