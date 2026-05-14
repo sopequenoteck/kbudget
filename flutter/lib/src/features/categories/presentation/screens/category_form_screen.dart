@@ -88,8 +88,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             const Padding(
               padding: EdgeInsets.only(right: AppSpacing.space4),
               child: SizedBox(
-                width: 20,
-                height: 20,
+                width: AppSpacing.space5,
+                height: AppSpacing.space5,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             )

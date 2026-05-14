@@ -10,7 +10,6 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
-import 'package:k_budget/src/features/categories/presentation/widgets/category_preview_card.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
 /// Formulaire de catégorie réutilisable et embeddable sans Scaffold.
@@ -202,13 +201,6 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          CategoryPreviewCard(
-            emoji: _selectedEmoji,
-            name: _nameController.text,
-            colorHex: _selectedColor,
-          ),
-          const SizedBox(height: AppSpacing.space6),
-
           // Emoji + Color row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
