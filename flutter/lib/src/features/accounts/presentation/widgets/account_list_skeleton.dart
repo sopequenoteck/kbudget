@@ -17,7 +17,7 @@ class AccountListSkeleton extends StatelessWidget {
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: Column(
-        children: List.generate(5, (_) => _SkeletonItem(baseColor: baseColor)),
+        children: List.generate(3, (_) => _SkeletonItem(baseColor: baseColor)),
       ),
     );
   }
@@ -40,8 +40,8 @@ class _SkeletonItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: AppSpacing.space10,
-            height: AppSpacing.space10,
+            width: AppSpacing.space8,
+            height: AppSpacing.space8,
             decoration: BoxDecoration(
               color: baseColor,
               borderRadius: BorderRadius.circular(AppRadius.round),

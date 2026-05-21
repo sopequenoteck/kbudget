@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 
 /// Retourne le chemin d'asset SVG ou le data URI du logo bancaire du compte,
@@ -25,17 +26,20 @@ class AccountBankIcon extends StatelessWidget {
   });
 
   final Account account;
+
+  /// Diamètre du conteneur extérieur en pixels.
   final double size;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppThemeExtension>()!;
     final bgColor = parseHexColor(account.bankBrandColor) ??
         parseHexColor(account.couleur) ??
-        Colors.grey;
+        colors.iconCircleBg;
 
     return Container(
-      width: size * 1.5,
-      height: size * 1.5,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: bgColor.withValues(alpha: 0.1),
@@ -48,14 +52,14 @@ class AccountBankIcon extends StatelessWidget {
   Widget _resolveIcon() {
     final fallback = Text(
       account.icone,
-      style: TextStyle(fontSize: size * 0.8),
+      style: TextStyle(fontSize: size * 0.55),
     );
 
     if (account.bankCode != 'OTHER' && account.bankCode.isNotEmpty) {
       return SvgPicture.asset(
         'assets/banks/${account.bankCode.toLowerCase()}.svg',
-        width: size,
-        height: size,
+        width: size * (2 / 3),
+        height: size * (2 / 3),
         placeholderBuilder: (_) => fallback,
       );
     }
@@ -70,8 +74,8 @@ class AccountBankIcon extends StatelessWidget {
           final bytes = base64Decode(dataUri.substring(commaIndex + 1));
           return Image.memory(
             bytes,
-            width: size,
-            height: size,
+            width: size * (2 / 3),
+            height: size * (2 / 3),
             fit: BoxFit.contain,
             errorBuilder: (_, _, _) => fallback,
           );

@@ -45,7 +45,17 @@ void main() {
     actif: true,
   );
 
-  Widget buildApp(Account account, {VoidCallback? onTap}) {
+  Widget buildApp(
+    Account account, {
+    VoidCallback? onTap,
+    VoidCallback? onRequestDelete,
+    VoidCallback? onConfirmDelete,
+    VoidCallback? onCancelDelete,
+    VoidCallback? onSetDefault,
+    VoidCallback? onEdit,
+    bool isConfirmingDelete = false,
+    String? deleteError,
+  }) {
     return ProviderScope(
       child: MaterialApp(
         theme: theme.AppTheme.light,
@@ -55,6 +65,13 @@ void main() {
           body: AccountListTile(
             account: account,
             onTap: onTap,
+            onRequestDelete: onRequestDelete,
+            onConfirmDelete: onConfirmDelete,
+            onCancelDelete: onCancelDelete,
+            onSetDefault: onSetDefault,
+            onEdit: onEdit,
+            isConfirmingDelete: isConfirmingDelete,
+            deleteError: deleteError,
           ),
         ),
       ),
@@ -91,37 +108,52 @@ void main() {
       expect(opacity.opacity, 0.5);
     });
 
-    testWidgets('should_showPopupMenu_when_menuTapped', (tester) async {
+    testWidgets('should_showTrashButton_when_rendered', (tester) async {
       await tester.pumpWidget(buildApp(normalAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Supprimer'), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsOneWidget);
     });
 
-    testWidgets('should_hideSetDefaultOption_when_alreadyDefault',
-        (tester) async {
+    testWidgets('should_hideStarButton_when_alreadyDefault', (tester) async {
       await tester.pumpWidget(buildApp(defaultAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Définir par défaut'), findsNothing);
-      expect(find.text('Supprimer'), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.star), findsNothing);
+      expect(find.byIcon(PhosphorIconsRegular.trash), findsOneWidget);
     });
 
-    testWidgets('should_showSetDefaultOption_when_notDefault',
-        (tester) async {
+    testWidgets('should_showStarButton_when_notDefault', (tester) async {
       await tester.pumpWidget(buildApp(normalAccount));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(PhosphorIconsRegular.dotsThreeVertical));
+      expect(find.byIcon(PhosphorIconsRegular.star), findsOneWidget);
+    });
+
+    testWidgets('should_showConfirmBlock_when_isConfirmingDelete',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(normalAccount, isConfirmingDelete: true),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('Définir par défaut'), findsOneWidget);
+      expect(find.text('Supprimer ce compte ?'), findsOneWidget);
+      expect(find.text('Annuler'), findsOneWidget);
+      expect(find.text('Supprimer'), findsOneWidget);
+    });
+
+    testWidgets('should_showDeleteError_when_deleteErrorProvided',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(
+          normalAccount,
+          isConfirmingDelete: true,
+          deleteError: 'Erreur serveur',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erreur serveur'), findsOneWidget);
     });
   });
 }
