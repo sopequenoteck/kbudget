@@ -307,9 +307,27 @@
   "recurringOverdue": "En retard",
   "recurringToday": "Aujourd'hui",
   "recurringUpcoming": "À venir",
-  "recurringValidate": "Valider",
-  "recurringSkip": "Passer",
-  "recurringDeactivate": "Désactiver",
+  "recurringValidate": "Marquer comme payée",
+  "recurringSkip": "Passer cette occurrence",
+  "recurringDeactivate": "Désactiver la récurrence",
+  "recurringValidateAll": "Tout payé",
+  "recurringNextOccurrence": "Prochaine : {date}",
+  "@recurringNextOccurrence": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringMonthlySummaryTitle": "BILAN MENSUEL",
+  "recurringChargesCount": "{count} CHARGES",
+  "@recurringChargesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recurringEmpty": "Aucune récurrence active",
   "recurringDeactivateConfirm": "Désactiver cette récurrence ?",
   "recurringValidateSuccess": "Transaction créée",

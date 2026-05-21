@@ -18,7 +18,7 @@ class RecurringListSkeleton extends StatelessWidget {
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: 6,
+        itemCount: 5,
         separatorBuilder: (context, index) =>
             const SizedBox(height: AppSpacing.space1),
         itemBuilder: (context, index) => const _RecurringSkeletonItem(),
@@ -42,13 +42,13 @@ class _RecurringSkeletonItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon placeholder
+          // Icon placeholder — cercle 36px
           Container(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: baseColor,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: AppSpacing.space3),
@@ -78,28 +78,14 @@ class _RecurringSkeletonItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.space3),
-          // Badge + amount placeholder
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                height: 20,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: baseColor,
-                  borderRadius: BorderRadius.circular(AppRadius.round),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.space2),
-              Container(
-                height: 12,
-                width: 80,
-                decoration: BoxDecoration(
-                  color: baseColor,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ),
-            ],
+          // Amount placeholder (sans badge)
+          Container(
+            height: 12,
+            width: 80,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
           ),
         ],
       ),

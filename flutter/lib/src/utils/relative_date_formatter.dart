@@ -4,9 +4,13 @@ class RelativeDateFormatter {
   RelativeDateFormatter._();
 
   static DateFormat? _longDateFormatter;
+  static DateFormat? _shortDateFormatter;
 
   static DateFormat get _formatter =>
       _longDateFormatter ??= DateFormat.yMMMMd('fr');
+
+  static DateFormat get _shortFormatter =>
+      _shortDateFormatter ??= DateFormat('dd MMM', 'fr');
 
   /// Formate une date en texte relatif francais.
   ///
@@ -38,5 +42,28 @@ class RelativeDateFormatter {
     }
 
     return _formatter.format(value);
+  }
+
+  /// Formate une date en texte relatif compact pour les sous-titres d'items.
+  ///
+  /// - aujourd'hui, hier, demain (minuscule)
+  /// - il y a N j. (2-7j passés)
+  /// - dans N j. (1-30j futurs)
+  /// - dd MMM (au-delà)
+  static String formatCompact(DateTime value, {DateTime? now}) {
+    final today = now ?? DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final targetDate = DateTime(value.year, value.month, value.day);
+
+    final diffDays = todayDate.difference(targetDate).inDays;
+
+    if (diffDays == 0) return "aujourd'hui";
+    if (diffDays == 1) return 'hier';
+    if (diffDays == -1) return 'demain';
+
+    if (diffDays >= 2 && diffDays <= 7) return 'il y a $diffDays j.';
+    if (diffDays < -1 && diffDays >= -30) return 'dans ${-diffDays} j.';
+
+    return _shortFormatter.format(value);
   }
 }

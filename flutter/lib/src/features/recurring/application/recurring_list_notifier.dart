@@ -86,6 +86,25 @@ class RecurringListNotifier
     }
   }
 
+  Future<void> validateAll(List<String> ids) async {
+    if (ids.isEmpty) return;
+    state = state.copyWith(
+      mutatingIds: {...state.mutatingIds, '__all__'},
+      error: null,
+    );
+    try {
+      for (final id in ids) {
+        await validate(id);
+      }
+    } on Exception {
+      // ignore: individual validate() handles its own error state
+    } finally {
+      state = state.copyWith(
+        mutatingIds: {...state.mutatingIds}..remove('__all__'),
+      );
+    }
+  }
+
   Future<void> deactivate(String id) async {
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},
