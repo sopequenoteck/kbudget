@@ -1,0 +1,29 @@
+{
+  "issueId": "KKS-249",
+  "currentStep": "review-impl",
+  "completedSteps": ["spec", "clarify", "plan", "tasks", "review-tasks", "implement"],
+  "createdAt": "2026-05-14T00:00:00.000Z",
+  "updatedAt": "2026-05-14T00:00:00.000Z",
+  "stepTimestamps": {
+    "spec": {
+      "startedAt": "2026-05-14T00:00:00.000Z",
+      "completedAt": "2026-05-14T00:00:00.000Z"
+    },
+    "clarify": {
+      "startedAt": "2026-05-14T00:00:00.000Z",
+      "completedAt": "2026-05-14T00:00:00.000Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-14T00:00:00.000Z",
+      "completedAt": "2026-05-14T00:00:00.000Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-14T00:00:00.000Z",
+      "completedAt": "2026-05-14T00:00:00.000Z"
+    },
+    "implement": {
+      "startedAt": "2026-05-14T00:00:00.000Z",
+      "completedAt": "2026-05-14T00:00:00.000Z"
+    }
+  }
+}
