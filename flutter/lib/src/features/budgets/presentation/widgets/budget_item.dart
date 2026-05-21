@@ -27,6 +27,7 @@ class BudgetItem extends StatelessWidget {
     required this.percentage,
     required this.currency,
     this.onTap,
+    this.showProgressBar = true,
   }) : _isSkeleton = false;
 
   /// Constructeur nommé pour l'état de chargement shimmer.
@@ -39,6 +40,7 @@ class BudgetItem extends StatelessWidget {
         percentage = 0,
         currency = '',
         onTap = null,
+        showProgressBar = true,
         _isSkeleton = true;
 
   final String categoryNom;
@@ -49,6 +51,7 @@ class BudgetItem extends StatelessWidget {
   final double percentage;
   final String currency;
   final VoidCallback? onTap;
+  final bool showProgressBar;
   final bool _isSkeleton;
 
   @override
@@ -67,7 +70,7 @@ class BudgetItem extends StatelessWidget {
     } else if (percentage >= 80) {
       barColor = colors.textWarning;
     } else {
-      barColor = colors.incomeColor.withValues(alpha: 0.7);
+      barColor = categoryColor?.withValues(alpha: 0.7) ?? colors.incomeColor.withValues(alpha: 0.7);
     }
 
     final clampedProgress = (percentage / 100).clamp(0.0, 1.0);
@@ -135,9 +138,10 @@ class BudgetItem extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.space2),
-          // Barre pleine largeur avec overflow marker
-          _buildProgressBar(context, clampedProgress, barColor, isOverBudget),
+          if (showProgressBar) ...[
+            const SizedBox(height: AppSpacing.space2),
+            _buildProgressBar(context, clampedProgress, barColor, isOverBudget),
+          ],
         ],
       ),
     );
