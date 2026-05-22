@@ -8,7 +8,7 @@ class UserResponse with _$UserResponse {
   const factory UserResponse({
     String? name,
     required String email,
-    required String defaultCurrency,
+    @Default('EUR') String defaultCurrency,
     @Default(false) bool isAdmin,
   }) = _UserResponse;
 

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_notifier.dart';
@@ -14,6 +12,7 @@ import 'package:k_budget/src/features/user_profile/presentation/widgets/change_p
 import 'package:k_budget/src/features/user_profile/presentation/widgets/delete_account_sheet.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/profile_settings_skeleton.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ProfileSettingsScreen extends ConsumerStatefulWidget {
@@ -26,34 +25,42 @@ class ProfileSettingsScreen extends ConsumerStatefulWidget {
 
 class _ProfileSettingsScreenState
     extends ConsumerState<ProfileSettingsScreen> {
-  Currency? _selectedCurrency;
-  bool _hasChanged = false;
-  bool _isSaving = false;
+  bool _isEditingName = false;
+  bool _isSavingName = false;
+  late TextEditingController _nameController;
+  bool _isExportingJson = false;
+  bool _isExportingCsv = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  AppThemeExtension ext(BuildContext context) =>
+      Theme.of(context).extension<AppThemeExtension>()!;
+
+  String _initials(User user) {
+    final name = user.name ?? user.email;
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}';
+    return name.isNotEmpty ? name[0] : '?';
+  }
 
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileNotifierProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mon compte'),
-        actions: [
-          if (_hasChanged)
-            _isSaving
-                ? const Padding(
-                    padding: EdgeInsets.only(right: AppSpacing.space4),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : IconButton(
-                    icon: const PhosphorIcon(PhosphorIconsBold.check, size: 24),
-                    onPressed: _save,
-                  ),
-        ],
       ),
       body: profileAsync.when(
         loading: () => const ProfileSettingsSkeleton(),
@@ -62,61 +69,249 @@ class _ProfileSettingsScreenState
           onRetry: () =>
               ref.read(userProfileNotifierProvider.notifier).loadProfile(),
         ),
-        data: (user) => _ProfileContent(
-          user: user,
-          selectedCurrency: _selectedCurrency ?? user.defaultCurrency,
-          onCurrencyChanged: (currency) {
-            setState(() {
-              _selectedCurrency = currency;
-              _hasChanged = currency != user.defaultCurrency;
-            });
-          },
-          theme: theme,
-          onLogout: _logout,
-          onChangePassword: _openChangePassword,
-          onAvatarChanged: () =>
-              ref.read(userProfileNotifierProvider.notifier).loadProfile(),
-          onExportJson: _exportJson,
-          onExportCsv: _exportCsv,
-          onDeleteAccount: _openDeleteAccount,
+        data: (user) => Column(
+          children: [
+            if (_errorMessage != null) _buildErrorBanner(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.space4),
+                children: [
+                  Center(
+                    child: AvatarPicker(
+                      currentAvatarUrl: null,
+                      userInitials: _initials(user),
+                      onUploadSuccess: () => ref
+                          .read(userProfileNotifierProvider.notifier)
+                          .loadProfile(),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  _SettingsSection(
+                    label: 'Identité',
+                    children: [
+                      _buildNameRow(user),
+                      _SettingsRow(
+                        title: user.email,
+                        description: 'Géré par l\'administrateur',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  _SettingsSection(
+                    label: 'Sécurité',
+                    children: [
+                      _SettingsRow(
+                        icon: PhosphorIconsRegular.lock,
+                        iconBg: ext(context).primarySubtle,
+                        title: 'Changer le mot de passe',
+                        onTap: _openChangePassword,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  _SettingsSection(
+                    label: 'Données',
+                    children: [
+                      _ExportRow(
+                        icon: PhosphorIconsRegular.database,
+                        iconBg: ext(context).primarySubtle,
+                        title: 'Exporter mes données (JSON)',
+                        isLoading: _isExportingJson,
+                        enabled: !_isExportingJson && !_isExportingCsv,
+                        onTap: _exportJson,
+                      ),
+                      _ExportRow(
+                        icon: PhosphorIconsRegular.fileCsv,
+                        iconBg: ext(context).primarySubtle,
+                        title: 'Exporter mes transactions (CSV)',
+                        isLoading: _isExportingCsv,
+                        enabled: !_isExportingJson && !_isExportingCsv,
+                        onTap: _exportCsv,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space4),
+                  _SettingsSection(
+                    label: 'Zone de danger',
+                    children: [
+                      _SettingsRow(
+                        title: 'Déconnexion',
+                        onTap: _logout,
+                      ),
+                      _SettingsRow(
+                        title: 'Supprimer mon compte',
+                        titleColor: Theme.of(context).colorScheme.error,
+                        onTap: _openDeleteAccount,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.space8),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _save() async {
-    final currency = _selectedCurrency;
-    if (currency == null) return;
-
-    setState(() => _isSaving = true);
-
-    final success = await ref
-        .read(userProfileNotifierProvider.notifier)
-        .updateCurrency(currency);
-
-    if (!mounted) return;
-
-    setState(() {
-      _isSaving = false;
-      if (success) {
-        _hasChanged = false;
-        _selectedCurrency = null;
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? 'Devise mise à jour avec succès'
-              : 'Erreur lors de la mise à jour',
+  Widget _buildNameRow(User user) {
+    if (_isEditingName) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space2,
         ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _nameController,
+                autofocus: true,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _saveName(),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: AppSpacing.space2,
+                    horizontal: AppSpacing.space2,
+                  ),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.space2),
+            if (_isSavingName)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else ...[
+              IconButton(
+                icon: const PhosphorIcon(PhosphorIconsRegular.check, size: 20),
+                onPressed: _saveName,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              IconButton(
+                icon: const PhosphorIcon(PhosphorIconsRegular.x, size: 20),
+                onPressed: () => setState(() => _isEditingName = false),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return _SettingsRow(
+      title: user.name ?? 'Non renseigné',
+      trailing: IconButton(
+        icon: const PhosphorIcon(PhosphorIconsRegular.pencil, size: 18),
+        onPressed: () => setState(() {
+          _nameController.text = user.name ?? '';
+          _isEditingName = true;
+        }),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
       ),
     );
+  }
+
+  Widget _buildErrorBanner() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      color: colorScheme.errorContainer,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space3,
+      ),
+      child: Row(
+        children: [
+          PhosphorIcon(
+            PhosphorIconsRegular.warning,
+            size: 16,
+            color: colorScheme.error,
+          ),
+          const SizedBox(width: AppSpacing.space2),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onErrorContainer,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveName() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty || name.length > 100) return;
+
+    setState(() {
+      _errorMessage = null;
+      _isSavingName = true;
+    });
+
+    try {
+      final repo = await ref.read(userProfileRepositoryProvider.future);
+      await repo.updateName(name);
+      await ref.read(userProfileNotifierProvider.notifier).loadProfile();
+      if (!mounted) return;
+      setState(() {
+        _isEditingName = false;
+        _isSavingName = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSavingName = false;
+        _errorMessage = 'Impossible de mettre à jour le nom';
+      });
+    }
+  }
+
+  Future<void> _exportJson() async {
+    setState(() {
+      _errorMessage = null;
+      _isExportingJson = true;
+    });
+    try {
+      final repo = await ref.read(userProfileRepositoryProvider.future);
+      await repo.exportJson();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Erreur lors de l\'export JSON');
+    } finally {
+      if (mounted) setState(() => _isExportingJson = false);
+    }
+  }
+
+  Future<void> _exportCsv() async {
+    setState(() {
+      _errorMessage = null;
+      _isExportingCsv = true;
+    });
+    try {
+      final repo = await ref.read(userProfileRepositoryProvider.future);
+      await repo.exportCsv();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Erreur lors de l\'export CSV');
+    } finally {
+      if (mounted) setState(() => _isExportingCsv = false);
+    }
   }
 
   Future<void> _logout() async {
-    // Résilience : déconnexion locale même si backend échoue
+    setState(() => _errorMessage = null);
     await ref.read(authNotifierProvider.notifier).logout();
     if (mounted) {
       context.go(RouteNames.login);
@@ -124,338 +319,150 @@ class _ProfileSettingsScreenState
   }
 
   Future<void> _openChangePassword() async {
+    setState(() => _errorMessage = null);
     if (!mounted) return;
     await ChangePasswordSheet.show(context);
-    // Les tokens sont déjà mis à jour dans la sheet en cas de succès
   }
 
   Future<void> _openDeleteAccount() async {
+    setState(() => _errorMessage = null);
     if (!mounted) return;
-    // La redirection vers /login est gérée par la sheet en cas de succès
     await DeleteAccountSheet.show(context);
   }
-
-  Future<void> _exportJson() async {
-    await _runExport(
-      action: () async {
-        final repo =
-            await ref.read(userProfileRepositoryProvider.future);
-        return repo.exportJson();
-      },
-      successLabel: 'Export JSON téléchargé',
-    );
-  }
-
-  Future<void> _exportCsv() async {
-    await _runExport(
-      action: () async {
-        final repo =
-            await ref.read(userProfileRepositoryProvider.future);
-        return repo.exportCsv();
-      },
-      successLabel: 'Export CSV téléchargé',
-    );
-  }
-
-  Future<void> _runExport({
-    required Future<dynamic> Function() action,
-    required String successLabel,
-  }) async {
-    if (!mounted) return;
-    try {
-      final file = await action();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$successLabel\n${file.path}'),
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    } on Exception catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors de l\'export : $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    }
-  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Contenu principal
+// Widgets privés
 // ────────────────────────────────────────────────────────────────────────────
 
-class _ProfileContent extends StatelessWidget {
-  final User user;
-  final Currency selectedCurrency;
-  final ValueChanged<Currency> onCurrencyChanged;
-  final ThemeData theme;
-  final VoidCallback onLogout;
-  final VoidCallback onChangePassword;
-  final VoidCallback onAvatarChanged;
-  final VoidCallback onExportJson;
-  final VoidCallback onExportCsv;
-  final VoidCallback onDeleteAccount;
-
-  const _ProfileContent({
-    required this.user,
-    required this.selectedCurrency,
-    required this.onCurrencyChanged,
-    required this.theme,
-    required this.onLogout,
-    required this.onChangePassword,
-    required this.onAvatarChanged,
-    required this.onExportJson,
-    required this.onExportCsv,
-    required this.onDeleteAccount,
-  });
-
-  String get _initials {
-    final name = user.name ?? user.email;
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}';
-    }
-    return name.isNotEmpty ? name[0] : '?';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      children: [
-        // ── Section Identité ──────────────────────────────────────────────
-        _SectionHeader(label: 'Identité', theme: theme),
-        const SizedBox(height: AppSpacing.space4),
-
-        // Avatar
-        Center(
-          child: AvatarPicker(
-            currentAvatarUrl: null, // TODO: wirer via avatarPath quand User expose la propriété
-            userInitials: _initials,
-            onUploadSuccess: onAvatarChanged,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space6),
-
-        // Nom
-        _ReadOnlyField(
-          label: 'Nom',
-          value: user.name,
-          theme: theme,
-        ),
-        const SizedBox(height: AppSpacing.space6),
-
-        // Email (géré par admin)
-        _ReadOnlyField(
-          label: 'Email',
-          value: user.email,
-          subtitle: 'Géré par l\'administrateur',
-          theme: theme,
-        ),
-        const SizedBox(height: AppSpacing.space6),
-
-        // Devise
-        Text(
-          'Devise par défaut',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space2),
-        _CurrencySelector(
-          selectedCurrency: selectedCurrency,
-          onChanged: onCurrencyChanged,
-          theme: theme,
-        ),
-
-        const SizedBox(height: AppSpacing.space8),
-        const Divider(),
-        const SizedBox(height: AppSpacing.space4),
-
-        // ── Section Sécurité ─────────────────────────────────────────────
-        _SectionHeader(label: 'Sécurité', theme: theme),
-        const SizedBox(height: AppSpacing.space3),
-
-        _ActionRow(
-          icon: PhosphorIconsRegular.lock,
-          label: 'Changer le mot de passe',
-          onTap: onChangePassword,
-          theme: theme,
-        ),
-
-        const SizedBox(height: AppSpacing.space8),
-        const Divider(),
-        const SizedBox(height: AppSpacing.space4),
-
-        // ── Section Données ──────────────────────────────────────────────
-        _SectionHeader(label: 'Données', theme: theme),
-        const SizedBox(height: AppSpacing.space3),
-
-        _ActionRow(
-          icon: PhosphorIconsRegular.database,
-          label: 'Exporter mes données (JSON)',
-          onTap: onExportJson,
-          theme: theme,
-        ),
-
-        _ActionRow(
-          icon: PhosphorIconsRegular.fileCsv,
-          label: 'Exporter mes transactions (CSV)',
-          onTap: onExportCsv,
-          theme: theme,
-        ),
-
-        const SizedBox(height: AppSpacing.space8),
-        const Divider(),
-        const SizedBox(height: AppSpacing.space4),
-
-        // ── Zone de danger ───────────────────────────────────────────────
-        _SectionHeader(label: 'Zone de danger', theme: theme),
-        const SizedBox(height: AppSpacing.space3),
-
-        _ActionRow(
-          icon: PhosphorIconsRegular.signOut,
-          label: 'Déconnexion',
-          onTap: onLogout,
-          theme: theme,
-          // Style neutre/gris (pas rouge — spec T-024)
-          foregroundColor: theme.colorScheme.onSurfaceVariant,
-        ),
-
-        _ActionRow(
-          icon: PhosphorIconsRegular.trash,
-          label: 'Supprimer mon compte',
-          onTap: onDeleteAccount,
-          theme: theme,
-          foregroundColor: AppColors.error,
-        ),
-
-        const SizedBox(height: AppSpacing.space8),
-      ],
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Widgets privés réutilisés dans l'écran
-// ────────────────────────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
+class _SettingsSection extends StatelessWidget {
   final String label;
-  final ThemeData theme;
+  final List<Widget> children;
 
-  const _SectionHeader({required this.label, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: theme.textTheme.titleSmall?.copyWith(
-        color: theme.colorScheme.primary,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _ReadOnlyField extends StatelessWidget {
-  final String label;
-  final String? value;
-  final String? subtitle;
-  final ThemeData theme;
-
-  const _ReadOnlyField({
-    required this.label,
-    required this.value,
-    required this.theme,
-    this.subtitle,
-  });
+  const _SettingsSection({required this.label, required this.children});
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = value != null && value!.isNotEmpty;
-
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          label.toUpperCase(),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
+              ),
         ),
-        const SizedBox(height: AppSpacing.space1),
-        Text(
-          hasValue ? value! : 'Non renseigné',
-          style: hasValue
-              ? theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                )
-              : theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.outline,
-                  fontStyle: FontStyle.italic,
-                ),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            subtitle!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontStyle: FontStyle.italic,
+        const SizedBox(height: AppSpacing.space2),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          child: Container(
+            color: colorScheme.surfaceContainerHighest,
+            child: Column(
+              children: [
+                for (int i = 0; i < children.length; i++) ...[
+                  children[i],
+                  if (i < children.length - 1)
+                    Divider(
+                        height: 0,
+                        thickness: 0.5,
+                        color: colorScheme.outlineVariant),
+                ],
+              ],
             ),
           ),
-        ],
+        ),
       ],
     );
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  final PhosphorIconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final ThemeData theme;
-  final Color? foregroundColor;
+class _SettingsRow extends StatelessWidget {
+  final PhosphorIconData? icon;
+  final Color? iconBg;
+  final String title;
+  final Color? titleColor;
+  final String? description;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool enabled;
 
-  const _ActionRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.theme,
-    this.foregroundColor,
+  const _SettingsRow({
+    this.icon,
+    this.iconBg,
+    required this.title,
+    this.titleColor,
+    this.description,
+    this.trailing,
+    this.onTap,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = foregroundColor ?? theme.colorScheme.onSurface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final effectiveColor = titleColor ?? colorScheme.onSurface;
+
+    Widget? iconWidget;
+    if (icon != null) {
+      iconWidget = Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: iconBg ?? colorScheme.surfaceContainerHighest,
+        ),
+        child: Center(
+          child: PhosphorIcon(icon!, size: 18, color: effectiveColor),
+        ),
+      );
+    }
+
+    final defaultTrailing = onTap != null
+        ? PhosphorIcon(
+            PhosphorIconsRegular.caretRight,
+            size: 18,
+            color: colorScheme.onSurfaceVariant,
+          )
+        : null;
 
     return InkWell(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: Padding(
         padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
           vertical: AppSpacing.space3,
-          horizontal: AppSpacing.space2,
         ),
         child: Row(
           children: [
-            PhosphorIcon(icon, color: color, size: 22),
-            const SizedBox(width: AppSpacing.space3),
+            if (iconWidget != null) ...[
+              iconWidget,
+              const SizedBox(width: AppSpacing.space3),
+            ],
             Expanded(
-              child: Text(
-                label,
-                style: theme.textTheme.bodyLarge?.copyWith(color: color),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: effectiveColor,
+                        ),
+                  ),
+                  if (description != null)
+                    Text(
+                      description!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                ],
               ),
             ),
-            PhosphorIcon(
-              PhosphorIconsRegular.caretRight,
-              color: theme.colorScheme.onSurfaceVariant,
-              size: 18,
-            ),
+            trailing ?? defaultTrailing ?? const SizedBox.shrink(),
           ],
         ),
       ),
@@ -463,78 +470,45 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-class _CurrencySelector extends StatelessWidget {
-  final Currency selectedCurrency;
-  final ValueChanged<Currency> onChanged;
-  final ThemeData theme;
+class _ExportRow extends StatelessWidget {
+  final PhosphorIconData icon;
+  final Color iconBg;
+  final String title;
+  final bool isLoading;
+  final bool enabled;
+  final VoidCallback onTap;
 
-  const _CurrencySelector({
-    required this.selectedCurrency,
-    required this.onChanged,
-    required this.theme,
+  const _ExportRow({
+    required this.icon,
+    required this.iconBg,
+    required this.title,
+    required this.isLoading,
+    required this.enabled,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      onTap: () => _showCurrencyPicker(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.space2),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${selectedCurrency.symbol} — ${selectedCurrency.displayName}',
-                style: theme.textTheme.bodyLarge,
-              ),
-            ),
-            PhosphorIcon(
+    final colorScheme = Theme.of(context).colorScheme;
+    return _SettingsRow(
+      icon: icon,
+      iconBg: iconBg,
+      title: title,
+      description: isLoading ? 'Téléchargement en cours…' : null,
+      enabled: enabled,
+      onTap: onTap,
+      trailing: isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : PhosphorIcon(
               PhosphorIconsRegular.caretRight,
-              color: theme.colorScheme.onSurfaceVariant,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
             ),
-          ],
-        ),
-      ),
     );
-  }
-
-  void _showCurrencyPicker(BuildContext context) {
-    showModalBottomSheet<Currency>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.space4),
-              child: Text(
-                'Devise par défaut',
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            ...Currency.values.map(
-              (currency) => ListTile(
-                title: Text('${currency.symbol} — ${currency.displayName}'),
-                trailing: currency == selectedCurrency
-                    ? PhosphorIcon(PhosphorIconsBold.check,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20)
-                    : null,
-                onTap: () {
-                  Navigator.of(context).pop(currency);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ).then((currency) {
-      if (currency != null) {
-        onChanged(currency);
-      }
-    });
   }
 }
 
@@ -574,8 +548,9 @@ class _ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const PhosphorIcon(
-                  PhosphorIconsRegular.arrowClockwise,
-                  size: 20),
+                PhosphorIconsRegular.arrowClockwise,
+                size: 20,
+              ),
               label: const Text('Réessayer'),
             ),
           ],

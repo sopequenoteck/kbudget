@@ -20,39 +20,78 @@ class ProfileSettingsSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _fieldPlaceholder(),
-            const SizedBox(height: AppSpacing.space6),
-            _fieldPlaceholder(),
-            const SizedBox(height: AppSpacing.space6),
-            _fieldPlaceholder(),
+            _sectionSkeleton(rowCount: 2),
+            const SizedBox(height: AppSpacing.space4),
+            _sectionSkeleton(rowCount: 1),
+            const SizedBox(height: AppSpacing.space4),
+            _sectionSkeleton(rowCount: 2),
+            const SizedBox(height: AppSpacing.space4),
+            _sectionSkeleton(rowCount: 2),
           ],
         ),
       ),
     );
   }
 
-  Widget _fieldPlaceholder() {
+  Widget _sectionSkeleton({required int rowCount}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Label placeholder
         Container(
           width: 80,
-          height: 14,
+          height: 12,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
         ),
         const SizedBox(height: AppSpacing.space2),
+        // Container section arrondi
         Container(
-          width: 200,
-          height: 20,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < rowCount; i++) _rowPlaceholder(),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _rowPlaceholder() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space3,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.space3),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
