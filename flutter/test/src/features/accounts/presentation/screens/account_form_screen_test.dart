@@ -4,12 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
+import 'package:k_budget/src/common_widgets/bank_select_picker.dart';
+import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/bank.dart';
 import 'package:k_budget/src/features/accounts/application/bank_provider.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
+import 'package:k_budget/src/features/accounts/presentation/widgets/account_type_selector.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
@@ -199,6 +202,93 @@ void main() {
       );
 
       expect(find.byType(Switch), findsOneWidget);
+    });
+
+    // SC-001 : AccountTypeSelector apparaît avant BankSelectPicker dans le tree
+    testWidgets('should_showTypeSectionBeforeBank_when_createMode',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      final typeSelectorPos =
+          tester.getTopLeft(find.byType(AccountTypeSelector));
+      final bankPickerPos = tester.getTopLeft(find.byType(BankSelectPicker));
+      expect(typeSelectorPos.dy, lessThan(bankPickerPos.dy));
+    });
+
+    // SC-002 : Les 4 SectionHeaders sont présents en mode création
+    testWidgets('should_showSectionHeaders_when_createMode', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      // Les premiers headers sont visibles sans scroll
+      expect(find.text('TYPE DE COMPTE'), findsOneWidget);
+      expect(find.text('BANQUE'), findsOneWidget);
+      // PERSONNALISATION visible car _selectedBankCode == 'OTHER' par défaut
+      expect(find.text('PERSONNALISATION'), findsOneWidget);
+
+      // DÉTAILS peut être hors viewport — scroller pour l'atteindre
+      await tester.scrollUntilVisible(
+        find.text('DÉTAILS'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('DÉTAILS'), findsOneWidget);
+    });
+
+    // SC-003 : La preview affiche "COURANT" (type par défaut en mode création)
+    testWidgets('should_showTypeLabel_when_defaultTypeInPreview',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('COURANT'), findsOneWidget);
+    });
+
+    // SC-005 : SelectPicker devise absent en mode édition
+    testWidgets('should_hideCurrencyPicker_when_editMode', (tester) async {
+      await tester.pumpWidget(buildApp(account: testAccount));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SelectPicker), findsNothing);
+    });
+
+    // SC-006 : ConfirmDialogCustom (Dialog) affiché au tap delete
+    testWidgets('should_useConfirmDialogCustom_when_deletePressed',
+        (tester) async {
+      await tester.pumpWidget(buildApp(account: testAccount));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byIcon(PhosphorIconsRegular.trash),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Dialog), findsOneWidget);
+    });
+
+    // SC-007 : Bloc solde actuel avec Container présent en mode édition
+    testWidgets('should_showCurrentBalanceBlock_when_editMode', (tester) async {
+      await tester.pumpWidget(buildApp(account: testAccount));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Solde actuel'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      final containerFinder = find.ancestor(
+        of: find.text('Solde actuel'),
+        matching: find.byType(Container),
+      );
+      expect(containerFinder, findsWidgets);
+      // Format fr_FR : "1 250,50 €" — utiliser textContaining pour éviter
+      // les variations d'espace insécable selon la plateforme
+      expect(find.textContaining('250'), findsWidgets);
     });
   });
 }
