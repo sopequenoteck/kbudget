@@ -361,7 +361,6 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         onPrevNextMonth: (m, y) {
           if (!isPastMonthLimit(m, y)) _onMonthChanged(m, y);
         },
-        onChartsTap: () => context.push(RouteNames.budgetDetails),
       ),
     );
 
@@ -405,7 +404,6 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         delegate: SliverChildBuilderDelegate(
           (ctx, i) {
             final e = convertedItems[i];
-            final budget = state.items.firstWhereOrNull((b) => b.id == e.item.budgetId);
             return BudgetItem(
               categoryNom: e.item.categoryNom,
               categoryIcone: e.item.categoryIcone,
@@ -414,12 +412,17 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
               montantDepense: e.depense,
               percentage: e.item.percentage,
               currency: _activeCurrency.name,
-              onTap: budget != null
-                  ? () => ref.read(modalNotifierProvider.notifier).open(
-                        ModalType.budget,
-                        entity: budget,
-                      )
-                  : null,
+              onTap: () {
+                final month =
+                    '$_selectedYear-${_selectedMonth.toString().padLeft(2, '0')}';
+                context.pushNamed(
+                  RouteNames.budgetDetailsName,
+                  queryParameters: {
+                    'categoryId': e.item.categoryId,
+                    'month': month,
+                  },
+                );
+              },
             );
           },
           childCount: convertedItems.length,
@@ -446,7 +449,17 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                   montantDepense: 0,
                   percentage: 0,
                   currency: _activeCurrency.name,
-                  onTap: null,
+                  onTap: () {
+                    final month =
+                        '$_selectedYear-${_selectedMonth.toString().padLeft(2, '0')}';
+                    context.pushNamed(
+                      RouteNames.budgetDetailsName,
+                      queryParameters: {
+                        'categoryId': b.categoryId,
+                        'month': month,
+                      },
+                    );
+                  },
                   showProgressBar: false,
                 ),
               );
@@ -522,7 +535,6 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         onPrevNextMonth: (m, y) {
           if (!isPastMonthLimit(m, y)) _onMonthChanged(m, y);
         },
-        onChartsTap: () => context.push(RouteNames.budgetDetails),
       ),
     );
 
@@ -552,6 +564,17 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
               montantDepense: e.depense,
               percentage: e.item.percentage,
               currency: _activeCurrency.name,
+              onTap: () {
+                final month =
+                    '$_selectedYear-${_selectedMonth.toString().padLeft(2, '0')}';
+                context.pushNamed(
+                  RouteNames.budgetDetailsName,
+                  queryParameters: {
+                    'categoryId': e.item.categoryId,
+                    'month': month,
+                  },
+                );
+              },
             );
           },
           childCount: convertedItems.length,

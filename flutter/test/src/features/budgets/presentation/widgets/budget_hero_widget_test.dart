@@ -32,7 +32,6 @@ void main() {
             selectedYear: 2026,
             isCurrentMonth: true,
             onPrevNextMonth: (_, __) {},
-            onChartsTap: () {},
           ),
         ),
       ),

@@ -245,8 +245,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: RouteNames.budgetDetailsName,
                 parentNavigatorKey: _rootNavigatorKey,
                 builder: (context, state) {
+                  final categoryId = state.uri.queryParameters['categoryId'] ?? '';
                   final month = state.uri.queryParameters['month'];
-                  return BudgetDetailScreen(month: month);
+                  return BudgetDetailScreen(categoryId: categoryId, month: month);
                 },
               ),
             ],

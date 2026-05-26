@@ -71,7 +71,6 @@ class BudgetHeroWidget extends StatelessWidget {
     required this.selectedYear,
     required this.isCurrentMonth,
     required this.onPrevNextMonth,
-    required this.onChartsTap,
   });
 
   final double budgetedSpent;
@@ -89,7 +88,6 @@ class BudgetHeroWidget extends StatelessWidget {
   final int selectedYear;
   final bool isCurrentMonth;
   final void Function(int month, int year) onPrevNextMonth;
-  final VoidCallback onChartsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -123,10 +121,6 @@ class BudgetHeroWidget extends StatelessWidget {
                 currencies: currencies,
                 activeCurrency: activeCurrency,
                 onCurrencyChanged: onCurrencyChanged,
-              ),
-              IconButton(
-                icon: const PhosphorIcon(PhosphorIconsRegular.chartBar, size: 20),
-                onPressed: onChartsTap,
               ),
             ],
           ),
