@@ -55,6 +55,9 @@ dependencies:
   flutter_image_compress: ^2.3.0
   path_provider: ^2.1.5
 
+  # App info
+  package_info_plus: ^8.1.2
+
   # Utils
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0

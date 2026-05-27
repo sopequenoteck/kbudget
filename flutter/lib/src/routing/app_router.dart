@@ -27,15 +27,12 @@ import 'package:k_budget/src/features/onboarding/presentation/server_setup_scree
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
-import 'package:k_budget/src/features/notifications/presentation/notification_settings_screen.dart';
-import 'package:k_budget/src/features/settings/presentation/appearance_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_form_screen.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
-import 'package:k_budget/src/features/settings/presentation/feature_settings_screen.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/budget_list_screen.dart';
 import 'package:k_budget/src/features/budgets/presentation/budget_detail_screen.dart';
@@ -268,20 +265,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 const ProfileSettingsScreen(),
           ),
           GoRoute(
-            path: RouteNames.settingsAppearance,
-            name: RouteNames.settingsAppearanceName,
-            parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) =>
-                const AppearanceSettingsScreen(),
-          ),
-          GoRoute(
-            path: RouteNames.settingsFeatures,
-            name: RouteNames.settingsFeaturesName,
-            parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) =>
-                const FeatureSettingsScreen(),
-          ),
-          GoRoute(
             path: RouteNames.settingsAccounts,
             name: RouteNames.settingsAccountsName,
             parentNavigatorKey: _rootNavigatorKey,
@@ -338,12 +321,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.settingsCurrenciesName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const CurrencySettingsScreen(),
-          ),
-          GoRoute(
-            path: RouteNames.settingsNotifications,
-            name: RouteNames.settingsNotificationsName,
-            parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) => const NotificationSettingsScreen(),
           ),
           GoRoute(
             path: 'users',
