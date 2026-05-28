@@ -74,14 +74,9 @@ class DashboardHeroWidget extends StatelessWidget {
       );
     }
 
-    return Padding(
+    return Column(
       key: const Key('dashboard_hero'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Label
           Text(
@@ -89,7 +84,7 @@ class DashboardHeroWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
-              letterSpacing: 0.8,
+              letterSpacing: AppTypography.labelLetterSpacingForSize12,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
@@ -132,65 +127,70 @@ class DashboardHeroWidget extends StatelessWidget {
             _buildVariationBadge(colors, patrimoineTotal),
           ],
 
-          // 5. Meta-lines revenus/dépenses
-          if (currentSummary != null) ...[
-            const SizedBox(height: AppSpacing.space2),
-            Row(
-              children: [
-                PhosphorIcon(
-                  PhosphorIconsRegular.trendUp,
-                  size: 14,
-                  color: colors.incomeColor,
-                ),
-                const SizedBox(width: AppSpacing.space2),
-                Text(
-                  AmountFormatter.format(
-                    currentSummary!.totalRecettes,
-                    currency: activeCurrency,
-                  ),
-                  style: TextStyle(
-                    fontSize: AppTypography.sizeSm,
-                    color: colors.incomeColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.space1),
-            Row(
-              children: [
-                PhosphorIcon(
-                  PhosphorIconsRegular.trendDown,
-                  size: 14,
-                  color: colors.expenseColor,
-                ),
-                const SizedBox(width: AppSpacing.space2),
-                Text(
-                  AmountFormatter.format(
-                    currentSummary!.totalDepenses,
-                    currency: activeCurrency,
-                  ),
-                  style: TextStyle(
-                    fontSize: AppTypography.sizeSm,
-                    color: colors.expenseColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          // 6. Devise secondaire
+          // 5. Devise secondaire — avant les meta-lines (ordre Angular)
           if (patrimoineSecondaire != null && secondaryCurrency != null) ...[
             const SizedBox(height: AppSpacing.space1),
             Text(
               '≈ ${AmountFormatter.format(patrimoineSecondaire, currency: secondaryCurrency)}',
               style: TextStyle(
-                fontSize: AppTypography.sizeSm,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                fontSize: AppTypography.sizeXs,
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ),
           ],
+
+          // 6. Meta-lines revenus/dépenses — côte à côte (flex row Angular)
+          if (currentSummary != null) ...[
+            const SizedBox(height: AppSpacing.space2),
+            Row(
+              spacing: AppSpacing.space4,
+              children: [
+                Row(
+                  spacing: AppSpacing.space2,
+                  children: [
+                    PhosphorIcon(
+                      PhosphorIconsRegular.trendUp,
+                      size: 14,
+                      color: colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                    Text(
+                      AmountFormatter.format(
+                        currentSummary!.totalRecettes,
+                        type: 'recette',
+                        currency: activeCurrency,
+                      ),
+                      style: TextStyle(
+                        fontSize: AppTypography.sizeXs,
+                        color: colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  spacing: AppSpacing.space2,
+                  children: [
+                    PhosphorIcon(
+                      PhosphorIconsRegular.trendDown,
+                      size: 14,
+                      color: colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                    Text(
+                      AmountFormatter.format(
+                        currentSummary!.totalDepenses,
+                        type: 'depense',
+                        currency: activeCurrency,
+                      ),
+                      style: TextStyle(
+                        fontSize: AppTypography.sizeXs,
+                        color: colors.expenseColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ],
-      ),
     );
   }
 
@@ -217,22 +217,12 @@ class DashboardHeroWidget extends StatelessWidget {
     final variationColor =
         netDuMois >= 0 ? colors.incomeColor : colors.expenseColor;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space2,
-        vertical: AppSpacing.space1,
-      ),
-      decoration: BoxDecoration(
-        color: variationColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppRadius.round),
-      ),
-      child: Text(
-        variationLabel,
-        style: TextStyle(
-          fontSize: AppTypography.sizeSm,
-          fontWeight: AppTypography.medium,
-          color: variationColor,
-        ),
+    return Text(
+      variationLabel,
+      style: TextStyle(
+        fontSize: AppTypography.sizeXs,
+        fontWeight: AppTypography.medium,
+        color: variationColor,
       ),
     );
   }

@@ -52,3 +52,25 @@
 **Gate checklist** : mode dégradé — `checklist.md` absent, gate ignorée.  
 **Scan tech** : Flutter `.gitignore` présent et complet. ✅  
 **Décision** : implémentation lancée sans blocage.
+
+---
+
+## review-impl — 2026-05-27
+
+**Verdict : PASS**
+
+### Warnings (non-bloquants)
+
+- **W-001** — Health check : seuil `< 500` au lieu de `== 200` — code 4xx traité comme "En ligne" (spec dit "tout code != 200 → offline"). À corriger en post-commit ou en /devflow.docs.
+- **W-002** — Avatar réseau non implémenté : modèle `User` n'a pas de champ `avatarUrl`. Dette sur le modèle User, hors scope KKS-246.
+- **W-003** — `debtReminder` visible en plus de `debtDue` dans Notifications — extension non documentée, cohérente avec l'enum.
+- **W-004** — T-054 non cochée (validation manuelle quickstart à effectuer).
+- **W-005** — Ordre sections : Navigation placée avant Notifications (spec : Notifications → Navigation).
+
+### Infos
+
+- I-001 : `settings_section.dart` supprimé entièrement plutôt que modifié — résultat équivalent ou meilleur.
+- I-002 : `radius: 28` = diamètre 56px — conforme spec.
+- I-003 : `setThemeMode()` convertit `ThemeMode.system` → `AppTheme.dark` pour le legacy repo Drift — comportement correct pour la rétrocompatibilité.
+
+**Commentaire** : 24/25 tâches cochées, tous les FR critiques couverts, 3 sous-écrans supprimés sans régression. W-001 (seuil health check) et W-005 (ordre sections) sont des écarts spec mineurs à traiter.

@@ -113,21 +113,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             padding: const EdgeInsets.all(AppSpacing.space4),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Header (salutation + cloche + avatar)
-                DashboardHeader(userName: state.userName),
-                const SizedBox(height: AppSpacing.space3),
-
-                // Pill selector multi-devises
-                if (state.currencies.length > 1) ...[
-                  CurrencyPillSelector(
-                    currencies: state.currencies,
-                    activeCurrency: state.activeCurrency,
-                    onCurrencyChanged: (c) {
-                      _onCurrencyPillTapped(c);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.space4),
-                ],
+                // Ligne top : salutation contextuelle + pill selector devises
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Expanded(child: DashboardHeader()),
+                    if (state.currencies.length > 1)
+                      CurrencyPillSelector(
+                        currencies: state.currencies,
+                        activeCurrency: state.activeCurrency,
+                        onCurrencyChanged: _onCurrencyPillTapped,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.space4),
 
                 // Hero patrimoine total + revenus/dépenses
                 DashboardHeroWidget(
