@@ -344,13 +344,27 @@ sudo chmod 750 /var/k-budget/avatars
 
 ## Mise a jour
 
-### Docker
+### Docker (prod — mise a jour manuelle)
 
 ```bash
 git pull
 docker compose build
 docker compose up -d
 ```
+
+### VM de test — deploiement continu (Watchtower)
+
+Sur la VM de test, Watchtower surveille Docker Hub et redeploie automatiquement
+des qu'une nouvelle image `:latest` est publiee (workflow `docker-publish.yml`
+sur push `main`). Aucune action manuelle requise a chaque release.
+
+Demarrage de Watchtower (installation initiale uniquement) :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.watchtower.yml up -d
+```
+
+Fichier de reference : [`docker-compose.watchtower.yml`](../docker-compose.watchtower.yml)
 
 ### Bare-metal
 
@@ -384,3 +398,29 @@ sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw enable
 ```
+
+## CI/CD (GitHub Actions + SonarQube)
+
+L'analyse qualite et la couverture des 3 stacks (API, Angular, Flutter) tournent
+via GitHub Actions (`.github/workflows/ci.yml`) avec scan SonarQube self-hosted.
+
+- **Sur PR** vers `main`/`develop` : Quality Gate **bloquant** (`sonar.qualitygate.wait`) —
+  le merge est bloque si la qualite du *new code* regresse.
+- **Sur push** vers `main`/`develop` : scan de reference non bloquant (alimente le dashboard).
+
+SonarQube etant self-hosted sur un reseau prive, le scan tourne sur un **runner
+GitHub self-hosted** (les runners cloud ne peuvent pas joindre le serveur Sonar).
+
+### Prerequis a configurer
+
+| Element | Ou | Detail |
+|---------|-----|--------|
+| Runner self-hosted | Box homelab | Enregistre sur le repo, sur le reseau Docker `ci-stack_ci-net` (pour joindre SonarQube) |
+| Secret `SONAR_TOKEN` | Settings repo → Secrets | Token utilisateur SonarQube |
+| Variable `SONAR_HOST_URL` | Settings repo → Variables | URL interne du serveur (ex `http://sonarqube:9000`) |
+| Quality Gate "Clean as You Code" | UI SonarQube | Couverture exigee sur le *new code* uniquement (pas l'existant) |
+| Plugin `sonar-flutter` | Serveur SonarQube | `extensions/plugins/` — requis pour l'analyse Dart (non supportee nativement) |
+| Required status checks | Settings repo → Branches | Rendre les 3 jobs CI obligatoires pour bloquer reellement le merge |
+
+Les `projectKey` Sonar sont `kbudget-api`, `kbudget-app`, `kbudget-flutter`
+(declares dans les `sonar-project.properties` respectifs et le workflow).
