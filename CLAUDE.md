@@ -15,6 +15,7 @@ cd api && mvn clean compile       # Build
 cd api && mvn spring-boot:run -Dspring-boot.run.profiles=dev  # Lancer (profil dev)
 cd api && mvn test                # Tests
 cd api && mvn test -Dtest=NomDuTest  # Test unique
+cd api && mvn verify              # Tests + rapport couverture jacoco (target/site/jacoco/)
 cd api && mvn clean install       # Build complet avec tests
 ```
 
@@ -26,6 +27,7 @@ cd api && mvn clean install       # Build complet avec tests
 cd app && ng serve                # Dev server (http://localhost:4200)
 cd app && ng build                # Build
 cd app && npm test                # Tests unitaires (vitest)
+cd app && npm run test:coverage   # Tests + rapport de couverture (lcov)
 cd app && ng build --configuration production  # Build prod
 cd app && ng lint                 # ESLint
 ```

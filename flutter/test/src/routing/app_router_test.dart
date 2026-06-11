@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
@@ -31,6 +32,7 @@ void main() {
   late MockCategoryRepository mockCategoryRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
   late MockBudgetRepository mockBudgetRepo;
+  late MockRecurringTransactionRepository mockRecurringRepo;
 
   const localConfig = AppConfig(
     dataMode: DataMode.local,
@@ -47,6 +49,7 @@ void main() {
     mockCategoryRepo = MockCategoryRepository();
     mockExchangeRateRepo = MockExchangeRateRepository();
     mockBudgetRepo = MockBudgetRepository();
+    mockRecurringRepo = MockRecurringTransactionRepository();
 
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockTransactionRepo.getAll()).thenAnswer((_) async => []);
@@ -64,6 +67,7 @@ void main() {
         .thenAnswer((_) async => Feature.values.toList());
     when(mockBudgetRepo.getAll(includeInactive: false)).thenAnswer((_) async => []);
     when(mockBudgetRepo.getOverview()).thenAnswer((_) async => throw Exception('Not configured'));
+    when(mockRecurringRepo.listActive()).thenAnswer((_) async => []);
   });
 
   Widget buildApp({List<Override> overrides = const []}) {
@@ -78,6 +82,9 @@ void main() {
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
         budgetRepositoryProvider.overrideWithValue(mockBudgetRepo),
+        recurringTransactionRepositoryProvider.overrideWith(
+          (_) async => mockRecurringRepo,
+        ),
         currentUserNameProvider.overrideWith((_) async => null),
         ...overrides,
       ],
