@@ -1,0 +1,24 @@
+# Watchtower — déploiement continu sur la VM de TEST.
+#
+# Surveille Docker Hub et fait automatiquement pull + recreate des conteneurs
+# k-budget dès qu'une nouvelle image `:latest` est publiée par le workflow
+# GitHub Actions `docker-publish.yml` (sur push main). Évite le ssh + docker
+# pull + docker compose up manuel à chaque release.
+#
+# Usage sur la VM de test (combiné avec le compose applicatif) :
+#   docker compose -f docker-compose.yml -f docker-compose.watchtower.yml up -d
+#
+# La VM de test n'héberge que k-budget : Watchtower surveille donc les
+# conteneurs api/app sans configuration de label supplémentaire.
+
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 300          # vérifie les images toutes les 5 min
+      WATCHTOWER_CLEANUP: "true"             # purge les anciennes images après update
+      WATCHTOWER_INCLUDE_RESTARTING: "true"
+    restart: unless-stopped

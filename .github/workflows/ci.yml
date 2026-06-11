@@ -1,0 +1,129 @@
+name: CI - Qualité & Couverture
+
+# Analyse SonarQube des 3 stacks (API Spring, App Angular, App Flutter).
+#
+# Deux modes (cf. décision CI/CD) :
+#   - pull_request → Quality Gate BLOQUANT (sonar.qualitygate.wait=true).
+#                    Le job échoue si la qualité du "new code" régresse → merge bloqué.
+#   - push (merge) → scan de référence NON bloquant, alimente le dashboard Sonar.
+#
+# PRÉREQUIS INFRA (à configurer hors repo, voir docs/deployment.md) :
+#   - Un runner GitHub self-hosted enregistré sur le repo, sur la box homelab,
+#     ayant accès au réseau Docker `ci-stack_ci-net` (pour joindre SonarQube).
+#   - Secrets repo : SONAR_TOKEN (token utilisateur SonarQube).
+#   - Variable repo : SONAR_HOST_URL (ex http://sonarqube:9000 sur le réseau ci-net).
+#   - Quality Gate "Clean as You Code" (new code only) configuré côté serveur Sonar.
+#   - Plugin sonar-flutter installé sur le serveur (pour l'analyse Dart).
+#
+# Les conteneurs de job sont attachés à `ci-stack_ci-net` pour atteindre Sonar,
+# ce qui donne aussi un environnement propre et jetable à chaque run (isolation).
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+# Annule un run en cours si un nouveau commit arrive sur la même ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-analysis:
+    name: Analyse API (Spring Boot)
+    runs-on: self-hosted
+    container:
+      image: maven:3.9-eclipse-temurin-21
+      options: --network ci-stack_ci-net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Sonar a besoin de l'historique pour le blame / new code
+
+      - name: Build, tests, couverture & scan Sonar
+        working-directory: api
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B clean verify sonar:sonar \
+            -Dsonar.projectKey=kbudget-api \
+            -Dsonar.projectName=kbudget-api \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
+
+  app-analysis:
+    name: Analyse APP (Angular)
+    runs-on: self-hosted
+    container:
+      image: node:22
+      options: --network ci-stack_ci-net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install, tests + couverture
+        working-directory: app
+        run: |
+          npm ci
+          npm run test:coverage
+
+      - name: Scan Sonar
+        working-directory: app
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # La config (projectKey, sources, exclusions, chemin lcov) vient de
+        # app/sonar-project.properties. On ne surcharge que l'URL, le token et le gate.
+        run: |
+          npx --yes @sonar/scan \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
+
+  flutter-analysis:
+    name: Analyse Flutter
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cirruslabs/flutter:stable
+      options: --network ci-stack_ci-net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dépendances + code generation
+        working-directory: flutter
+        # Les fichiers générés (.g.dart, .freezed.dart) sont gitignorés :
+        # il faut les régénérer dans le checkout CI avant de compiler les tests.
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Tests + couverture
+        working-directory: flutter
+        run: flutter test --coverage
+
+      - name: Installer sonar-scanner CLI
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends curl unzip
+          curl -sSLo /tmp/sonar-scanner.zip \
+            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip
+          unzip -q /tmp/sonar-scanner.zip -d /opt
+          echo "/opt/sonar-scanner-6.2.1.4610-linux-x64/bin" >> "$GITHUB_PATH"
+
+      - name: Scan Sonar
+        working-directory: flutter
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # La config (projectKey, sources, exclusions, chemin lcov) vient de
+        # flutter/sonar-project.properties (plugin sonar-flutter côté serveur).
+        run: |
+          sonar-scanner \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
