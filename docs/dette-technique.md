@@ -59,3 +59,31 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 - `_bottom-sheet.scss` : ajout du selecteur imbrique `.bsheet__libelle.ng-invalid.ng-touched input` pour couvrir le cas wrapper `app-autocomplete` (en plus du selecteur input direct pour `subscription-form`)
 
 **Resultat** : l'etat `ng-invalid.ng-touched` se propage a nouveau sur le host, la bordure rouge du libelle est restauree automatiquement via `_bottom-sheet.scss`. Tests `autocomplete.spec.ts` verts (23/23).
+
+---
+
+### DT-004 — Icone recurrence non desactivee en mode local-first (KKS-241 / W-001)
+
+**Identifie** : 2026-05-12
+
+**Description** : Dans `TransactionForm`, l'icone de recurrence (bouton PhRepeat) est toujours active meme quand `dataModeProvider = DataMode.local`. R-004 (masquer ou desactiver l'icone en mode local) n'a pas ete implemente. Un SnackBar d'erreur est declenche si la creation echoue cote reseau, mais l'icone reste accessible et induira une erreur silencieuse pour l'utilisateur offline.
+
+**Impact** : Faible — fallback SnackBar present. Pas de crash, pas de perte de donnees.
+
+**Fichier concerne** : `flutter/lib/src/features/transactions/presentation/widgets/transaction_form.dart`
+
+**Correction proposee** : Lire `ref.watch(dataModeProvider)` dans `TransactionForm` et passer `isActive: dataModeProvider == DataMode.remote` sur le bouton repeat (ou masquer le widget entierement).
+
+---
+
+### DT-005 — RecurringListNotifier.create() utilise isLoading global (KKS-241 / W-002)
+
+**Identifie** : 2026-05-12
+
+**Description** : La methode `create()` ajoutee dans `RecurringListNotifier` (KKS-241) utilise `state = state.copyWith(isLoading: true)` au lieu du pattern `mutatingIds` etabli par `deactivate()`, `validate()`, `skip()`. A la creation, il n'y a pas encore d'identifiant a tracker, mais cela cree une incoherence de pattern dans le notifier.
+
+**Impact** : Cosmétique — aucun impact fonctionnel. L'indicateur de chargement global masque toute la liste au lieu d'un seul item.
+
+**Fichier concerne** : `flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`
+
+**Correction proposee** : Revenir a `isLoading` global pour `create()` (pas d'id a tracker) et documenter cette exception dans le notifier, OU introduire un `isCreating: bool` separe dans `ListState<T>` si le besoin se generalise.

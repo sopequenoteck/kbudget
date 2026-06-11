@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
+import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
+import 'package:k_budget/src/common_widgets/page_header.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
+import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
@@ -12,6 +15,7 @@ import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_n
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_calculator.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:go_router/go_router.dart';
 
 class CurrencySettingsScreen extends ConsumerStatefulWidget {
   const CurrencySettingsScreen({super.key});
@@ -49,27 +53,16 @@ class _CurrencySettingsScreenState
   }
 
   Future<void> _confirmDelete(ExchangeRate rate) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialogCustom.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer ce taux ?'),
-        content: Text(
-          '${rate.baseCurrency.symbol} → ${rate.targetCurrency.symbol} : ${rate.rate}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Supprimer'),
-          ),
-        ],
-      ),
-    );
+      icon: PhosphorIconsRegular.trash,
+      title: '${rate.baseCurrency.name.toUpperCase()} → ${rate.targetCurrency.name.toUpperCase()}',
+      message: 'Ce taux de conversion sera définitivement supprimé.',
+      confirmLabel: 'Supprimer',
+      variant: ConfirmVariant.danger,
+    ) ?? false;
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     await ref
         .read(exchangeRateListProvider.notifier)
         .delete(rate.baseCurrency, rate.targetCurrency);
@@ -84,25 +77,16 @@ class _CurrencySettingsScreenState
         ? 'Cette devise est utilisée par des comptes existants. Voulez-vous la retirer ?'
         : 'Retirer ${currency.name.toUpperCase()} de vos devises ?';
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialogCustom.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Retirer cette devise ?'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Retirer'),
-          ),
-        ],
-      ),
-    );
+      icon: PhosphorIconsRegular.warning,
+      title: 'Retirer ${currency.name.toUpperCase()} ?',
+      message: message,
+      confirmLabel: 'Retirer',
+      variant: ConfirmVariant.danger,
+    ) ?? false;
 
-    if (confirmed == true && mounted) {
+    if (confirmed && mounted) {
       await ref
           .read(currencyConfigNotifierProvider.notifier)
           .removeCurrency(currency);
@@ -155,167 +139,199 @@ class _CurrencySettingsScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(exchangeRateListProvider);
     final currencies = ref.watch(currencyConfigNotifierProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final sectionLabelStyle = TextStyle(
+      fontSize: AppTypography.sizeXs,
+      fontWeight: AppTypography.medium,
+      letterSpacing: AppTypography.labelLetterSpacingForSize12,
+      color: colorScheme.onSurfaceVariant,
+    );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Devises & Taux')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.space4),
-        children: [
-          // Section "Mes devises"
-          Text(
-            'Mes devises',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          children: [
+            PageHeader(
+              title: 'Devises & Taux',
+              onBack: () => context.pop(),
+              icon: const PhosphorIcon(PhosphorIconsRegular.bank, size: 16),
             ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
 
-          ReorderableListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: currencies.length,
-            onReorder: (oldIndex, newIndex) {
-              if (newIndex > oldIndex) newIndex--;
-              final reordered = [...currencies];
-              final item = reordered.removeAt(oldIndex);
-              reordered.insert(newIndex, item);
-              ref
-                  .read(currencyConfigNotifierProvider.notifier)
-                  .reorderCurrencies(reordered);
-            },
-            itemBuilder: (context, index) {
-              final currency = currencies[index];
-              final isPrimary = index == 0;
-              return ListTile(
-                key: ValueKey(currency.name),
-                leading: Text(
-                  currency.symbol,
-                  style: const TextStyle(fontSize: 20),
+            // Section "Mes devises"
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('MES DEVISES', style: sectionLabelStyle),
+                _AddButton(onTap: _addCurrency),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.space3),
+
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: currencies.length,
+              onReorder: (oldIndex, newIndex) {
+                if (newIndex > oldIndex) newIndex--;
+                final reordered = [...currencies];
+                final item = reordered.removeAt(oldIndex);
+                reordered.insert(newIndex, item);
+                ref
+                    .read(currencyConfigNotifierProvider.notifier)
+                    .reorderCurrencies(reordered);
+              },
+              itemBuilder: (context, index) {
+                final currency = currencies[index];
+                final isPrimary = index == 0;
+                return ListTile(
+                  key: ValueKey(currency.name),
+                  leading: Text(
+                    currency.symbol,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  title: Text(currency.name.toUpperCase()),
+                  subtitle: Text(
+                    isPrimary ? 'Principale • ${currency.displayName}' : currency.displayName,
+                    style: TextStyle(
+                      fontSize: AppTypography.sizeSm,
+                      color: isPrimary
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight:
+                          isPrimary ? AppTypography.medium : AppTypography.regular,
+                    ),
+                  ),
+                  trailing: isPrimary
+                      ? Chip(
+                          label: const Text('Principale'),
+                          labelStyle: TextStyle(
+                            fontSize: AppTypography.sizeXs,
+                            color: colorScheme.primary,
+                          ),
+                          backgroundColor:
+                              colorScheme.primary.withValues(alpha: 0.1),
+                          side: BorderSide.none,
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                        )
+                      : IconButton(
+                          icon: PhosphorIcon(
+                            PhosphorIconsRegular.trash,
+                            size: 20,
+                            color: colorScheme.error,
+                          ),
+                          onPressed: () => _confirmRemoveCurrency(currency),
+                          tooltip: 'Retirer cette devise',
+                        ),
+                );
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.space6),
+            const Divider(),
+            const SizedBox(height: AppSpacing.space4),
+
+            // Section taux de conversion
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('TAUX DE CONVERSION', style: sectionLabelStyle),
+                _AddButton(onTap: () => _openRateForm()),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.space3),
+
+            if (state.isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.space8),
+                  child: CircularProgressIndicator(),
                 ),
-                title: Text(currency.name.toUpperCase()),
-                subtitle: Text(
-                  isPrimary ? 'Principale • ${currency.displayName}' : currency.displayName,
+              )
+            else if (state.error != null)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: AppSpacing.space4),
+                child: Text(
+                  'Erreur : ${state.error}',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+              )
+            else if (state.items.isEmpty)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: AppSpacing.space6),
+                child: Text(
+                  'Aucun taux de conversion enregistré.',
                   style: TextStyle(
                     fontSize: AppTypography.sizeSm,
-                    color: isPrimary
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isPrimary ? AppTypography.medium : AppTypography.regular,
+                    color: colorScheme.onSurfaceVariant,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                trailing: isPrimary
-                    ? Chip(
-                        label: const Text('Principale'),
-                        labelStyle: TextStyle(
-                          fontSize: AppTypography.sizeXs,
-                          color: colorScheme.primary,
-                        ),
-                        backgroundColor:
-                            colorScheme.primary.withValues(alpha: 0.1),
-                        side: BorderSide.none,
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
-                      )
-                    : IconButton(
-                        icon: PhosphorIcon(
-                          PhosphorIconsRegular.trash,
-                          size: 20,
-                          color: colorScheme.error,
-                        ),
-                        onPressed: () => _confirmRemoveCurrency(currency),
-                        tooltip: 'Retirer cette devise',
+              )
+            else
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                ),
+                child: Column(
+                  children: [
+                    for (int i = 0; i < state.items.length; i++) ...[
+                      _RateTile(
+                        rate: state.items[i],
+                        onEdit: () => _openRateForm(existingRate: state.items[i]),
+                        onDelete: () => _confirmDelete(state.items[i]),
                       ),
-              );
-            },
-          ),
-
-          const SizedBox(height: AppSpacing.space3),
-
-          OutlinedButton.icon(
-            onPressed: _addCurrency,
-            icon: const PhosphorIcon(PhosphorIconsRegular.plus, size: 20),
-            label: const Text('Ajouter une devise'),
-          ),
-
-          const SizedBox(height: AppSpacing.space6),
-          const Divider(),
-          const SizedBox(height: AppSpacing.space4),
-
-          // Section taux de conversion
-          Text(
-            'Taux de conversion',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
-
-          if (state.isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.space8),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else if (state.error != null)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: AppSpacing.space4),
-              child: Text(
-                'Erreur : ${state.error}',
-                style: TextStyle(color: colorScheme.error),
-              ),
-            )
-          else if (state.items.isEmpty)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: AppSpacing.space6),
-              child: Text(
-                'Aucun taux de conversion enregistré.',
-                style: TextStyle(
-                  fontSize: AppTypography.sizeSm,
-                  color: colorScheme.onSurfaceVariant,
+                      if (i < state.items.length - 1)
+                        Divider(height: 1, color: colorScheme.outline),
+                    ],
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-            )
-          else
-            ...state.items.map((rate) => _RateTile(
-                  rate: rate,
-                  onEdit: () => _openRateForm(existingRate: rate),
-                  onDelete: () => _confirmDelete(rate),
-                )),
 
-          const SizedBox(height: AppSpacing.space4),
+            const SizedBox(height: AppSpacing.space6),
+            const Divider(),
+            const SizedBox(height: AppSpacing.space4),
 
-          // Bouton ajouter
-          OutlinedButton.icon(
-            onPressed: () => _openRateForm(),
-            icon: const PhosphorIcon(PhosphorIconsRegular.plus, size: 20),
-            label: const Text('Ajouter un taux'),
+            // Section calculateur
+            Text('CALCULATEUR', style: sectionLabelStyle),
+            const SizedBox(height: AppSpacing.space3),
+            const RateCalculator(),
+            const SizedBox(height: AppSpacing.space8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddButton extends StatelessWidget {
+  const _AddButton({required this.onTap});
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: colorScheme.outline),
+        ),
+        child: Center(
+          child: PhosphorIcon(
+            PhosphorIconsRegular.plus,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
           ),
-
-          const SizedBox(height: AppSpacing.space6),
-          const Divider(),
-          const SizedBox(height: AppSpacing.space4),
-
-          // Section calculateur
-          Text(
-            'Calculateur',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          const RateCalculator(),
-          const SizedBox(height: AppSpacing.space8),
-        ],
+        ),
       ),
     );
   }
@@ -335,57 +351,52 @@ class _RateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      color: colorScheme.surfaceContainerHighest,
-      margin: const EdgeInsets.only(bottom: AppSpacing.space2),
-      elevation: 0,
-      child: ListTile(
-        leading: PhosphorIcon(
-          PhosphorIconsRegular.currencyCircleDollar,
-          size: 24,
-          color: colorScheme.primary,
-        ),
-        title: Text(
-          '${rate.baseCurrency.name.toUpperCase()} → ${rate.targetCurrency.name.toUpperCase()}',
-          style: TextStyle(
-            fontSize: AppTypography.sizeMd,
-            fontWeight: AppTypography.medium,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          rate.rate.toStringAsFixed(
-            rate.rate < 1 ? 6 : (rate.rate < 10 ? 4 : 3),
-          ),
-          style: TextStyle(
-            fontSize: AppTypography.sizeSm,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: PhosphorIcon(
-                PhosphorIconsRegular.pencil,
-                size: 20,
-                color: colorScheme.onSurfaceVariant,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.space4,
+        vertical: AppSpacing.space3,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '${rate.baseCurrency.name.toUpperCase()} → ${rate.targetCurrency.name.toUpperCase()}',
+              style: TextStyle(
+                fontSize: AppTypography.sizeSm,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurface,
               ),
-              onPressed: onEdit,
-              tooltip: 'Modifier',
             ),
-            IconButton(
-              icon: PhosphorIcon(
-                PhosphorIconsRegular.trash,
-                size: 20,
-                color: colorScheme.error,
-              ),
-              onPressed: onDelete,
-              tooltip: 'Supprimer',
+          ),
+          Text(
+            rate.rate.toStringAsFixed(
+              rate.rate < 1 ? 6 : (rate.rate < 10 ? 4 : 3),
             ),
-          ],
-        ),
+            style: TextStyle(
+              fontSize: AppTypography.sizeSm,
+              fontWeight: AppTypography.semiBold,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          IconButton(
+            icon: PhosphorIcon(
+              PhosphorIconsRegular.pencil,
+              size: 20,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            onPressed: onEdit,
+            tooltip: 'Modifier',
+          ),
+          IconButton(
+            icon: PhosphorIcon(
+              PhosphorIconsRegular.trash,
+              size: 20,
+              color: colorScheme.error,
+            ),
+            onPressed: onDelete,
+            tooltip: 'Supprimer',
+          ),
+        ],
       ),
     );
   }

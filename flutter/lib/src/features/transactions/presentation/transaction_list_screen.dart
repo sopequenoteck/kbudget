@@ -1,15 +1,16 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/month_selector.dart';
-import 'package:k_budget/src/common_widgets/segmented_filter.dart';
+import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
+import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
@@ -18,7 +19,7 @@ import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_day_group.dart';
-import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_summary_card.dart';
+import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_hero_widget.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -109,46 +110,19 @@ class _TransactionListScreenState
             ),
           ),
 
-          // Résumé mensuel
+          // Hero solde mensuel
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.space3),
-              child: TransactionSummaryCard(
-                summary: state.summary,
-                isLoading: state.isLoading,
-              ),
+            child: TransactionHeroWidget(
+              summary: state.summary,
+              primaryCurrency: primaryCurrency,
+              isLoading: state.isLoading,
             ),
           ),
 
-          // Filtre segmenté
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.space4,
-                vertical: AppSpacing.space2,
-              ),
-              child: SegmentedFilter<TransactionTypeFilter>(
-                items: [
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.all,
-                    label: l10n.transactionsFilterAll,
-                  ),
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.depense,
-                    label: l10n.transactionsFilterDepenses,
-                  ),
-                  SegmentedFilterItem(
-                    value: TransactionTypeFilter.recette,
-                    label: l10n.transactionsFilterRecettes,
-                  ),
-                ],
-                selectedValue: state.activeFilter,
-                onChanged: (f) => ref.read(transactionListNotifierProvider.notifier).setFilter(f),
-              ),
-            ),
-          ),
+          // SectionHeaderSticky
+          const SectionHeaderSticky(title: 'Transactions'),
 
-          // Contenu principal
+          // Contenu principal (groupement sémantique)
           ..._buildContent(
             state,
             categoryMap,
@@ -222,14 +196,13 @@ class _TransactionListScreenState
       ];
     }
 
-    // Vide
-    if (state.filteredTransactions.isEmpty) {
-      final message = switch (state.activeFilter) {
-        TransactionTypeFilter.all => l10n.transactionsEmptyMonth,
-        TransactionTypeFilter.depense => l10n.transactionsEmptyDepenses,
-        TransactionTypeFilter.recette => l10n.transactionsEmptyRecettes,
-      };
+    // Groupement sémantique
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final semanticGroups = _groupBySemantics(state.allMonthTransactions, todayDate);
 
+    // Vide
+    if (semanticGroups.isEmpty) {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
@@ -246,7 +219,7 @@ class _TransactionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    message,
+                    l10n.transactionsEmptyMonth,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -260,41 +233,109 @@ class _TransactionListScreenState
       ];
     }
 
-    // Données — grouper par jour
-    final grouped = groupBy(
-      state.filteredTransactions,
-      (tx) => DateTime(tx.date.year, tx.date.month, tx.date.day),
-    );
-    final sortedDays = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
+    // Données
+    final widgets = <Widget>[];
+    for (final entry in semanticGroups.entries) {
+      final bucketLabel = entry.key;
+      final bucketTxs = entry.value;
+      final labelColor = bucketLabel == "Aujourd'hui"
+          ? AppColors.amber500
+          : colorScheme.onSurfaceVariant;
 
-    return [
-      SliverList.builder(
-        itemCount: sortedDays.length,
-        itemBuilder: (context, index) {
-          final day = sortedDays[index];
-          final dayTxs = grouped[day]!;
-          return TransactionDayGroup(
-            date: day,
-            transactions: dayTxs,
-            categories: categoryMap,
-            accounts: accounts,
-            exchangeRates: exchangeRates,
-            primaryCurrency: primaryCurrency,
-            onTransactionTap: (tx) {
-              if (tx.type == TransactionType.ajustement) return;
-              ref.read(modalNotifierProvider.notifier).open(
-                    ModalType.transaction,
-                    entity: tx,
-                  );
-            },
-          );
-        },
-      ),
-      // Padding en bas pour le FAB
-      const SliverToBoxAdapter(
-        child: SizedBox(height: AppSpacing.space12 * 2),
-      ),
+      // Date-label header
+      widgets.add(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.space4,
+              vertical: AppSpacing.space2,
+            ),
+            child: Text(
+              bucketLabel,
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                color: labelColor,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Sub-grouper par jour
+      final grouped = <DateTime, List<Transaction>>{};
+      for (final tx in bucketTxs) {
+        final day = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        grouped.putIfAbsent(day, () => []).add(tx);
+      }
+      final sortedDays = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+
+      widgets.add(
+        SliverList.builder(
+          itemCount: sortedDays.length,
+          itemBuilder: (context, index) {
+            final dayTxs = grouped[sortedDays[index]]!;
+            return TransactionDayGroup(
+              transactions: dayTxs,
+              categories: categoryMap,
+              accounts: accounts,
+              exchangeRates: exchangeRates,
+              primaryCurrency: primaryCurrency,
+              onTransactionTap: (tx) {
+                if (tx.type == TransactionType.ajustement) return;
+                ref.read(modalNotifierProvider.notifier).open(
+                  ModalType.transaction,
+                  entity: tx,
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    widgets.add(const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.space12 * 2)));
+    return widgets;
+  }
+
+  Map<String, List<Transaction>> _groupBySemantics(
+    List<Transaction> items,
+    DateTime today,
+  ) {
+    const kSemanticGroups = [
+      "Aujourd'hui",
+      'Hier',
+      'Cette semaine',
+      'Semaine dernière',
+      'Plus ancien',
     ];
+
+    final yesterday = today.subtract(const Duration(days: 1));
+    final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
+    final startOfLastWeek = startOfWeek.subtract(const Duration(days: 7));
+
+    final raw = <String, List<Transaction>>{};
+    for (final tx in items) {
+      final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+      final String bucket;
+      if (txDate == today) {
+        bucket = "Aujourd'hui";
+      } else if (txDate == yesterday) {
+        bucket = 'Hier';
+      } else if (!txDate.isBefore(startOfWeek)) {
+        bucket = 'Cette semaine';
+      } else if (!txDate.isBefore(startOfLastWeek)) {
+        bucket = 'Semaine dernière';
+      } else {
+        bucket = 'Plus ancien';
+      }
+      raw.putIfAbsent(bucket, () => []).add(tx);
+    }
+
+    final ordered = <String, List<Transaction>>{};
+    for (final key in kSemanticGroups) {
+      if (raw.containsKey(key)) ordered[key] = raw[key]!;
+    }
+    return ordered;
   }
 }

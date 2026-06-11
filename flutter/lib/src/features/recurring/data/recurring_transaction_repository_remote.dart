@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/recurring_transaction_remote_data_source.dart';
+import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart';
 import 'package:k_budget/src/data/remote/dtos/recurring_transaction_dtos.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart';
@@ -15,6 +16,12 @@ class RecurringTransactionRepositoryRemote
   Future<List<RecurringTransaction>> listActive() async {
     final responses = await _dataSource.getActive();
     return responses.map((r) => r.toDomain()).toList();
+  }
+
+  @override
+  Future<RecurringTransaction> create(RecurringTransactionCreateRequest req) async {
+    final response = await _dataSource.create(req);
+    return response.toDomain();
   }
 
   @override

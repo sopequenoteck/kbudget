@@ -827,13 +827,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recurringUpcoming => 'À venir';
 
   @override
-  String get recurringValidate => 'Valider';
+  String get recurringValidate => 'Marquer comme payée';
 
   @override
-  String get recurringSkip => 'Passer';
+  String get recurringSkip => 'Passer cette occurrence';
 
   @override
-  String get recurringDeactivate => 'Désactiver';
+  String get recurringDeactivate => 'Désactiver la récurrence';
+
+  @override
+  String get recurringValidateAll => 'Tout payé';
+
+  @override
+  String recurringNextOccurrence(String date) {
+    return 'Prochaine : $date';
+  }
+
+  @override
+  String get recurringMonthlySummaryTitle => 'BILAN MENSUEL';
+
+  @override
+  String recurringChargesCount(int count) {
+    return '$count CHARGES';
+  }
 
   @override
   String get recurringEmpty => 'Aucune récurrence active';

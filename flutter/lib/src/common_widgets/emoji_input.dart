@@ -114,7 +114,7 @@ class _EmojiInputState extends FormFieldState<String> {
                 child: _hasValue
                     ? Text(
                         value!,
-                        style: const TextStyle(fontSize: 24),
+                        style: const TextStyle(fontSize: AppTypography.size2xl),
                       )
                     : Text(
                         widget.placeholder,
@@ -170,8 +170,8 @@ class _EmojiPickerSheet extends StatelessWidget {
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: AppSpacing.space2),
-              width: 32,
-              height: 4,
+              width: AppSpacing.space8,
+              height: AppSpacing.space1,
               decoration: BoxDecoration(
                 color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(AppRadius.round),
@@ -219,7 +219,7 @@ class _EmojiPickerSheet extends StatelessWidget {
                   backgroundColor: colorScheme.surface,
                   noRecents: const Text(
                     'Aucun emoji récent',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: AppTypography.sizeXl),
                   ),
                 ),
                 categoryViewConfig: CategoryViewConfig(

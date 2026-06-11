@@ -1,34 +1,52 @@
 <!--
   Sync Impact Report
   ==================================================
-  Version change: 2.1.1 → 2.1.2 (PATCH — clarification contexte multi-user)
-  Bump rationale: Reconnaissance explicite du caractère multi-user
-    de l'instance self-hosted (groupe restreint ~16 comptes actifs).
-    Aucun principe modifié : le principe II (Sécurité par défaut)
-    couvrait déjà l'isolation par user authentifié. Ajout d'une
-    section "Contexte d'usage" et d'une bullet au principe VII pour
-    rendre explicites les décisions implicites (pas de partage
-    d'entités, pas de rapprochement cross-user auto, pas d'inscription
-    publique).
+  Version change: 2.1.2 → 3.0.0 (MAJOR — bifurcation
+    des trajectoires de distribution Spring/Angular vs Flutter)
+  Bump rationale: Reconnaissance explicite que Flutter devient
+    un produit commercial standalone distribué via stores publics
+    (App Store, Google Play), modèle paid one-shot, indépendant
+    de la trajectoire self-hosted Spring + Angular existante.
+    Cette bifurcation impacte structurellement deux principes
+    fondateurs (I et VII) ainsi que le contexte d'usage et les
+    contraintes techniques Flutter.
 
-  Modified principles: aucun (les 7 principes restent identiques)
+  Modified principles:
+    - Principe I (API-First) : reformulé en "API-First /
+      Local-First" pour couvrir le mode connecté (Spring +
+      Angular et Flutter en sync) et le mode standalone
+      (Flutter avec Drift comme source de vérité)
+    - Principe VII (Self-Hosted Ready) : reformulé en
+      "Two Distribution Trajectories" pour acter la coexistence
+      des deux modes de distribution (self-hosted et stores)
 
   Modified sections:
-    - Principe VII (Self-Hosted Ready) : ajout d'une bullet sur le
-      support multi-user
+    - Contexte d'usage : dédoublé en Contexte A (self-hosted)
+      et Contexte B (standalone commercial)
+    - Contraintes techniques (flutter/) : ajout des contraintes
+      stores, versioning indépendant, conformité Apple/Google
+    - Workflow de développement : précision versioning séparé
+      Flutter vs Spring + Angular
 
   Added sections:
-    - Contexte d'usage (nouveau) — avant "Contraintes techniques"
+    - Contexte B (Standalone Commercial)
 
   Removed sections: aucune
 
   Templates requiring updates:
-    - .specify/templates/plan-template.md ✅ compatible
+    - .specify/templates/plan-template.md ⚠ à vérifier
+      (principes I et VII modifiés peuvent impacter les
+      checklists Constitution Check)
     - .specify/templates/spec-template.md ✅ compatible
     - .specify/templates/tasks-template.md ✅ compatible
     - .specify/templates/checklist-template.md ✅ compatible
 
-  Follow-up TODOs: none
+  Follow-up TODOs:
+    - Réviser plan-template.md pour intégrer la distinction
+      Trajectoire A / Trajectoire B dans la Constitution Check
+    - Définir la stratégie concrète de versioning Flutter
+      (numérotation, branches release, CI/CD séparée) lors
+      de la phase technique de mise en commerce
   ==================================================
 -->
 
@@ -36,11 +54,15 @@
 
 ## Core Principles
 
-### I. API-First
+### I. API-First / Local-First
 
-Toute fonctionnalité DOIT être exposée via l'API REST avant
-d'être consommée par le frontend. Le backend est la source de
-vérité unique pour la logique métier et la validation.
+Toute fonctionnalité DOIT avoir une source de vérité unique
+explicitement documentée selon le mode de déploiement.
+
+**Mode connecté (Spring + Angular, Flutter en mode sync)** :
+le backend est la source de vérité. Toute fonctionnalité DOIT
+être exposée via l'API REST avant d'être consommée par le
+frontend.
 
 - Les endpoints DOIVENT suivre les conventions REST
   (GET/POST/PUT/DELETE, codes HTTP standards)
@@ -51,6 +73,19 @@ vérité unique pour la logique métier et la validation.
 - Les réponses DOIVENT être en JSON
 - Chaque ressource DOIT exposer un contrat clair
   (request DTO → response DTO) documenté par ses types
+
+**Mode standalone (Flutter local-first)** :
+la base Drift locale (SQLite) est la source de vérité.
+L'application DOIT fonctionner nominalement sans aucune
+dépendance réseau.
+
+- Le schéma Drift DOIT être versionné via migrations
+- Aucune feature en mode standalone NE DOIT requérir une
+  connexion serveur pour fonctionner
+- Si la sync Spring est activée par l'utilisateur (Settings →
+  Avancé), l'API devient une réplique secondaire — la
+  résolution de conflits DOIT être documentée explicitement
+  par feature dans le plan
 
 ### II. Sécurité par défaut
 
@@ -68,6 +103,9 @@ celles explicitement déclarées publiques dans `SecurityConfig`.
   (`@Valid`, `@NotNull`, `@Size`, etc.) avant traitement
 - Les erreurs de sécurité NE DOIVENT PAS exposer de détails
   internes (stack traces, noms de tables, etc.)
+- En mode standalone Flutter, les données locales DOIVENT
+  être protégées par le secure storage du device pour les
+  secrets (clés de chiffrement éventuelles, tokens de sync)
 
 ### III. Simplicité & YAGNI
 
@@ -107,6 +145,8 @@ saisie rapide est la priorité absolue.
   agrégés, préférences, comptes, catégories) peuvent
   utiliser le mode server-only (API REST sans Drift/SQLite)
   si justifié dans le plan
+- L'onboarding Flutter standalone DOIT être réalisable en
+  ≤ 30 secondes et démontrer la valeur produit immédiatement
 
 ### V. Testabilité
 
@@ -139,30 +179,58 @@ diagnostiquer tout problème sans accès au debugger.
 - Le format de log DOIT être structuré et cohérent
   (timestamp, niveau, classe, message)
 - Pas de `System.out.println` — utilisation exclusive de
-  SLF4J/Logback
+  SLF4J/Logback côté Spring, `developer.log` ou packages
+  de logging contrôlé côté Flutter (jamais de `print()`
+  laissé en production)
 
-### VII. Self-Hosted Ready
+### VII. Two Distribution Trajectories
 
-L'application DOIT être déployable sur un serveur personnel
-sans dépendance à des services cloud externes.
+L'application a deux trajectoires de distribution distinctes
+qui partagent le même backend Spring et la même DB PostgreSQL,
+mais répondent à des contraintes opérationnelles différentes.
 
-- La configuration DOIT supporter les profils Spring
-  (dev / prod) via fichiers YAML séparés
+**Trajectoire A — Self-Hosted (Spring + Angular)** :
+déploiement auto-hébergé, multi-user contrôlé.
+
+- La configuration DOIT supporter les profils Spring (dev /
+  prod) via fichiers YAML séparés
 - En production, toute configuration sensible DOIT provenir
   de variables d'environnement
 - PostgreSQL DOIT être la seule dépendance d'infrastructure
   externe
 - Pas de dépendance à des services SaaS (monitoring cloud,
-  auth externe, CDN) en v1
+  auth externe, CDN)
 - L'application DOIT démarrer avec une seule commande
   (`mvn spring-boot:run` ou `java -jar`)
 - L'application DOIT supporter plusieurs utilisateurs sur une
   même instance (multi-tenant logique via isolation par user
-  authentifié, cf. principe II). L'inscription publique
-  N'EST PAS un objectif : l'onboarding se fait via création
-  de compte contrôlée par l'administrateur du serveur.
+  authentifié, cf. principe II)
+- L'inscription publique N'EST PAS un objectif : l'onboarding
+  se fait via création de compte contrôlée par l'administrateur
+  du serveur
 
-## Contexte d'usage
+**Trajectoire B — Standalone Commercial (Flutter)** :
+distribution publique via App Store et Google Play, app
+standalone local-first, modèle économique paid one-shot.
+
+- Local-first par défaut (Drift/SQLite), aucune dépendance
+  serveur pour le fonctionnement nominal
+- Sync optionnelle vers la trajectoire A pour les utilisateurs
+  self-hostés (exposée via Settings → Avancé, non marketée)
+- Modèle économique : paid one-shot, prix différencié par
+  marché (Europe / Afrique) via les price tiers Apple / Google.
+  Pas de freemium, pas d'abonnement, pas de V2 payante prévue
+- Conformité stores obligatoire : privacy policy, privacy
+  nutrition labels, mécanisme de suppression de données
+  utilisateur (exigence Apple), backup cloud (iCloud /
+  Google Drive)
+- Versioning indépendant de la trajectoire A : releases
+  Flutter pilotées par les cycles stores (TestFlight, Play
+  Console), non couplées aux releases Spring + Angular
+
+## Contextes d'usage
+
+### Contexte A — Self-Hosted (Spring + Angular)
 
 - **Déploiement cible** : instance unique auto-hébergée,
   utilisée par un groupe restreint (~10-20 comptes actifs).
@@ -173,9 +241,29 @@ sans dépendance à des services cloud externes.
   users de l'instance (ex : prêt, commande pour compte de
   tiers) sont modélisées séparément dans chaque compte.
   Un rapprochement automatique inter-users N'EST PAS un
-  objectif de la v1.
+  objectif.
 - **Pas d'inscription publique** : création de compte
   contrôlée, pas de freemium, pas de quota payant.
+
+### Contexte B — Standalone Commercial (Flutter)
+
+- **Déploiement cible** : application standalone installée
+  par l'utilisateur final via App Store ou Google Play.
+- **Compte unique par device** : pas d'authentification
+  multi-user côté app standalone. Les données sont locales
+  au device.
+- **Sync optionnelle** : un utilisateur peut activer la sync
+  vers une instance self-hostée (Trajectoire A) via
+  Settings → Avancé. Ses données restent locales,
+  l'API agit comme réplique secondaire.
+- **Marchés cibles** : Europe (cible principale au launch) +
+  Afrique (cible secondaire avec différenciation potentielle
+  tontines / mobile money en post-launch).
+- **Modèle économique** : paid one-shot, pricing différencié
+  par marché via les price tiers Apple / Google. Pas de
+  freemium, pas d'abonnement, pas de V2 payante.
+- **Maintenance ciblée** : 3 à 5 ans après le launch, sans
+  cycle de re-paiement intermédiaire.
 
 ## Contraintes techniques
 
@@ -212,8 +300,9 @@ sans dépendance à des services cloud externes.
 - **Framework** : Flutter >= 3.27 (stable)
 - **State management** : flutter_riverpod
 - **Routing** : go_router
-- **Base de données locale** : Drift (SQLite)
-- **HTTP** : Dio
+- **Base de données locale** : Drift (SQLite) — source de
+  vérité en mode standalone (Contexte B)
+- **HTTP** : Dio (utilisé uniquement en mode sync optionnelle)
 - **Secure storage** : flutter_secure_storage
 - **Models** : Freezed + json_serializable
 - **Tests** : flutter_test + Mockito
@@ -221,8 +310,15 @@ sans dépendance à des services cloud externes.
 - **Structure** : `common_widgets/`, `constants/`, `data/`,
   `domain/`, `features/`, `localization/`, `routing/`,
   `theme/`, `utils/`
-- **Data mode** : local-first (Drift/SQLite) avec sync
-  optionnelle vers l'API REST via Dio
+- **Data mode** : local-first par défaut. Sync vers l'API
+  REST via Dio activable via Settings → Avancé.
+- **Distribution** : App Store (iOS) + Google Play (Android)
+- **Versioning** : indépendant des releases Spring + Angular,
+  piloté par les cycles stores
+- **Conformité stores** : privacy policy, privacy nutrition
+  labels, mécanisme de suppression de données utilisateur
+  (Apple), backup cloud iCloud / Google Drive
+- **Monétisation** : IAP pour licence one-shot
 
 ## Workflow de développement
 
@@ -236,6 +332,11 @@ sans dépendance à des services cloud externes.
   indépendamment
 - Les reviews DOIVENT vérifier l'alignement avec les
   7 principes de cette constitution
+- **Versioning** : Spring + Angular partagent une SemVer
+  commune (`VERSION`, `api/pom.xml`, `app/package.json`).
+  Flutter applique sa propre SemVer (`flutter/pubspec.yaml`),
+  indépendante des releases self-hostées et alignée sur les
+  cycles stores
 
 ## Governance
 
@@ -259,4 +360,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 2.1.2 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-04-13
+**Version**: 3.0.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-05-03

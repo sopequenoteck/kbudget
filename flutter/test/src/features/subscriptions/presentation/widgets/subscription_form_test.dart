@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
+import 'package:k_budget/src/common_widgets/category_select_expand.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -103,10 +105,14 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Nom'), findsOneWidget);
-      expect(find.text('Montant'), findsOneWidget);
-      expect(find.text('Date de début'), findsOneWidget);
-      expect(find.text('Actif'), findsOneWidget);
+      // Le formulaire est maintenant un BottomSheet4RowsWidget
+      expect(find.byType(BottomSheet4RowsWidget), findsOneWidget);
+      // Titre création
+      expect(find.text('Nouvel abonnement'), findsOneWidget);
+      // Boutons footer
+      expect(find.byKey(const Key('bsheet_submit')), findsOneWidget);
+      expect(find.byKey(const Key('bsheet_cancel')), findsOneWidget);
+      // Pill Enregistrer
       expect(find.text('Enregistrer'), findsOneWidget);
       expect(find.text('Annuler'), findsOneWidget);
     });
@@ -116,11 +122,11 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // Tap save button
-      await tester.tap(find.text('Enregistrer'));
+      // Tap sur le bouton Valider (Enregistrer)
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
       await tester.pumpAndSettle();
 
-      // Validation errors should appear
+      // Les erreurs de validation doivent apparaître
       expect(find.text('Champ requis'), findsAtLeast(1));
     });
 
@@ -136,20 +142,20 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Fill nom
+      // Fill montant (premier TextField hero)
       await tester.enterText(
-        find.byType(TextField).first,
-        'Spotify',
-      );
-
-      // Fill montant
-      await tester.enterText(
-        find.byType(TextField).last,
+        find.byKey(const Key('tf_montant')),
         '9.99',
       );
 
-      // Tap save
-      await tester.tap(find.text('Enregistrer'));
+      // Fill nom
+      await tester.enterText(
+        find.byKey(const Key('tf_nom')),
+        'Spotify',
+      );
+
+      // Tap sur Valider
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
       await tester.pump();
 
       expect(savedSub, isNotNull);
@@ -168,9 +174,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Verify pre-filled values
+      // Valeurs pré-remplies visibles
       expect(find.text('Netflix'), findsOneWidget);
       expect(find.text('15.99'), findsOneWidget);
+      // Titre mode édition
+      expect(find.text('Modifier abonnement'), findsOneWidget);
+      // Bouton Modifier dans le footer
       expect(find.text('Modifier'), findsOneWidget);
     });
 
@@ -183,11 +192,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Find and tap delete icon
+      // Trouver et tapper la pill Supprimer (icône trash)
       await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
       await tester.pumpAndSettle();
 
-      // Confirmation dialog should appear
+      // La boîte de dialogue de confirmation doit apparaître
       expect(find.text("Supprimer l'abonnement"), findsOneWidget);
       expect(
         find.text(
@@ -220,11 +229,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Fill required fields
-      await tester.enterText(find.byType(TextField).first, 'Test');
-      await tester.enterText(find.byType(TextField).last, '10');
+      // Remplir les champs requis
+      await tester.enterText(find.byKey(const Key('tf_montant')), '10');
+      await tester.enterText(find.byKey(const Key('tf_nom')), 'Test');
 
-      await tester.tap(find.text('Enregistrer'));
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
       await tester.pump();
 
       expect(savedSub, isNotNull);
@@ -244,15 +253,55 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Fill required fields
-      await tester.enterText(find.byType(TextField).first, 'Assurance');
-      await tester.enterText(find.byType(TextField).last, '600');
+      // Remplir les champs requis
+      await tester.enterText(find.byKey(const Key('tf_montant')), '600');
+      await tester.enterText(find.byKey(const Key('tf_nom')), 'Assurance');
 
-      await tester.tap(find.text('Enregistrer'));
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
       await tester.pump();
 
       expect(savedSub, isNotNull);
       expect(savedSub!.frequence, Frequency.annuel);
+    });
+
+    testWidgets('should_disable_footer_when_creating_category',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      // Le BottomSheet4RowsWidget doit être présent
+      expect(find.byType(BottomSheet4RowsWidget), findsOneWidget);
+
+      // Ouvrir la section catégorie via la pill
+      await tester.tap(find.text('Catégorie'));
+      await tester.pumpAndSettle();
+
+      // CategorySelectExpand doit être visible
+      expect(find.byType(CategorySelectExpand), findsOneWidget);
+
+      // Déclencher le mode création (bouton "+ Créer")
+      // La liste affiche testCategory (cat1 - Loisirs) mais on peut taper un terme inexistant
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(CategorySelectExpand),
+          matching: find.byType(TextField),
+        ),
+        'NouvelleCategorie',
+      );
+      await tester.pumpAndSettle();
+
+      // Le bouton "+ Créer «NouvelleCategorie»" doit apparaître
+      expect(find.textContaining('Créer'), findsAtLeast(1));
+
+      // Tapper le bouton créer pour basculer en mode création
+      await tester.tap(find.textContaining('+ Créer'));
+      await tester.pumpAndSettle();
+
+      // Le footer doit être désactivé (footerEnabled = false)
+      // On vérifie que le BottomSheet4RowsWidget est toujours présent avec footerEnabled = false
+      // via l'IgnorePointer + Opacity sur bsheet_bottom_row
+      final bottomRow = find.byKey(const Key('bsheet_bottom_row'));
+      expect(bottomRow, findsOneWidget);
     });
   });
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart';
 import 'package:k_budget/src/data/remote/dtos/recurring_transaction_dtos.dart';
 
 class RecurringTransactionRemoteDataSource {
@@ -11,6 +12,11 @@ class RecurringTransactionRemoteDataSource {
     return response.data!
         .map((e) => RecurringTransactionResponse.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<RecurringTransactionResponse> create(RecurringTransactionCreateRequest req) async {
+    final response = await _dio.post('/transactions/recurring', data: req.toJson());
+    return RecurringTransactionResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> validate(String id) async {

@@ -1681,20 +1681,44 @@ abstract class AppLocalizations {
   /// No description provided for @recurringValidate.
   ///
   /// In fr, this message translates to:
-  /// **'Valider'**
+  /// **'Marquer comme payée'**
   String get recurringValidate;
 
   /// No description provided for @recurringSkip.
   ///
   /// In fr, this message translates to:
-  /// **'Passer'**
+  /// **'Passer cette occurrence'**
   String get recurringSkip;
 
   /// No description provided for @recurringDeactivate.
   ///
   /// In fr, this message translates to:
-  /// **'Désactiver'**
+  /// **'Désactiver la récurrence'**
   String get recurringDeactivate;
+
+  /// No description provided for @recurringValidateAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout payé'**
+  String get recurringValidateAll;
+
+  /// No description provided for @recurringNextOccurrence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaine : {date}'**
+  String recurringNextOccurrence(String date);
+
+  /// No description provided for @recurringMonthlySummaryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'BILAN MENSUEL'**
+  String get recurringMonthlySummaryTitle;
+
+  /// No description provided for @recurringChargesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} CHARGES'**
+  String recurringChargesCount(int count);
 
   /// No description provided for @recurringEmpty.
   ///

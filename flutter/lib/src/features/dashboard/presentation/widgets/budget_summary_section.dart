@@ -35,8 +35,7 @@ class BudgetSummarySection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Top 4 items tries par pourcentage decroissant (depasses en premier)
     final topItems = [...overview.items]
@@ -56,78 +55,63 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Budgets \u00b7 ${DateFormat('MMMM yyyy', 'fr_FR').format(DateTime.now())}',
+              'Budgets · ${DateFormat('MMMM yyyy', 'fr_FR').format(DateTime.now())}',
               style: TextStyle(
-                fontSize: AppTypography.sizeLg,
+                fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
-                color: colorScheme.onSurface,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             TextButton(
-              onPressed: () => context.push(RouteNames.budgetDetails),
+              onPressed: () => context.push(RouteNames.budgets),
               child: const Text('Voir tout'),
             ),
           ],
         ),
 
-        // Contenu dans une carte
+        // Sous-titre : MENSUEL · EN {devise} + total (entre header et carte)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'MENSUEL · EN ${overview.currency.toUpperCase()}',
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurfaceVariant,
+                letterSpacing: AppTypography.sizeXs * 0.05,
+              ),
+            ),
+            Text(
+              '${AmountFormatter.format(overview.totalSpent, currency: currencyEnum)} / ${AmountFormatter.format(overview.totalBudget, currency: currencyEnum)}',
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.space3),
+
+        // Carte items
         Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
           ),
           child: Column(
-            children: [
-              // Liste des budgets
-              ...displayItems.map(
-                (item) => BudgetItem(
-                  categoryNom: item.categoryNom,
-                  categoryIcone: item.categoryIcone,
-                  categoryCouleur: item.categoryCouleur,
-                  montantBudget: item.montantBudgetNormalise,
-                  montantDepense: item.montantDepense,
-                  percentage: item.percentage,
-                  currency: item.currency,
-                ),
+            children: displayItems.map(
+              (item) => BudgetItem(
+                categoryNom: item.categoryNom,
+                categoryIcone: item.categoryIcone,
+                categoryCouleur: item.categoryCouleur,
+                montantBudget: item.montantBudgetNormalise,
+                montantDepense: item.montantDepense,
+                percentage: item.percentage,
+                currency: item.currency,
               ),
-
-              // Separateur
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: colorScheme.outlineVariant,
-              ),
-
-              // Footer : total depense / total budget
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.space4,
-                  vertical: AppSpacing.space3,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total du mois',
-                      style: TextStyle(
-                        fontSize: AppTypography.sizeSm,
-                        fontWeight: AppTypography.medium,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    Text(
-                      '${AmountFormatter.format(overview.totalSpent, currency: currencyEnum)} / ${AmountFormatter.format(overview.totalBudget, currency: currencyEnum)}',
-                      style: TextStyle(
-                        fontSize: AppTypography.sizeSm,
-                        fontWeight: AppTypography.semiBold,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ).toList(),
           ),
         ),
       ],
@@ -164,8 +148,7 @@ class _BudgetSummarySkeleton extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
             ),
             child: Column(
               children: List.generate(

@@ -24,34 +24,36 @@ class CurrencyPillSelector extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
+        spacing: AppSpacing.space1,
         children: currencies.map((c) {
           final isActive = c == activeCurrency;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.space2),
-            child: GestureDetector(
-              onTap: () => onCurrencyChanged(c),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.space4,
-                  vertical: AppSpacing.space2,
-                ),
-                decoration: BoxDecoration(
+          return GestureDetector(
+            onTap: () => onCurrencyChanged(c),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.space3,
+                vertical: AppSpacing.space1,
+              ),
+              decoration: BoxDecoration(
+                color: isActive ? colorScheme.primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppRadius.round),
+                border: Border.all(
                   color: isActive
                       ? colorScheme.primary
-                      : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppRadius.round),
+                      : colorScheme.outlineVariant,
+                  width: 1,
                 ),
-                child: Text(
-                  c.symbol,
-                  style: TextStyle(
-                    fontSize: AppTypography.sizeSm,
-                    fontWeight:
-                        isActive ? AppTypography.semiBold : AppTypography.medium,
-                    color: isActive
-                        ? colorScheme.onPrimary
-                        : colorScheme.onSurfaceVariant,
-                  ),
+              ),
+              child: Text(
+                c.symbol,
+                style: TextStyle(
+                  fontSize: AppTypography.sizeXs,
+                  fontWeight:
+                      isActive ? AppTypography.semiBold : AppTypography.medium,
+                  color: isActive
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

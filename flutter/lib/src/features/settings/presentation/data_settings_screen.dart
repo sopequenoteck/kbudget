@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
+import 'package:k_budget/src/common_widgets/page_header.dart';
 import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DataSettingsScreen extends ConsumerStatefulWidget {
@@ -38,81 +42,92 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dataSettingsNotifierProvider);
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Données')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.space4),
-        children: [
-          // Source active
-          Text(
-            'Source de données',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          children: [
+            PageHeader(
+              title: 'Données',
+              onBack: () => context.pop(),
+              icon: const PhosphorIcon(PhosphorIconsRegular.database, size: 16),
             ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<DataMode>(
-              segments: const [
-                ButtonSegment(
-                  value: DataMode.local,
-                  label: Text('Local'),
-                  icon: PhosphorIcon(PhosphorIconsRegular.deviceMobile, size: 20),
-                ),
-                ButtonSegment(
-                  value: DataMode.server,
-                  label: Text('Serveur'),
-                  icon: PhosphorIcon(PhosphorIconsRegular.cloud, size: 20),
-                ),
-              ],
-              selected: {state.dataMode},
-              onSelectionChanged: (selection) {
-                final newMode = selection.first;
-                if (newMode == state.dataMode) return;
-                _onModeChanged(newMode, state);
+
+            // Source active
+            Text(
+              'SOURCE DE DONNÉES',
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                letterSpacing: AppTypography.labelLetterSpacingForSize12,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<DataMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: DataMode.local,
+                    label: Text('Local'),
+                    icon: PhosphorIcon(PhosphorIconsRegular.deviceMobile, size: 20),
+                  ),
+                  ButtonSegment(
+                    value: DataMode.server,
+                    label: Text('Serveur'),
+                    icon: PhosphorIcon(PhosphorIconsRegular.cloud, size: 20),
+                  ),
+                ],
+                selected: {state.dataMode},
+                onSelectionChanged: (selection) {
+                  final newMode = selection.first;
+                  if (newMode == state.dataMode) return;
+                  _onModeChanged(newMode, state);
+                },
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space6),
+
+            // URL serveur
+            Text(
+              'URL DU SERVEUR',
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                letterSpacing: AppTypography.labelLetterSpacingForSize12,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.space3),
+            TextField(
+              controller: _urlController,
+              decoration: InputDecoration(
+                hintText: 'https://budget.kksdev.fr/api',
+                prefixIcon: const PhosphorIcon(PhosphorIconsRegular.link, size: 20),
+                errorText: state.error,
+                border: const OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.url,
+              onChanged: (_) {
+                if (state.error != null) ref.read(dataSettingsNotifierProvider.notifier).clearError();
               },
             ),
-          ),
-          const SizedBox(height: AppSpacing.space6),
-
-          // URL serveur
-          Text(
-            'URL du serveur',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: AppSpacing.space3),
+            FilledButton.icon(
+              onPressed: state.isLoading ? null : _onSaveUrl,
+              icon: const PhosphorIcon(PhosphorIconsRegular.floppyDisk, size: 20),
+              label: const Text('Enregistrer'),
             ),
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          TextField(
-            controller: _urlController,
-            decoration: InputDecoration(
-              hintText: 'https://budget.kksdev.fr/api',
-              prefixIcon: const PhosphorIcon(PhosphorIconsRegular.link, size: 20),
-              errorText: state.error,
-              border: const OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.url,
-            onChanged: (_) {
-              if (state.error != null) ref.read(dataSettingsNotifierProvider.notifier).clearError();
-            },
-          ),
-          const SizedBox(height: AppSpacing.space3),
-          FilledButton.icon(
-            onPressed: state.isLoading ? null : _onSaveUrl,
-            icon: const PhosphorIcon(PhosphorIconsRegular.floppyDisk, size: 20),
-            label: const Text('Enregistrer'),
-          ),
 
-          if (state.isLoading) ...[
-            const SizedBox(height: AppSpacing.space4),
-            const Center(child: CircularProgressIndicator()),
+            if (state.isLoading) ...[
+              const SizedBox(height: AppSpacing.space4),
+              const Center(child: CircularProgressIndicator()),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -153,30 +168,19 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
       }
     }
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialogCustom.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Changer de source ?'),
-        content: const Text(
-          'Les sources de données sont indépendantes. '
+      icon: PhosphorIconsRegular.arrowsLeftRight,
+      title: 'Changer de source ?',
+      message: 'Les sources de données sont indépendantes. '
           'Les données de la source actuelle ne seront pas visibles '
           'après le changement.\n\n'
           "L'application va redémarrer pour appliquer la nouvelle source.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirmer'),
-          ),
-        ],
-      ),
-    );
+      confirmLabel: 'Confirmer',
+      variant: ConfirmVariant.primary,
+    ) ?? false;
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     // If switching to server, check connectivity
     if (newMode == DataMode.server) {

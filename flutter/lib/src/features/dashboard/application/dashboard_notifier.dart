@@ -12,6 +12,7 @@ import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
+import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 
 /// Provider qui lit le nom utilisateur depuis FlutterSecureStorage.
@@ -54,6 +55,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
         ref.read(categoryNotifierProvider.notifier).loadItems(),
         ref.read(exchangeRateListProvider.notifier).loadItems(),
         ref.read(budgetNotifierProvider.notifier).loadOverview(),
+        ref.read(recurringListNotifierProvider.notifier).loadItems(),
       ]);
 
       // Lire les donnees chargees
@@ -156,13 +158,10 @@ class DashboardNotifier extends Notifier<DashboardState> {
     ref.invalidate(transactionNotifierProvider);
     ref.invalidate(categoryNotifierProvider);
     ref.invalidate(budgetNotifierProvider);
+    ref.invalidate(recurringListNotifierProvider);
     ref.invalidate(currentUserNameProvider);
 
     await loadDashboard();
-  }
-
-  void setActiveCurrency(Currency currency) {
-    state = state.copyWith(activeCurrency: currency);
   }
 
   void setActiveCurrencyAndCurrencies(

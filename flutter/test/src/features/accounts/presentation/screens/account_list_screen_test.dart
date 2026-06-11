@@ -79,10 +79,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Impossible de charger les comptes'), findsOneWidget);
-      expect(
-        find.byIcon(PhosphorIconsRegular.arrowClockwise),
-        findsOneWidget,
-      );
+      expect(find.text('Réessayer'), findsOneWidget);
     });
 
     testWidgets('should_showEmptyState_when_noAccounts', (tester) async {
@@ -111,7 +108,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.byIcon(PhosphorIconsBold.plus),
+        find.byIcon(PhosphorIconsRegular.plus),
         findsOneWidget,
       );
     });

@@ -26,7 +26,7 @@ import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_f
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
-import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -341,10 +341,13 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   Future<void> _onDelete() async {
     final l10n = AppLocalizations.of(context)!;
 
-    final confirmed = await showDeleteConfirmDialog(
+    final confirmed = await ConfirmDialogCustom.show(
       context: context,
+      icon: PhosphorIconsRegular.trash,
       title: l10n.accountDeleteConfirmTitle,
       message: l10n.accountDeleteConfirmMessage,
+      confirmLabel: l10n.delete,
+      variant: ConfirmVariant.danger,
     );
 
     if (confirmed != true || !mounted) return;
@@ -409,18 +412,13 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             name: _nameController.text,
             colorHex: _selectedColor,
             bankCode: _selectedBankCode != 'OTHER' ? _selectedBankCode : null,
-          ),
-          const SizedBox(height: AppSpacing.space6),
-
-          // Bank selector
-          BankSelectPicker(
-            selectedBankCode: _selectedBankCode,
-            onChanged: _onBankCodeChanged,
-            banks: ref.watch(banksProvider),
+            accountType: _selectedType,
           ),
           const SizedBox(height: AppSpacing.space6),
 
           // Type selector
+          _SectionHeader('TYPE DE COMPTE'),
+          const SizedBox(height: AppSpacing.space2),
           AccountTypeSelector(
             selectedType: _selectedType,
             onChanged: _onTypeChanged,
@@ -428,8 +426,20 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           ),
           const SizedBox(height: AppSpacing.space6),
 
+          // Bank selector
+          _SectionHeader('BANQUE'),
+          const SizedBox(height: AppSpacing.space2),
+          BankSelectPicker(
+            selectedBankCode: _selectedBankCode,
+            onChanged: _onBankCodeChanged,
+            banks: ref.watch(banksProvider),
+          ),
+          const SizedBox(height: AppSpacing.space6),
+
           // Emoji + Color row (masqué si une banque connue est sélectionnée)
           if (_selectedBankCode == 'OTHER') ...[
+            _SectionHeader('PERSONNALISATION'),
+            const SizedBox(height: AppSpacing.space2),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -488,6 +498,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             const SizedBox(height: AppSpacing.space0),
 
           // Name field
+          _SectionHeader('DÉTAILS'),
+          const SizedBox(height: AppSpacing.space2),
           AppFormField(
             label: l10n.accountFormNameField,
             showError: nomError != null,
@@ -507,25 +519,25 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           ),
           const SizedBox(height: AppSpacing.space6),
 
-          // Currency picker
-          SelectPicker(
-            label: l10n.accountFormCurrencyPicker,
-            items: Currency.values
-                .map((c) => SelectPickerItem(
-                      id: c.name,
-                      label: '${c.symbol} — ${c.name}',
-                    ))
-                .toList(),
-            selectedId: _selectedCurrency.name,
-            onChanged: (id) {
-              if (id != null) {
-                setState(() {
-                  _selectedCurrency = Currency.values.byName(id);
-                });
-              }
-            },
-            enabled: !_isEditMode,
-          ),
+          // Currency picker (create mode only)
+          if (!_isEditMode)
+            SelectPicker(
+              label: l10n.accountFormCurrencyPicker,
+              items: Currency.values
+                  .map((c) => SelectPickerItem(
+                        id: c.name,
+                        label: '${c.symbol} — ${c.name}',
+                      ))
+                  .toList(),
+              selectedId: _selectedCurrency.name,
+              onChanged: (id) {
+                if (id != null) {
+                  setState(() {
+                    _selectedCurrency = Currency.values.byName(id);
+                  });
+                }
+              },
+            ),
           const SizedBox(height: AppSpacing.space6),
 
           // Initial balance (create mode) or current balance + adjust (edit mode)
@@ -554,11 +566,37 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             ),
           ] else ...[
             // Current balance (read-only)
-            _ReadOnlyField(
-              label: l10n.accountFormCurrentBalance,
-              value: AmountFormatter.format(
-                widget.account!.solde,
-                currency: widget.account!.currency,
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.space4,
+                vertical: AppSpacing.space3,
+              ),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.accountFormCurrentBalance,
+                    style: TextStyle(
+                      fontSize: AppTypography.sizeSm,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    AmountFormatter.format(
+                      widget.account!.solde,
+                      currency: widget.account!.currency,
+                    ),
+                    style: TextStyle(
+                      fontSize: AppTypography.sizeSm,
+                      fontWeight: AppTypography.semiBold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.space6),
@@ -710,36 +748,21 @@ class _BankLogoUpload extends StatelessWidget {
   }
 }
 
-class _ReadOnlyField extends StatelessWidget {
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(this.label);
   final String label;
-  final String value;
-
-  const _ReadOnlyField({
-    required this.label,
-    required this.value,
-  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.space1),
-        Text(
-          value,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+    final colorScheme = Theme.of(context).colorScheme;
+    return Text(
+      label.toUpperCase(),
+      style: TextStyle(
+        fontSize: AppTypography.sizeXs,
+        fontWeight: AppTypography.semiBold,
+        color: colorScheme.onSurfaceVariant,
+        letterSpacing: 0.8,
+      ),
     );
   }
 }

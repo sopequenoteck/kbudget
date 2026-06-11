@@ -68,8 +68,8 @@ class ColorPalettePicker extends StatelessWidget {
               onTap: () => onChanged(hex),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                width: 36,
-                height: 36,
+                width: AppSpacing.space9,
+                height: AppSpacing.space9,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,

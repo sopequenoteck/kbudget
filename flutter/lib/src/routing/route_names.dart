@@ -20,13 +20,10 @@ class RouteNames {
 
   // Settings sub-paths (relative)
   static const String settingsProfile = 'profile';
-  static const String settingsAppearance = 'appearance';
-  static const String settingsFeatures = 'features';
   static const String settingsAccounts = 'accounts';
   static const String settingsCategories = 'categories';
   static const String settingsData = 'data';
   static const String settingsCurrencies = 'currencies';
-  static const String settingsNotifications = 'notifications';
 
   // Names
   static const String onboardingName = 'onboarding';
@@ -41,13 +38,10 @@ class RouteNames {
   static const String acceptInviteName = 'acceptInvite';
   static const String adminUsersName = 'adminUsers';
   static const String settingsProfileName = 'settings-profile';
-  static const String settingsAppearanceName = 'settings-appearance';
-  static const String settingsFeaturesName = 'settings-features';
   static const String settingsAccountsName = 'settings-accounts';
   static const String settingsCategoriesName = 'settings-categories';
   static const String settingsDataName = 'settings-data';
   static const String settingsCurrenciesName = 'settings-currencies';
-  static const String settingsNotificationsName = 'settings-notifications';
   static const String budgetsName = 'budgets';
   static const String budgetDetailsName = 'budget-details';
   static const String debtDetailName = 'debt-detail';

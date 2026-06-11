@@ -3,6 +3,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 
 class CategoryListTile extends StatelessWidget {
@@ -18,6 +19,7 @@ class CategoryListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final themeExt = Theme.of(context).extension<AppThemeExtension>();
     final iconColor = parseHexColor(category.couleur);
 
     return InkWell(
@@ -37,7 +39,7 @@ class CategoryListTile extends StatelessWidget {
               height: AppSpacing.space10,
               decoration: BoxDecoration(
                 color: iconColor?.withValues(alpha: 0.15) ??
-                    colorScheme.surfaceContainerHighest,
+                    themeExt?.iconCircleBg ?? colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppRadius.round),
               ),
               child: Center(

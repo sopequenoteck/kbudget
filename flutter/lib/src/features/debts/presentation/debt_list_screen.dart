@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
-import 'package:k_budget/src/common_widgets/segmented_filter.dart';
-import 'package:k_budget/src/constants/app_radius.dart';
+import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
+import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/debts/presentation/widgets/debt_hero_widget.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
@@ -22,7 +23,6 @@ import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:shimmer/shimmer.dart';
 
 class DebtListScreen extends ConsumerStatefulWidget {
   const DebtListScreen({super.key});
@@ -67,6 +67,8 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
         ? dashboardState.currencies.first
         : null;
 
+    final kEnCours = state.items.where((d) => !d.rembourse).length;
+
     return RefreshIndicator(
       onRefresh: () async {
         try {
@@ -89,6 +91,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
             theme,
             exchangeRates: exchangeRateState.items,
             primaryCurrency: primaryCurrency,
+            kEnCours: kEnCours,
           ),
         ],
       ),
@@ -103,15 +106,16 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     ThemeData theme, {
     List<ExchangeRate> exchangeRates = const [],
     Currency? primaryCurrency,
+    int kEnCours = 0,
   }) {
-    final themeExt = theme.extension<AppThemeExtension>();
-
     // Loading
     if (state.isLoading) {
       return [
         SliverToBoxAdapter(
-          child: _DebtSummaryCard(
+          child: DebtHeroWidget(
             summary: state.summary,
+            primaryCurrency: primaryCurrency,
+            enCours: kEnCours,
             isLoading: true,
           ),
         ),
@@ -166,27 +170,17 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       ];
     }
 
-    // Partition items into prêts and emprunts
-    final prets = state.items.where((d) => d.sens == DebtType.pret).toList();
-    final emprunts =
-        state.items.where((d) => d.sens == DebtType.emprunt).toList();
-
     // Empty
     if (state.items.isEmpty) {
-      final emptyMessage = switch (state.activeFilter) {
-        DebtStatusFilter.all => l10n.debtsEmpty,
-        DebtStatusFilter.enCours => l10n.debtsEmptyEnCours,
-        DebtStatusFilter.rembourse => l10n.debtsEmptyRembourse,
-      };
-
       return [
         SliverToBoxAdapter(
-          child: _DebtSummaryCard(
+          child: DebtHeroWidget(
             summary: state.summary,
+            primaryCurrency: primaryCurrency,
+            enCours: 0,
             isLoading: false,
           ),
         ),
-        _buildFilter(state, l10n),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Center(
@@ -202,7 +196,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    emptyMessage,
+                    l10n.debtsEmpty,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -216,29 +210,63 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       ];
     }
 
-    // Data
+    // Data — groupement temporel
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final groups = _groupByDueDate(state.items, todayDate);
+    final themeExt = theme.extension<AppThemeExtension>();
     final dateFormat = DateFormat('d MMMM', 'fr_FR');
 
-    return [
+    final widgets = <Widget>[
       SliverToBoxAdapter(
-        child: _DebtSummaryCard(
+        child: DebtHeroWidget(
           summary: state.summary,
+          primaryCurrency: primaryCurrency,
+          enCours: kEnCours,
           isLoading: false,
         ),
       ),
-      _buildFilter(state, l10n),
-      // Prêts section
-      if (prets.isNotEmpty) ...[
+      SectionHeaderSticky(title: 'Dettes · $kEnCours en cours'),
+    ];
+
+    for (final entry in groups.entries) {
+      final bucketLabel = entry.key;
+      final bucketDebts = entry.value;
+
+      // Couleur du date-label
+      final Color labelColor;
+      if (bucketLabel == 'En retard') {
+        labelColor = themeExt?.expenseColor ?? colorScheme.error;
+      } else if (bucketLabel == "Aujourd'hui") {
+        labelColor = AppColors.amber500;
+      } else {
+        labelColor = colorScheme.onSurfaceVariant;
+      }
+
+      widgets.add(
         SliverToBoxAdapter(
-          child: _SectionHeader(
-            title: l10n.debtsSectionPrets,
-            items: prets,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.space4,
+              vertical: AppSpacing.space2,
+            ),
+            child: Text(
+              bucketLabel,
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                fontWeight: AppTypography.medium,
+                color: labelColor,
+              ),
+            ),
           ),
         ),
+      );
+
+      widgets.add(
         SliverList.builder(
-          itemCount: prets.length,
+          itemCount: bucketDebts.length,
           itemBuilder: (context, index) => _buildDebtItem(
-            prets[index],
+            bucketDebts[index],
             categoryMap,
             colorScheme,
             dateFormat,
@@ -248,67 +276,79 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
             primaryCurrency: primaryCurrency,
           ),
         ),
-      ],
-      // Emprunts section
-      if (emprunts.isNotEmpty) ...[
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            title: l10n.debtsSectionEmprunts,
-            items: emprunts,
-          ),
-        ),
-        SliverList.builder(
-          itemCount: emprunts.length,
-          itemBuilder: (context, index) => _buildDebtItem(
-            emprunts[index],
-            categoryMap,
-            colorScheme,
-            dateFormat,
-            l10n,
-            themeExt,
-            exchangeRates: exchangeRates,
-            primaryCurrency: primaryCurrency,
-          ),
-        ),
-      ],
-      // FAB padding
+      );
+    }
+
+    widgets.add(
       const SliverToBoxAdapter(
         child: SizedBox(height: AppSpacing.space12 * 2),
       ),
-    ];
+    );
+
+    return widgets;
   }
 
-  SliverToBoxAdapter _buildFilter(
-    DebtListState state,
-    AppLocalizations l10n,
+  Map<String, List<Debt>> _groupByDueDate(
+    List<Debt> items,
+    DateTime today,
   ) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.space4,
-          vertical: AppSpacing.space2,
-        ),
-        child: SegmentedFilter<DebtStatusFilter>(
-          items: [
-            SegmentedFilterItem(
-              value: DebtStatusFilter.all,
-              label: l10n.debtsFilterAll,
-            ),
-            SegmentedFilterItem(
-              value: DebtStatusFilter.enCours,
-              label: l10n.debtsFilterEnCours,
-            ),
-            SegmentedFilterItem(
-              value: DebtStatusFilter.rembourse,
-              label: l10n.debtsFilterRembourse,
-            ),
-          ],
-          selectedValue: state.activeFilter,
-          onChanged: (f) =>
-              ref.read(debtNotifierProvider.notifier).setFilter(f),
-        ),
-      ),
-    );
+    const kDebtBuckets = [
+      'En retard',
+      "Aujourd'hui",
+      'Cette semaine',
+      'Ce mois-ci',
+      'Plus tard',
+      'Sans échéance',
+      'Remboursées',
+    ];
+
+    final raw = <String, List<Debt>>{};
+    for (final debt in items) {
+      final String bucket;
+      if (debt.rembourse) {
+        bucket = 'Remboursées';
+      } else if (debt.dueDate == null) {
+        bucket = 'Sans échéance';
+      } else {
+        final dueDay = DateTime(
+          debt.dueDate!.year,
+          debt.dueDate!.month,
+          debt.dueDate!.day,
+        );
+        if (dueDay.isBefore(today)) {
+          bucket = 'En retard';
+        } else if (dueDay == today) {
+          bucket = "Aujourd'hui";
+        } else if (!dueDay.isAfter(today.add(const Duration(days: 7)))) {
+          bucket = 'Cette semaine';
+        } else if (dueDay.year == today.year && dueDay.month == today.month) {
+          bucket = 'Ce mois-ci';
+        } else {
+          bucket = 'Plus tard';
+        }
+      }
+      raw.putIfAbsent(bucket, () => []).add(debt);
+    }
+
+    // Tri dans chaque bucket : dueDate ASC (null après), puis date DESC
+    for (final list in raw.values) {
+      list.sort((a, b) {
+        if (a.dueDate == null && b.dueDate == null) {
+          return b.date.compareTo(a.date);
+        }
+        if (a.dueDate == null) return 1;
+        if (b.dueDate == null) return -1;
+        final dueCmp = a.dueDate!.compareTo(b.dueDate!);
+        if (dueCmp != 0) return dueCmp;
+        return b.date.compareTo(a.date);
+      });
+    }
+
+    final ordered = <String, List<Debt>>{};
+    for (final key in kDebtBuckets) {
+      if (raw.containsKey(key)) ordered[key] = raw[key]!;
+    }
+    return ordered;
   }
 
   Widget _buildDebtItem(
@@ -359,230 +399,6 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       onPressed: () {
         context.push('/debts/${debt.id}', extra: debt);
       },
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.items,
-  });
-
-  final String title;
-  final List<Debt> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    // Compute sub-totals per currency
-    final totals = <Currency, double>{};
-    for (final debt in items) {
-      totals[debt.currency] = (totals[debt.currency] ?? 0) + debt.montant;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: AppTypography.sizeSm,
-              fontWeight: AppTypography.semiBold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          Row(
-            spacing: AppSpacing.space2,
-            children: totals.entries
-                .map(
-                  (e) => Text(
-                    AmountFormatter.format(e.value, currency: e.key),
-                    style: TextStyle(
-                      fontSize: AppTypography.sizeSm,
-                      fontWeight: AppTypography.medium,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DebtSummaryCard extends StatelessWidget {
-  const _DebtSummaryCard({
-    required this.summary,
-    required this.isLoading,
-  });
-
-  final Map<Currency, DebtCurrencySummary> summary;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) return const _SummaryCardSkeleton();
-    if (summary.isEmpty) return const SizedBox.shrink();
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final themeExt = theme.extension<AppThemeExtension>();
-    final l10n = AppLocalizations.of(context)!;
-
-    final entries = summary.entries.toList();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.space4,
-          vertical: AppSpacing.space3,
-        ),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final entry in entries) ...[
-              if (entries.indexOf(entry) > 0)
-                const SizedBox(height: AppSpacing.space3),
-              // Emprunts row
-              _SummaryRow(
-                label: l10n.debtsSummaryEmprunts,
-                amount: entry.value.totalEmprunts,
-                currency: entry.key,
-                color: themeExt?.debtOweColor ?? colorScheme.error,
-              ),
-              const SizedBox(height: AppSpacing.space1),
-              // Prêts row
-              _SummaryRow(
-                label: l10n.debtsSummaryPrets,
-                amount: entry.value.totalPrets,
-                currency: entry.key,
-                color: themeExt?.debtOwedColor ?? colorScheme.primary,
-              ),
-              const SizedBox(height: AppSpacing.space1),
-              // Solde net row
-              Builder(
-                builder: (context) {
-                  final net =
-                      entry.value.totalPrets - entry.value.totalEmprunts;
-                  final netColor = net > 0
-                      ? themeExt?.incomeColor ?? colorScheme.primary
-                      : net < 0
-                          ? themeExt?.expenseColor ?? colorScheme.error
-                          : colorScheme.onSurfaceVariant;
-                  return _SummaryRow(
-                    label: l10n.debtsSummaryNet,
-                    amount: net.abs(),
-                    currency: entry.key,
-                    color: netColor,
-                    prefix: net > 0
-                        ? '+'
-                        : net < 0
-                            ? '-'
-                            : '',
-                    isBold: true,
-                  );
-                },
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.amount,
-    required this.currency,
-    required this.color,
-    this.prefix = '',
-    this.isBold = false,
-  });
-
-  final String label;
-  final double amount;
-  final Currency currency;
-  final Color color;
-  final String prefix;
-  final bool isBold;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final formatted = AmountFormatter.format(amount, currency: currency);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isBold ? AppTypography.sizeSm : AppTypography.sizeXs,
-            fontWeight:
-                isBold ? AppTypography.semiBold : AppTypography.medium,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Text(
-          '$prefix$formatted',
-          style: TextStyle(
-            fontSize: isBold ? AppTypography.sizeMd : AppTypography.sizeSm,
-            fontWeight:
-                isBold ? AppTypography.bold : AppTypography.semiBold,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryCardSkeleton extends StatelessWidget {
-  const _SummaryCardSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final baseColor = colorScheme.surfaceContainerHighest;
-    final highlightColor = colorScheme.surface;
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.space4,
-          vertical: AppSpacing.space2,
-        ),
-        child: Container(
-          height: 80,
-          decoration: BoxDecoration(
-            color: baseColor,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-          ),
-        ),
-      ),
     );
   }
 }

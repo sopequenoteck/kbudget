@@ -176,6 +176,59 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
+    group('validateAll', () {
+      test(
+          'should_validateAll_call_validate_for_each_id_and_clear_sentinel',
+          () async {
+        when(mockRepo.listActive()).thenAnswer(
+          (_) async => [overdueItem, overdueItem2],
+        );
+        await notifier().loadItems();
+
+        when(mockRepo.validate('overdue-1')).thenAnswer((_) async {});
+        when(mockRepo.validate('overdue-2')).thenAnswer((_) async {});
+        when(mockRepo.listActive()).thenAnswer((_) async => []);
+
+        await notifier().validateAll(['overdue-1', 'overdue-2']);
+
+        verify(mockRepo.validate('overdue-1')).called(1);
+        verify(mockRepo.validate('overdue-2')).called(1);
+        expect(state().mutatingIds, isNot(contains('__all__')));
+        expect(state().mutatingIds, isEmpty);
+      });
+
+      test(
+          'should_validateAll_stop_at_first_failure_and_clear_sentinel',
+          () async {
+        when(mockRepo.listActive()).thenAnswer(
+          (_) async => [overdueItem, overdueItem2],
+        );
+        await notifier().loadItems();
+
+        // overdue-2 fails
+        when(mockRepo.validate('overdue-2'))
+            .thenThrow(Exception('Network error'));
+        // After failing, listActive still returns both (no change)
+        when(mockRepo.listActive())
+            .thenAnswer((_) async => [overdueItem, overdueItem2]);
+
+        await notifier().validateAll(['overdue-2']);
+
+        // Sentinel must be cleared in finally
+        expect(state().mutatingIds, isNot(contains('__all__')));
+      });
+
+      test('should_validateAll_return_immediately_when_ids_empty', () async {
+        when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+        await notifier().loadItems();
+
+        await notifier().validateAll([]);
+
+        verifyNever(mockRepo.validate(any));
+        expect(state().mutatingIds, isEmpty);
+      });
+    });
+
     test('should_set_error_on_failure', () async {
       when(mockRepo.listActive()).thenThrow(Exception('Network error'));
 

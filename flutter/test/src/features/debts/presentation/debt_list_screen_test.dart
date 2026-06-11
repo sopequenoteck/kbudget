@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
@@ -93,21 +95,6 @@ void main() {
   }
 
   group('DebtListScreen', () {
-    testWidgets('should_displaySections_when_dataLoaded', (tester) async {
-      when(mockDebtRepo.getAll())
-          .thenAnswer((_) async => [debtPret, debtEmprunt]);
-      when(mockCatRepo.getAll())
-          .thenAnswer((_) async => [category1, category2]);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Prêts'), findsWidgets);
-      expect(find.text('Emprunts'), findsWidgets);
-      expect(find.text('Alice'), findsOneWidget);
-      expect(find.text('Bob'), findsOneWidget);
-    });
-
     testWidgets('should_displayEmptyState_when_noDebts', (tester) async {
       when(mockDebtRepo.getAll()).thenAnswer((_) async => []);
       when(mockCatRepo.getAll()).thenAnswer((_) async => []);
@@ -118,8 +105,10 @@ void main() {
       expect(find.text('Aucune dette'), findsOneWidget);
     });
 
-    testWidgets('should_displayRepaidBadge_when_debtIsRepaid',
+    testWidgets('should_display_temporal_groups_when_data_loaded',
         (tester) async {
+      // debtPret : non remboursé → bucket temporel (sans échéance)
+      // debtRepaid : remboursé → bucket 'Remboursées'
       when(mockDebtRepo.getAll())
           .thenAnswer((_) async => [debtPret, debtRepaid]);
       when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
@@ -127,39 +116,11 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // "Remboursé" appears as badge + filter segment = 2 occurrences
-      expect(find.text('Remboursé'), findsNWidgets(2));
+      expect(find.text('Alice'), findsOneWidget);
+      expect(find.text('Remboursées'), findsOneWidget);
     });
 
-    testWidgets('should_displaySummaryCard_when_nonRepaidDebtsExist',
-        (tester) async {
-      when(mockDebtRepo.getAll())
-          .thenAnswer((_) async => [debtPret, debtEmprunt]);
-      when(mockCatRepo.getAll())
-          .thenAnswer((_) async => [category1, category2]);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Emprunts'), findsWidgets);
-      expect(find.text('Solde net'), findsOneWidget);
-    });
-
-    testWidgets('should_displayFilterSegments', (tester) async {
-      when(mockDebtRepo.getAll())
-          .thenAnswer((_) async => [debtPret, debtEmprunt]);
-      when(mockCatRepo.getAll())
-          .thenAnswer((_) async => [category1, category2]);
-
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Tous'), findsOneWidget);
-      expect(find.text('En cours'), findsOneWidget);
-      expect(find.text('Remboursé'), findsOneWidget);
-    });
-
-    testWidgets('should_displayContextualEmptyMessage_when_filterActive',
+    testWidgets('should_display_section_header_when_data_loaded',
         (tester) async {
       when(mockDebtRepo.getAll()).thenAnswer((_) async => [debtPret]);
       when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
@@ -167,11 +128,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // Tap "Remboursé" filter
-      await tester.tap(find.text('Remboursé'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Aucune dette remboursée'), findsOneWidget);
+      expect(find.byType(SectionHeaderSticky), findsOneWidget);
     });
 
     testWidgets('should_displaySkeleton_when_loading', (tester) async {
@@ -185,6 +142,67 @@ void main() {
       // Should not show empty or data state
       expect(find.text('Aucune dette'), findsNothing);
       expect(find.text('Alice'), findsNothing);
+    });
+  });
+
+  group('DebtListScreen navigation', () {
+    late GoRouter router;
+    late String lastPushedLocation;
+
+    setUp(() {
+      lastPushedLocation = '';
+      router = GoRouter(
+        initialLocation: '/debts',
+        routes: [
+          GoRoute(
+            path: '/debts',
+            builder: (_, __) => ProviderScope(
+              overrides: [
+                debtRepositoryProvider.overrideWithValue(mockDebtRepo),
+                categoryRepositoryProvider
+                    .overrideWithValue(mockCatRepo),
+                accountRepositoryProvider
+                    .overrideWithValue(mockAccountRepo),
+                exchangeRateRepositoryProvider
+                    .overrideWith((_) async => mockExchangeRateRepo),
+              ],
+              child: const Scaffold(
+                body: DebtListScreen(),
+                floatingActionButton: SizedBox.shrink(),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/debts/:id',
+            builder: (context, state) {
+              lastPushedLocation = '/debts/${state.pathParameters['id']}';
+              return const Scaffold(body: Text('Detail'));
+            },
+          ),
+        ],
+      );
+    });
+
+    Widget buildAppWithRouter() => MaterialApp.router(
+          routerConfig: router,
+          theme: theme.AppTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        );
+
+    testWidgets(
+        'should_navigate_to_debt_detail_on_item_tap',
+        (tester) async {
+      when(mockDebtRepo.getAll()).thenAnswer((_) async => [debtPret]);
+      when(mockCatRepo.getAll()).thenAnswer((_) async => [category1]);
+
+      await tester.pumpWidget(buildAppWithRouter());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Alice'));
+      await tester.pumpAndSettle();
+
+      expect(lastPushedLocation, '/debts/1');
     });
   });
 }
