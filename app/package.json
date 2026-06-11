@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
@@ -40,6 +41,7 @@
     "@angular/cli": "^21.1.3",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/platform-browser-dynamic": "^21.1.3",
+    "@vitest/coverage-v8": "^4.1.8",
     "angular-eslint": "21.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
