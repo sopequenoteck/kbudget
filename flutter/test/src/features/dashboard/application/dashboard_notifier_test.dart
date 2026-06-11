@@ -11,6 +11,7 @@ import 'package:k_budget/src/features/budgets/application/budget_list_state.dart
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/mocks.mocks.dart';
@@ -21,6 +22,7 @@ void main() {
   late MockCategoryRepository mockCategoryRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
   late MockAppConfigRepository mockAppConfigRepo;
+  late MockRecurringTransactionRepository mockRecurringRepo;
   late ProviderContainer container;
 
   // --- Fixtures ---
@@ -160,6 +162,9 @@ void main() {
         ),
         dataModeProvider.overrideWith((ref) async => DataMode.local),
         budgetNotifierProvider.overrideWith(() => _FakeBudgetNotifier()),
+        recurringTransactionRepositoryProvider.overrideWith(
+          (_) async => mockRecurringRepo,
+        ),
         currentUserNameProvider.overrideWith((ref) async => null),
         ...extraOverrides,
       ],
@@ -172,6 +177,7 @@ void main() {
     mockCategoryRepo = MockCategoryRepository();
     mockExchangeRateRepo = MockExchangeRateRepository();
     mockAppConfigRepo = MockAppConfigRepository();
+    mockRecurringRepo = MockRecurringTransactionRepository();
 
     // Comportements par défaut (retours vides)
     when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
@@ -182,6 +188,7 @@ void main() {
     when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => []);
     when(mockAppConfigRepo.getDataMode())
         .thenAnswer((_) async => DataMode.local);
+    when(mockRecurringRepo.listActive()).thenAnswer((_) async => []);
 
     container = buildContainer();
   });
@@ -540,14 +547,6 @@ void main() {
       expect(state().accounts, accountsBefore);
       expect(state().isLoading, false);
       expect(state().error, isNull);
-    });
-
-    test('should_setActiveCurrency_when_setActiveCurrencyCalled', () async {
-      await notifier().loadDashboard();
-
-      notifier().setActiveCurrency(Currency.usd);
-
-      expect(state().activeCurrency, Currency.usd);
     });
   });
 

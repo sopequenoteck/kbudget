@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 
 void main() {
   Widget buildApp({DataMode initialMode = DataMode.local, String? serverUrl}) {
+    final router = GoRouter(
+      initialLocation: '/data',
+      routes: [
+        GoRoute(
+          path: '/data',
+          builder: (context, state) => const DataSettingsScreen(),
+        ),
+      ],
+    );
+
     return ProviderScope(
       overrides: [
         dataSettingsNotifierProvider.overrideWith(() {
@@ -14,8 +26,9 @@ void main() {
           return notifier;
         }),
       ],
-      child: const MaterialApp(
-        home: DataSettingsScreen(),
+      child: MaterialApp.router(
+        routerConfig: router,
+        theme: app_theme.AppTheme.light,
       ),
     );
   }
@@ -26,7 +39,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Données'), findsOneWidget);
-      expect(find.text('Source de données'), findsOneWidget);
+      expect(find.text('SOURCE DE DONNÉES'), findsOneWidget);
       expect(find.text('Local'), findsOneWidget);
       expect(find.text('Serveur'), findsOneWidget);
     });
@@ -35,7 +48,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('URL du serveur'), findsOneWidget);
+      expect(find.text('URL DU SERVEUR'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
     });
 

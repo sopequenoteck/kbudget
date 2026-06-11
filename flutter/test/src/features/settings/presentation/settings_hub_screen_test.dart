@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
+import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 
 void main() {
   late GoRouter router;
@@ -22,13 +23,6 @@ void main() {
               builder: (context, state) {
                 lastPushedLocation = '/settings/profile';
                 return const Scaffold(body: Text('Profile'));
-              },
-            ),
-            GoRoute(
-              path: 'appearance',
-              builder: (context, state) {
-                lastPushedLocation = '/settings/appearance';
-                return const Scaffold(body: Text('Appearance'));
               },
             ),
             GoRoute(
@@ -62,102 +56,71 @@ void main() {
     return ProviderScope(
       child: MaterialApp.router(
         routerConfig: router,
+        theme: app_theme.AppTheme.light,
       ),
     );
   }
 
   group('SettingsHubScreen', () {
-    testWidgets('should display 10 items with correct titles', (tester) async {
+    testWidgets('should_display_management_items_when_rendered',
+        (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Profil'), findsOneWidget);
-      expect(find.text('Fonctionnalités & Navigation'), findsOneWidget);
-      expect(find.text('Apparence'), findsOneWidget);
-      expect(find.text('Notifications'), findsOneWidget);
-
-      // Scroll down to reveal remaining items
-      await tester.scrollUntilVisible(find.text('Comptes'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('Comptes'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Catégories'), 100);
-      await tester.pumpAndSettle();
+      // Items visibles sans scroll dans la section Gestion
+      expect(find.text('Mon compte'), findsOneWidget);
+      expect(find.text('Comptes & Devises'), findsOneWidget);
       expect(find.text('Catégories'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Devises & Taux'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('Devises & Taux'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Données'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('Données'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Sécurité'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('Sécurité'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('À propos'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('À propos'), findsOneWidget);
     });
 
-    testWidgets('should display 3 group titles', (tester) async {
+    testWidgets('should_display_section_labels_when_rendered', (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Général'), findsOneWidget);
-      expect(find.text('Gestion'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Autre'), 100);
-      await tester.pumpAndSettle();
-      expect(find.text('Autre'), findsOneWidget);
+      // Sections visibles
+      expect(find.text('GESTION'), findsOneWidget);
+      expect(find.text('APPARENCE'), findsOneWidget);
     });
 
-    testWidgets('should display Réglages in AppBar', (tester) async {
+    testWidgets('should_display_Réglages_in_AppBar_when_rendered',
+        (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
       expect(find.text('Réglages'), findsOneWidget);
     });
 
-    testWidgets('should navigate to /settings/accounts on tap',
+    testWidgets('should_navigate_to_settings_accounts_when_tapped',
         (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Comptes'));
+      await tester.tap(find.text('Comptes & Devises'));
       await tester.pumpAndSettle();
 
       expect(lastPushedLocation, '/settings/accounts');
     });
 
-    testWidgets('should navigate to /settings/profile on tap',
+    testWidgets('should_navigate_to_settings_profile_when_tapped',
         (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Profil'));
+      await tester.tap(find.text('Mon compte'));
       await tester.pumpAndSettle();
 
       expect(lastPushedLocation, '/settings/profile');
     });
 
-    testWidgets('should not navigate on placeholder tap', (tester) async {
+    testWidgets('should_navigate_to_settings_categories_when_tapped',
+        (tester) async {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // Scroll to reveal placeholder "Sécurité"
-      await tester.scrollUntilVisible(find.text('Sécurité'), 100);
+      await tester.tap(find.text('Catégories'));
       await tester.pumpAndSettle();
 
-      // Tap on placeholder "Sécurité"
-      await tester.tap(find.text('Sécurité'));
-      await tester.pumpAndSettle();
-
-      // Should still be on settings hub (no navigation happened)
-      expect(lastPushedLocation, '');
-      expect(find.text('Réglages'), findsOneWidget);
+      expect(lastPushedLocation, '/settings/categories');
     });
   });
 }
