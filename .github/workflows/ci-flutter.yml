@@ -1,0 +1,85 @@
+name: CI - Flutter
+
+# Analyse qualité + couverture de la stack Flutter (plugin sonar-flutter côté serveur).
+#
+# Gate qualité : Quality Gate "Clean as You Code" (new code only) côté Sonar.
+#   - pull_request → BLOQUANT dans le run (sonar.qualitygate.wait=true) : le check
+#                    apparaît ROUGE sur la PR si le new code régresse.
+#                    Barrière HUMAINE au merge (pas de required check strict).
+#   - push (merge) → scan de référence non bloquant, alimente le dashboard Sonar.
+#
+# PRÉREQUIS INFRA (hors repo) :
+#   - Runner self-hosted labellisé [self-hosted, kbudget-ci] sur VM 105,
+#     avec accès au réseau Docker ci-stack_ci-net (pour joindre SonarQube).
+#   - Repo PRIVÉ. Settings → Actions → "Require approval for all external
+#     contributors" : le runner a le socket Docker, ne jamais exécuter de code
+#     de fork non approuvé (risque RCE sur l'infra homelab).
+#   - Secret repo SONAR_TOKEN, variable repo SONAR_HOST_URL (ex http://sonarqube:9000).
+#   - Plugin sonar-flutter installé sur le serveur SonarQube (analyse Dart).
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'flutter/**'
+      - '.github/workflows/ci-flutter.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'flutter/**'
+      - '.github/workflows/ci-flutter.yml'
+
+# Annule un run PR obsolète si un nouveau commit arrive sur la même PR.
+# Sur push (merge), on NE PAS annule : on préserve les scans de référence.
+concurrency:
+  group: ci-flutter-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  flutter-analysis:
+    name: Analyse Flutter
+    runs-on: [self-hosted, kbudget-ci]
+    timeout-minutes: 20
+    container:
+      # TODO épingler une version (ex: ghcr.io/cirruslabs/flutter:3.27.4)
+      # pour des builds reproductibles. :stable change sous toi.
+      image: ghcr.io/cirruslabs/flutter:stable
+      options: --network ci-stack_ci-net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Sonar : blame / détection du new code
+
+      - name: Dépendances + code generation
+        working-directory: flutter
+        # .g.dart / .freezed.dart gitignorés : régénérés dans le checkout CI.
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Tests + couverture
+        working-directory: flutter
+        run: flutter test --coverage
+
+      - name: Installer sonar-scanner CLI
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends curl unzip
+          curl -sSLo /tmp/sonar-scanner.zip \
+            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip
+          unzip -q /tmp/sonar-scanner.zip -d /opt
+          echo "/opt/sonar-scanner-6.2.1.4610-linux-x64/bin" >> "$GITHUB_PATH"
+
+      - name: Scan Sonar
+        working-directory: flutter
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # projectKey, sources, exclusions, chemin lcov : flutter/sonar-project.properties
+        run: |
+          sonar-scanner \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}

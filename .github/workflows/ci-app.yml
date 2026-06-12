@@ -1,0 +1,69 @@
+name: CI - APP (Angular)
+
+# Analyse qualité + couverture de la stack Angular.
+#
+# Gate qualité : Quality Gate "Clean as You Code" (new code only) côté Sonar.
+#   - pull_request → BLOQUANT dans le run (sonar.qualitygate.wait=true) : le check
+#                    apparaît ROUGE sur la PR si le new code régresse.
+#                    Barrière HUMAINE au merge (pas de required check strict).
+#   - push (merge) → scan de référence non bloquant, alimente le dashboard Sonar.
+#
+# PRÉREQUIS INFRA (hors repo) :
+#   - Runner self-hosted labellisé [self-hosted, kbudget-ci] sur VM 105,
+#     avec accès au réseau Docker ci-stack_ci-net (pour joindre SonarQube).
+#   - Repo PRIVÉ. Settings → Actions → "Require approval for all external
+#     contributors" : le runner a le socket Docker, ne jamais exécuter de code
+#     de fork non approuvé (risque RCE sur l'infra homelab).
+#   - Secret repo SONAR_TOKEN, variable repo SONAR_HOST_URL (ex http://sonarqube:9000).
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci-app.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci-app.yml'
+
+# Annule un run PR obsolète si un nouveau commit arrive sur la même PR.
+# Sur push (merge), on NE PAS annule : on préserve les scans de référence.
+concurrency:
+  group: ci-app-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  app-analysis:
+    name: Analyse APP (Angular)
+    runs-on: [self-hosted, kbudget-ci]
+    timeout-minutes: 15
+    container:
+      image: node:22
+      options: --network ci-stack_ci-net
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Sonar : blame / détection du new code
+
+      - name: Install, tests + couverture
+        working-directory: app
+        run: |
+          npm ci
+          npm run test:coverage
+
+      - name: Scan Sonar
+        working-directory: app
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # projectKey, sources, exclusions, chemin lcov : app/sonar-project.properties
+        run: |
+          npx --yes @sonar/scan \
+            -Dsonar.host.url="${SONAR_HOST_URL}" \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
