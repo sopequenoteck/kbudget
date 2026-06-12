@@ -1,0 +1,92 @@
+name: Release
+
+# Remplace tag-on-merge.yml ET docker-publish.yml (à supprimer pour éviter
+# la double exécution sur push main).
+#
+# Ordre garanti : build+push des images D'ABORD, tag git ENSUITE.
+# Le job `tag` dépend de `build-and-push` (needs) -> si le push échoue,
+# aucun tag n'est créé. Un tag vX.Y.Z implique donc qu'une image :X.Y.Z existe.
+
+on:
+  push:
+    branches: [main]
+
+# Sérialise les releases : ne jamais annuler une release en cours
+# (éviter une image à moitié poussée).
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+# Moindre privilège par défaut ; le job tag réhausse ce qu'il lui faut.
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "value=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api
+          push: true
+          platforms: linux/amd64
+          tags: |
+            sopequenotech/k-budget-api:latest
+            sopequenotech/k-budget-api:${{ steps.version.outputs.value }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Build & push App
+        uses: docker/build-push-action@v6
+        with:
+          context: ./app
+          push: true
+          platforms: linux/amd64
+          tags: |
+            sopequenotech/k-budget-app:latest
+            sopequenotech/k-budget-app:${{ steps.version.outputs.value }}
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
+
+  tag:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # nécessaire pour pousser le tag
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tag from VERSION
+        env:
+          VERSION: ${{ needs.build-and-push.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} existe déjà, skip."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}"
+          echo "Tag ${TAG} créé et pushé."
