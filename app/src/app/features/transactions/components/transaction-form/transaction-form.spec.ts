@@ -15,6 +15,8 @@ import { Frequency } from '../../../../core/models/subscription.model';
 import { type RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { type Category } from '../../../../core/models/category.model';
 import { type AccountSummary } from '../../../../core/models/account.model';
+import { CategoryService } from '../../../../core/services/category';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 
 if (!getTestBed().platform) {
   getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
@@ -83,6 +85,15 @@ describe('TransactionForm', () => {
     search: ReturnType<typeof vi.fn>;
   };
 
+  let categoryServiceMock: {
+    getAll: ReturnType<typeof vi.fn>;
+    refreshTrigger: ReturnType<typeof signal>;
+  };
+
+  let confirmServiceMock: {
+    confirm: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     transactionServiceMock = {
       create: vi.fn().mockReturnValue(of(makeTransaction())),
@@ -120,6 +131,15 @@ describe('TransactionForm', () => {
     libelleServiceMock = {
       search: vi.fn().mockReturnValue(of([])),
     };
+
+    categoryServiceMock = {
+      getAll: vi.fn().mockReturnValue(of([])),
+      refreshTrigger: signal(0),
+    };
+
+    confirmServiceMock = {
+      confirm: vi.fn().mockResolvedValue(false),
+    };
   });
 
   const setupTestBed = () => {
@@ -132,6 +152,8 @@ describe('TransactionForm', () => {
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
+        { provide: CategoryService, useValue: categoryServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
       ],
     });
   };

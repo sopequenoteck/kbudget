@@ -27,7 +27,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // servletPath n'inclut pas le context-path (/api) — c'est la bonne valeur pour matcher /admin/
+        // servletPath n'inclut pas le context path (/api) — c'est la bonne valeur pour matcher /admin/
         String servletPath = request.getServletPath();
 
         if (!servletPath.startsWith("/admin/")) {

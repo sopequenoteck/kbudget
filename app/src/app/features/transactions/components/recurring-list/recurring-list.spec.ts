@@ -7,6 +7,9 @@ import { Router } from '@angular/router';
 import { RecurringList } from './recurring-list';
 import { RecurringTransactionService } from '../../../../core/services/recurring-transaction';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { ConversionService } from '../../../../core/services/conversion';
+import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { PreferenceService } from '../../../../core/services/preference';
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
@@ -89,6 +92,34 @@ function createMockService(
   };
 }
 
+function createMockConversionService() {
+  return {
+    convert: vi.fn().mockReturnValue(null),
+    canConvert: vi.fn().mockReturnValue(false),
+    availableRates: signal([]),
+    get primaryCurrency() {
+      return 'EUR';
+    },
+  };
+}
+
+function createMockExchangeRateService() {
+  return {
+    rates: signal([]),
+    loading: signal(false),
+    error: signal(null),
+    loadRates: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
+function createMockPreferenceService() {
+  return {
+    primaryCurrency: signal('EUR'),
+    currencies: signal(['EUR']),
+    enabledFeatures: signal([]),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Suite
 // ---------------------------------------------------------------------------
@@ -103,6 +134,10 @@ describe('RecurringList', () => {
     navigate: ReturnType<typeof vi.fn>;
   };
 
+  let conversionServiceMock: ReturnType<typeof createMockConversionService>;
+  let exchangeRateServiceMock: ReturnType<typeof createMockExchangeRateService>;
+  let preferenceServiceMock: ReturnType<typeof createMockPreferenceService>;
+
   beforeEach(() => {
     toastServiceMock = {
       success: vi.fn(),
@@ -112,7 +147,25 @@ describe('RecurringList', () => {
     routerMock = {
       navigate: vi.fn(),
     };
+
+    conversionServiceMock = createMockConversionService();
+    exchangeRateServiceMock = createMockExchangeRateService();
+    preferenceServiceMock = createMockPreferenceService();
   });
+
+  const setupTestBed = (mockService: ReturnType<typeof createMockService>) => {
+    TestBed.configureTestingModule({
+      imports: [RecurringList],
+      providers: [
+        { provide: RecurringTransactionService, useValue: mockService },
+        { provide: ToastService, useValue: toastServiceMock },
+        { provide: Router, useValue: routerMock },
+        { provide: ConversionService, useValue: conversionServiceMock },
+        { provide: ExchangeRateService, useValue: exchangeRateServiceMock },
+        { provide: PreferenceService, useValue: preferenceServiceMock },
+      ],
+    });
+  };
 
   // -------------------------------------------------------------------------
   // T012-1 : affichage de la liste
@@ -120,15 +173,7 @@ describe('RecurringList', () => {
 
   it('should_display_recurring_transactions_list', async () => {
     const mockService = createMockService([overdueItem, upcomingItem]);
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     fixture.detectChanges();
@@ -147,15 +192,7 @@ describe('RecurringList', () => {
   it('should_sort_by_status_overdue_first', async () => {
     // On fournit les items dans l'ordre inverse pour vérifier le tri
     const mockService = createMockService([upcomingItem, todayItem, overdueItem]);
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     fixture.detectChanges();
@@ -173,15 +210,7 @@ describe('RecurringList', () => {
 
   it('should_display_correct_badge_for_each_status', () => {
     const mockService = createMockService([]);
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     const component = fixture.componentInstance;
@@ -197,15 +226,7 @@ describe('RecurringList', () => {
 
   it('should_display_empty_state_when_no_transactions', async () => {
     const mockService = createMockService([]);
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     fixture.detectChanges();
@@ -231,15 +252,7 @@ describe('RecurringList', () => {
         /* ne complète pas */
       }),
     );
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     fixture.detectChanges();
@@ -260,15 +273,7 @@ describe('RecurringList', () => {
   it('should_show_toast_after_successful_validate', async () => {
     const mockService = createMockService([overdueItem]);
     mockService.validate = vi.fn().mockReturnValue(of({ id: 'tx-new' }));
-
-    TestBed.configureTestingModule({
-      imports: [RecurringList],
-      providers: [
-        { provide: RecurringTransactionService, useValue: mockService },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+    setupTestBed(mockService);
 
     const fixture = TestBed.createComponent(RecurringList);
     fixture.detectChanges();

@@ -24,7 +24,7 @@ class AmountFormatter {
 
   /// Formate un montant avec devise et signe optionnel.
   ///
-  /// [type] : nom de l'enum (`TransactionType.depense.name`,
+  /// [type] : nom de lenum (`TransactionType.depense.name`,
   /// `DebtType.pret.name`) pour determiner le signe +/-.
   /// Sans [type], le signe est deduit de la valeur.
   static String format(
