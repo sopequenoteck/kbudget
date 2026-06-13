@@ -5,6 +5,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.0.3] - 2026-06-13
+
+> Release de maintenance — infrastructure CI/CD. Pas de changement fonctionnel.
+
+### Changed
+
+- **Release gatée par les tests** : `release.yml` exécute désormais les tests API (`mvn clean verify`, H2) et APP (`npm test`) avant de construire et publier les images Docker. Si un test échoue, aucune image n'est poussée ni taguée — la prod ne reçoit jamais de code dont les tests échouent. Seul gate dur possible sans branch protection (repo privé, plan GitHub free). Les tests Flutter ne sont pas dans le gate (pas d'image Docker Flutter).
+
+### Fixed
+
+- **Tests APP** : correction des timeouts de `recurring-list.spec.ts` (providers `ConversionService`, `ExchangeRateService`, `PreferenceService` manquants dans le TestBed). Suite APP : 475/475.
+
+> Note : les versions 5.0.1 et 5.0.2 ont été taguées sans entrée CHANGELOG correspondante.
+
 ## [5.0.0] - 2026-05-03
 
 > Release MAJOR — 3 BREAKING changes : suppression du module shop, refonte de l'onboarding (KKS-232), refacto architecture admin (KKS-233). Inclut également les features non-breaking KKS-234 (refonte design pages auth) et KKS-235 (page Mon compte).
