@@ -60,11 +60,14 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install & tests
+      - name: Install, tests + couverture
         working-directory: app
+        # `test:coverage` (et non `test`) : commande de reference de la CI-APP.
+        # Sur ubuntu-latest, `npm test` est flaky (isolation TestBed inter-fichiers
+        # selon la repartition en workers, cf. DT-003) alors que test:coverage passe.
         run: |
           npm ci
-          npm test
+          npm run test:coverage
 
   build-and-push:
     needs: [test-api, test-app]

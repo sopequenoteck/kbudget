@@ -5,19 +5,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
-## [5.0.3] - 2026-06-13
+## [5.0.4] - 2026-06-14
 
-> Release de maintenance — infrastructure CI/CD. Pas de changement fonctionnel.
+> Release de maintenance — infrastructure CI/CD. Pas de changement fonctionnel. (La version 5.0.3 a été préparée mais jamais publiée : le gate de release a correctement bloqué la livraison sur des tests rouges ; les correctifs sont regroupés ici.)
 
 ### Changed
 
-- **Release gatée par les tests** : `release.yml` exécute désormais les tests API (`mvn clean verify`, H2) et APP (`npm test`) avant de construire et publier les images Docker. Si un test échoue, aucune image n'est poussée ni taguée — la prod ne reçoit jamais de code dont les tests échouent. Seul gate dur possible sans branch protection (repo privé, plan GitHub free). Les tests Flutter ne sont pas dans le gate (pas d'image Docker Flutter).
+- **Release gatée par les tests** : `release.yml` exécute les tests API (`mvn clean verify`, H2) et APP (`npm run test:coverage`) avant de construire et publier les images Docker. Si un test échoue, aucune image n'est poussée ni taguée — la prod ne reçoit jamais de code dont les tests échouent. Seul gate dur possible sans branch protection (repo privé, plan GitHub free). Les tests Flutter ne sont pas dans le gate (pas d'image Docker Flutter).
+- **Test de perf API robuste** : `TransactionRepositoryTest` ne mesure plus un temps absolu (« < 100 ms ») mais un **ratio de scaling** T(10k)/T(1k) avec warm-up JIT — détecte une régression algorithmique (N+1, scan quadratique) sans dépendre de la vitesse de la machine. Méthode renommée `should_scale_sublinearly_on_large_transaction_volume`.
 
 ### Fixed
 
-- **Tests APP** : correction des timeouts de `recurring-list.spec.ts` (providers `ConversionService`, `ExchangeRateService`, `PreferenceService` manquants dans le TestBed). Suite APP : 475/475.
+- **Tests APP** : correction des timeouts de `recurring-list.spec.ts` et des fuites réseau undici de `transaction-form.spec.ts` (providers manquants dans le TestBed). Suite APP : 475/475.
 
-> Note : les versions 5.0.1 et 5.0.2 ont été taguées sans entrée CHANGELOG correspondante.
+> Note : les versions 5.0.1, 5.0.2 et 5.0.3 ont été taguées ou préparées sans publication ; voir DT-003 pour la dette d'isolation des tests APP restante.
 
 ## [5.0.0] - 2026-05-03
 
