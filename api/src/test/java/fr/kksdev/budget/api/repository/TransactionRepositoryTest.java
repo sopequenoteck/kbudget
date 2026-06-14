@@ -15,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -350,7 +351,7 @@ class TransactionRepositoryTest {
                     .montant(new BigDecimal("10.00"))
                     .libelle("Libelle_" + (i % 50))
                     .type(TransactionType.DEPENSE)
-                    .date(LocalDate.of(2026, 1, 1).plusDays(i % 365))
+                    .date(LocalDate.of(2026, Month.JANUARY, 1).plusDays(i % 365))
                     .account(account1)
                     .user(user1)
                     .build());
@@ -374,7 +375,7 @@ class TransactionRepositoryTest {
                     .montant(new BigDecimal("10.00"))
                     .libelle("Libelle_" + (i % 200))
                     .type(TransactionType.DEPENSE)
-                    .date(LocalDate.of(2026, 1, 1).plusDays(i % 365))
+                    .date(LocalDate.of(2026, Month.JANUARY, 1).plusDays(i % 365))
                     .account(account1)
                     .user(user1)
                     .build());
