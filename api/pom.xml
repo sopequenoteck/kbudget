@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.kksdev.budget</groupId>
     <artifactId>api</artifactId>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
     <name>k-budget-api</name>
     <description>K-Budget API — Gestion de budget personnel</description>
     <url/>

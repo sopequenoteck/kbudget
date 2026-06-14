@@ -48,23 +48,20 @@ jobs:
 
   test-app:
     name: Tests APP (gate release)
-    runs-on: ubuntu-latest
+    # Runner self-hosted (et non ubuntu-latest) : l'isolation TestBed vitest est
+    # instable a faible nombre de coeurs (DT-006) -> sur ubuntu-latest les tests
+    # APP echouent en cascade quelle que soit la commande. Sur le self-hosted
+    # (memes ressources que la CI-APP), `test:coverage` passe de facon fiable.
+    # Pas de Sonar ici -> pas besoin du reseau ci-stack_ci-net.
+    runs-on: [self-hosted, kbudget-ci]
     timeout-minutes: 15
+    container:
+      image: node:22
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-
       - name: Install, tests + couverture
         working-directory: app
-        # `test:coverage` (et non `test`) : commande de reference de la CI-APP.
-        # Sur ubuntu-latest, `npm test` est flaky (isolation TestBed inter-fichiers
-        # selon la repartition en workers, cf. DT-003) alors que test:coverage passe.
         run: |
           npm ci
           npm run test:coverage
