@@ -87,3 +87,19 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 **Fichier concerne** : `flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`
 
 **Correction proposee** : Revenir a `isLoading` global pour `create()` (pas d'id a tracker) et documenter cette exception dans le notifier, OU introduire un `isCreating: bool` separe dans `ListState<T>` si le besoin se generalise.
+
+---
+
+### DT-006 — Isolation TestBed instable avec vitest + Angular 21 (APP)
+
+**Identifie** : 2026-06-14
+
+**Description** : Les tests APP appellent `getTestBed().initTestEnvironment(...)` directement dans chaque fichier `.spec.ts` (contournement d'un probleme de chargement de `setupFiles` avec Angular 21 + vitest, documente dans `app/src/test-setup.ts`). Aucun `TestBed.resetTestingModule()` n'est effectue entre les fichiers. Tant que vitest isole chaque fichier dans son propre worker (cas de `npm test` en parallele avec assez de coeurs), tout passe. Mais des que plusieurs fichiers partagent un worker — `npx vitest run --no-file-parallelism`, ou CI sur runner a faible nombre de coeurs — le singleton TestBed est contamine : `Cannot configure the test module when the test module has already been instantiated`. Repro : `--no-file-parallelism` -> 406+/475 tests en echec.
+
+**Impact** : `npm test` est flaky selon la repartition en workers (donc selon la machine). Contournement actuel : le gate de release et la CI-APP utilisent `npm run test:coverage` (le coverage v8 change le parallelisme et ne declenche pas la collision). La divergence `npm test` (flaky) vs `test:coverage` (stable) subsiste pour le dev local.
+
+**Tentative echouee** (patch sauvegarde, `/tmp/isolation-attempt.patch`) : centraliser `initTestEnvironment` + `beforeEach(resetTestingModule)` dans `test-setup.ts` casse tout (`Need to call TestBed.initTestEnvironment() first`, injector null) — c'est precisement le probleme de chargement `setupFiles` Angular 21 que le contournement evitait. **Ne pas refaire cette approche.**
+
+**Correction proposee** : A traiter a froid. Pistes : (1) garder l'init dans les specs mais ajouter un reset inter-fichiers fiable sans casser le chargement ; (2) regler l'isolation cote `vitest.config.ts` (pool/isolate) pour garantir un worker frais par fichier meme a faible nombre de coeurs ; (3) suivre l'evolution du support vitest dans `@analogjs/vite-plugin-angular` pour Angular 21.
+
+**Fichiers concernes** : `app/src/test-setup.ts`, `app/vitest.config.ts`, l'ensemble des `app/src/**/*.spec.ts`.
