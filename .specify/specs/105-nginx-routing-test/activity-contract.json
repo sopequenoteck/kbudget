@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-004:standard:prepare:v1",
+  "issueId": "DEMO-004",
+  "profile": "standard",
+  "activity": "prepare",
+  "objective": "Ajouter dans l’application frontend un test automatisé de non-régression pour app/nginx.conf. Le test doit vérifier que les requêtes /api/, notamment /api/bank-logos/*.svg, restent prioritaires sur la regex générique des assets SVG grâce à location ^~ /api/, que le proxy_pass vers le conteneur API est conservé, et qu’une régression de cette configuration fait échouer le test. Ne pas modifier le comportement applicatif ni nécessiter un serveur de production.",
+  "featurePath": ".specify/specs/105-nginx-routing-test",
+  "inputs": [
+    ".specify/specs/105-nginx-routing-test/assessment.json",
+    ".specify/specs/105-nginx-routing-test/workflow-state.json"
+  ],
+  "allowedActions": [
+    "read",
+    "execute"
+  ],
+  "constraints": [
+    "Respecter strictement l'objectif et le perimetre du contrat.",
+    "Preserver les changements utilisateur sans rapport avec cette activite.",
+    "Ne pas modifier state.json, workflow-state.json ou assessment.json.",
+    "Ne pas creer de commit et ne pas changer de branche.",
+    "Signaler tout blocage au lieu de contourner une validation.",
+    "Ne modifier aucun fichier du depot pendant la preparation.",
+    "Identifier les composants concernes et une strategie de validation.",
+    "Ne pas inventer de precision fonctionnelle manquante."
+  ],
+  "completionCriteria": [
+    "Le perimetre et les fichiers probablement concernes sont identifies.",
+    "L'approche d'implementation et les validations sont resumees.",
+    "Les risques ou blocages restants sont explicites."
+  ],
+  "requiredEvidence": [],
+  "expectedOutput": {
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "contractId",
+      "status",
+      "summary",
+      "changedFiles",
+      "checks",
+      "evidence",
+      "remainingRisks",
+      "blockers",
+      "validationPlan"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "integer",
+        "const": 1
+      },
+      "contractId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "blocked"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "changedFiles": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "checks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "command",
+            "exitCode",
+            "status"
+          ],
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "exitCode": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "outcome",
+            "report"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            },
+            "report": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "remainingRisks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "blockers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "validationPlan": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "command",
+            "purpose",
+            "blocking",
+            "timeoutSeconds"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "command": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "purpose": {
+              "type": "string"
+            },
+            "blocking": {
+              "type": "boolean"
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3600
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}
