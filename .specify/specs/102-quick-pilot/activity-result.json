@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-001:quick:implement:v1",
+  "status": "blocked",
+  "summary": "Implémentation impossible sans extrapoler hors contrat : l’objectif ne précise ni le bouton concerné parmi les multiples boutons « Enregistrer », ni le libellé de remplacement attendu.",
+  "changedFiles": [],
+  "checks": [
+    {
+      "command": "rg -n --hidden -S \"Enregistrer|Enregist\" . --glob '!node_modules' --glob '!.git'",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "git diff -- app flutter",
+      "exitCode": 0,
+      "status": "passed"
+    }
+  ],
+  "evidence": [],
+  "remainingRisks": [
+    "Modifier arbitrairement l’un des nombreux boutons « Enregistrer » pourrait altérer un écran non concerné et ne pas satisfaire l’intention fonctionnelle."
+  ],
+  "blockers": [
+    "Le fichier cible ou l’écran concerné n’est pas identifié.",
+    "Le libellé corrigé attendu n’est pas indiqué."
+  ]
+}

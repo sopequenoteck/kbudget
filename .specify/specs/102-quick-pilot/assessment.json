@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "issueId": "DEMO-001",
+  "recommendedProfile": "quick",
+  "selectedProfile": "quick",
+  "confidence": "high",
+  "signals": {
+    "scope": "local",
+    "ambiguity": "low",
+    "risk": "low",
+    "contractChange": false,
+    "dataOrSecurity": false
+  },
+  "reasons": [
+    "le changement est local, clair, peu risque et ne modifie aucun contrat"
+  ],
+  "activities": [
+    "assess",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "requiredEvidence": [
+    "targeted-check",
+    "diff-inspection"
+  ],
+  "assessedAt": "2026-08-18T00:17:13Z",
+  "summary": "Corriger le libellé du bouton Enregistrer sans modifier son comportement"
+}
