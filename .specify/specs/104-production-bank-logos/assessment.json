@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "issueId": "DEMO-003",
+  "recommendedProfile": "standard",
+  "selectedProfile": "standard",
+  "confidence": "medium",
+  "signals": {
+    "scope": "multiple",
+    "ambiguity": "medium",
+    "risk": "medium",
+    "contractChange": false,
+    "dataOrSecurity": false
+  },
+  "reasons": [
+    "plusieurs composants sont affectes",
+    "certaines precisions peuvent etre necessaires",
+    "le risque d'impact est modere"
+  ],
+  "activities": [
+    "assess",
+    "prepare",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "requiredEvidence": [
+    "targeted-tests",
+    "regression-check",
+    "diff-inspection"
+  ],
+  "assessedAt": "2026-08-18T01:06:07Z",
+  "summary": "En production, les logos des banques connues ne s’affichent plus dans la liste des comptes ni dans le formulaire de compte, alors qu’ils fonctionnent en localhost. Les URLs utilisent actuellement /api/bank-logos/*.svg. Identifier la différence entre les configurations locale et serveur, puis corriger le routage ou la construction des URLs afin que les logos soient accessibles dans les deux environnements, sans casser les logos personnalisés ni l’authentification."
+}
