@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-002:quick:implement:v1",
+  "issueId": "DEMO-002",
+  "profile": "quick",
+  "activity": "implement",
+  "objective": "Sur la page Angular Budgets, toutes les barres de progression de la liste doivent avoir la même largeur disponible, indépendamment du nom de catégorie et des montants. Le composant concerné est app/src/app/features/budgets/components/budget-list/.",
+  "featurePath": ".specify/specs/103-fixed-budget-bars",
+  "inputs": [
+    ".specify/specs/103-fixed-budget-bars/assessment.json",
+    ".specify/specs/103-fixed-budget-bars/workflow-state.json"
+  ],
+  "allowedActions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "constraints": [
+    "Respecter strictement l'objectif et le perimetre du contrat.",
+    "Preserver les changements utilisateur sans rapport avec cette activite.",
+    "Ne pas modifier state.json, workflow-state.json ou assessment.json.",
+    "Ne pas creer de commit et ne pas changer de branche.",
+    "Signaler tout blocage au lieu de contourner une validation.",
+    "Limiter les modifications source au changement demande.",
+    "Suivre les conventions et les tests existants du depot."
+  ],
+  "completionCriteria": [
+    "Le changement demande est implemente dans le depot.",
+    "Les fichiers modifies sont listes dans le resultat.",
+    "Les risques ou blocages restants sont explicites."
+  ],
+  "requiredEvidence": [],
+  "expectedOutput": {
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "contractId",
+      "status",
+      "summary",
+      "changedFiles",
+      "checks",
+      "evidence",
+      "remainingRisks",
+      "blockers"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "integer",
+        "const": 1
+      },
+      "contractId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "blocked"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "changedFiles": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "checks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "command",
+            "exitCode",
+            "status"
+          ],
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "exitCode": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "outcome",
+            "report"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            },
+            "report": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "remainingRisks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "blockers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "issueId": "DEMO-002",
+  "profile": "quick",
+  "activities": [
+    "assess",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "requiredEvidence": [
+    "targeted-check",
+    "diff-inspection"
+  ],
+  "currentActivity": "done",
+  "completedActivities": [
+    "assess",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "evidence": {
+    "targeted-check": {
+      "recordedAt": "2026-08-18T00:49:44Z",
+      "source": "devflow",
+      "outcome": "passed",
+      "report": ".specify/specs/103-fixed-budget-bars/evidence/targeted-check.json"
+    },
+    "diff-inspection": {
+      "recordedAt": "2026-08-18T00:49:44Z",
+      "source": "devflow",
+      "outcome": "passed",
+      "report": ".specify/specs/103-fixed-budget-bars/evidence/diff-inspection.json"
+    }
+  },
+  "status": "completed",
+  "schemaVersion": 2,
+  "createdAt": "2026-08-18T00:40:47Z",
+  "updatedAt": "2026-08-18T00:50:27Z"
+}

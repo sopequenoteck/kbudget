@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "issueId": "DEMO-002",
+  "recommendedProfile": "quick",
+  "selectedProfile": "quick",
+  "confidence": "high",
+  "signals": {
+    "scope": "local",
+    "ambiguity": "low",
+    "risk": "low",
+    "contractChange": false,
+    "dataOrSecurity": false
+  },
+  "reasons": [
+    "le changement est local, clair, peu risque et ne modifie aucun contrat"
+  ],
+  "activities": [
+    "assess",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "requiredEvidence": [
+    "targeted-check",
+    "diff-inspection"
+  ],
+  "assessedAt": "2026-08-18T00:40:40Z",
+  "summary": "Sur la page Angular Budgets, toutes les barres de progression de la liste doivent avoir la même largeur disponible, indépendamment du nom de catégorie et des montants. Le composant concerné est app/src/app/features/budgets/components/budget-list/."
+}
