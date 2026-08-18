@@ -79,7 +79,22 @@ class AdminUserControllerTest {
     @Test
     void should_return_401_when_not_authenticated_on_get() throws Exception {
         mockMvc.perform(get("/admin/users"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"))
+                .andExpect(jsonPath("$.message").value("Authentification requise"))
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void should_return_unified_403_when_authenticated_user_is_not_admin() throws Exception {
+        adminUser.setAdmin(false);
+        when(userRepository.findById(adminId)).thenReturn(Optional.of(adminUser));
+
+        mockMvc.perform(get("/admin/users").header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.message").value("Accès refusé"))
+                .andExpect(jsonPath("$.length()").value(2));
     }
 
     // ---- PATCH /admin/users/{id}/disable ----

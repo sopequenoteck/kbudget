@@ -246,7 +246,9 @@ class AuthControllerFirstLoginResetIT {
         mockMvc.perform(get("/users/me")
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("PASSWORD_RESET_REQUIRED"));
+                .andExpect(jsonPath("$.error").value("PASSWORD_RESET_REQUIRED"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.length()").value(2));
 
         // Reset endpoint → 200 OK malgré le claim
         var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
@@ -266,7 +268,10 @@ class AuthControllerFirstLoginResetIT {
         mockMvc.perform(post("/auth/first-login-reset")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"))
+                .andExpect(jsonPath("$.message").value("Authentification requise"))
+                .andExpect(jsonPath("$.length()").value(2));
     }
 
     // ---- TC-11 : Préservation admin après reset vers email absent de ADMIN_EMAILS (SC-005) ----

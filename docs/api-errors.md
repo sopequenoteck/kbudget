@@ -1,6 +1,6 @@
 # Budget API — Contrat d'erreurs
 
-Cette page decrit le contrat public des erreurs gerees par `GlobalExceptionHandler`.
+Cette page decrit le contrat public des erreurs HTTP JSON de l'API, y compris celles produites par Spring Security et les filtres servlet.
 
 ## Schema public
 
@@ -34,11 +34,13 @@ interface ApiError {
 | Mot de passe inchange | 400 | `PASSWORD_UNCHANGED` | Message specialise existant |
 | Confirmation manquante | 400 | `CONFIRMATION_REQUIRED` | Message specialise existant |
 | Mot de passe incorrect | 401 | `PASSWORD_INCORRECT` | Message specialise existant |
+| Authentification absente ou invalide | 401 | `UNAUTHENTICATED` | `Authentification requise` |
 | Refresh token expire | 401 | `TOKEN_EXPIRED` | Message specialise existant |
 | Refresh token revoque | 401 | `TOKEN_REVOKED` | Message specialise existant |
 | Reutilisation de refresh token | 401 | `TOKEN_REUSE_DETECTED` | Message specialise existant |
 | Refresh token invalide | 401 | `TOKEN_INVALID` | Message specialise existant |
-| Acces refuse atteignant le handler | 403 | `ACCESS_DENIED` | Message public, avec fallback |
+| Acces refuse | 403 | `ACCESS_DENIED` | `Accès refusé` ou message public du handler |
+| Reset obligatoire avant acces | 403 | `PASSWORD_RESET_REQUIRED` | Message public specialise |
 | Fonctionnalite desactivee | 403 | `FEATURE_DISABLED` | Message metier, avec fallback public |
 | Reset non requis | 403 | `PASSWORD_RESET_NOT_REQUIRED` | Message specialise existant |
 | Suppression du dernier admin | 403 | `LAST_ADMIN_DELETION_FORBIDDEN` | Message specialise existant |
@@ -53,6 +55,10 @@ interface ApiError {
 
 Les erreurs 500 sont journalisees avec leur trace complete cote serveur. Le corps public ne reprend jamais le message, la cause, le type ou la trace de l'exception.
 
-## Frontiere avec la securite
+## Securite HTTP
 
-Ce contrat couvre les exceptions traitees par `GlobalExceptionHandler`. Les erreurs emises directement par Spring Security, les filtres JWT ou les points d'entree de securite peuvent conserver un corps distinct ou vide. Les regles d'authentification, les routes publiques, le refresh et la deconnexion ne sont pas modifies par ce contrat.
+Les erreurs emises avant les controleurs utilisent le meme contrat grace a un writer partage. Une requete protegee sans authentification retourne `UNAUTHENTICATED`; un refus d'autorisation retourne `ACCESS_DENIED`; le filtre de premier login retourne `PASSWORD_RESET_REQUIRED`.
+
+L'intercepteur Angular tente un refresh uniquement apres un 401. Un 403 represente une authentification valide mais insuffisamment autorisee et est propage sans refresh.
+
+Les erreurs STOMP/WebSocket ne sont pas des reponses HTTP JSON et restent hors de ce contrat.

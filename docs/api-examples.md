@@ -216,8 +216,6 @@ Erreur `409` si l'user cible est le dernier admin actif :
 
 ```json
 {
-  "timestamp": "2026-04-19T14:30:25.123",
-  "status": 409,
   "error": "LAST_ADMIN_CANNOT_BE_DISABLED",
   "message": "Impossible de desactiver le dernier admin actif."
 }

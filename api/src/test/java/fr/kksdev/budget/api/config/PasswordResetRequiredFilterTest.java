@@ -12,12 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,6 +27,9 @@ class PasswordResetRequiredFilterTest {
 
     @Mock
     private JwtUtil jwtUtil;
+
+    @Mock
+    private ApiErrorWriter errorWriter;
 
     @Mock
     private HttpServletRequest request;
@@ -116,18 +116,15 @@ class PasswordResetRequiredFilterTest {
     @ValueSource(strings = {"/users/me", "/accounts", "/transactions", "/admin/users"})
     void should_return_403_when_claim_is_true_and_path_is_not_allowlisted(String path) throws Exception {
         setAuthenticatedContext();
-        StringWriter writer = new StringWriter();
         when(request.getHeader("Authorization")).thenReturn("Bearer reset-token");
         when(jwtUtil.extractClaim("reset-token", "mustResetCredentials")).thenReturn(true);
         when(request.getServletPath()).thenReturn(path);
-        when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain, never()).doFilter(any(), any());
-        verify(response).setStatus(HttpStatus.FORBIDDEN.value());
-        verify(response).setContentType(MediaType.APPLICATION_JSON_VALUE);
-        assertThat(writer.toString()).contains("PASSWORD_RESET_REQUIRED");
+        verify(errorWriter).write(response, HttpStatus.FORBIDDEN, "PASSWORD_RESET_REQUIRED",
+                "Credentials reset required before accessing this resource.");
     }
 
     @Test

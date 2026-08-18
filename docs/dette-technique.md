@@ -8,17 +8,18 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 
 ---
 
-### DT-001 — Deux formats d'erreur API coexistent
+### DT-001 — Deux formats d'erreur API coexistent — RESOLU 2026-08-18
 
 **Identifie** : 2026-03-30
+**Resolu** : 2026-08-18
 
-**Description** : Le format standard (`{ timestamp, status, message }` via `GlobalExceptionHandler.errorBody()`) et le format JWT (`{ error, message }` via le record `ErrorResponse`) coexistent. Le frontend doit gerer deux structures differentes selon le code HTTP.
+**Description initiale** : Le format standard (`{ timestamp, status, message }` via `GlobalExceptionHandler.errorBody()`) et le format JWT (`{ error, message }` via le record `ErrorResponse`) coexistaient. Le frontend devait gerer deux structures differentes selon le code HTTP.
 
 **Impact** : Contrat d'API incoherent. Chaque nouveau client doit connaitre l'exception au format.
 
-**Correction proposee** : Unifier sur `{ error, message }` partout. Le status HTTP est deja dans la reponse, le timestamp est rarement exploite cote client. Migrer `GlobalExceptionHandler.errorBody()` vers `ErrorResponse` avec un champ `error` generique (ex: `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`, `INTERNAL_ERROR`).
+**Correction appliquee** : Toutes les erreurs HTTP JSON utilisent `{ error, message }`. Le gestionnaire global, les points d'entree Spring Security et les filtres servlet partagent le meme contrat. Les 401 sans authentification utilisent `UNAUTHENTICATED`; les refus utilisent `ACCESS_DENIED` ou un code specialise.
 
-**Fichiers concernes** : `GlobalExceptionHandler.java`, `ErrorResponse.java`, intercepteur Angular, api-errors.md
+**Fichiers concernes** : `GlobalExceptionHandler.java`, `ErrorResponse.java`, `ApiErrorWriter.java`, `SecurityConfig.java`, filtres de securite, intercepteur Angular, `api-errors.md`
 
 ---
 

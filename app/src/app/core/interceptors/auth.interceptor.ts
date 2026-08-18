@@ -51,7 +51,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(request).pipe(
     catchError((error: HttpErrorResponse) => {
       if (
-        (error.status === 401 || error.status === 403) &&
+        error.status === 401 &&
         !isPublicUrl(req.url) &&
         !isExternalUrl(req.url) &&
         !req.headers.has('_retry')

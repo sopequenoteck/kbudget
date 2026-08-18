@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.kksdev.budget.api.repository.UserRepository;
 
 import java.util.List;
@@ -17,9 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,21 +32,39 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
+    @Bean
+    public ApiErrorWriter apiErrorWriter() {
+        return new ApiErrorWriter(new ObjectMapper());
+    }
+
+    @Bean
+    public ApiAuthenticationEntryPoint apiAuthenticationEntryPoint(ApiErrorWriter errorWriter) {
+        return new ApiAuthenticationEntryPoint(errorWriter);
+    }
+
+    @Bean
+    public ApiAccessDeniedHandler apiAccessDeniedHandler(ApiErrorWriter errorWriter) {
+        return new ApiAccessDeniedHandler(errorWriter);
+    }
+
     @Value("${app.cors.allowed-origins:http://localhost:4200,http://localhost:49228}")
     private List<String> allowedOrigins;
 
     @Bean
-    public AdminAuthorizationFilter adminAuthorizationFilter() {
-        return new AdminAuthorizationFilter(userRepository);
+    public AdminAuthorizationFilter adminAuthorizationFilter(ApiErrorWriter errorWriter) {
+        return new AdminAuthorizationFilter(userRepository, errorWriter);
     }
 
     @Bean
-    public PasswordResetRequiredFilter passwordResetRequiredFilter() {
-        return new PasswordResetRequiredFilter(jwtUtil);
+    public PasswordResetRequiredFilter passwordResetRequiredFilter(ApiErrorWriter errorWriter) {
+        return new PasswordResetRequiredFilter(jwtUtil, errorWriter);
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   ApiAuthenticationEntryPoint authenticationEntryPoint,
+                                                   ApiAccessDeniedHandler accessDeniedHandler,
+                                                   ApiErrorWriter errorWriter) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -64,10 +81,11 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(passwordResetRequiredFilter(), JwtFilter.class)
-                .addFilterAfter(adminAuthorizationFilter(), PasswordResetRequiredFilter.class)
+                .addFilterAfter(passwordResetRequiredFilter(errorWriter), JwtFilter.class)
+                .addFilterAfter(adminAuthorizationFilter(errorWriter), PasswordResetRequiredFilter.class)
                 .build();
     }
 
