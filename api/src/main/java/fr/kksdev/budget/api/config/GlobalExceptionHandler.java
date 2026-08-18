@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.dto.response.ValidationErrorDetail;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
 import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.ConflictException;
@@ -26,6 +27,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @RestControllerAdvice
@@ -95,12 +99,27 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+        List<ValidationErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> new ValidationErrorDetail(
+                        fieldError.getField(),
+                        validationCode(fieldError.getCode()),
+                        nonBlank(fieldError.getDefaultMessage(), "Valeur invalide")
+                ))
+                .toList();
+        String message = details.stream()
+                .map(error -> error.field() + ": " + error.message())
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Validation error");
         log.warn("Validation failed: {}", message);
-        return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, "Requete invalide");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("VALIDATION_ERROR", message, details));
+    }
+
+    private String validationCode(String code) {
+        if (code == null || code.isBlank()) {
+            return "INVALID_VALUE";
+        }
+        return code.replaceAll("([a-z0-9])([A-Z])", "$1_$2").toUpperCase(Locale.ROOT);
     }
 
     @ExceptionHandler(InvalidImageFormatException.class)

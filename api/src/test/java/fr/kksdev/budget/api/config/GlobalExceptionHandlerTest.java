@@ -45,13 +45,26 @@ class GlobalExceptionHandlerTest {
     @Test
     void should_return_all_validation_messages() {
         var bindingResult = new BeanPropertyBindingResult(new Object(), "request");
-        bindingResult.addError(new FieldError("request", "montant", "must not be null"));
-        bindingResult.addError(new FieldError("request", "libelle", "must not be blank"));
+        bindingResult.addError(new FieldError("request", "montant", null, false,
+                new String[]{"NotNull"}, null, "must not be null"));
+        bindingResult.addError(new FieldError("request", "libelle", "", false,
+                new String[]{"NotBlank"}, null, "must not be blank"));
 
         var response = handler.handleValidation(new MethodArgumentNotValidException(null, bindingResult));
 
-        assertResponse(response, 400, "VALIDATION_ERROR",
-                "montant: must not be null; libelle: must not be blank");
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error()).isEqualTo("VALIDATION_ERROR");
+        assertThat(response.getBody().message())
+                .isEqualTo("montant: must not be null; libelle: must not be blank");
+        assertThat(response.getBody().details()).containsExactly(
+                new fr.kksdev.budget.api.dto.response.ValidationErrorDetail(
+                        "montant", "NOT_NULL", "must not be null"),
+                new fr.kksdev.budget.api.dto.response.ValidationErrorDetail(
+                        "libelle", "NOT_BLANK", "must not be blank")
+        );
+        assertThat(objectMapper.valueToTree(response.getBody()).fieldNames()).toIterable()
+                .containsExactlyInAnyOrder("error", "message", "details");
     }
 
     @Test

@@ -4,11 +4,18 @@ Cette page decrit le contrat public des erreurs HTTP JSON de l'API, y compris ce
 
 ## Schema public
 
-Le corps contient exactement deux chaines non vides. Le code HTTP est porte uniquement par la reponse HTTP.
+Le corps contient toujours deux chaines non vides, `error` et `message`. Le code HTTP est porte uniquement par la reponse HTTP. Une erreur `VALIDATION_ERROR` contient en plus une liste `details` structuree.
 
 ```ts
 interface ApiError {
   error: string;
+  message: string;
+  details?: ValidationErrorDetail[];
+}
+
+interface ValidationErrorDetail {
+  field: string;
+  code: string;
   message: string;
 }
 ```
@@ -22,12 +29,37 @@ interface ApiError {
 
 `error` est un identifiant machine stable. `message` est destine a l'affichage et peut reprendre un message metier ou de validation. Un consommateur doit brancher sa logique sur `error`, jamais sur `message`.
 
+### Validation des champs
+
+Pour `VALIDATION_ERROR`, `details` permet d'associer chaque contrainte au champ concerne sans analyser la chaine `message` :
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "email: must not be blank; password: size must be between 12 and 100",
+  "details": [
+    {
+      "field": "email",
+      "code": "NOT_BLANK",
+      "message": "must not be blank"
+    },
+    {
+      "field": "password",
+      "code": "SIZE",
+      "message": "size must be between 12 and 100"
+    }
+  ]
+}
+```
+
+Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devient `NOT_NULL`). `details` est absent pour toutes les autres erreurs.
+
 ## Matrice des erreurs gerees
 
 | Categorie | HTTP | `error` | Message public |
 |---|---:|---|---|
 | Argument ou etat invalide | 400 | `BAD_REQUEST` | Message metier, avec fallback public |
-| Validation Bean Validation | 400 | `VALIDATION_ERROR` | Erreurs de champs concatenees, avec fallback public |
+| Validation Bean Validation | 400 | `VALIDATION_ERROR` | Message agrege et `details` structures par champ |
 | Corps JSON illisible | 400 | `MALFORMED_REQUEST` | `Requete invalide` |
 | Format d'image | 400 | `INVALID_IMAGE_FORMAT` | Message specialise existant |
 | Format d'export | 400 | `INVALID_EXPORT_FORMAT` | Message specialise existant |
