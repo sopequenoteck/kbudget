@@ -5,6 +5,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.2.1] - 2026-08-25
+
+### Fixed
+
+- **Nettoyage qualité (Sonar)** : constante `INVALID_REQUEST_MESSAGE` remplaçant 4 littéraux dupliqués dans `GlobalExceptionHandler`, remplacement de `HttpStatus.UNPROCESSABLE_ENTITY` (déprécié Spring Framework 7.0) par `UNPROCESSABLE_CONTENT` (même code HTTP 422), imports inutilisés retirés dans 2 tests, `throws Exception` inutile et lambda simplifiés dans `UserDeletionConcurrencyIT`.
+
 ## [5.2.0] - 2026-08-25
 
 ### Added
