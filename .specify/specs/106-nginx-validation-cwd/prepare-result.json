@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-005:standard:prepare:v1",
+  "status": "completed",
+  "summary": "Périmètre identifié sans modification du dépôt. `app/nginx.conf` contient actuellement le bloc `location ^~ /api/`, le proxy `http://api:8080/api/` et une regex générique couvrant les SVG. L’implémentation probable consiste à ajouter `app/src/nginx.conf.spec.ts`, découvert par la configuration Vitest existante, qui lit statiquement la configuration, vérifie la priorité de `/api/` (notamment pour `/api/bank-logos/*.svg`) et la destination du proxy, puis teste des configurations altérées en mémoire afin de démontrer que la suppression de `^~` ou la modification du `proxy_pass` provoque un échec. Aucun serveur Nginx ni changement applicatif, de dépendances ou de configuration de test ne devrait être nécessaire.",
+  "changedFiles": [],
+  "checks": [
+    {
+      "command": "pwd && rg --files .specify/specs/106-nginx-validation-cwd app && git status --short && sed -n '1,240p' .specify/specs/106-nginx-validation-cwd/assessment.json && sed -n '1,240p' .specify/specs/106-nginx-validation-cwd/workflow-state.json && sed -n '1,240p' app/nginx.conf",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "sed -n '1,240p' app/package.json && sed -n '1,240p' app/vitest.config.ts && sed -n '1,200p' app/tsconfig.spec.json && rg -n \"nginx\\.conf|readFileSync|node:fs|bank-logos|proxy_pass|location \\^~\" app .specify/specs/105-nginx-routing-test .specify/specs/106-nginx-validation-cwd",
+      "exitCode": 0,
+      "status": "passed"
+    }
+  ],
+  "evidence": [],
+  "remainingRisks": [
+    "Une extraction naïve du bloc Nginx par expression régulière pourrait être fragile si des blocs imbriqués sont ajoutés ; les assertions devront délimiter le bloc API de façon robuste.",
+    "La méthode de lecture de `nginx.conf` doit être compatible avec Vitest et les types TypeScript actuels ; un import Vite brut ou une lecture Node devra être confirmé pendant l’implémentation.",
+    "Des répertoires de spécification non suivis, dont `.specify/specs/105-nginx-routing-test/` et `.specify/specs/106-nginx-validation-cwd/`, existent déjà dans le worktree et devront être préservés."
+  ],
+  "blockers": [],
+  "validationPlan": [
+    {
+      "id": "targeted-tests",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "src/nginx.conf.spec.ts"
+      ],
+      "purpose": "Exécuter le nouveau test statique ciblé et vérifier `location ^~ /api/`, le cas `/api/bank-logos/*.svg`, la regex SVG concurrente et le `proxy_pass` attendu sans serveur de production.",
+      "blocking": true,
+      "timeoutSeconds": 120,
+      "workingDirectory": "app"
+    },
+    {
+      "id": "regression-check",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "src/nginx.conf.spec.ts",
+        "-t",
+        "rejette les régressions"
+      ],
+      "purpose": "Démontrer que les variantes en mémoire sans `^~` ou sans la destination `proxy_pass` attendue sont rejetées par les assertions du test.",
+      "blocking": true,
+      "timeoutSeconds": 120,
+      "workingDirectory": "app"
+    },
+    {
+      "id": "frontend-suite",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "purpose": "Vérifier que le nouveau test n’introduit aucune régression dans la suite Vitest frontend.",
+      "blocking": true,
+      "timeoutSeconds": 600,
+      "workingDirectory": "app"
+    },
+    {
+      "id": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "purpose": "Détecter les erreurs de whitespace dans les changements d’implémentation.",
+      "blocking": true,
+      "timeoutSeconds": 30,
+      "workingDirectory": "."
+    },
+    {
+      "id": "scope-inspection",
+      "command": [
+        "git",
+        "diff",
+        "--",
+        "app/src/nginx.conf.spec.ts",
+        "app/nginx.conf",
+        "app/package.json",
+        "app/vitest.config.ts",
+        "app/tsconfig.spec.json"
+      ],
+      "purpose": "Confirmer que seul le test prévu est ajouté et que la configuration Nginx, les dépendances et l’infrastructure Vitest restent inchangées.",
+      "blocking": true,
+      "timeoutSeconds": 30,
+      "workingDirectory": "."
+    }
+  ]
+}

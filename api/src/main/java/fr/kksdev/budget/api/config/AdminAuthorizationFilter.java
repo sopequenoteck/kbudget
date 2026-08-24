@@ -22,13 +22,16 @@ import java.util.UUID;
 public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
+    private final ApiErrorWriter errorWriter;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // servletPath n'inclut pas le context path (/api) — c'est la bonne valeur pour matcher /admin/
         String servletPath = request.getServletPath();
+        if (servletPath == null || servletPath.isEmpty()) {
+            servletPath = stripContextPath(request);
+        }
 
         if (!servletPath.startsWith("/admin/")) {
             filterChain.doFilter(request, response);
@@ -37,7 +40,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
-            // Non authentifié → laisser HttpStatusEntryPoint gérer 401 via la chaîne normale
+            // Non authentifié → laisser l'AuthenticationEntryPoint gérer le 401 unifié
             filterChain.doFilter(request, response);
             return;
         }
@@ -57,10 +60,19 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
         if (!isAdmin) {
             log.warn("Admin access denied: user={} path={}", userId, servletPath);
-            response.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden");
+            errorWriter.write(response, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Accès refusé");
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String stripContextPath(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (contextPath != null && !contextPath.isEmpty() && uri != null && uri.startsWith(contextPath)) {
+            return uri.substring(contextPath.length());
+        }
+        return uri != null ? uri : "";
     }
 }

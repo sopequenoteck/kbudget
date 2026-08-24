@@ -292,30 +292,23 @@ describe('authInterceptor', () => {
     expect(caughtError).not.toBeNull();
   });
 
-  it('should_refresh_and_replay_when_403_received', () => {
-    // Arrange — 403 triggers refresh (expired token sent without header)
+  it('should_not_refresh_when_403_received', () => {
+    // Arrange — a forbidden request is not an expired authentication
     authService.getToken.mockReturnValue('my-token');
-    const newToken = 'new-valid-token';
-    authService.refreshAccessToken.mockReturnValue(
-      of({ token: newToken, refreshToken: 'new-refresh', email: 'a@b.com', name: 'A' }),
-    );
-    vi.spyOn(console, 'log').mockReturnValue(undefined);
+    let caughtError: unknown = null;
 
     // Act
-    let result: unknown = null;
-    httpClient.get('/api/transactions').subscribe((r) => (result = r));
+    httpClient.get('/api/transactions').subscribe({ error: (err) => (caughtError = err) });
 
     const firstReq = httpTesting.expectOne('/api/transactions');
-    firstReq.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
-
-    // Interceptor retries with new token
-    const retryReq = httpTesting.expectOne('/api/transactions');
-    expect(retryReq.request.headers.get('Authorization')).toBe(`Bearer ${newToken}`);
-    retryReq.flush({ data: 'success' });
+    firstReq.flush(
+      { error: 'ACCESS_DENIED', message: 'Accès refusé' },
+      { status: 403, statusText: 'Forbidden' },
+    );
 
     // Assert
-    expect(authService.refreshAccessToken).toHaveBeenCalledOnce();
-    expect(result).toEqual({ data: 'success' });
+    expect(authService.refreshAccessToken).not.toHaveBeenCalled();
+    expect(caughtError).toBeInstanceOf(HttpErrorResponse);
   });
 
   it('should_not_refresh_on_403_from_public_path', () => {

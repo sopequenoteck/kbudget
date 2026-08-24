@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-003:standard:implement:v1",
+  "issueId": "DEMO-003",
+  "profile": "standard",
+  "activity": "implement",
+  "objective": "En production, les logos des banques connues ne s’affichent plus dans la liste des comptes ni dans le formulaire de compte, alors qu’ils fonctionnent en localhost. Les URLs utilisent actuellement /api/bank-logos/*.svg. Identifier la différence entre les configurations locale et serveur, puis corriger le routage ou la construction des URLs afin que les logos soient accessibles dans les deux environnements, sans casser les logos personnalisés ni l’authentification.",
+  "featurePath": ".specify/specs/104-production-bank-logos",
+  "inputs": [
+    ".specify/specs/104-production-bank-logos/assessment.json",
+    ".specify/specs/104-production-bank-logos/workflow-state.json",
+    ".specify/specs/104-production-bank-logos/prepare-result.json"
+  ],
+  "allowedActions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "constraints": [
+    "Respecter strictement l'objectif et le perimetre du contrat.",
+    "Preserver les changements utilisateur sans rapport avec cette activite.",
+    "Ne pas modifier state.json, workflow-state.json ou assessment.json.",
+    "Ne pas creer de commit et ne pas changer de branche.",
+    "Signaler tout blocage au lieu de contourner une validation.",
+    "Limiter les modifications source au changement demande.",
+    "Suivre les conventions et les tests existants du depot."
+  ],
+  "completionCriteria": [
+    "Le changement demande est implemente dans le depot.",
+    "Les fichiers modifies sont listes dans le resultat.",
+    "Les risques ou blocages restants sont explicites."
+  ],
+  "requiredEvidence": [],
+  "expectedOutput": {
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "contractId",
+      "status",
+      "summary",
+      "changedFiles",
+      "checks",
+      "evidence",
+      "remainingRisks",
+      "blockers"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "integer",
+        "const": 1
+      },
+      "contractId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "blocked"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "changedFiles": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "checks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "command",
+            "exitCode",
+            "status"
+          ],
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "exitCode": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "outcome",
+            "report"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            },
+            "report": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "remainingRisks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "blockers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

@@ -165,7 +165,13 @@ class AuthControllerRefreshTest {
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"refreshToken\":\"\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.details.length()").value(1))
+                .andExpect(jsonPath("$.details[0].field").value("refreshToken"))
+                .andExpect(jsonPath("$.details[0].code").value("NOT_BLANK"))
+                .andExpect(jsonPath("$.details[0].message").isNotEmpty());
     }
 
     @Test

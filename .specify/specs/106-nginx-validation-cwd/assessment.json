@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "issueId": "DEMO-005",
+  "recommendedProfile": "standard",
+  "selectedProfile": "standard",
+  "confidence": "medium",
+  "signals": {
+    "scope": "local",
+    "ambiguity": "medium",
+    "risk": "low",
+    "contractChange": false,
+    "dataOrSecurity": false
+  },
+  "reasons": [
+    "certaines precisions peuvent etre necessaires"
+  ],
+  "activities": [
+    "assess",
+    "prepare",
+    "implement",
+    "verify",
+    "done"
+  ],
+  "requiredEvidence": [
+    "targeted-tests",
+    "regression-check",
+    "diff-inspection"
+  ],
+  "assessedAt": "2026-08-18T12:38:04Z",
+  "summary": "Ajouter dans l’application frontend un test automatisé de non-régression pour app/nginx.conf. Le test doit vérifier que les requêtes /api/, notamment /api/bank-logos/*.svg, restent prioritaires sur la regex générique des assets SVG grâce à location ^~ /api/, que le proxy_pass vers le conteneur API est conservé, et qu’une régression de cette configuration fait échouer le test. Ne pas modifier le comportement applicatif ni nécessiter un serveur de production."
+}

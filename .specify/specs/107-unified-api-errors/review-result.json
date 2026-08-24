@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-006:deep:review:v1",
+  "status": "completed",
+  "summary": "Revue d’implémentation réussie. Le diff respecte le contrat unifié {error, message}, préserve les statuts HTTP et les codes spécialisés, masque les détails internes des erreurs 500 et ne modifie ni Angular ni les mécanismes d’authentification. Aucun fichier n’a été modifié pendant la review.",
+  "changedFiles": [],
+  "checks": [
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "cd api && ./mvnw -q -Dtest=GlobalExceptionHandlerTest test (preuve test-suite)",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "cd api && ./mvnw -q verify (preuve test-suite)",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "cd app && npm test -- --run (preuve test-suite)",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "cd app && npm run lint (preuve test-suite)",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "cd app && npm run format:check (contrôle non bloquant, dette préexistante)",
+      "exitCode": 1,
+      "status": "failed"
+    },
+    {
+      "command": "cd api && mvn -q -Dtest=GlobalExceptionHandlerTest test (nouvelle exécution en sandbox lecture seule)",
+      "exitCode": 1,
+      "status": "failed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "implementation-review",
+      "outcome": "passed",
+      "report": "Le handler retourne ErrorResponse sur toutes ses branches. Les handlers migrés utilisent les codes stables requis et conservent leurs statuts; les conflits LAST_ADMIN_CANNOT_BE_DISABLED et EMAIL_ALREADY_EXISTS gardent leurs codes et messages publics; les conflits ordinaires deviennent CONFLICT; les messages absents disposent de fallbacks pour les branches concernées; MALFORMED_REQUEST ne divulgue pas la cause de désérialisation; INTERNAL_ERROR retourne exclusivement le message générique tout en conservant la journalisation serveur. Les tests vérifient la structure exacte, l’absence de timestamp/status, les codes génériques et spécialisés, les conflits, les fallbacks et le masquage du 500. La documentation contient le schéma unique et la matrice code/statut. Le diff ne touche aucun consommateur Angular, filtre JWT, configuration de sécurité, modèle persistant, migration ou réponse de succès. Les preuves enregistrées confirment la réussite de la suite Maven complète, de 477 tests Angular et du lint."
+    }
+  ],
+  "remainingRisks": [
+    "Les clients externes au dépôt qui consomment encore timestamp ou status devront migrer vers error et message.",
+    "Le contrôle Prettier global reste rouge sur 144 fichiers frontend préexistants non modifiés par cette activité.",
+    "La nouvelle exécution Maven pendant la review n’a pas pu écrire dans api/target à cause de la sandbox en lecture seule; la revue repose donc aussi sur la preuve test-suite enregistrée, qui rapporte les suites Maven réussies."
+  ],
+  "blockers": []
+}

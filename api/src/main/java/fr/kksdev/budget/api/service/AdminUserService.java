@@ -1,6 +1,5 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.dto.response.AdminUserResponse;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.model.User;
@@ -22,7 +21,7 @@ import java.util.UUID;
 public class AdminUserService {
 
     private final UserRepository userRepository;
-    private final AdminEmailResolver adminEmailResolver;
+    private final ActiveAdminInvariantLock activeAdminInvariantLock;
 
     @Transactional(readOnly = true)
     public List<AdminUserResponse> list() {
@@ -34,13 +33,14 @@ public class AdminUserService {
                         u.getName(),
                         u.getCreatedAt(),
                         u.getDisabledAt(),
-                        adminEmailResolver.isAdminEmail(u.getEmail())
+                        u.isAdmin()
                 ))
                 .toList();
     }
 
     @Transactional
     public void disable(UUID userId, User admin) {
+        activeAdminInvariantLock.acquire();
         User target = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
         guardLastActiveAdmin(target);
@@ -51,6 +51,7 @@ public class AdminUserService {
 
     @Transactional
     public void enable(UUID userId, User admin) {
+        activeAdminInvariantLock.acquire();
         User target = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
         target.setDisabledAt(null);
@@ -59,13 +60,13 @@ public class AdminUserService {
     }
 
     private void guardLastActiveAdmin(User target) {
-        if (!adminEmailResolver.isAdminEmail(target.getEmail())) {
+        if (!target.isAdmin()) {
             return;
         }
         long otherActiveAdmins = userRepository.findAll().stream()
                 .filter(u -> !u.getId().equals(target.getId()))
                 .filter(u -> u.getDisabledAt() == null)
-                .filter(u -> adminEmailResolver.isAdminEmail(u.getEmail()))
+                .filter(User::isAdmin)
                 .count();
         if (otherActiveAdmins == 0) {
             log.warn("Admin action refused: user.disable would leave zero active admin. target=user:{}", target.getId());

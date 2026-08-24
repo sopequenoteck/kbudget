@@ -28,6 +28,9 @@ class AdminAuthorizationFilterTest {
     private UserRepository userRepository;
 
     @Mock
+    private ApiErrorWriter errorWriter;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -65,6 +68,24 @@ class AdminAuthorizationFilterTest {
     }
 
     @Test
+    void should_resolve_admin_path_from_request_uri_when_servlet_path_is_empty() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(request.getServletPath()).thenReturn("");
+        when(request.getRequestURI()).thenReturn("/api/admin/users");
+        when(request.getContextPath()).thenReturn("/api");
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(userId, null, List.of()));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(
+                User.builder().id(userId).email("user@mail.com").isAdmin(false).build()));
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED", "Accès refusé");
+        verify(filterChain, never()).doFilter(any(), any());
+    }
+
+    @Test
     void should_pass_through_when_not_authenticated_on_admin_path() throws Exception {
         // SecurityContext vide — le filter laisse passer, HttpStatusEntryPoint gérera 401
         when(request.getServletPath()).thenReturn("/admin/invitations");
@@ -88,7 +109,8 @@ class AdminAuthorizationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(403), eq("Forbidden"));
+        verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED", "Accès refusé");
         verify(filterChain, never()).doFilter(any(), any());
     }
 
@@ -106,7 +128,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verify(response, never()).sendError(anyInt(), anyString());
+        verifyNoInteractions(errorWriter);
     }
 
     @Test
@@ -122,7 +144,8 @@ class AdminAuthorizationFilterTest {
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response).sendError(eq(403), eq("Forbidden"));
+        verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED", "Accès refusé");
         verify(filterChain, never()).doFilter(any(), any());
     }
 

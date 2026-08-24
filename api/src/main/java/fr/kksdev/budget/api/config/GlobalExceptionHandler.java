@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.config;
 
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
+import fr.kksdev.budget.api.dto.response.ValidationErrorDetail;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
 import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.ConflictException;
@@ -27,71 +28,57 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), "Requete invalide");
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
         log.warn("Bad request (illegal state): {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), "Requete invalide");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
-                HttpStatus.FORBIDDEN.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.FORBIDDEN, "ACCESS_DENIED", ex.getMessage(), "Acces refuse");
     }
 
     @ExceptionHandler(FeatureDisabledException.class)
-    public ResponseEntity<Map<String, Object>> handleFeatureDisabled(FeatureDisabledException ex) {
+    public ResponseEntity<ErrorResponse> handleFeatureDisabled(FeatureDisabledException ex) {
         log.warn("Feature disabled: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody(
-                HttpStatus.FORBIDDEN.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.FORBIDDEN, "FEATURE_DISABLED", ex.getMessage(), "Fonctionnalite desactivee");
     }
 
     @ExceptionHandler(CsvProfileNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCsvProfileNotFound(CsvProfileNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleCsvProfileNotFound(CsvProfileNotFoundException ex) {
         log.warn("CSV profile not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorBody(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.UNPROCESSABLE_ENTITY, "CSV_PROFILE_NOT_FOUND", ex.getMessage(),
+                "Profil CSV introuvable");
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
         log.warn("Conflict: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", HttpStatus.CONFLICT.value(),
-                "error", ex.getMessage(),
-                "message", resolveConflictMessage(ex.getMessage())
-        ));
+        String code = isSpecializedConflict(ex.getMessage()) ? ex.getMessage() : "CONFLICT";
+        return error(HttpStatus.CONFLICT, code, resolveConflictMessage(ex.getMessage()), "Conflit de donnees");
+    }
+
+    private boolean isSpecializedConflict(String value) {
+        return "LAST_ADMIN_CANNOT_BE_DISABLED".equals(value) || "EMAIL_ALREADY_EXISTS".equals(value);
     }
 
     private String resolveConflictMessage(String errorCode) {
-        return switch (errorCode) {
+        return switch (errorCode == null ? "" : errorCode) {
             case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "Impossible de désactiver le dernier admin actif.";
             case "EMAIL_ALREADY_EXISTS" -> "Cet email est déjà utilisé par un autre utilisateur.";
             default -> errorCode;
@@ -99,55 +86,61 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleEntityNotFound(EntityNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
         log.warn("Entity not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage()
-        ));
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), "Ressource introuvable");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         log.warn("Malformed request: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
-                HttpStatus.BAD_REQUEST.value(),
-                "Requête invalide"
-        ));
+        return error(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Requete invalide", "Requete invalide");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        List<ValidationErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> new ValidationErrorDetail(
+                        fieldError.getField(),
+                        validationCode(fieldError.getCode()),
+                        nonBlank(fieldError.getDefaultMessage(), "Valeur invalide")
+                ))
+                .toList();
+        String message = details.stream()
+                .map(error -> error.field() + ": " + error.message())
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Validation error");
         log.warn("Validation failed: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
-                HttpStatus.BAD_REQUEST.value(),
-                message
-        ));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("VALIDATION_ERROR", message, details));
+    }
+
+    private String validationCode(String code) {
+        if (code == null || code.isBlank()) {
+            return "INVALID_VALUE";
+        }
+        return code.replaceAll("([a-z0-9])([A-Z])", "$1_$2").toUpperCase(Locale.ROOT);
     }
 
     @ExceptionHandler(InvalidImageFormatException.class)
     public ResponseEntity<ErrorResponse> handleInvalidImageFormat(InvalidImageFormatException ex) {
         log.warn("Invalid image format: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", ex.getMessage()));
+                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", nonBlank(ex.getMessage(), "Format d'image invalide")));
     }
 
     @ExceptionHandler(FileTooLargeException.class)
     public ResponseEntity<ErrorResponse> handleFileTooLarge(FileTooLargeException ex) {
         log.warn("File too large: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(new ErrorResponse("FILE_TOO_LARGE", ex.getMessage()));
+                .body(new ErrorResponse("FILE_TOO_LARGE", nonBlank(ex.getMessage(), "Fichier trop volumineux")));
     }
 
     @ExceptionHandler(AvatarNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundException ex) {
         log.warn("Avatar not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("AVATAR_NOT_FOUND", ex.getMessage()));
+                .body(new ErrorResponse("AVATAR_NOT_FOUND", nonBlank(ex.getMessage(), "Avatar introuvable")));
     }
 
     @ExceptionHandler(PasswordIncorrectException.class)
@@ -217,19 +210,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("Unexpected error", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Une erreur interne est survenue"
-        ));
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
+                "Une erreur interne est survenue", "Une erreur interne est survenue");
     }
 
-    private Map<String, Object> errorBody(int status, String message) {
-        return Map.of(
-                "timestamp", LocalDateTime.now().toString(),
-                "status", status,
-                "message", message
-        );
+    private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message, String fallback) {
+        return ResponseEntity.status(status).body(new ErrorResponse(code, nonBlank(message, fallback)));
+    }
+
+    private String nonBlank(String message, String fallback) {
+        return message == null || message.isBlank() ? fallback : message;
     }
 }

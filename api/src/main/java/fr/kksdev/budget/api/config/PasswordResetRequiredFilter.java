@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,6 +24,7 @@ public class PasswordResetRequiredFilter extends OncePerRequestFilter {
     );
 
     private final JwtUtil jwtUtil;
+    private final ApiErrorWriter errorWriter;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -63,12 +63,8 @@ public class PasswordResetRequiredFilter extends OncePerRequestFilter {
         }
 
         log.info("Request blocked by password-reset gate: path={}", path);
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(
-                "{\"error\":\"PASSWORD_RESET_REQUIRED\"," +
-                "\"message\":\"Credentials reset required before accessing this resource.\"}"
-        );
+        errorWriter.write(response, HttpStatus.FORBIDDEN, "PASSWORD_RESET_REQUIRED",
+                "Credentials reset required before accessing this resource.");
     }
 
     private String extractBearerToken(HttpServletRequest request) {

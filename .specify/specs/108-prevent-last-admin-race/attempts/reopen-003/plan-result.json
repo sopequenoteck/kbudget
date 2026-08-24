@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-007:critical:plan:v1",
+  "status": "completed",
+  "summary": "Plan devflow complet produit. Il décrit le verrou consultatif transactionnel PostgreSQL commun, l’atomicité compte/tokens, l’adoption par tous les écrivains administrateur, le test concurrent déterministe, les validations de sécurité et de données, ainsi que les gates de déploiement et de rollback N/N-1.",
+  "changedFiles": [
+    ".specify/specs/108-prevent-last-admin-race/plan.md"
+  ],
+  "checks": [
+    {
+      "command": "test -s .specify/specs/108-prevent-last-admin-race/plan.md",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "rg -n des sections devflow obligatoires dans plan.md",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "rg -n TODO|TBD|placeholder|section vide .specify/specs/108-prevent-last-admin-race/plan.md",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "git status --short",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "git diff -- .specify/specs/108-prevent-last-admin-race/plan.md",
+      "exitCode": 0,
+      "status": "passed"
+    }
+  ],
+  "evidence": [],
+  "remainingRisks": [
+    "La version majeure de PostgreSQL en production et l’autorisation opérationnelle de pg_advisory_xact_lock doivent être confirmées avant l’implémentation.",
+    "Docker, Testcontainers et l’image PostgreSQL compatible production doivent être validés dans la CI.",
+    "Le mécanisme test-only garantissant une preuve déterministe de l’ancienne course doit être choisi et revu.",
+    "Les écrivains SQL, DBA ou services externes susceptibles de modifier l’ensemble des administrateurs actifs restent à inventorier.",
+    "La suspension des mutations administrateur pendant la coexistence N/N-1 doit être démontrée avant déploiement.",
+    "Les seuils SRE de contention, timeout, deadlock et latence restent à définir."
+  ],
+  "blockers": [],
+  "validationPlan": [
+    {
+      "id": "unit-transaction",
+      "command": [
+        "./mvnw",
+        "-Dtest=ActiveAdminInvariantLockTest,UserDeletionServiceTest,AdminSyncRunnerTest",
+        "test"
+      ],
+      "purpose": "Vérifier l’ordre verrou-décompte-mutation, la transaction unique, le refus sans effet et l’adoption du verrou commun.",
+      "blocking": true,
+      "timeoutSeconds": 900,
+      "workingDirectory": "api"
+    },
+    {
+      "id": "concurrent-security-data",
+      "command": [
+        "./mvnw",
+        "-Dtest=UserDeletionConcurrencyIT",
+        "verify"
+      ],
+      "purpose": "Validation bloquante de sécurité, données et authentification sur PostgreSQL réel : une seule suppression réussit, un administrateur reste actif et les refresh tokens conservent l’état attendu.",
+      "blocking": true,
+      "timeoutSeconds": 1800,
+      "workingDirectory": "api"
+    },
+    {
+      "id": "api-auth-regression",
+      "command": [
+        "./mvnw",
+        "-Dtest=UserControllerTest,GlobalExceptionHandlerTest,UserDeletionServiceTest",
+        "test"
+      ],
+      "purpose": "Préserver les statuts HTTP, corps d’erreur, contrôles d’accès et comportements de suppression existants.",
+      "blocking": true,
+      "timeoutSeconds": 900,
+      "workingDirectory": "api"
+    },
+    {
+      "id": "backend-suite",
+      "command": [
+        "./mvnw",
+        "verify"
+      ],
+      "purpose": "Exécuter toute la suite backend et produire le rapport de couverture.",
+      "blocking": true,
+      "timeoutSeconds": 3600,
+      "workingDirectory": "api"
+    },
+    {
+      "id": "writer-inventory",
+      "command": [
+        "rg",
+        "-n",
+        "setAdmin\\(|setDisabledAt\\(|is_admin|disabled_at",
+        "src/main/java",
+        "src/main/resources"
+      ],
+      "purpose": "Inventorier tous les chemins applicatifs et SQL qui modifient l’ensemble protégé afin de confirmer leur adoption du protocole commun.",
+      "blocking": true,
+      "timeoutSeconds": 60,
+      "workingDirectory": "api"
+    },
+    {
+      "id": "migration-audit",
+      "command": [
+        "rg",
+        "-n",
+        "pg_advisory_xact_lock|CREATE TABLE|ALTER TABLE",
+        "src/main/java",
+        "src/main/resources/db/migration"
+      ],
+      "purpose": "Confirmer l’usage du verrou transactionnel et l’absence de migration pour l’option principale; toute migration inattendue déclenche une nouvelle revue DBA et rollback.",
+      "blocking": true,
+      "timeoutSeconds": 60,
+      "workingDirectory": "api"
+    }
+  ]
+}
