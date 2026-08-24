@@ -35,16 +35,18 @@ import java.util.Locale;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String INVALID_REQUEST_MESSAGE = "Requete invalide";
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
-        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), "Requete invalide");
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
         log.warn("Bad request (illegal state): {}", ex.getMessage());
-        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), "Requete invalide");
+        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -62,7 +64,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CsvProfileNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCsvProfileNotFound(CsvProfileNotFoundException ex) {
         log.warn("CSV profile not found: {}", ex.getMessage());
-        return error(HttpStatus.UNPROCESSABLE_ENTITY, "CSV_PROFILE_NOT_FOUND", ex.getMessage(),
+        return error(HttpStatus.UNPROCESSABLE_CONTENT, "CSV_PROFILE_NOT_FOUND", ex.getMessage(),
                 "Profil CSV introuvable");
     }
 
@@ -94,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         log.warn("Malformed request: {}", ex.getMessage());
-        return error(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Requete invalide", "Requete invalide");
+        return error(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", INVALID_REQUEST_MESSAGE, INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
