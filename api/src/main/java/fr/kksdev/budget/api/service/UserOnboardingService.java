@@ -19,6 +19,7 @@ public class UserOnboardingService {
     private final CategoryService categoryService;
     private final AccountService accountService;
     private final PreferenceService preferenceService;
+    private final ActiveAdminInvariantLock activeAdminInvariantLock;
 
     public record UserProvisioningRequest(
             String email,
@@ -31,6 +32,9 @@ public class UserOnboardingService {
     ) {}
 
     public User provisionUser(UserProvisioningRequest request) {
+        if (request.isAdmin()) {
+            activeAdminInvariantLock.acquire();
+        }
         User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.rawPassword()))

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-007:critical:rollback-check:v1",
+  "status": "completed",
+  "summary": "Contrôle de rollback terminé en lecture seule. Le changement n'ajoute aucune migration ni transformation de données irréversible. Le retour applicatif est fiable uniquement sous confinement strict des suppressions et mutations d'administrateurs; ces opérations ne doivent pas être rouvertes sur une version N-1 vulnérable.",
+  "changedFiles": [],
+  "checks": [
+    {
+      "command": "rg --files .specify/specs/108-prevent-last-admin-race && git status --short && git diff --stat && git diff",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "jq review-result.json activity-result.json evidence/test-suite.json evidence/security-or-data-check.json && rg rollback/restauration/déclencheurs/responsables/N-1/tokens dans les artefacts contractuels",
+      "exitCode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "git diff --name-only && git ls-files --others --exclude-standard api/src/main/resources/db/migration",
+      "exitCode": 0,
+      "status": "passed"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "rollback-plan",
+      "outcome": "passed",
+      "report": "Plan applicable et vérifiable. Déclencheurs: zéro administrateur actif; deux suppressions concurrentes réussies; état incorrect des refresh tokens; dérive des statuts ou erreurs HTTP; timeout, deadlock, contention ou 5xx dépassant les seuils approuvés. Étapes et responsables: (1) SRE suspend immédiatement DELETE /users/me et toute création, promotion, rétrogradation, activation ou désactivation d'administrateur sur toutes les instances et bloque les écritures DBA équivalentes; (2) SRE arrête le rollout, draine les requêtes en cours et conserve logs, métriques, versions et identifiants de transactions; (3) DBA vérifie en lecture le nombre d'administrateurs actifs, disabled_at et les statuts des refresh_tokens, sans corriger manuellement les données; (4) Release Manager redéploie l'artefact applicatif antérieur, sans rollback de schéma puisqu'aucune migration n'a été ajoutée; (5) Backend et DBA confirment exactement au moins un administrateur actif, l'absence de mutation partielle et la cohérence compte/token; (6) QA exécute les régressions d'authentification et de contrats HTTP ainsi que le scénario concurrent; le scénario est attendu en échec sur N-1, donc les mutations restent suspendues; (7) SRE ne rouvre les mutations qu'après déploiement intégral d'une version protégée et réussite du test concurrent: exactement un 204, un 403 LAST_ADMIN_DELETION_FORBIDDEN, un administrateur actif, refresh 200 pour le compte refusé et 401 TOKEN_REVOKED pour le compte supprimé. Données affectées: users.is_admin, users.disabled_at et refresh_tokens.status; aucun objet de schéma nouveau. Limites: un rollback vers N-1 réintroduit la course et constitue uniquement un confinement opérationnel; une instance déjà à zéro administrateur exige la procédure de récupération auditée distincte. Critère d'abandon du rollback: impossibilité de suspendre tous les écrivains ou impossibilité d'établir qu'au moins un administrateur actif subsiste."
+    }
+  ],
+  "remainingRisks": [
+    "La garantie de confinement dépend de l'inventaire et de la suspension effective de tous les écrivains applicatifs, DBA et externes.",
+    "Le retour vers N-1 ne permet pas de rouvrir les mutations d'administrateurs; une correction protégée doit être redéployée avant reprise normale.",
+    "La récupération d'une instance déjà sans administrateur reste hors périmètre et nécessite une procédure auditée séparée.",
+    "Les seuils opérationnels de contention, deadlock, timeout et 5xx doivent être approuvés avant production."
+  ],
+  "blockers": []
+}

@@ -1,6 +1,6 @@
 {
   "name": "k-budget-app",
-  "version": "5.0.5",
+  "version": "5.2.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",

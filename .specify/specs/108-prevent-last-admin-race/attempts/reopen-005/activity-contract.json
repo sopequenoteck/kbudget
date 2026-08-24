@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "contractId": "DEMO-007:critical:rollback-check:v1",
+  "issueId": "DEMO-007",
+  "profile": "critical",
+  "activity": "rollback-check",
+  "objective": "La suppression d’un compte administrateur vérifie actuellement le nombre d’administrateurs actifs avant de désactiver le compte, sans sérialisation apparente entre les transactions. Deux administrateurs supprimant simultanément leur compte peuvent chacun observer deux administrateurs actifs puis être tous les deux désactivés, laissant l’instance sans administrateur. Rendre cette invariant atomique au niveau transactionnel ou base de données. Ajouter un test d’intégration concurrent exécutant deux suppressions simultanées et vérifier qu’une seule réussit, que l’autre reçoit LAST_ADMIN_DELETION_FORBIDDEN, qu’il reste exactement un administrateur actif et que les refresh tokens du compte dont la suppression est refusée restent valides. Conserver les statuts HTTP et contrats d’erreur existants.",
+  "featurePath": ".specify/specs/108-prevent-last-admin-race",
+  "inputs": [
+    ".specify/specs/108-prevent-last-admin-race/assessment.json",
+    ".specify/specs/108-prevent-last-admin-race/workflow-state.json",
+    ".specify/specs/108-prevent-last-admin-race/risk-assessment.md",
+    ".specify/specs/108-prevent-last-admin-race/spec.md",
+    ".specify/specs/108-prevent-last-admin-race/contracts.md",
+    ".specify/specs/108-prevent-last-admin-race/plan.md",
+    ".specify/specs/108-prevent-last-admin-race/tasks.md",
+    ".specify/specs/108-prevent-last-admin-race/activity-result.json",
+    ".specify/specs/108-prevent-last-admin-race/evidence/requirements-coverage.json",
+    ".specify/specs/108-prevent-last-admin-race/evidence/test-suite.json",
+    ".specify/specs/108-prevent-last-admin-race/evidence/security-or-data-check.json",
+    ".specify/specs/108-prevent-last-admin-race/review-result.json"
+  ],
+  "allowedActions": [
+    "read",
+    "execute"
+  ],
+  "constraints": [
+    "Respecter strictement l'objectif et le perimetre du contrat.",
+    "Preserver les changements utilisateur sans rapport avec cette activite.",
+    "Ne pas modifier state.json, workflow-state.json ou assessment.json.",
+    "Ne pas creer de commit et ne pas changer de branche.",
+    "Signaler tout blocage au lieu de contourner une validation.",
+    "Ne modifier aucun fichier pendant le controle de rollback.",
+    "Verifier une procedure de restauration actionnable, les donnees affectees, les validations post-rollback et les declencheurs.",
+    "Retourner blocked si un effet irreversible ou une inconnue critique empeche un retour arriere fiable.",
+    "Ne produire rollback-plan=passed que si le plan est applicable et verifiable."
+  ],
+  "completionCriteria": [
+    "Le plan de rollback precise les etapes, responsables, donnees et controles.",
+    "Les declencheurs et limites du rollback sont explicites.",
+    "La preuve rollback-plan contient un rapport exploitable."
+  ],
+  "requiredEvidence": [
+    "rollback-plan"
+  ],
+  "expectedOutput": {
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "contractId",
+      "status",
+      "summary",
+      "changedFiles",
+      "checks",
+      "evidence",
+      "remainingRisks",
+      "blockers"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "integer",
+        "const": 1
+      },
+      "contractId": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "blocked"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "changedFiles": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "checks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "command",
+            "exitCode",
+            "status"
+          ],
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "exitCode": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "outcome",
+            "report"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "passed",
+                "failed"
+              ]
+            },
+            "report": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "remainingRisks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "blockers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

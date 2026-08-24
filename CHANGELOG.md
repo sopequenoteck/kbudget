@@ -5,6 +5,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-08-25
+
+### Added
+
+- **Contrat unifié des erreurs API** : `GlobalExceptionHandler` retourne pour toute erreur gérée un objet unique `{ error, message }`, remplaçant l'ancien format `{ timestamp, status, message }` et le format hybride des conflits. Les erreurs de validation exposent désormais un détail structuré par champ (`ValidationErrorDetail`). Voir `docs/api-errors.md`.
+
+### Fixed
+
+- **Suppression atomique du dernier administrateur** : verrou transactionnel (`ActiveAdminInvariantLock`, `pg_advisory_xact_lock`) empêchant deux suppressions de compte concurrentes de désactiver simultanément tous les administrateurs actifs. La suppression refusée reste sans effet persistant (403 `LAST_ADMIN_DELETION_FORBIDDEN`), la suppression acceptée conserve la désactivation du compte et la révocation de ses refresh tokens. Tests d'intégration concurrents `UserDeletionConcurrencyIT` et `UserDeletionRollbackIT`.
+- **Nginx bank-logos** : test de non-régression Vitest (`nginx.conf.spec.ts`) garantissant que `/api/bank-logos/*.svg` reste prioritaire sur la regex SVG générique et que `proxy_pass` pointe vers `http://api:8080/api/`.
+
 ## [5.0.5] - 2026-06-14
 
 > Release de maintenance — infrastructure CI/CD. Pas de changement fonctionnel. (Les versions 5.0.3 et 5.0.4 ont été préparées mais jamais publiées : le gate de release a correctement bloqué la livraison sur des tests rouges ; les correctifs sont regroupés ici.)

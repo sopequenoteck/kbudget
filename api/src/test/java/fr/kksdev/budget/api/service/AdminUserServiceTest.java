@@ -1,6 +1,5 @@
 package fr.kksdev.budget.api.service;
 
-import fr.kksdev.budget.api.config.AdminEmailResolver;
 import fr.kksdev.budget.api.dto.response.AdminUserResponse;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.model.User;
@@ -29,7 +28,7 @@ class AdminUserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private AdminEmailResolver adminEmailResolver;
+    private ActiveAdminInvariantLock activeAdminInvariantLock;
 
     @InjectMocks
     private AdminUserService adminUserService;
@@ -41,14 +40,11 @@ class AdminUserServiceTest {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
         User user1 = User.builder().id(id1).email("admin@test.fr").name("Admin")
-                .createdAt(LocalDateTime.now().minusDays(2)).build();
+                .createdAt(LocalDateTime.now().minusDays(2)).isAdmin(true).build();
         User user2 = User.builder().id(id2).email("user@test.fr").name("User")
                 .createdAt(LocalDateTime.now().minusDays(1)).build();
 
         when(userRepository.findAll()).thenReturn(List.of(user2, user1));
-        when(adminEmailResolver.isAdminEmail("admin@test.fr")).thenReturn(true);
-        when(adminEmailResolver.isAdminEmail("user@test.fr")).thenReturn(false);
-
         List<AdminUserResponse> result = adminUserService.list();
 
         assertThat(result).hasSize(2);
@@ -67,8 +63,6 @@ class AdminUserServiceTest {
         User admin = User.builder().id(UUID.randomUUID()).email("admin@test.fr").build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(target));
-        when(adminEmailResolver.isAdminEmail("user@test.fr")).thenReturn(false);
-
         adminUserService.disable(userId, admin);
 
         assertThat(target.getDisabledAt()).isNotNull();
@@ -94,8 +88,6 @@ class AdminUserServiceTest {
         User admin = User.builder().id(UUID.randomUUID()).email("admin@test.fr").build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(target));
-        when(adminEmailResolver.isAdminEmail("user@test.fr")).thenReturn(false);
-
         adminUserService.disable(userId, admin);
 
         // findAll ne doit pas être appelé car le target n'est pas admin
@@ -157,10 +149,27 @@ class AdminUserServiceTest {
         User admin = User.builder()
                 .id(adminId)
                 .email("admin@test.fr")
+                .isAdmin(true)
                 .build();
         when(userRepository.findById(adminId)).thenReturn(Optional.of(admin));
         when(userRepository.findAll()).thenReturn(List.of(admin));
-        when(adminEmailResolver.isAdminEmail("admin@test.fr")).thenReturn(true);
+
+        assertThatThrownBy(() -> adminUserService.disable(adminId, admin))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("LAST_ADMIN_CANNOT_BE_DISABLED");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void should_use_persisted_admin_role_when_protecting_last_active_admin() {
+        UUID adminId = UUID.randomUUID();
+        User admin = User.builder()
+                .id(adminId)
+                .email("admin-not-in-config@test.fr")
+                .isAdmin(true)
+                .build();
+
+        when(userRepository.findById(adminId)).thenReturn(Optional.of(admin));
 
         assertThatThrownBy(() -> adminUserService.disable(adminId, admin))
                 .isInstanceOf(ConflictException.class)
@@ -171,14 +180,11 @@ class AdminUserServiceTest {
     @Test
     void should_allow_self_disable_when_other_active_admin_exists() {
         UUID adminId = UUID.randomUUID();
-        User admin1 = User.builder().id(adminId).email("admin1@test.fr").build();
-        User admin2 = User.builder().id(UUID.randomUUID()).email("admin2@test.fr").build();
+        User admin1 = User.builder().id(adminId).email("admin1@test.fr").isAdmin(true).build();
+        User admin2 = User.builder().id(UUID.randomUUID()).email("admin2@test.fr").isAdmin(true).build();
 
         when(userRepository.findById(adminId)).thenReturn(Optional.of(admin1));
         when(userRepository.findAll()).thenReturn(List.of(admin1, admin2));
-        when(adminEmailResolver.isAdminEmail("admin1@test.fr")).thenReturn(true);
-        when(adminEmailResolver.isAdminEmail("admin2@test.fr")).thenReturn(true);
-
         adminUserService.disable(adminId, admin1);
 
         assertThat(admin1.getDisabledAt()).isNotNull();
@@ -188,18 +194,16 @@ class AdminUserServiceTest {
     @Test
     void should_not_count_disabled_admins_as_active() {
         UUID admin1Id = UUID.randomUUID();
-        User admin1 = User.builder().id(admin1Id).email("admin1@test.fr").build();
+        User admin1 = User.builder().id(admin1Id).email("admin1@test.fr").isAdmin(true).build();
         User admin2Disabled = User.builder()
                 .id(UUID.randomUUID())
                 .email("admin2@test.fr")
+                .isAdmin(true)
                 .disabledAt(LocalDateTime.now().minusHours(1))
                 .build();
 
         when(userRepository.findById(admin1Id)).thenReturn(Optional.of(admin1));
         when(userRepository.findAll()).thenReturn(List.of(admin1, admin2Disabled));
-        when(adminEmailResolver.isAdminEmail("admin1@test.fr")).thenReturn(true);
-        // admin2Disabled est filtré par disabledAt != null avant l'appel isAdminEmail — pas de stub nécessaire
-
         assertThatThrownBy(() -> adminUserService.disable(admin1Id, admin1))
                 .isInstanceOf(ConflictException.class);
     }
