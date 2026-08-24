@@ -65,6 +65,8 @@ class NotificationSchedulerTest {
     @InjectMocks
     private NotificationScheduler notificationScheduler;
 
+    private static final ZoneId PARIS = ZoneId.of("Europe/Paris");
+
     private final UUID userId = UUID.randomUUID();
     private final UUID subscriptionId = UUID.randomUUID();
     private final UUID debtId = UUID.randomUUID();
@@ -99,7 +101,7 @@ class NotificationSchedulerTest {
     @Test
     void should_create_subscription_notification_when_due_tomorrow() {
         var user = buildUser();
-        var tomorrow = LocalDate.now().plusDays(1);
+        var tomorrow = LocalDate.now(PARIS).plusDays(1);
         var sub = buildSubscription(tomorrow, Frequency.MENSUEL);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -125,7 +127,7 @@ class NotificationSchedulerTest {
     @Test
     void should_create_debt_notification_when_due_tomorrow() {
         var user = buildUser();
-        var tomorrow = LocalDate.now().plusDays(1);
+        var tomorrow = LocalDate.now(PARIS).plusDays(1);
         var debt = buildDebt(tomorrow, tomorrow);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -231,7 +233,7 @@ class NotificationSchedulerTest {
     @Test
     void should_not_create_debt_notification_when_due_date_is_null() {
         var user = buildUser();
-        var tomorrow = LocalDate.now().plusDays(1);
+        var tomorrow = LocalDate.now(PARIS).plusDays(1);
         var debt = buildDebt(tomorrow, null);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -248,7 +250,7 @@ class NotificationSchedulerTest {
     @Test
     void should_not_create_duplicate_notification_when_already_exists_today() {
         var user = buildUser();
-        var tomorrow = LocalDate.now().plusDays(1);
+        var tomorrow = LocalDate.now(PARIS).plusDays(1);
         var debt = buildDebt(tomorrow, tomorrow);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
@@ -284,7 +286,7 @@ class NotificationSchedulerTest {
     @Test
     void should_createNotification_when_reminderDue() {
         var user = buildUser();
-        var now = LocalDate.now();
+        var now = LocalDate.now(PARIS);
         var time = LocalTime.now();
         var debt = buildDebtWithReminder(now, time.minusMinutes(1));
 
@@ -324,7 +326,7 @@ class NotificationSchedulerTest {
     @Test
     void should_skipNotification_when_alreadyNotified24h() {
         var user = buildUser();
-        var now = LocalDate.now();
+        var now = LocalDate.now(PARIS);
         var debt = buildDebtWithReminder(now, LocalTime.of(10, 0));
 
         when(debtRepository.findUsersWithActiveReminders()).thenReturn(List.of(user));
@@ -372,7 +374,7 @@ class NotificationSchedulerTest {
                 .montant(BigDecimal.valueOf(800))
                 .libelle("Loyer")
                 .type(TransactionType.DEPENSE)
-                .date(LocalDate.now())
+                .date(LocalDate.now(PARIS))
                 .isRecurring(true)
                 .frequency(Frequency.MENSUEL)
                 .nextOccurrence(nextOccurrence)
@@ -386,7 +388,7 @@ class NotificationSchedulerTest {
     void should_createNotification_when_recurringTransactionDue() {
         var user = buildUser();
         var recurringId = UUID.randomUUID();
-        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(PARIS), true);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
@@ -424,7 +426,7 @@ class NotificationSchedulerTest {
     void should_createNotificationDaily_when_notValidatedYesterday() {
         var user = buildUser();
         var recurringId = UUID.randomUUID();
-        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(PARIS), true);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
@@ -448,7 +450,7 @@ class NotificationSchedulerTest {
     void should_notDuplicate_when_schedulerRunsTwiceSameDay() {
         var user = buildUser();
         var recurringId = UUID.randomUUID();
-        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(PARIS), true);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
@@ -493,7 +495,7 @@ class NotificationSchedulerTest {
     void should_notCreateTransaction_when_schedulerRuns() {
         var user = buildUser();
         var recurringId = UUID.randomUUID();
-        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(), true);
+        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(PARIS), true);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
@@ -509,7 +511,7 @@ class NotificationSchedulerTest {
     @Test
     void should_processMultipleDebts_when_multipleDue() {
         var user = buildUser();
-        var now = LocalDate.now();
+        var now = LocalDate.now(PARIS);
         var debt1 = buildDebtWithReminder(now, LocalTime.of(10, 0));
         var debt2Id = UUID.randomUUID();
         var debt2 = Debt.builder()
