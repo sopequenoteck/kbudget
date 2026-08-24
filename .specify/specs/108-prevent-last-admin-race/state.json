@@ -1,0 +1,20 @@
+{
+  "issueId": "DEMO-007",
+  "schemaVersion": 3,
+  "currentStep": "spec",
+  "completedSteps": [
+    "constitution"
+  ],
+  "stepTimestamps": {
+    "constitution": {
+      "startedAt": "2026-08-18T20:04:37Z",
+      "completedAt": "2026-08-18T20:04:37Z"
+    }
+  },
+  "reviewIterations": {},
+  "reviewAttempts": {},
+  "mode": "full",
+  "skippedSteps": [],
+  "createdAt": "2026-08-18T20:04:37Z",
+  "updatedAt": "2026-08-18T20:04:37Z"
+}

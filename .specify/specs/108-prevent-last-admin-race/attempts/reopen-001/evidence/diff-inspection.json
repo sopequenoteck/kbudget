@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "diff-inspection",
+  "outcome": "passed",
+  "generatedAt": "2026-08-18T20:42:31Z",
+  "changedFiles": [
+    "api/pom.xml",
+    "api/src/main/java/fr/kksdev/budget/api/runner/AdminSyncRunner.java",
+    "api/src/main/java/fr/kksdev/budget/api/service/ActiveAdminInvariantLock.java",
+    "api/src/main/java/fr/kksdev/budget/api/service/AdminUserService.java",
+    "api/src/main/java/fr/kksdev/budget/api/service/UserDeletionService.java",
+    "api/src/main/java/fr/kksdev/budget/api/service/UserOnboardingService.java",
+    "api/src/test/java/fr/kksdev/budget/api/controller/UserDeletionConcurrencyIT.java",
+    "api/src/test/java/fr/kksdev/budget/api/runner/AdminSyncRunnerTest.java",
+    "api/src/test/java/fr/kksdev/budget/api/service/AdminUserServiceTest.java",
+    "api/src/test/java/fr/kksdev/budget/api/service/UserDeletionServiceTest.java"
+  ],
+  "findings": [],
+  "gitDiffCheck": {
+    "id": "AUTO-DIFF",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "blocking": true,
+    "returncode": 0,
+    "succeeded": true,
+    "timedOut": false,
+    "workingDirectory": ".",
+    "stdout": "",
+    "stderr": ""
+  }
+}

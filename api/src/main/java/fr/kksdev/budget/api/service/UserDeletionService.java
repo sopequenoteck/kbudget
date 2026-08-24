@@ -11,8 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -22,6 +25,7 @@ public class UserDeletionService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+    private final ActiveAdminInvariantLock activeAdminInvariantLock;
 
     @Transactional
     public void softDelete(User user, DeleteAccountRequest request) {
@@ -35,16 +39,35 @@ public class UserDeletionService {
             throw new PasswordIncorrectException();
         }
 
-        if (user.isAdmin() && userRepository.countActiveAdmins() <= 1) {
+        activeAdminInvariantLock.acquire();
+        User currentUser = userRepository.findById(user.getId()).orElseThrow();
+        if (currentUser.isAdmin() && currentUser.getDisabledAt() == null
+                && userRepository.countActiveAdmins() <= 1) {
             log.warn("Account deletion rejected: last active admin (userId={})", user.getId());
             throw new LastAdminDeletionForbiddenException();
         }
 
-        user.setDisabledAt(LocalDateTime.now());
-        userRepository.save(user);
+        UUID deletedUserId = currentUser.getId();
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                log.info("User deletion committed (userId={})", deletedUserId);
+            }
 
-        refreshTokenService.revokeAllUserTokens(user);
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_ROLLED_BACK) {
+                    log.warn("User deletion rolled back (userId={})", deletedUserId);
+                }
+            }
+            });
+        }
 
-        log.info("User {} soft-deleted (disabled_at={})", user.getId(), user.getDisabledAt());
+        currentUser.setDisabledAt(LocalDateTime.now());
+        userRepository.save(currentUser);
+
+        refreshTokenService.revokeAllUserTokens(currentUser);
+
     }
 }

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "issueId": "DEMO-007",
+  "recommendedProfile": "critical",
+  "selectedProfile": "critical",
+  "confidence": "high",
+  "signals": {
+    "scope": "multiple",
+    "ambiguity": "medium",
+    "risk": "high",
+    "contractChange": false,
+    "dataOrSecurity": true
+  },
+  "reasons": [
+    "le changement touche aux donnees ou a la securite"
+  ],
+  "activities": [
+    "assess",
+    "risk-assessment",
+    "spec",
+    "research",
+    "contracts",
+    "plan",
+    "tasks",
+    "implement",
+    "verify",
+    "review",
+    "rollback-check",
+    "done"
+  ],
+  "requiredEvidence": [
+    "requirements-coverage",
+    "test-suite",
+    "security-or-data-check",
+    "rollback-plan",
+    "independent-review"
+  ],
+  "assessedAt": "2026-08-18T20:04:45Z",
+  "summary": "La suppression d’un compte administrateur vérifie actuellement le nombre d’administrateurs actifs avant de désactiver le compte, sans sérialisation apparente entre les transactions. Deux administrateurs supprimant simultanément leur compte peuvent chacun observer deux administrateurs actifs puis être tous les deux désactivés, laissant l’instance sans administrateur. Rendre cette invariant atomique au niveau transactionnel ou base de données. Ajouter un test d’intégration concurrent exécutant deux suppressions simultanées et vérifier qu’une seule réussit, que l’autre reçoit LAST_ADMIN_DELETION_FORBIDDEN, qu’il reste exactement un administrateur actif et que les refresh tokens du compte dont la suppression est refusée restent valides. Conserver les statuts HTTP et contrats d’erreur existants."
+}

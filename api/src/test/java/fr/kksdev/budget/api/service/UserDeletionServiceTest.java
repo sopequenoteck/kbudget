@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,6 +35,9 @@ class UserDeletionServiceTest {
     @Mock
     private RefreshTokenService refreshTokenService;
 
+    @Mock
+    private ActiveAdminInvariantLock activeAdminInvariantLock;
+
     @InjectMocks
     private UserDeletionService userDeletionService;
 
@@ -48,6 +52,7 @@ class UserDeletionServiceTest {
         var req = new DeleteAccountRequest("CorrectPassword1!", true);
 
         when(passwordEncoder.matches("CorrectPassword1!", "encoded-password")).thenReturn(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         userDeletionService.softDelete(user, req);
@@ -102,6 +107,7 @@ class UserDeletionServiceTest {
         var req = new DeleteAccountRequest("CorrectPassword1!", true);
 
         when(passwordEncoder.matches("CorrectPassword1!", "encoded-password")).thenReturn(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.countActiveAdmins()).thenReturn(1L);
 
         assertThatThrownBy(() -> userDeletionService.softDelete(user, req))
@@ -109,6 +115,7 @@ class UserDeletionServiceTest {
 
         verify(userRepository, never()).save(any());
         verify(refreshTokenService, never()).revokeAllUserTokens(any());
+        verify(activeAdminInvariantLock).acquire();
     }
 
     @Test
@@ -122,6 +129,7 @@ class UserDeletionServiceTest {
         var req = new DeleteAccountRequest("CorrectPassword1!", true);
 
         when(passwordEncoder.matches("CorrectPassword1!", "encoded-password")).thenReturn(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.countActiveAdmins()).thenReturn(2L);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -143,6 +151,7 @@ class UserDeletionServiceTest {
         var req = new DeleteAccountRequest("CorrectPassword1!", true);
 
         when(passwordEncoder.matches("CorrectPassword1!", "encoded-password")).thenReturn(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         userDeletionService.softDelete(user, req);
@@ -162,6 +171,7 @@ class UserDeletionServiceTest {
         var req = new DeleteAccountRequest("CorrectPassword1!", true);
 
         when(passwordEncoder.matches("CorrectPassword1!", "encoded-password")).thenReturn(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         userDeletionService.softDelete(user, req);
