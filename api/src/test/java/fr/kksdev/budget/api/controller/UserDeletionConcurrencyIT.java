@@ -78,8 +78,8 @@ class UserDeletionConcurrencyIT {
     }
 
     @Test
-    void should_preserve_one_admin_and_rejected_admin_refresh_token_under_concurrent_deletion() throws Exception {
-        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(Duration.ofSeconds(30), () -> runScenario());
+    void should_preserve_one_admin_and_rejected_admin_refresh_token_under_concurrent_deletion() {
+        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(Duration.ofSeconds(30), this::runScenario);
     }
 
     @Test
