@@ -69,7 +69,7 @@ L'API utilise des tokens JWT sans etat serveur. Chaque requete porte son token d
 
 ### Un seul module Maven (pas de multi-module)
 
-Le projet tient dans un seul module Maven. La separation se fait par packages (`controller/`, `service/`, `repository/`, etc.), pas par modules. Un multi-module n'apporterait que de la complexite de build sans benefice reel pour une application single-user.
+Le projet tient dans un seul module Maven. La separation se fait par packages (`controller/`, `service/`, `repository/`, etc.), pas par modules. Un multi-module n'apporterait que de la complexite de build sans benefice reel a cette echelle.
 
 ### Flyway pour les migrations (pas de ddl-auto en prod)
 
@@ -81,7 +81,7 @@ Les entites JPA ne sont jamais retournees directement par les controllers. Des D
 
 ### Pas de CQRS, DDD tactique ou Event Sourcing
 
-L'architecture reste en couches simples : Controller → Service → Repository. Ces patterns complexes n'apportent aucune valeur pour une application single-user de gestion de budget. Si un besoin le justifie, il devra etre documente dans le plan avant implementation.
+L'architecture reste en couches simples : Controller → Service → Repository. Ces patterns complexes n'apportent aucune valeur a l'echelle actuelle du projet. Si un besoin le justifie, il devra etre documente dans le plan avant implementation.
 
 ## Modele de donnees
 
@@ -405,7 +405,7 @@ app/src/app/
 
 | Ecran | Route | Role |
 |-------|-------|------|
-| Auth | `/auth` | Inscription et connexion (toggle login/register) |
+| Auth | `/auth` | Connexion, acceptation d'invitation, reset a la premiere connexion (pas d'inscription publique) |
 | Dashboard | `/dashboard` | Patrimoine total (variation mensuelle), revenus/depenses du mois, budgets (conditionnel), dernieres operations |
 | Transactions | `/transactions` | Liste, filtres, detail/edition |
 | Abonnements | `/subscriptions` | Liste, total mensuel |
@@ -430,8 +430,8 @@ app/src/app/
 - Le filtre `JwtFilter` de Spring Security intercepte toutes les routes `/api/**`
 - `POST /api/auth/refresh` renouvelle les tokens (rotation : l'ancien refresh token est consomme)
 - `POST /api/auth/logout` revoque le refresh token
-- Cote Angular : intercepteur HTTP ajoute le token et renouvelle automatiquement via refresh, guard protege les routes, ecran auth dedie (login/register)
-- Un seul utilisateur, credentials stockes en base (BCrypt)
+- Cote Angular : intercepteur HTTP ajoute le token et renouvelle automatiquement via refresh, guard protege les routes, ecran auth dedie (login, acceptation d'invitation, reset premiere connexion)
+- Multi-utilisateurs sur une meme instance : credentials stockes en base (BCrypt), isolation stricte par user authentifie sur chaque requete
 
 ## Schema de deploiement
 
