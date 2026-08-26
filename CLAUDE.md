@@ -48,15 +48,16 @@ cd flutter && flutter analyze          # Analyse statique
 
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v3.0.0) est le document de reference. 7 principes :
+Le fichier `.specify/memory/constitution.md` (v4.0.0) est le document de reference. 8 principes :
 
-1. **API-First** : toute feature via REST avant frontend. DTOs obligatoires, jamais d'entite JPA exposee.
+1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Une seule version d'API servie a la fois + `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
 3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
-4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans.
-5. **Testabilite** : tests d'integration sur endpoints, tests unitaires sur services. Nommage : `should_[resultat]_when_[condition]`.
-6. **Observabilite** : SLF4J/Logback uniquement. INFO pour actions, ERROR pour erreurs.
-7. **Self-Hosted Ready** : PostgreSQL seule dependance infra.
+4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans. L'instance de l'utilisateur sera souvent injoignable : degrader proprement, le cache n'est jamais source de verite.
+5. **Testabilite** : tests d'integration sur endpoints, tests unitaires sur services. Nommage : `should_[resultat]_when_[condition]`. La suite doit tourner chez un contributeur externe.
+6. **Observabilite** : SLF4J/Logback uniquement. INFO pour actions, ERROR pour erreurs. Logs et messages techniques en anglais.
+7. **Self-Hosted & Distribution ouverte** : PostgreSQL seule dependance infra. AGPL-3.0 (`api/`, `app/`), MPL-2.0 (`flutter/`). Aucun bridage selon l'origine du build. Anglais par defaut, francais a parite.
+8. **Angular, client de reference** : toute feature nait cote Angular. Flutter n'a jamais d'obligation de parite — frontiere a 3 etats **Suivi / Gele / Jamais**. Verifier l'etat d'une surface avant tout portage.
 
 ## Conventions backend
 
@@ -142,6 +143,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
+| [`docs/direction.md`](docs/direction.md) | **Direction produit (2026-08-26)** : ouverture open source, positionnement, decisions et alternatives ecartees |
 | [`docs/roadmap-v2.md`](docs/roadmap-v2.md) | Roadmap V2 : features, phases, decisions |
 | [`docs/dette-technique.md`](docs/dette-technique.md) | Registre des dettes techniques identifiees |
 | [`docs/pwa-install.md`](docs/pwa-install.md) | Guide d'installation PWA (Android/iOS) |
