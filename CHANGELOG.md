@@ -5,6 +5,23 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.3.0] - 2026-08-26
+
+> Release documentaire — aucun changement de code applicatif. Acte le changement de direction du projet.
+
+### Added
+
+- **`docs/direction.md`** : document de direction produit. k-budget s'ouvre en open source à destination de la communauté self-hosted, avec une différenciation assumée sur la zone francophone (France et Afrique de l'Ouest). Le document conserve les huit décisions structurantes, les alternatives écartées et leurs motifs, le séquencement en huit jalons, les risques et les questions laissées ouvertes.
+
+### Changed
+
+- **Constitution v3.0.0 → v4.0.0** (MAJOR) : suppression de la bifurcation des trajectoires de distribution. Il n'existe plus qu'une trajectoire — self-host, tous les clients consommant la même API.
+  - *Principe I* : « API-First / Local-First » redevient « API-First ». L'API est la source de vérité unique ; aucun client ne détient de source de vérité propre. Ajout du contrat de version : une seule version d'API servie à la fois, découverte des capacités par le client, et trois règles de compatibilité descendante.
+  - *Principe VII* : « Two Distribution Trajectories » devient « Self-Hosted & Distribution ouverte ». Licences AGPL-3.0 (`api/`, `app/`) et MPL-2.0 (`flutter/`), règle de non-bridage des builds compilés par des tiers, politique de langues (anglais par défaut, français à parité).
+  - *Principe VIII* (nouveau) : Angular est le client de référence. Flutter n'a jamais d'obligation de parité — frontière à trois états, Suivi / Gelé / Jamais.
+  - Suppression du Contexte B (Standalone Commercial) et des règles propres au mode autonome Flutter.
+- **`CLAUDE.md`** : mise en cohérence avec la constitution v4.0.0 (8 principes au lieu de 7) et référencement de `docs/direction.md`.
+
 ## [5.2.1] - 2026-08-25
 
 ### Fixed

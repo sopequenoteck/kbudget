@@ -1,52 +1,59 @@
 <!--
   Sync Impact Report
   ==================================================
-  Version change: 2.1.2 → 3.0.0 (MAJOR — bifurcation
-    des trajectoires de distribution Spring/Angular vs Flutter)
-  Bump rationale: Reconnaissance explicite que Flutter devient
-    un produit commercial standalone distribué via stores publics
-    (App Store, Google Play), modèle paid one-shot, indépendant
-    de la trajectoire self-hosted Spring + Angular existante.
-    Cette bifurcation impacte structurellement deux principes
-    fondateurs (I et VII) ainsi que le contexte d'usage et les
-    contraintes techniques Flutter.
+  Version change: 3.0.0 → 4.0.0 (MAJOR — suppression de
+    la bifurcation des trajectoires de distribution)
+  Bump rationale: La direction actée le 2026-08-26 supprime
+    la Trajectoire B (Flutter standalone commercial
+    local-first). Le projet s'ouvre en open source à
+    destination de la communauté self-hosted, avec une
+    trajectoire unique : chaque utilisateur héberge son
+    instance, et tous les clients — Angular comme Flutter —
+    consomment la même API. Cette suppression redéfinit
+    structurellement les principes I et VII, retire le
+    Contexte B et introduit un principe VIII.
 
   Modified principles:
-    - Principe I (API-First) : reformulé en "API-First /
-      Local-First" pour couvrir le mode connecté (Spring +
-      Angular et Flutter en sync) et le mode standalone
-      (Flutter avec Drift comme source de vérité)
-    - Principe VII (Self-Hosted Ready) : reformulé en
-      "Two Distribution Trajectories" pour acter la coexistence
-      des deux modes de distribution (self-hosted et stores)
-
-  Modified sections:
-    - Contexte d'usage : dédoublé en Contexte A (self-hosted)
-      et Contexte B (standalone commercial)
-    - Contraintes techniques (flutter/) : ajout des contraintes
-      stores, versioning indépendant, conformité Apple/Google
-    - Workflow de développement : précision versioning séparé
-      Flutter vs Spring + Angular
+    - Principe I : "API-First / Local-First" → "API-First".
+      L'API est la source de vérité unique pour tous les
+      clients. Ajout des règles de versioning et de
+      compatibilité descendante (une seule version courante).
+    - Principe II : retrait de la clause propre au mode
+      standalone (protection des données locales comme
+      source de vérité).
+    - Principe IV : retrait de l'onboarding standalone en
+      ≤ 30 s ; l'offline redevient un cache, jamais une
+      source de vérité.
+    - Principe VII : "Two Distribution Trajectories" →
+      "Self-Hosted & Distribution ouverte". Trajectoire
+      unique, licences, règle de non-bridage des builds,
+      politique de langues.
 
   Added sections:
-    - Contexte B (Standalone Commercial)
+    - Principe VIII — Angular, client de référence
+      (frontière Suivi / Gelé / Jamais)
 
-  Removed sections: aucune
+  Removed sections:
+    - Contexte B (Standalone Commercial)
+    - Trajectoire A / Trajectoire B (principe VII)
+    - Mode standalone (principe I)
 
   Templates requiring updates:
-    - .specify/templates/plan-template.md ⚠ à vérifier
-      (principes I et VII modifiés peuvent impacter les
-      checklists Constitution Check)
+    - .specify/templates/plan-template.md ⚠ à vérifier —
+      toute Constitution Check distinguant Trajectoire A /
+      Trajectoire B doit être supprimée
     - .specify/templates/spec-template.md ✅ compatible
     - .specify/templates/tasks-template.md ✅ compatible
     - .specify/templates/checklist-template.md ✅ compatible
 
   Follow-up TODOs:
-    - Réviser plan-template.md pour intégrer la distinction
-      Trajectoire A / Trajectoire B dans la Constitution Check
-    - Définir la stratégie concrète de versioning Flutter
-      (numérotation, branches release, CI/CD séparée) lors
-      de la phase technique de mise en commerce
+    - Retirer la distinction Trajectoire A / B de
+      plan-template.md (TODO hérité de la v3.0.0, désormais
+      sans objet : il n'y a plus qu'une trajectoire)
+    - Aligner docs/vision.md, docs/architecture.md et
+      CLAUDE.md sur la trajectoire unique
+    - Suppression effective du mode standalone Flutter :
+      voir KKS-335
   ==================================================
 -->
 
@@ -54,15 +61,11 @@
 
 ## Core Principles
 
-### I. API-First / Local-First
+### I. API-First
 
-Toute fonctionnalité DOIT avoir une source de vérité unique
-explicitement documentée selon le mode de déploiement.
-
-**Mode connecté (Spring + Angular, Flutter en mode sync)** :
-le backend est la source de vérité. Toute fonctionnalité DOIT
-être exposée via l'API REST avant d'être consommée par le
-frontend.
+L'API REST est la source de vérité unique pour tous les
+clients. Toute fonctionnalité DOIT être exposée via l'API
+avant d'être consommée par un frontend, quel qu'il soit.
 
 - Les endpoints DOIVENT suivre les conventions REST
   (GET/POST/PUT/DELETE, codes HTTP standards)
@@ -73,19 +76,32 @@ frontend.
 - Les réponses DOIVENT être en JSON
 - Chaque ressource DOIT exposer un contrat clair
   (request DTO → response DTO) documenté par ses types
+- Aucun client NE DOIT détenir de source de vérité propre.
+  Un stockage local est un cache : il peut disparaître sans
+  perte de donnée.
 
-**Mode standalone (Flutter local-first)** :
-la base Drift locale (SQLite) est la source de vérité.
-L'application DOIT fonctionner nominalement sans aucune
-dépendance réseau.
+**Contrat de version.** Les clients se mettent à jour
+indépendamment des serveurs : une app installée depuis un
+store évolue seule, tandis que l'instance de l'utilisateur
+reste sur la version qu'il a choisi de déployer.
 
-- Le schéma Drift DOIT être versionné via migrations
-- Aucune feature en mode standalone NE DOIT requérir une
-  connexion serveur pour fonctionner
-- Si la sync Spring est activée par l'utilisateur (Settings →
-  Avancé), l'API devient une réplique secondaire — la
-  résolution de conflits DOIT être documentée explicitement
-  par feature dans le plan
+- Une seule version d'API est servie à la fois. Aucune
+  version antérieure N'EST maintenue en parallèle
+- Un endpoint public et non versionné DOIT permettre à tout
+  client de découvrir la version du serveur, la version
+  d'API, la version minimale de client supportée et les
+  capacités disponibles
+- Un client incompatible DOIT l'apprendre explicitement et
+  le dire à l'utilisateur — jamais échouer sur une erreur
+  technique
+- On NE retire ni NE renomme jamais un champ de réponse ;
+  on ajoute
+- On NE rend jamais obligatoire un champ de requête qui ne
+  l'était pas
+- Un changement de contrat passe par un nouvel endpoint,
+  pas par la modification d'un existant
+- Une rupture inévitable DOIT être assumée : version
+  minimale de client relevée, note de migration publiée
 
 ### II. Sécurité par défaut
 
@@ -103,9 +119,12 @@ celles explicitement déclarées publiques dans `SecurityConfig`.
   (`@Valid`, `@NotNull`, `@Size`, etc.) avant traitement
 - Les erreurs de sécurité NE DOIVENT PAS exposer de détails
   internes (stack traces, noms de tables, etc.)
-- En mode standalone Flutter, les données locales DOIVENT
-  être protégées par le secure storage du device pour les
-  secrets (clés de chiffrement éventuelles, tokens de sync)
+- Les secrets détenus par un client (jetons d'authentification,
+  code de verrouillage) DOIVENT être conservés dans le stockage
+  sécurisé de la plateforme
+- Les instances étant exposées publiquement par leurs
+  propriétaires, les endpoints d'authentification DOIVENT
+  être protégés contre les tentatives répétées
 
 ### III. Simplicité & YAGNI
 
@@ -127,7 +146,7 @@ spéculatives.
 
 ### IV. Mobile-First UX
 
-Les frontends (PWA Angular et app Flutter) DOIVENT être
+Les clients (PWA Angular et app Flutter) DOIVENT être
 optimisés pour un usage mobile quotidien. L'expérience de
 saisie rapide est la priorité absolue.
 
@@ -138,15 +157,12 @@ saisie rapide est la priorité absolue.
   abonnements, état des dettes
 - Le design DOIT être responsive mais optimisé mobile
   en priorité
-- Les interactions DOIVENT fonctionner offline quand possible
-  (PWA service worker côté Angular, SQLite local côté Flutter).
-  **Exception** : les features dont les données doivent être
-  fraîches en temps réel (remboursements, paiements, soldes
-  agrégés, préférences, comptes, catégories) peuvent
-  utiliser le mode server-only (API REST sans Drift/SQLite)
-  si justifié dans le plan
-- L'onboarding Flutter standalone DOIT être réalisable en
-  ≤ 30 secondes et démontrer la valeur produit immédiatement
+- **L'instance de l'utilisateur sera régulièrement
+  injoignable** : elle est hébergée chez lui, derrière un
+  VPN ou un reverse proxy fragile. Les clients DOIVENT
+  dégrader proprement plutôt qu'échouer — cache de lecture,
+  message explicite, reprise automatique. Ce cache N'EST
+  JAMAIS une source de vérité (cf. principe I)
 
 ### V. Testabilité
 
@@ -164,6 +180,8 @@ Les tests sont un filet de sécurité, pas une contrainte.
   valeurs aux bornes (0, négatif, max)
 - Pas de tests triviaux (getter/setter) — tester le
   comportement, pas l'implémentation
+- La suite de tests DOIT être exécutable par un contributeur
+  extérieur, sans accès à une infrastructure privée
 
 ### VI. Observabilité
 
@@ -182,88 +200,120 @@ diagnostiquer tout problème sans accès au debugger.
   SLF4J/Logback côté Spring, `developer.log` ou packages
   de logging contrôlé côté Flutter (jamais de `print()`
   laissé en production)
+- Les logs et les messages techniques de l'API DOIVENT être
+  en anglais : ils s'adressent aux développeurs et aux
+  administrateurs d'instance, pas aux utilisateurs finaux
 
-### VII. Two Distribution Trajectories
+### VII. Self-Hosted & Distribution ouverte
 
-L'application a deux trajectoires de distribution distinctes
-qui partagent le même backend Spring et la même DB PostgreSQL,
-mais répondent à des contraintes opérationnelles différentes.
+Il existe **une seule trajectoire** : chaque utilisateur
+héberge sa propre instance. Le projet n'exploite aucun
+service et ne collecte aucune donnée.
 
-**Trajectoire A — Self-Hosted (Spring + Angular)** :
-déploiement auto-hébergé, multi-user contrôlé.
+**Contraintes d'hébergement**
 
-- La configuration DOIT supporter les profils Spring (dev /
-  prod) via fichiers YAML séparés
+- La configuration DOIT supporter les profils Spring
+  (dev / prod) via fichiers YAML séparés
 - En production, toute configuration sensible DOIT provenir
   de variables d'environnement
 - PostgreSQL DOIT être la seule dépendance d'infrastructure
   externe
 - Pas de dépendance à des services SaaS (monitoring cloud,
-  auth externe, CDN)
-- L'application DOIT démarrer avec une seule commande
-  (`mvn spring-boot:run` ou `java -jar`)
+  auth externe, CDN, notifications propriétaires)
+- L'installation DOIT être réalisable sans connaissance
+  préalable du projet, base de données comprise
 - L'application DOIT supporter plusieurs utilisateurs sur une
-  même instance (multi-tenant logique via isolation par user
-  authentifié, cf. principe II)
+  même instance (isolation par user authentifié, cf.
+  principe II)
 - L'inscription publique N'EST PAS un objectif : l'onboarding
-  se fait via création de compte contrôlée par l'administrateur
-  du serveur
+  se fait via invitation contrôlée par l'administrateur de
+  l'instance
 
-**Trajectoire B — Standalone Commercial (Flutter)** :
-distribution publique via App Store et Google Play, app
-standalone local-first, modèle économique paid one-shot.
+**Ouverture du code**
 
-- Local-first par défaut (Drift/SQLite), aucune dépendance
-  serveur pour le fonctionnement nominal
-- Sync optionnelle vers la trajectoire A pour les utilisateurs
-  self-hostés (exposée via Settings → Avancé, non marketée)
-- Modèle économique : paid one-shot, prix différencié par
-  marché (Europe / Afrique) via les price tiers Apple / Google.
-  Pas de freemium, pas d'abonnement, pas de V2 payante prévue
-- Conformité stores obligatoire : privacy policy, privacy
-  nutrition labels, mécanisme de suppression de données
-  utilisateur (exigence Apple), backup cloud (iCloud /
-  Google Drive)
-- Versioning indépendant de la trajectoire A : releases
-  Flutter pilotées par les cycles stores (TestFlight, Play
-  Console), non couplées aux releases Spring + Angular
+- `api/` et `app/` sont sous AGPL-3.0 : la clause réseau
+  empêche un tiers de fermer le backend pour en exploiter
+  un service
+- `flutter/` est sous MPL-2.0 : GPL et AGPL sont
+  incompatibles avec les conditions des stores
+- Les actifs tiers (logos de marques, polices) NE SONT PAS
+  couverts par ces licences et DOIVENT être déclarés
+  séparément
+- Le nom et le logo du projet sont réservés et hors licence
+- Toute contribution externe DOIT être couverte par un
+  accord de contribution, faute de quoi la licence devient
+  impossible à faire évoluer
 
-## Contextes d'usage
+**Non-bridage**
 
-### Contexte A — Self-Hosted (Spring + Angular)
+L'application mobile est payante sur les stores : on y vend
+la commodité, pas le logiciel.
 
-- **Déploiement cible** : instance unique auto-hébergée,
-  utilisée par un groupe restreint (~10-20 comptes actifs).
+- Un build compilé par un tiers DOIT être fonctionnellement
+  identique à celui distribué sur les stores
+- Aucune fonctionnalité NE DOIT être conditionnée à
+  l'origine du build, à un achat ou à une licence
+
+**Langues**
+
+- L'anglais est la langue par défaut de l'interface et de
+  la vitrine du projet
+- Le français est maintenu **à parité** et n'est jamais en
+  retard sur l'anglais : c'est la langue de la zone visée
+- Aucune chaîne d'interface NE DOIT être codée en dur
+- L'API ne se traduit pas : elle émet des codes d'erreur,
+  et les clients en affichent une traduction locale
+
+### VIII. Angular, client de référence
+
+Deux clients complets servis par une même API représentent
+un coût de maintenance double. Ce coût vient de la **parité**,
+pas de l'existence du second client.
+
+- **Toute fonctionnalité naît côté Angular**, qui est le
+  client de référence et la surface fonctionnelle complète
+- **Flutter n'a jamais d'obligation de parité.** Une
+  fonctionnalité absente de Flutter n'est pas une dette
+- Toute surface DOIT être classée dans l'un des trois états :
+  - **Suivi** — parité maintenue, toute évolution est portée
+  - **Gelé** — existe côté Flutter, continue de fonctionner
+    et reste maintenu (traductions, montées de version,
+    tests), mais n'accueille aucune évolution fonctionnelle
+  - **Jamais** — n'existe pas côté Flutter et n'existera pas
+- Le critère de classement d'une nouvelle surface est unique :
+  *cette surface va-t-elle continuer à bouger ?* Si oui et
+  qu'elle est complexe, elle reste côté Angular. Si c'est un
+  CRUD stable sur une entité, elle peut vivre des deux côtés
+- Flutter porte en propre ce que le web ne peut pas offrir :
+  verrouillage biométrique, notifications locales planifiées
+  fonctionnant serveur injoignable, intégrations système
+- Le classement d'une surface DOIT être vérifié avant tout
+  portage, et documenté
+
+## Contexte d'usage
+
+- **Déploiement cible** : instance auto-hébergée, installée
+  et administrée par son propriétaire.
+- **Public visé** : la communauté self-hosted, avec une
+  différenciation assumée sur la zone francophone — France
+  et Afrique de l'Ouest — via le multi-devises et la
+  couverture bancaire par profils d'import.
 - **Isolation stricte** : chaque user a ses propres comptes,
   transactions, budgets, dettes. Aucune entité n'est partagée
   entre users.
 - **Flux cross-user** : les relations financières entre deux
-  users de l'instance (ex : prêt, commande pour compte de
-  tiers) sont modélisées séparément dans chaque compte.
-  Un rapprochement automatique inter-users N'EST PAS un
-  objectif.
-- **Pas d'inscription publique** : création de compte
-  contrôlée, pas de freemium, pas de quota payant.
-
-### Contexte B — Standalone Commercial (Flutter)
-
-- **Déploiement cible** : application standalone installée
-  par l'utilisateur final via App Store ou Google Play.
-- **Compte unique par device** : pas d'authentification
-  multi-user côté app standalone. Les données sont locales
-  au device.
-- **Sync optionnelle** : un utilisateur peut activer la sync
-  vers une instance self-hostée (Trajectoire A) via
-  Settings → Avancé. Ses données restent locales,
-  l'API agit comme réplique secondaire.
-- **Marchés cibles** : Europe (cible principale au launch) +
-  Afrique (cible secondaire avec différenciation potentielle
-  tontines / mobile money en post-launch).
-- **Modèle économique** : paid one-shot, pricing différencié
-  par marché via les price tiers Apple / Google. Pas de
-  freemium, pas d'abonnement, pas de V2 payante.
-- **Maintenance ciblée** : 3 à 5 ans après le launch, sans
-  cycle de re-paiement intermédiaire.
+  users de l'instance (ex : prêt) sont modélisées séparément
+  dans chaque compte. Un rapprochement automatique inter-users
+  N'EST PAS un objectif.
+- **Pas d'inscription publique** : création de compte par
+  invitation, contrôlée par l'administrateur de l'instance.
+- **Aucune collecte** : le projet n'exploite aucun serveur,
+  ne reçoit aucune donnée, n'embarque ni analytique ni
+  traceur.
+- **Pas d'agrégation bancaire** : elle exigerait un agrément
+  AISP, donc une entité exploitant un service. L'alimentation
+  se fait par import de relevés, avec des profils bancaires
+  contribués par la communauté.
 
 ## Contraintes techniques
 
@@ -281,6 +331,7 @@ standalone local-first, modèle économique paid one-shot.
 - **Structure** : `config/`, `controller/`, `service/`,
   `repository/`, `model/`, `dto/`, `enums/`
 - **DDL dev** : `create-drop` — **DDL prod** : `validate`
+- **Licence** : AGPL-3.0
 
 ### Frontend PWA (app/)
 
@@ -293,6 +344,9 @@ standalone local-first, modèle économique paid one-shot.
 - **DI** : `inject()` uniquement (pas de constructor injection)
 - **RxJS** : Limité aux flux HTTP et opérateurs complexes
 - **Linting** : ESLint + Prettier
+- **i18n** : chargement à l'exécution — une seule image
+  Docker DOIT servir toutes les langues
+- **Licence** : AGPL-3.0
 
 ### Mobile natif (flutter/)
 
@@ -300,25 +354,23 @@ standalone local-first, modèle économique paid one-shot.
 - **Framework** : Flutter >= 3.27 (stable)
 - **State management** : flutter_riverpod
 - **Routing** : go_router
-- **Base de données locale** : Drift (SQLite) — source de
-  vérité en mode standalone (Contexte B)
-- **HTTP** : Dio (utilisé uniquement en mode sync optionnelle)
+- **HTTP** : Dio — l'API est la source de vérité
+- **Stockage local** : cache et préférences uniquement,
+  jamais une source de vérité
 - **Secure storage** : flutter_secure_storage
 - **Models** : Freezed + json_serializable
 - **Tests** : flutter_test + Mockito
-- **Code generation** : build_runner (Drift, Freezed, JSON)
+- **Code generation** : build_runner (Freezed, JSON)
 - **Structure** : `common_widgets/`, `constants/`, `data/`,
-  `domain/`, `features/`, `localization/`, `routing/`,
-  `theme/`, `utils/`
-- **Data mode** : local-first par défaut. Sync vers l'API
-  REST via Dio activable via Settings → Avancé.
-- **Distribution** : App Store (iOS) + Google Play (Android)
-- **Versioning** : indépendant des releases Spring + Angular,
-  piloté par les cycles stores
-- **Conformité stores** : privacy policy, privacy nutrition
-  labels, mécanisme de suppression de données utilisateur
-  (Apple), backup cloud iCloud / Google Drive
-- **Monétisation** : IAP pour licence one-shot
+  `domain/`, `features/`, `l10n/`, `routing/`, `theme/`,
+  `utils/`
+- **Configuration serveur** : l'URL de l'instance est une
+  étape primaire et assumée de l'onboarding, jamais une
+  option avancée
+- **Distribution** : App Store, Google Play et F-Droid
+- **Build sans secret** : la compilation depuis les sources
+  DOIT réussir sans keystore ni configuration privée
+- **Licence** : MPL-2.0
 
 ## Workflow de développement
 
@@ -331,12 +383,14 @@ standalone local-first, modèle économique paid one-shot.
 - Chaque user story DOIT être implémentable et testable
   indépendamment
 - Les reviews DOIVENT vérifier l'alignement avec les
-  7 principes de cette constitution
-- **Versioning** : Spring + Angular partagent une SemVer
-  commune (`VERSION`, `api/pom.xml`, `app/package.json`).
-  Flutter applique sa propre SemVer (`flutter/pubspec.yaml`),
-  indépendante des releases self-hostées et alignée sur les
-  cycles stores
+  8 principes de cette constitution
+- Avant tout portage vers Flutter, l'état de la surface
+  (Suivi / Gelé / Jamais) DOIT être vérifié
+- **Versioning** : `VERSION`, `api/pom.xml` et
+  `app/package.json` partagent une SemVer commune. Flutter
+  applique sa propre SemVer (`flutter/pubspec.yaml`), alignée
+  sur les cycles stores, mais DOIT rester compatible avec la
+  version minimale de client déclarée par l'API
 
 ## Governance
 
@@ -360,4 +414,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 3.0.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-05-03
+**Version**: 4.0.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-08-26
