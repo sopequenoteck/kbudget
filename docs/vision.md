@@ -97,5 +97,4 @@ Hebergee en self-hosted sur serveur personnel.
 ## Hors scope (pour plus tard)
 
 - Bilans avances (graphiques, comparaisons mois par mois)
-- Ouverture multi-utilisateurs
 - Categorisation automatique par ML (les regles de categorisation manuelles par pattern sont implementees)
