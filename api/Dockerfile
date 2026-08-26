@@ -20,12 +20,12 @@ RUN groupadd --system budget && useradd --system --gid budget budget
 
 WORKDIR /app
 
-RUN mkdir logs && chown budget:budget logs
+RUN mkdir -p logs data/avatars && chown -R budget:budget logs data
 
 COPY --from=build /app/target/api-*.jar app.jar
 RUN chown budget:budget app.jar
 
 EXPOSE 8080
 
-# Entrypoint : fix permissions volume logs puis lance en user budget
-ENTRYPOINT ["sh", "-c", "chown -R budget:budget /app/logs && exec runuser -u budget -- java -jar app.jar"]
+# Entrypoint : fix permissions volumes (logs, avatars) puis lance en user budget
+ENTRYPOINT ["sh", "-c", "chown -R budget:budget /app/logs /app/data && exec runuser -u budget -- java -jar app.jar"]

@@ -5,6 +5,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **KKS-307 — Persistance des avatars en Docker** : `docker-compose.yml` ne montait aucun volume sur le chemin de stockage des avatars, qui pointait par défaut à l'intérieur du container (`/app/data/avatars`). Les fichiers disparaissaient silencieusement à chaque recréation du container — donc à chaque mise à jour d'image par Watchtower — et l'API répondait ensuite `AVATAR_NOT_FOUND` sur des `users.avatar_path` orphelins.
+  - Volume nommé `api-avatars` monté sur `/app/data/avatars`, et `AVATAR_STORAGE_PATH` fixée explicitement sur ce chemin dans le service `api` (la personnalisation se fait côté hôte, sur la source du volume).
+  - `api/Dockerfile` : création de `data/avatars` et reprise des permissions à l'entrypoint, même traitement que `logs` — le volume neuf est créé en root par Docker alors que l'application tourne en utilisateur `budget`.
+  - `docs/deployment.md` : section Docker réécrite (le volume est désormais fourni par défaut) et procédures de backup/restauration du volume ajoutées à côté des procédures bare-metal existantes.
+
 ## [5.3.1] - 2026-08-26
 
 > Correctifs documentaires — aucun changement de code applicatif.

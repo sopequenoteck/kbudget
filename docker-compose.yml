@@ -6,10 +6,15 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      # Chemin fixe dans le container : le volume api-avatars est monte dessus.
+      # Pour stocker les avatars ailleurs sur l'hote, modifier la source du
+      # volume ci-dessous, pas cette variable.
+      AVATAR_STORAGE_PATH: /app/data/avatars
     ports:
       - "3001:8080"
     volumes:
       - api-logs:/app/logs
+      - api-avatars:/app/data/avatars
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/api/actuator/health || exit 1"]
       interval: 30s
@@ -26,3 +31,4 @@ services:
 
 volumes:
   api-logs:
+  api-avatars:
