@@ -5,6 +5,18 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.3.1] - 2026-08-26
+
+> Correctifs documentaires — aucun changement de code applicatif.
+
+### Fixed
+
+- **Affirmations mono-utilisateur obsolètes** : plusieurs documents décrivaient encore une application à utilisateur unique, alors que le multi-utilisateurs existe depuis KKS-233 (invitations, rôles admin, garde-fou du dernier admin actif, isolation par user authentifié) et que la constitution v4.0.0 l'impose au principe VII.
+  - `docs/vision.md` : « Ouverture multi-utilisateurs » retirée de la section « Hors scope ».
+  - `docs/architecture.md` : le flux d'authentification annonçait « Un seul utilisateur » — corrigé en multi-utilisateurs avec isolation stricte. La ligne contredisait la section sécurité du même fichier.
+  - `docs/architecture.md` : deux justifications architecturales (module Maven unique, absence de CQRS/DDD) reformulées sur l'échelle du projet plutôt que sur un nombre d'utilisateurs. L'argument de simplicité est conservé.
+  - `docs/architecture.md` : la table des écrans et le flux Angular annonçaient une inscription publique, retirée depuis KKS-233. L'écran `/auth` couvre connexion, acceptation d'invitation et reset à la première connexion.
+
 ## [5.3.0] - 2026-08-26
 
 > Release documentaire — aucun changement de code applicatif. Acte le changement de direction du projet.
