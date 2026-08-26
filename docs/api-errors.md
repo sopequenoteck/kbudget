@@ -77,6 +77,7 @@ Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devi
 | Reset non requis | 403 | `PASSWORD_RESET_NOT_REQUIRED` | Message specialise existant |
 | Suppression du dernier admin | 403 | `LAST_ADMIN_DELETION_FORBIDDEN` | Message specialise existant |
 | Ressource absente | 404 | `NOT_FOUND` | Message metier, avec fallback public |
+| Route inconnue | 404 | `NOT_FOUND` | `Ressource introuvable` |
 | Avatar absent | 404 | `AVATAR_NOT_FOUND` | Message specialise existant |
 | Conflit metier generique | 409 | `CONFLICT` | Message metier, avec fallback public |
 | Desactivation du dernier admin | 409 | `LAST_ADMIN_CANNOT_BE_DISABLED` | `Impossible de désactiver le dernier admin actif.` |

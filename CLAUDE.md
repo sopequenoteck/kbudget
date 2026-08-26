@@ -148,7 +148,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/dette-technique.md`](docs/dette-technique.md) | Registre des dettes techniques identifiees |
 | [`docs/pwa-install.md`](docs/pwa-install.md) | Guide d'installation PWA (Android/iOS) |
 | [`docs/manual-test-plan.md`](docs/manual-test-plan.md) | Plan de tests manuels (Angular + Flutter) |
-| **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` |
+| **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — profil `dev` uniquement. Desactivee par defaut ailleurs, reactivable via `SWAGGER_ENABLED=true` (KKS-311) |
 
 ## Recent Changes
 

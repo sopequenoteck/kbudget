@@ -42,3 +42,28 @@ management:
   endpoint:
     health:
       show-details: never
+
+# Documentation OpenAPI desactivee par defaut : elle publierait la surface
+# d'API complete de chaque instance self-hostee sans benefice en production.
+# Reactivable volontairement via SWAGGER_ENABLED=true (utile pour developper
+# un client tiers contre son instance).
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+
+---
+# Profil dev : Swagger actif par defaut. L'activation vit ici plutot que dans
+# application-dev.yaml, qui n'est pas versionne (cf. .gitignore) et n'existe
+# donc pas chez un contributeur qui vient de cloner le depot.
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}

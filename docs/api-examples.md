@@ -1699,4 +1699,4 @@ Response `200` : la regle mise a jour.
 ## Voir aussi
 
 - [`api-errors.md`](api-errors.md) — Contrat d'erreurs HTTP et format des reponses d'erreur
-- **Swagger UI** : [http://localhost:8080/api/swagger-ui.html](http://localhost:8080/api/swagger-ui.html) — Documentation interactive (quand l'app tourne)
+- **Swagger UI** : [http://localhost:8080/api/swagger-ui.html](http://localhost:8080/api/swagger-ui.html) — Documentation interactive, servie uniquement en profil `dev` ou avec `SWAGGER_ENABLED=true`

@@ -24,6 +24,7 @@ cp .env.example .env
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
 | `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
 | `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
+| `SWAGGER_ENABLED` | *(Optionnelle, KKS-311)* Expose la documentation OpenAPI (`/swagger-ui.html`, `/v3/api-docs`). Defaut : `false` hors profil `dev`, `true` en `dev`. Publier la surface d'API complete d'une instance exposee n'a pas de benefice en production. | `true` |
 | `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production bare-metal, recommandation : `/var/k-budget/avatars`. En Docker, fixee a `/app/data/avatars` par le compose (volume `api-avatars`) : ne pas la surcharger. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
 
 ### Avatars utilisateurs (KKS-235)
@@ -414,7 +415,7 @@ ssh serveur "sudo systemctl restart k-budget-api"
 ## Notes importantes
 
 - **Endpoint de sante** : `GET /api/actuator/health` — accessible sans JWT, utilise par les healthchecks Docker et le monitoring
-- **Swagger UI** : actif en production par defaut. Pour le desactiver, ajouter `springdoc.api-docs.enabled: false` dans `application-prod.yaml`. Alternativement, proteger l'acces via le reverse proxy
+- **Swagger UI** : desactivee par defaut hors profil `dev` (KKS-311). Les routes `/swagger-ui.html` et `/v3/api-docs` ne sont pas mappees et repondent 404. Pour l'activer volontairement sur une instance — developpement d'un client tiers, exploration de l'API — definir `SWAGGER_ENABLED=true` ; penser alors a restreindre l'acces via le reverse proxy
 - **Generation JWT_SECRET** : `openssl rand -base64 64`
 - **Firewall** : ouvrir uniquement les ports 80 (HTTP), 443 (HTTPS) et 22 (SSH)
 

@@ -87,7 +87,7 @@ k-budget/
 | [`docs/api-errors.md`](docs/api-errors.md)       | Contrat d'erreurs HTTP et guide d'integration                            |
 | [`docs/deployment.md`](docs/deployment.md)       | Deploiement Docker, bare-metal, reverse proxy, backup                    |
 | [`docs/design-tokens.md`](docs/design-tokens.md) | Couleurs, typographie, spacing, radius, ombres, animations               |
-| **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (quand l'app tourne)         |
+| **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (profil `dev`)               |
 
 ## Licence
 
