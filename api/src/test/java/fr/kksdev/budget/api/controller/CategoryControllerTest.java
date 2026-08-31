@@ -78,7 +78,7 @@ class CategoryControllerTest {
 
         when(categoryService.create(any(CategoryRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/v1/categories")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Alimentation", "\uD83C\uDF54", "#FF5733")))
@@ -95,7 +95,7 @@ class CategoryControllerTest {
 
         when(categoryService.getAllByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/categories")
+        mockMvc.perform(get("/v1/categories")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nom").value("Alimentation"))
@@ -108,7 +108,7 @@ class CategoryControllerTest {
 
         when(categoryService.getById(categoryId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/categories/{id}", categoryId)
+        mockMvc.perform(get("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nom").value("Alimentation"));
@@ -121,7 +121,7 @@ class CategoryControllerTest {
         when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/categories/{id}", categoryId)
+        mockMvc.perform(put("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Transport", "\uD83D\uDE97", "#3498DB")))
@@ -133,7 +133,7 @@ class CategoryControllerTest {
     void should_return_204_when_delete_category() throws Exception {
         doNothing().when(categoryService).delete(categoryId, userId);
 
-        mockMvc.perform(delete("/categories/{id}", categoryId)
+        mockMvc.perform(delete("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -143,7 +143,7 @@ class CategoryControllerTest {
         when(categoryService.getById(categoryId, userId))
                 .thenThrow(new EntityNotFoundException("Catégorie non trouvée"));
 
-        mockMvc.perform(get("/categories/{id}", categoryId)
+        mockMvc.perform(get("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Catégorie non trouvée"));
@@ -151,7 +151,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_400_when_create_with_missing_fields() throws Exception {
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/v1/categories")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -160,7 +160,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_400_when_create_with_invalid_color() throws Exception {
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/v1/categories")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Test", "\uD83C\uDF54", "invalid")))
@@ -172,7 +172,7 @@ class CategoryControllerTest {
         when(categoryService.create(any(CategoryRequest.class), any(UUID.class)))
                 .thenThrow(new IllegalArgumentException("Une catégorie avec ce nom existe déjà"));
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/v1/categories")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Existing", "\uD83C\uDF54", "#FF5733")))
@@ -184,7 +184,7 @@ class CategoryControllerTest {
         doThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être supprimées"))
                 .when(categoryService).delete(categoryId, userId);
 
-        mockMvc.perform(delete("/categories/{id}", categoryId)
+        mockMvc.perform(delete("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest());
     }
@@ -194,7 +194,7 @@ class CategoryControllerTest {
         when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être modifiées"));
 
-        mockMvc.perform(put("/categories/{id}", categoryId)
+        mockMvc.perform(put("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson("Renamed", "\uD83D\uDD04", "#6366f1")))
@@ -203,7 +203,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_401_when_no_token() throws Exception {
-        mockMvc.perform(get("/categories"))
+        mockMvc.perform(get("/v1/categories"))
                 .andExpect(status().isUnauthorized());
     }
 }

@@ -75,10 +75,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('my-jwt-token');
 
     // Act
-    httpClient.get('/api/transactions').subscribe();
+    httpClient.get('/api/v1/transactions').subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/transactions');
+    const req = httpTesting.expectOne('/api/v1/transactions');
     expect(req.request.headers.get('Authorization')).toBe('Bearer my-jwt-token');
     req.flush({});
   });
@@ -88,10 +88,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue(null);
 
     // Act
-    httpClient.get('/api/transactions').subscribe();
+    httpClient.get('/api/v1/transactions').subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/transactions');
+    const req = httpTesting.expectOne('/api/v1/transactions');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
@@ -101,8 +101,8 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('shared-token');
 
     // Act
-    httpClient.get('/api/transactions').subscribe();
-    httpClient.get('/api/subscriptions').subscribe();
+    httpClient.get('/api/v1/transactions').subscribe();
+    httpClient.get('/api/v1/subscriptions').subscribe();
 
     // Assert
     const reqs = httpTesting.match((r) => r.url.startsWith('/api/'));
@@ -120,10 +120,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('my-token');
 
     // Act
-    httpClient.post('/api/auth/login', {}).subscribe();
+    httpClient.post('/api/v1/auth/login', {}).subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/auth/login');
+    const req = httpTesting.expectOne('/api/v1/auth/login');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
@@ -133,10 +133,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('my-token');
 
     // Act
-    httpClient.post('/api/auth/accept-invite', {}).subscribe();
+    httpClient.post('/api/v1/auth/accept-invite', {}).subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/auth/accept-invite');
+    const req = httpTesting.expectOne('/api/v1/auth/accept-invite');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
@@ -146,10 +146,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('my-token');
 
     // Act
-    httpClient.post('/api/auth/refresh', {}).subscribe();
+    httpClient.post('/api/v1/auth/refresh', {}).subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/auth/refresh');
+    const req = httpTesting.expectOne('/api/v1/auth/refresh');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
@@ -159,10 +159,10 @@ describe('authInterceptor', () => {
     authService.getToken.mockReturnValue('my-token');
 
     // Act
-    httpClient.post('/api/auth/logout', {}).subscribe();
+    httpClient.post('/api/v1/auth/logout', {}).subscribe();
 
     // Assert
-    const req = httpTesting.expectOne('/api/auth/logout');
+    const req = httpTesting.expectOne('/api/v1/auth/logout');
     expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
@@ -193,14 +193,14 @@ describe('authInterceptor', () => {
 
     // Act
     let result: unknown = null;
-    httpClient.get('/api/transactions').subscribe((r) => (result = r));
+    httpClient.get('/api/v1/transactions').subscribe((r) => (result = r));
 
     // First request returns 401
-    const firstReq = httpTesting.expectOne('/api/transactions');
+    const firstReq = httpTesting.expectOne('/api/v1/transactions');
     firstReq.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Interceptor retries with new token
-    const retryReq = httpTesting.expectOne('/api/transactions');
+    const retryReq = httpTesting.expectOne('/api/v1/transactions');
     expect(retryReq.request.headers.get('Authorization')).toBe(`Bearer ${newToken}`);
     expect(retryReq.request.headers.has('_retry')).toBe(true);
     retryReq.flush({ data: 'success' });
@@ -227,8 +227,8 @@ describe('authInterceptor', () => {
     // Act — 2 concurrent requests
     let result1: unknown = null;
     let result2: unknown = null;
-    httpClient.get('/api/transactions').subscribe((r) => (result1 = r));
-    httpClient.get('/api/subscriptions').subscribe((r) => (result2 = r));
+    httpClient.get('/api/v1/transactions').subscribe((r) => (result1 = r));
+    httpClient.get('/api/v1/subscriptions').subscribe((r) => (result2 = r));
 
     // Both get 401
     const reqs = httpTesting.match((r) => r.url.startsWith('/api/') && !r.headers.has('_retry'));
@@ -267,9 +267,9 @@ describe('authInterceptor', () => {
 
     // Act
     httpClient
-      .get('/api/transactions', { headers: { _retry: 'true' } })
+      .get('/api/v1/transactions', { headers: { _retry: 'true' } })
       .subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/transactions');
+    const req = httpTesting.expectOne('/api/v1/transactions');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Assert — no refresh attempt, error propagated
@@ -283,8 +283,8 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.post('/api/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/auth/login');
+    httpClient.post('/api/v1/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
+    const req = httpTesting.expectOne('/api/v1/auth/login');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Assert
@@ -298,9 +298,9 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.get('/api/transactions').subscribe({ error: (err) => (caughtError = err) });
+    httpClient.get('/api/v1/transactions').subscribe({ error: (err) => (caughtError = err) });
 
-    const firstReq = httpTesting.expectOne('/api/transactions');
+    const firstReq = httpTesting.expectOne('/api/v1/transactions');
     firstReq.flush(
       { error: 'ACCESS_DENIED', message: 'Accès refusé' },
       { status: 403, statusText: 'Forbidden' },
@@ -317,8 +317,8 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.post('/api/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/auth/login');
+    httpClient.post('/api/v1/auth/login', {}).subscribe({ error: (err) => (caughtError = err) });
+    const req = httpTesting.expectOne('/api/v1/auth/login');
     req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
 
     // Assert
@@ -339,8 +339,8 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.get('/api/transactions').subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/transactions');
+    httpClient.get('/api/v1/transactions').subscribe({ error: (err) => (caughtError = err) });
+    const req = httpTesting.expectOne('/api/v1/transactions');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Assert
@@ -359,8 +359,8 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.get('/api/transactions').subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/transactions');
+    httpClient.get('/api/v1/transactions').subscribe({ error: (err) => (caughtError = err) });
+    const req = httpTesting.expectOne('/api/v1/transactions');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Assert — network error: no logout, error propagated
@@ -379,8 +379,8 @@ describe('authInterceptor', () => {
     let caughtError: unknown = null;
 
     // Act
-    httpClient.get('/api/transactions').subscribe({ error: (err) => (caughtError = err) });
-    const req = httpTesting.expectOne('/api/transactions');
+    httpClient.get('/api/v1/transactions').subscribe({ error: (err) => (caughtError = err) });
+    const req = httpTesting.expectOne('/api/v1/transactions');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
     // Assert

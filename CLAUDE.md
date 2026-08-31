@@ -50,7 +50,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 Le fichier `.specify/memory/constitution.md` (v4.0.0) est le document de reference. 8 principes :
 
-1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Une seule version d'API servie a la fois + `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
+1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
 3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
 4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans. L'instance de l'utilisateur sera souvent injoignable : degrader proprement, le cache n'est jamais source de verite.

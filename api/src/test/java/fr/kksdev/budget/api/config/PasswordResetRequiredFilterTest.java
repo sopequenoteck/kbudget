@@ -90,7 +90,7 @@ class PasswordResetRequiredFilterTest {
         setAuthenticatedContext();
         when(request.getHeader("Authorization")).thenReturn("Bearer reset-token");
         when(jwtUtil.extractClaim("reset-token", "mustResetCredentials")).thenReturn(true);
-        when(request.getServletPath()).thenReturn("/auth/first-login-reset");
+        when(request.getServletPath()).thenReturn("/v1/auth/first-login-reset");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -103,7 +103,7 @@ class PasswordResetRequiredFilterTest {
         setAuthenticatedContext();
         when(request.getHeader("Authorization")).thenReturn("Bearer reset-token");
         when(jwtUtil.extractClaim("reset-token", "mustResetCredentials")).thenReturn(true);
-        when(request.getServletPath()).thenReturn("/auth/logout");
+        when(request.getServletPath()).thenReturn("/v1/auth/logout");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -112,7 +112,7 @@ class PasswordResetRequiredFilterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/users/me", "/accounts", "/transactions", "/admin/users"})
+    @ValueSource(strings = {"/v1/users/me", "/v1/accounts", "/v1/transactions", "/v1/admin/users"})
     void should_return_403_when_claim_is_true_and_path_is_not_allowlisted(String path) throws Exception {
         setAuthenticatedContext();
         when(request.getHeader("Authorization")).thenReturn("Bearer reset-token");

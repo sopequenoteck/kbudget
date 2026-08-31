@@ -68,7 +68,7 @@ class AdminUserControllerTest {
         );
         when(adminUserService.list()).thenReturn(users);
 
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/v1/admin/users")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
@@ -78,7 +78,7 @@ class AdminUserControllerTest {
 
     @Test
     void should_return_401_when_not_authenticated_on_get() throws Exception {
-        mockMvc.perform(get("/admin/users"))
+        mockMvc.perform(get("/v1/admin/users"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"))
                 .andExpect(jsonPath("$.message").value("Authentification requise"))
@@ -90,7 +90,7 @@ class AdminUserControllerTest {
         adminUser.setAdmin(false);
         when(userRepository.findById(adminId)).thenReturn(Optional.of(adminUser));
 
-        mockMvc.perform(get("/admin/users").header("Authorization", BEARER_TOKEN))
+        mockMvc.perform(get("/v1/admin/users").header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("ACCESS_DENIED"))
                 .andExpect(jsonPath("$.message").value("Accès refusé"))
@@ -104,7 +104,7 @@ class AdminUserControllerTest {
         UUID targetId = UUID.randomUUID();
         doNothing().when(adminUserService).disable(eq(targetId), any(User.class));
 
-        mockMvc.perform(patch("/admin/users/" + targetId + "/disable")
+        mockMvc.perform(patch("/v1/admin/users/" + targetId + "/disable")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
 
@@ -117,7 +117,7 @@ class AdminUserControllerTest {
         doThrow(new EntityNotFoundException("Utilisateur introuvable"))
                 .when(adminUserService).disable(eq(targetId), any(User.class));
 
-        mockMvc.perform(patch("/admin/users/" + targetId + "/disable")
+        mockMvc.perform(patch("/v1/admin/users/" + targetId + "/disable")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound());
     }
@@ -127,7 +127,7 @@ class AdminUserControllerTest {
         doThrow(new ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED"))
                 .when(adminUserService).disable(eq(adminId), any(User.class));
 
-        mockMvc.perform(patch("/admin/users/" + adminId + "/disable")
+        mockMvc.perform(patch("/v1/admin/users/" + adminId + "/disable")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("LAST_ADMIN_CANNOT_BE_DISABLED"))
@@ -141,7 +141,7 @@ class AdminUserControllerTest {
         UUID targetId = UUID.randomUUID();
         doNothing().when(adminUserService).enable(eq(targetId), any(User.class));
 
-        mockMvc.perform(patch("/admin/users/" + targetId + "/enable")
+        mockMvc.perform(patch("/v1/admin/users/" + targetId + "/enable")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
 
@@ -154,7 +154,7 @@ class AdminUserControllerTest {
         doThrow(new EntityNotFoundException("Utilisateur introuvable"))
                 .when(adminUserService).enable(eq(targetId), any(User.class));
 
-        mockMvc.perform(patch("/admin/users/" + targetId + "/enable")
+        mockMvc.perform(patch("/v1/admin/users/" + targetId + "/enable")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound());
     }

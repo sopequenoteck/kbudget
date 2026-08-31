@@ -5,6 +5,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- **KKS-313 — Endpoints métier préfixés en `/api/v1`** : aucun des 102 endpoints ne portait de version. Tant que l'API et les clients se déploient ensemble, c'est sans conséquence ; dès qu'une app mobile se met à jour via les stores pendant que le serveur d'un self-hoster reste en arrière, toute évolution de contrat devient aveugle. C'est le seul chantier qui devient impossible une fois des installations tierces dans la nature.
+  - `ApiVersioningConfig` applique le préfixe globalement via `PathMatchConfigurer.addPathPrefix`, plutôt que de modifier 18 `@RequestMapping`. Le prédicat cible le **package** des controllers et non l'annotation `@RestController` : `HandlerTypePredicate` combine ses sélecteurs par OU, si bien qu'ajouter l'annotation élargit la sélection au lieu de la restreindre — springdoc se retrouvait servi sous `/v1/v3/api-docs`.
+  - Le versionnement natif de Spring Framework 7 (`ApiVersionConfigurer`, attribut `version` sur les mappings) a été évalué et écarté : son `PathApiVersionResolver` extrait la version d'un segment sans réécrire le chemin — un préfixe reste donc nécessaire — et il est conçu pour faire coexister plusieurs versions, ce que le projet exclut.
+  - **Trois zones de sécurité dépendaient de chemins non préfixés**, aucune n'était identifiée dans le ticket : les `requestMatchers` de `SecurityConfig` (le login serait devenu authentifié), la garde `startsWith("/admin/")` d'`AdminAuthorizationFilter` (contrôle d'accès admin contourné) et les `ALLOWED_PATHS` de `PasswordResetRequiredFilter` (compte verrouillé, reset impossible). Les trois dérivent désormais de `ApiVersioningConfig.CURRENT_VERSION_PREFIX`.
+  - `deploy/nginx.conf` : la règle de rate limiting `location /api/auth/` aurait cessé de matcher sans erreur, supprimant la protection contre le bruteforce. `Caddyfile` (`handle /api/*`) et `app/nginx.conf` (`location ^~ /api/`) couvrent déjà `/api/v1/` et sont inchangés.
+  - Clients : Angular sépare `apiRootUrl` (racine, non versionnée) de `apiUrl` (`/api/v1`) — le health check `actuator` utilise la première. Flutter garde `API_BASE_URL` à la racine (l'URL que saisit le self-hoster, dont dérivent aussi le WebSocket et le health check) et applique la version dans le client HTTP métier.
+  - Restent non versionnés : `/api/actuator/**`, `/api/bank-logos/**`, `/api/ws`, et la documentation OpenAPI.
+
 ### Removed
 
 - **KKS-341 — Doublon obsolète `docs/constitution.md`** : le dépôt contenait deux constitutions. La copie de `docs/` était figée en v2.1.1 (mars 2026, 7 principes) face à `.specify/memory/constitution.md` en v4.0.0 — deux versions majeures d'écart, décrivant un projet qui n'existe plus (ni bifurcation des trajectoires, ni frontière Angular/Flutter). Sur un dépôt public, un contributeur serait allé lire `docs/` et aurait implémenté contre des principes abrogés.

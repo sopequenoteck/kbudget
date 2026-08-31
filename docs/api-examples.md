@@ -2,15 +2,31 @@
 
 Exemples de payloads (request/response) pour chaque endpoint. Toutes les routes (sauf auth) necessitent un header `Authorization: Bearer <token>`.
 
+## Versionnement des chemins
+
+Les endpoints metier sont servis sous `/api/v1` (KKS-313). Une seule version est
+servie a la fois : le projet ne fera jamais coexister `/v1` et `/v2` sur une meme
+instance. Le prefixe existe pour que les clients puissent detecter une
+incompatibilite, pas pour maintenir deux contrats en parallele.
+
+Ne sont **pas** versionnes, et gardent leur chemin sous `/api` :
+
+| Chemin | Raison |
+|--------|--------|
+| `/api/actuator/health` | Endpoint Spring Boot, hors du contrat applicatif |
+| `/api/bank-logos/*.svg` | Ressources statiques |
+| `/api/ws` | Handshake WebSocket |
+| `/api/v3/api-docs`, `/api/swagger-ui.html` | Documentation OpenAPI (profil `dev`, cf. KKS-311) |
+
 ## Authentification
 
 ### Inscription publique
 
-**Route supprimee** depuis KKS-232 (conformite constitution principe VII). L'onboarding se fait via invitation admin — voir `POST /api/auth/accept-invite` ci-dessous.
+**Route supprimee** depuis KKS-232 (conformite constitution principe VII). L'onboarding se fait via invitation admin — voir `POST /api/v1/auth/accept-invite` ci-dessous.
 
-### Valider un token d'invitation `GET /api/auth/invitations/{token}` (public)
+### Valider un token d'invitation `GET /api/v1/auth/invitations/{token}` (public)
 
-Request : aucun body. Exemple : `GET /api/auth/invitations/8b3f7c2a-...`
+Request : aucun body. Exemple : `GET /api/v1/auth/invitations/8b3f7c2a-...`
 
 Response `200` :
 
@@ -22,7 +38,7 @@ Response `200` :
 
 Response `404` : token invalide, expire, utilise ou revoque (indifferencie).
 
-### Accepter une invitation `POST /api/auth/accept-invite` (public)
+### Accepter une invitation `POST /api/v1/auth/accept-invite` (public)
 
 Request :
 
@@ -52,7 +68,7 @@ Response `201` :
 
 Response `404` : token invalide/expire/utilise/revoque.
 
-### Connexion `POST /api/auth/login`
+### Connexion `POST /api/v1/auth/login`
 
 Request :
 
@@ -75,9 +91,9 @@ Response `200` :
 }
 ```
 
-> Le champ `mustResetCredentials` est `true` uniquement pour le compte admin bootstrappé (KKS-233) tant qu'il n'a pas complete son premier reset. Dans ce cas le JWT emis porte un claim `mustResetCredentials` et le filtre `PasswordResetRequiredFilter` bloque tous les endpoints sauf `POST /auth/first-login-reset` et `POST /auth/logout` avec `403 PASSWORD_RESET_REQUIRED`.
+> Le champ `mustResetCredentials` est `true` uniquement pour le compte admin bootstrappé (KKS-233) tant qu'il n'a pas complete son premier reset. Dans ce cas le JWT emis porte un claim `mustResetCredentials` et le filtre `PasswordResetRequiredFilter` bloque tous les endpoints sauf `POST /api/v1/auth/first-login-reset` et `POST /api/v1/auth/logout` avec `403 PASSWORD_RESET_REQUIRED`.
 
-### Premier reset des credentials `POST /api/auth/first-login-reset` (KKS-233)
+### Premier reset des credentials `POST /api/v1/auth/first-login-reset` (KKS-233)
 
 Endpoint utilise uniquement lors du premier demarrage d'une instance vierge, pour permettre a l'admin seed (cree par le `BootstrapSeedRunner` avec un mot de passe aleatoire affiche dans les logs) de definir ses credentials definitifs.
 
@@ -109,7 +125,7 @@ Response `403 PASSWORD_RESET_NOT_REQUIRED` : le user authentifie a deja `passwor
 
 Response `409 EMAIL_ALREADY_EXISTS` : l'email cible est deja utilise par un autre user.
 
-### Renouvellement `POST /api/auth/refresh`
+### Renouvellement `POST /api/v1/auth/refresh`
 
 Request :
 
@@ -130,7 +146,7 @@ Response `200` :
 }
 ```
 
-### Deconnexion `POST /api/auth/logout`
+### Deconnexion `POST /api/v1/auth/logout`
 
 Request :
 
@@ -146,7 +162,7 @@ Response `200` : (corps vide)
 
 > Endpoints proteges par `AdminAuthorizationFilter`. Requiert un JWT dont l'email figure dans `ADMIN_EMAILS` (env var). Sinon 403 Forbidden.
 
-### Creer une invitation `POST /api/admin/invitations`
+### Creer une invitation `POST /api/v1/admin/invitations`
 
 Request :
 
@@ -167,7 +183,7 @@ Response `201` :
 
 Le front compose le lien : `${origin}/auth/accept-invite/${token}` (TTL 7 jours). L'admin transmet le lien hors bande (Signal, SMS).
 
-### Lister les invitations `GET /api/admin/invitations`
+### Lister les invitations `GET /api/v1/admin/invitations`
 
 Response `200` : tri `createdAt DESC`, statut derive. Le champ `token` est expose uniquement pour les invitations `ACTIVE` (null pour EXPIRED/USED/REVOKED).
 
@@ -187,11 +203,11 @@ Response `200` : tri `createdAt DESC`, statut derive. Le champ `token` est expos
 ]
 ```
 
-### Revoquer une invitation `DELETE /api/admin/invitations/{id}`
+### Revoquer une invitation `DELETE /api/v1/admin/invitations/{id}`
 
-Response `204` No Content. Positionne `revokedAt = now`. Le `GET /api/auth/invitations/{token}` retourne ensuite 404.
+Response `204` No Content. Positionne `revokedAt = now`. Le `GET /api/v1/auth/invitations/{token}` retourne ensuite 404.
 
-### Lister les users `GET /api/admin/users`
+### Lister les users `GET /api/v1/admin/users`
 
 Response `200` :
 
@@ -208,7 +224,7 @@ Response `200` :
 ]
 ```
 
-### Desactiver un user `PATCH /api/admin/users/{id}/disable`
+### Desactiver un user `PATCH /api/v1/admin/users/{id}/disable`
 
 Response `204` No Content. Positionne `disabledAt = now`. Le user ne peut plus s'authentifier (401 sur requetes authentifiees via `JwtFilter`).
 
@@ -221,13 +237,13 @@ Erreur `409` si l'user cible est le dernier admin actif :
 }
 ```
 
-### Reactiver un user `PATCH /api/admin/users/{id}/enable`
+### Reactiver un user `PATCH /api/v1/admin/users/{id}/enable`
 
 Response `204` No Content. Remet `disabledAt = null`. Le user peut a nouveau se connecter.
 
 ## Transactions
 
-### Creer `POST /api/transactions`
+### Creer `POST /api/v1/transactions`
 
 Request :
 
@@ -270,7 +286,7 @@ Response `200` :
 }
 ```
 
-### Lister `GET /api/transactions?month=2&year=2026`
+### Lister `GET /api/v1/transactions?month=2&year=2026`
 
 Parametres optionnels : `month` et `year` pour filtrer par mois.
 
@@ -293,21 +309,21 @@ Response `200` :
 ]
 ```
 
-### Consulter `GET /api/transactions/{id}`
+### Consulter `GET /api/v1/transactions/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Modifier `PUT /api/transactions/{id}`
+### Modifier `PUT /api/v1/transactions/{id}`
 
 Request : meme format que la creation.
 
 Response `200` : la transaction mise a jour.
 
-### Supprimer `DELETE /api/transactions/{id}`
+### Supprimer `DELETE /api/v1/transactions/{id}`
 
 Response `204` (corps vide).
 
-### Bilan mensuel `GET /api/transactions/summary?month=2&year=2026`
+### Bilan mensuel `GET /api/v1/transactions/summary?month=2&year=2026`
 
 Response `200` :
 
@@ -321,7 +337,7 @@ Response `200` :
 }
 ```
 
-### Libelles autocomplete `GET /api/transactions/libelles?q=car&limit=20`
+### Libelles autocomplete `GET /api/v1/transactions/libelles?q=car&limit=20`
 
 Retourne les libelles distincts de l'utilisateur authentifie, tries par frequence decroissante puis par date de derniere utilisation decroissante. Filtre `q` optionnel `contains` case-insensitive et accent-insensible. `limit` optionnel clampe a `[1, 50]` (defaut `20`).
 
@@ -332,15 +348,15 @@ Response `200` :
 ```
 
 Exemples :
-- `GET /api/transactions/libelles` → tous les libelles tries par frequence
-- `GET /api/transactions/libelles?q=cafe` → "Cafe du coin" (accent-insensible)
-- `GET /api/transactions/libelles?q=market&limit=5` → max 5 libelles contenant "market"
+- `GET /api/v1/transactions/libelles` → tous les libelles tries par frequence
+- `GET /api/v1/transactions/libelles?q=cafe` → "Cafe du coin" (accent-insensible)
+- `GET /api/v1/transactions/libelles?q=market&limit=5` → max 5 libelles contenant "market"
 
 Erreur `401` si JWT absent ou invalide.
 
 ## Abonnements
 
-### Creer `POST /api/subscriptions`
+### Creer `POST /api/v1/subscriptions`
 
 Request :
 
@@ -375,7 +391,7 @@ Response `200` :
 }
 ```
 
-### Modifier `PUT /api/subscriptions/{id}`
+### Modifier `PUT /api/v1/subscriptions/{id}`
 
 Request :
 
@@ -410,7 +426,7 @@ Response `200` :
 }
 ```
 
-### Lister `GET /api/subscriptions?actif=true`
+### Lister `GET /api/v1/subscriptions?actif=true`
 
 Response `200` :
 
@@ -444,15 +460,15 @@ Response `200` :
 ]
 ```
 
-### Consulter `GET /api/subscriptions/{id}`
+### Consulter `GET /api/v1/subscriptions/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Supprimer `DELETE /api/subscriptions/{id}`
+### Supprimer `DELETE /api/v1/subscriptions/{id}`
 
 Response `204` (corps vide).
 
-### Payer `POST /api/subscriptions/{id}/pay`
+### Payer `POST /api/v1/subscriptions/{id}/pay`
 
 Response `201` :
 
@@ -466,7 +482,7 @@ Response `201` :
 }
 ```
 
-### Historique paiements `GET /api/subscriptions/{id}/payments`
+### Historique paiements `GET /api/v1/subscriptions/{id}/payments`
 
 Response `200` :
 
@@ -482,7 +498,7 @@ Response `200` :
 ]
 ```
 
-### Cumul paiements `GET /api/subscriptions/{id}/payments/total`
+### Cumul paiements `GET /api/v1/subscriptions/{id}/payments/total`
 
 Response `200` :
 
@@ -494,7 +510,7 @@ Response `200` :
 
 ## Dettes
 
-### Creer `POST /api/debts`
+### Creer `POST /api/v1/debts`
 
 Request :
 
@@ -534,7 +550,7 @@ Response `200` :
 }
 ```
 
-### Modifier `PUT /api/debts/{id}`
+### Modifier `PUT /api/v1/debts/{id}`
 
 Request :
 
@@ -574,7 +590,7 @@ Response `200` :
 }
 ```
 
-### Lister `GET /api/debts?rembourse=false`
+### Lister `GET /api/v1/debts?rembourse=false`
 
 Response `200` :
 
@@ -599,7 +615,7 @@ Response `200` :
 ]
 ```
 
-### Rembourser `POST /api/debts/{id}/repay`
+### Rembourser `POST /api/v1/debts/{id}/repay`
 
 Request :
 
@@ -614,7 +630,7 @@ Request :
 
 Response `200` : la dette mise a jour (meme format que ci-dessus, `montantRestant` recalcule, `rembourse: true` si solde).
 
-### Historique paiements `GET /api/debts/{id}/payments`
+### Historique paiements `GET /api/v1/debts/{id}/payments`
 
 Response `200` :
 
@@ -629,7 +645,7 @@ Response `200` :
 ]
 ```
 
-### Reporter le rappel `POST /api/debts/{id}/snooze`
+### Reporter le rappel `POST /api/v1/debts/{id}/snooze`
 
 Request :
 
@@ -642,15 +658,15 @@ Request :
 
 Response `200` : la dette mise a jour avec les nouveaux `reminderDate` et `reminderTime`.
 
-### Consulter `GET /api/debts/{id}`
+### Consulter `GET /api/v1/debts/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Supprimer `DELETE /api/debts/{id}`
+### Supprimer `DELETE /api/v1/debts/{id}`
 
 Response `204` (corps vide).
 
-### Solde total `GET /api/accounts/total-balance`
+### Solde total `GET /api/v1/accounts/total-balance`
 
 Response `200` :
 
@@ -667,7 +683,7 @@ Response `200` :
 
 ## Comptes
 
-### Creer `POST /api/accounts`
+### Creer `POST /api/v1/accounts`
 
 Request :
 
@@ -707,7 +723,7 @@ Response `201` :
 }
 ```
 
-### Lister `GET /api/accounts`
+### Lister `GET /api/v1/accounts`
 
 Response `200` :
 
@@ -754,7 +770,7 @@ Response `200` :
 ]
 ```
 
-### Virement `POST /api/accounts/transfer`
+### Virement `POST /api/v1/accounts/transfer`
 
 Request :
 
@@ -793,21 +809,21 @@ Response `201` :
 }
 ```
 
-### Consulter `GET /api/accounts/{id}`
+### Consulter `GET /api/v1/accounts/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Modifier `PUT /api/accounts/{id}`
+### Modifier `PUT /api/v1/accounts/{id}`
 
 Request : meme format que la creation.
 
 Response `200` : le compte mis a jour.
 
-### Supprimer `DELETE /api/accounts/{id}`
+### Supprimer `DELETE /api/v1/accounts/{id}`
 
 Response `204` (corps vide).
 
-### Ajuster le solde `POST /api/accounts/{id}/adjust-balance`
+### Ajuster le solde `POST /api/v1/accounts/{id}/adjust-balance`
 
 Request :
 
@@ -819,7 +835,7 @@ Request :
 
 Response `200` : le compte mis a jour avec le nouveau solde.
 
-### Definir par defaut `PUT /api/accounts/{id}/default`
+### Definir par defaut `PUT /api/v1/accounts/{id}/default`
 
 Response `200` :
 
@@ -847,7 +863,7 @@ Response `200` :
 
 ## Categories
 
-### Creer `POST /api/categories`
+### Creer `POST /api/v1/categories`
 
 Request :
 
@@ -871,21 +887,21 @@ Response `200` :
 }
 ```
 
-### Consulter `GET /api/categories/{id}`
+### Consulter `GET /api/v1/categories/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Modifier `PUT /api/categories/{id}`
+### Modifier `PUT /api/v1/categories/{id}`
 
 Request : meme format que la creation.
 
 Response `200` : la categorie mise a jour.
 
-### Supprimer `DELETE /api/categories/{id}`
+### Supprimer `DELETE /api/v1/categories/{id}`
 
 Response `204` (corps vide). Erreur `409` si categorie systeme.
 
-### Lister `GET /api/categories`
+### Lister `GET /api/v1/categories`
 
 Response `200` :
 
@@ -910,7 +926,7 @@ Response `200` :
 
 ## Taux de conversion
 
-### Lister `GET /api/exchange-rates`
+### Lister `GET /api/v1/exchange-rates`
 
 Response `200` :
 
@@ -926,7 +942,7 @@ Response `200` :
 ]
 ```
 
-### Creer ou mettre a jour `PUT /api/exchange-rates`
+### Creer ou mettre a jour `PUT /api/v1/exchange-rates`
 
 Request (upsert — cree ou met a jour le taux pour la paire) :
 
@@ -950,13 +966,13 @@ Response `200` :
 }
 ```
 
-### Supprimer `DELETE /api/exchange-rates/{baseCurrency}/{targetCurrency}`
+### Supprimer `DELETE /api/v1/exchange-rates/{baseCurrency}/{targetCurrency}`
 
 Response `204` (corps vide).
 
 ## Preferences utilisateur
 
-### Consulter `GET /api/users/me/preferences`
+### Consulter `GET /api/v1/users/me/preferences`
 
 Response `200` (valeurs par defaut) :
 
@@ -968,7 +984,7 @@ Response `200` (valeurs par defaut) :
 }
 ```
 
-### Mettre a jour `PUT /api/users/me/preferences`
+### Mettre a jour `PUT /api/v1/users/me/preferences`
 
 Request (desactiver les dettes, navOrder auto-gere) :
 
@@ -1010,7 +1026,7 @@ Response `200` :
 
 ## Budgets
 
-### Creer `POST /api/budgets`
+### Creer `POST /api/v1/budgets`
 
 Request :
 
@@ -1046,7 +1062,7 @@ Response `200` :
 }
 ```
 
-### Lister `GET /api/budgets`
+### Lister `GET /api/v1/budgets`
 
 Response `200` :
 
@@ -1066,19 +1082,19 @@ Response `200` :
 ]
 ```
 
-### Consulter `GET /api/budgets/{id}`
+### Consulter `GET /api/v1/budgets/{id}`
 
 Response `200` : meme format qu'un element de la liste.
 
-### Modifier `PUT /api/budgets/{id}`
+### Modifier `PUT /api/v1/budgets/{id}`
 
 Request : meme format que la creation (tous les champs optionnels sauf `categoryId`).
 
-### Supprimer `DELETE /api/budgets/{id}`
+### Supprimer `DELETE /api/v1/budgets/{id}`
 
 Response `204` (pas de corps).
 
-### Vue mensuelle `GET /api/budgets/overview`
+### Vue mensuelle `GET /api/v1/budgets/overview`
 
 Response `200` :
 
@@ -1118,7 +1134,7 @@ Response `200` :
 }
 ```
 
-### Historique `GET /api/budgets/history?month=2026-02`
+### Historique `GET /api/v1/budgets/history?month=2026-02`
 
 Response `200` :
 
@@ -1159,7 +1175,7 @@ Response `200` :
 
 ## Banques
 
-### Lister `GET /api/banks`
+### Lister `GET /api/v1/banks`
 
 Endpoint public (pas de token requis). Retourne les 29 banques supportees, triees par pays (FR, TG, International) puis par nom.
 
@@ -1202,7 +1218,7 @@ Response `200` :
 
 ## Transactions recurrentes
 
-### Creer `POST /api/transactions/recurring`
+### Creer `POST /api/v1/transactions/recurring`
 
 Request :
 
@@ -1235,29 +1251,29 @@ Response `201` :
 }
 ```
 
-### Lister les actives `GET /api/transactions/recurring`
+### Lister les actives `GET /api/v1/transactions/recurring`
 
 Response `200` : liste de `RecurringTransactionResponse`.
 
-### Valider une occurrence `POST /api/transactions/recurring/{id}/validate`
+### Valider une occurrence `POST /api/v1/transactions/recurring/{id}/validate`
 
 Cree la transaction pour l'occurrence courante et avance `nextOccurrence`.
 
 Response `201` : `TransactionResponse` (la transaction creee).
 
-### Passer une occurrence `PATCH /api/transactions/recurring/{id}/skip`
+### Passer une occurrence `PATCH /api/v1/transactions/recurring/{id}/skip`
 
 Avance `nextOccurrence` sans creer de transaction.
 
 Response `200` : `RecurringTransactionResponse` mise a jour.
 
-### Desactiver `PATCH /api/transactions/recurring/{id}/deactivate`
+### Desactiver `PATCH /api/v1/transactions/recurring/{id}/deactivate`
 
 Response `200` : `RecurringTransactionResponse` avec `recurringActive: false`.
 
 ## Notifications
 
-### Lister `GET /api/notifications?page=0&size=20&unread=true`
+### Lister `GET /api/v1/notifications?page=0&size=20&unread=true`
 
 Parametres optionnels : `page` (defaut 0), `size` (defaut 20, max 100), `unread` (filtre optionnel).
 
@@ -1285,7 +1301,7 @@ Response `200` :
 }
 ```
 
-### Compteur non lues `GET /api/notifications/unread-count`
+### Compteur non lues `GET /api/v1/notifications/unread-count`
 
 Response `200` :
 
@@ -1295,25 +1311,25 @@ Response `200` :
 }
 ```
 
-### Marquer comme lue `PUT /api/notifications/{id}/read`
+### Marquer comme lue `PUT /api/v1/notifications/{id}/read`
 
 Response `200` : `NotificationResponse` avec `read: true` et `readAt` renseigne.
 
-### Tout marquer comme lu `PUT /api/notifications/read-all`
+### Tout marquer comme lu `PUT /api/v1/notifications/read-all`
 
 Response `204` (corps vide).
 
-### Supprimer `DELETE /api/notifications/{id}`
+### Supprimer `DELETE /api/v1/notifications/{id}`
 
 Response `204` (corps vide).
 
-### Tout supprimer `DELETE /api/notifications`
+### Tout supprimer `DELETE /api/v1/notifications`
 
 Response `204` (corps vide).
 
 ## Profil utilisateur
 
-### Consulter `GET /api/users/me`
+### Consulter `GET /api/v1/users/me`
 
 Response `200` :
 
@@ -1331,7 +1347,7 @@ Le flag `isAdmin` est derive cote serveur via `AdminEmailResolver.isAdminEmail(u
 
 > Endpoints proteges par JWT. Tous les endpoints operent sur le user authentifie (pas de path parameter `id`). Voir aussi [`api-errors.md`](api-errors.md) pour les codes d'erreur dedies (`INVALID_IMAGE_FORMAT`, `FILE_TOO_LARGE`, `AVATAR_NOT_FOUND`, `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`, `CONFIRMATION_REQUIRED`, `LAST_ADMIN_DELETION_FORBIDDEN`, `INVALID_EXPORT_FORMAT`).
 
-### Modifier le nom `PUT /api/users/me`
+### Modifier le nom `PUT /api/v1/users/me`
 
 Request (`UpdateProfileRequest`, header `Authorization: Bearer <token>`) :
 
@@ -1355,7 +1371,7 @@ Response `200` :
 
 Erreurs : `400` (validation Bean : `name` blank ou `> 100` chars).
 
-### Uploader un avatar `POST /api/users/me/avatar`
+### Uploader un avatar `POST /api/v1/users/me/avatar`
 
 Request (multipart/form-data, header `Authorization: Bearer <token>`) :
 
@@ -1367,7 +1383,7 @@ Response `200` (`AvatarMetadataResponse`) :
 
 ```json
 {
-  "url": "/api/users/me/avatar",
+  "url": "/api/v1/users/me/avatar",
   "etag": "9c1185a5",
   "uploadedAt": "2026-04-27T10:30:00Z"
 }
@@ -1377,7 +1393,7 @@ Erreurs :
 - `400 INVALID_IMAGE_FORMAT` — type MIME non supporte (autre que `image/jpeg` ou `image/png`)
 - `413 FILE_TOO_LARGE` — fichier > 2 Mo
 
-### Recuperer l'avatar `GET /api/users/me/avatar`
+### Recuperer l'avatar `GET /api/v1/users/me/avatar`
 
 Headers requis :
 - `Authorization: Bearer <token>`
@@ -1392,7 +1408,7 @@ Response `304 Not Modified` : si le header `If-None-Match` correspond a l'ETag c
 
 Response `404 AVATAR_NOT_FOUND` : aucun avatar configure pour ce user.
 
-### Supprimer l'avatar `DELETE /api/users/me/avatar`
+### Supprimer l'avatar `DELETE /api/v1/users/me/avatar`
 
 Header requis : `Authorization: Bearer <token>`.
 
@@ -1400,7 +1416,7 @@ Response `204` : avatar supprime cote disque + `users.avatar_path` remis a `null
 
 Response `404 AVATAR_NOT_FOUND` : aucun avatar a supprimer.
 
-### Changer de mot de passe `POST /api/users/me/password`
+### Changer de mot de passe `POST /api/v1/users/me/password`
 
 Request (`ChangePasswordRequest`, header `Authorization: Bearer <token>`) :
 
@@ -1413,7 +1429,7 @@ Request (`ChangePasswordRequest`, header `Authorization: Bearer <token>`) :
 
 > Le `currentPassword` est verifie via `BCryptPasswordEncoder.matches`. Le `newPassword` doit faire au moins 12 caracteres et etre different de l'actuel. La rotation invalide tous les refresh tokens existants et en emet de nouveaux.
 
-Response `200` (`AuthResponse` — meme format que `/api/auth/login`) :
+Response `200` (`AuthResponse` — meme format que `/api/v1/auth/login`) :
 
 ```json
 {
@@ -1430,7 +1446,7 @@ Erreurs :
 - `400 PASSWORD_UNCHANGED` — le nouveau password est identique a l'actuel
 - `401 PASSWORD_INCORRECT` — le `currentPassword` ne correspond pas
 
-### Exporter ses donnees JSON `GET /api/users/me/export?format=json`
+### Exporter ses donnees JSON `GET /api/v1/users/me/export?format=json`
 
 Header requis : `Authorization: Bearer <token>`.
 
@@ -1458,7 +1474,7 @@ Response `200` :
 }
 ```
 
-### Exporter ses transactions CSV `GET /api/users/me/export?format=csv`
+### Exporter ses transactions CSV `GET /api/v1/users/me/export?format=csv`
 
 Header requis : `Authorization: Bearer <token>`.
 
@@ -1479,7 +1495,7 @@ date,libelle,montant,type,devise,compte,categorie,note
 
 Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parametre `format` absent ou autre que `json`/`csv`.
 
-### Supprimer son compte `DELETE /api/users/me`
+### Supprimer son compte `DELETE /api/v1/users/me`
 
 Soft-delete : le compte est desactive (`disabled_at = now`), les budgets/snapshots/refresh_tokens sont supprimes en cascade en DB. Les transactions/comptes/abonnements/dettes sont conserves (anonymisation differee).
 
@@ -1503,7 +1519,7 @@ Erreurs :
 
 ## Devises
 
-### Lister `GET /api/currencies`
+### Lister `GET /api/v1/currencies`
 
 Response `200` :
 
@@ -1539,7 +1555,7 @@ Response `200` :
 
 ## Import CSV
 
-### Upload CSV `POST /api/imports/upload`
+### Upload CSV `POST /api/v1/imports/upload`
 
 Request (multipart/form-data) :
 
@@ -1589,7 +1605,7 @@ Response `201` :
 Erreur `409` : brouillon actif existant pour ce compte.
 Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
 
-### Confirmer import `POST /api/imports/drafts/{draftId}/confirm`
+### Confirmer import `POST /api/v1/imports/drafts/{draftId}/confirm`
 
 Response `200` :
 
@@ -1603,7 +1619,7 @@ Response `200` :
 
 Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues.
 
-### Mettre a jour une ligne `PUT /api/imports/drafts/{draftId}/lines/{lineId}`
+### Mettre a jour une ligne `PUT /api/v1/imports/drafts/{draftId}/lines/{lineId}`
 
 Request :
 
@@ -1614,7 +1630,7 @@ Request :
 }
 ```
 
-### Actions groupees `PUT /api/imports/drafts/{draftId}/lines/batch`
+### Actions groupees `PUT /api/v1/imports/drafts/{draftId}/lines/batch`
 
 Request :
 
@@ -1626,7 +1642,7 @@ Request :
 }
 ```
 
-### Regles de categorisation `POST /api/imports/rules`
+### Regles de categorisation `POST /api/v1/imports/rules`
 
 Request :
 
@@ -1650,11 +1666,11 @@ Response `201` :
 }
 ```
 
-### Lister les regles `GET /api/imports/rules`
+### Lister les regles `GET /api/v1/imports/rules`
 
-### Supprimer une regle `DELETE /api/imports/rules/{ruleId}` — `204`
+### Supprimer une regle `DELETE /api/v1/imports/rules/{ruleId}` — `204`
 
-### Preview CSV `POST /api/imports/preview`
+### Preview CSV `POST /api/v1/imports/preview`
 
 Request (multipart/form-data) : `file` + optionnel `separator`, `encoding`, `skipHeaderLines`
 
@@ -1670,31 +1686,31 @@ Response `200` :
 }
 ```
 
-### Upload avec mapping `POST /api/imports/upload-with-mapping`
+### Upload avec mapping `POST /api/v1/imports/upload-with-mapping`
 
 Request (multipart/form-data) : `file`, `accountId`, `mapping` (JSON string)
 
-### Consulter un brouillon `GET /api/imports/drafts/{draftId}`
+### Consulter un brouillon `GET /api/v1/imports/drafts/{draftId}`
 
 Response `200` : meme format que la reponse de l'upload (avec toutes les lignes).
 
-### Supprimer un brouillon `DELETE /api/imports/drafts/{draftId}`
+### Supprimer un brouillon `DELETE /api/v1/imports/drafts/{draftId}`
 
 Response `204` (corps vide).
 
-### Modifier une regle `PUT /api/imports/rules/{ruleId}`
+### Modifier une regle `PUT /api/v1/imports/rules/{ruleId}`
 
 Request : meme format que la creation (`pattern`, `categoryId`).
 
 Response `200` : la regle mise a jour.
 
-### Lister brouillons `GET /api/imports/drafts` — liste des brouillons PENDING
+### Lister brouillons `GET /api/v1/imports/drafts` — liste des brouillons PENDING
 
-### Historique `GET /api/imports/history?page=0&size=20` — imports finalises pagines
+### Historique `GET /api/v1/imports/history?page=0&size=20` — imports finalises pagines
 
-### Profils `GET /api/imports/profiles` — profils pre-configures + personnalises
+### Profils `GET /api/v1/imports/profiles` — profils pre-configures + personnalises
 
-### Supprimer profil `DELETE /api/imports/profiles/{profileId}` — `204`
+### Supprimer profil `DELETE /api/v1/imports/profiles/{profileId}` — `204`
 
 ## Voir aussi
 

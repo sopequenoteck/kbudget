@@ -80,7 +80,7 @@ class AdminInvitationControllerTest {
 
         when(invitationService.create(any(User.class), eq("new@example.com"))).thenReturn(invitation);
 
-        mockMvc.perform(post("/admin/invitations")
+        mockMvc.perform(post("/v1/admin/invitations")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CreateInvitationRequest("new@example.com"))))
@@ -90,7 +90,7 @@ class AdminInvitationControllerTest {
 
     @Test
     void should_return_400_when_email_invalid() throws Exception {
-        mockMvc.perform(post("/admin/invitations")
+        mockMvc.perform(post("/v1/admin/invitations")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"not-an-email\"}"))
@@ -99,7 +99,7 @@ class AdminInvitationControllerTest {
 
     @Test
     void should_return_401_when_not_authenticated() throws Exception {
-        mockMvc.perform(post("/admin/invitations")
+        mockMvc.perform(post("/v1/admin/invitations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"new@example.com\"}"))
                 .andExpect(status().isUnauthorized());
@@ -111,7 +111,7 @@ class AdminInvitationControllerTest {
     void should_return_204_when_revoke_active_invitation() throws Exception {
         doNothing().when(invitationService).revoke(eq(42L), any(User.class));
 
-        mockMvc.perform(delete("/admin/invitations/42")
+        mockMvc.perform(delete("/v1/admin/invitations/42")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
 
@@ -123,7 +123,7 @@ class AdminInvitationControllerTest {
         doThrow(new EntityNotFoundException("Invitation introuvable"))
                 .when(invitationService).revoke(eq(99L), any(User.class));
 
-        mockMvc.perform(delete("/admin/invitations/99")
+        mockMvc.perform(delete("/v1/admin/invitations/99")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound());
     }
@@ -148,7 +148,7 @@ class AdminInvitationControllerTest {
 
         when(invitationService.list()).thenReturn(invitations);
 
-        mockMvc.perform(get("/admin/invitations")
+        mockMvc.perform(get("/v1/admin/invitations")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(4))
@@ -166,7 +166,7 @@ class AdminInvitationControllerTest {
     void should_return_200_with_empty_list_when_no_invitations() throws Exception {
         when(invitationService.list()).thenReturn(List.of());
 
-        mockMvc.perform(get("/admin/invitations")
+        mockMvc.perform(get("/v1/admin/invitations")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));

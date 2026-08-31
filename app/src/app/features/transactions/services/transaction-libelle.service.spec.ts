@@ -35,7 +35,7 @@ describe('TransactionLibelleService', () => {
 
     const req = httpMock.expectOne((r) => {
       return (
-        r.url === '/api/transactions/libelles' &&
+        r.url === '/api/v1/transactions/libelles' &&
         r.params.get('q') === 'car' &&
         r.params.get('limit') === '10'
       );
@@ -50,7 +50,7 @@ describe('TransactionLibelleService', () => {
     let result: string[] | undefined;
     service.search('err', 20).subscribe((r) => (result = r));
 
-    const req = httpMock.expectOne((r) => r.url === '/api/transactions/libelles');
+    const req = httpMock.expectOne((r) => r.url === '/api/v1/transactions/libelles');
     req.flush('Erreur serveur', { status: 500, statusText: 'Internal Server Error' });
 
     expect(result).toEqual([]);
@@ -62,7 +62,7 @@ describe('TransactionLibelleService', () => {
 
     const req = httpMock.expectOne((r) => {
       return (
-        r.url === '/api/transactions/libelles' &&
+        r.url === '/api/v1/transactions/libelles' &&
         !r.params.has('q') &&
         r.params.get('limit') === '20'
       );

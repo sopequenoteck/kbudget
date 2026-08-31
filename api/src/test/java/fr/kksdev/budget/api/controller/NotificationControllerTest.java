@@ -86,7 +86,7 @@ class NotificationControllerTest {
 
         when(notificationService.getNotifications(eq(userId), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/notifications")
+        mockMvc.perform(get("/v1/notifications")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(notificationId.toString()))
@@ -99,7 +99,7 @@ class NotificationControllerTest {
     void should_return_unread_count_when_has_unread() throws Exception {
         when(notificationService.getUnreadCount(userId)).thenReturn(3L);
 
-        mockMvc.perform(get("/notifications/unread-count")
+        mockMvc.perform(get("/v1/notifications/unread-count")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(3));
@@ -111,7 +111,7 @@ class NotificationControllerTest {
 
         when(notificationService.markAsRead(userId, notificationId)).thenReturn(notification);
 
-        mockMvc.perform(put("/notifications/{id}/read", notificationId)
+        mockMvc.perform(put("/v1/notifications/{id}/read", notificationId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(notificationId.toString()))
@@ -122,7 +122,7 @@ class NotificationControllerTest {
     void should_mark_all_as_read_when_has_unread() throws Exception {
         doNothing().when(notificationService).markAllAsRead(userId);
 
-        mockMvc.perform(put("/notifications/read-all")
+        mockMvc.perform(put("/v1/notifications/read-all")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -131,7 +131,7 @@ class NotificationControllerTest {
     void should_delete_notification_when_valid_id() throws Exception {
         doNothing().when(notificationService).deleteNotification(userId, notificationId);
 
-        mockMvc.perform(delete("/notifications/{id}", notificationId)
+        mockMvc.perform(delete("/v1/notifications/{id}", notificationId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -140,7 +140,7 @@ class NotificationControllerTest {
     void should_delete_all_notifications_when_authenticated() throws Exception {
         doNothing().when(notificationService).deleteAllNotifications(userId);
 
-        mockMvc.perform(delete("/notifications")
+        mockMvc.perform(delete("/v1/notifications")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -151,7 +151,7 @@ class NotificationControllerTest {
         when(notificationService.markAsRead(eq(userId), eq(randomId)))
                 .thenThrow(new EntityNotFoundException("Notification non trouvée"));
 
-        mockMvc.perform(put("/notifications/{id}/read", randomId)
+        mockMvc.perform(put("/v1/notifications/{id}/read", randomId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Notification non trouvée"));
@@ -163,7 +163,7 @@ class NotificationControllerTest {
         when(notificationService.markAsRead(eq(userId), eq(otherNotificationId)))
                 .thenThrow(new org.springframework.security.access.AccessDeniedException("Accès refusé"));
 
-        mockMvc.perform(put("/notifications/{id}/read", otherNotificationId)
+        mockMvc.perform(put("/v1/notifications/{id}/read", otherNotificationId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden());
     }
@@ -174,14 +174,14 @@ class NotificationControllerTest {
         doThrow(new org.springframework.security.access.AccessDeniedException("Accès refusé"))
                 .when(notificationService).deleteNotification(eq(userId), eq(otherNotificationId));
 
-        mockMvc.perform(delete("/notifications/{id}", otherNotificationId)
+        mockMvc.perform(delete("/v1/notifications/{id}", otherNotificationId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void should_return_401_when_no_token() throws Exception {
-        mockMvc.perform(get("/notifications"))
+        mockMvc.perform(get("/v1/notifications"))
                 .andExpect(status().isUnauthorized());
     }
 }

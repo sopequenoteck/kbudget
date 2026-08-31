@@ -50,7 +50,7 @@ class CurrencyControllerTest {
 
     @Test
     void should_returnAllCurrencies_when_authenticated() throws Exception {
-        mockMvc.perform(get("/currencies")
+        mockMvc.perform(get("/v1/currencies")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(7))
@@ -62,7 +62,7 @@ class CurrencyControllerTest {
 
     @Test
     void should_returnCurrenciesWithCorrectFormat_when_authenticated() throws Exception {
-        mockMvc.perform(get("/currencies")
+        mockMvc.perform(get("/v1/currencies")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].code").exists())
@@ -73,7 +73,7 @@ class CurrencyControllerTest {
 
     @Test
     void should_return401_when_notAuthenticated() throws Exception {
-        mockMvc.perform(get("/currencies"))
+        mockMvc.perform(get("/v1/currencies"))
                 .andExpect(status().isUnauthorized());
     }
 }

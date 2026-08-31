@@ -93,7 +93,7 @@ class TransactionControllerTest {
 
         when(transactionService.create(any(TransactionRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/transactions")
+        mockMvc.perform(post("/v1/transactions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("50.00", "Courses", "DEPENSE", "2026-02-07")))
@@ -112,7 +112,7 @@ class TransactionControllerTest {
 
         when(transactionService.getAllByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/transactions")
+        mockMvc.perform(get("/v1/transactions")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].libelle").value("Courses"))
@@ -127,7 +127,7 @@ class TransactionControllerTest {
 
         when(transactionService.getById(transactionId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/transactions/{id}", transactionId)
+        mockMvc.perform(get("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.libelle").value("Courses"));
@@ -142,7 +142,7 @@ class TransactionControllerTest {
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/transactions/{id}", transactionId)
+        mockMvc.perform(put("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("75.00", "Courses modifiées", "DEPENSE", "2026-02-08")))
@@ -154,7 +154,7 @@ class TransactionControllerTest {
     void should_return_204_when_delete_transaction() throws Exception {
         doNothing().when(transactionService).delete(transactionId, userId);
 
-        mockMvc.perform(delete("/transactions/{id}", transactionId)
+        mockMvc.perform(delete("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -164,7 +164,7 @@ class TransactionControllerTest {
         when(transactionService.getById(transactionId, userId))
                 .thenThrow(new EntityNotFoundException("Transaction non trouvée"));
 
-        mockMvc.perform(get("/transactions/{id}", transactionId)
+        mockMvc.perform(get("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Transaction non trouvée"));
@@ -177,7 +177,7 @@ class TransactionControllerTest {
 
         when(transactionService.getMonthlySummary(2, 2026, userId)).thenReturn(List.of(summary));
 
-        mockMvc.perform(get("/transactions/summary")
+        mockMvc.perform(get("/v1/transactions/summary")
                         .param("month", "2")
                         .param("year", "2026")
                         .header("Authorization", BEARER_TOKEN))
@@ -192,7 +192,7 @@ class TransactionControllerTest {
 
     @Test
     void should_return_400_when_create_with_missing_fields() throws Exception {
-        mockMvc.perform(post("/transactions")
+        mockMvc.perform(post("/v1/transactions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -201,7 +201,7 @@ class TransactionControllerTest {
 
     @Test
     void should_return_401_when_no_token() throws Exception {
-        mockMvc.perform(get("/transactions"))
+        mockMvc.perform(get("/v1/transactions"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -212,7 +212,7 @@ class TransactionControllerTest {
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
                 .thenThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées"));
 
-        mockMvc.perform(put("/transactions/{id}", transactionId)
+        mockMvc.perform(put("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("100.00", "Test", "DEPENSE", "2026-02-19")))
@@ -225,7 +225,7 @@ class TransactionControllerTest {
         doThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées"))
                 .when(transactionService).delete(transactionId, userId);
 
-        mockMvc.perform(delete("/transactions/{id}", transactionId)
+        mockMvc.perform(delete("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent pas être supprimées"));
@@ -236,7 +236,7 @@ class TransactionControllerTest {
         when(transactionService.create(any(TransactionRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
 
-        mockMvc.perform(post("/transactions")
+        mockMvc.perform(post("/v1/transactions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("250.00", "Ajustement", "AJUSTEMENT", "2026-02-19")))
@@ -248,7 +248,7 @@ class TransactionControllerTest {
 
     @Test
     void should_return_401_when_unauthenticated() throws Exception {
-        mockMvc.perform(get("/transactions/libelles"))
+        mockMvc.perform(get("/v1/transactions/libelles"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -277,7 +277,7 @@ class TransactionControllerTest {
                 .thenReturn(libellesUserB);
 
         // Appel en tant que userA → doit retourner uniquement les libellés de A
-        mockMvc.perform(get("/transactions/libelles")
+        mockMvc.perform(get("/v1/transactions/libelles")
                         .header("Authorization", "Bearer token-user-a"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value("Salaire A"))

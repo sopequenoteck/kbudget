@@ -70,7 +70,7 @@ class ExchangeRateControllerTest {
     void should_returnEmptyList_when_noRates() throws Exception {
         when(exchangeRateService.getAll(userId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/exchange-rates")
+        mockMvc.perform(get("/v1/exchange-rates")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
@@ -81,7 +81,7 @@ class ExchangeRateControllerTest {
         var response = new ExchangeRateResponse(rateId, "EUR", "XOF", new BigDecimal("655.957000"), LocalDateTime.now());
         when(exchangeRateService.upsert(any(), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(put("/exchange-rates")
+        mockMvc.perform(put("/v1/exchange-rates")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -102,7 +102,7 @@ class ExchangeRateControllerTest {
         var response = new ExchangeRateResponse(rateId, "EUR", "XOF", new BigDecimal("660.000000"), LocalDateTime.now());
         when(exchangeRateService.upsert(any(), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(put("/exchange-rates")
+        mockMvc.perform(put("/v1/exchange-rates")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -121,7 +121,7 @@ class ExchangeRateControllerTest {
     void should_deleteRate_when_exists() throws Exception {
         doNothing().when(exchangeRateService).delete(userId, Currency.EUR, Currency.XOF);
 
-        mockMvc.perform(delete("/exchange-rates/EUR/XOF")
+        mockMvc.perform(delete("/v1/exchange-rates/EUR/XOF")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -131,7 +131,7 @@ class ExchangeRateControllerTest {
         doThrow(new EntityNotFoundException("Taux non trouvé"))
                 .when(exchangeRateService).delete(userId, Currency.EUR, Currency.XOF);
 
-        mockMvc.perform(delete("/exchange-rates/EUR/XOF")
+        mockMvc.perform(delete("/v1/exchange-rates/EUR/XOF")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Taux non trouvé"));
@@ -139,7 +139,7 @@ class ExchangeRateControllerTest {
 
     @Test
     void should_return400_when_rateNegative() throws Exception {
-        mockMvc.perform(put("/exchange-rates")
+        mockMvc.perform(put("/v1/exchange-rates")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -157,7 +157,7 @@ class ExchangeRateControllerTest {
         doThrow(new IllegalArgumentException("Les devises de base et cible doivent être différentes"))
                 .when(exchangeRateService).upsert(any(), eq(userId));
 
-        mockMvc.perform(put("/exchange-rates")
+        mockMvc.perform(put("/v1/exchange-rates")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
