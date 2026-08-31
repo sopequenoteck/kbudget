@@ -78,6 +78,13 @@ jobs:
         id: version
         run: echo "value=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
 
+      # QEMU : necessaire pour les instructions RUN du stage runtime arm64
+      # (apt-get, useradd). Les stages de build restent natifs via BUILDPLATFORM.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -92,7 +99,7 @@ jobs:
         with:
           context: ./api
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           tags: |
             sopequenotech/k-budget-api:latest
             sopequenotech/k-budget-api:${{ steps.version.outputs.value }}
@@ -104,7 +111,7 @@ jobs:
         with:
           context: ./app
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           tags: |
             sopequenotech/k-budget-app:latest
             sopequenotech/k-budget-app:${{ steps.version.outputs.value }}

@@ -2,8 +2,10 @@
 
 ## Prerequis
 
-- Serveur Linux (Ubuntu 22.04+, Debian 12+ recommande)
-- **Option A** : Docker Engine 24+ et Docker Compose v2
+- Serveur Linux (Ubuntu 22.04+, Debian 12+ recommande), architecture `amd64` ou `arm64`
+- **Option A** : Docker Engine 24+ et Docker Compose v2 — les images publiees couvrent
+  `linux/amd64` et `linux/arm64` (Raspberry Pi 4/5, NAS ARM, Apple Silicon, instances
+  ARM cloud). Docker selectionne automatiquement la variante correspondant a l'hote.
 - **Option B** : Java 21 JRE + PostgreSQL 15+
 - Node.js 20+ et npm 10+ (pour le build frontend)
 - Nom de domaine : `budget.kksdev.fr`
