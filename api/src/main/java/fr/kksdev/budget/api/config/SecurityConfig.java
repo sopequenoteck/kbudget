@@ -73,6 +73,10 @@ public class SecurityConfig {
                         // /auth/first-login-reset nécessite un JWT valide (user avec mustResetCredentials=true)
                         .requestMatchers("/auth/login", "/auth/refresh", "/auth/logout",
                                 "/auth/invitations/**", "/auth/accept-invite").permitAll()
+                        // Les routes springdoc restent en permitAll, mais ne sont mappées
+                        // que si springdoc est actif : desactive par defaut, actif en profil
+                        // dev ou via SWAGGER_ENABLED=true. Sans mapping elles repondent 404,
+                        // ce qui expose moins qu'un 401 sur un chemin retire de cette liste.
                         .requestMatchers("/error",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/actuator/health", "/banks", "/bank-logos/**").permitAll()

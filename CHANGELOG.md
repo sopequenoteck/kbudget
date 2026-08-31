@@ -5,6 +5,26 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.3.2] - 2026-08-31
+
+> Correctifs de sécurité et de robustesse — aucune évolution fonctionnelle.
+
+### Fixed
+
+- **KKS-307 — Persistance des avatars en Docker** : `docker-compose.yml` ne montait aucun volume sur le chemin de stockage des avatars, qui pointait par défaut à l'intérieur du container (`/app/data/avatars`). Les fichiers disparaissaient silencieusement à chaque recréation du container — donc à chaque mise à jour d'image par Watchtower — et l'API répondait ensuite `AVATAR_NOT_FOUND` sur des `users.avatar_path` orphelins.
+  - Volume nommé `api-avatars` monté sur `/app/data/avatars`, et `AVATAR_STORAGE_PATH` fixée explicitement sur ce chemin dans le service `api` (la personnalisation se fait côté hôte, sur la source du volume).
+  - `api/Dockerfile` : création de `data/avatars` et reprise des permissions à l'entrypoint, même traitement que `logs` — le volume neuf est créé en root par Docker alors que l'application tourne en utilisateur `budget`.
+  - `docs/deployment.md` : section Docker réécrite (le volume est désormais fourni par défaut) et procédures de backup/restauration du volume ajoutées à côté des procédures bare-metal existantes.
+
+- **KKS-311 — Route inconnue : 500 au lieu de 404** : le `@ExceptionHandler(Exception.class)` de `GlobalExceptionHandler` interceptait `NoResourceFoundException`, si bien que toute URL non mappée répondait `500 INTERNAL_ERROR` et journalisait une trace complète en ERROR. Un handler dédié renvoie désormais `404 NOT_FOUND` au contrat d'erreurs unifié, avec un log WARN. Défaut découvert en validant KKS-311 : sans lui, chaque crawl de bot sur `/swagger-ui.html` aurait produit une erreur 500 et une trace sur toutes les instances.
+
+### Security
+
+- **KKS-311 — Documentation OpenAPI restreinte au profil dev** : springdoc était actif sans condition, publiant la surface d'API complète (endpoints, structure des DTOs, contraintes de validation) de chaque instance exposée sur Internet, pour un bénéfice nul en production. L'API reste protégée par JWT — ce n'est pas une faille en soi, mais une surface d'attaque documentée gratuitement.
+  - `springdoc.api-docs.enabled` et `springdoc.swagger-ui.enabled` à `false` par défaut, `true` en profil `dev` via un document profil-spécifique d'`application.yaml` (`application-dev.yaml` n'est pas versionné, l'activation ne pouvait donc pas y vivre).
+  - Réactivation volontaire par `SWAGGER_ENABLED=true`, pour développer un client tiers contre son instance.
+  - Les routes restent en `permitAll` dans `SecurityConfig` : non mappées, elles répondent 404, ce qui expose moins qu'un 401 sur un chemin retiré de la liste.
+
 ## [5.3.1] - 2026-08-26
 
 > Correctifs documentaires — aucun changement de code applicatif.
@@ -368,7 +388,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.3.2...HEAD
+[5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
 [4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0

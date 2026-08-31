@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -40,6 +42,13 @@ class GlobalExceptionHandlerTest {
         assertResponse(handler.handleHttpMessageNotReadable(
                         new HttpMessageNotReadableException("technical parser detail", (HttpInputMessage) null)), 400,
                 "MALFORMED_REQUEST", "Requete invalide");
+    }
+
+    @Test
+    void should_return_404_when_route_is_not_mapped() {
+        assertResponse(handler.handleNoResourceFound(
+                        new NoResourceFoundException(HttpMethod.GET, "/api/route-inconnue", "/route-inconnue")),
+                404, "NOT_FOUND", "Ressource introuvable");
     }
 
     @Test

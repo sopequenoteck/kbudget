@@ -27,6 +27,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.Locale;
@@ -91,6 +92,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
         log.warn("Entity not found: {}", ex.getMessage());
         return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), "Ressource introuvable");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
+        log.warn("No handler for {} {}", ex.getHttpMethod(), ex.getResourcePath());
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", "Ressource introuvable", "Ressource introuvable");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

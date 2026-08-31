@@ -24,7 +24,8 @@ cp .env.example .env
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
 | `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
 | `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
-| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production, recommandation : `/var/k-budget/avatars`. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
+| `SWAGGER_ENABLED` | *(Optionnelle, KKS-311)* Expose la documentation OpenAPI (`/swagger-ui.html`, `/v3/api-docs`). Defaut : `false` hors profil `dev`, `true` en `dev`. Publier la surface d'API complete d'une instance exposee n'a pas de benefice en production. | `true` |
+| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production bare-metal, recommandation : `/var/k-budget/avatars`. En Docker, fixee a `/app/data/avatars` par le compose (volume `api-avatars`) : ne pas la surcharger. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
 
 ### Avatars utilisateurs (KKS-235)
 
@@ -40,16 +41,20 @@ sudo chmod 750 /var/k-budget/avatars
 
 > Adapter `k-budget:k-budget` au user/groupe systeme reel (par defaut `budget` dans la procedure bare-metal ci-dessous, soit `chown -R budget:budget /var/k-budget/avatars`).
 
-**Docker** : monter le dossier en volume si `AVATAR_STORAGE_PATH=/var/k-budget/avatars` est defini dans `.env` :
+**Docker** : rien a configurer. Le compose fourni declare un volume nomme `api-avatars` monte sur `/app/data/avatars` et fixe `AVATAR_STORAGE_PATH` sur ce chemin. Les avatars survivent a `docker compose down`, aux mises a jour d'image et aux recreations de container par Watchtower.
+
+Pour les stocker sur un emplacement precis de l'hote (disque dedie, sauvegarde existante), remplacer la source du volume par un bind-mount. Le chemin **container** reste `/app/data/avatars` :
 
 ```yaml
 services:
   api:
     volumes:
-      - /var/k-budget/avatars:/var/k-budget/avatars
+      - /var/k-budget/avatars:/app/data/avatars
 ```
 
-Sinon, le dossier `./data/avatars` reside dans le container et disparait avec lui — definir un volume nomme ou bind-mount pour la persistence.
+> Ne pas redefinir `AVATAR_STORAGE_PATH` dans `.env` en mode Docker : le point de montage ne suivrait pas et les avatars repartiraient dans la couche ephemere du container, ou ils disparaissent a chaque recreation (defaut KKS-307).
+
+**Migration d'une instance anterieure a KKS-307** : les avatars uploades avant l'ajout du volume sont perdus — ils vivaient dans la couche ephemere du container et ont disparu a la premiere recreation. Aucune recuperation possible. Apres `docker compose up -d` avec le nouveau compose, demander aux utilisateurs concernes de re-televerser leur avatar ; les `users.avatar_path` orphelins produisent un `404 AVATAR_NOT_FOUND` jusque-la, sans autre effet sur l'application.
 
 ## Configuration admin
 
@@ -325,20 +330,42 @@ gunzip -c /opt/k-budget-api/backups/budget_db_2026-02-07_030000.sql.gz | psql -h
 
 Les avatars utilisateurs sont stockes hors-DB sur le filesystem (cf. `AVATAR_STORAGE_PATH`). **Inclure ce dossier dans la strategie de backup** au meme titre que la DB — un dump PostgreSQL seul ne restaure que la reference (`users.avatar_path`), pas les binaires.
 
-### Backup quotidien (avatars + DB)
+### Bare-metal — backup quotidien (avatars + DB)
 
 ```bash
 # Cron quotidien a 3h05 (apres le dump PostgreSQL de 3h)
 5 3 * * * tar czf /opt/k-budget-api/backups/avatars_$(date +\%F).tar.gz -C /var/k-budget avatars/ && find /opt/k-budget-api/backups/avatars_*.tar.gz -mtime +7 -delete
 ```
 
-### Restauration
+### Bare-metal — restauration
 
 ```bash
 sudo tar xzf /opt/k-budget-api/backups/avatars_2026-04-27.tar.gz -C /var/k-budget/
 sudo chown -R budget:budget /var/k-budget/avatars
 sudo chmod 750 /var/k-budget/avatars
 ```
+
+### Docker — backup du volume `api-avatars`
+
+Le volume ne se sauvegarde pas avec un `tar` direct sur l'hote : passer par un container ephemere monte sur les memes volumes que l'API. `--volumes-from` evite d'avoir a deviner le nom du volume (prefixe par le nom du projet compose).
+
+```bash
+# Cron quotidien a 3h05. Le `cd` est indispensable : cron ne s'execute pas
+# dans le repertoire du docker-compose.yml, dont `docker compose` a besoin.
+5 3 * * * cd /opt/k-budget && docker run --rm --volumes-from $(docker compose ps -q api) -v /opt/k-budget-api/backups:/backup alpine tar czf /backup/avatars_$(date +\%F).tar.gz -C /app/data/avatars . && find /opt/k-budget-api/backups/avatars_*.tar.gz -mtime +7 -delete
+```
+
+### Docker — restauration
+
+```bash
+docker compose stop api
+docker run --rm --volumes-from $(docker compose ps -aq api) \
+  -v /opt/k-budget-api/backups:/backup alpine \
+  sh -c 'rm -rf /app/data/avatars/* && tar xzf /backup/avatars_2026-04-27.tar.gz -C /app/data/avatars'
+docker compose start api
+```
+
+> Pas de `chown` manuel a prevoir : l'entrypoint de l'image reajuste les permissions du volume au demarrage.
 
 > Apres restauration, verifier que les chemins en DB (`users.avatar_path`) correspondent aux fichiers physiques. Tout `avatar_path` orphelin produit un `404 AVATAR_NOT_FOUND` cote API.
 
@@ -388,7 +415,7 @@ ssh serveur "sudo systemctl restart k-budget-api"
 ## Notes importantes
 
 - **Endpoint de sante** : `GET /api/actuator/health` — accessible sans JWT, utilise par les healthchecks Docker et le monitoring
-- **Swagger UI** : actif en production par defaut. Pour le desactiver, ajouter `springdoc.api-docs.enabled: false` dans `application-prod.yaml`. Alternativement, proteger l'acces via le reverse proxy
+- **Swagger UI** : desactivee par defaut hors profil `dev` (KKS-311). Les routes `/swagger-ui.html` et `/v3/api-docs` ne sont pas mappees et repondent 404. Pour l'activer volontairement sur une instance — developpement d'un client tiers, exploration de l'API — definir `SWAGGER_ENABLED=true` ; penser alors a restreindre l'acces via le reverse proxy
 - **Generation JWT_SECRET** : `openssl rand -base64 64`
 - **Firewall** : ouvrir uniquement les ports 80 (HTTP), 443 (HTTPS) et 22 (SSH)
 
