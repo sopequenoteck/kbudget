@@ -85,6 +85,7 @@ k-budget/
 
 | Document                                         | Contenu                                                                  |
 |--------------------------------------------------|--------------------------------------------------------------------------|
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** — principes fondateurs. Fait autorite sur toute autre documentation |
 | [`docs/vision.md`](docs/vision.md)               | Vision produit, modules fonctionnels, principes UX                       |
 | [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (17 entites), structure frontend |
 | [`docs/api-examples.md`](docs/api-examples.md)   | Exemples de requetes et reponses pour chaque endpoint                    |
