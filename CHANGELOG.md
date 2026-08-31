@@ -11,6 +11,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   - Fichier supprimé. Les seules références restantes sont dans des artefacts devflow archivés (`docs/features/KKS-238`, `239`, `240`, `252`), documents historiques figés qui décrivent l'état au moment de leur feature.
   - `README.md` et `CLAUDE.md` : la constitution est ajoutée en tête de leur index de documentation, désignée comme faisant autorité.
 
+### Fixed
+
+- **Index de documentation du `README`** : la ligne `docs/design-tokens.md` pointait vers un fichier supprimé — un lien mort dans le premier tableau que lit un contributeur. Remplacée par `DESIGN.md`, source de vérité actuelle du design.
+- **Décompte des entités JPA** : le `README` annonçait 17 entités et `CLAUDE.md` 19, deux chiffres contradictoires et tous deux faux. Le modèle en compte 18, conformément à `docs/architecture.md` qui les documente une à une.
+
 ## [5.4.0] - 2026-08-31
 
 > Publication des images Docker sur ARM — débloque la cible self-hosted.
