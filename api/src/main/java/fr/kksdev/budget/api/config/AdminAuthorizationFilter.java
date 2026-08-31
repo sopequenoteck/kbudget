@@ -21,6 +21,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
+    /**
+     * Prefixe des routes d'administration, version d'API comprise (KKS-313).
+     * Derive de {@link ApiVersioningConfig} : coder "/admin/" en dur ferait
+     * silencieusement cesser ce controle d'acces au prochain changement de version.
+     */
+    private static final String ADMIN_PATH_PREFIX =
+            ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/admin/";
+
     private final UserRepository userRepository;
     private final ApiErrorWriter errorWriter;
 
@@ -33,7 +41,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
             servletPath = stripContextPath(request);
         }
 
-        if (!servletPath.startsWith("/admin/")) {
+        if (!servletPath.startsWith(ADMIN_PATH_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }

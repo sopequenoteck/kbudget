@@ -27,7 +27,7 @@ cp .env.example .env
 | `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
 | `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
 | `SWAGGER_ENABLED` | *(Optionnelle, KKS-311)* Expose la documentation OpenAPI (`/swagger-ui.html`, `/v3/api-docs`). Defaut : `false` hors profil `dev`, `true` en `dev`. Publier la surface d'API complete d'une instance exposee n'a pas de benefice en production. | `true` |
-| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production bare-metal, recommandation : `/var/k-budget/avatars`. En Docker, fixee a `/app/data/avatars` par le compose (volume `api-avatars`) : ne pas la surcharger. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
+| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/v1/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production bare-metal, recommandation : `/var/k-budget/avatars`. En Docker, fixee a `/app/data/avatars` par le compose (volume `api-avatars`) : ne pas la surcharger. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
 
 ### Avatars utilisateurs (KKS-235)
 
@@ -66,13 +66,13 @@ L'instance identifie les administrateurs via la variable d'environnement `ADMIN_
 ADMIN_EMAILS=so-pequeno@live.fr,autre-admin@example.com
 ```
 
-- Un user dont l'email figure dans `ADMIN_EMAILS` et dont `disabled_at IS NULL` peut appeler les endpoints `/api/admin/*` (invitations, desactivation de users).
+- Un user dont l'email figure dans `ADMIN_EMAILS` et dont `disabled_at IS NULL` peut appeler les endpoints `/api/v1/admin/*` (invitations, desactivation de users).
 - Les users non-admin recoivent 403 sur ces endpoints.
 - Si `ADMIN_EMAILS` est vide OU si aucun user actif ne correspond a un email de la liste, un `WARN` est emis au boot : aucune invitation ne peut etre emise tant qu'un admin valide n'est pas configure.
-- **Pas d'inscription publique** : l'onboarding se fait exclusivement via le flux d'invitation (`POST /api/admin/invitations` puis acceptation via `POST /api/auth/accept-invite`). L'admin transmet le lien manuellement (Signal, SMS, face-a-face) — l'application n'envoie pas d'email.
+- **Pas d'inscription publique** : l'onboarding se fait exclusivement via le flux d'invitation (`POST /api/v1/admin/invitations` puis acceptation via `POST /api/v1/auth/accept-invite`). L'admin transmet le lien manuellement (Signal, SMS, face-a-face) — l'application n'envoie pas d'email.
 - **Changement d'admin** : modifier `ADMIN_EMAILS` dans l'env puis redemarrer. Pas de rechargement a chaud.
 - **Garde-fou dernier admin** : un admin ne peut pas se desactiver s'il est le seul admin actif (HTTP 409 `LAST_ADMIN_CANNOT_BE_DISABLED`).
-- **Source d'autorite du role admin** : le statut admin est stocke directement en base (`users.is_admin`). `ADMIN_EMAILS` sert uniquement de source de promotion au demarrage : au boot, les users dont l'email figure dans la liste sont promus `isAdmin=true` s'ils ne le sont pas deja. `ADMIN_EMAILS` ne retrograde **jamais** un admin existant. Consequence : apres un changement d'email (via `/api/auth/first-login-reset`), le user conserve son acces admin meme si son nouvel email n'apparait pas dans `ADMIN_EMAILS`.
+- **Source d'autorite du role admin** : le statut admin est stocke directement en base (`users.is_admin`). `ADMIN_EMAILS` sert uniquement de source de promotion au demarrage : au boot, les users dont l'email figure dans la liste sont promus `isAdmin=true` s'ils ne le sont pas deja. `ADMIN_EMAILS` ne retrograde **jamais** un admin existant. Consequence : apres un changement d'email (via `/api/v1/auth/first-login-reset`), le user conserve son acces admin meme si son nouvel email n'apparait pas dans `ADMIN_EMAILS`.
 
 ## Premier demarrage sur instance vierge (self-hoster)
 
@@ -120,7 +120,7 @@ Sur une instance avec une base PostgreSQL vide, l'app amorce automatiquement un 
 ### Proprietes de securite
 
 - Le mot de passe initial est aleatoire 32 chars alphanumeriques, genere via `SecureRandom` — jamais dans le code ni dans le repo.
-- Tant que le reset n'a pas ete effectue, le JWT emis par le login n'autorise que l'endpoint `POST /api/auth/first-login-reset` et `POST /api/auth/logout`. Tous les autres endpoints protegés renvoient **403 `PASSWORD_RESET_REQUIRED`**.
+- Tant que le reset n'a pas ete effectue, le JWT emis par le login n'autorise que l'endpoint `POST /api/v1/auth/first-login-reset` et `POST /api/v1/auth/logout`. Tous les autres endpoints protegés renvoient **403 `PASSWORD_RESET_REQUIRED`**.
 - Apres le reset, le user conserve son role admin meme si le nouvel email n'est pas dans `ADMIN_EMAILS` (cf. "Configuration admin").
 - Si le container redemarre avant le reset : le meme mot de passe reste valide en base (pas de regeneration, condition `users.count() == 0` assure l'idempotence).
 - Aucun seed n'est effectue si des users existent deja en DB.

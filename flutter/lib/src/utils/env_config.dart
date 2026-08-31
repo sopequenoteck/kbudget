@@ -6,6 +6,18 @@ class EnvConfig {
     defaultValue: 'http://localhost:8080/api',
   );
 
+  /// Segment de version des endpoints metier (KKS-313).
+  ///
+  /// [apiBaseUrl] reste la racine de l'API : c'est l'URL que le self-hoster
+  /// saisit, et celle dont derivent le WebSocket et le health check, qui ne
+  /// sont pas versionnes. Seul le client HTTP metier ajoute ce segment.
+  static const String apiVersionPath = '/v1';
+
+  /// Racine des endpoints metier, version comprise.
+  static String versionedUrl(String baseUrl) =>
+      '${baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl}'
+      '$apiVersionPath';
+
   static const String env = String.fromEnvironment(
     'ENV',
     defaultValue: 'dev',

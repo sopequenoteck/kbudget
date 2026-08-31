@@ -45,7 +45,7 @@ class BankControllerTest {
         List<BankResponse> banks = buildBankList(29);
         when(bankService.getAllBanks()).thenReturn(banks);
 
-        mockMvc.perform(get("/banks"))
+        mockMvc.perform(get("/v1/banks"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(29));
     }
@@ -55,7 +55,7 @@ class BankControllerTest {
         var bank = new BankResponse("BNP", "BNP Paribas", "FR", "#00915a", "/api/bank-logos/bnp.svg");
         when(bankService.getAllBanks()).thenReturn(List.of(bank));
 
-        mockMvc.perform(get("/banks"))
+        mockMvc.perform(get("/v1/banks"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].code").value("BNP"))
                 .andExpect(jsonPath("$[0].name").value("BNP Paribas"))
@@ -68,7 +68,7 @@ class BankControllerTest {
     void should_beAccessibleWithoutAuth() throws Exception {
         when(bankService.getAllBanks()).thenReturn(List.of());
 
-        mockMvc.perform(get("/banks"))
+        mockMvc.perform(get("/v1/banks"))
                 .andExpect(status().isOk());
     }
 

@@ -90,7 +90,7 @@ class RecurringTransactionControllerTest {
 
         when(recurringTransactionService.create(any(), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/transactions/recurring")
+        mockMvc.perform(post("/v1/transactions/recurring")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(recurringRequestJson("50.00", "Loyer", "DEPENSE", "MENSUEL", "2027-03-15")))
@@ -102,7 +102,7 @@ class RecurringTransactionControllerTest {
 
     @Test
     void should_return400_when_missingFrequency() throws Exception {
-        mockMvc.perform(post("/transactions/recurring")
+        mockMvc.perform(post("/v1/transactions/recurring")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -118,7 +118,7 @@ class RecurringTransactionControllerTest {
 
     @Test
     void should_return400_when_missingNextOccurrence() throws Exception {
-        mockMvc.perform(post("/transactions/recurring")
+        mockMvc.perform(post("/v1/transactions/recurring")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -138,7 +138,7 @@ class RecurringTransactionControllerTest {
 
         when(recurringTransactionService.listActive(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/transactions/recurring")
+        mockMvc.perform(get("/v1/transactions/recurring")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].libelle").value("Loyer"))
@@ -154,7 +154,7 @@ class RecurringTransactionControllerTest {
 
         when(recurringTransactionService.validate(eq(recurringId), any(UUID.class))).thenReturn(transactionResponse);
 
-        mockMvc.perform(post("/transactions/recurring/{id}/validate", recurringId)
+        mockMvc.perform(post("/v1/transactions/recurring/{id}/validate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.libelle").value("Loyer"));
@@ -165,7 +165,7 @@ class RecurringTransactionControllerTest {
         when(recurringTransactionService.validate(eq(recurringId), any(UUID.class)))
                 .thenThrow(new EntityNotFoundException("Transaction récurrente non trouvée"));
 
-        mockMvc.perform(post("/transactions/recurring/{id}/validate", recurringId)
+        mockMvc.perform(post("/v1/transactions/recurring/{id}/validate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Transaction récurrente non trouvée"));
@@ -173,7 +173,7 @@ class RecurringTransactionControllerTest {
 
     @Test
     void should_return401_when_notAuthenticated() throws Exception {
-        mockMvc.perform(get("/transactions/recurring"))
+        mockMvc.perform(get("/v1/transactions/recurring"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -183,7 +183,7 @@ class RecurringTransactionControllerTest {
 
         when(recurringTransactionService.skip(eq(recurringId), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(patch("/transactions/recurring/{id}/skip", recurringId)
+        mockMvc.perform(patch("/v1/transactions/recurring/{id}/skip", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.libelle").value("Loyer"))
@@ -195,7 +195,7 @@ class RecurringTransactionControllerTest {
         when(recurringTransactionService.skip(eq(recurringId), any(UUID.class)))
                 .thenThrow(new IllegalStateException("La transaction récurrente est désactivée"));
 
-        mockMvc.perform(patch("/transactions/recurring/{id}/skip", recurringId)
+        mockMvc.perform(patch("/v1/transactions/recurring/{id}/skip", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("La transaction récurrente est désactivée"));
@@ -210,7 +210,7 @@ class RecurringTransactionControllerTest {
 
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class))).thenReturn(deactivatedResponse);
 
-        mockMvc.perform(patch("/transactions/recurring/{id}/deactivate", recurringId)
+        mockMvc.perform(patch("/v1/transactions/recurring/{id}/deactivate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.recurringActive").value(false));
@@ -221,7 +221,7 @@ class RecurringTransactionControllerTest {
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class)))
                 .thenThrow(new EntityNotFoundException("Transaction récurrente non trouvée"));
 
-        mockMvc.perform(patch("/transactions/recurring/{id}/deactivate", recurringId)
+        mockMvc.perform(patch("/v1/transactions/recurring/{id}/deactivate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Transaction récurrente non trouvée"));

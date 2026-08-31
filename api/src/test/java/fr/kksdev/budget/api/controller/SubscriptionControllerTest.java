@@ -89,7 +89,7 @@ class SubscriptionControllerTest {
 
         when(subscriptionService.create(any(SubscriptionRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/subscriptions")
+        mockMvc.perform(post("/v1/subscriptions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(subscriptionJson("Netflix", "13.99", "MENSUEL", "2026-01-01")))
@@ -106,7 +106,7 @@ class SubscriptionControllerTest {
 
         when(subscriptionService.getAllByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/subscriptions")
+        mockMvc.perform(get("/v1/subscriptions")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nom").value("Netflix"));
@@ -120,7 +120,7 @@ class SubscriptionControllerTest {
 
         when(subscriptionService.getActiveByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/subscriptions")
+        mockMvc.perform(get("/v1/subscriptions")
                         .param("actif", "true")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
@@ -135,7 +135,7 @@ class SubscriptionControllerTest {
 
         when(subscriptionService.getById(subscriptionId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/subscriptions/{id}", subscriptionId)
+        mockMvc.perform(get("/v1/subscriptions/{id}", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nom").value("Netflix"));
@@ -150,7 +150,7 @@ class SubscriptionControllerTest {
         when(subscriptionService.update(eq(subscriptionId), any(SubscriptionRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/subscriptions/{id}", subscriptionId)
+        mockMvc.perform(put("/v1/subscriptions/{id}", subscriptionId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(subscriptionJson("Spotify", "9.99", "MENSUEL", "2026-02-01")))
@@ -162,7 +162,7 @@ class SubscriptionControllerTest {
     void should_return_204_when_delete_subscription() throws Exception {
         doNothing().when(subscriptionService).delete(subscriptionId, userId);
 
-        mockMvc.perform(delete("/subscriptions/{id}", subscriptionId)
+        mockMvc.perform(delete("/v1/subscriptions/{id}", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -172,7 +172,7 @@ class SubscriptionControllerTest {
         when(subscriptionService.getById(subscriptionId, userId))
                 .thenThrow(new EntityNotFoundException("Abonnement non trouvé"));
 
-        mockMvc.perform(get("/subscriptions/{id}", subscriptionId)
+        mockMvc.perform(get("/v1/subscriptions/{id}", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Abonnement non trouvé"));
@@ -180,7 +180,7 @@ class SubscriptionControllerTest {
 
     @Test
     void should_return_400_when_create_with_missing_fields() throws Exception {
-        mockMvc.perform(post("/subscriptions")
+        mockMvc.perform(post("/v1/subscriptions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -195,7 +195,7 @@ class SubscriptionControllerTest {
 
         when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class))).thenReturn(paymentResponse);
 
-        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+        mockMvc.perform(post("/v1/subscriptions/{id}/pay", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.subscriptionName").value("Netflix"))
@@ -208,7 +208,7 @@ class SubscriptionControllerTest {
         when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
                 .thenThrow(new IllegalStateException("L'abonnement est inactif"));
 
-        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+        mockMvc.perform(post("/v1/subscriptions/{id}/pay", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest());
     }
@@ -218,7 +218,7 @@ class SubscriptionControllerTest {
         when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
                 .thenThrow(new EntityNotFoundException("Abonnement non trouvé"));
 
-        mockMvc.perform(post("/subscriptions/{id}/pay", subscriptionId)
+        mockMvc.perform(post("/v1/subscriptions/{id}/pay", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Abonnement non trouvé"));
@@ -233,7 +233,7 @@ class SubscriptionControllerTest {
         when(subscriptionPaymentService.getPayments(eq(subscriptionId), any(UUID.class)))
                 .thenReturn(List.of(paymentResponse));
 
-        mockMvc.perform(get("/subscriptions/{id}/payments", subscriptionId)
+        mockMvc.perform(get("/v1/subscriptions/{id}/payments", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].subscriptionName").value("Netflix"))
@@ -251,7 +251,7 @@ class SubscriptionControllerTest {
         when(subscriptionPaymentService.getTotalPaid(eq(subscriptionId), any(UUID.class)))
                 .thenReturn(totalResponse);
 
-        mockMvc.perform(get("/subscriptions/{id}/payments/total", subscriptionId)
+        mockMvc.perform(get("/v1/subscriptions/{id}/payments/total", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscriptionName").value("Netflix"))

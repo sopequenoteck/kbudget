@@ -70,7 +70,7 @@ class PreferenceControllerTest {
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/me/preferences")
+        mockMvc.perform(get("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabledFeatures.length()").value(2))
@@ -89,7 +89,7 @@ class PreferenceControllerTest {
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/me/preferences")
+        mockMvc.perform(get("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabledFeatures.length()").value(2))
@@ -101,7 +101,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return401_when_noTokenOnGet() throws Exception {
-        mockMvc.perform(get("/users/me/preferences"))
+        mockMvc.perform(get("/v1/users/me/preferences"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -117,7 +117,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -134,7 +134,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -147,7 +147,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return400_when_unknownFeature() throws Exception {
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -158,7 +158,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return401_when_noTokenOnPut() throws Exception {
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"enabledFeatures": ["SUBSCRIPTIONS"]}
@@ -178,7 +178,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -195,7 +195,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenThrow(new IllegalArgumentException("L'ordre de navigation ne doit pas contenir de doublons"));
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -210,7 +210,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenThrow(new IllegalArgumentException("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -225,7 +225,7 @@ class PreferenceControllerTest {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenThrow(new IllegalArgumentException("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
 
-        mockMvc.perform(put("/users/me/preferences")
+        mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

@@ -28,6 +28,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    /** Prefixe de version applique aux controllers par {@link ApiVersioningConfig} (KKS-313). */
+    private static final String V = ApiVersioningConfig.CURRENT_VERSION_PREFIX;
+
     private final JwtFilter jwtFilter;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
@@ -71,15 +74,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // /auth/first-login-reset nécessite un JWT valide (user avec mustResetCredentials=true)
-                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/logout",
-                                "/auth/invitations/**", "/auth/accept-invite").permitAll()
+                        .requestMatchers(V + "/auth/login", V + "/auth/refresh", V + "/auth/logout",
+                                V + "/auth/invitations/**", V + "/auth/accept-invite").permitAll()
                         // Les routes springdoc restent en permitAll, mais ne sont mappées
                         // que si springdoc est actif : desactive par defaut, actif en profil
                         // dev ou via SWAGGER_ENABLED=true. Sans mapping elles repondent 404,
                         // ce qui expose moins qu'un 401 sur un chemin retire de cette liste.
+                        // /error, /actuator, /bank-logos et /ws ne sont pas des @RestController :
+                        // ApiVersioningConfig ne les prefixe pas, leurs chemins sont inchanges.
                         .requestMatchers("/error",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/actuator/health", "/banks", "/bank-logos/**").permitAll()
+                                "/actuator/health", V + "/banks", "/bank-logos/**").permitAll()
                         // WebSocket: auth déléguée au StompAuthInterceptor (CONNECT frame)
                         // car le handshake HTTP ne supporte pas le header Authorization
                         .requestMatchers("/ws/**").permitAll()

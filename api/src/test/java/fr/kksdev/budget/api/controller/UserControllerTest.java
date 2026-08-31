@@ -101,7 +101,7 @@ class UserControllerTest {
         var response = new UserResponse("Test", "test@mail.com", false);
         when(userService.getProfile(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/me")
+        mockMvc.perform(get("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test"))
@@ -111,7 +111,7 @@ class UserControllerTest {
 
     @Test
     void should_return401_when_notAuthenticated() throws Exception {
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/v1/users/me"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -120,7 +120,7 @@ class UserControllerTest {
         var response = new UserResponse("Admin", "admin@mail.com", true);
         when(userService.getProfile(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/me")
+        mockMvc.perform(get("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isAdmin").value(true));
@@ -131,7 +131,7 @@ class UserControllerTest {
         var response = new UserResponse("User", "user@mail.com", false);
         when(userService.getProfile(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/users/me")
+        mockMvc.perform(get("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isAdmin").value(false));
@@ -144,7 +144,7 @@ class UserControllerTest {
         var response = new UserResponse("Updated", "test@mail.com", false);
         when(userService.updateProfile(eq(userId), any())).thenReturn(response);
 
-        mockMvc.perform(put("/users/me")
+        mockMvc.perform(put("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -163,7 +163,7 @@ class UserControllerTest {
         when(avatarStorageService.read(any(User.class))).thenReturn(jpegBytes);
         when(avatarStorageService.computeEtag(jpegBytes)).thenReturn("a3f5b2c1");
 
-        mockMvc.perform(multipart("/users/me/avatar")
+        mockMvc.perform(multipart("/v1/users/me/avatar")
                         .file(file)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
@@ -178,7 +178,7 @@ class UserControllerTest {
         MockMultipartFile file = new MockMultipartFile("file", "malicious.jpg", "image/jpeg", pdfBytes);
         doThrow(new InvalidImageFormatException()).when(avatarStorageService).store(any(), any());
 
-        mockMvc.perform(multipart("/users/me/avatar")
+        mockMvc.perform(multipart("/v1/users/me/avatar")
                         .file(file)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
@@ -192,7 +192,7 @@ class UserControllerTest {
         when(avatarStorageService.read(any(User.class))).thenReturn(jpegBytes);
         when(avatarStorageService.computeEtag(jpegBytes)).thenReturn("a3f5b2c1");
 
-        mockMvc.perform(get("/users/me/avatar")
+        mockMvc.perform(get("/v1/users/me/avatar")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(header().string("ETag", "\"a3f5b2c1\""))
@@ -206,7 +206,7 @@ class UserControllerTest {
         when(avatarStorageService.read(any(User.class))).thenReturn(jpegBytes);
         when(avatarStorageService.computeEtag(jpegBytes)).thenReturn("a3f5b2c1");
 
-        mockMvc.perform(get("/users/me/avatar")
+        mockMvc.perform(get("/v1/users/me/avatar")
                         .header("Authorization", BEARER_TOKEN)
                         .header("If-None-Match", "\"a3f5b2c1\""))
                 .andExpect(status().isNotModified());
@@ -216,7 +216,7 @@ class UserControllerTest {
     void should_delete_avatar_when_authenticated() throws Exception {
         testUser.setAvatarPath("/tmp/avatar.jpg");
 
-        mockMvc.perform(delete("/users/me/avatar")
+        mockMvc.perform(delete("/v1/users/me/avatar")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -225,7 +225,7 @@ class UserControllerTest {
     void should_return_404_when_avatar_not_found() throws Exception {
         when(avatarStorageService.read(any(User.class))).thenThrow(new AvatarNotFoundException());
 
-        mockMvc.perform(get("/users/me/avatar")
+        mockMvc.perform(get("/v1/users/me/avatar")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("AVATAR_NOT_FOUND"));
@@ -238,7 +238,7 @@ class UserControllerTest {
         AuthResponse authResponse = new AuthResponse("new-jwt", "new-refresh", "test@mail.com", "Test", false);
         when(userPasswordService.changePassword(any(User.class), any())).thenReturn(authResponse);
 
-        mockMvc.perform(post("/users/me/password")
+        mockMvc.perform(post("/v1/users/me/password")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -258,7 +258,7 @@ class UserControllerTest {
         when(userPasswordService.changePassword(any(User.class), any()))
                 .thenThrow(new PasswordIncorrectException());
 
-        mockMvc.perform(post("/users/me/password")
+        mockMvc.perform(post("/v1/users/me/password")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -273,7 +273,7 @@ class UserControllerTest {
 
     @Test
     void should_reject_when_new_too_short() throws Exception {
-        mockMvc.perform(post("/users/me/password")
+        mockMvc.perform(post("/v1/users/me/password")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -290,7 +290,7 @@ class UserControllerTest {
         when(userPasswordService.changePassword(any(User.class), any()))
                 .thenThrow(new PasswordUnchangedException());
 
-        mockMvc.perform(post("/users/me/password")
+        mockMvc.perform(post("/v1/users/me/password")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -317,7 +317,7 @@ class UserControllerTest {
         );
         when(userExportService.exportJson(any(User.class))).thenReturn(exportResponse);
 
-        mockMvc.perform(get("/users/me/export")
+        mockMvc.perform(get("/v1/users/me/export")
                         .param("format", "json")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
@@ -328,7 +328,7 @@ class UserControllerTest {
 
     @Test
     void should_reject_when_format_invalid() throws Exception {
-        mockMvc.perform(get("/users/me/export")
+        mockMvc.perform(get("/v1/users/me/export")
                         .param("format", "xml")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
@@ -337,7 +337,7 @@ class UserControllerTest {
 
     @Test
     void should_reject_when_unauthenticated_on_export() throws Exception {
-        mockMvc.perform(get("/users/me/export")
+        mockMvc.perform(get("/v1/users/me/export")
                         .param("format", "json"))
                 .andExpect(status().isUnauthorized());
     }
@@ -349,7 +349,7 @@ class UserControllerTest {
 
     @Test
     void should_return_204_when_delete_account_success() throws Exception {
-        mockMvc.perform(delete("/users/me")
+        mockMvc.perform(delete("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -366,7 +366,7 @@ class UserControllerTest {
     @Test
     void should_return_400_when_not_confirmed() throws Exception {
         // confirmed=false déclenche la validation Bean (@AssertTrue) avant le service
-        mockMvc.perform(delete("/users/me")
+        mockMvc.perform(delete("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -383,7 +383,7 @@ class UserControllerTest {
     void should_return_401_when_password_incorrect() throws Exception {
         doThrow(new PasswordIncorrectException()).when(userDeletionService).softDelete(any(User.class), any());
 
-        mockMvc.perform(delete("/users/me")
+        mockMvc.perform(delete("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -400,7 +400,7 @@ class UserControllerTest {
     void should_return_403_when_last_admin() throws Exception {
         doThrow(new LastAdminDeletionForbiddenException()).when(userDeletionService).softDelete(any(User.class), any());
 
-        mockMvc.perform(delete("/users/me")
+        mockMvc.perform(delete("/v1/users/me")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

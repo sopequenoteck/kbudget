@@ -104,7 +104,7 @@ class AuthControllerFirstLoginResetIT {
 
         var request = new FirstLoginResetRequest("newadmin@test.com", "NewPass4567890!", "New Name");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -128,7 +128,7 @@ class AuthControllerFirstLoginResetIT {
 
         var request = new FirstLoginResetRequest("admin@test.com", "SamePass123!", "Admin");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -143,7 +143,7 @@ class AuthControllerFirstLoginResetIT {
         User user = createUserWithResetFlag("admin@test.com", "OldPass123!");
         String jwt = generateResetJwt(user.getEmail());
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"not-an-email\",\"password\":\"NewPass456!\",\"displayName\":\"Admin\"}"))
@@ -157,7 +157,7 @@ class AuthControllerFirstLoginResetIT {
         User user = createUserWithResetFlag("admin@test.com", "OldPass123!");
         String jwt = generateResetJwt(user.getEmail());
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"admin@test.com\",\"password\":\"short\",\"displayName\":\"Admin\"}"))
@@ -171,7 +171,7 @@ class AuthControllerFirstLoginResetIT {
         User user = createUserWithResetFlag("admin@test.com", "OldPass123!");
         String jwt = generateResetJwt(user.getEmail());
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"admin@test.com\",\"password\":\"NewPass456!\",\"displayName\":\"\"}"))
@@ -188,7 +188,7 @@ class AuthControllerFirstLoginResetIT {
 
         var request = new FirstLoginResetRequest("user@test.com", "NewPass4567890!", "User");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -207,7 +207,7 @@ class AuthControllerFirstLoginResetIT {
         String jwt = generateResetJwt(admin.getEmail());
         var request = new FirstLoginResetRequest("taken@test.com", "NewPass4567890!", "Admin");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -224,7 +224,7 @@ class AuthControllerFirstLoginResetIT {
 
         var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -243,7 +243,7 @@ class AuthControllerFirstLoginResetIT {
         String jwt = generateResetJwt(user.getEmail());
 
         // Endpoint protégé → 403 car JWT porte mustResetCredentials=true
-        mockMvc.perform(get("/users/me")
+        mockMvc.perform(get("/v1/users/me")
                         .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("PASSWORD_RESET_REQUIRED"))
@@ -252,7 +252,7 @@ class AuthControllerFirstLoginResetIT {
 
         // Reset endpoint → 200 OK malgré le claim
         var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -265,7 +265,7 @@ class AuthControllerFirstLoginResetIT {
     void should_return_401_when_no_jwt() throws Exception {
         var request = new FirstLoginResetRequest("admin@test.com", "NewPass4567890!", "Admin");
 
-        mockMvc.perform(post("/auth/first-login-reset")
+        mockMvc.perform(post("/v1/auth/first-login-reset")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -288,7 +288,7 @@ class AuthControllerFirstLoginResetIT {
         String loginBody = objectMapper.writeValueAsString(
                 Map.of("email", "admin@localhost", "password", initialPassword));
 
-        String loginResponse = mockMvc.perform(post("/auth/login")
+        String loginResponse = mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
@@ -300,7 +300,7 @@ class AuthControllerFirstLoginResetIT {
         // 5. POST /auth/first-login-reset avec le nouvel email kelly@exemple.com
         var resetRequest = new FirstLoginResetRequest("kelly@exemple.com", "NouveauMotFort123!", "Kelly");
 
-        String resetResponse = mockMvc.perform(post("/auth/first-login-reset")
+        String resetResponse = mockMvc.perform(post("/v1/auth/first-login-reset")
                         .header("Authorization", "Bearer " + resetToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resetRequest)))
@@ -313,7 +313,7 @@ class AuthControllerFirstLoginResetIT {
         String newToken = objectMapper.readTree(resetResponse).get("token").asText();
 
         // 6. Accéder à GET /admin/users avec le nouveau token → 200 (admin préservé)
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/v1/admin/users")
                         .header("Authorization", "Bearer " + newToken))
                 .andExpect(status().isOk());
 
@@ -330,7 +330,7 @@ class AuthControllerFirstLoginResetIT {
         String reloginBody = objectMapper.writeValueAsString(
                 Map.of("email", "kelly@exemple.com", "password", "NouveauMotFort123!"));
 
-        String reloginResponse = mockMvc.perform(post("/auth/login")
+        String reloginResponse = mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(reloginBody))
                 .andExpect(status().isOk())
@@ -340,7 +340,7 @@ class AuthControllerFirstLoginResetIT {
         String freshToken = objectMapper.readTree(reloginResponse).get("token").asText();
 
         // 9. Appeler GET /admin/users avec le token frais → 200 OK
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/v1/admin/users")
                         .header("Authorization", "Bearer " + freshToken))
                 .andExpect(status().isOk());
     }

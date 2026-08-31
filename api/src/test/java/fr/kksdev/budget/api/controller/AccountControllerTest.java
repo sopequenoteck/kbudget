@@ -84,7 +84,7 @@ class AccountControllerTest {
     void should_listActiveAccounts_when_authenticated() throws Exception {
         when(accountService.getAccounts(userId, false)).thenReturn(List.of(buildAccountResponse()));
 
-        mockMvc.perform(get("/accounts")
+        mockMvc.perform(get("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nom").value("Compte Principal"))
@@ -101,7 +101,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -122,7 +122,7 @@ class AccountControllerTest {
         when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Un compte avec ce nom existe déjà"));
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -146,7 +146,7 @@ class AccountControllerTest {
         when(accountService.updateAccount(eq(accountId), any(AccountRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/accounts/{id}", accountId)
+        mockMvc.perform(put("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -163,7 +163,7 @@ class AccountControllerTest {
     void should_deleteAccount_when_noDataAttached() throws Exception {
         doNothing().when(accountService).deleteAccount(accountId, userId);
 
-        mockMvc.perform(delete("/accounts/{id}", accountId)
+        mockMvc.perform(delete("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -173,7 +173,7 @@ class AccountControllerTest {
         doThrow(new IllegalArgumentException("Impossible de supprimer un compte avec des transactions rattachées"))
                 .when(accountService).deleteAccount(accountId, userId);
 
-        mockMvc.perform(delete("/accounts/{id}", accountId)
+        mockMvc.perform(delete("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Impossible de supprimer un compte avec des transactions rattachées"));
@@ -189,7 +189,7 @@ class AccountControllerTest {
 
         when(accountService.setDefault(accountId, userId)).thenReturn(response);
 
-        mockMvc.perform(put("/accounts/{id}/default", accountId)
+        mockMvc.perform(put("/v1/accounts/{id}/default", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isDefault").value(true));
@@ -200,7 +200,7 @@ class AccountControllerTest {
         when(accountService.getAccountById(accountId, userId))
                 .thenThrow(new EntityNotFoundException("Compte non trouvé"));
 
-        mockMvc.perform(get("/accounts/{id}", accountId)
+        mockMvc.perform(get("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Compte non trouvé"));
@@ -208,7 +208,7 @@ class AccountControllerTest {
 
     @Test
     void should_return401_when_notAuthenticated() throws Exception {
-        mockMvc.perform(get("/accounts"))
+        mockMvc.perform(get("/v1/accounts"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -231,7 +231,7 @@ class AccountControllerTest {
 
         when(accountService.transfer(any(), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts/transfer")
+        mockMvc.perform(post("/v1/accounts/transfer")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -256,7 +256,7 @@ class AccountControllerTest {
         when(accountService.transfer(any(), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Les comptes source et destination doivent être différents"));
 
-        mockMvc.perform(post("/accounts/transfer")
+        mockMvc.perform(post("/v1/accounts/transfer")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -275,7 +275,7 @@ class AccountControllerTest {
         when(accountService.transfer(any(), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Le compte source est inactif"));
 
-        mockMvc.perform(post("/accounts/transfer")
+        mockMvc.perform(post("/v1/accounts/transfer")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -302,7 +302,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -323,7 +323,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -344,7 +344,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -359,7 +359,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Impossible d'ajuster le solde d'un compte inactif"));
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -374,7 +374,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
                 .thenThrow(new EntityNotFoundException("Compte non trouvé"));
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -395,7 +395,7 @@ class AccountControllerTest {
         when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/accounts/{id}/adjust-balance", accountId)
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -414,7 +414,7 @@ class AccountControllerTest {
 
         when(accountService.getTotalBalance(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/accounts/total-balance")
+        mockMvc.perform(get("/v1/accounts/total-balance")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balances[0].currency").value("EUR"))
@@ -429,7 +429,7 @@ class AccountControllerTest {
 
         when(accountService.getTotalBalance(userId)).thenReturn(response);
 
-        mockMvc.perform(get("/accounts/total-balance")
+        mockMvc.perform(get("/v1/accounts/total-balance")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balances").isArray())
@@ -448,7 +448,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -473,7 +473,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -491,7 +491,7 @@ class AccountControllerTest {
         when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Invalid bank code: INEXISTANT"));
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -515,7 +515,7 @@ class AccountControllerTest {
 
         when(accountService.getAccountById(accountId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/accounts/{id}", accountId)
+        mockMvc.perform(get("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bankCode").value("BNP"))
@@ -538,7 +538,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -565,7 +565,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -591,7 +591,7 @@ class AccountControllerTest {
 
         when(accountService.createAccount(any(AccountRequest.class), eq(userId))).thenReturn(response);
 
-        mockMvc.perform(post("/accounts")
+        mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -619,7 +619,7 @@ class AccountControllerTest {
 
         when(accountService.getAccountById(accountId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/accounts/{id}", accountId)
+        mockMvc.perform(get("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bankCode").value("OTHER"))

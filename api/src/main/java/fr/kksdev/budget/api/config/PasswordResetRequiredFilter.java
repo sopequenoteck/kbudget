@@ -18,9 +18,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PasswordResetRequiredFilter extends OncePerRequestFilter {
 
+    /**
+     * Chemins accessibles a un utilisateur soumis au reset force, version d'API
+     * comprise (KKS-313). Derive de {@link ApiVersioningConfig} : sans le prefixe,
+     * l'exact-match ci-dessous echouerait et l'utilisateur ne pourrait plus
+     * effectuer le reset qui debloque son compte.
+     */
     private static final Set<String> ALLOWED_PATHS = Set.of(
-            "/auth/first-login-reset",
-            "/auth/logout"
+            ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/auth/first-login-reset",
+            ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/auth/logout"
     );
 
     private final JwtUtil jwtUtil;

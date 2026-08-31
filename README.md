@@ -44,7 +44,7 @@ cp .env.example .env   # Éditer avec vos valeurs (DB_USERNAME, DB_PASSWORD, JWT
 docker compose up -d
 ```
 
-L'API démarre sur `http://localhost:8080/api`. Le frontend sur `http://localhost:4200`.
+L'API démarre sur `http://localhost:8080/api` — les endpoints métier sont servis sous `/api/v1` (KKS-313). Le frontend sur `http://localhost:4200`.
 
 Les images sont publiées pour `linux/amd64` et `linux/arm64` : Raspberry Pi 4/5,
 NAS ARM, instances ARM cloud et Apple Silicon sont supportés sans build local.
