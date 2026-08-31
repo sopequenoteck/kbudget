@@ -5,6 +5,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.4.0] - 2026-08-31
+
+> Publication des images Docker sur ARM — débloque la cible self-hosted.
+
 ### Added
 
 - **KKS-308 — Images Docker multi-architecture (`arm64`)** : les images étaient construites pour `linux/amd64` uniquement, alors que la cible self-hosted tourne massivement sur ARM (Raspberry Pi, NAS, instances ARM cloud, Apple Silicon). Sur ces machines, le premier contact avec le projet était un `exec format error`.
@@ -396,7 +400,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.3.2...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.4.0...HEAD
+[5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
 [4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
