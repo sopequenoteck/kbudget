@@ -5,6 +5,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-08-31
+
+> **BREAKING** — Les endpoints métier changent de chemin : `/api/<ressource>` devient
+> `/api/v1/<ressource>`. Tout client pointant sur les anciens chemins cesse de fonctionner
+> et doit être mis à jour. Les clients Angular et Flutter livrés avec cette version sont
+> déjà alignés.
+>
+> Restent inchangés, hors versionnement : `/api/actuator/health`, `/api/bank-logos/*`,
+> `/api/ws` et la documentation OpenAPI.
+>
+> Version majeure car le contrat d'API change de façon incompatible. Aucune installation
+> tierce n'existe à ce jour — c'est précisément la fenêtre pour poser ce préfixe, avant
+> que le dépôt ne s'ouvre.
+
 ### Changed
 
 - **KKS-313 — Endpoints métier préfixés en `/api/v1`** : aucun des 102 endpoints ne portait de version. Tant que l'API et les clients se déploient ensemble, c'est sans conséquence ; dès qu'une app mobile se met à jour via les stores pendant que le serveur d'un self-hoster reste en arrière, toute évolution de contrat devient aveugle. C'est le seul chantier qui devient impossible une fois des installations tierces dans la nature.
@@ -421,7 +435,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.4.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
 [4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
