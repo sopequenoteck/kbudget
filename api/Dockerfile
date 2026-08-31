@@ -1,5 +1,7 @@
 # ---- Stage build ----
-FROM maven:3.9-eclipse-temurin-21 AS build
+# Epingle sur l'architecture du runner : le JAR produit est independant de
+# l'architecture cible, inutile de recompiler sous emulation QEMU (KKS-308).
+FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Cache des dependances Maven
