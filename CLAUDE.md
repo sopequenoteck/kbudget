@@ -136,7 +136,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 | Document | Contenu |
 |----------|---------|
-| [`docs/architecture.md`](docs/architecture.md) | Structure du code, securite, profils Spring, decisions techniques, modele de donnees (19 entites) |
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** (v4.0.0) — principes fondateurs. Fait autorite sur toute autre documentation |
+| [`docs/architecture.md`](docs/architecture.md) | Structure du code, securite, profils Spring, decisions techniques, modele de donnees (18 entites) |
 | [`docs/vision.md`](docs/vision.md) | Vision produit, modules fonctionnels |
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |

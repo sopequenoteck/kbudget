@@ -85,12 +85,13 @@ k-budget/
 
 | Document                                         | Contenu                                                                  |
 |--------------------------------------------------|--------------------------------------------------------------------------|
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** — principes fondateurs. Fait autorite sur toute autre documentation |
 | [`docs/vision.md`](docs/vision.md)               | Vision produit, modules fonctionnels, principes UX                       |
-| [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (17 entites), structure frontend |
+| [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (18 entites), structure frontend |
 | [`docs/api-examples.md`](docs/api-examples.md)   | Exemples de requetes et reponses pour chaque endpoint                    |
 | [`docs/api-errors.md`](docs/api-errors.md)       | Contrat d'erreurs HTTP et guide d'integration                            |
 | [`docs/deployment.md`](docs/deployment.md)       | Deploiement Docker, bare-metal, reverse proxy, backup                    |
-| [`docs/design-tokens.md`](docs/design-tokens.md) | Couleurs, typographie, spacing, radius, ombres, animations               |
+| [`DESIGN.md`](DESIGN.md)                         | Reference design : principes, couleurs, patterns, tokens                  |
 | **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (profil `dev`)               |
 
 ## Licence

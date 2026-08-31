@@ -5,6 +5,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Removed
+
+- **KKS-341 — Doublon obsolète `docs/constitution.md`** : le dépôt contenait deux constitutions. La copie de `docs/` était figée en v2.1.1 (mars 2026, 7 principes) face à `.specify/memory/constitution.md` en v4.0.0 — deux versions majeures d'écart, décrivant un projet qui n'existe plus (ni bifurcation des trajectoires, ni frontière Angular/Flutter). Sur un dépôt public, un contributeur serait allé lire `docs/` et aurait implémenté contre des principes abrogés.
+  - Fichier supprimé. Les seules références restantes sont dans des artefacts devflow archivés (`docs/features/KKS-238`, `239`, `240`, `252`), documents historiques figés qui décrivent l'état au moment de leur feature.
+  - `README.md` et `CLAUDE.md` : la constitution est ajoutée en tête de leur index de documentation, désignée comme faisant autorité.
+
+### Fixed
+
+- **Index de documentation du `README`** : la ligne `docs/design-tokens.md` pointait vers un fichier supprimé — un lien mort dans le premier tableau que lit un contributeur. Remplacée par `DESIGN.md`, source de vérité actuelle du design.
+- **Décompte des entités JPA** : le `README` annonçait 17 entités et `CLAUDE.md` 19, deux chiffres contradictoires et tous deux faux. Le modèle en compte 18, conformément à `docs/architecture.md` qui les documente une à une.
+
 ## [5.4.0] - 2026-08-31
 
 > Publication des images Docker sur ARM — débloque la cible self-hosted.
