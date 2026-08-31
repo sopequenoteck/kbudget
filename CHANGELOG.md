@@ -5,6 +5,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [5.3.2] - 2026-08-31
+
+> Correctifs de sécurité et de robustesse — aucune évolution fonctionnelle.
+
 ### Fixed
 
 - **KKS-307 — Persistance des avatars en Docker** : `docker-compose.yml` ne montait aucun volume sur le chemin de stockage des avatars, qui pointait par défaut à l'intérieur du container (`/app/data/avatars`). Les fichiers disparaissaient silencieusement à chaque recréation du container — donc à chaque mise à jour d'image par Watchtower — et l'API répondait ensuite `AVATAR_NOT_FOUND` sur des `users.avatar_path` orphelins.
@@ -384,7 +388,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.3.2...HEAD
+[5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
 [4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0
