@@ -18,6 +18,45 @@ Ne sont **pas** versionnes, et gardent leur chemin sous `/api` :
 | `/api/ws` | Handshake WebSocket |
 | `/api/v3/api-docs`, `/api/swagger-ui.html` | Documentation OpenAPI (profil `dev`, cf. KKS-311) |
 
+## Decouverte du serveur `GET /api/meta` (public, non versionne)
+
+Permet a un client de verifier qu'il peut fonctionner avec ce serveur avant
+d'aller plus loin (KKS-314). **Public et jamais versionne** : c'est lui qui sert
+a detecter les cassures, il ne doit donc jamais casser. Aucun champ ne sera
+retire ni renomme, y compris lors d'un changement de version majeure.
+
+Response :
+
+```json
+{
+  "serverVersion": "6.1.0",
+  "apiVersion": "v1",
+  "minClientVersion": "6.0.0",
+  "capabilities": ["SUBSCRIPTIONS", "DEBTS", "BUDGETS"]
+}
+```
+
+| Champ | Signification |
+|-------|---------------|
+| `serverVersion` | Version du serveur, derivee du build Maven |
+| `apiVersion` | Version d'API servie, sans le slash |
+| `minClientVersion` | Version de client la plus ancienne acceptee |
+| `capabilities` | Fonctionnalites connues du serveur, a croiser avec les preferences utilisateur |
+
+Les clients l'appellent au demarrage et se placent dans l'un de ces etats :
+
+| Situation | Comportement attendu |
+|-----------|----------------------|
+| Reponse 200, versions compatibles | Fonctionnement normal |
+| `clientVersion` < `minClientVersion` | Inviter a mettre l'application a jour |
+| `serverVersion` < minimum exige par le client | Inviter a mettre le serveur a jour |
+| **404** | Serveur anterieur a KKS-314, donc trop ancien |
+| **Aucune reponse** (timeout, DNS, connexion refusee) | **Hors ligne — jamais une incompatibilite.** Le cache prend le relais |
+
+La derniere ligne est la distinction a ne pas perdre : confondre un serveur
+injoignable avec un serveur incompatible afficherait « mettez votre serveur a
+jour » a un utilisateur simplement coupe du reseau.
+
 ## Authentification
 
 ### Inscription publique

@@ -82,7 +82,10 @@ public class SecurityConfig {
                         // ce qui expose moins qu'un 401 sur un chemin retire de cette liste.
                         // /error, /actuator, /bank-logos et /ws ne sont pas des @RestController :
                         // ApiVersioningConfig ne les prefixe pas, leurs chemins sont inchanges.
-                        .requestMatchers("/error",
+                        // /meta est public et non versionne (KKS-314) : un client doit
+                        // pouvoir verifier la compatibilite avant d'avoir des identifiants,
+                        // et l'ecran de configuration serveur s'en sert pour valider l'URL.
+                        .requestMatchers("/error", "/meta",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/actuator/health", V + "/banks", "/bank-logos/**").permitAll()
                         // WebSocket: auth déléguée au StompAuthInterceptor (CONNECT frame)

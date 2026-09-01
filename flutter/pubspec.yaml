@@ -1,7 +1,10 @@
 name: k_budget
 description: Application personnelle de gestion de budget
 publish_to: 'none'
-version: 1.0.0+1
+# Alignee sur le monorepo (VERSION, api/pom.xml, app/package.json) depuis
+# KKS-314 : minClientVersion s'exprime dans un referentiel unique. Le build
+# number reste propre aux stores, qui exigent qu'il croisse a chaque depot.
+version: 6.0.0+1
 
 environment:
   sdk: ^3.11.0

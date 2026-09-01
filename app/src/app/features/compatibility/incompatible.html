@@ -1,0 +1,35 @@
+<app-auth-shell [title]="title()" tagline="Cette version de l'application et votre serveur ne peuvent pas fonctionner ensemble.">
+  <div class="incompatible">
+    @if (isClientTooOld()) {
+      <p class="incompatible__text">
+        Votre serveur exige au minimum la version
+        <strong>{{ requiredVersion() }}</strong> de l'application.
+        @if (currentVersion()) {
+          Vous utilisez la version <strong>{{ currentVersion() }}</strong>.
+        }
+      </p>
+      <p class="incompatible__hint">
+        Mettez l'application à jour depuis votre navigateur ou votre magasin
+        d'applications, puis reconnectez-vous.
+      </p>
+    } @else {
+      <p class="incompatible__text">
+        @if (currentVersion()) {
+          Votre serveur est en version <strong>{{ currentVersion() }}</strong>.
+        } @else {
+          Votre serveur est trop ancien pour indiquer sa version.
+        }
+        Cette application requiert au minimum la version
+        <strong>{{ requiredVersion() }}</strong>.
+      </p>
+      <p class="incompatible__hint">
+        Mettez votre instance à jour, puis rechargez cette page. La procédure est
+        décrite dans le guide de déploiement du projet.
+      </p>
+    }
+
+    <button type="button" class="btn-primary incompatible__retry" (click)="retry()">
+      Réessayer
+    </button>
+  </div>
+</app-auth-shell>
