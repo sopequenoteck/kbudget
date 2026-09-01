@@ -21,6 +21,12 @@ cd api && mvn clean install       # Build complet avec tests
 
 > Le profil `prod` est le défaut. En dev, activer `dev` explicitement. Toutes les commandes Maven depuis `api/`.
 
+> **Maven doit tourner sous Java 21**, la version de la CI. `java -version` peut
+> afficher 21 pendant que Maven utilise un autre JDK — c'est `JAVA_HOME` qui
+> decide, verifier avec `mvn -version`. Un JDK plus recent fait echouer
+> l'instrumentation JaCoCo sur une erreur opaque ; le `maven-enforcer-plugin`
+> intercepte le cas et affiche la marche a suivre.
+
 ### Frontend (app/)
 
 ```bash
