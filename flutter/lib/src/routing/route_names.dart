@@ -14,6 +14,8 @@ class RouteNames {
   static const String budgets = '/budgets';
   static const String budgetDetails = '/budgets/details';
   static const String login = '/login';
+  /// Ecran d'incompatibilite client/serveur (KKS-314).
+  static const String incompatible = '/incompatible';
   static const String lock = '/lock';
   static const String acceptInvite = '/accept-invite/:token';
   static const String adminUsers = '/settings/users';
@@ -34,6 +36,7 @@ class RouteNames {
   static const String debtsName = 'debts';
   static const String settingsName = 'settings';
   static const String loginName = 'login';
+  static const String incompatibleName = 'incompatible';
   static const String lockName = 'lock';
   static const String acceptInviteName = 'acceptInvite';
   static const String adminUsersName = 'adminUsers';

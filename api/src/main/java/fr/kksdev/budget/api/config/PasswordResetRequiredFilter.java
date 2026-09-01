@@ -26,7 +26,12 @@ public class PasswordResetRequiredFilter extends OncePerRequestFilter {
      */
     private static final Set<String> ALLOWED_PATHS = Set.of(
             ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/auth/first-login-reset",
-            ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/auth/logout"
+            ApiVersioningConfig.CURRENT_VERSION_PREFIX + "/auth/logout",
+            // /meta n'expose aucune donnee utilisateur et sert a la detection
+            // d'incompatibilite au demarrage (KKS-314). Le bloquer ferait conclure
+            // le client a un serveur incompatible alors que le compte attend
+            // simplement un reset.
+            "/meta"
     );
 
     private final JwtUtil jwtUtil;

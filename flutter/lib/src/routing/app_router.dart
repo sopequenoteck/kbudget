@@ -58,6 +58,9 @@ import 'package:k_budget/src/features/transactions/presentation/widgets/transact
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/remote/compatibility_provider.dart';
+import 'package:k_budget/src/domain/models/server_meta.dart';
+import 'package:k_budget/src/features/compatibility/presentation/incompatible_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
@@ -101,6 +104,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
         // Server mode: check authentication
         if (config.dataMode == DataMode.server) {
+          // Compatibilite du serveur (KKS-314), verifiee une fois par session.
+          // Un serveur injoignable ne redirige pas : hors ligne n'est pas une
+          // incompatibilite, le cache prend le relais (constitution, principe IV).
+          final compatibility =
+              await ref.read(compatibilityNotifierProvider.notifier).ensureChecked();
+          final isIncompatible = compatibility is CompatibilityServerTooOld ||
+              compatibility is CompatibilityClientTooOld;
+          final isIncompatibleRoute = matchedLocation == RouteNames.incompatible;
+
+          if (isIncompatible && !isIncompatibleRoute) {
+            return RouteNames.incompatible;
+          }
+          if (!isIncompatible && isIncompatibleRoute) {
+            return RouteNames.dashboard;
+          }
+
           final authState = ref.read(authNotifierProvider);
 
           // Premier lancement : valider les tokens stockés
@@ -147,6 +166,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.loginName,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.incompatible,
+        name: RouteNames.incompatibleName,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const IncompatibleScreen(),
       ),
       GoRoute(
         path: '/accept-invite/:token',

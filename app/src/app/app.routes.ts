@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { compatibilityGuard } from './core/guards/compatibility.guard';
 import { featureGuard } from './core/guards/feature.guard';
 import { notPasswordResetGuard } from './core/guards/not-password-reset.guard';
 import { passwordResetGuard } from './core/guards/password-reset.guard';
@@ -8,12 +9,21 @@ import { Shell } from './shared/components/shell/shell';
 
 export const routes: Routes = [
   {
+    // Hors compatibilityGuard : la garde y redirige, l'y appliquer bouclerait.
+    path: 'incompatible',
+    loadComponent: () =>
+      import('./features/compatibility/incompatible').then((m) => m.Incompatible),
+  },
+  {
+    // Garde aussi sur l'authentification : laisser l'utilisateur tenter un login
+    // voue a l'echec est exactement l'erreur technique que KKS-314 supprime.
     path: 'auth',
+    canActivate: [compatibilityGuard],
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
   {
     path: 'first-login-reset',
-    canActivate: [authGuard, notPasswordResetGuard],
+    canActivate: [compatibilityGuard, authGuard, notPasswordResetGuard],
     loadComponent: () =>
       import('./features/auth/pages/first-login-reset/first-login-reset').then(
         (m) => m.FirstLoginResetComponent,
@@ -22,7 +32,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Shell,
-    canActivate: [authGuard, passwordResetGuard],
+    canActivate: [compatibilityGuard, authGuard, passwordResetGuard],
     children: [
       {
         path: '',

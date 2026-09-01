@@ -5,6 +5,21 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **KKS-314 — `GET /api/meta` et détection d'incompatibilité** : aucun endpoint ne permettait à un client de savoir à quel serveur il parlait. En self-host, l'app mobile est mise à jour par les stores pendant que le serveur reste sur la version que l'utilisateur a déployée : une incompatibilité se manifestait par une erreur de désérialisation JSON, chez quelqu'un qui n'avait aucun moyen de comprendre que son serveur était en cause.
+  - `MetaController` expose `serverVersion` (dérivée du build Maven via `build-info`, jamais codée en dur), `apiVersion`, `minClientVersion` (property `MIN_CLIENT_VERSION`) et `capabilities` (valeurs de `Feature`).
+  - Le contrôleur vit **hors** du package des contrôleurs versionnés : `/api/meta` ne porte pas de préfixe, un client ne pouvant pas deviner celui du serveur qu'il interroge. Un test verrouille ce placement.
+  - **Un serveur injoignable n'est jamais traité comme incompatible.** Le discriminant est net : 404 avec réponse HTTP = serveur trop ancien ; absence de réponse = hors ligne, le cache prend le relais (constitution, principe IV). Les deux clients testent cette distinction.
+  - Quand client et serveur sont tous deux hors plage, `clientTooOld` prime : mettre à jour son application est actionnable, mettre à jour un serveur qui exige déjà plus récent que soi ne l'est pas.
+  - Angular : `CompatibilityService`, `compatibilityGuard` sur `/auth` et les routes protégées, écran d'incompatibilité réutilisant `AuthShell`.
+  - Flutter : `server_setup_screen` valide désormais l'URL saisie via `/api/meta` — l'ancien `HEAD` acceptait tout statut < 500, donc n'importe quel serveur web. Détection également au démarrage, en mode serveur uniquement.
+  - `/meta` ajouté à l'allowlist de `PasswordResetRequiredFilter` : le bloquer ferait conclure le client à une incompatibilité alors que le compte attend simplement un reset.
+
+### Changed
+
+- **Version Flutter alignée sur le monorepo** : `pubspec.yaml` passe de `1.0.0+1` à `6.0.0+1` et suit désormais `VERSION`, `api/pom.xml` et `app/package.json`. `minClientVersion` s'exprime ainsi dans un référentiel unique — comparer un client `1.0.0` à un minimum exprimé en `6.x` n'aurait eu aucun sens. Le build number reste propre aux stores. **Le processus de release porte désormais sur 4 fichiers de version.**
+
 ### Fixed
 
 - **Documentation désynchronisée après KKS-313** : `docs/architecture.md` décrivait encore le contrat non versionné — routes publiques, `POST /api/auth/login` et surtout le fonctionnement des deux filtres de sécurité (`AdminAuthorizationFilter` sur `/admin/**`, allowlist de `PasswordResetRequiredFilter`). Ces deux lignes documentaient précisément le mécanisme dont la désynchronisation aurait ouvert une faille. `ApiVersioningConfig` y est désormais documenté, avec la raison du prédicat par package. `docs/manual-test-plan.md` : 6 cas de test appelaient des URLs mortes, un testeur les suivant aurait conclu à une régression. `CLAUDE.md` : KKS-313 et KKS-341 ajoutés aux « Recent Changes ».

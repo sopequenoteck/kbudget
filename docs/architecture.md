@@ -46,6 +46,14 @@ Architecture en couches : Controller → Service → Repository. Les entites JPA
 - **`User.isAdmin`** (KKS-233) : flag boolean **autoritaire en DB** (`users.is_admin`, colonne ajoutee via migration V30, defaut `FALSE`). Remplace la resolution dynamique via `ADMIN_EMAILS` pour eviter qu'un self-hoster perde son acces admin apres un changement d'email.
 - **`AdminEmailResolver`** (KKS-232) : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)` + `listAdminEmails()`. Emet `WARN` au boot si la liste est vide. **Depuis KKS-233, il n'est plus utilise pour l'autorisation** — uniquement consomme par `AdminSyncRunner` et par les services d'invitation.
 - **`AdminSyncRunner`** (KKS-233) : `ApplicationRunner @Order(2)`, `@Transactional`. Au boot, pour chaque email de `ADMIN_EMAILS` : si le user existe avec `isAdmin=false`, passe a `true` (promotion). **Jamais de retrogradation** (`true → false`). Idempotent.
+- **`MetaController`** (KKS-314) : expose `GET /api/meta` — `serverVersion`
+  (derivee du build via `BuildProperties`), `apiVersion`, `minClientVersion`
+  (property `app.meta.min-client-version`) et `capabilities` (valeurs de
+  `Feature`). **Vit hors du package `...api.controller`** : `ApiVersioningConfig`
+  y prefixerait le chemin, or un client ne peut pas deviner le prefixe du serveur
+  qu'il interroge — c'est precisement ce qu'il vient lui demander. Public, et
+  ajoute a l'allowlist de `PasswordResetRequiredFilter` : le bloquer ferait
+  conclure le client a une incompatibilite alors que le compte attend un reset.
 - **`ApiVersioningConfig`** (KKS-313) : `WebMvcConfigurer` prefixant tous les controllers du package `fr.kksdev.budget.api.controller` avec `CURRENT_VERSION_PREFIX` (`/v1`), via `PathMatchConfigurer.addPathPrefix`. Le predicat cible le **package** et non l'annotation `@RestController` : `HandlerTypePredicate` combine ses selecteurs par OU, si bien qu'ajouter l'annotation elargirait la selection aux controllers des bibliotheques tierces (springdoc se retrouvait servi sous `/v1/v3/api-docs`). Restent hors versionnement : `/actuator/**`, `/error`, `/bank-logos/**`, `/ws/**` et la documentation OpenAPI. Une seule version est servie a la fois — le projet ne fera jamais coexister `/v1` et `/v2`.
 - **`AdminAuthorizationFilter`** (KKS-232, refactor KKS-233) : `OncePerRequestFilter` declare via `@Bean` dans `SecurityConfig`. Matche `/v1/admin/` (via `servletPath`, avec fallback sur l'URI et retrait du context-path). Le prefixe est derive de `ApiVersioningConfig.CURRENT_VERSION_PREFIX` (KKS-313) et non ecrit en dur : un litteral se desynchroniserait au prochain changement de version, desactivant ce controle d'acces sans erreur ni test rouge. Resout le statut admin via `user.isAdmin()` (champ DB). Pour un user authentifie non-admin, retourne `ACCESS_DENIED` en 403 via le writer partage. Si non authentifie, laisse l'`ApiAuthenticationEntryPoint` retourner `UNAUTHENTICATED` en 401.
 - **`PasswordResetRequiredFilter`** (KKS-233) : `OncePerRequestFilter` declare apres `JwtFilter`. Si le JWT porte le claim `mustResetCredentials: true` et que le path n'est pas dans l'allowlist (`/v1/auth/first-login-reset`, `/v1/auth/logout`, prefixes derives de `ApiVersioningConfig` — KKS-313), renvoie `403 PASSWORD_RESET_REQUIRED`. Sinon laisse passer.
@@ -424,6 +432,16 @@ app/src/app/
   - `/budgets` : Budget (tap direct)
 - *si feature activee | **si ≥ 2 comptes actifs
 - Saisie en 2-3 taps
+
+## Classement des surfaces Flutter
+
+La constitution (principe VIII) impose de classer toute surface Flutter en
+**Suivi / Gele / Jamais** et de verifier ce classement avant tout portage. Le
+classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
+
+| Surface | Etat | Motif |
+|---------|------|-------|
+| Onboarding et configuration serveur | **Suivi** | C'est le client Flutter qui subit le scenario que KKS-314 supprime : mis a jour par les stores face a un serveur reste en arriere. L'exclure de la detection d'incompatibilite viderait le mecanisme de son objet |
 
 ## Flux d'authentification
 
