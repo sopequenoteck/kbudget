@@ -42,6 +42,59 @@ jobs:
           echo ""
           echo "OK: version incrémentée ${MAIN_VERSION} -> ${PR_VERSION}"
 
+      # Depuis KKS-314, la version vit dans QUATRE fichiers. Le workflow n'en
+      # controlait qu'un : oublier api/pom.xml, app/package.json ou
+      # flutter/pubspec.yaml passait silencieusement, et l'incoherence
+      # n'apparaissait qu'apres publication — dans le champ serverVersion de
+      # /api/meta pour l'API, dans le pied de page pour le frontend.
+      - name: Check all version files agree
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+
+          # La version du projet, pas celle du parent Spring Boot : on prend la
+          # premiere <version> qui suit <artifactId>api</artifactId>.
+          POM=$(grep -A 1 '<artifactId>api</artifactId>' api/pom.xml \
+                | grep '<version>' \
+                | head -1 \
+                | sed -E 's:.*<version>(.*)</version>.*:\1:' \
+                | tr -d '[:space:]')
+
+          PKG=$(jq -r .version app/package.json)
+
+          # pubspec porte un build number pour les stores (6.1.0+2) : seule la
+          # partie semver doit correspondre, le +N suit le rythme des depots.
+          PUBSPEC=$(grep -E '^version:' flutter/pubspec.yaml \
+                    | sed -E 's/^version:[[:space:]]*//' \
+                    | cut -d'+' -f1 \
+                    | tr -d '[:space:]')
+
+          printf '%-24s %s\n' 'VERSION' "${VERSION}"
+          printf '%-24s %s\n' 'api/pom.xml' "${POM}"
+          printf '%-24s %s\n' 'app/package.json' "${PKG}"
+          printf '%-24s %s\n' 'flutter/pubspec.yaml' "${PUBSPEC}"
+          echo ""
+
+          STATUS=0
+          for pair in "api/pom.xml:${POM}" "app/package.json:${PKG}" "flutter/pubspec.yaml:${PUBSPEC}"; do
+            FILE="${pair%%:*}"
+            FOUND="${pair##*:}"
+            if [ -z "${FOUND}" ]; then
+              echo "ERREUR: version introuvable dans ${FILE}."
+              STATUS=1
+            elif [ "${FOUND}" != "${VERSION}" ]; then
+              echo "ERREUR: ${FILE} est en ${FOUND}, VERSION annonce ${VERSION}."
+              STATUS=1
+            fi
+          done
+
+          if [ "${STATUS}" -ne 0 ]; then
+            echo ""
+            echo "Les quatre fichiers de version doivent porter le meme numero."
+            exit 1
+          fi
+
+          echo "OK: les quatre fichiers de version concordent sur ${VERSION}"
+
       - name: Check tag does not already exist
         run: |
           PR_VERSION=$(cat VERSION | tr -d '[:space:]')
