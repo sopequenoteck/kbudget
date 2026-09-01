@@ -5,7 +5,8 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/utils/env_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-/// Verdict de compatibilite du serveur configure, memorise pour la session (KKS-314).
+/// Verdict de compatibilite du serveur configure, memorise pour la session
+/// (KKS-314).
 ///
 /// Le routeur consulte cet etat a chaque redirection : refaire l'appel reseau a
 /// chaque navigation ajouterait une latence sur chaque transition, pour une
@@ -14,13 +15,15 @@ class CompatibilityNotifier extends Notifier<CompatibilityStatus?> {
   @override
   CompatibilityStatus? build() => null;
 
-  /// Verifie une fois par session. Les appels suivants renvoient le verdict connu.
+  /// Verifie une fois par session. Les appels suivants renvoient le verdict
+  /// connu.
   Future<CompatibilityStatus> ensureChecked() async {
     final known = state;
     if (known != null) return known;
 
     final serverUrl =
-        await ref.read(appConfigRepositoryProvider).getServerUrl() ?? EnvConfig.apiBaseUrl;
+        await ref.read(appConfigRepositoryProvider).getServerUrl() ??
+        EnvConfig.apiBaseUrl;
     final info = await PackageInfo.fromPlatform();
 
     final status = await ref
@@ -31,11 +34,12 @@ class CompatibilityNotifier extends Notifier<CompatibilityStatus?> {
     return status;
   }
 
-  /// Efface le verdict — apres un changement d'URL de serveur, il ne vaut plus.
+  /// Efface le verdict — apres un changement d'URL de serveur, il ne
+  /// vaut plus.
   void reset() => state = null;
 }
 
 final compatibilityNotifierProvider =
     NotifierProvider<CompatibilityNotifier, CompatibilityStatus?>(
-  CompatibilityNotifier.new,
-);
+      CompatibilityNotifier.new,
+    );

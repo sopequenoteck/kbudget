@@ -5,7 +5,8 @@ import 'package:k_budget/src/utils/version_compare.dart';
 
 /// Version de serveur la plus ancienne que ce client sait exploiter (KKS-314).
 ///
-/// Ne bouge qu'a une rupture de contrat cote serveur. `6.1.0` est la version qui
+/// Ne bouge qu'a une rupture de contrat cote serveur. `6.1.0` est la version
+/// qui
 /// introduit `/api/meta` : un serveur anterieur ne sait pas se decrire.
 const String kMinServerVersion = '6.1.0';
 
@@ -28,7 +29,9 @@ class CompatibilityService {
     required String baseUrl,
     required String clientVersion,
   }) async {
-    final root = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+    final root = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
 
     final Response<Map<String, dynamic>> response;
     try {
@@ -40,11 +43,13 @@ class CompatibilityService {
         ),
       );
     } on DioException catch (e) {
-      // 404 : le serveur repond mais ignore /meta — il est anterieur a KKS-314,
-      // donc trop ancien. Toute autre issue signifie qu'on ne sait pas : hors
-      // ligne, jamais incompatible.
+      // 404 : le serveur repond mais ignore /meta — il est anterieur
+      // a KKS-314, donc trop ancien. Toute autre issue signifie qu'on ne
+      // sait pas : hors ligne, jamais incompatible.
       if (e.response?.statusCode == 404) {
-        return const CompatibilityServerTooOld(requiredVersion: kMinServerVersion);
+        return const CompatibilityServerTooOld(
+          requiredVersion: kMinServerVersion,
+        );
       }
       return const CompatibilityOffline();
     }
@@ -54,7 +59,8 @@ class CompatibilityService {
 
     final meta = ServerMeta.fromJson(data);
 
-    // clientTooOld prime : demander a l'utilisateur de mettre a jour son app est
+    // clientTooOld prime : demander a l'utilisateur de mettre a jour son app
+    // est
     // actionnable, lui demander de mettre a jour un serveur qui exige deja plus
     // recent que lui ne l'est pas.
     if (isOlderThan(clientVersion, meta.minClientVersion)) {
@@ -74,7 +80,7 @@ class CompatibilityService {
 }
 
 final compatibilityServiceProvider = Provider<CompatibilityService>(
-  (ref) => CompatibilityService(Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
-  ))),
+  (ref) => CompatibilityService(
+    Dio(BaseOptions(connectTimeout: const Duration(seconds: 10))),
+  ),
 );

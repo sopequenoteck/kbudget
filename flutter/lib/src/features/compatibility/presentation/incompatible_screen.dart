@@ -8,7 +8,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 /// Ecran affiche quand cette application et le serveur configure ne peuvent pas
 /// fonctionner ensemble (KKS-314).
 ///
-/// Sa raison d'etre : sans lui, l'incompatibilite se manifeste par une erreur de
+/// Sa raison d'etre : sans lui, l'incompatibilite se manifeste par une erreur
+/// de
 /// deserialisation JSON, chez un utilisateur qui n'a aucun moyen de comprendre
 /// que son serveur est en cause. Le message nomme donc le responsable et
 /// l'action, jamais l'erreur technique.
@@ -61,18 +62,20 @@ class IncompatibleScreen extends ConsumerWidget {
   }
 
   String _message(CompatibilityStatus? status) => switch (status) {
-        CompatibilityClientTooOld(:final clientVersion, :final requiredVersion) =>
-          'Votre serveur exige au minimum la version $requiredVersion de '
-              'l\'application. Vous utilisez la version $clientVersion. '
-              'Mettez K-Budget a jour depuis votre magasin d\'applications.',
-        CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
-          serverVersion == null
-              ? 'Votre serveur est trop ancien pour indiquer sa version. '
-                  'Cette application requiert au minimum la version $requiredVersion. '
-                  'Mettez votre instance a jour, puis relancez l\'application.'
-              : 'Votre serveur est en version $serverVersion. Cette application '
-                  'requiert au minimum la version $requiredVersion. Mettez votre '
-                  'instance a jour, puis relancez l\'application.',
-        _ => 'Cette application et votre serveur ne peuvent pas fonctionner ensemble.',
-      };
+    CompatibilityClientTooOld(:final clientVersion, :final requiredVersion) =>
+      'Votre serveur exige au minimum la version $requiredVersion de '
+          "l'application. Vous utilisez la version $clientVersion. "
+          "Mettez K-Budget a jour depuis votre magasin d'applications.",
+    CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
+      serverVersion == null
+          ? 'Votre serveur est trop ancien pour indiquer sa version. '
+                'Cette application requiert au minimum la version '
+                '$requiredVersion. '
+                "Mettez votre instance a jour, puis relancez l'application."
+          : 'Votre serveur est en version $serverVersion. Cette application '
+                'requiert au minimum la version $requiredVersion. Mettez votre '
+                "instance a jour, puis relancez l'application.",
+    _ =>
+      'Cette application et votre serveur ne peuvent pas fonctionner ensemble.',
+  };
 }

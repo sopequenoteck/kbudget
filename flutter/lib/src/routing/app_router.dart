@@ -106,12 +106,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (config.dataMode == DataMode.server) {
           // Compatibilite du serveur (KKS-314), verifiee une fois par session.
           // Un serveur injoignable ne redirige pas : hors ligne n'est pas une
-          // incompatibilite, le cache prend le relais (constitution, principe IV).
+          // incompatibilite, le cache prend le relais (constitution,
+          // principe IV).
           final compatibility =
-              await ref.read(compatibilityNotifierProvider.notifier).ensureChecked();
+              await ref
+                  .read(compatibilityNotifierProvider.notifier)
+                  .ensureChecked();
           final isIncompatible = compatibility is CompatibilityServerTooOld ||
               compatibility is CompatibilityClientTooOld;
-          final isIncompatibleRoute = matchedLocation == RouteNames.incompatible;
+          final isIncompatibleRoute =
+              matchedLocation == RouteNames.incompatible;
 
           if (isIncompatible && !isIncompatibleRoute) {
             return RouteNames.incompatible;

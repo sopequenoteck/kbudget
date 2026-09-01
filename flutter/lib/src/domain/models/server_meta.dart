@@ -19,12 +19,13 @@ class ServerMeta {
   final List<String> capabilities;
 
   factory ServerMeta.fromJson(Map<String, dynamic> json) => ServerMeta(
-        serverVersion: json['serverVersion'] as String? ?? '',
-        apiVersion: json['apiVersion'] as String? ?? '',
-        minClientVersion: json['minClientVersion'] as String? ?? '0.0.0',
-        capabilities:
-            (json['capabilities'] as List<dynamic>? ?? []).map((e) => e as String).toList(),
-      );
+    serverVersion: json['serverVersion'] as String? ?? '',
+    apiVersion: json['apiVersion'] as String? ?? '',
+    minClientVersion: json['minClientVersion'] as String? ?? '0.0.0',
+    capabilities: (json['capabilities'] as List<dynamic>? ?? [])
+        .map((e) => e as String)
+        .toList(),
+  );
 }
 
 /// Verdict de compatibilite entre ce client et le serveur configure (KKS-314).
@@ -51,7 +52,10 @@ class CompatibilityOffline extends CompatibilityStatus {
 
 /// Le serveur est trop ancien pour cette version du client.
 class CompatibilityServerTooOld extends CompatibilityStatus {
-  const CompatibilityServerTooOld({this.serverVersion, required this.requiredVersion});
+  const CompatibilityServerTooOld({
+    this.serverVersion,
+    required this.requiredVersion,
+  });
 
   /// `null` quand le serveur est trop ancien pour exposer `/api/meta`.
   final String? serverVersion;

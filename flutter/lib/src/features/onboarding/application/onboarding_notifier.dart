@@ -40,9 +40,11 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
 
   /// Valide l'URL saisie via `/api/meta` (KKS-314).
   ///
-  /// Remplace l'ancien `HEAD` sur l'URL brute, qui acceptait tout statut < 500 :
+  /// Remplace l'ancien `HEAD` sur l'URL brute, qui acceptait tout
+  /// statut < 500 :
   /// n'importe quel serveur web passait ce test, y compris une box internet ou
-  /// une page d'erreur de reverse proxy. Interroger `/meta` prouve a la fois que
+  /// une page d'erreur de reverse proxy. Interroger `/meta` prouve a la
+  /// fois que
   /// le serveur repond, qu'il s'agit bien d'une instance K-Budget, et que sa
   /// version est exploitable par cette application.
   Future<bool> checkServerConnectivity(String url) async {
@@ -56,16 +58,17 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     final message = switch (status) {
       CompatibilityOk() => null,
       CompatibilityOffline() =>
-        'Serveur injoignable. Verifiez l\'URL et votre connexion.',
+        "Serveur injoignable. Verifiez l'URL et votre connexion.",
       CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
         serverVersion == null
             ? 'Ce serveur est trop ancien : il ne fournit pas /api/meta. '
                 'Mettez-le a jour en version $requiredVersion ou superieure.'
             : 'Ce serveur est en version $serverVersion. '
-                'Cette application requiert au minimum la version $requiredVersion.',
+                'Cette application requiert au minimum la version '
+                '$requiredVersion.',
       CompatibilityClientTooOld(:final requiredVersion) =>
         'Ce serveur exige au minimum la version $requiredVersion de '
-            'l\'application. Mettez a jour K-Budget depuis votre magasin.',
+            "l'application. Mettez a jour K-Budget depuis votre magasin.",
     };
 
     state = state.copyWith(
