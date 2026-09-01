@@ -37,6 +37,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **`CORS_ALLOWED_ORIGINS` non documentée** : en profil `prod`, les origines autorisées valent `https://budget.kksdev.fr` par défaut. La variable qui permet de les changer n'apparaissait ni dans `docs/deployment.md`, ni dans `.env.example`, ni dans `docker-compose.yml` — et le compose ne la transmettait pas au conteneur, si bien que la définir dans son `.env` restait sans effet. Tout self-hoster sur son propre domaine recevait un `403 Invalid CORS request` au login, sans message exploitable. Découvert en validant KKS-313 de bout en bout.
 - **Index de documentation du `README`** : la ligne `docs/design-tokens.md` pointait vers un fichier supprimé — un lien mort dans le premier tableau que lit un contributeur. Remplacée par `DESIGN.md`, source de vérité actuelle du design.
 - **Décompte des entités JPA** : le `README` annonçait 17 entités et `CLAUDE.md` 19, deux chiffres contradictoires et tous deux faux. Le modèle en compte 18, conformément à `docs/architecture.md` qui les documente une à une.
 
