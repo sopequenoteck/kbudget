@@ -52,6 +52,6 @@ export class Incompatible {
   });
 
   protected retry(): void {
-    window.location.reload();
+    globalThis.location.reload();
   }
 }
