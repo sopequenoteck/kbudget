@@ -107,7 +107,7 @@ class BudgetControllerTest {
     void should_create_budget_return_201() throws Exception {
         when(budgetService.create(any(), any(UUID.class))).thenReturn(buildBudgetResponse());
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "80", "true")))
@@ -124,7 +124,7 @@ class BudgetControllerTest {
         when(budgetService.create(any(), any(UUID.class)))
                 .thenThrow(new ConflictException("Un budget existe déjà pour cette catégorie"));
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "80", "true")))
@@ -136,7 +136,7 @@ class BudgetControllerTest {
     void should_list_budgets_with_spent() throws Exception {
         when(budgetService.getAll(eq(userId), eq(false))).thenReturn(List.of(buildBudgetResponse()));
 
-        mockMvc.perform(get("/budgets")
+        mockMvc.perform(get("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(budgetId.toString()))
@@ -148,7 +148,7 @@ class BudgetControllerTest {
     void should_get_budget_by_id() throws Exception {
         when(budgetService.getById(eq(budgetId), eq(userId))).thenReturn(buildBudgetResponse());
 
-        mockMvc.perform(get("/budgets/{id}", budgetId)
+        mockMvc.perform(get("/v1/budgets/{id}", budgetId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(budgetId.toString()))
@@ -170,7 +170,7 @@ class BudgetControllerTest {
         );
         when(budgetService.update(eq(budgetId), any(), eq(userId))).thenReturn(updated);
 
-        mockMvc.perform(put("/budgets/{id}", budgetId)
+        mockMvc.perform(put("/v1/budgets/{id}", budgetId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "600.00", "MENSUEL", "EUR", "70", "true")))
@@ -183,7 +183,7 @@ class BudgetControllerTest {
     void should_delete_budget_return_204() throws Exception {
         doNothing().when(budgetService).delete(eq(budgetId), eq(userId));
 
-        mockMvc.perform(delete("/budgets/{id}", budgetId)
+        mockMvc.perform(delete("/v1/budgets/{id}", budgetId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -193,7 +193,7 @@ class BudgetControllerTest {
         when(budgetService.getById(eq(budgetId), eq(userId)))
                 .thenThrow(new EntityNotFoundException("Budget non trouvé"));
 
-        mockMvc.perform(get("/budgets/{id}", budgetId)
+        mockMvc.perform(get("/v1/budgets/{id}", budgetId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Budget non trouvé"));
@@ -201,13 +201,13 @@ class BudgetControllerTest {
 
     @Test
     void should_validate_positive_montant() throws Exception {
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "0", "MENSUEL", "EUR", "80", "true")))
                 .andExpect(status().isBadRequest());
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "-10.00", "MENSUEL", "EUR", "80", "true")))
@@ -216,7 +216,7 @@ class BudgetControllerTest {
 
     @Test
     void should_validate_seuil_range() throws Exception {
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "101", "true")))
@@ -227,13 +227,13 @@ class BudgetControllerTest {
     void should_accept_seuil_0_and_100() throws Exception {
         when(budgetService.create(any(), any(UUID.class))).thenReturn(buildBudgetResponse());
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "0", "true")))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "100", "true")))
@@ -245,7 +245,7 @@ class BudgetControllerTest {
         when(budgetService.create(any(), any(UUID.class)))
                 .thenThrow(new FeatureDisabledException("Budgets"));
 
-        mockMvc.perform(post("/budgets")
+        mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "80", "true")))
@@ -274,7 +274,7 @@ class BudgetControllerTest {
         );
         when(budgetService.getOverview(eq(userId))).thenReturn(overview);
 
-        mockMvc.perform(get("/budgets/overview")
+        mockMvc.perform(get("/v1/budgets/overview")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.month").value("2026-03"))
@@ -304,7 +304,7 @@ class BudgetControllerTest {
         );
         when(budgetService.getOverview(eq(userId))).thenReturn(overview);
 
-        mockMvc.perform(get("/budgets/overview")
+        mockMvc.perform(get("/v1/budgets/overview")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].montantBudget").value(1200.00))
@@ -334,7 +334,7 @@ class BudgetControllerTest {
         );
         when(budgetService.getHistory(eq("2026-02"), eq(userId))).thenReturn(history);
 
-        mockMvc.perform(get("/budgets/history")
+        mockMvc.perform(get("/v1/budgets/history")
                         .header("Authorization", BEARER_TOKEN)
                         .param("month", "2026-02"))
                 .andExpect(status().isOk())
@@ -350,7 +350,7 @@ class BudgetControllerTest {
         when(budgetService.getHistory(eq("2026-03"), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Seuls les mois passés sont autorisés"));
 
-        mockMvc.perform(get("/budgets/history")
+        mockMvc.perform(get("/v1/budgets/history")
                         .header("Authorization", BEARER_TOKEN)
                         .param("month", "2026-03"))
                 .andExpect(status().isBadRequest())
@@ -362,7 +362,7 @@ class BudgetControllerTest {
         when(budgetService.getHistory(eq("invalid"), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Format de mois invalide. Utilisez YYYY-MM"));
 
-        mockMvc.perform(get("/budgets/history")
+        mockMvc.perform(get("/v1/budgets/history")
                         .header("Authorization", BEARER_TOKEN)
                         .param("month", "invalid"))
                 .andExpect(status().isBadRequest())

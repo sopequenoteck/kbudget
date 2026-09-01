@@ -89,7 +89,7 @@ class DebtControllerTest {
 
         when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/debts")
+        mockMvc.perform(post("/v1/debts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(debtJson("Alice", "100.00", "EMPRUNT", "2026-02-01")))
@@ -108,7 +108,7 @@ class DebtControllerTest {
 
         when(debtService.getAllByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/debts")
+        mockMvc.perform(get("/v1/debts")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].personne").value("Alice"));
@@ -124,7 +124,7 @@ class DebtControllerTest {
 
         when(debtService.getUnpaidByUser(userId)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/debts")
+        mockMvc.perform(get("/v1/debts")
                         .param("rembourse", "false")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
@@ -141,7 +141,7 @@ class DebtControllerTest {
 
         when(debtService.getById(debtId, userId)).thenReturn(response);
 
-        mockMvc.perform(get("/debts/{id}", debtId)
+        mockMvc.perform(get("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personne").value("Alice"));
@@ -158,7 +158,7 @@ class DebtControllerTest {
         when(debtService.update(eq(debtId), any(DebtRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/debts/{id}", debtId)
+        mockMvc.perform(put("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(debtJson("Bob", "200.00", "PRET", "2026-02-05")))
@@ -170,7 +170,7 @@ class DebtControllerTest {
     void should_return_204_when_delete_debt() throws Exception {
         doNothing().when(debtService).delete(debtId, userId);
 
-        mockMvc.perform(delete("/debts/{id}", debtId)
+        mockMvc.perform(delete("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNoContent());
     }
@@ -180,7 +180,7 @@ class DebtControllerTest {
         when(debtService.getById(debtId, userId))
                 .thenThrow(new EntityNotFoundException("Dette non trouvée"));
 
-        mockMvc.perform(get("/debts/{id}", debtId)
+        mockMvc.perform(get("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Dette non trouvée"));
@@ -188,7 +188,7 @@ class DebtControllerTest {
 
     @Test
     void should_return_400_when_create_with_missing_fields() throws Exception {
-        mockMvc.perform(post("/debts")
+        mockMvc.perform(post("/v1/debts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -208,7 +208,7 @@ class DebtControllerTest {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/debts/{id}/repay", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -230,7 +230,7 @@ class DebtControllerTest {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/debts/{id}/repay", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -246,7 +246,7 @@ class DebtControllerTest {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Le montant dépasse le montant restant"));
 
-        mockMvc.perform(post("/debts/{id}/repay", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -260,7 +260,7 @@ class DebtControllerTest {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Cette dette est déjà remboursée"));
 
-        mockMvc.perform(post("/debts/{id}/repay", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -277,7 +277,7 @@ class DebtControllerTest {
 
         when(debtService.getPayments(debtId, userId)).thenReturn(List.of(payment));
 
-        mockMvc.perform(get("/debts/{id}/payments", debtId)
+        mockMvc.perform(get("/v1/debts/{id}/payments", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].amount").value(50.00))
@@ -288,7 +288,7 @@ class DebtControllerTest {
     void should_return_200_when_get_payments_empty() throws Exception {
         when(debtService.getPayments(debtId, userId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/debts/{id}/payments", debtId)
+        mockMvc.perform(get("/v1/debts/{id}/payments", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -300,7 +300,7 @@ class DebtControllerTest {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
                 .thenThrow(new EntityNotFoundException("Dette non trouvée"));
 
-        mockMvc.perform(post("/debts/{id}/repay", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -321,7 +321,7 @@ class DebtControllerTest {
 
         when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/debts")
+        mockMvc.perform(post("/v1/debts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -348,7 +348,7 @@ class DebtControllerTest {
         when(debtService.update(eq(debtId), any(DebtRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/debts/{id}", debtId)
+        mockMvc.perform(put("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -378,7 +378,7 @@ class DebtControllerTest {
         when(debtService.update(eq(debtId), any(DebtRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(put("/debts/{id}", debtId)
+        mockMvc.perform(put("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -407,7 +407,7 @@ class DebtControllerTest {
 
         when(debtService.create(any(DebtRequest.class), any(UUID.class))).thenReturn(response);
 
-        mockMvc.perform(post("/debts")
+        mockMvc.perform(post("/v1/debts")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -438,7 +438,7 @@ class DebtControllerTest {
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
                 .thenReturn(response);
 
-        mockMvc.perform(post("/debts/{id}/snooze", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/snooze", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -453,7 +453,7 @@ class DebtControllerTest {
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Cette dette n'a pas de rappel configuré"));
 
-        mockMvc.perform(post("/debts/{id}/snooze", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/snooze", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -467,7 +467,7 @@ class DebtControllerTest {
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
                 .thenThrow(new EntityNotFoundException("Dette non trouvée"));
 
-        mockMvc.perform(post("/debts/{id}/snooze", debtId)
+        mockMvc.perform(post("/v1/debts/{id}/snooze", debtId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

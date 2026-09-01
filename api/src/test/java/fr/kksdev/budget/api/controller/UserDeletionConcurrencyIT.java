@@ -184,7 +184,7 @@ class UserDeletionConcurrencyIT {
 
     private DeletionResult deleteAfterBarrier(User user, CyclicBarrier barrier) throws Exception {
         barrier.await(5, TimeUnit.SECONDS);
-        MvcResult result = mockMvc.perform(delete("/users/me")
+        MvcResult result = mockMvc.perform(delete("/v1/users/me")
                         .header("Authorization", "Bearer " + jwtUtil.generateToken(user.getEmail()))
                         .contentType("application/json")
                         .content("{\"currentPassword\":\"" + PASSWORD + "\",\"confirmed\":true}"))
@@ -212,7 +212,7 @@ class UserDeletionConcurrencyIT {
     }
 
     private MvcResult refresh(String token) throws Exception {
-        return mockMvc.perform(post("/auth/refresh")
+        return mockMvc.perform(post("/v1/auth/refresh")
                         .contentType("application/json")
                         .content("{\"refreshToken\":\"" + token + "\"}"))
                 .andReturn();

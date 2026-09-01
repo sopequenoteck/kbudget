@@ -68,7 +68,7 @@ class AuthControllerRefreshTest {
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class AuthControllerRefreshTest {
         when(refreshTokenService.refreshAccessToken("expired-token"))
                 .thenThrow(new TokenExpiredException());
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -100,7 +100,7 @@ class AuthControllerRefreshTest {
         when(refreshTokenService.refreshAccessToken("unknown-token"))
                 .thenThrow(new TokenInvalidException());
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -114,7 +114,7 @@ class AuthControllerRefreshTest {
         when(refreshTokenService.refreshAccessToken("revoked-token"))
                 .thenThrow(new TokenRevokedException());
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -128,7 +128,7 @@ class AuthControllerRefreshTest {
         when(refreshTokenService.refreshAccessToken("consumed-token"))
                 .thenThrow(new TokenReusedException());
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -141,7 +141,7 @@ class AuthControllerRefreshTest {
 
         doNothing().when(refreshTokenService).revokeRefreshToken("valid-refresh-token");
 
-        mockMvc.perform(post("/auth/logout")
+        mockMvc.perform(post("/v1/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
@@ -153,7 +153,7 @@ class AuthControllerRefreshTest {
 
         doThrow(new TokenInvalidException()).when(refreshTokenService).revokeRefreshToken("invalid-token");
 
-        mockMvc.perform(post("/auth/logout")
+        mockMvc.perform(post("/v1/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -162,7 +162,7 @@ class AuthControllerRefreshTest {
 
     @Test
     void should_return_400_when_refresh_body_blank() throws Exception {
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"refreshToken\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -181,7 +181,7 @@ class AuthControllerRefreshTest {
 
         when(refreshTokenService.refreshAccessToken("valid-refresh-token")).thenReturn(response);
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

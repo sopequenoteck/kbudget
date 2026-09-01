@@ -50,7 +50,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 Le fichier `.specify/memory/constitution.md` (v4.0.0) est le document de reference. 8 principes :
 
-1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Une seule version d'API servie a la fois + `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
+1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
 3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
 4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans. L'instance de l'utilisateur sera souvent injoignable : degrader proprement, le cache n'est jamais source de verite.
@@ -136,7 +136,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 | Document | Contenu |
 |----------|---------|
-| [`docs/architecture.md`](docs/architecture.md) | Structure du code, securite, profils Spring, decisions techniques, modele de donnees (19 entites) |
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** (v4.0.0) — principes fondateurs. Fait autorite sur toute autre documentation |
+| [`docs/architecture.md`](docs/architecture.md) | Structure du code, securite, profils Spring, decisions techniques, modele de donnees (18 entites) |
 | [`docs/vision.md`](docs/vision.md) | Vision produit, modules fonctionnels |
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
@@ -154,8 +155,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
 
-- **v5.0.5 — Gate release CI/CD** : `release.yml` gate la release sur les tests API (`mvn clean verify`, H2, runner GitHub) et APP (`npm run test:coverage`, runner self-hosted `kbudget-ci` — cf. DT-006) ; aucune image n'est publiee ni taguee si un test echoue. CI par stack (`ci-api`, `ci-app`, `ci-flutter`) sur runner self-hosted + Sonar, succedant a Jenkins. Test perf API robustifie (ratio de scaling T(10k)/T(1k), plus de seuil absolu). Fixes tests APP : `recurring-list.spec.ts` (timeouts) et `transaction-form.spec.ts` (fuites reseau undici), providers TestBed manquants. Suite APP : 475/475.
-- **KKS-241 — Refonte 3 formulaires XL Flutter** : Migration `TransactionForm`, `SubscriptionForm`, `DebtForm` vers `BottomSheet4RowsWidget` (KKS-239). Saisie date et categorie entierement inline (`InlineDatePicker`, `CategorySelectExpand`) — plus de dialogs. Recurence inline dans `TransactionForm` (creation uniquement) via `RecurringTransactionCreateRequest` DTO + `create()` sur 4 couches. 3 widgets extraits en `common_widgets` : `BSheetTypeToggle`, `BSheetMetaPill`, `BSheetDeletePill`. `_showFormBottomSheet()` dans `app_router` bypasse `AppModal` pour les formulaires. 19 tests widget, 454 tests PASS.
-- **KKS-240 — Refonte 4 écrans liste Flutter** : Refonte `Dashboard`, `Transactions`, `Abonnements`, `Dettes` pour conformite DESIGN.md v5. Suppression gradients, `SegmentedFilter`/`ChoiceChips` et summary cards non conformes. Remplacement par 4 heroes flat (`DashboardHeroWidget`, `TransactionHeroWidget`, `SubscriptionHeroWidget`, `DebtHeroWidget`) + `SectionHeaderSticky` global + groupements semantiques/temporels. Aucun notifier/couche data modifie.
-- **KKS-239 — BottomSheet4RowsWidget composable** : Squelette commun pour les 3 formulaires bottom sheet (Transaction, Abonnement, Dette). Structure visuelle 4-rows alignee sur le pattern Angular `_bottom-sheet.scss`, API par slots types, gestion etat loading/erreur/footer desactive.
-- **KKS-238 — Composants shared Flutter (8 widgets)** : `SectionHeaderSticky`, `ListGroup`, `EmptyStateWidget`, `PageHeader`, `ConfirmDialog`, `VariationBadge`, `InlineDatePicker`, `CategorySelectExpand` + extraction `CategoryFormWidget`. Suppression anti-pattern `SegmentedFilter`. 100% UI, pas de dependance reseau.
+- **KKS-308 — Images Docker multi-architecture (v5.4.0)** : images publiees en `linux/amd64` + `linux/arm64`. Les stages de build des deux Dockerfiles sont epingles sur `--platform=$BUILDPLATFORM` : le JAR Maven et le bundle Angular etant independants de l'architecture cible, ils ne passent jamais sous emulation QEMU. Cout mesure : +49 s sur `build-and-push` (5m13s -> 6m02s). `setup-qemu-action` requis pour les `RUN` du runtime arm64 de l'API.
+- **KKS-311 — OpenAPI restreinte au profil dev (v5.3.2)** : springdoc desactive par defaut, actif en profil `dev`, reactivable via `SWAGGER_ENABLED=true`. Handler dedie pour `NoResourceFoundException` : une route inconnue repond 404 `NOT_FOUND` au lieu de 500 avec trace ERROR.
+- **KKS-307 — Persistance des avatars en Docker (v5.3.2)** : volume nomme `api-avatars` monte sur `/app/data/avatars`. Les fichiers disparaissaient a chaque recreation du container, donc a chaque mise a jour d'image par Watchtower. Reprise des permissions a l'entrypoint, comme `logs`.
+- **v5.3.0 — Direction produit open source (constitution v4.0.0)** : `docs/direction.md` acte l'ouverture open source vers la communaute self-hosted, differenciation sur la zone francophone. Constitution v4.0.0 : 8 principes, dont la frontiere Angular (reference) / Flutter (non-paritaire, 3 etats Suivi/Gele/Jamais). `docs/roadmap-v2.md` archive.
+- **v5.2.0 — Contrat unifie des erreurs API** : `GlobalExceptionHandler` retourne `{ error, message }` pour toute erreur geree, avec detail structure par champ sur les erreurs de validation (`ValidationErrorDetail`). Verrou transactionnel `ActiveAdminInvariantLock` (`pg_advisory_xact_lock`) empechant deux suppressions concurrentes de desactiver tous les administrateurs actifs.

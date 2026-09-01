@@ -71,7 +71,7 @@ class AuthControllerTest {
         // En @WebMvcTest, Spring retourne 500 via GlobalExceptionHandler pour les routes inconnues.
         // La preuve de suppression est la compilation sans RegisterRequest et sans méthode register().
         // Ce test vérifie que le body retourné ne contient pas de token JWT (la route ne fonctionnerait plus).
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"test@mail.com\",\"password\":\"password123\"}"))
                 .andExpect(result -> {
@@ -91,7 +91,7 @@ class AuthControllerTest {
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -104,7 +104,7 @@ class AuthControllerTest {
     void should_return_400_when_login_email_blank() throws Exception {
         var request = new LoginRequest("", "password123");
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -117,7 +117,7 @@ class AuthControllerTest {
         when(authService.login(any(LoginRequest.class)))
                 .thenThrow(new IllegalArgumentException("Email ou mot de passe incorrect"));
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -137,7 +137,7 @@ class AuthControllerTest {
 
         when(invitationService.validatePublic(token)).thenReturn(Optional.of(invitation));
 
-        mockMvc.perform(get("/auth/invitations/{token}", token))
+        mockMvc.perform(get("/v1/auth/invitations/{token}", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("invitee@example.com"));
     }
@@ -147,7 +147,7 @@ class AuthControllerTest {
         UUID token = UUID.randomUUID();
         when(invitationService.validatePublic(token)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/auth/invitations/{token}", token))
+        mockMvc.perform(get("/v1/auth/invitations/{token}", token))
                 .andExpect(status().isNotFound());
     }
 
@@ -156,7 +156,7 @@ class AuthControllerTest {
         UUID token = UUID.randomUUID();
         when(invitationService.validatePublic(token)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/auth/invitations/{token}", token))
+        mockMvc.perform(get("/v1/auth/invitations/{token}", token))
                 .andExpect(status().isNotFound());
     }
 
@@ -165,7 +165,7 @@ class AuthControllerTest {
         UUID token = UUID.randomUUID();
         when(invitationService.validatePublic(token)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/auth/invitations/{token}", token))
+        mockMvc.perform(get("/v1/auth/invitations/{token}", token))
                 .andExpect(status().isNotFound());
     }
 
@@ -174,7 +174,7 @@ class AuthControllerTest {
         UUID token = UUID.randomUUID();
         when(invitationService.validatePublic(token)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/auth/invitations/{token}", token))
+        mockMvc.perform(get("/v1/auth/invitations/{token}", token))
                 .andExpect(status().isNotFound());
     }
 
@@ -188,7 +188,7 @@ class AuthControllerTest {
 
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/auth/accept-invite")
+        mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -200,7 +200,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_400_when_password_too_short() throws Exception {
-        mockMvc.perform(post("/auth/accept-invite")
+        mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":\"" + UUID.randomUUID() + "\","
                                 + "\"password\":\"short\","
@@ -212,7 +212,7 @@ class AuthControllerTest {
 
     @Test
     void should_return_400_when_token_null() throws Exception {
-        mockMvc.perform(post("/auth/accept-invite")
+        mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":null,"
                                 + "\"password\":\"password123\","
@@ -227,7 +227,7 @@ class AuthControllerTest {
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class)))
                 .thenThrow(new EntityNotFoundException("Invitation invalide."));
 
-        mockMvc.perform(post("/auth/accept-invite")
+        mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":\"" + UUID.randomUUID() + "\","
                                 + "\"password\":\"password123\","
@@ -242,7 +242,7 @@ class AuthControllerTest {
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class)))
                 .thenThrow(new IllegalArgumentException("Email déjà utilisé"));
 
-        mockMvc.perform(post("/auth/accept-invite")
+        mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":\"" + UUID.randomUUID() + "\","
                                 + "\"password\":\"password123\","

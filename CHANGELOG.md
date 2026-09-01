@@ -5,6 +5,42 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-08-31
+
+> **BREAKING** — Les endpoints métier changent de chemin : `/api/<ressource>` devient
+> `/api/v1/<ressource>`. Tout client pointant sur les anciens chemins cesse de fonctionner
+> et doit être mis à jour. Les clients Angular et Flutter livrés avec cette version sont
+> déjà alignés.
+>
+> Restent inchangés, hors versionnement : `/api/actuator/health`, `/api/bank-logos/*`,
+> `/api/ws` et la documentation OpenAPI.
+>
+> Version majeure car le contrat d'API change de façon incompatible. Aucune installation
+> tierce n'existe à ce jour — c'est précisément la fenêtre pour poser ce préfixe, avant
+> que le dépôt ne s'ouvre.
+
+### Changed
+
+- **KKS-313 — Endpoints métier préfixés en `/api/v1`** : aucun des 102 endpoints ne portait de version. Tant que l'API et les clients se déploient ensemble, c'est sans conséquence ; dès qu'une app mobile se met à jour via les stores pendant que le serveur d'un self-hoster reste en arrière, toute évolution de contrat devient aveugle. C'est le seul chantier qui devient impossible une fois des installations tierces dans la nature.
+  - `ApiVersioningConfig` applique le préfixe globalement via `PathMatchConfigurer.addPathPrefix`, plutôt que de modifier 18 `@RequestMapping`. Le prédicat cible le **package** des controllers et non l'annotation `@RestController` : `HandlerTypePredicate` combine ses sélecteurs par OU, si bien qu'ajouter l'annotation élargit la sélection au lieu de la restreindre — springdoc se retrouvait servi sous `/v1/v3/api-docs`.
+  - Le versionnement natif de Spring Framework 7 (`ApiVersionConfigurer`, attribut `version` sur les mappings) a été évalué et écarté : son `PathApiVersionResolver` extrait la version d'un segment sans réécrire le chemin — un préfixe reste donc nécessaire — et il est conçu pour faire coexister plusieurs versions, ce que le projet exclut.
+  - **Trois zones de sécurité dépendaient de chemins non préfixés**, aucune n'était identifiée dans le ticket : les `requestMatchers` de `SecurityConfig` (le login serait devenu authentifié), la garde `startsWith("/admin/")` d'`AdminAuthorizationFilter` (contrôle d'accès admin contourné) et les `ALLOWED_PATHS` de `PasswordResetRequiredFilter` (compte verrouillé, reset impossible). Les trois dérivent désormais de `ApiVersioningConfig.CURRENT_VERSION_PREFIX`.
+  - `deploy/nginx.conf` : la règle de rate limiting `location /api/auth/` aurait cessé de matcher sans erreur, supprimant la protection contre le bruteforce. `Caddyfile` (`handle /api/*`) et `app/nginx.conf` (`location ^~ /api/`) couvrent déjà `/api/v1/` et sont inchangés.
+  - Clients : Angular sépare `apiRootUrl` (racine, non versionnée) de `apiUrl` (`/api/v1`) — le health check `actuator` utilise la première. Flutter garde `API_BASE_URL` à la racine (l'URL que saisit le self-hoster, dont dérivent aussi le WebSocket et le health check) et applique la version dans le client HTTP métier.
+  - Restent non versionnés : `/api/actuator/**`, `/api/bank-logos/**`, `/api/ws`, et la documentation OpenAPI.
+
+### Removed
+
+- **KKS-341 — Doublon obsolète `docs/constitution.md`** : le dépôt contenait deux constitutions. La copie de `docs/` était figée en v2.1.1 (mars 2026, 7 principes) face à `.specify/memory/constitution.md` en v4.0.0 — deux versions majeures d'écart, décrivant un projet qui n'existe plus (ni bifurcation des trajectoires, ni frontière Angular/Flutter). Sur un dépôt public, un contributeur serait allé lire `docs/` et aurait implémenté contre des principes abrogés.
+  - Fichier supprimé. Les seules références restantes sont dans des artefacts devflow archivés (`docs/features/KKS-238`, `239`, `240`, `252`), documents historiques figés qui décrivent l'état au moment de leur feature.
+  - `README.md` et `CLAUDE.md` : la constitution est ajoutée en tête de leur index de documentation, désignée comme faisant autorité.
+
+### Fixed
+
+- **`CORS_ALLOWED_ORIGINS` non documentée** : en profil `prod`, les origines autorisées valent `https://budget.kksdev.fr` par défaut. La variable qui permet de les changer n'apparaissait ni dans `docs/deployment.md`, ni dans `.env.example`, ni dans `docker-compose.yml` — et le compose ne la transmettait pas au conteneur, si bien que la définir dans son `.env` restait sans effet. Tout self-hoster sur son propre domaine recevait un `403 Invalid CORS request` au login, sans message exploitable. Découvert en validant KKS-313 de bout en bout.
+- **Index de documentation du `README`** : la ligne `docs/design-tokens.md` pointait vers un fichier supprimé — un lien mort dans le premier tableau que lit un contributeur. Remplacée par `DESIGN.md`, source de vérité actuelle du design.
+- **Décompte des entités JPA** : le `README` annonçait 17 entités et `CLAUDE.md` 19, deux chiffres contradictoires et tous deux faux. Le modèle en compte 18, conformément à `docs/architecture.md` qui les documente une à une.
+
 ## [5.4.0] - 2026-08-31
 
 > Publication des images Docker sur ARM — débloque la cible self-hosted.
@@ -400,7 +436,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v5.4.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
 [4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0

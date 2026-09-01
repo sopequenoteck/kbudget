@@ -48,7 +48,7 @@ class AdminAuthorizationFilterTest {
 
     @Test
     void should_pass_through_when_path_not_admin() throws Exception {
-        when(request.getServletPath()).thenReturn("/users/me");
+        when(request.getServletPath()).thenReturn("/v1/users/me");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -70,7 +70,7 @@ class AdminAuthorizationFilterTest {
     void should_resolve_admin_path_from_request_uri_when_servlet_path_is_empty() throws Exception {
         UUID userId = UUID.randomUUID();
         when(request.getServletPath()).thenReturn("");
-        when(request.getRequestURI()).thenReturn("/api/admin/users");
+        when(request.getRequestURI()).thenReturn("/api/v1/admin/users");
         when(request.getContextPath()).thenReturn("/api");
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(userId, null, List.of()));
@@ -87,7 +87,7 @@ class AdminAuthorizationFilterTest {
     @Test
     void should_pass_through_when_not_authenticated_on_admin_path() throws Exception {
         // SecurityContext vide — le filter laisse passer, HttpStatusEntryPoint gérera 401
-        when(request.getServletPath()).thenReturn("/admin/invitations");
+        when(request.getServletPath()).thenReturn("/v1/admin/invitations");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -98,7 +98,7 @@ class AdminAuthorizationFilterTest {
     @Test
     void should_send_403_when_authenticated_user_not_admin() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(request.getServletPath()).thenReturn("/admin/invitations");
+        when(request.getServletPath()).thenReturn("/v1/admin/invitations");
 
         var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -116,7 +116,7 @@ class AdminAuthorizationFilterTest {
     @Test
     void should_pass_through_when_authenticated_user_is_admin() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(request.getServletPath()).thenReturn("/admin/invitations");
+        when(request.getServletPath()).thenReturn("/v1/admin/invitations");
 
         var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -134,7 +134,7 @@ class AdminAuthorizationFilterTest {
     void should_send_403_when_principal_user_not_found_in_db() throws Exception {
         // Edge case : UUID dans JWT mais user supprimé → 403, pas 500
         UUID userId = UUID.randomUUID();
-        when(request.getServletPath()).thenReturn("/admin/users");
+        when(request.getServletPath()).thenReturn("/v1/admin/users");
 
         var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -151,7 +151,7 @@ class AdminAuthorizationFilterTest {
     @Test
     void should_pass_through_when_principal_not_uuid() throws Exception {
         // Edge case : mauvais type de principal
-        when(request.getServletPath()).thenReturn("/admin/invitations");
+        when(request.getServletPath()).thenReturn("/v1/admin/invitations");
 
         var auth = new UsernamePasswordAuthenticationToken("not-a-uuid", null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);

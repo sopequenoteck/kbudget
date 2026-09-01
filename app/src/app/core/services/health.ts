@@ -30,7 +30,8 @@ export class HealthService {
 
   checkHealth(): Observable<HealthCheckResult> {
     const startTime = Date.now();
-    const url = `${environment.apiUrl}/actuator/health`;
+    // actuator n'est pas versionne : il se resout depuis la racine de l'API (KKS-313)
+    const url = `${environment.apiRootUrl}/actuator/health`;
 
     return this.http.get(url).pipe(
       timeout(10000),
