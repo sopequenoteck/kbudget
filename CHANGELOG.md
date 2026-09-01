@@ -5,6 +5,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **KKS-315 — Politique de compatibilité d'API** : le projet ne sert qu'une seule version d'API à la fois (KKS-313), donc la compatibilité descendante ne repose sur aucun mécanisme — seulement sur une discipline d'écriture, qui n'était écrite nulle part. `docs/api-compatibility.md` l'énonce : six règles (ne jamais retirer ni renommer un champ de réponse, ne jamais rendre obligatoire un champ de requête qui ne l'était pas, passer par un nouvel endpoint, ne pas invalider une réponse servie par une migration Flyway, tolérer les valeurs d'enum inconnues côté client, assumer les ruptures) et la procédure complète de rupture assumée, `minClientVersion` comprise.
+  - `.github/pull_request_template.md` : la checklist arrive au moment où elle compte, à la revue. Le dépôt n'avait aucun template.
+  - Renvois depuis `README.md` et depuis `CLAUDE.md` — index et principe I, qui portait déjà la règle 1 en germe.
+  - La règle 5 s'appuie sur les parseurs tolérants existants de `flutter/lib/src/domain/models/app_config.dart`, que le ticket citait comme le bon réflexe à généraliser.
+  - **Aucun contrôle automatique** : le test de non-régression de contrat est écarté vers un ticket dédié. Il demande sa propre conception, et bâclé il produirait un test fragile. Le document le dit explicitement plutôt que de laisser croire à un filet qui n'existe pas.
+
 ### Fixed
 
 - **`MIN_CLIENT_VERSION` invisible et sans effet en Docker** : la variable était documentée dans `docs/deployment.md` mais absente de `.env.example`, et surtout non transmise par `docker-compose.yml` — la définir dans son `.env` restait donc sans effet. Un self-hoster voulant relever le minimum exigé pour bloquer les vieux clients ne le pouvait pas. Même défaut que celui corrigé pour `CORS_ALLOWED_ORIGINS` quelques heures plus tôt, reproduit à l'identique.

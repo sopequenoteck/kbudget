@@ -90,6 +90,7 @@ k-budget/
 | [`docs/architecture.md`](docs/architecture.md)   | Decisions techniques, modele de donnees (18 entites), structure frontend |
 | [`docs/api-examples.md`](docs/api-examples.md)   | Exemples de requetes et reponses pour chaque endpoint                    |
 | [`docs/api-errors.md`](docs/api-errors.md)       | Contrat d'erreurs HTTP et guide d'integration                            |
+| [`docs/api-compatibility.md`](docs/api-compatibility.md) | **Politique de compatibilite d'API** — regles d'ecriture, procedure de rupture assumee |
 | [`docs/deployment.md`](docs/deployment.md)       | Deploiement Docker, bare-metal, reverse proxy, backup                    |
 | [`DESIGN.md`](DESIGN.md)                         | Reference design : principes, couleurs, patterns, tokens                  |
 | **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (profil `dev`)               |
