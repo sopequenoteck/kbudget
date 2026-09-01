@@ -61,21 +61,7 @@ class IncompatibleScreen extends ConsumerWidget {
     );
   }
 
-  String _message(CompatibilityStatus? status) => switch (status) {
-    CompatibilityClientTooOld(:final clientVersion, :final requiredVersion) =>
-      'Votre serveur exige au minimum la version $requiredVersion de '
-          "l'application. Vous utilisez la version $clientVersion. "
-          "Mettez K-Budget a jour depuis votre magasin d'applications.",
-    CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
-      serverVersion == null
-          ? 'Votre serveur est trop ancien pour indiquer sa version. '
-                'Cette application requiert au minimum la version '
-                '$requiredVersion. '
-                "Mettez votre instance a jour, puis relancez l'application."
-          : 'Votre serveur est en version $serverVersion. Cette application '
-                'requiert au minimum la version $requiredVersion. Mettez votre '
-                "instance a jour, puis relancez l'application.",
-    _ =>
-      'Cette application et votre serveur ne peuvent pas fonctionner ensemble.',
-  };
+  String _message(CompatibilityStatus? status) =>
+      status?.userMessage(verbose: true) ??
+      'Cette application et votre serveur ne peuvent pas fonctionner ensemble.';
 }

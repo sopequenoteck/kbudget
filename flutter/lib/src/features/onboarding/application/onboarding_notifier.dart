@@ -55,21 +55,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         .read(compatibilityServiceProvider)
         .check(baseUrl: url, clientVersion: info.version);
 
-    final message = switch (status) {
-      CompatibilityOk() => null,
-      CompatibilityOffline() =>
-        "Serveur injoignable. Verifiez l'URL et votre connexion.",
-      CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
-        serverVersion == null
-            ? 'Ce serveur est trop ancien : il ne fournit pas /api/meta. '
-                'Mettez-le a jour en version $requiredVersion ou superieure.'
-            : 'Ce serveur est en version $serverVersion. '
-                'Cette application requiert au minimum la version '
-                '$requiredVersion.',
-      CompatibilityClientTooOld(:final requiredVersion) =>
-        'Ce serveur exige au minimum la version $requiredVersion de '
-            "l'application. Mettez a jour K-Budget depuis votre magasin.",
-    };
+    final message = status.userMessage();
 
     state = state.copyWith(
       isCheckingServer: false,

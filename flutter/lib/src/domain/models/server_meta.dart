@@ -76,3 +76,35 @@ class CompatibilityClientTooOld extends CompatibilityStatus {
   final String clientVersion;
   final String requiredVersion;
 }
+
+/// Formulations destinees a l'utilisateur, portees par le verdict lui-meme.
+///
+/// Elles vivaient en double — dans l'ecran de configuration serveur et dans
+/// l'ecran de blocage — avec des phrases voisines mais divergentes. Une
+/// formulation modifiee d'un cote laissait l'autre en arriere. Les regrouper
+/// ici garantit qu'un utilisateur lit la meme chose quel que soit l'endroit ou
+/// l'incompatibilite se manifeste.
+extension CompatibilityMessage on CompatibilityStatus {
+  /// Message a afficher, ou `null` quand tout va bien.
+  ///
+  /// [verbose] ajoute la version du client, pertinente sur un ecran de blocage
+  /// mais bruyante sous un champ de saisie d'URL.
+  String? userMessage({bool verbose = false}) => switch (this) {
+    CompatibilityOk() => null,
+    CompatibilityOffline() =>
+      "Serveur injoignable. Verifiez l'URL et votre connexion.",
+    CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
+      serverVersion == null
+          ? 'Ce serveur est trop ancien pour indiquer sa version. Cette '
+                'application requiert au minimum la version $requiredVersion. '
+                "Mettez votre instance a jour, puis relancez l'application."
+          : 'Ce serveur est en version $serverVersion. Cette application '
+                'requiert au minimum la version $requiredVersion. '
+                "Mettez votre instance a jour, puis relancez l'application.",
+    CompatibilityClientTooOld(:final clientVersion, :final requiredVersion) =>
+      'Ce serveur exige au minimum la version $requiredVersion de '
+          "l'application. "
+          "${verbose ? 'Vous utilisez la version $clientVersion. ' : ''}"
+          'Mettez a jour K-Budget depuis votre magasin.',
+  };
+}
