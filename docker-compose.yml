@@ -10,6 +10,9 @@ services:
       # accepte et le frontend recoit 403 "Invalid CORS request" au login.
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
+      # Sans cette ligne, relever le minimum dans .env resterait sans effet :
+      # la variable n'atteindrait pas le container (KKS-314).
+      MIN_CLIENT_VERSION: ${MIN_CLIENT_VERSION}
       # Chemin fixe dans le container : le volume api-avatars est monte dessus.
       # Pour stocker les avatars ailleurs sur l'hote, modifier la source du
       # volume ci-dessous, pas cette variable.
