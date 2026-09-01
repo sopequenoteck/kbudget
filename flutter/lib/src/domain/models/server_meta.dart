@@ -38,15 +38,18 @@ sealed class CompatibilityStatus {
   const CompatibilityStatus();
 }
 
+/// Client et serveur peuvent fonctionner ensemble.
 class CompatibilityOk extends CompatibilityStatus {
   const CompatibilityOk(this.meta);
   final ServerMeta meta;
 }
 
+/// Serveur injoignable — verdict inconnu, jamais une incompatibilite.
 class CompatibilityOffline extends CompatibilityStatus {
   const CompatibilityOffline();
 }
 
+/// Le serveur est trop ancien pour cette version du client.
 class CompatibilityServerTooOld extends CompatibilityStatus {
   const CompatibilityServerTooOld({this.serverVersion, required this.requiredVersion});
 
@@ -55,6 +58,7 @@ class CompatibilityServerTooOld extends CompatibilityStatus {
   final String requiredVersion;
 }
 
+/// Le client est plus ancien que le minimum exige par le serveur.
 class CompatibilityClientTooOld extends CompatibilityStatus {
   const CompatibilityClientTooOld({
     required this.clientVersion,

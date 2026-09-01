@@ -36,6 +36,7 @@ class RouteNames {
   static const String debtsName = 'debts';
   static const String settingsName = 'settings';
   static const String loginName = 'login';
+  /// Nom de la route de l'ecran d'incompatibilite (KKS-314).
   static const String incompatibleName = 'incompatible';
   static const String lockName = 'lock';
   static const String acceptInviteName = 'acceptInvite';
