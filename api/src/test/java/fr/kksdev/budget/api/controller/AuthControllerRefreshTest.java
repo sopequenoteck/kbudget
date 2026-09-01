@@ -19,6 +19,7 @@ import fr.kksdev.budget.api.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,6 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
+// Rate limiting neutralise : cette suite enchaine bien plus de tentatives
+// d'authentification qu'un utilisateur reel, toutes depuis la meme IP MockMvc.
+// Le comportement de limitation est verifie par RateLimitIT (KKS-310).
+@TestPropertySource(properties = "app.security.rate-limit.capacity=100000")
 @Import(SecurityConfig.class)
 class AuthControllerRefreshTest {
 

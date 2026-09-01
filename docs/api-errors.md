@@ -84,9 +84,87 @@ Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devi
 | Email deja utilise | 409 | `EMAIL_ALREADY_EXISTS` | `Cet email est déjà utilisé par un autre utilisateur.` |
 | Fichier trop volumineux | 413 | `FILE_TOO_LARGE` | Message specialise existant |
 | Profil CSV absent | 422 | `CSV_PROFILE_NOT_FOUND` | Message metier, avec fallback public |
+| Trop de tentatives d'authentification | 429 | `TOO_MANY_REQUESTS` | `Trop de tentatives. Réessayez dans quelques instants.` |
 | Erreur inattendue | 500 | `INTERNAL_ERROR` | `Une erreur interne est survenue` |
 
 Les erreurs 500 sont journalisees avec leur trace complete cote serveur. Le corps public ne reprend jamais le message, la cause, le type ou la trace de l'exception.
+
+## Limitation de debit (KKS-310)
+
+Les endpoints d'authentification sont limites par IP. Sans cela, `/auth/login`
+offre du bruteforce sans cout et `/auth/invitations/{token}` permet d'enumerer
+des jetons d'invitation — acceptable derriere un reseau prive, plus du tout des
+lors que des instances sont exposees sur Internet.
+
+| Endpoint | Limite |
+|----------|--------|
+| `POST /api/v1/auth/login` | Oui |
+| `POST /api/v1/auth/refresh` | Oui |
+| `POST /api/v1/auth/accept-invite` | Oui |
+| `GET /api/v1/auth/invitations/{token}` | Oui |
+| `POST /api/v1/auth/logout`, `/auth/first-login-reset` | Non — exigent deja un JWT valide |
+| Tout le reste, dont `/api/actuator/health` | Non |
+
+Au-dela du quota, la reponse suit le contrat unifie :
+
+```json
+HTTP 429
+{ "error": "TOO_MANY_REQUESTS", "message": "Trop de tentatives. Réessayez dans quelques instants." }
+```
+
+**La limitation porte sur l'IP, jamais sur le compte.** Verrouiller un compte
+apres des echecs repetes ouvrirait un deni de service cible : il suffirait de
+connaitre l'email de quelqu'un pour l'empecher de se connecter.
+
+### Configuration
+
+| Variable | Defaut | Role |
+|----------|--------|------|
+| `RATE_LIMIT_CAPACITY` | `5` | Tentatives autorisees par fenetre et par IP |
+| `RATE_LIMIT_WINDOW_SECONDS` | `60` | Duree de la fenetre |
+| `TRUSTED_PROXIES` | Plages privees | Prefixes d'IP dont l'en-tete `X-Forwarded-For` est cru |
+
+Un self-hoster derriere un VPN voudra desserrer, une instance exposee voudra
+serrer.
+
+### Derriere un reverse proxy
+
+Sans proxy, l'IP retenue est l'adresse TCP de l'appelant.
+
+Avec un proxy, toutes les requetes portent l'adresse du proxy : la limite
+s'appliquerait globalement a tous les utilisateurs. L'API lit donc
+`X-Forwarded-For` — **mais seulement si la requete provient d'une IP listee dans
+`TRUSTED_PROXIES`**.
+
+Cette condition n'est pas un detail. `X-Forwarded-For` est un en-tete fourni par
+le client : n'importe qui peut l'envoyer. Cru sans condition, il suffirait d'y
+mettre une valeur differente a chaque requete pour obtenir un quota neuf et
+contourner la limitation entierement.
+
+Le defaut couvre le deploiement fourni par le projet — Caddy et le container
+nginx joignent l'API depuis le reseau Docker ou le LAN. Une instance derriere un
+proxy situe sur un autre reseau doit ajouter son adresse :
+
+```bash
+TRUSTED_PROXIES=10.,192.168.,203.0.113.5
+```
+
+Les proxies fournis transmettent `X-Forwarded-For`, mais **pas de la meme
+facon selon leur position** :
+
+| Fichier | Position | Comportement |
+|---------|----------|--------------|
+| `deploy/Caddyfile` | Bordure | **Ecrase** l'en-tete (`header_up X-Forwarded-For {remote_host}`) |
+| `deploy/nginx.conf` | Bordure | **Ecrase** l'en-tete (`$remote_addr`) |
+| `app/nginx.conf` | Interne, derriere Caddy | **Enrichit** la chaine (`$proxy_add_x_forwarded_for`) |
+
+La distinction est essentielle. Un proxy de bordure recoit directement les
+clients : s'il enrichit au lieu d'ecraser, une valeur envoyee par le client
+reste en premier maillon — celui que l'API retient. Un proxy interne, lui, doit
+enrichir : ecraser remplacerait l'IP reelle du client par celle du proxy amont.
+
+Si `app/nginx.conf` devait etre expose directement sur Internet, sans proxy
+devant, il faudrait le passer a `$remote_addr`.
 
 ## Securite HTTP
 

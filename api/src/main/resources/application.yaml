@@ -29,6 +29,17 @@ app:
     # Version de client la plus ancienne acceptee, exposee par /api/meta (KKS-314).
     # Ne bouge qu'a une rupture de contrat, pas a chaque release.
     min-client-version: ${MIN_CLIENT_VERSION:6.0.0}
+  security:
+    # Reverse proxies dont l'en-tete X-Forwarded-For est cru (KKS-310).
+    # Lu sans condition, cet en-tete rendrait le rate limiting contournable :
+    # n'importe qui peut l'envoyer. Defaut : plages privees, ce qui couvre le
+    # deploiement fourni (Caddy et le container nginx joignent l'API depuis le
+    # reseau Docker ou le LAN).
+    trusted-proxies: ${TRUSTED_PROXIES:10.,172.16.,172.17.,172.18.,172.19.,172.2,172.3,192.168.,127.0.0.1,::1}
+    rate-limit:
+      # Tentatives autorisees par IP et par fenetre, sur les endpoints d'auth.
+      capacity: ${RATE_LIMIT_CAPACITY:5}
+      window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
   storage:
     avatars:
       path: ${AVATAR_STORAGE_PATH:./data/avatars}

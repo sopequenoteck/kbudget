@@ -3,7 +3,18 @@
 budget.kksdev.fr {
 	# API Spring Boot
 	handle /api/* {
-		reverse_proxy 192.168.1.81:3001
+		reverse_proxy 192.168.1.81:3001 {
+			# Ecrase X-Forwarded-For au lieu de l'enrichir (KKS-310).
+			#
+			# Par defaut Caddy AJOUTE l'IP du client a l'en-tete recu. Un client
+			# qui en envoie deja un se placerait donc en premier maillon — or
+			# c'est ce maillon que l'API retient comme IP d'origine. La
+			# limitation de debit deviendrait contournable en variant la valeur
+			# a chaque requete.
+			#
+			# En l'ecrasant, seule l'adresse TCP reelle vue par Caddy remonte.
+			header_up X-Forwarded-For {remote_host}
+		}
 	}
 
 	# Frontend Angular (container Nginx)
