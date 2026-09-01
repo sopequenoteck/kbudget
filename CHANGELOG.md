@@ -5,6 +5,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Documentation désynchronisée après KKS-313** : `docs/architecture.md` décrivait encore le contrat non versionné — routes publiques, `POST /api/auth/login` et surtout le fonctionnement des deux filtres de sécurité (`AdminAuthorizationFilter` sur `/admin/**`, allowlist de `PasswordResetRequiredFilter`). Ces deux lignes documentaient précisément le mécanisme dont la désynchronisation aurait ouvert une faille. `ApiVersioningConfig` y est désormais documenté, avec la raison du prédicat par package. `docs/manual-test-plan.md` : 6 cas de test appelaient des URLs mortes, un testeur les suivant aurait conclu à une régression. `CLAUDE.md` : KKS-313 et KKS-341 ajoutés aux « Recent Changes ».
+
 ## [6.0.0] - 2026-08-31
 
 > **BREAKING** — Les endpoints métier changent de chemin : `/api/<ressource>` devient
