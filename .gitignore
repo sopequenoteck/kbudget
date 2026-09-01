@@ -18,7 +18,11 @@ Thumbs.db
 **/application-dev.yaml
 
 # Local runtime data (avatars, uploads, exports, etc.)
-data/
+# Ancre a la racine et a api/ : sans le slash initial, la regle matchait TOUT
+# repertoire nomme data/, dont flutter/lib/src/data/ — 41 fichiers source y
+# vivent, et tout nouveau fichier y etait ignore en silence (KKS-314).
+/data/
+api/data/
 **/data/avatars/
 
 HELP.md

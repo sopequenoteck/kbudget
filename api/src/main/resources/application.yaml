@@ -25,6 +25,10 @@ app:
   admin-emails: ${ADMIN_EMAILS:}
   bootstrap:
     email: ${BOOTSTRAP_EMAIL:admin@localhost}
+  meta:
+    # Version de client la plus ancienne acceptee, exposee par /api/meta (KKS-314).
+    # Ne bouge qu'a une rupture de contrat, pas a chaque release.
+    min-client-version: ${MIN_CLIENT_VERSION:6.0.0}
   storage:
     avatars:
       path: ${AVATAR_STORAGE_PATH:./data/avatars}

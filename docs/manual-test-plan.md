@@ -465,7 +465,7 @@
 ## 22. KKS-235 — Page Mon compte (Angular + Flutter)
 
 > **Concerne** : Page `Settings > Mon compte` + bouton de deconnexion fixe.
-> **Mode serveur uniquement** (les endpoints `/api/users/me/*` ne sont pas dispo en mode local Drift).
+> **Mode serveur uniquement** (les endpoints `/api/v1/users/me/*` ne sont pas dispo en mode local Drift).
 > **Prerequis** : compte de test, mot de passe connu, au moins 1 admin secondaire en DB pour le test "dernier admin".
 
 ### 22.1 — US-001 : Navigation et deconnexion
@@ -481,14 +481,14 @@
 | # | Scenario | Pre-conditions | Etapes | Resultat attendu | Statut |
 |---|----------|----------------|--------|-------------------|--------|
 | MC-4 | Email read-only | Page Mon compte | Inspecter le champ Email | Champ desactive, non editable, valeur correcte | -- |
-| MC-5 | Modifier le nom | Page Mon compte | Editer "Nom" → "Kelly K." → Enregistrer | Snackbar succes, GET /api/users/me retourne le nouveau nom | -- |
+| MC-5 | Modifier le nom | Page Mon compte | Editer "Nom" → "Kelly K." → Enregistrer | Snackbar succes, GET /api/v1/users/me retourne le nouveau nom | -- |
 | MC-6 | Nom vide | Page Mon compte | Vider le nom → Enregistrer | Erreur de validation client (champ requis) | -- |
 | MC-7 | Nom > 100 chars | Page Mon compte | Coller 101 caracteres dans nom | Bloque (maxLength) ou erreur 400 explicite | -- |
 | MC-8 | Upload avatar JPG | Page Mon compte | Tap zone avatar → choisir fichier .jpg < 2 Mo | Avatar affiche immediatement, ETag retourne | -- |
 | MC-9 | Upload avatar PNG | Page Mon compte | Choisir fichier .png < 2 Mo | Avatar affiche, content-type `image/png` | -- |
 | MC-10 | Upload format invalide | Page Mon compte | Choisir fichier .gif ou .pdf | Erreur "Format d'image non supporte" (`INVALID_IMAGE_FORMAT` 400) | -- |
 | MC-11 | Upload > 2 Mo | Page Mon compte | Choisir fichier image > 2 Mo | Erreur "L'image depasse 2 Mo" (`FILE_TOO_LARGE` 413) | -- |
-| MC-12 | Cache avatar (304) | Avatar configure | Recharger la page deux fois (DevTools) | Deuxieme requete `GET /api/users/me/avatar` retourne `304 Not Modified` (header `If-None-Match`) | -- |
+| MC-12 | Cache avatar (304) | Avatar configure | Recharger la page deux fois (DevTools) | Deuxieme requete `GET /api/v1/users/me/avatar` retourne `304 Not Modified` (header `If-None-Match`) | -- |
 | MC-13 | Supprimer avatar | Avatar configure | Tap "Supprimer l'avatar" → confirmer | Avatar disparait, GET retourne `404 AVATAR_NOT_FOUND` | -- |
 | MC-14 | Supprimer sans avatar | Aucun avatar | Tenter suppression | Erreur `AVATAR_NOT_FOUND` 404 (ou bouton desactive cote UI) | -- |
 
@@ -510,8 +510,8 @@
 | MC-21 | Contenu JSON | Apres MC-20 | Ouvrir le fichier JSON | Backup complet : user, preferences, accounts, categories, transactions, subscriptions, debts, budgets, exchangeRates | -- |
 | MC-22 | Export CSV | Compte avec transactions | Tap "Exporter (CSV)" | Telechargement `k-budget-transactions-YYYY-MM-DD.csv` | -- |
 | MC-23 | BOM UTF-8 dans le CSV | Apres MC-22 | Inspecter les 3 premiers octets du fichier (hexdump) | `EF BB BF` au debut du fichier, ouverture correcte des accents dans Excel | -- |
-| MC-24 | Format invalide | URL directe | Appeler `GET /api/users/me/export?format=xml` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
-| MC-25 | Format manquant | URL directe | Appeler `GET /api/users/me/export` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+| MC-24 | Format invalide | URL directe | Appeler `GET /api/v1/users/me/export?format=xml` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
+| MC-25 | Format manquant | URL directe | Appeler `GET /api/v1/users/me/export` | Erreur `INVALID_EXPORT_FORMAT` 400 | -- |
 
 ### 22.5 — US-005 : Suppression du compte
 
@@ -522,7 +522,7 @@
 | MC-28 | Confirmation vide | Page Mon compte | Saisir `password` + chaine vide | Erreur de validation 400 (Bean `@NotBlank`) | -- |
 | MC-29 | MDP incorrect | Page Mon compte | Saisir mauvais password + `SUPPRIMER` | Erreur `PASSWORD_INCORRECT` 401 | -- |
 | MC-30 | Dernier admin bloque | User est seul admin actif (desactiver les autres en DB ou ADMIN_EMAILS reduit) | Tenter la suppression avec password + `SUPPRIMER` valides | Erreur `LAST_ADMIN_DELETION_FORBIDDEN` 403, compte non supprime | -- |
-| MC-31 | Reconnexion impossible | Apres MC-26 | Tenter `POST /api/auth/login` avec les credentials du compte supprime | Echec auth (compte `disabled_at` non null) | -- |
+| MC-31 | Reconnexion impossible | Apres MC-26 | Tenter `POST /api/v1/auth/login` avec les credentials du compte supprime | Echec auth (compte `disabled_at` non null) | -- |
 
 ---
 

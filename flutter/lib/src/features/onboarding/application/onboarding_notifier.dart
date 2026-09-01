@@ -1,10 +1,12 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_state.dart';
 import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
+import 'package:k_budget/src/data/remote/compatibility_service.dart';
+import 'package:k_budget/src/domain/models/server_meta.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 final appConfigRepositoryProvider = Provider<AppConfigRepository>((ref) {
   return AppConfigRepositoryImpl();
@@ -36,30 +38,31 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(serverUrl: url, error: null);
   }
 
+  /// Valide l'URL saisie via `/api/meta` (KKS-314).
+  ///
+  /// Remplace l'ancien `HEAD` sur l'URL brute, qui acceptait tout
+  /// statut < 500 :
+  /// n'importe quel serveur web passait ce test, y compris une box internet ou
+  /// une page d'erreur de reverse proxy. Interroger `/meta` prouve a la
+  /// fois que
+  /// le serveur repond, qu'il s'agit bien d'une instance K-Budget, et que sa
+  /// version est exploitable par cette application.
   Future<bool> checkServerConnectivity(String url) async {
     state = state.copyWith(isCheckingServer: true, error: null);
-    try {
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
-      final response = await dio.head(url);
-      final isReachable =
-          response.statusCode != null && response.statusCode! < 500;
-      state = state.copyWith(
-        isCheckingServer: false,
-        isServerReachable: isReachable,
-        error: isReachable ? null : 'Serveur injoignable',
-      );
-      return isReachable;
-    } on DioException {
-      state = state.copyWith(
-        isCheckingServer: false,
-        isServerReachable: false,
-        error: 'Serveur injoignable',
-      );
-      return false;
-    }
+
+    final info = await PackageInfo.fromPlatform();
+    final status = await ref
+        .read(compatibilityServiceProvider)
+        .check(baseUrl: url, clientVersion: info.version);
+
+    final message = status.userMessage();
+
+    state = state.copyWith(
+      isCheckingServer: false,
+      isServerReachable: message == null,
+      error: message,
+    );
+    return message == null;
   }
 
   Future<AppConfig> getConfig() async {

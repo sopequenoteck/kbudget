@@ -5,6 +5,39 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-09-01
+
+> Les clients savent désormais reconnaître un serveur incompatible. C'est aussi
+> la version que `MIN_SERVER_VERSION` désigne côté clients : un serveur antérieur
+> ne sait pas se décrire.
+
+### Added
+
+- **KKS-314 — `GET /api/meta` et détection d'incompatibilité** : aucun endpoint ne permettait à un client de savoir à quel serveur il parlait. En self-host, l'app mobile est mise à jour par les stores pendant que le serveur reste sur la version que l'utilisateur a déployée : une incompatibilité se manifestait par une erreur de désérialisation JSON, chez quelqu'un qui n'avait aucun moyen de comprendre que son serveur était en cause.
+  - `MetaController` expose `serverVersion` (dérivée du build Maven via `build-info`, jamais codée en dur), `apiVersion`, `minClientVersion` (property `MIN_CLIENT_VERSION`) et `capabilities` (valeurs de `Feature`).
+  - Le contrôleur vit **hors** du package des contrôleurs versionnés : `/api/meta` ne porte pas de préfixe, un client ne pouvant pas deviner celui du serveur qu'il interroge. Un test verrouille ce placement.
+  - **Un serveur injoignable n'est jamais traité comme incompatible.** Le discriminant est net : 404 avec réponse HTTP = serveur trop ancien ; absence de réponse = hors ligne, le cache prend le relais (constitution, principe IV). Les deux clients testent cette distinction.
+  - Quand client et serveur sont tous deux hors plage, `clientTooOld` prime : mettre à jour son application est actionnable, mettre à jour un serveur qui exige déjà plus récent que soi ne l'est pas.
+  - Angular : `CompatibilityService`, `compatibilityGuard` sur `/auth` et les routes protégées, écran d'incompatibilité réutilisant `AuthShell`.
+  - Flutter : `server_setup_screen` valide désormais l'URL saisie via `/api/meta` — l'ancien `HEAD` acceptait tout statut < 500, donc n'importe quel serveur web. Détection également au démarrage, en mode serveur uniquement.
+  - `/meta` ajouté à l'allowlist de `PasswordResetRequiredFilter` : le bloquer ferait conclure le client à une incompatibilité alors que le compte attend simplement un reset.
+
+### Changed
+
+- **Version Flutter alignée sur le monorepo** : `pubspec.yaml` passe de `1.0.0+1` à `6.0.0+1` et suit désormais `VERSION`, `api/pom.xml` et `app/package.json`. `minClientVersion` s'exprime ainsi dans un référentiel unique — comparer un client `1.0.0` à un minimum exprimé en `6.x` n'aurait eu aucun sens. Le build number reste propre aux stores. **Le processus de release porte désormais sur 4 fichiers de version.**
+
+### Fixed
+
+- **Profil qualité Sonar Dart contredisant le projet** : le profil appliqué exigeait `prefer_double_quotes` là où `analysis_options.yaml` active `prefer_single_quotes` (6 455 littéraux en quotes simples contre 43), `prefer_relative_imports` là où le projet impose `avoid_relative_lib_imports`, et `unnecessary_final` là où il active `prefer_final_locals`. Il se contredisait même lui-même : `unnecessary_final` interdit `final`, `prefer_final_parameters` l'exige — aucun code ne peut satisfaire les deux. Ces cinq règles sont neutralisées via `sonar.issue.ignore.multicriteria`, versionné dans `flutter/sonar-project.properties` plutôt que dans le profil serveur : le choix reste relu en PR et survit à une réinitialisation. Les autres règles signalées ont été corrigées dans le code.
+
+- **Configuration Sonar divergente entre les deux projets** : `app/sonar-project.properties` excluait déjà `**/*.spec.ts` de l'analyse, mais `flutter/sonar-project.properties` soumettait ses tests aux mêmes règles que le code de production. Une PR Flutter ajoutant des tests était donc pénalisée là où une PR Angular ne l'était pas — les règles de duplication de littéraux, en particulier, sont contre-productives sur des tests où la répétition explicite est une qualité. Les tests Flutter restent déclarés (métriques, couverture) mais sortent de l'analyse de maintenabilité.
+
+- **Règle `.gitignore` trop large** : `data/`, destinée aux données runtime, matchait **tout** répertoire nommé `data/` — dont `flutter/lib/src/data/`, où vivent 41 fichiers source. Ceux-ci restaient suivis (ajoutés avant l'introduction de la règle), mais tout nouveau fichier y était ignoré **en silence** : `git status` ne le montrait pas, le commit passait, et la compilation échouait en CI sur un fichier introuvable. Trois fichiers de KKS-314 ont été perdus ainsi. La règle est désormais ancrée (`/data/`, `api/data/`) ; les fichiers générés Dart restent couverts par `flutter/.gitignore`, qui les traite explicitement.
+
+- **CI Flutter rouge en permanence depuis juin 2026** : le workflow tournait sur `ghcr.io/cirruslabs/flutter:stable`, un tag qui suit les releases du SDK. Il a fini par livrer un Flutter où `IconData` est une `final class`, que `phosphor_flutter 2.1.0` étend — 68 tests ne compilaient plus, sur `develop` comme sur `main`, sans qu'aucun commit du projet en soit la cause. Le check est resté rouge pendant trois mois, devenant incapable de signaler une vraie régression : personne ne pouvait plus distinguer un problème réel du bruit de fond. L'image est désormais épinglée sur `3.41.2`, alignée sur le SDK de développement et sur la contrainte `sdk: ^3.11.0` du pubspec. Le `TODO` qui recommandait cet épinglage figurait déjà dans le workflow.
+
+- **Documentation désynchronisée après KKS-313** : `docs/architecture.md` décrivait encore le contrat non versionné — routes publiques, `POST /api/auth/login` et surtout le fonctionnement des deux filtres de sécurité (`AdminAuthorizationFilter` sur `/admin/**`, allowlist de `PasswordResetRequiredFilter`). Ces deux lignes documentaient précisément le mécanisme dont la désynchronisation aurait ouvert une faille. `ApiVersioningConfig` y est désormais documenté, avec la raison du prédicat par package. `docs/manual-test-plan.md` : 6 cas de test appelaient des URLs mortes, un testeur les suivant aurait conclu à une régression. `CLAUDE.md` : KKS-313 et KKS-341 ajoutés aux « Recent Changes ».
+
 ## [6.0.0] - 2026-08-31
 
 > **BREAKING** — Les endpoints métier changent de chemin : `/api/<ressource>` devient
@@ -436,7 +469,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2

@@ -44,9 +44,19 @@ jobs:
     runs-on: [self-hosted, kbudget-ci]
     timeout-minutes: 20
     container:
-      # TODO épingler une version (ex: ghcr.io/cirruslabs/flutter:3.27.4)
-      # pour des builds reproductibles. :stable change sous toi.
-      image: ghcr.io/cirruslabs/flutter:stable
+      # Version épinglée, alignée sur le SDK de développement (Flutter 3.41.2 /
+      # Dart 3.11.0, la contrainte `sdk: ^3.11.0` du pubspec).
+      #
+      # `:stable` a glissé sous le projet : la CI a fini par tourner sur un SDK
+      # où `IconData` est devenue une `final class`, que `phosphor_flutter 2.1.0`
+      # étend. 68 tests ne compilaient plus, sur `develop` comme sur `main`, sans
+      # qu'aucun commit du projet en soit la cause. Le check est resté rouge de
+      # juin à septembre 2026, devenant incapable de signaler une vraie
+      # régression.
+      #
+      # Monter de SDK est un choix délibéré : changer ce tag, vérifier que les
+      # dépendances suivent, puis aligner les postes de développement.
+      image: ghcr.io/cirruslabs/flutter:3.41.2
       options: --network ci-stack_ci-net
     steps:
       - uses: actions/checkout@v4
