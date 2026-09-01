@@ -5,6 +5,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-09-01
+
+> Les clients savent désormais reconnaître un serveur incompatible. C'est aussi
+> la version que `MIN_SERVER_VERSION` désigne côté clients : un serveur antérieur
+> ne sait pas se décrire.
+
 ### Added
 
 - **KKS-314 — `GET /api/meta` et détection d'incompatibilité** : aucun endpoint ne permettait à un client de savoir à quel serveur il parlait. En self-host, l'app mobile est mise à jour par les stores pendant que le serveur reste sur la version que l'utilisateur a déployée : une incompatibilité se manifestait par une erreur de désérialisation JSON, chez quelqu'un qui n'avait aucun moyen de comprendre que son serveur était en cause.
@@ -21,6 +27,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - **Version Flutter alignée sur le monorepo** : `pubspec.yaml` passe de `1.0.0+1` à `6.0.0+1` et suit désormais `VERSION`, `api/pom.xml` et `app/package.json`. `minClientVersion` s'exprime ainsi dans un référentiel unique — comparer un client `1.0.0` à un minimum exprimé en `6.x` n'aurait eu aucun sens. Le build number reste propre aux stores. **Le processus de release porte désormais sur 4 fichiers de version.**
 
 ### Fixed
+
+- **Profil qualité Sonar Dart contredisant le projet** : le profil appliqué exigeait `prefer_double_quotes` là où `analysis_options.yaml` active `prefer_single_quotes` (6 455 littéraux en quotes simples contre 43), `prefer_relative_imports` là où le projet impose `avoid_relative_lib_imports`, et `unnecessary_final` là où il active `prefer_final_locals`. Il se contredisait même lui-même : `unnecessary_final` interdit `final`, `prefer_final_parameters` l'exige — aucun code ne peut satisfaire les deux. Ces cinq règles sont neutralisées via `sonar.issue.ignore.multicriteria`, versionné dans `flutter/sonar-project.properties` plutôt que dans le profil serveur : le choix reste relu en PR et survit à une réinitialisation. Les autres règles signalées ont été corrigées dans le code.
 
 - **Configuration Sonar divergente entre les deux projets** : `app/sonar-project.properties` excluait déjà `**/*.spec.ts` de l'analyse, mais `flutter/sonar-project.properties` soumettait ses tests aux mêmes règles que le code de production. Une PR Flutter ajoutant des tests était donc pénalisée là où une PR Angular ne l'était pas — les règles de duplication de littéraux, en particulier, sont contre-productives sur des tests où la répétition explicite est une qualité. Les tests Flutter restent déclarés (métriques, couverture) mais sortent de l'analyse de maintenabilité.
 
@@ -461,7 +469,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
