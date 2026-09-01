@@ -5,6 +5,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Build local silencieusement cassé par un JDK trop récent** : la CI construit sous `maven:3.9-eclipse-temurin-21`, mais rien n'imposait la même version en local. Avec un JDK plus récent, `mvn verify` échouait après trois minutes sur `Unsupported class file major version 69` pendant l'instrumentation JaCoCo — un message qui ne désigne ni la cause ni la solution. Le cas est facile à rencontrer : `java -version` peut afficher 21 pendant que Maven utilise le JDK par défaut du gestionnaire de paquets, c'est `JAVA_HOME` qui tranche. Le `maven-enforcer-plugin` échoue désormais en quelques secondes avec la commande exacte à lancer. Prérequis rappelé dans `CLAUDE.md`.
+
 ### Added
 
 - **KKS-310 — Limitation de débit sur les endpoints d'authentification** : aucun mécanisme n'existait. `/auth/login` offrait du bruteforce sans coût et `/auth/invitations/{token}` permettait d'énumérer des jetons d'invitation — acceptable derrière un réseau privé, plus du tout dès lors que des instances sont exposées sur Internet. Bucket4j en mémoire, 5 tentatives par minute et par IP configurables, réponse `429 TOO_MANY_REQUESTS` au contrat d'erreur unifié.

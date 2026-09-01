@@ -212,6 +212,48 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Echoue tot, avec un message lisible, si Maven ne tourne pas sous
+                 Java 21. Sans cette garde, un JDK plus recent produit une erreur
+                 opaque a l'etape de couverture — « Unsupported class file major
+                 version 69 » sur une classe du JDK — qui ne designe ni la cause
+                 ni la solution.
+
+                 Le cas est frequent : `java` en ligne de commande peut etre en 21
+                 pendant que Maven utilise le JDK par defaut du gestionnaire de
+                 paquets. La CI, elle, tourne sur maven:3.9-eclipse-temurin-21. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,22)</version>
+                                    <message>
+Ce projet se construit avec Java 21 — la version utilisee par la CI.
+
+Maven tourne actuellement sous une autre version. Verifiez avec :
+    mvn -version
+
+`java -version` peut afficher 21 pendant que Maven utilise un autre JDK :
+c'est JAVA_HOME qui decide. Pour corriger le temps d'une commande :
+    JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn clean verify   # macOS
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk mvn clean verify      # Linux
+
+Pour le fixer durablement, exportez JAVA_HOME dans votre shell.
+                                    </message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
