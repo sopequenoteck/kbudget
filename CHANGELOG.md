@@ -22,6 +22,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **CI Flutter rouge en permanence depuis juin 2026** : le workflow tournait sur `ghcr.io/cirruslabs/flutter:stable`, un tag qui suit les releases du SDK. Il a fini par livrer un Flutter où `IconData` est une `final class`, que `phosphor_flutter 2.1.0` étend — 68 tests ne compilaient plus, sur `develop` comme sur `main`, sans qu'aucun commit du projet en soit la cause. Le check est resté rouge pendant trois mois, devenant incapable de signaler une vraie régression : personne ne pouvait plus distinguer un problème réel du bruit de fond. L'image est désormais épinglée sur `3.41.2`, alignée sur le SDK de développement et sur la contrainte `sdk: ^3.11.0` du pubspec. Le `TODO` qui recommandait cet épinglage figurait déjà dans le workflow.
+
 - **Documentation désynchronisée après KKS-313** : `docs/architecture.md` décrivait encore le contrat non versionné — routes publiques, `POST /api/auth/login` et surtout le fonctionnement des deux filtres de sécurité (`AdminAuthorizationFilter` sur `/admin/**`, allowlist de `PasswordResetRequiredFilter`). Ces deux lignes documentaient précisément le mécanisme dont la désynchronisation aurait ouvert une faille. `ApiVersioningConfig` y est désormais documenté, avec la raison du prédicat par package. `docs/manual-test-plan.md` : 6 cas de test appelaient des URLs mortes, un testeur les suivant aurait conclu à une régression. `CLAUDE.md` : KKS-313 et KKS-341 ajoutés aux « Recent Changes ».
 
 ## [6.0.0] - 2026-08-31
