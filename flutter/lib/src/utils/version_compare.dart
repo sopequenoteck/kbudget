@@ -23,7 +23,9 @@ int compareVersions(String a, String b) {
   for (var i = 0; i < 3; i++) {
     final diff =
         (i < left.length ? left[i] : 0) - (i < right.length ? right[i] : 0);
-    if (diff != 0) return diff;
+    if (diff != 0) {
+      return diff;
+    }
   }
   return 0;
 }

@@ -1,5 +1,6 @@
 /// Description que le serveur donne de lui-meme, via `GET /api/meta` (KKS-314).
 class ServerMeta {
+  /// Construit la description renvoyee par `GET /api/meta`.
   const ServerMeta({
     required this.serverVersion,
     required this.apiVersion,
@@ -41,6 +42,7 @@ sealed class CompatibilityStatus {
 
 /// Client et serveur peuvent fonctionner ensemble.
 class CompatibilityOk extends CompatibilityStatus {
+  /// [meta] est la description renvoyee par le serveur.
   const CompatibilityOk(this.meta);
   final ServerMeta meta;
 }
@@ -52,9 +54,10 @@ class CompatibilityOffline extends CompatibilityStatus {
 
 /// Le serveur est trop ancien pour cette version du client.
 class CompatibilityServerTooOld extends CompatibilityStatus {
+  /// [serverVersion] est nul si le serveur ne sait pas exposer sa version.
   const CompatibilityServerTooOld({
-    this.serverVersion,
     required this.requiredVersion,
+    this.serverVersion,
   });
 
   /// `null` quand le serveur est trop ancien pour exposer `/api/meta`.
@@ -64,6 +67,7 @@ class CompatibilityServerTooOld extends CompatibilityStatus {
 
 /// Le client est plus ancien que le minimum exige par le serveur.
 class CompatibilityClientTooOld extends CompatibilityStatus {
+  /// [requiredVersion] est le minimum exige par le serveur.
   const CompatibilityClientTooOld({
     required this.clientVersion,
     required this.requiredVersion,

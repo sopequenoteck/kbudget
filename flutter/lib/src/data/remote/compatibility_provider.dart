@@ -19,7 +19,9 @@ class CompatibilityNotifier extends Notifier<CompatibilityStatus?> {
   /// connu.
   Future<CompatibilityStatus> ensureChecked() async {
     final known = state;
-    if (known != null) return known;
+    if (known != null) {
+      return known;
+    }
 
     final serverUrl =
         await ref.read(appConfigRepositoryProvider).getServerUrl() ??
@@ -39,6 +41,7 @@ class CompatibilityNotifier extends Notifier<CompatibilityStatus?> {
   void reset() => state = null;
 }
 
+/// Verdict de compatibilite du serveur, memorise pour la session.
 final compatibilityNotifierProvider =
     NotifierProvider<CompatibilityNotifier, CompatibilityStatus?>(
       CompatibilityNotifier.new,

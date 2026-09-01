@@ -16,6 +16,7 @@ const String kMinServerVersion = '6.1.0';
 /// deserialisation JSON chez un utilisateur qui n'a aucun moyen de comprendre
 /// que son serveur est en cause.
 class CompatibilityService {
+  /// [dio] doit pointer la racine de l'API, sans segment de version.
   const CompatibilityService(this._dio);
 
   final Dio _dio;
@@ -55,7 +56,9 @@ class CompatibilityService {
     }
 
     final data = response.data;
-    if (data == null) return const CompatibilityOffline();
+    if (data == null) {
+      return const CompatibilityOffline();
+    }
 
     final meta = ServerMeta.fromJson(data);
 
@@ -79,6 +82,10 @@ class CompatibilityService {
   }
 }
 
+/// Service de verification de compatibilite, sur un client HTTP dedie.
+///
+/// Volontairement distinct du Dio metier : celui-ci pointe la racine de l'API,
+/// la ou le client metier vise la version courante.
 final compatibilityServiceProvider = Provider<CompatibilityService>(
   (ref) => CompatibilityService(
     Dio(BaseOptions(connectTimeout: const Duration(seconds: 10))),
