@@ -7,6 +7,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **KKS-310 — Limitation de débit sur les endpoints d'authentification** : aucun mécanisme n'existait. `/auth/login` offrait du bruteforce sans coût et `/auth/invitations/{token}` permettait d'énumérer des jetons d'invitation — acceptable derrière un réseau privé, plus du tout dès lors que des instances sont exposées sur Internet. Bucket4j en mémoire, 5 tentatives par minute et par IP configurables, réponse `429 TOO_MANY_REQUESTS` au contrat d'erreur unifié.
+  - **La limitation porte sur l'IP, jamais sur le compte.** Verrouiller un compte après des échecs répétés ouvrirait un déni de service ciblé : il suffirait de connaître l'email de quelqu'un pour l'empêcher de se connecter.
+  - **`X-Forwarded-For` n'est lu que si la requête provient d'un proxy de confiance** (`TRUSTED_PROXIES`). Cet en-tête est fourni par le client : cru sans condition, il suffirait d'y mettre une valeur différente à chaque requête pour obtenir un quota neuf. Le ticket demandait de le lire ; le lire naïvement aurait rendu la protection décorative.
+  - **Les proxies fournis ont été corrigés selon leur position.** `deploy/Caddyfile` et `deploy/nginx.conf` sont en bordure : ils **écrasent** désormais l'en-tête au lieu de l'enrichir, faute de quoi une valeur envoyée par le client restait en premier maillon — celui que l'API retient. `app/nginx.conf` est un maillon interne et continue d'enrichir, l'écraser y remplacerait l'IP réelle du client par celle de Caddy.
+  - Rejets journalisés en WARN, seuils configurables (`RATE_LIMIT_CAPACITY`, `RATE_LIMIT_WINDOW_SECONDS`), documentation dans `docs/api-errors.md`.
+  - Effet de bord assumé : les suites `@WebMvcTest` d'authentification enchaînent bien plus de tentatives qu'un utilisateur réel depuis la même IP MockMvc. La limite y est neutralisée explicitement, et le comportement réel est vérifié par `RateLimitIT`.
+
+### Added
+
 - **KKS-315 — Politique de compatibilité d'API** : le projet ne sert qu'une seule version d'API à la fois (KKS-313), donc la compatibilité descendante ne repose sur aucun mécanisme — seulement sur une discipline d'écriture, qui n'était écrite nulle part. `docs/api-compatibility.md` l'énonce : six règles (ne jamais retirer ni renommer un champ de réponse, ne jamais rendre obligatoire un champ de requête qui ne l'était pas, passer par un nouvel endpoint, ne pas invalider une réponse servie par une migration Flyway, tolérer les valeurs d'enum inconnues côté client, assumer les ruptures) et la procédure complète de rupture assumée, `minClientVersion` comprise.
   - `.github/pull_request_template.md` : la checklist arrive au moment où elle compte, à la revue. Le dépôt n'avait aucun template.
   - Renvois depuis `README.md` et depuis `CLAUDE.md` — index et principe I, qui portait déjà la règle 1 en germe.

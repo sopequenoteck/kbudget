@@ -13,6 +13,12 @@ services:
       # Sans cette ligne, relever le minimum dans .env resterait sans effet :
       # la variable n'atteindrait pas le container (KKS-314).
       MIN_CLIENT_VERSION: ${MIN_CLIENT_VERSION}
+      # Limitation de debit sur l'authentification (KKS-310). TRUSTED_PROXIES
+      # est indispensable derriere un reverse proxy : sans elle, toutes les
+      # requetes portent l'IP du proxy et la limite s'applique globalement.
+      RATE_LIMIT_CAPACITY: ${RATE_LIMIT_CAPACITY}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES}
       # Chemin fixe dans le container : le volume api-avatars est monte dessus.
       # Pour stocker les avatars ailleurs sur l'hote, modifier la source du
       # volume ci-dessous, pas cette variable.

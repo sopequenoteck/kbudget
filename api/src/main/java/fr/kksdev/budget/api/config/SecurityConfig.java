@@ -63,11 +63,42 @@ public class SecurityConfig {
         return new PasswordResetRequiredFilter(jwtUtil, errorWriter);
     }
 
+    @Value("${app.security.rate-limit.capacity:5}")
+    private int rateLimitCapacity;
+
+    @Value("${app.security.rate-limit.window-seconds:60}")
+    private long rateLimitWindowSeconds;
+
+    /**
+     * Proxies dont l'en-tete {@code X-Forwarded-For} est cru (KKS-310).
+     *
+     * <p>Declare ici plutot qu'en {@code @Component}, comme les autres filtres
+     * de securite du projet : la chaine reste lisible d'un seul endroit.
+     */
+    @Bean
+    public ClientIpResolver clientIpResolver(
+            @Value("${app.security.trusted-proxies}") List<String> trustedProxies) {
+        return new ClientIpResolver(trustedProxies);
+    }
+
+    /**
+     * Limitation de debit sur les endpoints d'authentification (KKS-310).
+     *
+     * <p>Seuils configurables : un self-hoster derriere un VPN voudra desserrer,
+     * une instance exposee sur Internet voudra serrer.
+     */
+    @Bean
+    public RateLimitFilter rateLimitFilter(ClientIpResolver ipResolver, ApiErrorWriter errorWriter) {
+        return new RateLimitFilter(ipResolver, errorWriter, rateLimitCapacity,
+                java.time.Duration.ofSeconds(rateLimitWindowSeconds));
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    ApiAuthenticationEntryPoint authenticationEntryPoint,
                                                    ApiAccessDeniedHandler accessDeniedHandler,
-                                                   ApiErrorWriter errorWriter) throws Exception {
+                                                   ApiErrorWriter errorWriter,
+                                                   RateLimitFilter rateLimitFilter) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -96,6 +127,15 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // Avant JwtFilter dans la chaine : les endpoints proteges sont
+                // publics, ils ne traversent aucune authentification. Placer la
+                // limite plus loin la rendrait inoperante sur /auth/login.
+                //
+                // Declare apres jwtFilter, et non avant : Spring Security exige
+                // que le filtre de reference ait deja un ordre enregistre. Ici
+                // l'ordre des appels ne determine pas la position dans la
+                // chaine — c'est l'argument qui le fait.
+                .addFilterBefore(rateLimitFilter, JwtFilter.class)
                 .addFilterAfter(passwordResetRequiredFilter(errorWriter), JwtFilter.class)
                 .addFilterAfter(adminAuthorizationFilter(errorWriter), PasswordResetRequiredFilter.class)
                 .build();

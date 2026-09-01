@@ -89,6 +89,17 @@
             <version>3.0.1</version>
         </dependency>
 
+        <!-- Rate limiting en memoire sur les endpoints d'authentification (KKS-310).
+             Variante _jdk17 : la seule maintenue pour Java 17+.
+             En memoire, donc aucune dependance d'infrastructure ajoutee — le
+             principe VII de la constitution vise PostgreSQL comme seule
+             dependance d'infra, pas les bibliotheques. -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>8.14.0</version>
+        </dependency>
+
         <!-- Actuator (health endpoint pour monitoring/health check) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
