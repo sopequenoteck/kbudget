@@ -16,7 +16,8 @@ const String kMinServerVersion = '6.1.0';
 /// deserialisation JSON chez un utilisateur qui n'a aucun moyen de comprendre
 /// que son serveur est en cause.
 class CompatibilityService {
-  /// [dio] doit pointer la racine de l'API, sans segment de version.
+  /// Le client HTTP fourni doit pointer la racine de l'API, sans segment
+  /// de version.
   const CompatibilityService(this._dio);
 
   final Dio _dio;

@@ -5,6 +5,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Deux derniers signalements Sonar sur le code Flutter de KKS-314** : une référence `[dio]` dans un commentaire de documentation pointait vers un paramètre privé `_dio`, donc invisible depuis la doc générée ; et les imports ajoutés à `onboarding_notifier.dart` l'avaient été en fin de bloc plutôt qu'à leur place alphabétique. Le Quality Gate Flutter est désormais sans signalement.
+
 ## [6.1.0] - 2026-09-01
 
 > Les clients savent désormais reconnaître un serveur incompatible. C'est aussi

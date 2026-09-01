@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/remote/compatibility_service.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
+import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_state.dart';
 import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
-import 'package:k_budget/src/data/remote/compatibility_service.dart';
-import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 final appConfigRepositoryProvider = Provider<AppConfigRepository>((ref) {
