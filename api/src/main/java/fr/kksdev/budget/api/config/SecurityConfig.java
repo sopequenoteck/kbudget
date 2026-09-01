@@ -98,7 +98,7 @@ public class SecurityConfig {
                                                    ApiAuthenticationEntryPoint authenticationEntryPoint,
                                                    ApiAccessDeniedHandler accessDeniedHandler,
                                                    ApiErrorWriter errorWriter,
-                                                   RateLimitFilter rateLimitFilter) throws Exception {
+                                                   RateLimitFilter rateLimitFilter) {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
