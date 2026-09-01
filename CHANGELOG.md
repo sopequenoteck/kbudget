@@ -7,6 +7,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **`MIN_CLIENT_VERSION` invisible et sans effet en Docker** : la variable était documentée dans `docs/deployment.md` mais absente de `.env.example`, et surtout non transmise par `docker-compose.yml` — la définir dans son `.env` restait donc sans effet. Un self-hoster voulant relever le minimum exigé pour bloquer les vieux clients ne le pouvait pas. Même défaut que celui corrigé pour `CORS_ALLOWED_ORIGINS` quelques heures plus tôt, reproduit à l'identique.
+
+- **`version-check` ne contrôlait qu'un fichier sur quatre** : depuis KKS-314, la version vit dans `VERSION`, `api/pom.xml`, `app/package.json` et `flutter/pubspec.yaml`. Le workflow ne vérifiait que le premier — oublier l'un des trois autres passait silencieusement, et l'incohérence n'apparaissait qu'après publication : dans le champ `serverVersion` de `/api/meta` pour l'API, dans le pied de page pour le frontend. Une étape compare désormais les quatre et nomme le fichier fautif. Le build number Flutter (`+N`) est ignoré : il suit le rythme des dépôts sur les stores, pas celui des releases.
+
 - **Deux derniers signalements Sonar sur le code Flutter de KKS-314** : une référence `[dio]` dans un commentaire de documentation pointait vers un paramètre privé `_dio`, donc invisible depuis la doc générée ; et les imports ajoutés à `onboarding_notifier.dart` l'avaient été en fin de bloc plutôt qu'à leur place alphabétique. Le Quality Gate Flutter est désormais sans signalement.
 
 ## [6.1.0] - 2026-09-01
