@@ -17,3 +17,13 @@ app:
   jwt:
     secret: test-secret-key-budget-app-min-256-bits-long-enough-for-hmac-sha
     expiration: 86400000
+  security:
+    # Le rate limiting est neutralise par defaut dans les tests : les suites
+    # d'authentification enchainent bien plus de tentatives qu'un utilisateur
+    # reel, toutes depuis la meme IP MockMvc. RateLimitIT redescend la capacite
+    # via @TestPropertySource pour verifier le comportement de limitation.
+    trusted-proxies: 127.0.0.1
+    rate-limit:
+      capacity: 100000
+      window-seconds: 60
+

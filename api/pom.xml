@@ -10,7 +10,7 @@
     </parent>
     <groupId>fr.kksdev.budget</groupId>
     <artifactId>api</artifactId>
-    <version>6.1.0</version>
+    <version>6.2.0</version>
     <name>k-budget-api</name>
     <description>K-Budget API — Gestion de budget personnel</description>
     <url/>
@@ -87,6 +87,17 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>3.0.1</version>
+        </dependency>
+
+        <!-- Rate limiting en memoire sur les endpoints d'authentification (KKS-310).
+             Variante _jdk17 : la seule maintenue pour Java 17+.
+             En memoire, donc aucune dependance d'infrastructure ajoutee — le
+             principe VII de la constitution vise PostgreSQL comme seule
+             dependance d'infra, pas les bibliotheques. -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>8.14.0</version>
         </dependency>
 
         <!-- Actuator (health endpoint pour monitoring/health check) -->
@@ -198,6 +209,48 @@
                         <goals>
                             <goal>build-info</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Echoue tot, avec un message lisible, si Maven ne tourne pas sous
+                 Java 21. Sans cette garde, un JDK plus recent produit une erreur
+                 opaque a l'etape de couverture — « Unsupported class file major
+                 version 69 » sur une classe du JDK — qui ne designe ni la cause
+                 ni la solution.
+
+                 Le cas est frequent : `java` en ligne de commande peut etre en 21
+                 pendant que Maven utilise le JDK par defaut du gestionnaire de
+                 paquets. La CI, elle, tourne sur maven:3.9-eclipse-temurin-21. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,22)</version>
+                                    <message>
+Ce projet se construit avec Java 21 — la version utilisee par la CI.
+
+Maven tourne actuellement sous une autre version. Verifiez avec :
+    mvn -version
+
+`java -version` peut afficher 21 pendant que Maven utilise un autre JDK :
+c'est JAVA_HOME qui decide. Pour corriger le temps d'une commande :
+    JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn clean verify   # macOS
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk mvn clean verify      # Linux
+
+Pour le fixer durablement, exportez JAVA_HOME dans votre shell.
+                                    </message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

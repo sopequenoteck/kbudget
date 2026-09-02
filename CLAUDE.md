@@ -21,6 +21,12 @@ cd api && mvn clean install       # Build complet avec tests
 
 > Le profil `prod` est le défaut. En dev, activer `dev` explicitement. Toutes les commandes Maven depuis `api/`.
 
+> **Maven doit tourner sous Java 21**, la version de la CI. `java -version` peut
+> afficher 21 pendant que Maven utilise un autre JDK — c'est `JAVA_HOME` qui
+> decide, verifier avec `mvn -version`. Un JDK plus recent fait echouer
+> l'instrumentation JaCoCo sur une erreur opaque ; le `maven-enforcer-plugin`
+> intercepte le cas et affiche la marche a suivre.
+
 ### Frontend (app/)
 
 ```bash
@@ -50,7 +56,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 Le fichier `.specify/memory/constitution.md` (v4.0.0) est le document de reference. 8 principes :
 
-1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse.
+1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse — voir [`docs/api-compatibility.md`](docs/api-compatibility.md) pour les six regles et la procedure de rupture assumee.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
 3. **Simplicite & YAGNI** : Controller → Service → Repository. Pas de CQRS/DDD/Event Sourcing.
 4. **Mobile-First UX** : saisie en 2-3 interactions, bouton flottant (+) sur tous les ecrans. L'instance de l'utilisateur sera souvent injoignable : degrader proprement, le cache n'est jamais source de verite.
@@ -141,6 +147,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/vision.md`](docs/vision.md) | Vision produit, modules fonctionnels |
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
+| [`docs/api-compatibility.md`](docs/api-compatibility.md) | **Politique de compatibilite d'API** (KKS-315) — les six regles d'ecriture et la procedure de rupture assumee. A consulter avant toute modification de DTO, de migration Flyway ou de parsing client |
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
@@ -151,12 +158,37 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/manual-test-plan.md`](docs/manual-test-plan.md) | Plan de tests manuels (Angular + Flutter) |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — profil `dev` uniquement. Desactivee par defaut ailleurs, reactivable via `SWAGGER_ENABLED=true` (KKS-311) |
 
+## Processus de release
+
+La version vit dans **quatre** fichiers, tous a incrementer ensemble :
+
+| Fichier | Format |
+|---------|--------|
+| `VERSION` | `6.1.0` |
+| `api/pom.xml` | `<version>` du projet, pas celle du parent Spring Boot |
+| `app/package.json` | champ `version` |
+| `flutter/pubspec.yaml` | `6.1.0+2` — le `+N` suit le rythme des depots sur les stores, pas celui des releases |
+
+Le workflow `version-check` compare les quatre sur toute PR vers `main` et nomme
+le fichier fautif. Avant KKS-314, `flutter/pubspec.yaml` etait fige a `1.0.0+1`
+et hors du controle : l'incoherence n'apparaissait qu'apres publication, dans le
+champ `serverVersion` de `/api/meta`.
+
+Le reste du processus :
+
+1. Mettre a jour `CHANGELOG.md` — bloc `Unreleased` promu, liens de comparaison
+2. Commit sur `develop`, puis PR `develop` -> `main` (le push direct sur `main`
+   est bloque)
+3. **Ne jamais pousser le tag** : la CI le cree au merge, apres le gate de tests
+   et la publication des images. Un tag `vX.Y.Z` implique donc qu'une image
+   `:X.Y.Z` existe
+
 ## Recent Changes
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
 
+- **KKS-314 — `GET /api/meta` et detection d'incompatibilite (v6.1.0)** : endpoint public **non versionne** — `MetaController` vit hors du package `...api.controller`, sinon `ApiVersioningConfig` le prefixerait, or un client ne peut pas deviner le prefixe du serveur qu'il interroge. Expose `serverVersion` (derivee du build via `build-info`), `apiVersion`, `minClientVersion` (property `MIN_CLIENT_VERSION`) et `capabilities` (valeurs de `Feature`). **Un serveur injoignable n'est jamais traite comme incompatible** : 404 avec reponse HTTP = serveur trop ancien, absence de reponse = hors ligne, le cache prend le relais. Quand les deux sont hors plage, `clientTooOld` prime — mettre a jour son app est actionnable, mettre a jour un serveur qui exige deja plus recent ne l'est pas. `server_setup_screen` valide l'URL saisie via cet endpoint : l'ancien `HEAD` acceptait tout statut < 500, donc n'importe quel serveur web. `pubspec.yaml` aligne sur le monorepo (1.0.0+1 -> 6.0.0+1).
+- **CI Flutter reparee, rouge de juin a septembre 2026** : le workflow tournait sur `flutter:stable`, tag mouvant qui a fini par livrer un SDK ou `IconData` est `final class`, que `phosphor_flutter` etend. Image epinglee sur `3.41.2`, alignee sur le SDK de developpement. Un check toujours rouge ne signale plus rien : sa remise en service a immediatement revele **trois fichiers source absents du depot** (`.gitignore` contenait `data/` sans ancre, ce qui avale tout repertoire de ce nom — dont `flutter/lib/src/data/`, ou vivent 41 fichiers) et une couverture de 55 % sur du code neuf.
+- **Profil Sonar Dart calibre** : il exigeait `prefer_double_quotes` la ou `analysis_options.yaml` impose `prefer_single_quotes` (6455 occurrences contre 43), `prefer_relative_imports` contre `avoid_relative_lib_imports`, et se contredisait lui-meme (`unnecessary_final` vs `prefer_final_parameters`). Cinq regles neutralisees via `sonar.issue.ignore.multicriteria` dans `flutter/sonar-project.properties` — versionne plutot que cote serveur. Les tests Flutter sortent de l'analyse de maintenabilite, comme les `*.spec.ts` cote Angular. Quality Gate : 346 signalements -> 0.
 - **KKS-313 — Endpoints metier prefixes en `/api/v1` (v6.0.0, BREAKING)** : `ApiVersioningConfig` prefixe les controllers du package `...api.controller` via `PathMatchConfigurer.addPathPrefix`. Le predicat cible le PACKAGE, pas l'annotation `@RestController` : `HandlerTypePredicate` combine ses selecteurs par OU, ajouter l'annotation elargirait la selection (springdoc se retrouvait sous `/v1/v3/api-docs`). Le versionnement natif de Spring 7 a ete evalue puis ecarte — son `PathApiVersionResolver` ne reecrit pas le chemin, et il vise la coexistence de versions, exclue ici. `SecurityConfig`, `AdminAuthorizationFilter` et `PasswordResetRequiredFilter` derivent leurs chemins de `CURRENT_VERSION_PREFIX`. Hors versionnement : `/actuator/**`, `/bank-logos/**`, `/ws`, OpenAPI. Verifie de bout en bout (Docker, navigateur).
 - **KKS-341 — Doublon obsolete `docs/constitution.md` (v6.0.0)** : la copie figee en v2.1.1 face a `.specify/memory/constitution.md` en v4.0.0 a ete supprimee. La constitution est ajoutee en tete des index de documentation de `README.md` et `CLAUDE.md`. Correctifs adjacents : lien mort `docs/design-tokens.md`, decompte des entites JPA (18, et non 17/19).
-- **KKS-308 — Images Docker multi-architecture (v5.4.0)** : images publiees en `linux/amd64` + `linux/arm64`. Les stages de build des deux Dockerfiles sont epingles sur `--platform=$BUILDPLATFORM` : le JAR Maven et le bundle Angular etant independants de l'architecture cible, ils ne passent jamais sous emulation QEMU. Cout mesure : +49 s sur `build-and-push` (5m13s -> 6m02s). `setup-qemu-action` requis pour les `RUN` du runtime arm64 de l'API.
-- **KKS-311 — OpenAPI restreinte au profil dev (v5.3.2)** : springdoc desactive par defaut, actif en profil `dev`, reactivable via `SWAGGER_ENABLED=true`. Handler dedie pour `NoResourceFoundException` : une route inconnue repond 404 `NOT_FOUND` au lieu de 500 avec trace ERROR.
-- **KKS-307 — Persistance des avatars en Docker (v5.3.2)** : volume nomme `api-avatars` monte sur `/app/data/avatars`. Les fichiers disparaissaient a chaque recreation du container, donc a chaque mise a jour d'image par Watchtower. Reprise des permissions a l'entrypoint, comme `logs`.
