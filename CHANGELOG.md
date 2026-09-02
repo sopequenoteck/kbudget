@@ -5,9 +5,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
-### Fixed
+## [6.2.0] - 2026-09-02
 
-- **Build local silencieusement cassé par un JDK trop récent** : la CI construit sous `maven:3.9-eclipse-temurin-21`, mais rien n'imposait la même version en local. Avec un JDK plus récent, `mvn verify` échouait après trois minutes sur `Unsupported class file major version 69` pendant l'instrumentation JaCoCo — un message qui ne désigne ni la cause ni la solution. Le cas est facile à rencontrer : `java -version` peut afficher 21 pendant que Maven utilise le JDK par défaut du gestionnaire de paquets, c'est `JAVA_HOME` qui tranche. Le `maven-enforcer-plugin` échoue désormais en quelques secondes avec la commande exacte à lancer. Prérequis rappelé dans `CLAUDE.md`.
+> Les endpoints d'authentification sont desormais limites en debit, et la
+> politique de compatibilite d'API est ecrite. Deux prealables a l'ouverture du
+> depot.
 
 ### Added
 
@@ -19,8 +21,6 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   - `securityFilterChain` ne déclare plus `throws Exception` : `HttpSecurity.build()` ne lève plus d'exception checked en Spring Security 7, la déclaration était un vestige. Signalé par Sonar parce que l'ajout d'un paramètre a fait de cette ligne du code neuf — un cas où « Clean as You Code » fait remonter une dette préexistante au moment où on touche la ligne.
   - Effet de bord assumé : les suites `@WebMvcTest` d'authentification enchaînent bien plus de tentatives qu'un utilisateur réel depuis la même IP MockMvc. La limite y est neutralisée explicitement, et le comportement réel est vérifié par `RateLimitIT`.
 
-### Added
-
 - **KKS-315 — Politique de compatibilité d'API** : le projet ne sert qu'une seule version d'API à la fois (KKS-313), donc la compatibilité descendante ne repose sur aucun mécanisme — seulement sur une discipline d'écriture, qui n'était écrite nulle part. `docs/api-compatibility.md` l'énonce : six règles (ne jamais retirer ni renommer un champ de réponse, ne jamais rendre obligatoire un champ de requête qui ne l'était pas, passer par un nouvel endpoint, ne pas invalider une réponse servie par une migration Flyway, tolérer les valeurs d'enum inconnues côté client, assumer les ruptures) et la procédure complète de rupture assumée, `minClientVersion` comprise.
   - `.github/pull_request_template.md` : la checklist arrive au moment où elle compte, à la revue. Le dépôt n'avait aucun template.
   - Renvois depuis `README.md` et depuis `CLAUDE.md` — index et principe I, qui portait déjà la règle 1 en germe.
@@ -29,12 +29,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Build local silencieusement cassé par un JDK trop récent** : la CI construit sous `maven:3.9-eclipse-temurin-21`, mais rien n'imposait la même version en local. Avec un JDK plus récent, `mvn verify` échouait après trois minutes sur `Unsupported class file major version 69` pendant l'instrumentation JaCoCo — un message qui ne désigne ni la cause ni la solution. Le cas est facile à rencontrer : `java -version` peut afficher 21 pendant que Maven utilise le JDK par défaut du gestionnaire de paquets, c'est `JAVA_HOME` qui tranche. Le `maven-enforcer-plugin` échoue désormais en quelques secondes avec la commande exacte à lancer. Prérequis rappelé dans `CLAUDE.md`.
+
 - **`MIN_CLIENT_VERSION` invisible et sans effet en Docker** : la variable était documentée dans `docs/deployment.md` mais absente de `.env.example`, et surtout non transmise par `docker-compose.yml` — la définir dans son `.env` restait donc sans effet. Un self-hoster voulant relever le minimum exigé pour bloquer les vieux clients ne le pouvait pas. Même défaut que celui corrigé pour `CORS_ALLOWED_ORIGINS` quelques heures plus tôt, reproduit à l'identique.
 
 - **`version-check` ne contrôlait qu'un fichier sur quatre** : depuis KKS-314, la version vit dans `VERSION`, `api/pom.xml`, `app/package.json` et `flutter/pubspec.yaml`. Le workflow ne vérifiait que le premier — oublier l'un des trois autres passait silencieusement, et l'incohérence n'apparaissait qu'après publication : dans le champ `serverVersion` de `/api/meta` pour l'API, dans le pied de page pour le frontend. Une étape compare désormais les quatre et nomme le fichier fautif. Le build number Flutter (`+N`) est ignoré : il suit le rythme des dépôts sur les stores, pas celui des releases.
 
 - **Deux derniers signalements Sonar sur le code Flutter de KKS-314** : une référence `[dio]` dans un commentaire de documentation pointait vers un paramètre privé `_dio`, donc invisible depuis la doc générée ; et les imports ajoutés à `onboarding_notifier.dart` l'avaient été en fin de bloc plutôt qu'à leur place alphabétique. Le Quality Gate Flutter est désormais sans signalement.
-
 ## [6.1.0] - 2026-09-01
 
 > Les clients savent désormais reconnaître un serveur incompatible. C'est aussi
@@ -499,7 +500,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.2.0...HEAD
+[6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
