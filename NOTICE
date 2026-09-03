@@ -1,0 +1,110 @@
+k-budget — Third-party assets notice
+====================================
+
+Ce fichier recense les elements du depot qui **ne sont pas couverts** par les
+licences du projet (AGPL-3.0 pour `api/` et `app/`, MPL-2.0 pour `flutter/`).
+On ne licencie pas ce qu'on ne possede pas : ces elements appartiennent a leurs
+titulaires respectifs.
+
+Voir [LICENSE](LICENSE), [flutter/LICENSE](flutter/LICENSE) et la section
+« Licence » du [README](README.md).
+
+
+1. Logos d'etablissements bancaires
+-----------------------------------
+
+**Emplacements** — les memes fichiers sont presents en deux exemplaires, un par
+client :
+
+    api/src/main/resources/static/bank-logos/
+    flutter/assets/banks/
+
+**Statut.** Ces logos sont des marques deposees appartenant aux etablissements
+qui les detiennent. Ils sont inclus dans ce depot **a seule fin d'identifier
+visuellement l'etablissement associe a un compte de l'utilisateur**. Leur
+presence ne vaut ni partenariat, ni affiliation, ni approbation par ces
+etablissements, et **ils ne sont couverts par aucune des licences du projet**.
+
+Un fork, une redistribution ou une republication de ce depot ne recoit aucun
+droit sur ces marques. Il appartient a qui redistribue de verifier ce que sa
+propre juridiction autorise.
+
+**28 marques concernees**, plus `other.svg` qui est un pictogramme generique du
+projet et ne pose pas ce probleme :
+
+    Fichier          Etablissement
+    ---------------  ---------------------------------------
+    bia.svg          BIA
+    bnp.svg          BNP Paribas
+    bourso.svg       Boursorama
+    bp.svg           Banque Populaire
+    ca.svg           Credit Agricole
+    ce.svg           Caisse d'Epargne
+    cm.svg           Credit Mutuel
+    fortuneo.svg     Fortuneo
+    hello.svg        Hello Bank
+    hsbc_fr.svg      HSBC France
+    lbp.svg          La Banque Postale
+    lcl.svg          LCL
+    n26.svg          N26
+    revolut.svg      Revolut
+    sg.svg           Societe Generale
+    wise.svg         Wise
+
+    bdt.svg          Banque de Developpement du Togo
+    boa.svg          Bank of Africa
+    bsic.svg         BSIC
+    btci.svg         BTCI
+    coris.svg        Coris Bank
+    ecobank.svg      Ecobank
+    nsia.svg         NSIA Banque
+    orabank.svg      Orabank
+    sgto.svg         Societe Generale Togo
+    sunu.svg         SUNU Bank
+    uba.svg          United Bank for Africa
+    utb.svg          UTB
+
+La correspondance fait autorite dans
+`api/src/main/java/fr/kksdev/budget/api/service/BankRegistry.java`.
+
+**En cas de contestation** — si un etablissement s'y oppose, ou si une
+plateforme de distribution estime que l'affichage de ces marques suggere une
+affiliation, le repli prevu est le remplacement par des monogrammes colores
+generes. Ce repli est moins couteux a decider maintenant qu'au moment d'une
+soumission aux stores.
+
+
+2. Police Inter
+---------------
+
+**Emplacement** : `flutter/assets/fonts/Inter/`
+**Licence** : SIL Open Font License 1.1
+**Texte** : `flutter/assets/fonts/Inter/OFL.txt`
+**Copyright** : (c) 2016 The Inter Project Authors
+**Source** : https://github.com/rsms/inter
+
+L'OFL autorise la redistribution a condition de joindre le texte de la licence.
+`OFL.txt` se trouve dans le repertoire de la police, lui-meme declare comme
+ressource dans `flutter/pubspec.yaml` : le texte est donc embarque dans
+l'application distribuee, et pas seulement present dans le depot.
+
+
+3. Ce qui appartient au projet
+------------------------------
+
+Pour lever l'ambiguite, les elements suivants ne sont **pas** des actifs tiers :
+
+- `app/public/icons/`, `flutter/web/favicon.png`, `app/public/favicon.ico`,
+  `flutter/assets/budget-icon-no-background.svg` — icones du projet.
+- `other.svg` — pictogramme generique, sans marque.
+- `docs/screenshots/` — captures de l'application elle-meme.
+
+**Le nom « k-budget » et le logo du projet sont reserves** et ne sont couverts
+par aucune des licences du projet. Un fork est libre d'exister ; il doit se
+presenter sous un autre nom et un autre logo. Voir la section « Licence » du
+README.
+
+
+---
+Ce document decrit des elements de propriete intellectuelle. Il ne constitue
+pas un avis juridique.

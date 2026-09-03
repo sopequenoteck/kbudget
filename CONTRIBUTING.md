@@ -71,6 +71,11 @@ des qu'il quitte le depot :
 Le nom « k-budget » et le logo sont reserves et ne sont couverts par aucune de
 ces licences. Un fork est libre d'exister, sous un autre nom.
 
+Certains elements du depot echappent aux deux licences : les logos
+d'etablissements bancaires et la police Inter. Ils sont recenses dans
+[`NOTICE`](NOTICE). **N'ajoutez pas de logo de marque sans le declarer la** —
+et preferez, quand c'est possible, un actif dont la licence est claire.
+
 ## Avant d'ouvrir une pull request
 
 Le projet suit une constitution — [`.specify/memory/constitution.md`](.specify/memory/constitution.md) —

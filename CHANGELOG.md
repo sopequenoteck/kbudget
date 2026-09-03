@@ -7,6 +7,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **KKS-318 — Actifs tiers déclarés : `NOTICE` et licence OFL de la police Inter** : le README affirmait depuis KKS-316 que les logos de banques et la police Inter étaient hors licence, sans qu'aucun fichier ne le matérialise. L'affirmation était correcte et pas encore opposable.
+  - `NOTICE` à la racine recense les **28 marques** concernées avec leur établissement, tiré de `BankRegistry` plutôt que deviné, et énonce que leur présence ne vaut ni partenariat ni affiliation.
+  - **Les logos sont présents en deux exemplaires**, `api/src/main/resources/static/bank-logos/` et `flutter/assets/banks/` — le ticket ne mentionnait que le premier. Déclarer un seul emplacement aurait laissé la moitié des fichiers non couverts, sous deux licences différentes de surcroît.
+  - `flutter/assets/fonts/Inter/OFL.txt` ajouté, texte officiel depuis le dépôt d'Inter. Le répertoire de la police étant déclaré comme ressource dans `pubspec.yaml`, la licence est **embarquée dans l'application distribuée** et pas seulement présente dans le dépôt — ce que l'OFL exige à la redistribution.
+  - Le repli en cas de contestation (monogrammes générés) est écrit dans le `NOTICE`, où il sera lu au moment utile plutôt que dans un ticket fermé.
+  - `NOTICE` référencé depuis le README et `CONTRIBUTING.md`, avec la consigne de ne pas ajouter de logo de marque sans l'y déclarer.
 - **KKS-317 — Accord de contribution (CLA) avant la première contribution externe** : sans lui, la première pull request externe fusionnée aurait rendu toute relicence impossible sans l'accord écrit de chaque contributeur, y compris ceux devenus injoignables. Ce point se referme **silencieusement** — aucun signal n'avertit qu'il est trop tard.
   - `CLA.md` adapté de l'Apache ICLA V2.2, texte officiel extrait de la source. Les trois écarts par rapport au modèle sont énoncés dans le document plutôt que laissés à découvrir.
   - **Une contrepartie explicite remplace celle de l'ICLA.** L'accord Apache est équilibré par l'engagement de la Foundation à agir conformément à son statut non lucratif ; un mainteneur seul ne peut pas le reprendre. À la place, le projet s'engage à ce que les contributions restent disponibles sous une licence approuvée par l'OSI : une relicence peut changer laquelle, elle ne peut pas les retirer du logiciel libre.
