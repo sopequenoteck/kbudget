@@ -63,8 +63,8 @@
         form.controls.password.hasError('required')
           ? 'Mot de passe requis'
           : form.controls.password.hasError('minlength')
-            ? '8 caractères minimum'
-            : '100 caractères maximum'
+            ? passwordMinLengthMessage
+            : passwordMaxLengthMessage
       "
       [showError]="form.controls.password.touched && form.controls.password.invalid"
     >
@@ -73,7 +73,7 @@
         type="password"
         formControlName="password"
         autocomplete="new-password"
-        placeholder="Au moins 8 caractères"
+        [placeholder]="passwordPlaceholder"
         [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
       />
     </app-form-field>

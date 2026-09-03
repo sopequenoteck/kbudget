@@ -57,7 +57,7 @@
           label="Mot de passe"
           fieldId="accept-password"
           prefixIcon="phosphorLock"
-          errorMessage="8 caractères minimum"
+          [errorMessage]="passwordMinLengthMessage"
           [showError]="form.controls.password.touched && form.controls.password.invalid"
         >
           <input
@@ -65,7 +65,7 @@
             type="password"
             formControlName="password"
             autocomplete="new-password"
-            placeholder="Au moins 8 caractères"
+            [placeholder]="passwordPlaceholder"
             [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
           />
         </app-form-field>

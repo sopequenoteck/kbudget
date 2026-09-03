@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
@@ -153,7 +154,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 obscureText: !_showNew,
                 decoration: InputDecoration(
                   labelText: 'Nouveau mot de passe',
-                  helperText: 'Minimum 12 caractères',
+                  helperText: PasswordPolicy.helperText,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: PhosphorIcon(
@@ -166,8 +167,8 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Champ requis';
-                  if (v.length < 12) {
-                    return 'Le mot de passe doit contenir au moins 12 caractères';
+                  if (v.length < PasswordPolicy.minLength) {
+                    return PasswordPolicy.tooShortMessage;
                   }
                   return null;
                 },

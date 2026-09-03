@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/data/remote/api_client.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
@@ -247,13 +248,14 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
+              helperText: PasswordPolicy.helperText,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Veuillez saisir un mot de passe';
               }
-              if (value.length < 8) {
-                return 'Le mot de passe doit contenir au moins 8 caractères';
+              if (value.length < PasswordPolicy.minLength) {
+                return PasswordPolicy.tooShortMessage;
               }
               return null;
             },

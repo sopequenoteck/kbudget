@@ -450,6 +450,7 @@ classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
 | Surface | Etat | Motif |
 |---------|------|-------|
 | Onboarding et configuration serveur | **Suivi** | C'est le client Flutter qui subit le scenario que KKS-314 supprime : mis a jour par les stores face a un serveur reste en arriere. L'exclure de la detection d'incompatibilite viderait le mecanisme de son objet |
+| Reinitialisation a la premiere connexion | **Suivi** | Portee par KKS-309. Le tout premier compte de chaque installation self-hostee est dans cet etat : l'exclure laisserait un utilisateur enferme dans une application qui s'ouvre et ne fonctionne pas |
 
 ## Flux d'authentification
 
@@ -458,6 +459,9 @@ classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
 - `POST /api/v1/auth/refresh` renouvelle les tokens (rotation : l'ancien refresh token est consomme)
 - `POST /api/v1/auth/logout` revoque le refresh token
 - Cote Angular : intercepteur HTTP ajoute le token et renouvelle automatiquement via refresh, guard protege les routes, ecran auth dedie (login, acceptation d'invitation, reset premiere connexion)
+- Cote Flutter (KKS-309) : meme parcours, mecanique differente. La protection ne passe pas par un guard mais par le `redirect` global de `GoRouter`, a l'interieur du bloc `dataMode == DataMode.server` — l'ecran de reset est donc structurellement inatteignable en mode local, et le contournement par navigation manuelle impossible. L'etat est porte par un variant sealed `AuthState.passwordResetRequired`, et non par un booleen sur `authenticated` : un nouveau type est visible dans les `is`, un champ optionnel s'oublie.
+- **Le flag peut ne pas etre connu a la connexion.** Apres redemarrage de l'application, les jetons sont restaures depuis le stockage et `mustResetCredentials` n'est ni dans le JWT ni persiste. `jwt_interceptor` intercepte alors le `403 PASSWORD_RESET_REQUIRED` au premier appel metier et bascule l'etat. La discrimination se fait sur le code d'erreur du corps : un `403 ACCESS_DENIED` ne redirige pas.
+- **Longueur du mot de passe** (KKS-351) : une seule regle pour tous les parcours de creation ou de changement, portee par `PasswordPolicy` cote API et utilisee directement dans les annotations `@Size`. Les clients en derivent leur propre constante (`password.constants.ts`, `password_policy.dart`). Le login n'impose aucune longueur : il verifie un mot de passe existant, et l'imposer bloquerait un compte anterieur a un durcissement.
 - Multi-utilisateurs sur une meme instance : credentials stockes en base (BCrypt), isolation stricte par user authentifie sur chaque requete
 
 ## Schema de deploiement

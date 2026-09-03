@@ -5,6 +5,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- **KKS-351 — Une seule longueur minimale de mot de passe, 12 caractères** : le projet en appliquait quatre. `ChangePasswordRequest` et `FirstLoginResetRequest` exigeaient 12, `AcceptInviteRequest` 8, et l'écran de connexion Angular en annonçait 6 — pour vérifier un mot de passe existant, ce qui aurait bloqué un compte antérieur à un durcissement.
+  - **Le parcours d'acceptation d'invitation passe de 8 à 12.** Un client déjà déployé qui valide 8 caractères verra une acceptation refusée en `400 VALIDATION_ERROR`. L'utilisateur peut choisir un mot de passe plus long : ce n'est pas un blocage, mais c'est un changement de comportement à connaître avant de mettre à jour une instance.
+  - L'écran Angular de première connexion **annonçait 8 face à un serveur qui en exigeait 12** : la saisie passait la validation client puis échouait côté serveur, et `mapAuthError` affichait le message brut de Bean Validation — « password: size must be between 12 and 100 », en anglais, sur un écran français.
+  - Les `VALIDATION_ERROR` sont désormais formulées à partir de `details` (couple `field` / `code`) et non du `message` du serveur. La traduction générale des codes reste l'objet de KKS-324.
+  - La valeur ne vit plus qu'à trois endroits, un par stack : `PasswordPolicy` (API), `password.constants.ts` (Angular), `PasswordPolicy` (Flutter). Elle était auparavant écrite en dur dans quatorze fichiers — trois DTOs, huit fichiers Angular, trois écrans Flutter — ce qui est précisément ce qui a produit la divergence.
+  - Ce travail termine KKS-235, qui avait décidé l'harmonisation à 12 et relevé `FirstLoginResetRequest` sans toucher au parcours d'invitation ni aux clients.
+
 ### Fixed
 
 - **KKS-312 — DT-006 : la CI APP ne dépend plus d'un runner self-hosted** : la suite de tests échouait en cascade dès que plusieurs fichiers `.spec.ts` partageaient un worker vitest — 415 tests sur 507. Le contournement était de faire tourner les tests APP sur le runner self-hosted, ce qui rendait toute contribution frontend externe invérifiable.

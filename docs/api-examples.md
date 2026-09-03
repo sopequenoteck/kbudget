@@ -84,7 +84,7 @@ Request :
 ```json
 {
   "token": "8b3f7c2a-4d5e-...",
-  "password": "secret123",
+  "password": "motDePasse12",
   "displayName": "Kelly",
   "currency": "XOF",
   "timezone": "Africa/Lome"
@@ -92,6 +92,12 @@ Request :
 ```
 
 > `email` n'est **pas** dans le body — l'email vient de l'invitation (verrouille cote serveur).
+
+> `password` doit faire **au moins 12 caracteres** (KKS-351), comme sur
+> `/auth/first-login-reset` et `/user/password`. Ce parcours en exigeait 8
+> auparavant : un client plus ancien qui valide 8 caracteres recevra une
+> `400 VALIDATION_ERROR`. Source de verite : `PasswordPolicy` cote API, dont
+> les clients derivent leur propre constante.
 
 Response `201` :
 
