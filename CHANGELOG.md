@@ -5,6 +5,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-09-03
+
+> Le parcours de premiere connexion fonctionne enfin depuis le mobile, la CI
+> APP tourne sur un runner GitHub, et une seule regle de mot de passe
+> s'applique partout.
+
+### Added
+
+- **KKS-309 — Écran de réinitialisation à la première connexion (Flutter)** : un compte provisionné par un administrateur — dont l'admin seed créé par `BootstrapSeedRunner` au premier démarrage de **toute** installation self-hostée — se connectait depuis le mobile, entrait dans le dashboard, puis voyait chaque appel métier rejeté en 403 par `PasswordResetRequiredFilter`, sans aucun écran pour s'en sortir. Il devait ouvrir le web pour débloquer son compte.
+  - **La racine n'était pas l'écran manquant** : le DTO `AuthResponse` côté Flutter ne déclarait pas `mustResetCredentials`, pourtant servi par l'API. Le signal était reçu et jeté silencieusement.
+  - L'état est porté par un variant sealed `AuthState.passwordResetRequired`, et non par un booléen sur `authenticated` : un nouveau type est visible dans les `is`, un champ optionnel à `false` s'oublie.
+  - La redirection vit dans le `redirect` global de GoRouter, à l'intérieur du bloc `dataMode == server` — l'écran est donc structurellement inatteignable en mode local, et le contournement par navigation manuelle impossible.
+  - `jwt_interceptor` ne traitait que le 401 : il intercepte désormais le `403 PASSWORD_RESET_REQUIRED`, pour le cas où le flag n'a pas été vu à la connexion (jetons restaurés au démarrage, l'information n'étant ni dans le JWT ni persistée). La discrimination se fait sur le code d'erreur du corps, un `ACCESS_DENIED` ne redirige pas.
+
 ### Changed
 
 - **KKS-351 — Une seule longueur minimale de mot de passe, 12 caractères** : le projet en appliquait quatre. `ChangePasswordRequest` et `FirstLoginResetRequest` exigeaient 12, `AcceptInviteRequest` 8, et l'écran de connexion Angular en annonçait 6 — pour vérifier un mot de passe existant, ce qui aurait bloqué un compte antérieur à un durcissement.
@@ -518,7 +532,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.2.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.0...HEAD
+[6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
