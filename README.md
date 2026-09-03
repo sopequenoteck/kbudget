@@ -114,7 +114,8 @@ s'applique avant de reutiliser du code.
 | `flutter/` — application mobile | **MPL-2.0** | [`flutter/LICENSE`](flutter/LICENSE) |
 
 Tout autre fichier du depot (racine, `docs/`, `deploy/`, `scripts/`,
-`.github/`) est couvert par l'**AGPL-3.0**.
+`.github/`) est couvert par l'**AGPL-3.0**, a l'exception des elements
+recenses dans [`NOTICE`](NOTICE).
 
 ### Pourquoi deux licences
 
@@ -143,10 +144,16 @@ projet ni lui en imputer le comportement.
 
 ### Actifs tiers
 
-Les logos de banques (`api/src/main/resources/static/bank-logos/`) et la police
-Inter (`flutter/assets/fonts/Inter/`) appartiennent a leurs titulaires
-respectifs et **ne sont couverts par aucune des licences ci-dessus**. Leur
-declaration separee est en cours (KKS-318).
+Les logos d'etablissements bancaires et la police Inter appartiennent a leurs
+titulaires respectifs et **ne sont couverts par aucune des licences ci-dessus**.
+Ils sont recenses dans [`NOTICE`](NOTICE), qui precise leur statut et le repli
+prevu en cas de contestation.
+
+Les logos sont presents en deux exemplaires, un par client :
+`api/src/main/resources/static/bank-logos/` et `flutter/assets/banks/`. La
+police Inter est sous SIL Open Font License 1.1, dont le texte est joint dans
+[`flutter/assets/fonts/Inter/OFL.txt`](flutter/assets/fonts/Inter/OFL.txt) et
+embarque dans l'application distribuee.
 
 ### Dependances
 
