@@ -5,6 +5,38 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-09-03
+
+> Le parcours de premiere connexion fonctionne enfin depuis le mobile, la CI
+> APP tourne sur un runner GitHub, et une seule regle de mot de passe
+> s'applique partout.
+
+### Added
+
+- **KKS-309 — Écran de réinitialisation à la première connexion (Flutter)** : un compte provisionné par un administrateur — dont l'admin seed créé par `BootstrapSeedRunner` au premier démarrage de **toute** installation self-hostée — se connectait depuis le mobile, entrait dans le dashboard, puis voyait chaque appel métier rejeté en 403 par `PasswordResetRequiredFilter`, sans aucun écran pour s'en sortir. Il devait ouvrir le web pour débloquer son compte.
+  - **La racine n'était pas l'écran manquant** : le DTO `AuthResponse` côté Flutter ne déclarait pas `mustResetCredentials`, pourtant servi par l'API. Le signal était reçu et jeté silencieusement.
+  - L'état est porté par un variant sealed `AuthState.passwordResetRequired`, et non par un booléen sur `authenticated` : un nouveau type est visible dans les `is`, un champ optionnel à `false` s'oublie.
+  - La redirection vit dans le `redirect` global de GoRouter, à l'intérieur du bloc `dataMode == server` — l'écran est donc structurellement inatteignable en mode local, et le contournement par navigation manuelle impossible.
+  - `jwt_interceptor` ne traitait que le 401 : il intercepte désormais le `403 PASSWORD_RESET_REQUIRED`, pour le cas où le flag n'a pas été vu à la connexion (jetons restaurés au démarrage, l'information n'étant ni dans le JWT ni persistée). La discrimination se fait sur le code d'erreur du corps, un `ACCESS_DENIED` ne redirige pas.
+
+### Changed
+
+- **KKS-351 — Une seule longueur minimale de mot de passe, 12 caractères** : le projet en appliquait quatre. `ChangePasswordRequest` et `FirstLoginResetRequest` exigeaient 12, `AcceptInviteRequest` 8, et l'écran de connexion Angular en annonçait 6 — pour vérifier un mot de passe existant, ce qui aurait bloqué un compte antérieur à un durcissement.
+  - **Le parcours d'acceptation d'invitation passe de 8 à 12.** Un client déjà déployé qui valide 8 caractères verra une acceptation refusée en `400 VALIDATION_ERROR`. L'utilisateur peut choisir un mot de passe plus long : ce n'est pas un blocage, mais c'est un changement de comportement à connaître avant de mettre à jour une instance.
+  - L'écran Angular de première connexion **annonçait 8 face à un serveur qui en exigeait 12** : la saisie passait la validation client puis échouait côté serveur, et `mapAuthError` affichait le message brut de Bean Validation — « password: size must be between 12 and 100 », en anglais, sur un écran français.
+  - Les `VALIDATION_ERROR` sont désormais formulées à partir de `details` (couple `field` / `code`) et non du `message` du serveur. La traduction générale des codes reste l'objet de KKS-324.
+  - La valeur ne vit plus qu'à trois endroits, un par stack : `PasswordPolicy` (API), `password.constants.ts` (Angular), `PasswordPolicy` (Flutter). Elle était auparavant écrite en dur dans quatorze fichiers — trois DTOs, huit fichiers Angular, trois écrans Flutter — ce qui est précisément ce qui a produit la divergence.
+  - Ce travail termine KKS-235, qui avait décidé l'harmonisation à 12 et relevé `FirstLoginResetRequest` sans toucher au parcours d'invitation ni aux clients.
+
+### Fixed
+
+- **KKS-312 — DT-006 : la CI APP ne dépend plus d'un runner self-hosted** : la suite de tests échouait en cascade dès que plusieurs fichiers `.spec.ts` partageaient un worker vitest — 415 tests sur 507. Le contournement était de faire tourner les tests APP sur le runner self-hosted, ce qui rendait toute contribution frontend externe invérifiable.
+  - **La cause n'était pas celle documentée.** `setupFiles` ne s'exécutait **jamais** : `src/test-setup.ts` était absent de l'`include` de `tsconfig.spec.json`, et le plugin Angular produit une sortie vide pour un fichier hors de son programme TypeScript. Vitest chargeait un module vide, sans erreur ni avertissement. Le même fichier en `.js` s'exécutait, en `.ts` non.
+  - Conséquence en chaîne : les hooks de nettoyage du TestBed — ceux que Karma/Jasmine posent d'office — n'étaient jamais installés. L'init manuelle répétée dans 47 specs compensait le symptôme et tenait tant que chaque fichier avait son propre worker.
+  - Les trois pistes envisagées par DT-006 portaient à côté : `--isolate` et `--max-workers=1` ne changent rien, vérifié.
+  - `setupTestBed()` de `@analogjs/vitest-angular` remplace les 47 inits manuelles. `@analogjs/vite-plugin-angular`, importé par `vitest.config.ts` alors qu'il n'était présent que comme dépendance transitive, est désormais déclaré.
+  - Le job `test-app` du gate de release passe sur `ubuntu-latest`, et `ci-app.yml` gagne un job de tests sur runner GitHub — le seul qu'une PR de fork puisse exécuter, le self-hosted ayant accès au socket Docker. Le job Sonar y reste, sa dépendance au réseau Docker interne n'ayant rien à voir avec DT-006.
+
 ## [6.2.0] - 2026-09-02
 
 > Les endpoints d'authentification sont desormais limites en debit, et la
@@ -500,7 +532,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.2.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.0...HEAD
+[6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0

@@ -22,6 +22,12 @@ import { InvitationService } from '../../../../core/services/invitation.service'
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_MESSAGE,
+  PASSWORD_PLACEHOLDER,
+} from '../../../../core/constants/password.constants';
 
 @Component({
   selector: 'app-accept-invite',
@@ -61,8 +67,11 @@ export class AcceptInvite implements OnInit {
     { code: 'MAD', label: 'MAD - Dirham marocain' },
   ];
 
+  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
+  readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
+
   readonly form = this.fb.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)]],
     displayName: ['', [Validators.required, Validators.maxLength(100)]],
     currency: ['EUR', [Validators.required]],
     timezone: [this.detectTimezone(), [Validators.required]],

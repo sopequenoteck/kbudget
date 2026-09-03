@@ -1,13 +1,8 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 
 import { PreferenceService } from '../services/preference';
 import { featureGuard } from './feature.guard';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('featureGuard', () => {
   let preferenceService: {

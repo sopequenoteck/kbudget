@@ -7,10 +7,17 @@ import { ApiService } from './api';
 import { AuthResponse, FirstLoginResetRequest, LoginRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
 import { DevLogger } from './dev-logger';
+import { PASSWORD_MIN_LENGTH_MESSAGE } from '../constants/password.constants';
 
 const STORAGE_TOKEN_KEY = 'budget_token';
 const STORAGE_REFRESH_TOKEN_KEY = 'budget_refresh_token';
 const STORAGE_USER_KEY = 'budget_user';
+
+interface ValidationErrorDetail {
+  field: string;
+  code: string;
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -197,11 +204,35 @@ export class AuthService {
     return payload['exp'] < Date.now() / 1000;
   }
 
+  /**
+   * Traduit une `VALIDATION_ERROR` a partir de `details`, jamais du `message`.
+   *
+   * Le `message` du serveur est technique et en anglais (« password: size must
+   * be between 12 and 100 ») : l'afficher tel quel sur un ecran francais est
+   * incomprehensible. `details` associe chaque contrainte a son champ, ce qui
+   * permet de formuler sans analyser la chaine.
+   *
+   * Seule la longueur du mot de passe est traitee ici, c'est le cas que les
+   * ecrans d'authentification produisent reellement. La traduction generale
+   * des codes d'erreur fait l'objet de KKS-324.
+   */
+  private mapValidationError(error: HttpErrorResponse): string {
+    const details: ValidationErrorDetail[] = error.error?.details ?? [];
+    const passwordSize = details.find((d) => d.field === 'password' && d.code === 'SIZE');
+    if (passwordSize) {
+      return PASSWORD_MIN_LENGTH_MESSAGE;
+    }
+    return 'Veuillez vérifier les informations saisies.';
+  }
+
   private mapAuthError(error: HttpErrorResponse): string {
     if (error.status === 400) {
       const errorCode = error.error?.error;
       if (errorCode === 'PASSWORD_UNCHANGED') {
         return 'Le nouveau mot de passe doit être différent de l\'actuel.';
+      }
+      if (errorCode === 'VALIDATION_ERROR') {
+        return this.mapValidationError(error);
       }
       return error.error?.message ?? 'Une erreur est survenue';
     }

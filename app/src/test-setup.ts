@@ -1,4 +1,5 @@
-// Angular test environment initialization
-// Note: initTestEnvironment is called directly in spec files
-// to work around Vitest setupFiles loading issues with Angular 21.
-// This file is kept for future setup needs (e.g., global mocks).
+import '@angular/compiler';
+import '@analogjs/vitest-angular/setup-snapshots';
+import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
+
+setupTestBed();

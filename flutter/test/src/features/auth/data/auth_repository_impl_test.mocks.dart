@@ -164,6 +164,45 @@ class MockAuthRemoteDataSource extends _i1.Mock
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i2.AuthResponse> firstLoginReset({
+    required String? email,
+    required String? password,
+    required String? displayName,
+    required String? accessToken,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#firstLoginReset, [], {
+              #email: email,
+              #password: password,
+              #displayName: displayName,
+              #accessToken: accessToken,
+            }),
+            returnValue: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(#firstLoginReset, [], {
+                  #email: email,
+                  #password: password,
+                  #displayName: displayName,
+                  #accessToken: accessToken,
+                }),
+              ),
+            ),
+            returnValueForMissingStub: _i5.Future<_i2.AuthResponse>.value(
+              _FakeAuthResponse_0(
+                this,
+                Invocation.method(#firstLoginReset, [], {
+                  #email: email,
+                  #password: password,
+                  #displayName: displayName,
+                  #accessToken: accessToken,
+                }),
+              ),
+            ),
+          )
+          as _i5.Future<_i2.AuthResponse>);
 }
 
 /// A class which mocks [FlutterSecureStorage].

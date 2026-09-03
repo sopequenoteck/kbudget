@@ -188,7 +188,7 @@ class AuthControllerTest {
     @Test
     void should_return_201_when_accept_invite_success() throws Exception {
         var request = new AcceptInviteRequest(
-                UUID.randomUUID(), "password123", "Alice", Currency.EUR, "Europe/Paris");
+                UUID.randomUUID(), "motDePasse12", "Alice", Currency.EUR, "Europe/Paris");
         var response = new AuthResponse("jwt-token", "refresh-token", "invitee@example.com", "Alice", false);
 
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class))).thenReturn(response);
@@ -216,11 +216,26 @@ class AuthControllerTest {
     }
 
     @Test
+    void should_return_400_when_password_one_char_below_minimum() throws Exception {
+        // 11 caracteres : la limite exacte, en dessous de PasswordPolicy.MIN_LENGTH.
+        // Avant KKS-351 ce parcours acceptait 8 caracteres la ou la premiere
+        // connexion en exigeait 12, pour le meme geste.
+        mockMvc.perform(post("/v1/auth/accept-invite")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"token\":\"" + UUID.randomUUID() + "\","
+                                + "\"password\":\"onzeCarac12\","
+                                + "\"displayName\":\"Alice\","
+                                + "\"currency\":\"EUR\","
+                                + "\"timezone\":\"Europe/Paris\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void should_return_400_when_token_null() throws Exception {
         mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":null,"
-                                + "\"password\":\"password123\","
+                                + "\"password\":\"motDePasse12\","
                                 + "\"displayName\":\"Alice\","
                                 + "\"currency\":\"EUR\","
                                 + "\"timezone\":\"Europe/Paris\"}"))
@@ -235,7 +250,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":\"" + UUID.randomUUID() + "\","
-                                + "\"password\":\"password123\","
+                                + "\"password\":\"motDePasse12\","
                                 + "\"displayName\":\"Alice\","
                                 + "\"currency\":\"EUR\","
                                 + "\"timezone\":\"Europe/Paris\"}"))
@@ -250,7 +265,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"token\":\"" + UUID.randomUUID() + "\","
-                                + "\"password\":\"password123\","
+                                + "\"password\":\"motDePasse12\","
                                 + "\"displayName\":\"Alice\","
                                 + "\"currency\":\"EUR\","
                                 + "\"timezone\":\"Europe/Paris\"}"))

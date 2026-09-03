@@ -1,12 +1,7 @@
-import { ComponentFixture, getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { AccountBankIcon } from './account-bank-icon';
 import { Account, AccountType } from '../../../core/models/account.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const makeAccount = (overrides: Partial<Account> = {}): Account => ({
   id: '1',

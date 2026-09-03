@@ -18,6 +18,7 @@ import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
 import 'package:k_budget/src/features/admin/presentation/users_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/accept_invite_screen.dart';
+import 'package:k_budget/src/features/auth/presentation/first_login_reset_screen.dart';
 import 'package:k_budget/src/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_detail_screen.dart';
@@ -133,11 +134,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
           final currentAuthState = ref.read(authNotifierProvider);
           final isAuthenticated = currentAuthState is AuthAuthenticated;
+          final mustResetCredentials =
+              currentAuthState is AuthPasswordResetRequired;
+          final isFirstLoginResetRoute =
+              matchedLocation == RouteNames.firstLoginReset;
 
-          if (!isAuthenticated && !isAuthRoute && !isInviteRoute) {
+          if (!isAuthenticated &&
+              !mustResetCredentials &&
+              !isAuthRoute &&
+              !isInviteRoute) {
             return RouteNames.login;
           }
           if (isAuthenticated && isAuthRoute) {
+            return RouteNames.dashboard;
+          }
+          if (mustResetCredentials && !isFirstLoginResetRoute) {
+            return RouteNames.firstLoginReset;
+          }
+          if (!mustResetCredentials && isFirstLoginResetRoute) {
             return RouteNames.dashboard;
           }
         }
@@ -176,6 +190,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.incompatibleName,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const IncompatibleScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.firstLoginReset,
+        name: RouteNames.firstLoginResetName,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FirstLoginResetScreen(),
       ),
       GoRoute(
         path: '/accept-invite/:token',

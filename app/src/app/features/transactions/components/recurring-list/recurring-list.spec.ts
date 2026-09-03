@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
@@ -13,10 +12,6 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 // ---------------------------------------------------------------------------
 // Données de test

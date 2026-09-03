@@ -1,15 +1,10 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, type ActivatedRouteSnapshot, type RouterStateSnapshot } from '@angular/router';
 import { signal } from '@angular/core';
 
 import { compatibilityGuard } from './compatibility.guard';
 import { CompatibilityService } from '../services/compatibility';
 import { type CompatibilityStatus } from '../models/meta.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const route = {} as ActivatedRouteSnapshot;
 const state = {} as RouterStateSnapshot;

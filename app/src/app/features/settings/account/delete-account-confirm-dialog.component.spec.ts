@@ -1,15 +1,10 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { DeleteAccountConfirmDialogComponent } from './delete-account-confirm-dialog.component';
 import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('DeleteAccountConfirmDialogComponent', () => {
   let userServiceMock: { deleteAccount: ReturnType<typeof vi.fn> };

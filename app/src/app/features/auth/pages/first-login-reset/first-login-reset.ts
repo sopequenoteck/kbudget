@@ -9,6 +9,13 @@ import {
   phosphorUser,
 } from '@ng-icons/phosphor-icons/regular';
 
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MAX_LENGTH_MESSAGE,
+  PASSWORD_MIN_LENGTH_MESSAGE,
+  PASSWORD_PLACEHOLDER,
+} from '../../../../core/constants/password.constants';
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
@@ -37,9 +44,13 @@ export class FirstLoginResetComponent {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
+  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
+  readonly passwordMaxLengthMessage = PASSWORD_MAX_LENGTH_MESSAGE;
+  readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
+
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
+    password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)]],
     passwordConfirm: ['', [Validators.required, passwordMatchValidator]],
     displayName: ['', [Validators.required, Validators.maxLength(100)]],
   });

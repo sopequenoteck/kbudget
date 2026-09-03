@@ -179,5 +179,80 @@ void main() {
       expect(state(), isA<AuthUnauthenticated>());
       verify(mockAuthRepo.logout()).called(1);
     });
+
+    test('should_bePasswordResetRequired_when_loginReturnsMustReset',
+        () async {
+      when(mockAuthRepo.login('provisioned@test.com', 'password'))
+          .thenAnswer((_) async => const AuthResult(
+                accessToken: 'access',
+                refreshToken: 'refresh',
+                email: 'provisioned@test.com',
+                mustResetCredentials: true,
+              ));
+
+      await notifier().login('provisioned@test.com', 'password');
+
+      expect(state(), isA<AuthPasswordResetRequired>());
+    });
+
+    test(
+        'should_bePasswordResetRequired_when_checkAuthRefreshReturnsMustReset',
+        () async {
+      when(mockAuthRepo.hasValidToken()).thenAnswer((_) async => false);
+      when(mockAuthRepo.refresh()).thenAnswer((_) async => const AuthResult(
+            accessToken: 'new_access',
+            refreshToken: 'new_refresh',
+            email: 'provisioned@test.com',
+            mustResetCredentials: true,
+          ));
+
+      await notifier().checkAuth();
+
+      expect(state(), isA<AuthPasswordResetRequired>());
+    });
+
+    test('should_setPasswordResetRequired_when_requirePasswordResetCalled',
+        () async {
+      // Authenticated first
+      when(mockAuthRepo.login('test@test.com', 'password'))
+          .thenAnswer((_) async => const AuthResult(
+                accessToken: 'access',
+                refreshToken: 'refresh',
+                email: 'test@test.com',
+              ));
+      await notifier().login('test@test.com', 'password');
+      expect(state(), isA<AuthAuthenticated>());
+
+      notifier().requirePasswordReset();
+
+      expect(state(), isA<AuthPasswordResetRequired>());
+    });
+
+    test('should_beAuthenticated_when_completeFirstLoginResetSucceeds',
+        () async {
+      when(mockAuthRepo.firstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+      )).thenAnswer((_) async => const AuthResult(
+            accessToken: 'new_access',
+            refreshToken: 'new_refresh',
+            email: 'test@test.com',
+            name: 'Test User',
+          ));
+
+      await notifier().completeFirstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+      );
+
+      expect(state(), isA<AuthAuthenticated>());
+      verify(mockAuthRepo.firstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+      )).called(1);
+    });
   });
 }

@@ -1,13 +1,8 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '../services/auth';
 import { authGuard } from './auth.guard';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('authGuard', () => {
   let authService: { isAuthenticated: ReturnType<typeof vi.fn> };

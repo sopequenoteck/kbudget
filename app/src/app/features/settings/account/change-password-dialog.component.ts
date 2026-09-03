@@ -16,6 +16,11 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_MESSAGE,
+} from '../../../core/constants/password.constants';
 import { UserService } from '../../../core/services/user';
 import { AuthResponse } from '../../../core/models/auth.model';
 
@@ -55,9 +60,14 @@ export class ChangePasswordDialogComponent {
 
   private resolveCallback: ((result: AuthResponse | null) => void) | null = null;
 
+  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
+
   readonly form = this.fb.nonNullable.group({
     currentPassword: ['', Validators.required],
-    newPassword: ['', [Validators.required, Validators.minLength(12)]],
+    newPassword: [
+      '',
+      [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)],
+    ],
     confirmPassword: ['', [Validators.required, passwordMatchValidator]],
   });
 
