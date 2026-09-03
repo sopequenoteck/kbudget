@@ -5,6 +5,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **KKS-316 — Licences posées : AGPL-3.0 (API + Angular) et MPL-2.0 (Flutter)** : le dépôt ne contenait **aucun** fichier de licence. Sans licence explicite, le code est juridiquement en « tous droits réservés » — le publier sur GitHub ne l'aurait pas rendu open source, et personne n'aurait eu le droit de l'utiliser, de le modifier ou de le redistribuer.
+  - `LICENSE` (AGPL-3.0) à la racine, `flutter/LICENSE` (MPL-2.0). Textes intégraux récupérés depuis gnu.org et mozilla.org.
+  - **Deux licences, pour une raison précise.** La clause réseau de l'AGPL empêche un tiers de fermer le backend pour en exploiter le service que ce projet a renoncé à être. Mais les conditions de l'App Store (DRM, limitation d'appareils) sont incompatibles avec GPL/AGPL — précédent VLC, retiré en 2011 et revenu après passage en MPL. La MPL-2.0 est un copyleft **par fichier** : la protection reste réelle sans le conflit.
+  - En-tête MPL ajouté aux **292 fichiers source** de `flutter/lib` — le copyleft MPL s'appliquant fichier par fichier, un fichier extrait du dépôt garde ainsi sa licence.
+  - Section *Licence* du README : quel répertoire relève de quelle licence, pourquoi, et le fait que **le nom « k-budget » et le logo sont réservés** — les licences portent sur le code, pas sur l'identité du projet. Un fork doit se présenter sous un autre nom.
+  - Licence déclarée dans les manifestes : `<licenses>` de `api/pom.xml` (vide depuis la génération Spring Initializr) et champ `license` de `app/package.json` (absent).
+  - **Compatibilité des dépendances vérifiée.** Aucun copyleft côté Flutter, ce qui était la condition pour la MPL. H2 est en `scope test` et n'est pas distribué, sa double licence EPL-1.0/MPL-2.0 est donc sans objet. Cinq paquets npm portent une licence de données (CC-BY, CC0, Python-2.0) : dépendances de construction, absentes du bundle livré — documenté comme tel plutôt qu'annoncé « sans conflit ».
+  - Les logos de banques et la police Inter restent hors de ces licences, leur déclaration séparée fait l'objet de KKS-318.
+
 ## [6.3.0] - 2026-09-03
 
 > Le parcours de premiere connexion fonctionne enfin depuis le mobile, la CI

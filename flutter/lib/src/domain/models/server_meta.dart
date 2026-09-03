@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /// Description que le serveur donne de lui-meme, via `GET /api/meta` (KKS-314).
 class ServerMeta {
   /// Construit la description renvoyee par `GET /api/meta`.
