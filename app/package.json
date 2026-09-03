@@ -1,6 +1,7 @@
 {
   "name": "k-budget-app",
   "version": "6.3.0",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",

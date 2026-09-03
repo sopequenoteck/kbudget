@@ -97,4 +97,68 @@ k-budget/
 
 ## Licence
 
-<!-- TODO: définir la licence -->
+Ce depot applique **deux licences selon le repertoire**. Verifier laquelle
+s'applique avant de reutiliser du code.
+
+| Repertoire | Licence | Fichier |
+|------------|---------|---------|
+| `api/` — backend Spring Boot | **AGPL-3.0-only** | [`LICENSE`](LICENSE) |
+| `app/` — frontend Angular | **AGPL-3.0-only** | [`LICENSE`](LICENSE) |
+| `flutter/` — application mobile | **MPL-2.0** | [`flutter/LICENSE`](flutter/LICENSE) |
+
+Tout autre fichier du depot (racine, `docs/`, `deploy/`, `scripts/`,
+`.github/`) est couvert par l'**AGPL-3.0**.
+
+### Pourquoi deux licences
+
+**AGPL-3.0 sur le serveur et le client web.** Sa clause reseau impose de
+publier les modifications a quiconque exploite le logiciel comme service. Elle
+existe pour empecher un tiers de prendre ce backend, de le fermer et d'en faire
+le service hebergé que ce projet a choisi de ne pas etre.
+
+**MPL-2.0 sur l'application mobile.** Les conditions de distribution de l'App
+Store — gestion des droits numeriques, limitation du nombre d'appareils — sont
+incompatibles avec GPL et AGPL ; VLC en a fait les frais en 2011, retire de
+l'App Store puis revenu apres passage en MPL. La MPL-2.0 est un copyleft **par
+fichier** : qui modifie un fichier doit le republier sous la meme licence, mais
+peut ajouter du code a cote. La protection reste reelle, sans le conflit.
+
+Les deux licences coexistent sans se contredire : un client qui dialogue en
+HTTP avec un serveur n'est pas une oeuvre derivee de ce serveur.
+
+### Nom et logo
+
+**Le nom « k-budget » et le logo du projet sont reserves et ne sont couverts
+par aucune de ces licences.** Les licences portent sur le code, pas sur
+l'identite du projet. Un fork est libre d'exister — il doit se presenter sous
+un autre nom et un autre logo, afin qu'on ne puisse pas le confondre avec ce
+projet ni lui en imputer le comportement.
+
+### Actifs tiers
+
+Les logos de banques (`api/src/main/resources/static/bank-logos/`) et la police
+Inter (`flutter/assets/fonts/Inter/`) appartiennent a leurs titulaires
+respectifs et **ne sont couverts par aucune des licences ci-dessus**. Leur
+declaration separee est en cours (KKS-318).
+
+### Dependances
+
+Verifie au 2026-09-03, aucun conflit :
+
+- **API** — Spring Boot, Commons, JJWT, Flyway et Bucket4j sous Apache-2.0,
+  pilote PostgreSQL sous BSD-2-Clause, Lombok sous MIT. H2 est en `scope test`
+  et n'est pas distribue, sa double licence EPL-1.0/MPL-2.0 est donc sans objet.
+- **Angular** — 424 paquets MIT, 61 ISC, 32 Apache-2.0, plus BSD et 0BSD.
+  Aucun copyleft.
+- **Flutter** — MIT, BSD-3-Clause et BSD (auteurs Dart et Flutter).
+  **Aucun copyleft**, ce qui est la condition pour la MPL-2.0.
+
+Nuance assumee : cinq paquets npm portent une licence de **donnees** et non de
+code — `caniuse-lite` (CC-BY-4.0), `spdx-exceptions` (CC-BY-3.0), `mdn-data` et
+`spdx-license-ids` (CC0-1.0), `argparse` (Python-2.0). CC-BY-3.0 n'est pas
+officiellement compatible GPL ; ces paquets sont des dependances de
+construction, absentes du bundle livre, la question ne se pose donc pas a la
+redistribution.
+
+> Cette section decrit des choix de licence, elle ne constitue pas un avis
+> juridique.
