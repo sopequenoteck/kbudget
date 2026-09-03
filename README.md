@@ -95,6 +95,13 @@ k-budget/
 | [`DESIGN.md`](DESIGN.md)                         | Reference design : principes, couleurs, patterns, tokens                  |
 | **Swagger UI**                                   | `http://localhost:8080/api/swagger-ui.html` (profil `dev`)               |
 
+## Contribuer
+
+Les contributions passent par une pull request couverte par le
+[CLA](CLA.md) — une signature par commentaire, rien a imprimer. Le pourquoi,
+les conventions et les verifications attendues sont dans
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Licence
 
 Ce depot applique **deux licences selon le repertoire**. Verifier laquelle
