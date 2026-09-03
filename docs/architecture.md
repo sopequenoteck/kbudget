@@ -18,7 +18,7 @@ api/src/main/java/fr/kksdev/budget/api/
 ├── runner/        # ApplicationRunner de boot (BootstrapSeedRunner, AdminSyncRunner)
 ├── exception/     # Exceptions metier (ConflictException, TokenExpiredException, FeatureDisabledException...)
 ├── util/          # ImageMimeValidator, PasswordGenerator
-├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile) + Bank (record, non-persiste)
+├── model/         # Entites JPA (User, Transaction, Subscription, Debt, Category, RefreshToken, Account, ExchangeRate, UserPreference, Notification, Budget, BudgetSnapshot, ImportDraft, ImportDraftLine, CategoryRule, ImportHistory, ImportProfile, Invitation) + Bank (record, non-persiste)
 ├── dto/
 │   ├── request/   # DTOs d'entree (validation Bean Validation)
 │   └── response/  # DTOs de sortie

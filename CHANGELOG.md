@@ -7,6 +7,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **KKS-319 — README anglais et fichiers de gouvernance** : le README annonçait en troisième ligne *« Self-hosted, single-user, mobile-first »*. **C'était faux** — l'application est multi-utilisateurs, avec invitations, rôles, isolation par utilisateur et garde-fou sur le dernier administrateur. Une erreur de cette nature en tête de vitrine décrédibilise le reste.
+  - `README.md` réécrit **en anglais**, langue de la communauté self-hosted visée, avec `README.fr.md` à parité. Le positionnement est explicite : multi-devises, banques ouest-africaines au même rang que les françaises, import CSV parce que l'open banking exige un intermédiaire agréé qu'un projet auto-hébergé ne peut pas être.
+  - **L'installation est décrite telle qu'elle est, pas telle qu'elle sera** : `docker-compose.yml` n'embarque pas PostgreSQL, le README le dit franchement plutôt que de promettre l'installation en une commande que KKS-320 doit livrer.
+  - Corrigé au passage : l'URL de clone du README pointait vers `kksdev/k-budget`, dépôt qui n'existe pas.
+  - Le contrat de l'app mobile est énoncé sans détour — le build compilé soi-même est fonctionnellement identique à celui des stores, l'acheter finance le projet et n'achète aucune fonctionnalité.
+  - `CONTRIBUTING.md` traduit et complété : les **profils d'import bancaire** sont mis en avant comme point d'entrée ne demandant pas de Java, avec la consigne de n'envoyer que des échantillons anonymisés. La frontière Angular/Flutter y figure, mais **sans prétendre à une classification complète** — celle-ci reste l'objet de KKS-333.
+  - `SECURITY.md` : signalement privé, et des délais annoncés honnêtement pour un projet maintenu par une personne. Les décisions qui ressemblent à des failles sans en être (limitation par IP et non par compte, `X-Forwarded-For` de confiance conditionnelle, compteurs en mémoire) y sont écrites pour éviter des rapports inutiles.
+  - `CODE_OF_CONDUCT.md` : Contributor Covenant 2.1, texte officiel.
+  - `docs/architecture.md` annonçait 18 entités JPA et n'en énumérait que 17 : `Invitation` manquait.
 - **KKS-318 — Actifs tiers déclarés : `NOTICE` et licence OFL de la police Inter** : le README affirmait depuis KKS-316 que les logos de banques et la police Inter étaient hors licence, sans qu'aucun fichier ne le matérialise. L'affirmation était correcte et pas encore opposable.
   - `NOTICE` à la racine recense les **28 marques** concernées avec leur établissement, tiré de `BankRegistry` plutôt que deviné, et énonce que leur présence ne vaut ni partenariat ni affiliation.
   - **Les logos sont présents en deux exemplaires**, `api/src/main/resources/static/bank-logos/` et `flutter/assets/banks/` — le ticket ne mentionnait que le premier. Déclarer un seul emplacement aurait laissé la moitié des fichiers non couverts, sous deux licences différentes de surcroît.
