@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { RecurringTransactionService } from './recurring-transaction';
@@ -7,10 +6,6 @@ import { ApiService } from './api';
 import { RecurringTransactionResponse } from '../models/recurring-transaction.model';
 import { Transaction, TransactionType } from '../models/transaction.model';
 import { Frequency } from '../models/subscription.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockCategory = { id: 'cat-1', nom: 'Alimentation', icone: '🛒', couleur: '#f59e0b' };
 const mockAccount = { id: 'acc-1', nom: 'Compte courant', icone: '🏦', couleur: '#4f46e5' };

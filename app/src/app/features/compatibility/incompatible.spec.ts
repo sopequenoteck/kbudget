@@ -1,14 +1,9 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import { Incompatible } from './incompatible';
 import { CompatibilityService } from '../../core/services/compatibility';
 import { type CompatibilityStatus } from '../../core/models/meta.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 function render(status: CompatibilityStatus) {
   TestBed.configureTestingModule({

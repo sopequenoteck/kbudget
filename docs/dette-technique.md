@@ -91,16 +91,54 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 
 ---
 
-### DT-006 — Isolation TestBed instable avec vitest + Angular 21 (APP)
+### DT-006 — Isolation TestBed instable avec vitest + Angular 21 (APP) — RESOLU 2026-09-03
 
 **Identifie** : 2026-06-14
+**Resolu** : 2026-09-03 (KKS-312)
 
-**Description** : Les tests APP appellent `getTestBed().initTestEnvironment(...)` directement dans chaque fichier `.spec.ts` (contournement d'un probleme de chargement de `setupFiles` avec Angular 21 + vitest, documente dans `app/src/test-setup.ts`). Aucun `TestBed.resetTestingModule()` n'est effectue entre les fichiers. Tant que vitest isole chaque fichier dans son propre worker (cas de `npm test` en parallele avec assez de coeurs), tout passe. Mais des que plusieurs fichiers partagent un worker — `npx vitest run --no-file-parallelism`, ou CI sur runner a faible nombre de coeurs — le singleton TestBed est contamine : `Cannot configure the test module when the test module has already been instantiated`. Repro : `--no-file-parallelism` -> 406+/475 tests en echec.
+**Symptome** : des que plusieurs fichiers `.spec.ts` partageaient un worker
+vitest — `--no-file-parallelism`, ou CI sur runner a faible nombre de coeurs —
+le TestBed etait contamine : `Cannot configure the test module when the test
+module has already been instantiated`. Repro : 46 fichiers et 415 tests en
+echec sur 52 et 507.
 
-**Impact** : les tests APP sont flaky selon le nombre de coeurs du runner, **quelle que soit la commande** (`npm test` comme `npm run test:coverage`). Verifie en CI : sur `ubuntu-latest` (peu de coeurs) les deux echouent ; sur le runner self-hosted `kbudget-ci` (memes ressources que la CI-APP) les deux passent. Le coverage v8 ne change PAS le resultat (hypothese initiale erronee). Contournement actuel : la CI-APP **et** le job `test-app` du gate de release tournent sur le runner **self-hosted** (cf. `ci-app.yml` et `release.yml`). Le gate ne peut donc pas tourner sur `ubuntu-latest` tant que DT-006 n'est pas resolu.
+**Cause reelle** : `setupFiles` ne s'executait **jamais**. `tsconfig.spec.json`
+n'incluait que `src/**/*.d.ts` et `src/**/*.spec.ts` ; `src/test-setup.ts`
+etait absent du programme TypeScript. Le plugin Angular compile les `.ts` via
+ce programme et produit une sortie vide pour un fichier qu'il ne connait pas :
+vitest chargeait donc un module vide, **sans erreur ni avertissement**. Verifie
+par elimination — un `test-setup.js` au contenu identique s'executait, le `.ts`
+non.
 
-**Tentative echouee** (patch sauvegarde, `/tmp/isolation-attempt.patch`) : centraliser `initTestEnvironment` + `beforeEach(resetTestingModule)` dans `test-setup.ts` casse tout (`Need to call TestBed.initTestEnvironment() first`, injector null) — c'est precisement le probleme de chargement `setupFiles` Angular 21 que le contournement evitait. **Ne pas refaire cette approche.**
+Consequence en chaine : sans `setupFiles`, les hooks de nettoyage du TestBed
+(`ɵgetCleanupHook`, ce que Karma/Jasmine installent d'office) n'etaient jamais
+poses. L'init manuelle repetee dans 47 specs compensait le symptome, et
+fonctionnait tant que chaque fichier disposait de son propre worker.
 
-**Correction proposee** : A traiter a froid. Pistes : (1) garder l'init dans les specs mais ajouter un reset inter-fichiers fiable sans casser le chargement ; (2) regler l'isolation cote `vitest.config.ts` (pool/isolate) pour garantir un worker frais par fichier meme a faible nombre de coeurs ; (3) suivre l'evolution du support vitest dans `@analogjs/vite-plugin-angular` pour Angular 21.
+**Ce qui avait egare le diagnostic** : la tentative documentee — centraliser
+`initTestEnvironment` dans `test-setup.ts` — echouait avec `Need to call
+TestBed.initTestEnvironment() first`. Message coherent avec un probleme de
+chargement `setupFiles` propre a Angular 21, alors que le fichier n'etait tout
+simplement jamais lu. Les trois pistes envisagees (reset inter-fichiers,
+`pool`/`isolate` cote vitest, evolution du plugin) portaient toutes a cote :
+verifie, `--isolate` et `--max-workers=1` ne changent rien.
 
-**Fichiers concernes** : `app/src/test-setup.ts`, `app/vitest.config.ts`, l'ensemble des `app/src/**/*.spec.ts`.
+**Correction** :
+
+1. `src/test-setup.ts` ajoute a l'`include` de `tsconfig.spec.json`
+2. `test-setup.ts` utilise `setupTestBed()` de `@analogjs/vitest-angular`, qui
+   installe les hooks de nettoyage et initialise l'environnement une seule fois
+3. Init manuelle retiree des 47 specs concernes
+4. `@analogjs/vite-plugin-angular` declare dans `package.json` — `vitest.config.ts`
+   l'importait alors qu'il n'etait present que comme dependance transitive
+5. Job `test-app` du gate de release bascule sur `ubuntu-latest` ; job
+   `app-tests` ajoute a `ci-app.yml` sur runner GitHub
+
+**Verifie** : 507 tests verts en parallele, en `--no-file-parallelism`, en
+`--max-workers=1` et apres un `npm ci` sur arbre de dependances neuf.
+
+**Reste sur runner self-hosted** : le job `app-analysis` de `ci-app.yml`, qui
+joint SonarQube par le reseau Docker interne `ci-stack_ci-net`. Cette
+dependance-la n'a rien a voir avec DT-006 et ne peut pas etre levee sans
+exposer Sonar.
+

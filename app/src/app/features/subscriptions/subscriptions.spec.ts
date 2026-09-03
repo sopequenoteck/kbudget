@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
@@ -14,10 +13,6 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { CurrencyService } from '../../core/services/currency';
 import { DevLogger } from '../../core/services/dev-logger';
 import { Frequency, Subscription } from '../../core/models/subscription.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 // jsdom ne fournit pas IntersectionObserver
 beforeAll(() => {

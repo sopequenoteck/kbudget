@@ -1,15 +1,10 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { SubscriptionService } from './subscription';
 import { ApiService } from './api';
 import { Subscription, SubscriptionRequest, Frequency } from '../models/subscription.model';
 import { SubscriptionPaymentResponse } from '../models/subscription-payment.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockSubscription: Subscription = {
   id: 'uuid-1',

@@ -5,6 +5,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **KKS-312 — DT-006 : la CI APP ne dépend plus d'un runner self-hosted** : la suite de tests échouait en cascade dès que plusieurs fichiers `.spec.ts` partageaient un worker vitest — 415 tests sur 507. Le contournement était de faire tourner les tests APP sur le runner self-hosted, ce qui rendait toute contribution frontend externe invérifiable.
+  - **La cause n'était pas celle documentée.** `setupFiles` ne s'exécutait **jamais** : `src/test-setup.ts` était absent de l'`include` de `tsconfig.spec.json`, et le plugin Angular produit une sortie vide pour un fichier hors de son programme TypeScript. Vitest chargeait un module vide, sans erreur ni avertissement. Le même fichier en `.js` s'exécutait, en `.ts` non.
+  - Conséquence en chaîne : les hooks de nettoyage du TestBed — ceux que Karma/Jasmine posent d'office — n'étaient jamais installés. L'init manuelle répétée dans 47 specs compensait le symptôme et tenait tant que chaque fichier avait son propre worker.
+  - Les trois pistes envisagées par DT-006 portaient à côté : `--isolate` et `--max-workers=1` ne changent rien, vérifié.
+  - `setupTestBed()` de `@analogjs/vitest-angular` remplace les 47 inits manuelles. `@analogjs/vite-plugin-angular`, importé par `vitest.config.ts` alors qu'il n'était présent que comme dépendance transitive, est désormais déclaré.
+  - Le job `test-app` du gate de release passe sur `ubuntu-latest`, et `ci-app.yml` gagne un job de tests sur runner GitHub — le seul qu'une PR de fork puisse exécuter, le self-hosted ayant accès au socket Docker. Le job Sonar y reste, sa dépendance au réseau Docker interne n'ayant rien à voir avec DT-006.
+
 ## [6.2.0] - 2026-09-02
 
 > Les endpoints d'authentification sont desormais limites en debit, et la

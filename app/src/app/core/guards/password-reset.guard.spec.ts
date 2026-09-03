@@ -1,13 +1,8 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '../services/auth';
 import { passwordResetGuard } from './password-reset.guard';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('passwordResetGuard', () => {
   let authService: { mustResetCredentials: ReturnType<typeof vi.fn> };

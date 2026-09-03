@@ -1,14 +1,9 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
 import { UserExportService } from './user-export.service';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('UserExportService', () => {
   let service: UserExportService;
