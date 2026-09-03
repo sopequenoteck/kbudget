@@ -28,6 +28,8 @@
 18. [Settings — Donnees](#18-settings-donnees)
 19. [Cas Limites & Edge Cases](#19-cas-limites--edge-cases)
 20. [Divergences connues Angular / Flutter](#20-divergences-connues)
+21. [Angular — Catégories (KKS-231)](#21-angular--catégories-kks-231)
+22. [KKS-235 — Page Mon compte](#22-kks-235--page-mon-compte-angular--flutter)
 
 ---
 
@@ -64,8 +66,17 @@
 
 ## 2. Authentification
 
-> **Concerne** : Login, Register, gestion tokens JWT.
+> **Concerne** : Login, reinitialisation a la premiere connexion, acceptation
+> d'invitation, gestion des tokens JWT.
 > **Mode serveur uniquement.**
+>
+> **L'inscription publique n'existe pas** (constitution, principe VII) :
+> l'onboarding se fait uniquement par invitation d'un administrateur. Les cas
+> A-7 a A-12 decrivaient un `RegisterScreen` retire depuis — ni ecran, ni route,
+> ni endpoint `/auth/register`. Ils sont remplaces par les parcours reels.
+>
+> **Longueur de mot de passe** : 12 caracteres minimum a la creation et au
+> changement (KKS-351), aucune au login.
 
 | # | Scenario | Etapes | Resultat attendu | Statut |
 |---|----------|--------|-------------------|--------|
@@ -75,14 +86,32 @@
 | A-4 | Login credentials incorrects | Email/mdp incorrects | Message d'erreur rouge | -- |
 | A-5 | Login succes | Credentials corrects | Redirect `/dashboard` | -- |
 | A-6 | Toggle visibility mdp | Tap icone oeil | Toggle masquage/affichage | -- |
-| A-7 | Register email invalide | Email sans "@" | Erreur validation client | -- |
-| A-8 | Register mdp trop court | Mdp < 6 caracteres | "Le mot de passe doit contenir au moins 6 caracteres" | -- |
-| A-9 | Register confirmation ≠ mdp | Confirmation differente du mdp | "Les mots de passe ne correspondent pas" | -- |
-| A-10 | Register email deja utilise | Email existant en BDD | Erreur serveur affichee | -- |
-| A-11 | Register succes (EUR defaut) | Donnees valides, devise non modifiee | Redirect `/dashboard` + Compte Principal en EUR | -- |
-| A-11b | Register succes (XOF) | Donnees valides, devise XOF selectionnee | Redirect `/dashboard` + Compte Principal en XOF, preferences currencies=[XOF] | -- |
-| A-12 | Invitation token | Ouvrir `/invite/TOKEN` | Banner "Invitation valide" dans RegisterScreen | -- |
-| A-13 | Logout | Menu utilisateur → Logout | Retour `/login`, tokens invalides | -- |
+| A-7 | Login mdp court accepte | Compte dont le mdp fait moins de 12 caracteres | Connexion acceptee — le login n'impose aucune longueur (KKS-351) | -- |
+| A-8 | Invitation : lien valide | Ouvrir `/invite/TOKEN` avec un token valide | Ecran d'acceptation, email pre-rempli et non modifiable | -- |
+| A-9 | Invitation : mdp trop court | Saisir 11 caracteres | "12 caracteres minimum", soumission bloquee cote client | -- |
+| A-10 | Invitation : mdp a la limite | Saisir exactement 12 caracteres | Accepte, compte cree, redirect `/dashboard` | -- |
+| A-11 | Invitation : lien invalide | Ouvrir `/invite/TOKEN-INEXISTANT` | Message d'invitation invalide, pas de formulaire | -- |
+| A-12 | Logout | Menu utilisateur → Logout | Retour `/login`, tokens invalides | -- |
+
+### 2.1 — Reinitialisation a la premiere connexion (KKS-309)
+
+> **Prerequis** : un compte provisionne par un administrateur, ou l'admin seed
+> cree par `BootstrapSeedRunner` au premier demarrage d'une instance vierge.
+> Ces comptes portent `mustResetCredentials=true`.
+>
+> **A tester sur les deux clients.** Avant KKS-309, Flutter n'avait pas cet
+> ecran : l'utilisateur entrait dans le dashboard puis voyait chaque appel
+> rejete en 403, sans aucune sortie.
+
+| # | Scenario | Etapes | Resultat attendu | Statut |
+|---|----------|--------|-------------------|--------|
+| FR-1 | Redirection a la connexion | Se connecter avec un compte a reinitialiser | Ecran de reinitialisation, pas le dashboard | -- |
+| FR-2 | Contournement par navigation | Tenter d'atteindre `/dashboard` manuellement | Renvoye sur l'ecran de reinitialisation | -- |
+| FR-3 | Mot de passe trop court | Saisir 11 caracteres | "12 caracteres minimum", soumission bloquee | -- |
+| FR-4 | Confirmation differente | Confirmation ≠ mot de passe | "Les mots de passe ne correspondent pas" | -- |
+| FR-5 | Reinitialisation reussie | Donnees valides → Valider | Nouveaux jetons stockes, acces au dashboard | -- |
+| FR-6 | Reprise apres redemarrage | Fermer et rouvrir l'app avec des jetons encore valides, puis toucher un ecran metier | Le 403 est intercepte et l'ecran de reinitialisation s'affiche — le flag n'est ni dans le JWT ni persiste (Flutter) | -- |
+| FR-7 | Mode local non concerne | Basculer en mode local (Drift) | L'ecran ne se declenche jamais : pas de serveur, donc pas de reinitialisation (Flutter) | -- |
 
 ---
 
