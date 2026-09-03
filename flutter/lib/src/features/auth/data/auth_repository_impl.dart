@@ -23,6 +23,7 @@ class AuthRepositoryImpl implements AuthRepository {
       refreshToken: response.refreshToken,
       email: response.email,
       name: response.name,
+      mustResetCredentials: response.mustResetCredentials,
     );
     await saveTokens(result.accessToken, result.refreshToken);
     await _saveUserName(result.name);
@@ -40,6 +41,35 @@ class AuthRepositoryImpl implements AuthRepository {
       refreshToken: response.refreshToken,
       email: response.email,
       name: response.name,
+      mustResetCredentials: response.mustResetCredentials,
+    );
+    await saveTokens(result.accessToken, result.refreshToken);
+    await _saveUserName(result.name);
+    return result;
+  }
+
+  @override
+  Future<AuthResult> firstLoginReset({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {
+    final accessToken = await getAccessToken();
+    if (accessToken == null) {
+      throw Exception('No access token available');
+    }
+    final response = await _dataSource.firstLoginReset(
+      email: email,
+      password: password,
+      displayName: displayName,
+      accessToken: accessToken,
+    );
+    final result = AuthResult(
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+      email: response.email,
+      name: response.name,
+      mustResetCredentials: response.mustResetCredentials,
     );
     await saveTokens(result.accessToken, result.refreshToken);
     await _saveUserName(result.name);

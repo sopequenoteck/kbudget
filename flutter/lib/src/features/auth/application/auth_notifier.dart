@@ -35,12 +35,16 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     final repo = await _repo;
     final hasToken = await repo.hasValidToken();
     if (hasToken) {
+      // Le token local ne porte pas mustResetCredentials — un compte encore
+      // soumis au reset sera intercepté au premier appel métier (KKS-309).
       state = const AuthState.authenticated();
     } else {
       // Access token expiré ou absent — tenter un refresh
       try {
-        await repo.refresh();
-        state = const AuthState.authenticated();
+        final result = await repo.refresh();
+        state = result.mustResetCredentials
+            ? const AuthState.passwordResetRequired()
+            : const AuthState.authenticated();
       } on Exception {
         state = const AuthState.unauthenticated();
       }
@@ -53,12 +57,21 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     _notifyListeners();
   }
 
+  /// Fait basculer l'état auth quand un 403 `PASSWORD_RESET_REQUIRED`
+  /// est intercepté en cours de session (KKS-309).
+  void requirePasswordReset() {
+    state = const AuthState.passwordResetRequired();
+    _notifyListeners();
+  }
+
   Future<void> login(String email, String password) async {
     state = const AuthState.authenticating();
     try {
       final repo = await _repo;
-      await repo.login(email, password);
-      state = const AuthState.authenticated();
+      final result = await repo.login(email, password);
+      state = result.mustResetCredentials
+          ? const AuthState.passwordResetRequired()
+          : const AuthState.authenticated();
     } on DioException catch (e) {
       final message = e.response?.statusCode == 401
           ? 'Email ou mot de passe incorrect'
@@ -76,9 +89,11 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     state = const AuthState.authenticating();
     try {
       final repo = await _repo;
-      await repo.register(email, password, name,
+      final result = await repo.register(email, password, name,
           currency: currency, timezone: timezone);
-      state = const AuthState.authenticated();
+      state = result.mustResetCredentials
+          ? const AuthState.passwordResetRequired()
+          : const AuthState.authenticated();
     } on DioException catch (e) {
       final message = e.response?.statusCode == 409
           ? 'Email déjà utilisé'
@@ -87,6 +102,24 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     } on Exception catch (e) {
       state = AuthState.unauthenticated(error: 'Erreur: $e');
     }
+    _notifyListeners();
+  }
+
+  /// Termine le flux de première connexion (KKS-309) : sauvegarde les
+  /// nouveaux tokens et repasse en authentifié normal. Laisse toute
+  /// [DioException] remonter à l'appelant pour affichage dans l'écran.
+  Future<void> completeFirstLoginReset({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {
+    final repo = await _repo;
+    await repo.firstLoginReset(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
+    state = const AuthState.authenticated();
     _notifyListeners();
   }
 

@@ -16,6 +16,9 @@ class RouteNames {
   static const String login = '/login';
   /// Ecran d'incompatibilite client/serveur (KKS-314).
   static const String incompatible = '/incompatible';
+  /// Ecran de premiere connexion : reset email/mot de passe/nom obligatoire
+  /// pour un compte provisionne par un admin (KKS-309).
+  static const String firstLoginReset = '/first-login-reset';
   static const String lock = '/lock';
   static const String acceptInvite = '/accept-invite/:token';
   static const String adminUsers = '/settings/users';
@@ -38,6 +41,8 @@ class RouteNames {
   static const String loginName = 'login';
   /// Nom de la route de l'ecran d'incompatibilite (KKS-314).
   static const String incompatibleName = 'incompatible';
+  /// Nom de la route de l'ecran de premiere connexion (KKS-309).
+  static const String firstLoginResetName = 'first-login-reset';
   static const String lockName = 'lock';
   static const String acceptInviteName = 'acceptInvite';
   static const String adminUsersName = 'adminUsers';
