@@ -120,6 +120,52 @@ void main() {
       verify(mockStorage.delete(key: 'refresh_token')).called(1);
     });
 
+    test('should_returnAuthResult_when_firstLoginResetSucceeds', () async {
+      when(mockStorage.read(key: 'access_token'))
+          .thenAnswer((_) async => 'current-access-token');
+      when(mockDataSource.firstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+        accessToken: 'current-access-token',
+      )).thenAnswer((_) async => testAuthResponse);
+      when(mockStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
+          .thenAnswer((_) async {});
+
+      final result = await repository.firstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+      );
+
+      expect(result.accessToken, 'test-access-token');
+      verify(mockDataSource.firstLoginReset(
+        email: 'test@test.com',
+        password: 'a-very-long-password',
+        displayName: 'Test User',
+        accessToken: 'current-access-token',
+      )).called(1);
+      verify(mockStorage.write(
+              key: 'access_token', value: 'test-access-token'))
+          .called(1);
+    });
+
+    test('should_throwException_when_firstLoginResetHasNoAccessToken',
+        () async {
+      when(mockStorage.read(key: 'access_token'))
+          .thenAnswer((_) async => null);
+
+      expect(
+        () => repository.firstLoginReset(
+          email: 'test@test.com',
+          password: 'a-very-long-password',
+          displayName: 'Test User',
+        ),
+        throwsException,
+      );
+    });
+
     test('should_clearTokensLocally_when_serverLogoutFails', () async {
       when(mockStorage.read(key: 'refresh_token'))
           .thenAnswer((_) async => 'refresh');

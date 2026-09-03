@@ -50,4 +50,26 @@ class AuthRemoteDataSource {
       data: LogoutRequest(refreshToken: refreshToken).toJson(),
     );
   }
+
+  /// Requiert un JWT valide : [accessToken] est attaché manuellement en
+  /// en-tête car ce data source utilise le Dio non authentifié
+  /// (`apiClientProvider`), partagé avec login/register qui n'en ont pas
+  /// besoin.
+  Future<AuthResponse> firstLoginReset({
+    required String email,
+    required String password,
+    required String displayName,
+    required String accessToken,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/auth/first-login-reset',
+      data: FirstLoginResetRequest(
+        email: email,
+        password: password,
+        displayName: displayName,
+      ).toJson(),
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+    return AuthResponse.fromJson(response.data!);
+  }
 }

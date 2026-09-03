@@ -4,10 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/remote/compatibility_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
+import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
@@ -17,6 +20,30 @@ import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
 
 import '../../helpers/mocks.mocks.dart';
+
+/// Verdict de compatibilite fixe — evite un appel reseau reel dans les tests
+/// de redirection en mode serveur (KKS-309).
+class _FixedCompatibilityNotifier extends CompatibilityNotifier {
+  @override
+  CompatibilityStatus? build() => const CompatibilityOk(
+        ServerMeta(
+          serverVersion: '1.0.0',
+          apiVersion: 'v1',
+          minClientVersion: '1.0.0',
+          capabilities: [],
+        ),
+      );
+}
+
+/// Etat auth fixe — evite de rejouer tout le flux login/checkAuth pour ne
+/// tester que la redirection du routeur (KKS-309).
+class _FixedAuthNotifier extends AuthNotifier {
+  _FixedAuthNotifier(this._initial);
+  final AuthState _initial;
+
+  @override
+  AuthState build() => _initial;
+}
 
 void main() {
   setUpAll(() async {
@@ -198,6 +225,52 @@ void main() {
       // Wide layout uses a custom sidebar with VerticalDivider, not NavigationRail
       expect(find.byType(VerticalDivider), findsOneWidget);
       expect(find.byType(BottomNavigationBar), findsNothing);
+    });
+  });
+
+  group('AppRouter — first-login-reset (KKS-309)', () {
+    const serverConfig = AppConfig(
+      dataMode: DataMode.server,
+      onboardingCompleted: true,
+    );
+
+    testWidgets(
+        'should_redirect_to_first_login_reset_when_mustResetCredentials_true',
+        (WidgetTester tester) async {
+      when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
+      when(mockRepo.getConfig()).thenAnswer((_) async => serverConfig);
+
+      await tester.pumpWidget(buildApp(overrides: [
+        compatibilityNotifierProvider
+            .overrideWith(() => _FixedCompatibilityNotifier()),
+        authNotifierProvider.overrideWith(
+          () => _FixedAuthNotifier(const AuthState.passwordResetRequired()),
+        ),
+      ]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Finalisez votre compte'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_not_redirect_to_first_login_reset_when_dataMode_local',
+        (WidgetTester tester) async {
+      when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
+      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildApp(overrides: [
+        authNotifierProvider.overrideWith(
+          () => _FixedAuthNotifier(const AuthState.passwordResetRequired()),
+        ),
+      ]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Finalisez votre compte'), findsNothing);
+      expect(find.text('Accueil'), findsWidgets);
     });
   });
 }

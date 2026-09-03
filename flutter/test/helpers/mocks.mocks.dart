@@ -455,6 +455,41 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
             returnValueForMissingStub: _i17.Future<bool>.value(false),
           )
           as _i17.Future<bool>);
+
+  @override
+  _i17.Future<_i3.AuthResult> firstLoginReset({
+    required String? email,
+    required String? password,
+    required String? displayName,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#firstLoginReset, [], {
+              #email: email,
+              #password: password,
+              #displayName: displayName,
+            }),
+            returnValue: _i17.Future<_i3.AuthResult>.value(
+              _FakeAuthResult_1(
+                this,
+                Invocation.method(#firstLoginReset, [], {
+                  #email: email,
+                  #password: password,
+                  #displayName: displayName,
+                }),
+              ),
+            ),
+            returnValueForMissingStub: _i17.Future<_i3.AuthResult>.value(
+              _FakeAuthResult_1(
+                this,
+                Invocation.method(#firstLoginReset, [], {
+                  #email: email,
+                  #password: password,
+                  #displayName: displayName,
+                }),
+              ),
+            ),
+          )
+          as _i17.Future<_i3.AuthResult>);
 }
 
 /// A class which mocks [TransactionRepository].

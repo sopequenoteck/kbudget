@@ -72,6 +72,9 @@ final authenticatedDioProvider = FutureProvider<Dio>((ref) async {
       onAuthFailure: () {
         ref.read(authNotifierProvider.notifier).forceUnauthenticated();
       },
+      onPasswordResetRequired: () {
+        ref.read(authNotifierProvider.notifier).requirePasswordReset();
+      },
     ),
   ]);
 

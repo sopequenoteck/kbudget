@@ -11,16 +11,23 @@ import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 /// - On 401 response, attempts a token refresh via `/auth/refresh`.
 /// - Replays the original request with the new access token.
 /// - If the refresh fails, calls [onAuthFailure] and forwards the error.
+/// - On 403 `PASSWORD_RESET_REQUIRED`, calls [onPasswordResetRequired]
+///   (KKS-309) — a provisioned account (or the admin seed) that reached the
+///   dashboard before completing its first-login reset gets rejected on every
+///   business call by the server's `PasswordResetRequiredFilter`, without a
+///   dedicated screen to break out of the loop.
 class JwtInterceptor extends Interceptor {
   JwtInterceptor({
     required this.dio,
     required this.secureStorage,
     this.onAuthFailure,
+    this.onPasswordResetRequired,
   });
 
   final Dio dio;
   final FlutterSecureStorage secureStorage;
   final VoidCallback? onAuthFailure;
+  final VoidCallback? onPasswordResetRequired;
 
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
@@ -41,6 +48,17 @@ class JwtInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 403) {
+      // Discriminer du 403 ordinaire (ex: ACCESS_DENIED sur une route admin) :
+      // seul le code d'erreur PASSWORD_RESET_REQUIRED doit rediriger.
+      final body = err.response?.data;
+      final errorCode = body is Map ? body['error'] as String? : null;
+      if (errorCode == 'PASSWORD_RESET_REQUIRED') {
+        onPasswordResetRequired?.call();
+      }
+      return handler.next(err);
+    }
+
     if (err.response?.statusCode != 401) {
       return handler.next(err);
     }
