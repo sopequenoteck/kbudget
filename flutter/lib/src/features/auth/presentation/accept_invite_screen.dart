@@ -10,6 +10,7 @@ import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 
 // Provider public (sans intercepteur auth) pour le lookup invitation
 final _invitationLookupProvider =
@@ -247,13 +248,14 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
+              helperText: PasswordPolicy.helperText,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Veuillez saisir un mot de passe';
               }
-              if (value.length < 8) {
-                return 'Le mot de passe doit contenir au moins 8 caractères';
+              if (value.length < PasswordPolicy.minLength) {
+                return PasswordPolicy.tooShortMessage;
               }
               return null;
             },

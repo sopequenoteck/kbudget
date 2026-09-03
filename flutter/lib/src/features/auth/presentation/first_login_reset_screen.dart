@@ -7,6 +7,7 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 
 /// Ecran de premiere connexion (KKS-309).
 ///
@@ -172,7 +173,7 @@ class _FirstLoginResetScreenState
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
                         labelText: 'Mot de passe',
-                        helperText: 'Minimum 12 caractères',
+                        helperText: PasswordPolicy.helperText,
                         prefixIcon: const PhosphorIcon(
                           PhosphorIconsRegular.lock,
                           size: 20,
@@ -192,9 +193,8 @@ class _FirstLoginResetScreenState
                         if (value == null || value.isEmpty) {
                           return 'Veuillez saisir un mot de passe';
                         }
-                        if (value.length < 12) {
-                          return 'Le mot de passe doit contenir au moins '
-                              '12 caractères';
+                        if (value.length < PasswordPolicy.minLength) {
+                          return PasswordPolicy.tooShortMessage;
                         }
                         return null;
                       },

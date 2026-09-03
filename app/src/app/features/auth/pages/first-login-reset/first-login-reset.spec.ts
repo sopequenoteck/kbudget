@@ -68,8 +68,8 @@ describe('FirstLoginResetComponent', () => {
     authService.firstLoginReset.mockReturnValue(of(mockAuthResponse));
     component.form.setValue({
       email: 'admin@new.com',
-      password: 'password123',
-      passwordConfirm: 'password123',
+      password: 'motDePasse12',
+      passwordConfirm: 'motDePasse12',
       displayName: 'Admin',
     });
 
@@ -79,7 +79,7 @@ describe('FirstLoginResetComponent', () => {
     // Assert
     expect(authService.firstLoginReset).toHaveBeenCalledWith({
       email: 'admin@new.com',
-      password: 'password123',
+      password: 'motDePasse12',
       displayName: 'Admin',
     });
   });
@@ -89,8 +89,8 @@ describe('FirstLoginResetComponent', () => {
     authService.firstLoginReset.mockReturnValue(of(mockAuthResponse));
     component.form.setValue({
       email: 'admin@new.com',
-      password: 'password123',
-      passwordConfirm: 'password123',
+      password: 'motDePasse12',
+      passwordConfirm: 'motDePasse12',
       displayName: 'Admin',
     });
 
@@ -106,8 +106,8 @@ describe('FirstLoginResetComponent', () => {
     authService.firstLoginReset.mockReturnValue(throwError(() => 'Email déjà utilisé'));
     component.form.setValue({
       email: 'used@email.com',
-      password: 'password123',
-      passwordConfirm: 'password123',
+      password: 'motDePasse12',
+      passwordConfirm: 'motDePasse12',
       displayName: 'Admin',
     });
 
@@ -119,11 +119,35 @@ describe('FirstLoginResetComponent', () => {
     expect(component.isSubmitting()).toBe(false);
   });
 
+  it('should_reject_password_one_char_below_minimum', () => {
+    // 11 caracteres : la limite exacte. Cet ecran validait 8 face a un serveur
+    // qui en exigeait 12, et l'utilisateur recevait une 400 en anglais.
+    component.form.patchValue({
+      email: 'test@mail.com',
+      password: 'onzeCarac12',
+      passwordConfirm: 'onzeCarac12',
+      displayName: 'Alice',
+    });
+
+    expect(component.form.controls.password.hasError('minlength')).toBe(true);
+  });
+
+  it('should_accept_password_at_exact_minimum', () => {
+    component.form.patchValue({
+      email: 'test@mail.com',
+      password: 'motDePasse12',
+      passwordConfirm: 'motDePasse12',
+      displayName: 'Alice',
+    });
+
+    expect(component.form.controls.password.hasError('minlength')).toBe(false);
+  });
+
   it('should_validate_password_equality', () => {
     // Arrange
     component.form.setValue({
       email: 'admin@new.com',
-      password: 'password123',
+      password: 'motDePasse12',
       passwordConfirm: 'different456',
       displayName: 'Admin',
     });
@@ -150,8 +174,8 @@ describe('FirstLoginResetComponent', () => {
     );
     component.form.setValue({
       email: 'admin@new.com',
-      password: 'password123',
-      passwordConfirm: 'password123',
+      password: 'motDePasse12',
+      passwordConfirm: 'motDePasse12',
       displayName: 'Admin',
     });
 

@@ -28,7 +28,9 @@ export class Auth {
 
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    // Pas de longueur minimale : on verifie un mot de passe existant, pas on
+    // en cree un. L'imposer bloquerait un compte anterieur a un durcissement.
+    password: ['', [Validators.required]],
   });
 
   async onLogin(): Promise<void> {

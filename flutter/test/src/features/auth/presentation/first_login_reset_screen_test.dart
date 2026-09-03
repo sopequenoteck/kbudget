@@ -9,6 +9,7 @@ import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/mocks.mocks.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 
 void main() {
   late MockAuthRepository mockAuthRepo;
@@ -89,7 +90,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Le mot de passe doit contenir au moins 12 caractères'),
+        find.text(PasswordPolicy.tooShortMessage),
         findsOneWidget,
       );
       verifyNever(mockAuthRepo.firstLoginReset(
