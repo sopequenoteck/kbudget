@@ -27,6 +27,10 @@ class JwtInterceptor extends Interceptor {
   final Dio dio;
   final FlutterSecureStorage secureStorage;
   final VoidCallback? onAuthFailure;
+  /// Appelé quand le serveur exige une réinitialisation des identifiants.
+  ///
+  /// Déclenché par un 403 `PASSWORD_RESET_REQUIRED`, c'est-à-dire quand le
+  /// flag n'a pas été vu à la connexion — jetons restaurés au démarrage.
   final VoidCallback? onPasswordResetRequired;
 
   static const _accessTokenKey = 'access_token';

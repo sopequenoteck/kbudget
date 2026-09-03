@@ -66,15 +66,21 @@ class AuthResponse with _$AuthResponse {
 /// Requête pour `POST /auth/first-login-reset` (KKS-309).
 ///
 /// Exige un JWT valide en en-tête `Authorization` — porté séparément par
-/// [AuthRemoteDataSource.firstLoginReset], pas par ce DTO.
+/// `AuthRemoteDataSource.firstLoginReset`, pas par ce DTO.
 @freezed
 class FirstLoginResetRequest with _$FirstLoginResetRequest {
+  /// Identifiants définitifs choisis par l'utilisateur.
+  ///
+  /// [password] doit faire au moins 12 caractères : c'est la contrainte
+  /// serveur de `FirstLoginResetRequest`, plus stricte que celle de
+  /// l'acceptation d'invitation.
   const factory FirstLoginResetRequest({
     required String email,
     required String password,
     required String displayName,
   }) = _FirstLoginResetRequest;
 
+  /// Construit la requête depuis sa représentation JSON.
   factory FirstLoginResetRequest.fromJson(Map<String, dynamic> json) =>
       _$FirstLoginResetRequestFromJson(json);
 }

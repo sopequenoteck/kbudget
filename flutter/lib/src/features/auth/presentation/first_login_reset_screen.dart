@@ -17,6 +17,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 /// (`PasswordResetRequiredFilter`). Sans cet ecran, l'utilisateur atteint le
 /// dashboard puis voit chaque requete rejetee en 403, sans issue.
 class FirstLoginResetScreen extends ConsumerStatefulWidget {
+  /// Crée l'écran de réinitialisation forcée.
   const FirstLoginResetScreen({super.key});
 
   @override
@@ -47,7 +48,9 @@ class _FirstLoginResetScreenState
   }
 
   Future<void> _handleSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     setState(() {
       _isSubmitting = true;
@@ -65,7 +68,8 @@ class _FirstLoginResetScreenState
         _isSubmitting = false;
         _submitError = e.response?.statusCode == 400
             ? 'Veuillez vérifier les informations saisies.'
-            : 'Erreur lors de la mise à jour de vos identifiants. Veuillez réessayer.';
+            : 'Erreur lors de la mise à jour de vos identifiants. '
+                  'Veuillez réessayer.';
       });
     } on Exception catch (e) {
       setState(() {
@@ -147,7 +151,7 @@ class _FirstLoginResetScreenState
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.name],
                       decoration: const InputDecoration(
-                        labelText: 'Nom d\'affichage',
+                        labelText: "Nom d'affichage",
                         prefixIcon: PhosphorIcon(
                           PhosphorIconsRegular.user,
                           size: 20,
@@ -189,7 +193,8 @@ class _FirstLoginResetScreenState
                           return 'Veuillez saisir un mot de passe';
                         }
                         if (value.length < 12) {
-                          return 'Le mot de passe doit contenir au moins 12 caractères';
+                          return 'Le mot de passe doit contenir au moins '
+                              '12 caractères';
                         }
                         return null;
                       },
