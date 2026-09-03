@@ -5,6 +5,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.3.1] - 2026-09-03
+
+> Le depot devient lisible et reutilisable par quelqu'un d'autre : licences
+> posees, accord de contribution, actifs tiers declares, README anglais.
+>
+> **Version corrective bien que la section soit `Added`** : rien de fonctionnel
+> ne change dans l'application livree. Ce qui est ajoute, c'est la gouvernance
+> du depot — une instance mise a jour depuis la 6.3.0 se comporte a l'identique.
+
 ### Added
 
 - **KKS-319 — README anglais et fichiers de gouvernance** : le README annonçait en troisième ligne *« Self-hosted, single-user, mobile-first »*. **C'était faux** — l'application est multi-utilisateurs, avec invitations, rôles, isolation par utilisateur et garde-fou sur le dernier administrateur. Une erreur de cette nature en tête de vitrine décrédibilise le reste.
@@ -565,7 +574,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.1...HEAD
+[6.3.1]: https://github.com/sopequenoteck/budget/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
