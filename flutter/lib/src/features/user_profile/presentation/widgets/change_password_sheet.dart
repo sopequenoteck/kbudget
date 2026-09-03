@@ -2,12 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/change_password_request.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:k_budget/src/constants/password_policy.dart';
 
 /// Bottom sheet de changement de mot de passe.
 ///

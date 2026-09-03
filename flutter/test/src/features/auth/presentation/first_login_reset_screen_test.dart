@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/presentation/first_login_reset_screen.dart';
@@ -9,7 +10,6 @@ import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/mocks.mocks.dart';
-import 'package:k_budget/src/constants/password_policy.dart';
 
 void main() {
   late MockAuthRepository mockAuthRepo;
