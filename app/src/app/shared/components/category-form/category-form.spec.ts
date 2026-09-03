@@ -1,15 +1,10 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { CategoryForm } from './category-form';
 import { CategoryService } from '../../../core/services/category';
 import { ModalService } from '../../../core/services/modal.service';
 import { Category } from '../../../core/models/category.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockCategory: Category = {
   id: 'cat-1',

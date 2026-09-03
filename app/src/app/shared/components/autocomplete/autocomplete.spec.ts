@@ -1,12 +1,7 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { Autocomplete } from './autocomplete';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -1,14 +1,9 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { StompService } from './stomp';
 import { NotificationService } from './notification';
 import { AuthService } from './auth';
 import { ApiService } from './api';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 // Mock Client from @stomp/stompjs
 vi.mock('@stomp/stompjs', () => {

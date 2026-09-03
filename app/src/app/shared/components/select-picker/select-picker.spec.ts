@@ -1,12 +1,7 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { SelectPicker } from './select-picker';
 import { SelectPickerItem } from './select-picker.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockItems: SelectPickerItem[] = [
   { id: 'acc-1', label: 'Compte courant', icon: '🏦', secondaryText: '150.00 €', color: '#3b82f6' },

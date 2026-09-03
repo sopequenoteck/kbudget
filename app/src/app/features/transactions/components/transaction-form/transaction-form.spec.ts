@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -17,10 +16,6 @@ import { type Category } from '../../../../core/models/category.model';
 import { type AccountSummary } from '../../../../core/models/account.model';
 import { CategoryService } from '../../../../core/services/category';
 import { ConfirmService } from '../../../../core/services/confirm.service';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const makeTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
   id: 'tx-1',

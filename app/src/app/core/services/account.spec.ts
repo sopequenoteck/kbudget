@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { AccountService } from './account';
@@ -13,10 +12,6 @@ import {
   TransactionRef,
 } from '../models/account.model';
 import { TransactionType } from '../models/transaction.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockAccount: Account = {
   id: 'acc-1',

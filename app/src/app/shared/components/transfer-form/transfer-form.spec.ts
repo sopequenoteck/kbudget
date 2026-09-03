@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { TransferForm } from './transfer-form';
@@ -7,10 +6,6 @@ import { AccountService } from '../../../core/services/account';
 import { TransactionService } from '../../../core/services/transaction';
 import { ModalService } from '../../../core/services/modal.service';
 import { Account, AccountType } from '../../../core/models/account.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockAccounts: Account[] = [
   {

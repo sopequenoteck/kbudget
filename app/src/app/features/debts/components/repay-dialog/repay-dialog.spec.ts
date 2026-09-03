@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -10,10 +9,6 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockAccounts: Account[] = [
   {

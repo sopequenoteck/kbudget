@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,10 +7,6 @@ import { UserService } from './user';
 import { ApiService } from './api';
 import { AuthService } from './auth';
 import { DeleteAccountRequest } from '../models/delete-account-request.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 describe('UserService', () => {
   let service: UserService;

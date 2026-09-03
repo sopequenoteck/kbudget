@@ -48,12 +48,11 @@ jobs:
 
   test-app:
     name: Tests APP (gate release)
-    # Runner self-hosted (et non ubuntu-latest) : l'isolation TestBed vitest est
-    # instable a faible nombre de coeurs (DT-006) -> sur ubuntu-latest les tests
-    # APP echouent en cascade quelle que soit la commande. Sur le self-hosted
-    # (memes ressources que la CI-APP), `test:coverage` passe de facon fiable.
+    # Depuis KKS-312, la suite ne depend plus du nombre de coeurs du runner :
+    # les hooks de nettoyage du TestBed sont installes par setupFiles, qui
+    # s'execute enfin (src/test-setup.ts etait absent de tsconfig.spec.json).
     # Pas de Sonar ici -> pas besoin du reseau ci-stack_ci-net.
-    runs-on: [self-hosted, kbudget-ci]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
       image: node:22

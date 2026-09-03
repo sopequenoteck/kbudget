@@ -1,14 +1,9 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { SnoozeDialog } from './snooze-dialog';
 import { DebtService } from '../../../../core/services/debt';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockDebt: Debt = {
   id: 'debt-1',

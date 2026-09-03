@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -7,10 +6,6 @@ import { of, throwError } from 'rxjs';
 import { FirstLoginResetComponent } from './first-login-reset';
 import { AuthService } from '../../../../core/services/auth';
 import { AuthResponse } from '../../../../core/models/auth.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 function createJwt(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256' }));

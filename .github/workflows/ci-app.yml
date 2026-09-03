@@ -38,6 +38,25 @@ permissions:
   contents: read
 
 jobs:
+  # Tests sur runner GitHub : c'est le seul job qu'une PR de fork peut executer,
+  # le self-hosted ayant le socket Docker (cf. PREREQUIS INFRA ci-dessus). Il ne
+  # depend d'aucune infra maison, donc un contributeur externe obtient un retour
+  # sur sa PR et peut reproduire l'echec en local.
+  app-tests:
+    name: Tests APP (runner GitHub)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: node:22
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install + tests
+        working-directory: app
+        run: |
+          npm ci
+          npm test
+
   app-analysis:
     name: Analyse APP (Angular)
     runs-on: [self-hosted, kbudget-ci]

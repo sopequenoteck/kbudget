@@ -1,5 +1,4 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { signal, computed } from '@angular/core';
 
@@ -12,10 +11,6 @@ import { type NotificationModel } from '../../../core/models/notification.model'
 import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const makeNotification = (overrides: Partial<NotificationModel> = {}): NotificationModel => ({
   id: 'notif-1',

@@ -1,14 +1,9 @@
-import { getTestBed, TestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { PreferenceService } from './preference';
 import { ApiService } from './api';
 import { type Feature, type UserPreference } from '../models/preference.model';
-
-if (!getTestBed().platform) {
-  getTestBed().initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
-}
 
 const mockPreference: UserPreference = {
   enabledFeatures: ['SUBSCRIPTIONS', 'DEBTS'],
