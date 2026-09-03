@@ -1,0 +1,70 @@
+name: CLA
+
+# Fait signer l'accord de contribution (KKS-317) avant qu'une PR externe ne
+# puisse etre fusionnee.
+#
+# Sans CLA, la premiere contribution externe fusionnee rend toute relicence
+# impossible sans l'accord ecrit de chaque contributeur — y compris ceux
+# devenus injoignables. Ce point se referme silencieusement : il n'y a aucun
+# signal au moment ou il devient trop tard.
+#
+# CHOIX D'IMPLEMENTATION : l'action tourne dans notre propre CI et stocke les
+# signatures dans ce depot. Le service heberge cla-assistant.io ferait la meme
+# chose, mais en donnant a un tiers un acces en ecriture au depot — ce que la
+# constitution exclut (principe VII, aucune dependance a un service SaaS).
+#
+# PREREQUIS INFRA (hors depot, a faire une fois) :
+#   - Creer la branche `cla-signatures` et la laisser NON PROTEGEE :
+#       git switch --orphan cla-signatures && git commit --allow-empty -m "init" && git push -u origin cla-signatures
+#     Elle est distincte de `main` parce que l'action y committe a chaque
+#     signature : une branche protegee ferait echouer l'ecriture. Aujourd'hui
+#     la protection de branche n'est pas disponible sur ce depot (compte
+#     gratuit + depot prive), mais elle le deviendra des l'ouverture publique.
+#   - Settings -> Actions -> General -> Workflow permissions : autoriser
+#     l'ecriture, sinon l'action ne peut ni commenter ni committer.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  statuses: write
+
+concurrency:
+  group: cla-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  cla:
+    name: Verifier la signature du CLA
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verifier ou enregistrer la signature
+        if: >
+          github.event.comment.body == 'recheck' ||
+          github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA' ||
+          github.event_name == 'pull_request_target'
+        uses: contributor-assistant/github-action@v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-document: 'https://github.com/sopequenoteck/budget/blob/main/CLA.md'
+          path-to-signatures: 'signatures/version1/cla.json'
+          branch: 'cla-signatures'
+          # Le mainteneur detient deja les droits ; les bots ne peuvent pas signer.
+          allowlist: sopequenoteck,bot*
+          create-file-commit-message: 'chore(cla): initialiser le registre des signatures'
+          signed-commit-message: 'chore(cla): $contributorName a signe le CLA dans $owner/$repo#$pullRequestNo'
+          custom-notsigned-prcomment: >
+            Merci pour cette contribution. Avant de pouvoir la fusionner, il
+            nous faut votre accord sur le [CLA](https://github.com/sopequenoteck/budget/blob/main/CLA.md)
+            — le document explique pourquoi ce projet le demande et ce qu'il
+            n'implique pas. Repondez sur cette PR avec exactement :
+          custom-pr-sign-comment: 'I have read the CLA Document and I hereby sign the CLA'
+          custom-allsigned-prcomment: 'CLA signe par tous les contributeurs de cette PR. Merci.'
+          lock-pullrequest-aftermerge: false

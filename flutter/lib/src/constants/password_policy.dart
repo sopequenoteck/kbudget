@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /// Politique de mot de passe, alignee sur `PasswordPolicy` cote API (KKS-351).
 ///
 /// Une longueur ecrite en dur dans un validateur se desynchronise du serveur

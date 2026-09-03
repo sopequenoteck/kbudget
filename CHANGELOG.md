@@ -5,6 +5,48 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.3.1] - 2026-09-03
+
+> Le depot devient lisible et reutilisable par quelqu'un d'autre : licences
+> posees, accord de contribution, actifs tiers declares, README anglais.
+>
+> **Version corrective bien que la section soit `Added`** : rien de fonctionnel
+> ne change dans l'application livree. Ce qui est ajoute, c'est la gouvernance
+> du depot — une instance mise a jour depuis la 6.3.0 se comporte a l'identique.
+
+### Added
+
+- **KKS-319 — README anglais et fichiers de gouvernance** : le README annonçait en troisième ligne *« Self-hosted, single-user, mobile-first »*. **C'était faux** — l'application est multi-utilisateurs, avec invitations, rôles, isolation par utilisateur et garde-fou sur le dernier administrateur. Une erreur de cette nature en tête de vitrine décrédibilise le reste.
+  - `README.md` réécrit **en anglais**, langue de la communauté self-hosted visée, avec `README.fr.md` à parité. Le positionnement est explicite : multi-devises, banques ouest-africaines au même rang que les françaises, import CSV parce que l'open banking exige un intermédiaire agréé qu'un projet auto-hébergé ne peut pas être.
+  - **L'installation est décrite telle qu'elle est, pas telle qu'elle sera** : `docker-compose.yml` n'embarque pas PostgreSQL, le README le dit franchement plutôt que de promettre l'installation en une commande que KKS-320 doit livrer.
+  - Corrigé au passage : l'URL de clone du README pointait vers `kksdev/k-budget`, dépôt qui n'existe pas.
+  - Le contrat de l'app mobile est énoncé sans détour — le build compilé soi-même est fonctionnellement identique à celui des stores, l'acheter finance le projet et n'achète aucune fonctionnalité.
+  - `CONTRIBUTING.md` traduit et complété : les **profils d'import bancaire** sont mis en avant comme point d'entrée ne demandant pas de Java, avec la consigne de n'envoyer que des échantillons anonymisés. La frontière Angular/Flutter y figure, mais **sans prétendre à une classification complète** — celle-ci reste l'objet de KKS-333.
+  - `SECURITY.md` : signalement privé, et des délais annoncés honnêtement pour un projet maintenu par une personne. Les décisions qui ressemblent à des failles sans en être (limitation par IP et non par compte, `X-Forwarded-For` de confiance conditionnelle, compteurs en mémoire) y sont écrites pour éviter des rapports inutiles.
+  - `CODE_OF_CONDUCT.md` : Contributor Covenant 2.1, texte officiel.
+  - `docs/architecture.md` annonçait 18 entités JPA et n'en énumérait que 17 : `Invitation` manquait.
+- **KKS-318 — Actifs tiers déclarés : `NOTICE` et licence OFL de la police Inter** : le README affirmait depuis KKS-316 que les logos de banques et la police Inter étaient hors licence, sans qu'aucun fichier ne le matérialise. L'affirmation était correcte et pas encore opposable.
+  - `NOTICE` à la racine recense les **28 marques** concernées avec leur établissement, tiré de `BankRegistry` plutôt que deviné, et énonce que leur présence ne vaut ni partenariat ni affiliation.
+  - **Les logos sont présents en deux exemplaires**, `api/src/main/resources/static/bank-logos/` et `flutter/assets/banks/` — le ticket ne mentionnait que le premier. Déclarer un seul emplacement aurait laissé la moitié des fichiers non couverts, sous deux licences différentes de surcroît.
+  - `flutter/assets/fonts/Inter/OFL.txt` ajouté, texte officiel depuis le dépôt d'Inter. Le répertoire de la police étant déclaré comme ressource dans `pubspec.yaml`, la licence est **embarquée dans l'application distribuée** et pas seulement présente dans le dépôt — ce que l'OFL exige à la redistribution.
+  - Le repli en cas de contestation (monogrammes générés) est écrit dans le `NOTICE`, où il sera lu au moment utile plutôt que dans un ticket fermé.
+  - `NOTICE` référencé depuis le README et `CONTRIBUTING.md`, avec la consigne de ne pas ajouter de logo de marque sans l'y déclarer.
+- **KKS-317 — Accord de contribution (CLA) avant la première contribution externe** : sans lui, la première pull request externe fusionnée aurait rendu toute relicence impossible sans l'accord écrit de chaque contributeur, y compris ceux devenus injoignables. Ce point se referme **silencieusement** — aucun signal n'avertit qu'il est trop tard.
+  - `CLA.md` adapté de l'Apache ICLA V2.2, texte officiel extrait de la source. Les trois écarts par rapport au modèle sont énoncés dans le document plutôt que laissés à découvrir.
+  - **Une contrepartie explicite remplace celle de l'ICLA.** L'accord Apache est équilibré par l'engagement de la Foundation à agir conformément à son statut non lucratif ; un mainteneur seul ne peut pas le reprendre. À la place, le projet s'engage à ce que les contributions restent disponibles sous une licence approuvée par l'OSI : une relicence peut changer laquelle, elle ne peut pas les retirer du logiciel libre.
+  - Le CLA couvre **les deux périmètres de licence** — une seule signature vaut pour l'AGPL comme pour la MPL.
+  - Vérification via `contributor-assistant/github-action`, qui tourne dans notre propre CI. Le service hébergé `cla-assistant.io` ferait la même chose en donnant à un tiers un accès en écriture au dépôt, ce que la constitution exclut (principe VII).
+  - Signatures stockées sur une branche dédiée `cla-signatures` : l'action y committe à chaque signature, une branche protégée ferait échouer l'écriture. Constaté au passage — **la protection de branche n'est pas disponible sur ce dépôt** (compte gratuit + dépôt privé) ; le « push direct sur `main` bloqué » est aujourd'hui une discipline, pas un garde-fou technique.
+  - `CONTRIBUTING.md` : pourquoi le CLA, les deux licences et l'en-tête MPL attendu sur tout nouveau fichier Dart, les commandes de vérification, et le fait que le job **Tests APP (runner GitHub)** est celui qui donne un retour exploitable à une PR de fork.
+- **KKS-316 — Licences posées : AGPL-3.0 (API + Angular) et MPL-2.0 (Flutter)** : le dépôt ne contenait **aucun** fichier de licence. Sans licence explicite, le code est juridiquement en « tous droits réservés » — le publier sur GitHub ne l'aurait pas rendu open source, et personne n'aurait eu le droit de l'utiliser, de le modifier ou de le redistribuer.
+  - `LICENSE` (AGPL-3.0) à la racine, `flutter/LICENSE` (MPL-2.0). Textes intégraux récupérés depuis gnu.org et mozilla.org.
+  - **Deux licences, pour une raison précise.** La clause réseau de l'AGPL empêche un tiers de fermer le backend pour en exploiter le service que ce projet a renoncé à être. Mais les conditions de l'App Store (DRM, limitation d'appareils) sont incompatibles avec GPL/AGPL — précédent VLC, retiré en 2011 et revenu après passage en MPL. La MPL-2.0 est un copyleft **par fichier** : la protection reste réelle sans le conflit.
+  - En-tête MPL ajouté aux **292 fichiers source** de `flutter/lib` — le copyleft MPL s'appliquant fichier par fichier, un fichier extrait du dépôt garde ainsi sa licence.
+  - Section *Licence* du README : quel répertoire relève de quelle licence, pourquoi, et le fait que **le nom « k-budget » et le logo sont réservés** — les licences portent sur le code, pas sur l'identité du projet. Un fork doit se présenter sous un autre nom.
+  - Licence déclarée dans les manifestes : `<licenses>` de `api/pom.xml` (vide depuis la génération Spring Initializr) et champ `license` de `app/package.json` (absent).
+  - **Compatibilité des dépendances vérifiée.** Aucun copyleft côté Flutter, ce qui était la condition pour la MPL. H2 est en `scope test` et n'est pas distribué, sa double licence EPL-1.0/MPL-2.0 est donc sans objet. Cinq paquets npm portent une licence de données (CC-BY, CC0, Python-2.0) : dépendances de construction, absentes du bundle livré — documenté comme tel plutôt qu'annoncé « sans conflit ».
+  - Les logos de banques et la police Inter restent hors de ces licences, leur déclaration séparée fait l'objet de KKS-318.
+
 ## [6.3.0] - 2026-09-03
 
 > Le parcours de premiere connexion fonctionne enfin depuis le mobile, la CI
@@ -532,7 +574,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.1...HEAD
+[6.3.1]: https://github.com/sopequenoteck/budget/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
