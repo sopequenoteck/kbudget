@@ -22,6 +22,13 @@ name: CLA
 #     gratuit + depot prive), mais elle le deviendra des l'ouverture publique.
 #   - Settings -> Actions -> General -> Workflow permissions : autoriser
 #     l'ecriture, sinon l'action ne peut ni commenter ni committer.
+#
+# COMPORTEMENT AU PREMIER RUN (constate le 2026-09-04, PR #52) : le tout
+# premier declenchement echoue sur « Committers of pull request N have to sign
+# the CLA », meme pour un auteur present dans l'allowlist. L'action cree le
+# registre `signatures/version1/cla.json` pendant ce run et evalue avant qu'il
+# n'existe. Relancer le workflow suffit — les runs suivants passent. A savoir
+# pour ne pas croire a une erreur de configuration.
 
 on:
   issue_comment:

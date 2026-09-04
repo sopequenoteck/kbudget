@@ -42,14 +42,20 @@ class JwtUtilTest {
     @Test
     void should_refuse_to_start_when_secret_too_short_for_hs256() {
         // 31 caracteres : un de moins que les 256 bits exiges par HS256.
-        assertThatThrownBy(() -> new JwtUtil("a".repeat(31), EXPIRATION))
+        // Construit hors du lambda : celui-ci ne doit contenir qu'une seule
+        // invocation susceptible de lever (java:S5778).
+        String tooShort = "a".repeat(31);
+
+        assertThatThrownBy(() -> new JwtUtil(tooShort, EXPIRATION))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("too short");
     }
 
     @Test
     void should_start_when_secret_is_exactly_at_minimum_length() {
-        assertThat(new JwtUtil("a".repeat(32), EXPIRATION).generateToken(EMAIL)).isNotBlank();
+        String atMinimum = "a".repeat(32);
+
+        assertThat(new JwtUtil(atMinimum, EXPIRATION).generateToken(EMAIL)).isNotBlank();
     }
 
     @Test
