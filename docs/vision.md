@@ -92,7 +92,7 @@ Hebergee en self-hosted sur serveur personnel.
 | Auth | Spring Security + JWT |
 | Reverse proxy | Caddy (auto-HTTPS) |
 | Hebergement | Serveur personnel (self-hosted) |
-| URL | `https://budget.kksdev.fr` |
+| URL | `https://budget.exemple.fr` |
 
 ## Hors scope (pour plus tard)
 

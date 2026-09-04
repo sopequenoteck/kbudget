@@ -5,6 +5,42 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-09-04
+
+> `docker compose up -d` suffit desormais : PostgreSQL est embarque, les images
+> viennent de GHCR, et la sauvegarde comme la restauration ont ete testees pour
+> de vrai.
+>
+> **Rien ne casse pour une instance existante.** Le compose de reference change
+> de registre et embarque une base, mais une installation qui utilise deja sa
+> propre base continue de fonctionner via `docker-compose.override.yml`.
+
+### Added
+
+- **KKS-321 — Images publiées sur GHCR, politique de tags explicite** : les images n'existaient que sur Docker Hub, qui applique des quotas de téléchargement aux utilisateurs anonymes — précisément le mode d'accès d'un self-hoster. Un `docker compose pull` qui échoue sur un quota est un premier contact désastreux.
+  - `release.yml` publie désormais sur **GHCR et Docker Hub**, en multi-architecture. GHCR devient la référence documentée, Docker Hub reste un miroir. Le job reçoit la permission `packages: write`, absente jusqu'ici.
+  - **Tag flottant `X.Y` ajouté** (`6.3` par exemple) : il reçoit les correctifs de la série sans les changements de fonctionnalités. Pas de tag `X` seul — il engloberait des ajouts de features, ce qu'on ne veut pas d'un tag présenté comme sûr.
+  - Les deux guides documentent **quel tag utiliser et pourquoi**, sous forme de tableau : `6.3.1` recommandé, `6.3` pour les correctifs, `latest` déconseillé.
+  - `docker-compose.watchtower.yml` porte désormais en tête la raison pour laquelle il ne doit pas être recommandé : une migration qui échoue à trois heures du matin chez quelqu'un dont on ne connaît ni la base ni les sauvegardes produit un incident indiagnostiquable.
+  - `scripts/docker-publish.sh` publie sur les deux registres et refuse un préfixe `v` — les tags d'image suivent `VERSION` (`6.3.1`), les tags git portent le préfixe (`v6.3.1`), et les confondre publierait un `:v6.3.1` que personne n'irait chercher.
+  - **Piège consigné** : les deux comptes ne s'écrivent pas pareil — GitHub est `sopequenoteck`, Docker Hub `sopequenotech`. Une lettre d'écart suffit à faire échouer la publication.
+- **KKS-322 — Guide d'exploitation, et sauvegarde réellement testée** : `docs/deployment.md` décrivait le déploiement tel que pratiqué sur une infrastructure personnelle. Il est réécrit **en anglais** pour quelqu'un qui ne connaît ni le projet ni cette infra, avec `docs/deployment.fr.md` à parité.
+  - Couvre l'installation, HTTPS et reverse proxy, les mises à jour, la sauvegarde et la restauration, et un dépannage organisé par symptôme observable plutôt que par composant.
+  - **`deploy/backup.sh` et `deploy/restore.sh` remplacent `backup-pg.sh`**, qui ne sauvegardait que la base et seulement en bare-metal. Les avatars sont désormais inclus : restaurer la base seule laisse des comptes dont la photo a disparu.
+  - **La procédure a été testée pour de vrai**, pas seulement écrite. Sauvegarde, modification volontaire des données, restauration, vérification que l'état antérieur revient — sur la base comme sur les avatars.
+  - Ce test a trouvé un défaut que la relecture n'aurait pas vu : `gzip -dc | tar -xzf -` décompressait **deux fois**, le tar échouait en silence et **les avatars n'étaient pas restaurés** alors que le script annonçait une réussite. Une sauvegarde qui ment sur son succès est pire que pas de sauvegarde.
+  - Le guide dit ce que personne d'autre ne dira au self-hoster : le bandeau du premier administrateur n'apparaît **qu'une fois** et le mot de passe est irrécupérable ; `latest` et les outils de mise à jour automatique sont déconseillés parce qu'une migration peut s'appliquer à un moment que personne ne surveille ; et une sauvegarde jamais restaurée est une hypothèse, pas une sauvegarde.
+- **KKS-320 — Installation en une commande : `docker-compose.yml` embarque PostgreSQL** : le compose ne déclarait que `api` et `app`, la base tournant sur une VM séparée propre à une infrastructure personnelle. Un nouvel arrivant devait comprendre cette infra, provisionner sa base et renseigner `DB_URL` avant de voir le premier écran.
+  - Service `db` (PostgreSQL 16), volume nommé, healthcheck interrogeant **la base et l'utilisateur réellement attendus** — `pg_isready` seul répond OK avant que la base applicative existe. L'API attend `service_healthy` : Flyway joue ses migrations au démarrage et échouait sinon.
+  - **Seul le client web publie un port.** L'API et la base restent sur le réseau interne, le container `app` proxifiant déjà `/api/`. C'est aussi ce qui rend `CORS_ALLOWED_ORIGINS` inutile ici — vérifié en conditions réelles, `/api/meta` répond en 200 depuis le port du client.
+  - **`JWT_SECRET` : l'API refuse de démarrer** si le secret est absent, trop court pour HS256, ou s'il vaut encore la valeur d'exemple. Cette valeur est publique — elle est dans le dépôt — et permettrait de forger un jeton pour n'importe quel compte. Un échec bruyant vaut mieux qu'une compromission silencieuse.
+  - **`.env.example` réduit à deux valeurs obligatoires**, `JWT_SECRET` et `DB_PASSWORD`, tout le reste ayant un défaut utilisable.
+  - Le défaut `https://budget.kksdev.fr` de `app.cors.allowed-origins` est retiré : aucune instance n'hérite plus d'un domaine qui n'est pas le sien. Sept références au domaine personnel ont été généralisées dans la documentation.
+  - `docker-compose.override.yml.example` pour brancher une base externe existante, avec `docker-compose.override.yml` ajouté au `.gitignore`.
+  - `deploy/Caddyfile` générique et simplifié : un seul `reverse_proxy` suffit désormais.
+  - **Mot de passe PostgreSQL en clair retiré de `docker-compose-dev.yml`** — il était versionné dans un dépôt destiné à devenir public.
+  - **Validé de bout en bout** sur une installation vierge : trois services `healthy`, interface en 200, compte administrateur créé, connexion réussie avec les identifiants du bandeau, données survivant à `down` puis `up`. Deux défauts ont été trouvés par ce test et n'auraient pas été vus autrement — un `:` non échappé qui empêchait le compose de démarrer, et des healthchecks interrogeant `localhost` là où nginx n'écoute qu'en IPv4.
+
 ## [6.3.1] - 2026-09-03
 
 > Le depot devient lisible et reutilisable par quelqu'un d'autre : licences
@@ -574,7 +610,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.4.0...HEAD
+[6.4.0]: https://github.com/sopequenoteck/budget/compare/v6.3.1...v6.4.0
 [6.3.1]: https://github.com/sopequenoteck/budget/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0

@@ -73,24 +73,42 @@ server, no external service.
 
 ## Getting started
 
-**You need a PostgreSQL 15+ database.** The bundled `docker-compose.yml` runs
-the API and the web client and expects the database to already exist. A
-single-command install that brings its own database is planned, not shipped —
-this README will say so plainly until it is.
+**PostgreSQL is included.** Nothing else to install.
 
 ```bash
 git clone https://github.com/sopequenoteck/budget.git
 cd budget
-cp .env.example .env    # set DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET
+cp .env.example .env
+```
+
+Set the two required values in `.env` — everything else has a working default:
+
+```bash
+openssl rand -base64 48    # paste as JWT_SECRET
+                           # then pick any DB_PASSWORD
+```
+
+```bash
 docker compose up -d
 ```
 
-The API listens on `http://localhost:8080/api`, with business endpoints under
-`/api/v1`. The web client is on `http://localhost:4200`.
+The interface is on **http://localhost:8080**. Change `APP_PORT` in `.env` if
+that port is taken.
 
 **On first start**, an administrator account is created and its generated
-password is printed in the API logs. Read it there, sign in, and you will be
-asked to set your own credentials before anything else.
+password is printed once in the API logs:
+
+```bash
+docker compose logs api | grep -A4 "FIRST BOOT"
+```
+
+> **Read it now.** That password is shown only at the very first start and is
+> stored hashed — it cannot be recovered afterwards. Signing in will ask you to
+> set your own credentials immediately.
+
+Already have a PostgreSQL server you would rather use? Copy
+`docker-compose.override.yml.example` to `docker-compose.override.yml` and set
+`DB_URL` in `.env`.
 
 Images are published for `linux/amd64` and `linux/arm64` — Raspberry Pi 4/5,
 ARM NAS, ARM cloud instances and Apple Silicon all work without a local build.
@@ -110,7 +128,7 @@ cd app && npm ci && ng serve
 
 </details>
 
-For production deployment — bare metal, Caddy, backups — see
+For HTTPS, updates, backup and restore, and troubleshooting, see
 [`docs/deployment.md`](docs/deployment.md).
 
 ## The mobile app
@@ -144,7 +162,7 @@ budget/
 | [`docs/api-examples.md`](docs/api-examples.md) | Request and response examples per endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | HTTP error contract |
 | [`docs/api-compatibility.md`](docs/api-compatibility.md) | **API compatibility policy** — the six writing rules and the deliberate-break procedure |
-| [`docs/deployment.md`](docs/deployment.md) | Docker and bare-metal deployment |
+| [`docs/deployment.md`](docs/deployment.md) | **Running an instance** — install, HTTPS, updates, backup and restore, troubleshooting |
 | [`DESIGN.md`](DESIGN.md) | Design reference: principles, colours, patterns, tokens |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — `dev` profile only |
 

@@ -467,7 +467,7 @@ classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
 ## Schema de deploiement
 
 ```
-                    budget.kksdev.fr
+                    budget.exemple.fr
                           |
                         Caddy (auto-HTTPS)
                        /          \
@@ -483,4 +483,4 @@ classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
 - **Caddy** : reverse proxy + serveur de fichiers statiques, certificats Let's Encrypt automatiques
 - **Frontend** : fichiers statiques Angular (`dist/`) servis directement par Caddy
 - **Backend** : Spring Boot sur `localhost:8080`, accessible uniquement via `/api/*`
-- **Domaine unique** : `budget.kksdev.fr` pour frontend et API
+- **Domaine unique** : `budget.exemple.fr` pour frontend et API

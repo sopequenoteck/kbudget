@@ -1,25 +1,33 @@
-# K-Budget — Caddy reverse proxy (VM separee)
+# k-budget — reverse proxy Caddy (exemple)
+#
+# Le compose fourni expose le client web en HTTP sur APP_PORT. Ce fichier
+# ajoute HTTPS et un nom de domaine. Il n'est pas obligatoire : sur un reseau
+# local, l'acces direct au port suffit.
+#
+#   1. Remplacer budget.exemple.fr par votre domaine
+#   2. Ajuster l'adresse de destination si Caddy tourne ailleurs que sur
+#      l'hote Docker
+#   3. caddy run --config deploy/Caddyfile
+#
+# Caddy obtient et renouvelle le certificat TLS tout seul, a condition que le
+# domaine pointe vers cette machine et que les ports 80 et 443 soient
+# joignables depuis Internet.
 
-budget.kksdev.fr {
-	# API Spring Boot
-	handle /api/* {
-		reverse_proxy 192.168.1.81:3001 {
-			# Ecrase X-Forwarded-For au lieu de l'enrichir (KKS-310).
-			#
-			# Par defaut Caddy AJOUTE l'IP du client a l'en-tete recu. Un client
-			# qui en envoie deja un se placerait donc en premier maillon — or
-			# c'est ce maillon que l'API retient comme IP d'origine. La
-			# limitation de debit deviendrait contournable en variant la valeur
-			# a chaque requete.
-			#
-			# En l'ecrasant, seule l'adresse TCP reelle vue par Caddy remonte.
-			header_up X-Forwarded-For {remote_host}
-		}
-	}
-
-	# Frontend Angular (container Nginx)
-	handle {
-		reverse_proxy 192.168.1.81:3000
+budget.exemple.fr {
+	# Un seul point d'entree : le container `app` sert l'interface et
+	# proxifie deja /api/ vers l'API (cf. app/nginx.conf). Inutile de router
+	# /api separement ici.
+	reverse_proxy localhost:8080 {
+		# Ecrase X-Forwarded-For au lieu de l'enrichir (KKS-310).
+		#
+		# Par defaut Caddy AJOUTE l'IP du client a l'en-tete recu. Un client
+		# qui en envoie deja un se placerait donc en premier maillon — or
+		# c'est ce maillon que l'API retient comme IP d'origine. La
+		# limitation de debit deviendrait contournable en variant la valeur
+		# a chaque requete.
+		#
+		# En l'ecrasant, seule l'adresse TCP reelle vue par Caddy remonte.
+		header_up X-Forwarded-For {remote_host}
 	}
 
 	header {
@@ -29,3 +37,9 @@ budget.kksdev.fr {
 		-Server
 	}
 }
+
+# Rappel : derriere un proxy, TRUSTED_PROXIES doit contenir le reseau depuis
+# lequel Caddy joint le container. Le defaut couvre les plages privees, ce qui
+# suffit quand Caddy tourne sur le meme hote. S'il est sur une autre machine,
+# ajouter son prefixe d'IP — sinon toutes les requetes portent son adresse et
+# la limitation de debit s'applique a tout le monde ensemble.

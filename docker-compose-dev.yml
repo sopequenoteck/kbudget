@@ -1,10 +1,22 @@
+# Base PostgreSQL pour le developpement local uniquement (KKS-320).
+#
+#   docker compose -f docker-compose-dev.yml up -d
+#
+# Pour faire tourner l'application complete, utiliser docker-compose.yml
+# qui embarque sa propre base. Ce fichier ne sert qu'a lancer l'API depuis
+# l'IDE contre une base jetable.
+#
+# Le mot de passe par defaut est volontairement trivial : cette base n'est
+# pas destinee a etre exposee. Un mot de passe reel n'a rien a faire dans
+# un fichier versionne.
+
 services:
   postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: budget_db
       POSTGRES_USER: budget_u
-      POSTGRES_PASSWORD: REDACTED
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devpassword}
     ports:
       - "5432:5432"
     volumes:

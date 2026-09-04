@@ -14,4 +14,8 @@ app:
   jwt:
     secret: ${JWT_SECRET}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://budget.kksdev.fr}
+    # Aucun defaut : le deploiement fourni sert le frontend et l'API sur la
+    # meme origine (le client web proxifie /api/), CORS n'a donc pas lieu de
+    # s'appliquer. Un defaut pointant vers un domaine particulier ferait
+    # heriter chaque self-hoster d'une origine qui n'est pas la sienne.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}

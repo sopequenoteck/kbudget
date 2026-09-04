@@ -1,460 +1,281 @@
-# Deploiement K-Budget
+# Running k-budget
 
-## Prerequis
+Everything needed to install, update, back up and troubleshoot a self-hosted
+instance. No prior knowledge of the project is assumed.
 
-- Serveur Linux (Ubuntu 22.04+, Debian 12+ recommande), architecture `amd64` ou `arm64`
-- **Option A** : Docker Engine 24+ et Docker Compose v2 — les images publiees couvrent
-  `linux/amd64` et `linux/arm64` (Raspberry Pi 4/5, NAS ARM, Apple Silicon, instances
-  ARM cloud). Docker selectionne automatiquement la variante correspondant a l'hote.
-- **Option B** : Java 21 JRE + PostgreSQL 15+
-- Node.js 20+ et npm 10+ (pour le build frontend)
-- Nom de domaine : `budget.kksdev.fr`
+> 🇫🇷 [Version française](deployment.fr.md)
 
-## Variables d'environnement
+- [Install](#install)
+- [HTTPS and reverse proxy](#https-and-reverse-proxy)
+- [Updating](#updating)
+- [Backup and restore](#backup-and-restore)
+- [Troubleshooting](#troubleshooting)
+- [Running without Docker](#running-without-docker)
+- [Environment variables](#environment-variables)
 
-Creer un fichier `.env` a la racine du projet (ou dans `/opt/k-budget-api/` pour bare-metal) :
+## Install
+
+**Requirements**: Docker with the Compose plugin. That is all — PostgreSQL
+comes with the stack. Roughly 1 GB of RAM and 2 GB of disk are enough to start.
 
 ```bash
+git clone https://github.com/sopequenoteck/budget.git
+cd budget
 cp .env.example .env
 ```
 
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `DB_URL` | URL JDBC PostgreSQL | `jdbc:postgresql://localhost:5432/budget_db` |
-| `DB_USERNAME` | Utilisateur BDD | `budget_u` |
-| `DB_PASSWORD` | Mot de passe BDD | un mot de passe fort |
-| `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
-| `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
-| `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
-| `CORS_ALLOWED_ORIGINS` | Origines autorisees a appeler l'API depuis un navigateur, separees par des virgules. Defaut en profil `prod` : `https://budget.kksdev.fr` — **a changer sur toute autre instance**, sinon le frontend recoit `403 Invalid CORS request` au login sans autre indication. Doit contenir le schema et le port si non standard, et correspondre exactement a l'origine du navigateur. | `https://budget.exemple.fr` |
-| `MIN_CLIENT_VERSION` | *(Optionnelle, KKS-314)* Version de client la plus ancienne acceptee, exposee par `/api/meta`. Defaut : `6.0.0`. Ne bouge qu'a une rupture de contrat, pas a chaque release : l'augmenter bloque les clients plus anciens avec un message explicite. | `6.0.0` |
-| `RATE_LIMIT_CAPACITY` | *(Optionnelle, KKS-310)* Tentatives d'authentification autorisees par fenetre et par IP. Defaut : `5`. Desserrer derriere un VPN, serrer sur une instance exposee. | `5` |
-| `RATE_LIMIT_WINDOW_SECONDS` | *(Optionnelle, KKS-310)* Duree de la fenetre de limitation, en secondes. Defaut : `60`. | `60` |
-| `TRUSTED_PROXIES` | *(Optionnelle, KKS-310)* Prefixes d'IP dont l'en-tete `X-Forwarded-For` est cru, separes par des virgules. Defaut : plages privees, ce qui couvre le deploiement fourni. **A completer si le reverse proxy est sur un autre reseau**, sinon la limitation s'applique globalement a tous les utilisateurs au lieu de par client. | `10.,192.168.,203.0.113.5` |
-| `SWAGGER_ENABLED` | *(Optionnelle, KKS-311)* Expose la documentation OpenAPI (`/swagger-ui.html`, `/v3/api-docs`). Defaut : `false` hors profil `dev`, `true` en `dev`. Publier la surface d'API complete d'une instance exposee n'a pas de benefice en production. | `true` |
-| `AVATAR_STORAGE_PATH` | *(Optionnelle, KKS-235)* Chemin disque pour le stockage des avatars utilisateurs (`POST /api/v1/users/me/avatar`). Defaut : `./data/avatars` (relatif au cwd du process). En production bare-metal, recommandation : `/var/k-budget/avatars`. En Docker, fixee a `/app/data/avatars` par le compose (volume `api-avatars`) : ne pas la surcharger. Le dossier est cree automatiquement au demarrage si absent. | `/var/k-budget/avatars` |
-
-### Avatars utilisateurs (KKS-235)
-
-Les avatars sont stockes en dehors de la base PostgreSQL, sur le filesystem indique par `AVATAR_STORAGE_PATH`. Un fichier par user, nomme via UUID (cf. `users.avatar_path` en DB). Limite : 2 Mo par image, formats JPG/PNG uniquement.
-
-**Permissions recommandees** (bare-metal) :
+Set the two required values in `.env`:
 
 ```bash
-sudo mkdir -p /var/k-budget/avatars
-sudo chown -R k-budget:k-budget /var/k-budget/avatars
-sudo chmod 750 /var/k-budget/avatars
+openssl rand -base64 48    # paste as JWT_SECRET
+                           # then choose any DB_PASSWORD
 ```
 
-> Adapter `k-budget:k-budget` au user/groupe systeme reel (par defaut `budget` dans la procedure bare-metal ci-dessous, soit `chown -R budget:budget /var/k-budget/avatars`).
-
-**Docker** : rien a configurer. Le compose fourni declare un volume nomme `api-avatars` monte sur `/app/data/avatars` et fixe `AVATAR_STORAGE_PATH` sur ce chemin. Les avatars survivent a `docker compose down`, aux mises a jour d'image et aux recreations de container par Watchtower.
-
-Pour les stocker sur un emplacement precis de l'hote (disque dedie, sauvegarde existante), remplacer la source du volume par un bind-mount. Le chemin **container** reste `/app/data/avatars` :
-
-```yaml
-services:
-  api:
-    volumes:
-      - /var/k-budget/avatars:/app/data/avatars
-```
-
-> Ne pas redefinir `AVATAR_STORAGE_PATH` dans `.env` en mode Docker : le point de montage ne suivrait pas et les avatars repartiraient dans la couche ephemere du container, ou ils disparaissent a chaque recreation (defaut KKS-307).
-
-**Migration d'une instance anterieure a KKS-307** : les avatars uploades avant l'ajout du volume sont perdus — ils vivaient dans la couche ephemere du container et ont disparu a la premiere recreation. Aucune recuperation possible. Apres `docker compose up -d` avec le nouveau compose, demander aux utilisateurs concernes de re-televerser leur avatar ; les `users.avatar_path` orphelins produisent un `404 AVATAR_NOT_FOUND` jusque-la, sans autre effet sur l'application.
-
-## Configuration admin
-
-L'instance identifie les administrateurs via la variable d'environnement `ADMIN_EMAILS`. Elle contient une liste d'emails separes par des virgules ; chaque email est normalise (trim + lowercase) au demarrage.
-
-```bash
-ADMIN_EMAILS=so-pequeno@live.fr,autre-admin@example.com
-```
-
-- Un user dont l'email figure dans `ADMIN_EMAILS` et dont `disabled_at IS NULL` peut appeler les endpoints `/api/v1/admin/*` (invitations, desactivation de users).
-- Les users non-admin recoivent 403 sur ces endpoints.
-- Si `ADMIN_EMAILS` est vide OU si aucun user actif ne correspond a un email de la liste, un `WARN` est emis au boot : aucune invitation ne peut etre emise tant qu'un admin valide n'est pas configure.
-- **Pas d'inscription publique** : l'onboarding se fait exclusivement via le flux d'invitation (`POST /api/v1/admin/invitations` puis acceptation via `POST /api/v1/auth/accept-invite`). L'admin transmet le lien manuellement (Signal, SMS, face-a-face) — l'application n'envoie pas d'email.
-- **Changement d'admin** : modifier `ADMIN_EMAILS` dans l'env puis redemarrer. Pas de rechargement a chaud.
-- **Garde-fou dernier admin** : un admin ne peut pas se desactiver s'il est le seul admin actif (HTTP 409 `LAST_ADMIN_CANNOT_BE_DISABLED`).
-- **Source d'autorite du role admin** : le statut admin est stocke directement en base (`users.is_admin`). `ADMIN_EMAILS` sert uniquement de source de promotion au demarrage : au boot, les users dont l'email figure dans la liste sont promus `isAdmin=true` s'ils ne le sont pas deja. `ADMIN_EMAILS` ne retrograde **jamais** un admin existant. Consequence : apres un changement d'email (via `/api/v1/auth/first-login-reset`), le user conserve son acces admin meme si son nouvel email n'apparait pas dans `ADMIN_EMAILS`.
-
-## Premier demarrage sur instance vierge (self-hoster)
-
-Sur une instance avec une base PostgreSQL vide, l'app amorce automatiquement un compte admin au premier boot afin de permettre l'acces initial. Aucune commande manuelle n'est requise.
-
-### Procedure
-
-1. **Lancer l'application** :
-
-   ```bash
-   docker compose up -d
-   ```
-
-2. **Recuperer le mot de passe initial** genere au premier boot :
-
-   ```bash
-   docker compose logs api | grep -A 5 "FIRST BOOT"
-   ```
-
-   Le log affiche une banniere encadree du type :
-
-   ```
-   ================================================
-    FIRST BOOT — Admin account created
-     Email:    admin@localhost
-     Password: xQ9mK3vP7nR2wL8t5sH4jD8fG1bN6cY3
-    CHANGE THESE CREDENTIALS IMMEDIATELY
-   ================================================
-   ```
-
-   Par defaut l'email est `admin@localhost`. Pour personnaliser, definir `BOOTSTRAP_EMAIL=votre@email.com` dans `.env` **avant le premier `docker compose up`** (apres le premier boot, la variable est sans effet — le compte est cree une seule fois dans la vie de l'instance).
-
-3. **Se connecter sur l'UI** : ouvrir l'URL publique (ex : `https://budget.kksdev.fr`) et saisir les credentials initiaux. L'application redirige automatiquement vers un ecran dedie de reset forcé.
-
-4. **Completer le formulaire de reset** : saisir l'email definitif, un nouveau mot de passe personnel (8 chars min) et un nom d'affichage. Apres validation, acces complet a l'application.
-
-5. **(Optionnel) Purger les logs du premier boot** si la sortie est persistee par un agent externe (Datadog, Loki, journalctl avec persistance, etc.) :
-
-   ```bash
-   docker compose logs --no-log-prefix api > /dev/null
-   ```
-
-   Les logs stdout ephemeres Docker n'ont pas besoin de purge explicite.
-
-### Proprietes de securite
-
-- Le mot de passe initial est aleatoire 32 chars alphanumeriques, genere via `SecureRandom` — jamais dans le code ni dans le repo.
-- Tant que le reset n'a pas ete effectue, le JWT emis par le login n'autorise que l'endpoint `POST /api/v1/auth/first-login-reset` et `POST /api/v1/auth/logout`. Tous les autres endpoints protegés renvoient **403 `PASSWORD_RESET_REQUIRED`**.
-- Apres le reset, le user conserve son role admin meme si le nouvel email n'est pas dans `ADMIN_EMAILS` (cf. "Configuration admin").
-- Si le container redemarre avant le reset : le meme mot de passe reste valide en base (pas de regeneration, condition `users.count() == 0` assure l'idempotence).
-- Aucun seed n'est effectue si des users existent deja en DB.
-
-### Restauration d'acces en cas de perte du mot de passe admin
-
-Si l'unique admin a perdu son mot de passe apres avoir complete le reset initial, la procedure de bootstrap ne s'applique plus (DB non vide). La recuperation se fait actuellement via intervention directe en base. Un ticket dedie pourra ajouter une commande CLI de reset ulterieurement.
-
-Generer un `JWT_SECRET` securise :
-
-```bash
-openssl rand -base64 64
-```
-
-## Build frontend
-
-```bash
-cd app
-npm ci
-ng build --configuration production
-```
-
-Le build genere les fichiers statiques dans `app/dist/k-budget-app/browser/`. Ces fichiers doivent etre copies sur le serveur dans `/opt/k-budget-app/dist/`.
-
-```bash
-scp -r app/dist/k-budget-app/browser/* serveur:/opt/k-budget-app/dist/
-```
-
-## Option A : Docker Compose (recommande)
-
-### 1. Configurer .env
-
-```bash
-cp .env.example .env
-# Editer .env avec vos valeurs
-```
-
-Le `DB_URL` est gere automatiquement par Docker Compose (hostname `postgres`). Vous devez configurer uniquement `DB_USERNAME`, `DB_PASSWORD` et `JWT_SECRET`.
-
-### 2. Lancer
+Everything else has a working default. Then:
 
 ```bash
 docker compose up -d
 ```
 
-Le premier lancement build l'image et demarre PostgreSQL puis l'API.
+The interface is on **http://localhost:8080**. If that port is taken, change
+`APP_PORT` in `.env`.
 
-### 3. Verifier
+### Finding the first administrator password
+
+On the very first start, the application creates an administrator account and
+prints its generated password:
 
 ```bash
-# Sante de l'API
-curl http://localhost:8080/api/actuator/health
-
-# Statut des conteneurs
-docker compose ps
-
-# Logs
-docker compose logs -f api
+docker compose logs api | grep -A4 "FIRST BOOT"
 ```
 
-### 4. Activer le reverse proxy (optionnel)
+```
+================================================
+ FIRST BOOT — Admin account created
+ Email:    admin@localhost
+ Password: <generated>
+ CHANGE THESE CREDENTIALS IMMEDIATELY
+================================================
+```
 
-Decommentez le service `caddy` dans `docker-compose.yml` et les volumes associes, puis editez `deploy/Caddyfile` avec votre domaine.
+> **Read it now.** This banner is printed **only at the very first start**, and
+> the password is stored hashed — it cannot be recovered afterwards. If you miss
+> it, see [Lost administrator password](#lost-administrator-password).
 
-**Important** : dans le Caddyfile, remplacez `localhost:8080` par `api:8080` (nom du service Docker).
+Signing in redirects you straight to a screen that requires setting your own
+email and password. That is expected: the seeded account is a way in, not an
+account to keep.
+
+### Adding other people
+
+**There is no public sign-up** — by design. An administrator invites people
+from **Settings → Users**, and the invitee receives a link to set their own
+password. Each user's data is strictly isolated from the others'.
+
+## HTTPS and reverse proxy
+
+The compose file serves plain HTTP on `APP_PORT`. On a local network or over a
+VPN, that is often enough and you can skip this section.
+
+To expose the instance on the internet, put a reverse proxy in front.
+[`deploy/Caddyfile`](../deploy/Caddyfile) is a working example — Caddy obtains
+and renews TLS certificates on its own. [`deploy/nginx.conf`](../deploy/nginx.conf)
+covers nginx with certbot.
+
+Two things matter whichever proxy you choose:
+
+**`TRUSTED_PROXIES` must contain the network the proxy connects from.** The
+default covers private ranges, which is enough when the proxy runs on the same
+host. Otherwise every request appears to come from the proxy's address, and
+rate limiting applies to everyone at once instead of per client.
+
+**The edge proxy must overwrite `X-Forwarded-For`, not append to it.** Both
+supplied configurations do. Appending would let a client forge the first hop —
+the one the API trusts — and bypass rate limiting.
+
+You should **not** need `CORS_ALLOWED_ORIGINS`: the web client proxies `/api/`
+to the API, so the browser only ever sees one origin. Set it only if you serve
+the frontend from a different domain than the API.
+
+## Updating
+
+**Back up first.** Always. See [Backup and restore](#backup-and-restore).
+
+Then read the [release notes](../CHANGELOG.md) — a major version means a
+deliberate break, and the entry says what it requires of you.
 
 ```bash
+# 1. Back up
+./deploy/backup.sh
+
+# 2. Pin the new version in docker-compose.yml
+#    image: ghcr.io/sopequenoteck/k-budget-api:6.4.0
+
+# 3. Pull and restart
+docker compose pull
 docker compose up -d
 ```
 
-## Option B : Bare-metal (JAR + systemd)
+Database migrations run automatically at startup.
 
-### 1. Installer les prerequis
+### Which tag to use
 
-```bash
-# Java 21 JRE
-sudo apt install -y temurin-21-jre
+Images are published to **GHCR**, `ghcr.io/sopequenoteck/k-budget-*`. Docker Hub
+(`sopequenotech/k-budget-*`) is kept as a mirror. Prefer GHCR: Docker Hub
+applies download quotas to anonymous users, which is exactly how a self-hoster
+pulls.
 
-# PostgreSQL 15
-sudo apt install -y postgresql-15
-```
+Taking `6.4.0` as an example — check the [changelog](../CHANGELOG.md) for the
+current version:
 
-### 2. Configurer PostgreSQL
+| Tag | Moves when | Use it |
+|-----|-----------|--------|
+| `6.4.0` | never | **Recommended.** You decide when to update |
+| `6.4` | a patch is released in the 6.4 series | Fixes without feature changes |
+| `latest` | every release | Not recommended — see below |
 
-```sql
-CREATE USER budget_u WITH PASSWORD 'votre_mot_de_passe';
-CREATE DATABASE budget_db OWNER budget_u;
-```
+`docker-compose.yml` ships with a pinned version on purpose. Following `latest`
+means a restart can apply a database migration you did not choose, at a moment
+you did not choose.
 
-### 3. Creer l'utilisateur systeme
+**Watchtower and other auto-updaters are not recommended** for the same reason:
+an unattended update that fails mid-migration leaves an instance in a state
+nobody was watching, and the person who has to diagnose it is you.
 
-```bash
-sudo useradd -r -m -d /opt/k-budget-api -s /usr/sbin/nologin budget
-```
+### If a migration fails
 
-### 4. Deployer le JAR
+The API stops and logs the failing migration. Nothing is silently half-applied
+— Flyway runs each migration in a transaction where the database allows it.
 
-```bash
-# Build sur la machine de dev
-cd api && mvn clean package -DskipTests
-scp target/api-*.jar serveur:/opt/k-budget-api/api.jar
-```
+1. Read `docker compose logs api` and find the Flyway error
+2. Restore the backup you took before updating
+3. Go back to the previous image version
+4. Open an issue with the migration name and the error
 
-### 5. Configurer l'environnement
+## Backup and restore
 
-```bash
-sudo cp .env /opt/k-budget-api/.env
-sudo chown budget:budget /opt/k-budget-api/.env
-sudo chmod 600 /opt/k-budget-api/.env
-```
+Two things need saving: the **database** and the **avatars**. Restoring only
+the database leaves accounts whose picture has vanished.
 
-Le fichier `.env` doit contenir les 4 variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`).
-
-### 6. Installer le service systemd
+### Backing up
 
 ```bash
-sudo cp deploy/k-budget-api.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable k-budget-api
-sudo systemctl start k-budget-api
+./deploy/backup.sh
 ```
 
-### 7. Verifier
+Writes `db_<timestamp>.sql.gz` and, when there are any, `avatars_<timestamp>.tar.gz`
+into `./backups`, and deletes files older than 14 days.
 
 ```bash
-sudo systemctl status k-budget-api
-curl http://localhost:8080/api/actuator/health
+BACKUP_DIR=/mnt/nas RETENTION_DAYS=30 ./deploy/backup.sh
 ```
 
-## Reverse proxy
+Daily at 03:00, from the directory holding `docker-compose.yml`:
 
-### Caddy (auto-HTTPS, recommande)
+```cron
+0 3 * * * cd /path/to/budget && ./deploy/backup.sh >> backups/backup.log 2>&1
+```
 
-Caddy gere automatiquement les certificats Let's Encrypt. Il sert a la fois le frontend Angular (fichiers statiques) et le reverse proxy vers l'API Spring Boot.
+> A backup that has never been restored is a hypothesis, not a backup. Restore
+> one into a throwaway copy at least once.
+
+### Restoring
 
 ```bash
-sudo apt install -y caddy
-
-# Copier les fichiers frontend
-sudo mkdir -p /opt/k-budget-app/dist
-sudo cp -r app/dist/k-budget-app/browser/* /opt/k-budget-app/dist/
-
-# Installer le Caddyfile
-sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
-sudo systemctl reload caddy
+./deploy/restore.sh 2026-09-04_140207
 ```
 
-Le Caddyfile route `/api/*` vers Spring Boot (`localhost:8080`) et sert les fichiers Angular pour toutes les autres routes, avec SPA fallback vers `index.html`.
+Run it without arguments to list what is available. The script stops the API,
+recreates the schema, restores the database and the avatars, restarts, and
+asks for confirmation first — `FORCE=1` skips the prompt for scripted use.
 
-Fichier de reference : [`deploy/Caddyfile`](../deploy/Caddyfile)
-
-### Nginx (certbot pour SSL)
+**Check the application answers before considering it done:**
 
 ```bash
-sudo apt install -y nginx
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/k-budget-api
-sudo ln -s /etc/nginx/sites-available/k-budget-api /etc/nginx/sites-enabled/
-# Editer : remplacer budget.kksdev.fr par votre domaine
-sudo nginx -t && sudo systemctl reload nginx
-
-# Generer le certificat SSL
-sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d budget.kksdev.fr
+curl -s http://localhost:8080/api/meta
 ```
 
-Fichier de reference : [`deploy/nginx.conf`](../deploy/nginx.conf)
+### Your data is yours alone
 
-## Backup PostgreSQL
+Nobody else holds a copy. There is no vendor, no support desk, no recovery
+procedure outside your own backups. That is the trade of self-hosting.
 
-### Script
+## Troubleshooting
 
-Le script `deploy/backup-pg.sh` effectue un `pg_dump` compresse avec rotation automatique.
-
-Variables configurables :
-
-| Variable | Defaut | Description |
-|----------|--------|-------------|
-| `BACKUP_DIR` | `/opt/k-budget-api/backups` | Repertoire de stockage |
-| `BACKUP_RETENTION_DAYS` | `7` | Jours de retention |
-| `DB_NAME` | `budget_db` | Nom de la base |
-| `DB_HOST` | `localhost` | Hote PostgreSQL |
-| `DB_PORT` | `5432` | Port PostgreSQL |
-| `DB_USER` | `budget_u` | Utilisateur PostgreSQL |
-
-### Authentification
-
-Configurer `~/.pgpass` pour eviter de saisir le mot de passe :
+### The API will not start
 
 ```bash
-echo "localhost:5432:budget_db:budget_u:votre_mot_de_passe" >> ~/.pgpass
-chmod 600 ~/.pgpass
+docker compose logs api | tail -50
 ```
 
-### Cron (backup quotidien a 3h)
+| What you see | Cause |
+|---|---|
+| `JWT_SECRET is not set` / `still holds the example value` / `too short` | Generate one: `openssl rand -base64 48` |
+| `Connection refused` to the database | The `db` service is not healthy yet — `docker compose ps` |
+| A Flyway error | See [If a migration fails](#if-a-migration-fails) |
+| `exec format error` | Wrong architecture. Images are published for amd64 and arm64; check `docker version --format '{{.Server.Arch}}'` |
+
+### `403 Invalid CORS request` when signing in
+
+The browser reaches the API on a different origin than the one the API allows.
+With the supplied compose this should not happen — if it does, you are likely
+serving the frontend separately. Set `CORS_ALLOWED_ORIGINS` to the exact origin,
+scheme and port included.
+
+### The mobile app will not connect
+
+1. The server URL must include the scheme: `https://budget.example.com`, not
+   `budget.example.com`
+2. `https://<your-server>/api/meta` must answer from the phone's network
+3. A self-signed certificate will be rejected — use a real one, Caddy gets you
+   one automatically
+4. If the app reports an incompatibility, compare its version with
+   `minClientVersion` from `/api/meta`
+
+### Lost administrator password
+
+The banner only ever appears once. If no administrator can sign in, reset the
+password directly in the database:
 
 ```bash
-crontab -e
-# Ajouter :
-0 3 * * * /opt/k-budget-api/deploy/backup-pg.sh >> /opt/k-budget-api/logs/backup.log 2>&1
+# Generate a BCrypt hash of your new password, then:
+docker compose exec -T db psql -U budget_u -d budget_db \
+  -c "UPDATE users SET password = '<bcrypt-hash>', password_reset_required = true WHERE email = 'admin@localhost';"
 ```
 
-### Restauration
+Setting `password_reset_required` forces the change screen at next sign-in.
+
+## Running without Docker
+
+Requires Java 21, PostgreSQL 15+ and Node 22.
 
 ```bash
-gunzip -c /opt/k-budget-api/backups/budget_db_2026-02-07_030000.sql.gz | psql -h localhost -U budget_u budget_db
+psql -c "CREATE USER budget_u WITH PASSWORD 'changeme';"
+psql -c "CREATE DATABASE budget_db OWNER budget_u;"
+
+cp .env.example .env    # set DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET
+
+cd api && mvn clean package && java -jar target/api-*.jar
+cd app && npm ci && npm run build    # serve dist/ with any web server
 ```
 
-## Backup avatars (KKS-235)
+A systemd unit is provided in [`deploy/k-budget-api.service`](../deploy/k-budget-api.service).
+The backup scripts work here too with `MODE=native`.
 
-Les avatars utilisateurs sont stockes hors-DB sur le filesystem (cf. `AVATAR_STORAGE_PATH`). **Inclure ce dossier dans la strategie de backup** au meme titre que la DB — un dump PostgreSQL seul ne restaure que la reference (`users.avatar_path`), pas les binaires.
+## Environment variables
 
-### Bare-metal — backup quotidien (avatars + DB)
-
-```bash
-# Cron quotidien a 3h05 (apres le dump PostgreSQL de 3h)
-5 3 * * * tar czf /opt/k-budget-api/backups/avatars_$(date +\%F).tar.gz -C /var/k-budget avatars/ && find /opt/k-budget-api/backups/avatars_*.tar.gz -mtime +7 -delete
-```
-
-### Bare-metal — restauration
-
-```bash
-sudo tar xzf /opt/k-budget-api/backups/avatars_2026-04-27.tar.gz -C /var/k-budget/
-sudo chown -R budget:budget /var/k-budget/avatars
-sudo chmod 750 /var/k-budget/avatars
-```
-
-### Docker — backup du volume `api-avatars`
-
-Le volume ne se sauvegarde pas avec un `tar` direct sur l'hote : passer par un container ephemere monte sur les memes volumes que l'API. `--volumes-from` evite d'avoir a deviner le nom du volume (prefixe par le nom du projet compose).
-
-```bash
-# Cron quotidien a 3h05. Le `cd` est indispensable : cron ne s'execute pas
-# dans le repertoire du docker-compose.yml, dont `docker compose` a besoin.
-5 3 * * * cd /opt/k-budget && docker run --rm --volumes-from $(docker compose ps -q api) -v /opt/k-budget-api/backups:/backup alpine tar czf /backup/avatars_$(date +\%F).tar.gz -C /app/data/avatars . && find /opt/k-budget-api/backups/avatars_*.tar.gz -mtime +7 -delete
-```
-
-### Docker — restauration
-
-```bash
-docker compose stop api
-docker run --rm --volumes-from $(docker compose ps -aq api) \
-  -v /opt/k-budget-api/backups:/backup alpine \
-  sh -c 'rm -rf /app/data/avatars/* && tar xzf /backup/avatars_2026-04-27.tar.gz -C /app/data/avatars'
-docker compose start api
-```
-
-> Pas de `chown` manuel a prevoir : l'entrypoint de l'image reajuste les permissions du volume au demarrage.
-
-> Apres restauration, verifier que les chemins en DB (`users.avatar_path`) correspondent aux fichiers physiques. Tout `avatar_path` orphelin produit un `404 AVATAR_NOT_FOUND` cote API.
-
-## Mise a jour
-
-### Docker (prod — mise a jour manuelle)
-
-```bash
-git pull
-docker compose build
-docker compose up -d
-```
-
-### VM de test — deploiement continu (Watchtower)
-
-Sur la VM de test, Watchtower surveille Docker Hub et redeploie automatiquement
-des qu'une nouvelle image `:latest` est publiee (workflow `docker-publish.yml`
-sur push `main`). Aucune action manuelle requise a chaque release.
-
-Demarrage de Watchtower (installation initiale uniquement) :
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.watchtower.yml up -d
-```
-
-Fichier de reference : [`docker-compose.watchtower.yml`](../docker-compose.watchtower.yml)
-
-### Bare-metal
-
-```bash
-# Build backend
-cd api && mvn clean package -DskipTests
-
-# Build frontend
-cd app && npm ci && ng build --configuration production
-
-# Transfert backend
-scp api/target/api-*.jar serveur:/opt/k-budget-api/api.jar
-
-# Transfert frontend
-scp -r app/dist/k-budget-app/browser/* serveur:/opt/k-budget-app/dist/
-
-# Redemarrage
-ssh serveur "sudo systemctl restart k-budget-api"
-```
-
-## Notes importantes
-
-- **Endpoint de sante** : `GET /api/actuator/health` — accessible sans JWT, utilise par les healthchecks Docker et le monitoring
-- **Swagger UI** : desactivee par defaut hors profil `dev` (KKS-311). Les routes `/swagger-ui.html` et `/v3/api-docs` ne sont pas mappees et repondent 404. Pour l'activer volontairement sur une instance — developpement d'un client tiers, exploration de l'API — definir `SWAGGER_ENABLED=true` ; penser alors a restreindre l'acces via le reverse proxy
-- **Generation JWT_SECRET** : `openssl rand -base64 64`
-- **Firewall** : ouvrir uniquement les ports 80 (HTTP), 443 (HTTPS) et 22 (SSH)
-
-```bash
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-```
-
-## CI/CD (GitHub Actions + SonarQube)
-
-L'analyse qualite et la couverture des 3 stacks (API, Angular, Flutter) tournent
-via GitHub Actions (`.github/workflows/ci.yml`) avec scan SonarQube self-hosted.
-
-- **Sur PR** vers `main`/`develop` : Quality Gate **bloquant** (`sonar.qualitygate.wait`) —
-  le merge est bloque si la qualite du *new code* regresse.
-- **Sur push** vers `main`/`develop` : scan de reference non bloquant (alimente le dashboard).
-
-SonarQube etant self-hosted sur un reseau prive, le scan tourne sur un **runner
-GitHub self-hosted** (les runners cloud ne peuvent pas joindre le serveur Sonar).
-
-### Prerequis a configurer
-
-| Element | Ou | Detail |
-|---------|-----|--------|
-| Runner self-hosted | Box homelab | Enregistre sur le repo, sur le reseau Docker `ci-stack_ci-net` (pour joindre SonarQube) |
-| Secret `SONAR_TOKEN` | Settings repo → Secrets | Token utilisateur SonarQube |
-| Variable `SONAR_HOST_URL` | Settings repo → Variables | URL interne du serveur (ex `http://sonarqube:9000`) |
-| Quality Gate "Clean as You Code" | UI SonarQube | Couverture exigee sur le *new code* uniquement (pas l'existant) |
-| Plugin `sonar-flutter` | Serveur SonarQube | `extensions/plugins/` — requis pour l'analyse Dart (non supportee nativement) |
-| Required status checks | Settings repo → Branches | Rendre les 3 jobs CI obligatoires pour bloquer reellement le merge |
-
-Les `projectKey` Sonar sont `kbudget-api`, `kbudget-app`, `kbudget-flutter`
-(declares dans les `sonar-project.properties` respectifs et le workflow).
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `JWT_SECRET` | **yes** | — | Token signing key. The API refuses to start if missing, shorter than 32 characters, or still the example value |
+| `DB_PASSWORD` | **yes** | — | Database password. Written into the PostgreSQL volume at first start |
+| `APP_PORT` | no | `8080` | Port the web interface listens on |
+| `DB_NAME` | no | `budget_db` | Database name |
+| `DB_USERNAME` | no | `budget_u` | Database user |
+| `DB_URL` | no | built from the above | JDBC URL. Only for an external database, via `docker-compose.override.yml` |
+| `ADMIN_EMAILS` | no | empty | Comma-separated emails promoted to administrator at startup |
+| `CORS_ALLOWED_ORIGINS` | no | empty | Unnecessary with the supplied compose. Only when the frontend is served from another domain |
+| `MIN_CLIENT_VERSION` | no | `6.0.0` | Oldest client version accepted, exposed by `/api/meta`. Raise it only on a deliberate contract break |
+| `RATE_LIMIT_CAPACITY` | no | `5` | Authentication attempts per window, per IP |
+| `RATE_LIMIT_WINDOW_SECONDS` | no | `60` | Length of that window |
+| `TRUSTED_PROXIES` | no | private ranges | IP prefixes whose `X-Forwarded-For` is trusted. Never set this to trust everything — the header is client-supplied, and trusting it unconditionally makes rate limiting bypassable |
+| `AVATAR_STORAGE_PATH` | no | `/app/data/avatars` | Fixed inside the container; the `api-avatars` volume mounts onto it |
