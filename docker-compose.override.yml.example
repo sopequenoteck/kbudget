@@ -1,0 +1,39 @@
+# Surcharge locale — base PostgreSQL externe (KKS-320)
+#
+#   cp docker-compose.override.yml.example docker-compose.override.yml
+#
+# Docker Compose applique automatiquement `docker-compose.override.yml` s'il
+# existe, sans option supplementaire. Le fichier est ignore par git : il decrit
+# une installation particuliere, pas le projet.
+#
+# A utiliser quand la base tourne deja ailleurs — VM dediee, service manage,
+# instance partagee — et qu'on ne veut pas de celle du compose.
+#
+# Renseigner DB_URL dans .env, par exemple :
+#   DB_URL=jdbc:postgresql://192.168.1.50:5432/budget_db
+
+services:
+  # Neutralise le PostgreSQL fourni : il ne demarre plus, et son volume
+  # `db-data` n'est plus alimente.
+  db:
+    profiles: ["ne-demarre-pas"]
+
+  api:
+    # Sans cette ligne, l'API attendrait indefiniment que le service `db`
+    # devienne healthy — or il ne demarre plus.
+    depends_on: !reset []
+    environment:
+      DB_URL: ${DB_URL:?renseigner DB_URL dans .env pour une base externe}
+
+  # Exemple : publier sur d'autres ports, derriere un reverse proxy existant.
+  # app:
+  #   ports:
+  #     - "3000:80"
+
+  # Exemple : suivre le dernier build plutot qu'une version epinglee.
+  # Deconseille en dehors d'une instance qu'on surveille soi-meme : une mise a
+  # jour automatique peut jouer une migration Flyway sans qu'on l'ait voulu.
+  # api:
+  #   image: sopequenotech/k-budget-api:latest
+  # app:
+  #   image: sopequenotech/k-budget-app:latest

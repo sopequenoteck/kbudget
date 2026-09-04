@@ -5,6 +5,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **KKS-320 — Installation en une commande : `docker-compose.yml` embarque PostgreSQL** : le compose ne déclarait que `api` et `app`, la base tournant sur une VM séparée propre à une infrastructure personnelle. Un nouvel arrivant devait comprendre cette infra, provisionner sa base et renseigner `DB_URL` avant de voir le premier écran.
+  - Service `db` (PostgreSQL 16), volume nommé, healthcheck interrogeant **la base et l'utilisateur réellement attendus** — `pg_isready` seul répond OK avant que la base applicative existe. L'API attend `service_healthy` : Flyway joue ses migrations au démarrage et échouait sinon.
+  - **Seul le client web publie un port.** L'API et la base restent sur le réseau interne, le container `app` proxifiant déjà `/api/`. C'est aussi ce qui rend `CORS_ALLOWED_ORIGINS` inutile ici — vérifié en conditions réelles, `/api/meta` répond en 200 depuis le port du client.
+  - **`JWT_SECRET` : l'API refuse de démarrer** si le secret est absent, trop court pour HS256, ou s'il vaut encore la valeur d'exemple. Cette valeur est publique — elle est dans le dépôt — et permettrait de forger un jeton pour n'importe quel compte. Un échec bruyant vaut mieux qu'une compromission silencieuse.
+  - **`.env.example` réduit à deux valeurs obligatoires**, `JWT_SECRET` et `DB_PASSWORD`, tout le reste ayant un défaut utilisable.
+  - Le défaut `https://budget.kksdev.fr` de `app.cors.allowed-origins` est retiré : aucune instance n'hérite plus d'un domaine qui n'est pas le sien. Sept références au domaine personnel ont été généralisées dans la documentation.
+  - `docker-compose.override.yml.example` pour brancher une base externe existante, avec `docker-compose.override.yml` ajouté au `.gitignore`.
+  - `deploy/Caddyfile` générique et simplifié : un seul `reverse_proxy` suffit désormais.
+  - **Mot de passe PostgreSQL en clair retiré de `docker-compose-dev.yml`** — il était versionné dans un dépôt destiné à devenir public.
+  - **Validé de bout en bout** sur une installation vierge : trois services `healthy`, interface en 200, compte administrateur créé, connexion réussie avec les identifiants du bandeau, données survivant à `down` puis `up`. Deux défauts ont été trouvés par ce test et n'auraient pas été vus autrement — un `:` non échappé qui empêchait le compose de démarrer, et des healthchecks interrogeant `localhost` là où nginx n'écoute qu'en IPv4.
+
 ## [6.3.1] - 2026-09-03
 
 > Le depot devient lisible et reutilisable par quelqu'un d'autre : licences

@@ -8,7 +8,7 @@
   ARM cloud). Docker selectionne automatiquement la variante correspondant a l'hote.
 - **Option B** : Java 21 JRE + PostgreSQL 15+
 - Node.js 20+ et npm 10+ (pour le build frontend)
-- Nom de domaine : `budget.kksdev.fr`
+- Nom de domaine pointant vers la machine (optionnel : un acces par IP et port suffit sur un reseau local)
 
 ## Variables d'environnement
 
@@ -24,9 +24,9 @@ cp .env.example .env
 | `DB_USERNAME` | Utilisateur BDD | `budget_u` |
 | `DB_PASSWORD` | Mot de passe BDD | un mot de passe fort |
 | `JWT_SECRET` | Cle secrete JWT (min 256 bits) | voir generation ci-dessous |
-| `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `so-pequeno@live.fr,admin@example.com` |
+| `ADMIN_EMAILS` | Liste d'emails admin separes par des virgules (cf. "Configuration admin") | `vous@exemple.fr,autre-admin@exemple.fr` |
 | `BOOTSTRAP_EMAIL` | *(Optionnelle)* Email du compte admin cree au premier demarrage sur DB vide. Defaut : `admin@localhost`. Doit etre un format email valide sinon l'app echoue a demarrer (fail-fast). | `kelly@exemple.com` |
-| `CORS_ALLOWED_ORIGINS` | Origines autorisees a appeler l'API depuis un navigateur, separees par des virgules. Defaut en profil `prod` : `https://budget.kksdev.fr` — **a changer sur toute autre instance**, sinon le frontend recoit `403 Invalid CORS request` au login sans autre indication. Doit contenir le schema et le port si non standard, et correspondre exactement a l'origine du navigateur. | `https://budget.exemple.fr` |
+| `CORS_ALLOWED_ORIGINS` | *(Optionnelle)* **Inutile avec le compose fourni** : le client web proxifie `/api/` vers l'API, le navigateur ne voit donc qu'une seule origine. A renseigner uniquement si le frontend est servi depuis un autre domaine que l'API — origine exacte, schema et port compris. Depuis KKS-320, il n'y a plus de valeur par defaut : aucune instance n'herite d'un domaine qui n'est pas le sien. | `https://budget.exemple.fr` |
 | `MIN_CLIENT_VERSION` | *(Optionnelle, KKS-314)* Version de client la plus ancienne acceptee, exposee par `/api/meta`. Defaut : `6.0.0`. Ne bouge qu'a une rupture de contrat, pas a chaque release : l'augmenter bloque les clients plus anciens avec un message explicite. | `6.0.0` |
 | `RATE_LIMIT_CAPACITY` | *(Optionnelle, KKS-310)* Tentatives d'authentification autorisees par fenetre et par IP. Defaut : `5`. Desserrer derriere un VPN, serrer sur une instance exposee. | `5` |
 | `RATE_LIMIT_WINDOW_SECONDS` | *(Optionnelle, KKS-310)* Duree de la fenetre de limitation, en secondes. Defaut : `60`. | `60` |
@@ -68,7 +68,7 @@ services:
 L'instance identifie les administrateurs via la variable d'environnement `ADMIN_EMAILS`. Elle contient une liste d'emails separes par des virgules ; chaque email est normalise (trim + lowercase) au demarrage.
 
 ```bash
-ADMIN_EMAILS=so-pequeno@live.fr,autre-admin@example.com
+ADMIN_EMAILS=vous@exemple.fr,autre-admin@exemple.fr
 ```
 
 - Un user dont l'email figure dans `ADMIN_EMAILS` et dont `disabled_at IS NULL` peut appeler les endpoints `/api/v1/admin/*` (invitations, desactivation de users).
@@ -110,7 +110,7 @@ Sur une instance avec une base PostgreSQL vide, l'app amorce automatiquement un 
 
    Par defaut l'email est `admin@localhost`. Pour personnaliser, definir `BOOTSTRAP_EMAIL=votre@email.com` dans `.env` **avant le premier `docker compose up`** (apres le premier boot, la variable est sans effet — le compte est cree une seule fois dans la vie de l'instance).
 
-3. **Se connecter sur l'UI** : ouvrir l'URL publique (ex : `https://budget.kksdev.fr`) et saisir les credentials initiaux. L'application redirige automatiquement vers un ecran dedie de reset forcé.
+3. **Se connecter sur l'UI** : ouvrir l'URL de l'instance (ex : `http://localhost:8080`) et saisir les credentials initiaux. L'application redirige automatiquement vers un ecran dedie de reset forcé.
 
 4. **Completer le formulaire de reset** : saisir l'email definitif, un nouveau mot de passe personnel (8 chars min) et un nom d'affichage. Apres validation, acces complet a l'application.
 
@@ -163,7 +163,9 @@ cp .env.example .env
 # Editer .env avec vos valeurs
 ```
 
-Le `DB_URL` est gere automatiquement par Docker Compose (hostname `postgres`). Vous devez configurer uniquement `DB_USERNAME`, `DB_PASSWORD` et `JWT_SECRET`.
+Depuis KKS-320, le compose embarque PostgreSQL : `DB_URL` est construit automatiquement vers le service `db`, et seules deux valeurs sont obligatoires — `JWT_SECRET` (generer avec `openssl rand -base64 48`) et `DB_PASSWORD`.
+
+Pour utiliser une base externe existante, copier `docker-compose.override.yml.example` vers `docker-compose.override.yml` et renseigner `DB_URL`.
 
 ### 2. Lancer
 
@@ -283,12 +285,12 @@ Fichier de reference : [`deploy/Caddyfile`](../deploy/Caddyfile)
 sudo apt install -y nginx
 sudo cp deploy/nginx.conf /etc/nginx/sites-available/k-budget-api
 sudo ln -s /etc/nginx/sites-available/k-budget-api /etc/nginx/sites-enabled/
-# Editer : remplacer budget.kksdev.fr par votre domaine
+# Editer : remplacer budget.exemple.fr par votre domaine
 sudo nginx -t && sudo systemctl reload nginx
 
 # Generer le certificat SSL
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d budget.kksdev.fr
+sudo certbot --nginx -d budget.exemple.fr
 ```
 
 Fichier de reference : [`deploy/nginx.conf`](../deploy/nginx.conf)

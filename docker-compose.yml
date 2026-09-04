@@ -1,47 +1,93 @@
+# k-budget — deploiement tout-en-un (KKS-320)
+#
+#   cp .env.example .env    puis renseigner JWT_SECRET et DB_PASSWORD
+#   docker compose up -d
+#
+# Rien d'autre a installer : PostgreSQL est inclus. Au premier demarrage, un
+# compte administrateur est cree et son mot de passe genere s'affiche dans les
+# logs de l'API :
+#
+#   docker compose logs api | grep -A2 "ADMIN"
+#
+# Seul le client web publie un port. L'API et la base restent sur le reseau
+# interne : le container `app` proxifie deja `/api/` vers l'API (cf.
+# app/nginx.conf), donc les exposer n'apporterait qu'une surface d'attaque.
+# C'est aussi ce qui fait que CORS_ALLOWED_ORIGINS est inutile ici — le
+# navigateur ne voit qu'une seule origine.
+
 services:
-  api:
-    image: sopequenotech/k-budget-api:latest
+  db:
+    image: postgres:16-alpine
     environment:
-      DB_URL: ${DB_URL}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      # Sans cette variable, seul le domaine par defaut du profil prod est
-      # accepte et le frontend recoit 403 "Invalid CORS request" au login.
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      ADMIN_EMAILS: ${ADMIN_EMAILS}
-      # Sans cette ligne, relever le minimum dans .env resterait sans effet :
-      # la variable n'atteindrait pas le container (KKS-314).
-      MIN_CLIENT_VERSION: ${MIN_CLIENT_VERSION}
-      # Limitation de debit sur l'authentification (KKS-310). TRUSTED_PROXIES
-      # est indispensable derriere un reverse proxy : sans elle, toutes les
-      # requetes portent l'IP du proxy et la limite s'applique globalement.
-      RATE_LIMIT_CAPACITY: ${RATE_LIMIT_CAPACITY}
-      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS}
-      TRUSTED_PROXIES: ${TRUSTED_PROXIES}
+      POSTGRES_DB: ${DB_NAME:-budget_db}
+      POSTGRES_USER: ${DB_USERNAME:-budget_u}
+      POSTGRES_PASSWORD: "${DB_PASSWORD:?renseigner DB_PASSWORD dans .env}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      # `pg_isready` seul repond OK avant que la base applicative existe :
+      # on interroge donc la base et l'utilisateur reellement attendus.
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-budget_u} -d ${DB_NAME:-budget_db}"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    image: sopequenotech/k-budget-api:6.3.1
+    depends_on:
+      db:
+        # Flyway joue les migrations au demarrage : sans `service_healthy`,
+        # l'API demarre avant que la base accepte les connexions et s'arrete.
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-budget_db}
+      DB_USERNAME: ${DB_USERNAME:-budget_u}
+      DB_PASSWORD: "${DB_PASSWORD:?renseigner DB_PASSWORD dans .env}"
+      JWT_SECRET: "${JWT_SECRET:?generer avec la commande openssl rand -base64 48}"
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      # Inutile avec ce compose : le client web proxifie /api/, donc l'origine
+      # est la meme. A renseigner uniquement si le frontend est servi depuis
+      # un autre domaine que l'API.
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+      MIN_CLIENT_VERSION: ${MIN_CLIENT_VERSION:-6.0.0}
+      RATE_LIMIT_CAPACITY: ${RATE_LIMIT_CAPACITY:-5}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-10.,172.16.,172.17.,172.18.,172.19.,172.2,172.3,192.168.,127.0.0.1}
       # Chemin fixe dans le container : le volume api-avatars est monte dessus.
-      # Pour stocker les avatars ailleurs sur l'hote, modifier la source du
+      # Pour stocker les avatars ailleurs sur l'hote, changer la source du
       # volume ci-dessous, pas cette variable.
       AVATAR_STORAGE_PATH: /app/data/avatars
-    ports:
-      - "3001:8080"
     volumes:
       - api-logs:/app/logs
       - api-avatars:/app/data/avatars
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/api/actuator/health || exit 1"]
       interval: 30s
       timeout: 5s
-      start_period: 30s
+      start_period: 60s
       retries: 3
     restart: unless-stopped
 
   app:
-    image: sopequenotech/k-budget-app:latest
+    image: sopequenotech/k-budget-app:6.3.1
+    depends_on:
+      - api
     ports:
-      - "3000:80"
+      - "${APP_PORT:-8080}:80"
+    healthcheck:
+      # 127.0.0.1 et non localhost : nginx n'ecoute qu'en IPv4 (`listen 80`),
+      # or localhost resout d'abord en ::1 dans le container — le healthcheck
+      # echouait alors que le service repondait.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
     restart: unless-stopped
 
 volumes:
+  db-data:
   api-logs:
   api-avatars:
