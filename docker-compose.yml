@@ -43,7 +43,7 @@ services:
     restart: unless-stopped
 
   api:
-    image: ghcr.io/sopequenoteck/k-budget-api:6.3.1
+    image: ghcr.io/sopequenoteck/k-budget-api:6.4.0
     depends_on:
       db:
         # Flyway joue les migrations au demarrage : sans `service_healthy`,
@@ -79,7 +79,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: ghcr.io/sopequenoteck/k-budget-app:6.3.1
+    image: ghcr.io/sopequenoteck/k-budget-app:6.4.0
     depends_on:
       - api
     ports:

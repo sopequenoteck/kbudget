@@ -115,7 +115,7 @@ signale une rupture assumee, et l'entree dit ce qu'elle exige de vous.
 ./deploy/backup.sh
 
 # 2. Epingler la nouvelle version dans docker-compose.yml
-#    image: ghcr.io/sopequenoteck/k-budget-api:6.3.1
+#    image: ghcr.io/sopequenoteck/k-budget-api:6.4.0
 
 # 3. Recuperer et redemarrer
 docker compose pull
@@ -131,10 +131,13 @@ Docker Hub (`sopequenotech/k-budget-*`) est conserve en miroir. Preferez GHCR :
 Docker Hub applique des quotas de telechargement aux utilisateurs anonymes,
 ce qui est exactement le mode d'acces d'un self-hoster.
 
+En prenant `6.4.0` pour exemple — la version courante figure dans le
+[changelog](../CHANGELOG.md) :
+
 | Tag | Bouge quand | A utiliser |
 |-----|-------------|------------|
-| `6.3.1` | jamais | **Recommande.** Vous decidez quand mettre a jour |
-| `6.3` | un correctif sort dans la serie 6.3 | Correctifs sans changement de fonctionnalites |
+| `6.4.0` | jamais | **Recommande.** Vous decidez quand mettre a jour |
+| `6.4` | un correctif sort dans la serie 6.4 | Correctifs sans changement de fonctionnalites |
 | `latest` | a chaque release | Deconseille — voir ci-dessous |
 
 `docker-compose.yml` est livre avec une version epinglee, volontairement.

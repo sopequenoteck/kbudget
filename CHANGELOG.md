@@ -5,6 +5,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-09-04
+
+> `docker compose up -d` suffit desormais : PostgreSQL est embarque, les images
+> viennent de GHCR, et la sauvegarde comme la restauration ont ete testees pour
+> de vrai.
+>
+> **Rien ne casse pour une instance existante.** Le compose de reference change
+> de registre et embarque une base, mais une installation qui utilise deja sa
+> propre base continue de fonctionner via `docker-compose.override.yml`.
+
 ### Added
 
 - **KKS-321 — Images publiées sur GHCR, politique de tags explicite** : les images n'existaient que sur Docker Hub, qui applique des quotas de téléchargement aux utilisateurs anonymes — précisément le mode d'accès d'un self-hoster. Un `docker compose pull` qui échoue sur un quota est un premier contact désastreux.
@@ -600,7 +610,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.3.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.4.0...HEAD
+[6.4.0]: https://github.com/sopequenoteck/budget/compare/v6.3.1...v6.4.0
 [6.3.1]: https://github.com/sopequenoteck/budget/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
