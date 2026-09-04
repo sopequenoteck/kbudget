@@ -131,8 +131,8 @@ cd app && npm ci && ng serve
 
 </details>
 
-Pour le deploiement en production — bare-metal, Caddy, sauvegardes — voir
-[`docs/deployment.md`](docs/deployment.md).
+Pour HTTPS, les mises a jour, la sauvegarde et la restauration, et le
+depannage, voir [`docs/deployment.fr.md`](docs/deployment.fr.md).
 
 ## L'application mobile
 
@@ -165,7 +165,7 @@ budget/
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples de requetes et reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat d'erreurs HTTP |
 | [`docs/api-compatibility.md`](docs/api-compatibility.md) | **Politique de compatibilite d'API** — les six regles d'ecriture et la procedure de rupture assumee |
-| [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker et bare-metal |
+| [`docs/deployment.fr.md`](docs/deployment.fr.md) | **Exploiter une instance** — installation, HTTPS, mises a jour, sauvegarde et restauration, depannage |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — profil `dev` uniquement |
 

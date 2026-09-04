@@ -128,7 +128,7 @@ cd app && npm ci && ng serve
 
 </details>
 
-For production deployment — bare metal, Caddy, backups — see
+For HTTPS, updates, backup and restore, and troubleshooting, see
 [`docs/deployment.md`](docs/deployment.md).
 
 ## The mobile app
@@ -162,7 +162,7 @@ budget/
 | [`docs/api-examples.md`](docs/api-examples.md) | Request and response examples per endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | HTTP error contract |
 | [`docs/api-compatibility.md`](docs/api-compatibility.md) | **API compatibility policy** — the six writing rules and the deliberate-break procedure |
-| [`docs/deployment.md`](docs/deployment.md) | Docker and bare-metal deployment |
+| [`docs/deployment.md`](docs/deployment.md) | **Running an instance** — install, HTTPS, updates, backup and restore, troubleshooting |
 | [`DESIGN.md`](DESIGN.md) | Design reference: principles, colours, patterns, tokens |
 | **Swagger UI** | `http://localhost:8080/api/swagger-ui.html` — `dev` profile only |
 
