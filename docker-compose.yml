@@ -9,6 +9,14 @@
 #
 #   docker compose logs api | grep -A2 "ADMIN"
 #
+# Les images viennent de GHCR (ghcr.io), lie au depot et sans quota de
+# telechargement anonyme — contrairement a Docker Hub, ou un `docker compose
+# pull` peut echouer sur une limite. Docker Hub reste alimente en miroir
+# (sopequenotech/k-budget-*) pour qui prefere.
+#
+# La version est epinglee volontairement. Suivre `latest` exposerait a une
+# migration de base appliquee au redemarrage, a un moment non choisi.
+#
 # Seul le client web publie un port. L'API et la base restent sur le reseau
 # interne : le container `app` proxifie deja `/api/` vers l'API (cf.
 # app/nginx.conf), donc les exposer n'apporterait qu'une surface d'attaque.
@@ -35,7 +43,7 @@ services:
     restart: unless-stopped
 
   api:
-    image: sopequenotech/k-budget-api:6.3.1
+    image: ghcr.io/sopequenoteck/k-budget-api:6.3.1
     depends_on:
       db:
         # Flyway joue les migrations au demarrage : sans `service_healthy`,
@@ -71,7 +79,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: sopequenotech/k-budget-app:6.3.1
+    image: ghcr.io/sopequenoteck/k-budget-app:6.3.1
     depends_on:
       - api
     ports:

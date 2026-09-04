@@ -7,6 +7,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **KKS-321 — Images publiées sur GHCR, politique de tags explicite** : les images n'existaient que sur Docker Hub, qui applique des quotas de téléchargement aux utilisateurs anonymes — précisément le mode d'accès d'un self-hoster. Un `docker compose pull` qui échoue sur un quota est un premier contact désastreux.
+  - `release.yml` publie désormais sur **GHCR et Docker Hub**, en multi-architecture. GHCR devient la référence documentée, Docker Hub reste un miroir. Le job reçoit la permission `packages: write`, absente jusqu'ici.
+  - **Tag flottant `X.Y` ajouté** (`6.3` par exemple) : il reçoit les correctifs de la série sans les changements de fonctionnalités. Pas de tag `X` seul — il engloberait des ajouts de features, ce qu'on ne veut pas d'un tag présenté comme sûr.
+  - Les deux guides documentent **quel tag utiliser et pourquoi**, sous forme de tableau : `6.3.1` recommandé, `6.3` pour les correctifs, `latest` déconseillé.
+  - `docker-compose.watchtower.yml` porte désormais en tête la raison pour laquelle il ne doit pas être recommandé : une migration qui échoue à trois heures du matin chez quelqu'un dont on ne connaît ni la base ni les sauvegardes produit un incident indiagnostiquable.
+  - `scripts/docker-publish.sh` publie sur les deux registres et refuse un préfixe `v` — les tags d'image suivent `VERSION` (`6.3.1`), les tags git portent le préfixe (`v6.3.1`), et les confondre publierait un `:v6.3.1` que personne n'irait chercher.
+  - **Piège consigné** : les deux comptes ne s'écrivent pas pareil — GitHub est `sopequenoteck`, Docker Hub `sopequenotech`. Une lettre d'écart suffit à faire échouer la publication.
 - **KKS-322 — Guide d'exploitation, et sauvegarde réellement testée** : `docs/deployment.md` décrivait le déploiement tel que pratiqué sur une infrastructure personnelle. Il est réécrit **en anglais** pour quelqu'un qui ne connaît ni le projet ni cette infra, avec `docs/deployment.fr.md` à parité.
   - Couvre l'installation, HTTPS et reverse proxy, les mises à jour, la sauvegarde et la restauration, et un dépannage organisé par symptôme observable plutôt que par composant.
   - **`deploy/backup.sh` et `deploy/restore.sh` remplacent `backup-pg.sh`**, qui ne sauvegardait que la base et seulement en bare-metal. Les avatars sont désormais inclus : restaurer la base seule laisse des comptes dont la photo a disparu.
