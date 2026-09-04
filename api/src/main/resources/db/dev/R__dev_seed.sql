@@ -79,8 +79,8 @@ BEGIN
     VALUES (
         gen_random_uuid(),
         v_user_id,
-        'SUBSCRIPTIONS,DEBTS',
-        'SUBSCRIPTIONS,DEBTS',
+        'SUBSCRIPTIONS,DEBTS,BUDGETS',
+        'SUBSCRIPTIONS,DEBTS,BUDGETS',
         'EUR',
         'Europe/Paris',
         'MEDIUM'
@@ -149,7 +149,7 @@ BEGIN
     -- ===========================================================
     UPDATE user_preferences
     SET currencies = 'EUR,XOF',
-        enabled_features = 'SUBSCRIPTIONS,DEBTS',
+        enabled_features = 'SUBSCRIPTIONS,DEBTS,BUDGETS',
         timezone = 'Europe/Paris'
     WHERE user_id = v_user_id;
 
@@ -265,6 +265,12 @@ BEGIN
     (gen_random_uuid(), 750.00, 'Loyer', 'DEPENSE', (CURRENT_DATE - INTERVAL '36 days'), v_user_id, v_cat_logement, v_compte_eur, true, 'MENSUEL', (CURRENT_DATE + INTERVAL '5 days'), true),
     (gen_random_uuid(), 45.00, 'Assurance auto', 'DEPENSE', (CURRENT_DATE - INTERVAL '22 days'), v_user_id, v_cat_transport, v_compte_eur, true, 'MENSUEL', (CURRENT_DATE + INTERVAL '12 days'), true);
 
+    -- Salaire du mois courant : sans lui, le tableau de bord n'affiche que
+    -- des depenses et annonce un mois deficitaire des le premier ecran.
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'Salaire', 'RECETTE', (CURRENT_DATE - INTERVAL '3 days'), NULL, v_user_id, v_cat_salaire, v_compte_eur),
+    (gen_random_uuid(),  620.00, 'Mission freelance', 'RECETTE', (CURRENT_DATE - INTERVAL '2 days'), 'Client Mensah', v_user_id, v_cat_freelance, v_compte_eur);
+
     -- ===========================================================
     -- AUTRES UTILISATEURS (KKS-354)
     -- ===========================================================
@@ -297,7 +303,7 @@ BEGIN
     FOREACH v_other IN ARRAY ARRAY[v_user_admin, v_user_invite] LOOP
 
         INSERT INTO user_preferences (id, user_id, enabled_features, nav_order, currencies, timezone, text_scale)
-        VALUES (gen_random_uuid(), v_other, 'SUBSCRIPTIONS,DEBTS', 'SUBSCRIPTIONS,DEBTS', 'EUR', 'Europe/Paris', 'MEDIUM')
+        VALUES (gen_random_uuid(), v_other, 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'EUR', 'Europe/Paris', 'MEDIUM')
         ON CONFLICT (user_id) DO NOTHING;
 
         INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)

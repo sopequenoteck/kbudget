@@ -10,13 +10,14 @@ machine, no telemetry.
 > 🇫🇷 [Version française](README.fr.md)
 
 <p>
-  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="383" height="829">
-  <img src="docs/screenshots/transactions.png" alt="Transactions" width="386" height="831">
-  <img src="docs/screenshots/budget.png" alt="Budgets" width="383" height="921">
+  <img src="docs/screenshots/dashboard.png"    alt="Dashboard"      width="240">
+  <img src="docs/screenshots/transactions.png" alt="Transactions"   width="240">
+  <img src="docs/screenshots/budget.png"       alt="Budgets"        width="240">
+  <img src="docs/screenshots/admin-users.png"  alt="User management" width="240">
 </p>
 
-> Screenshots are currently in French. They will be retaken once the interface
-> ships in English and French together.
+> Screenshots are in French — the interface ships in French today, English is
+> coming with the internationalisation work.
 
 ## Why this exists
 
