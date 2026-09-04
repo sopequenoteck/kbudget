@@ -74,24 +74,43 @@ pas de serveur de cache, aucun service externe.
 
 ## Demarrer
 
-**Il vous faut une base PostgreSQL 15+.** Le `docker-compose.yml` fourni lance
-l'API et le client web, et suppose la base deja existante. Une installation en
-une commande qui embarque sa propre base est prevue, pas livree — ce README le
-dira franchement tant que ce sera le cas.
+**PostgreSQL est inclus.** Rien d'autre a installer.
 
 ```bash
 git clone https://github.com/sopequenoteck/budget.git
 cd budget
-cp .env.example .env    # renseigner DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET
+cp .env.example .env
+```
+
+Renseignez les deux valeurs obligatoires dans `.env` — tout le reste a un
+defaut utilisable tel quel :
+
+```bash
+openssl rand -base64 48    # a coller dans JWT_SECRET
+                           # puis choisir un DB_PASSWORD
+```
+
+```bash
 docker compose up -d
 ```
 
-L'API ecoute sur `http://localhost:8080/api`, les endpoints metier sous
-`/api/v1`. Le client web est sur `http://localhost:4200`.
+L'interface est sur **http://localhost:8080**. Changez `APP_PORT` dans `.env`
+si ce port est deja pris.
 
 **Au premier demarrage**, un compte administrateur est cree et son mot de passe
-genere est affiche dans les logs de l'API. Recuperez-le, connectez-vous : il
-vous sera demande de definir vos propres identifiants avant toute chose.
+genere s'affiche une seule fois dans les logs de l'API :
+
+```bash
+docker compose logs api | grep -A4 "FIRST BOOT"
+```
+
+> **Notez-le tout de suite.** Ce mot de passe n'est affiche qu'au tout premier
+> demarrage et n'est stocke que hashe : il est irrecuperable ensuite. A la
+> connexion, il vous sera demande de definir vos propres identifiants.
+
+Vous avez deja un serveur PostgreSQL a utiliser ? Copiez
+`docker-compose.override.yml.example` vers `docker-compose.override.yml` et
+renseignez `DB_URL` dans `.env`.
 
 Les images sont publiees pour `linux/amd64` et `linux/arm64` — Raspberry Pi
 4/5, NAS ARM, instances ARM cloud et Apple Silicon fonctionnent sans build

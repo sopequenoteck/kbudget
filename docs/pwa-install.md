@@ -4,7 +4,7 @@ k-budget est une application web progressive (PWA). Elle s'installe directement 
 
 ## Android (Chrome)
 
-1. Ouvrir **Chrome** et aller sur `budget.kksdev.fr`
+1. Ouvrir **Chrome** et aller sur `budget.exemple.fr`
 2. Se connecter à son compte
 3. Chrome affiche une bannière **"Ajouter k-budget sur l'écran d'accueil"** en bas de l'écran
    - Si la bannière n'apparaît pas : appuyer sur le menu **&#8942;** (3 points en haut à droite)
@@ -24,7 +24,7 @@ L'icône k-budget apparaît sur l'écran d'accueil. L'application s'ouvre en ple
 
 > **Important** : sur iOS, l'installation PWA fonctionne **uniquement avec Safari**. Chrome et Firefox sur iOS ne proposent pas cette option.
 
-1. Ouvrir **Safari** et aller sur `budget.kksdev.fr`
+1. Ouvrir **Safari** et aller sur `budget.exemple.fr`
 2. Se connecter à son compte
 3. Appuyer sur le bouton **Partager** (icône carré avec flèche vers le haut, en bas de l'écran)
 4. Faire défiler les options et appuyer sur **"Sur l'écran d'accueil"**
