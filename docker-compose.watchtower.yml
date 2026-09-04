@@ -1,15 +1,16 @@
-# Watchtower — déploiement continu sur la VM de TEST.
+# Watchtower — deploiement continu sur la VM de TEST.
 #
-# Surveille Docker Hub et fait automatiquement pull + recreate des conteneurs
-# k-budget dès qu'une nouvelle image `:latest` est publiée par le workflow
-# GitHub Actions `docker-publish.yml` (sur push main). Évite le ssh + docker
-# pull + docker compose up manuel à chaque release.
+# NE PAS RECOMMANDER AUX SELF-HOSTERS (KKS-321). Une mise a jour automatique
+# peut appliquer une migration Flyway a trois heures du matin, sans personne
+# pour lire l'erreur. Chez quelqu'un dont on ne connait ni la base ni les
+# sauvegardes, cela produit un incident indiagnostiquable.
 #
-# Usage sur la VM de test (combiné avec le compose applicatif) :
-#   docker compose -f docker-compose.yml -f docker-compose.watchtower.yml up -d
+# Acceptable ici parce que c'est une VM de test, surveillee par la personne qui
+# l'exploite. La documentation destinee a la communaute privilegie la mise a
+# jour manuelle avec sauvegarde prealable — voir docs/deployment.md.
 #
-# La VM de test n'héberge que k-budget : Watchtower surveille donc les
-# conteneurs api/app sans configuration de label supplémentaire.
+# Surveille les images `:latest` publiees par `.github/workflows/release.yml`
+# au merge vers main, et recree les conteneurs k-budget.
 
 services:
   watchtower:

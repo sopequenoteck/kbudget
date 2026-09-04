@@ -109,7 +109,7 @@ deliberate break, and the entry says what it requires of you.
 ./deploy/backup.sh
 
 # 2. Pin the new version in docker-compose.yml
-#    image: sopequenotech/k-budget-api:6.3.1
+#    image: ghcr.io/sopequenoteck/k-budget-api:6.3.1
 
 # 3. Pull and restart
 docker compose pull
@@ -118,9 +118,20 @@ docker compose up -d
 
 Database migrations run automatically at startup.
 
-### Pin a version, do not follow `latest`
+### Which tag to use
 
-`docker-compose.yml` ships with pinned versions on purpose. Following `latest`
+Images are published to **GHCR**, `ghcr.io/sopequenoteck/k-budget-*`. Docker Hub
+(`sopequenotech/k-budget-*`) is kept as a mirror. Prefer GHCR: Docker Hub
+applies download quotas to anonymous users, which is exactly how a self-hoster
+pulls.
+
+| Tag | Moves when | Use it |
+|-----|-----------|--------|
+| `6.3.1` | never | **Recommended.** You decide when to update |
+| `6.3` | a patch is released in the 6.3 series | Fixes without feature changes |
+| `latest` | every release | Not recommended — see below |
+
+`docker-compose.yml` ships with a pinned version on purpose. Following `latest`
 means a restart can apply a database migration you did not choose, at a moment
 you did not choose.
 

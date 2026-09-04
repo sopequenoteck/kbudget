@@ -115,7 +115,7 @@ signale une rupture assumee, et l'entree dit ce qu'elle exige de vous.
 ./deploy/backup.sh
 
 # 2. Epingler la nouvelle version dans docker-compose.yml
-#    image: sopequenotech/k-budget-api:6.3.1
+#    image: ghcr.io/sopequenoteck/k-budget-api:6.3.1
 
 # 3. Recuperer et redemarrer
 docker compose pull
@@ -124,9 +124,20 @@ docker compose up -d
 
 Les migrations de base s'executent automatiquement au demarrage.
 
-### Epingler une version, ne pas suivre `latest`
+### Quel tag utiliser
 
-`docker-compose.yml` est livre avec des versions epinglees, volontairement.
+Les images sont publiees sur **GHCR**, `ghcr.io/sopequenoteck/k-budget-*`.
+Docker Hub (`sopequenotech/k-budget-*`) est conserve en miroir. Preferez GHCR :
+Docker Hub applique des quotas de telechargement aux utilisateurs anonymes,
+ce qui est exactement le mode d'acces d'un self-hoster.
+
+| Tag | Bouge quand | A utiliser |
+|-----|-------------|------------|
+| `6.3.1` | jamais | **Recommande.** Vous decidez quand mettre a jour |
+| `6.3` | un correctif sort dans la serie 6.3 | Correctifs sans changement de fonctionnalites |
+| `latest` | a chaque release | Deconseille — voir ci-dessous |
+
+`docker-compose.yml` est livre avec une version epinglee, volontairement.
 Suivre `latest` signifie qu'un redemarrage peut appliquer une migration de base
 que vous n'avez pas choisie, a un moment que vous n'avez pas choisi.
 

@@ -1,40 +1,70 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build, tag et push les images Docker sur Docker Hub
-# Usage: ./scripts/docker-publish.sh v1.0.0
+# Build et publie les images sur GHCR et Docker Hub.
+#
+#   ./scripts/docker-publish.sh 6.3.1
+#
+# Publication de secours : en temps normal c'est `.github/workflows/release.yml`
+# qui publie, au merge vers main, apres le gate de tests. Ce script sert quand
+# la CI est indisponible — il ne rejoue aucun test.
+#
 # Build multi-architecture (amd64 + arm64) : la cible self-hosted tourne aussi
 # sur Raspberry Pi, NAS ARM et Apple Silicon (KKS-308).
+#
+# Prerequis : etre authentifie sur les deux registres.
+#   echo $GITHUB_TOKEN | docker login ghcr.io -u <votre-login> --password-stdin
+#   docker login
 
 VERSION="${1:-}"
 
 if [ -z "$VERSION" ]; then
   echo "Usage: $0 <version>"
-  echo "Example: $0 v1.0.0"
+  echo "Exemple: $0 6.3.1"
+  exit 1
+fi
+
+# Refuse un prefixe 'v' : les tags d'image suivent VERSION (6.3.1), les tags
+# git portent le prefixe (v6.3.1). Les melanger publierait `:v6.3.1`, que
+# personne n'ira chercher.
+if [[ "$VERSION" == v* ]]; then
+  echo "ERREUR : donner la version sans prefixe 'v' (6.3.1, pas v6.3.1)." >&2
   exit 1
 fi
 
 PLATFORMS="linux/amd64,linux/arm64"
-API_IMAGE="sopequenotech/k-budget-api"
-APP_IMAGE="sopequenotech/k-budget-app"
+MINOR="$(cut -d. -f1,2 <<< "$VERSION")"
 
-echo "=== Build & push API image (${PLATFORMS}) ==="
-docker buildx build --platform "${PLATFORMS}" \
-  -t "${API_IMAGE}:${VERSION}" \
-  -t "${API_IMAGE}:latest" \
-  -f api/Dockerfile api/ \
-  --push
+# ATTENTION : les deux comptes ne s'ecrivent pas pareil.
+#   GitHub   : sopequenoteck  (…teck)
+#   DockerHub: sopequenotech  (…tech)
+GHCR_OWNER="sopequenoteck"
+HUB_OWNER="sopequenotech"
 
-echo "=== Build & push Frontend image (${PLATFORMS}) ==="
-docker buildx build --platform "${PLATFORMS}" \
-  -t "${APP_IMAGE}:${VERSION}" \
-  -t "${APP_IMAGE}:latest" \
-  -f app/Dockerfile app/ \
-  --push
+publish() {
+  local component="$1"
+  echo "=== ${component} (${PLATFORMS}) ==="
+  docker buildx build --platform "${PLATFORMS}" \
+    -t "ghcr.io/${GHCR_OWNER}/k-budget-${component}:${VERSION}" \
+    -t "ghcr.io/${GHCR_OWNER}/k-budget-${component}:${MINOR}" \
+    -t "ghcr.io/${GHCR_OWNER}/k-budget-${component}:latest" \
+    -t "${HUB_OWNER}/k-budget-${component}:${VERSION}" \
+    -t "${HUB_OWNER}/k-budget-${component}:${MINOR}" \
+    -t "${HUB_OWNER}/k-budget-${component}:latest" \
+    -f "${component}/Dockerfile" "${component}/" \
+    --push
+}
 
-echo "=== Done ==="
-echo "Published (${PLATFORMS}):"
-echo "  ${API_IMAGE}:${VERSION}"
-echo "  ${API_IMAGE}:latest"
-echo "  ${APP_IMAGE}:${VERSION}"
-echo "  ${APP_IMAGE}:latest"
+publish api
+publish app
+
+echo
+echo "=== Publie ==="
+for component in api app; do
+  echo "  ghcr.io/${GHCR_OWNER}/k-budget-${component}:{${VERSION}, ${MINOR}, latest}"
+  echo "  ${HUB_OWNER}/k-budget-${component}:{${VERSION}, ${MINOR}, latest}"
+done
+echo
+echo "Premiere publication sur GHCR ? Les paquets y sont PRIVES par defaut."
+echo "Les rendre publics : https://github.com/users/${GHCR_OWNER}/packages"
+echo "  -> chaque paquet -> Package settings -> Change visibility -> Public"
