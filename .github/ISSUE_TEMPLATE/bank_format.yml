@@ -1,0 +1,50 @@
+name: Bank export format
+description: Your bank's export is not recognised, or is parsed wrongly.
+labels: ["import", "bank-profile"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The import registry ships very few profiles. If yours is missing, you
+        are the person best placed to describe it — you have the file.
+
+        **A bank export is one of the most sensitive files you own.** Do not
+        attach the real one. Rewrite a handful of lines with fake amounts,
+        fake labels and fake account numbers, keeping the *structure* intact:
+        separators, column order, date format, header rows.
+
+  - type: checkboxes
+    id: anonymised
+    attributes:
+      label: Personal data
+      options:
+        - label: The sample below is fabricated. It contains no real amount, label, account number or name.
+          required: true
+
+  - type: input
+    id: bank
+    attributes:
+      label: Bank and country
+      placeholder: "Example Bank, France"
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Anonymised sample
+      description: A few lines, header included. Keep the structure, change the values.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: What the parser needs to know
+      description: |
+        Which column holds the date, the label, the amount. How dates are
+        formatted. Which lines to skip. How debits and credits are told apart —
+        two columns, or a sign.
+    validations:
+      required: true

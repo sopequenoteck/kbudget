@@ -189,8 +189,17 @@ it there**, and prefer assets whose licence is unambiguous.
 Security vulnerabilities: read [`SECURITY.md`](SECURITY.md) and report
 privately — not in a public issue.
 
-Anything else: issue tracking lives on **Linear**, not GitHub Issues. Open a
-discussion or a pull request; the corresponding ticket will be created on the
-project side.
+Anything else: **open a GitHub issue.** Three templates are offered — a bug
+report, an idea or question, and a bank export format the importer does not
+recognise.
+
+Planning lives on Linear, not here. That changes nothing for you: what deserves
+a ticket gets one created on the project side, and your issue stays as the
+thread of the conversation. You never need a Linear account.
+
+One thing the templates insist on, and this one is on you: **this is a
+budgeting app.** Screenshots, logs and exports carry real amounts and real
+account numbers. Replace them with plausible fake ones before posting. An issue
+can be edited afterwards — the notification email cannot.
 
 By participating, you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).

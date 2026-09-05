@@ -1,0 +1,83 @@
+name: Bug report
+description: Something behaves differently from what the documentation describes.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before anything else: this is a budgeting app.** Screenshots, logs and
+        exports carry real amounts, real labels and real account numbers.
+        Replace them with plausible fake ones before posting. Everything here is
+        public and permanent — an issue can be edited, but the notification
+        email already went out.
+
+  - type: checkboxes
+    id: anonymised
+    attributes:
+      label: Personal data
+      options:
+        - label: I removed real amounts, labels, account numbers and names from everything I attach.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From `GET /api/meta` (`serverVersion`), or the image tag you run.
+      placeholder: "6.4.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Where does it happen?
+      options:
+        - API (Spring Boot)
+        - Web app (Angular PWA)
+        - Mobile app (Flutter)
+        - Deployment (Docker, compose, reverse proxy)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - docker compose, as documented
+        - docker compose, with my own database or overrides
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, what you expected, what happened instead.
+      placeholder: |
+        1. ...
+        2. ...
+
+        Expected: ...
+        Actual: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        `docker compose logs api` is usually the useful one. Paste the lines
+        around the failure, not the whole file.
+      render: shell
+
+  - type: markdown
+    attributes:
+      value: |
+        **If this is a security vulnerability, close this and report it
+        privately instead** — see [SECURITY.md](https://github.com/sopequenoteck/kbudget/blob/main/SECURITY.md).
