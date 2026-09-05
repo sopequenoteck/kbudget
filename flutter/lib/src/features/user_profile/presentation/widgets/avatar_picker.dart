@@ -208,7 +208,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
                     shape: BoxShape.circle,
                     color: AppColors.gray900.withValues(alpha: 0.4),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: AppColors.gray50,

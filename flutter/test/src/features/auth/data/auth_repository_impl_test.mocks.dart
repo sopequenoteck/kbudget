@@ -88,56 +88,6 @@ class MockAuthRemoteDataSource extends _i1.Mock
           as _i5.Future<_i2.AuthResponse>);
 
   @override
-  _i5.Future<_i2.AuthResponse> register(
-    String? email,
-    String? password,
-    String? name, {
-    String? invitationToken,
-    String? currency,
-    String? timezone,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #register,
-              [email, password, name],
-              {
-                #invitationToken: invitationToken,
-                #currency: currency,
-                #timezone: timezone,
-              },
-            ),
-            returnValue: _i5.Future<_i2.AuthResponse>.value(
-              _FakeAuthResponse_0(
-                this,
-                Invocation.method(
-                  #register,
-                  [email, password, name],
-                  {
-                    #invitationToken: invitationToken,
-                    #currency: currency,
-                    #timezone: timezone,
-                  },
-                ),
-              ),
-            ),
-            returnValueForMissingStub: _i5.Future<_i2.AuthResponse>.value(
-              _FakeAuthResponse_0(
-                this,
-                Invocation.method(
-                  #register,
-                  [email, password, name],
-                  {
-                    #invitationToken: invitationToken,
-                    #currency: currency,
-                    #timezone: timezone,
-                  },
-                ),
-              ),
-            ),
-          )
-          as _i5.Future<_i2.AuthResponse>);
-
-  @override
   _i5.Future<_i2.AuthResponse> refresh(String? refreshToken) =>
       (super.noSuchMethod(
             Invocation.method(#refresh, [refreshToken]),

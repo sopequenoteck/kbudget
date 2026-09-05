@@ -31,7 +31,7 @@ void main() {
             selectedMonth: 1,
             selectedYear: 2026,
             isCurrentMonth: true,
-            onPrevNextMonth: (_, __) {},
+            onPrevNextMonth: (_, _) {},
           ),
         ),
       ),

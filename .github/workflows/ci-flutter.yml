@@ -93,3 +93,39 @@ jobs:
             -Dsonar.host.url="${SONAR_HOST_URL}" \
             -Dsonar.token="${SONAR_TOKEN}" \
             -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
+
+  # Job separe, sur runner GitHub : la conformite de licence doit se verifier
+  # partout, y compris sur une pull request de fork — qui n'a pas acces au
+  # runner self-hosted.
+  licence-headers:
+    name: En-tetes de licence MPL
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # La MPL-2.0 est un copyleft par fichier : l'en-tete est ce qui rattache
+      # chaque source a la licence. Le controle existe parce que
+      # `flutter gen-l10n` regenere app_localizations.dart sans lui, en
+      # silence — le fichier etant versionne, l'en-tete disparaissait du depot
+      # a chaque modification de traduction.
+      - name: Verifier que chaque source de flutter/lib porte l'en-tete
+        run: |
+          missing=""
+          while IFS= read -r file; do
+            if ! head -5 "$file" | grep -q "Mozilla Public"; then
+              missing="${missing}  ${file}\n"
+            fi
+          done < <(find flutter/lib -name '*.dart' -not -name '*.g.dart' -not -name '*.freezed.dart')
+
+          if [ -n "$missing" ]; then
+            echo "::error::Des sources de flutter/lib n'ont pas l'en-tete MPL-2.0."
+            printf "%b" "$missing"
+            echo ""
+            echo "Ajouter en tete de chaque fichier :"
+            echo "  // This Source Code Form is subject to the terms of the Mozilla Public"
+            echo "  // License, v. 2.0. If a copy of the MPL was not distributed with this"
+            echo "  // file, You can obtain one at https://mozilla.org/MPL/2.0/."
+            exit 1
+          fi
+          echo "Tous les fichiers de flutter/lib portent l'en-tete MPL-2.0."

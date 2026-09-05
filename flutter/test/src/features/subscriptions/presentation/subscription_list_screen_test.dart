@@ -187,7 +187,7 @@ void main() {
         routes: [
           GoRoute(
             path: '/subscriptions',
-            builder: (_, __) => ProviderScope(
+            builder: (_, _) => ProviderScope(
               overrides: [
                 subscriptionRepositoryProvider
                     .overrideWithValue(mockSubRepo),

@@ -4,8 +4,6 @@
 
 abstract class AuthRepository {
   Future<AuthResult> login(String email, String password);
-  Future<AuthResult> register(String email, String password, String? name,
-      {String? currency, String? timezone});
   Future<AuthResult> refresh();
   Future<void> logout();
   Future<String?> getAccessToken();
