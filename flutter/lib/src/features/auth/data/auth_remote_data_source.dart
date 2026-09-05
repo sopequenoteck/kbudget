@@ -18,28 +18,6 @@ class AuthRemoteDataSource {
     return AuthResponse.fromJson(response.data!);
   }
 
-  Future<AuthResponse> register(
-    String email,
-    String password,
-    String? name, {
-    String? invitationToken,
-    String? currency,
-    String? timezone,
-  }) async {
-    final response = await _dio.post<Map<String, dynamic>>(
-      '/auth/register',
-      data: RegisterRequest(
-        email: email,
-        password: password,
-        name: name,
-        invitationToken: invitationToken,
-        currency: currency,
-        timezone: timezone,
-      ).toJson(),
-    );
-    return AuthResponse.fromJson(response.data!);
-  }
-
   Future<AuthResponse> refresh(String refreshToken) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/auth/refresh',
@@ -57,8 +35,7 @@ class AuthRemoteDataSource {
 
   /// Requiert un JWT valide : [accessToken] est attaché manuellement en
   /// en-tête car ce data source utilise le Dio non authentifié
-  /// (`apiClientProvider`), partagé avec login/register qui n'en ont pas
-  /// besoin.
+  /// (`apiClientProvider`), partagé avec login qui n'en a pas besoin.
   Future<AuthResponse> firstLoginReset({
     required String email,
     required String password,

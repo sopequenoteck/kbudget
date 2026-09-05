@@ -67,21 +67,6 @@ void main() {
           .called(1);
     });
 
-    test('should_returnAuthResult_when_registerSucceeds', () async {
-      when(mockDataSource.register('new@test.com', 'password', 'New'))
-          .thenAnswer((_) async => testAuthResponse);
-      when(mockStorage.write(
-              key: anyNamed('key'), value: anyNamed('value')))
-          .thenAnswer((_) async {});
-
-      final result =
-          await repository.register('new@test.com', 'password', 'New');
-
-      expect(result.accessToken, 'test-access-token');
-      verify(mockDataSource.register('new@test.com', 'password', 'New'))
-          .called(1);
-    });
-
     test('should_refreshTokens_when_refreshCalled', () async {
       when(mockStorage.read(key: 'refresh_token'))
           .thenAnswer((_) async => 'old-refresh');

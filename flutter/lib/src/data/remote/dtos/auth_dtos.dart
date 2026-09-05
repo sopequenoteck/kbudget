@@ -19,21 +19,6 @@ class LoginRequest with _$LoginRequest {
 }
 
 @freezed
-class RegisterRequest with _$RegisterRequest {
-  const factory RegisterRequest({
-    required String email,
-    required String password,
-    String? name,
-    String? invitationToken,
-    String? currency,
-    String? timezone,
-  }) = _RegisterRequest;
-
-  factory RegisterRequest.fromJson(Map<String, dynamic> json) =>
-      _$RegisterRequestFromJson(json);
-}
-
-@freezed
 class RefreshRequest with _$RefreshRequest {
   const factory RefreshRequest({
     required String refreshToken,

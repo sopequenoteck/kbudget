@@ -35,24 +35,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthResult> register(
-      String email, String password, String? name,
-      {String? currency, String? timezone}) async {
-    final response = await _dataSource.register(email, password, name,
-        currency: currency, timezone: timezone);
-    final result = AuthResult(
-      accessToken: response.accessToken,
-      refreshToken: response.refreshToken,
-      email: response.email,
-      name: response.name,
-      mustResetCredentials: response.mustResetCredentials,
-    );
-    await saveTokens(result.accessToken, result.refreshToken);
-    await _saveUserName(result.name);
-    return result;
-  }
-
-  @override
   Future<AuthResult> firstLoginReset({
     required String email,
     required String password,
