@@ -87,28 +87,6 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     _notifyListeners();
   }
 
-  Future<void> register(
-      String email, String password, String? name,
-      {String? currency, String? timezone}) async {
-    state = const AuthState.authenticating();
-    try {
-      final repo = await _repo;
-      final result = await repo.register(email, password, name,
-          currency: currency, timezone: timezone);
-      state = result.mustResetCredentials
-          ? const AuthState.passwordResetRequired()
-          : const AuthState.authenticated();
-    } on DioException catch (e) {
-      final message = e.response?.statusCode == 409
-          ? 'Email déjà utilisé'
-          : 'Erreur lors de l\'inscription';
-      state = AuthState.unauthenticated(error: message);
-    } on Exception catch (e) {
-      state = AuthState.unauthenticated(error: 'Erreur: $e');
-    }
-    _notifyListeners();
-  }
-
   /// Termine le flux de première connexion (KKS-309) : sauvegarde les
   /// nouveaux tokens et repasse en authentifié normal. Laisse toute
   /// [DioException] remonter à l'appelant pour affichage dans l'écran.

@@ -112,38 +112,6 @@ void main() {
       expect((s as AuthUnauthenticated).error, 'Erreur de connexion');
     });
 
-    test('should_beAuthenticated_when_registerSucceeds', () async {
-      when(mockAuthRepo.register('new@test.com', 'password', 'Test'))
-          .thenAnswer((_) async => const AuthResult(
-                accessToken: 'access',
-                refreshToken: 'refresh',
-                email: 'new@test.com',
-                name: 'Test',
-              ));
-
-      await notifier().register('new@test.com', 'password', 'Test');
-
-      expect(state(), isA<AuthAuthenticated>());
-    });
-
-    test('should_showError_when_registerFails409', () async {
-      when(mockAuthRepo.register('dup@test.com', 'password', null))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
-          requestOptions: RequestOptions(),
-          statusCode: 409,
-        ),
-      ));
-
-      await notifier().register('dup@test.com', 'password', null);
-
-      final s = state();
-      expect(s, isA<AuthUnauthenticated>());
-      expect(
-          (s as AuthUnauthenticated).error, 'Email déjà utilisé');
-    });
-
     test('should_beUnauthenticated_when_forceUnauthenticatedCalled', () async {
       // Login first
       when(mockAuthRepo.login('test@test.com', 'password'))
