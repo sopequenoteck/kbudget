@@ -78,7 +78,7 @@ pas de serveur de cache, aucun service externe.
 **PostgreSQL est inclus.** Rien d'autre a installer.
 
 ```bash
-git clone https://github.com/sopequenoteck/budget.git
+git clone https://github.com/sopequenoteck/kbudget.git
 cd budget
 cp .env.example .env
 ```

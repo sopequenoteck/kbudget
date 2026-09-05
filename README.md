@@ -77,7 +77,7 @@ server, no external service.
 **PostgreSQL is included.** Nothing else to install.
 
 ```bash
-git clone https://github.com/sopequenoteck/budget.git
+git clone https://github.com/sopequenoteck/kbudget.git
 cd budget
 cp .env.example .env
 ```

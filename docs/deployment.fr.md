@@ -20,7 +20,7 @@ fourni avec la pile. Environ 1 Go de RAM et 2 Go de disque suffisent pour
 demarrer.
 
 ```bash
-git clone https://github.com/sopequenoteck/budget.git
+git clone https://github.com/sopequenoteck/kbudget.git
 cd budget
 cp .env.example .env
 ```

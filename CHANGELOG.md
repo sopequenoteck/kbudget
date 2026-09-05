@@ -610,22 +610,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/budget/compare/v6.4.0...HEAD
-[6.4.0]: https://github.com/sopequenoteck/budget/compare/v6.3.1...v6.4.0
-[6.3.1]: https://github.com/sopequenoteck/budget/compare/v6.3.0...v6.3.1
-[6.3.0]: https://github.com/sopequenoteck/budget/compare/v6.2.0...v6.3.0
-[6.2.0]: https://github.com/sopequenoteck/budget/compare/v6.1.0...v6.2.0
-[6.1.0]: https://github.com/sopequenoteck/budget/compare/v6.0.0...v6.1.0
-[6.0.0]: https://github.com/sopequenoteck/budget/compare/v5.4.0...v6.0.0
-[5.4.0]: https://github.com/sopequenoteck/budget/compare/v5.3.2...v5.4.0
-[5.3.2]: https://github.com/sopequenoteck/budget/compare/v5.3.1...v5.3.2
-[4.2.0]: https://github.com/sopequenoteck/budget/compare/v4.1.0...v4.2.0
-[4.1.0]: https://github.com/sopequenoteck/budget/compare/v4.0.0...v4.1.0
-[4.0.0]: https://github.com/sopequenoteck/budget/compare/v3.0.0...v4.0.0
-[3.0.0]: https://github.com/sopequenoteck/budget/compare/v2.1.1...v3.0.0
-[2.1.1]: https://github.com/sopequenoteck/budget/compare/v2.0.0...v2.1.1
-[2.0.0]: https://github.com/sopequenoteck/budget/compare/v1.4.0...v2.0.0
-[1.4.0]: https://github.com/sopequenoteck/budget/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/sopequenoteck/budget/compare/v1.2.0...v1.3.0
-[1.0.0]: https://github.com/sopequenoteck/budget/compare/v0.1.0...v1.0.0
-[0.1.0]: https://github.com/sopequenoteck/budget/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...HEAD
+[6.4.0]: https://github.com/sopequenoteck/kbudget/compare/v6.3.1...v6.4.0
+[6.3.1]: https://github.com/sopequenoteck/kbudget/compare/v6.3.0...v6.3.1
+[6.3.0]: https://github.com/sopequenoteck/kbudget/compare/v6.2.0...v6.3.0
+[6.2.0]: https://github.com/sopequenoteck/kbudget/compare/v6.1.0...v6.2.0
+[6.1.0]: https://github.com/sopequenoteck/kbudget/compare/v6.0.0...v6.1.0
+[6.0.0]: https://github.com/sopequenoteck/kbudget/compare/v5.4.0...v6.0.0
+[5.4.0]: https://github.com/sopequenoteck/kbudget/compare/v5.3.2...v5.4.0
+[5.3.2]: https://github.com/sopequenoteck/kbudget/compare/v5.3.1...v5.3.2
+[4.2.0]: https://github.com/sopequenoteck/kbudget/compare/v4.1.0...v4.2.0
+[4.1.0]: https://github.com/sopequenoteck/kbudget/compare/v4.0.0...v4.1.0
+[4.0.0]: https://github.com/sopequenoteck/kbudget/compare/v3.0.0...v4.0.0
+[3.0.0]: https://github.com/sopequenoteck/kbudget/compare/v2.1.1...v3.0.0
+[2.1.1]: https://github.com/sopequenoteck/kbudget/compare/v2.0.0...v2.1.1
+[2.0.0]: https://github.com/sopequenoteck/kbudget/compare/v1.4.0...v2.0.0
+[1.4.0]: https://github.com/sopequenoteck/kbudget/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/sopequenoteck/kbudget/compare/v1.2.0...v1.3.0
+[1.0.0]: https://github.com/sopequenoteck/kbudget/compare/v0.1.0...v1.0.0
+[0.1.0]: https://github.com/sopequenoteck/kbudget/releases/tag/v0.1.0

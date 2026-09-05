@@ -6,7 +6,7 @@ report it privately — do not open a public issue.
 ## Reporting a vulnerability
 
 **Use GitHub's private reporting**: go to the
-[Security tab](https://github.com/sopequenoteck/budget/security/advisories/new)
+[Security tab](https://github.com/sopequenoteck/kbudget/security/advisories/new)
 and open a draft advisory. It is private between you and the maintainer.
 
 If that is unavailable to you, email **sopequeno.tech@gmail.com** with
