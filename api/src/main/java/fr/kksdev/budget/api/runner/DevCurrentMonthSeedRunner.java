@@ -57,7 +57,7 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
 
     /** Les ecritures du mois, en table plutot qu'en suite d'appels : plus lisible a relire. */
     private static final List<SeedEntry> SEED_ENTRIES = List.of(
-            new SeedEntry(CAT_SALAIRE, new BigDecimal("2800.00"), "Salaire", TransactionType.RECETTE, 1),
+            new SeedEntry(CAT_SALAIRE, new BigDecimal("2800.00"), "Salaire mensuel", TransactionType.RECETTE, 1),
             new SeedEntry(CAT_LOGEMENT, new BigDecimal("750.00"), "Loyer", TransactionType.DEPENSE, 1),
             new SeedEntry(CAT_ALIMENTATION, new BigDecimal("67.40"), "Carrefour Market", TransactionType.DEPENSE, 3),
             new SeedEntry(CAT_TRANSPORT, new BigDecimal("1.90"), "Ticket metro", TransactionType.DEPENSE, 4),
