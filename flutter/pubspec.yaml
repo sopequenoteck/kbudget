@@ -4,7 +4,7 @@ publish_to: 'none'
 # Alignee sur le monorepo (VERSION, api/pom.xml, app/package.json) depuis
 # KKS-314 : minClientVersion s'exprime dans un referentiel unique. Le build
 # number reste propre aux stores, qui exigent qu'il croisse a chaque depot.
-version: 6.5.0+6
+version: 6.5.1+6
 
 environment:
   sdk: ^3.11.0
