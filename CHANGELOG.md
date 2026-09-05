@@ -5,6 +5,60 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.5.1] - 2026-09-05
+
+> Deux correctifs qui ne changent rien a l'application, mais beaucoup a ce
+> qu'on peut croire de sa CI : un garde-fou la ou la compatibilite d'API ne
+> reposait que sur la relecture, et un test instable qui usait le signal de
+> toute la suite.
+
+### Added
+
+- **Garde-fou automatique sur le contrat d'API (KKS-350)** : les regles 1 et 2
+  de `docs/api-compatibility.md` — ne jamais retirer un champ de reponse, ne
+  jamais rendre obligatoire un champ de requete — ne reposaient sur rien
+  d'automatique. Ni les tests d'API, qui verifient ce qu'une reponse contient
+  mais jamais ce qu'elle ne contient plus. Ni le compilateur, un DTO ampute
+  compilant parfaitement. L'erreur se manifestait chez l'utilisateur, apres
+  publication.
+  - `ApiContractIT` compare le schema OpenAPI courant a un snapshot versionne :
+    **1050 champs de reponse, 86 contraintes de requete**, une ligne par champ.
+    Le JSON brut d'OpenAPI produirait des diffs illisibles ; ici une suppression
+    de champ **est** une ligne supprimee.
+  - **Les deux sens de comparaison sont inverses**, et c'est le coeur du
+    dispositif : pour les reponses, le snapshot doit rester inclus dans le
+    courant ; pour les requetes, l'inverse. La direction depend de ce qu'un
+    client ancien absorbe sans casser, pas de la taille du diff. Un ajout de
+    champ ne coute donc jamais rien.
+  - La regeneration passe par `-Dcontract.update=true`, mais le garde-fou n'est
+    pas ce drapeau : c'est que le snapshot soit versionne, donc relu dans le
+    diff de la pull request.
+  - **Limite documentee** : springdoc ne decrit que les 200, faute
+    d'annotations `@ApiResponse` sur les 4xx. Le contrat de `docs/api-errors.md`
+    reste sans garde-fou automatique, et la documentation le dit desormais
+    plutot que de laisser croire a un filet complet.
+
+### Fixed
+
+- **Test d'integration instable : interblocage PostgreSQL au `TRUNCATE`
+  (KKS-356)** : `UserDeletionRollbackIT` echouait au hasard en CI, sans qu'une
+  ligne du test ait change. Aucune des trois pistes envisagees n'etait la
+  bonne — les tests ne tournent pas en parallele, ne partagent pas de base, et
+  le test fautif ne contient aucune concurrence.
+  - La cause : `NotificationScheduler.checkDebtReminders()` porte
+    `@Scheduled(fixedDelay = 60_000)` **sans** `initialDelay`, donc s'execute
+    des le demarrage du contexte. Sa requete joint `debts` et `users` pendant
+    que le test lance `TRUNCATE TABLE users CASCADE` — memes tables, ordres de
+    verrouillage opposes. Rien ne desactivait le scheduling en test.
+  - `@EnableScheduling` devient conditionnel, **actif par defaut**, desactive
+    dans le profil de test. Verifie par **vingt executions consecutives en
+    local**, sans echec — une mesure ponctuelle, pas un controle permanent :
+    la CI ne fait qu'un passage, exactement celui qu'un test instable
+    reussit une fois sur deux.
+  - Remplacer `TRUNCATE` par `DELETE` aurait supprime le symptome sans traiter
+    la cause : une tache de production qui tourne pendant les tests peut aussi
+    creer des notifications au hasard.
+
 ## [6.5.0] - 2026-09-05
 
 > **Le depot a change de nom** : `sopequenoteck/budget` devient
@@ -668,7 +722,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...HEAD
+[6.5.1]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...v6.5.1
 [6.5.0]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/sopequenoteck/kbudget/compare/v6.3.1...v6.4.0
 [6.3.1]: https://github.com/sopequenoteck/kbudget/compare/v6.3.0...v6.3.1
