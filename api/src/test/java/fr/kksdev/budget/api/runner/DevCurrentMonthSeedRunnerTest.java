@@ -13,13 +13,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,6 +49,15 @@ class DevCurrentMonthSeedRunnerTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    /**
+     * Horloge fixe : le test verifie un comportement date sans dependre du jour
+     * ou il s'execute. Le 12 mars 2026 laisse onze jours ecoules, assez pour que
+     * les dix ecritures tombent a leur jour prevu sans etre ramenees a today.
+     */
+    @Spy
+    private final Clock clock = Clock.fixed(
+            LocalDate.of(2026, 3, 12).atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
     @InjectMocks
     private DevCurrentMonthSeedRunner devCurrentMonthSeedRunner;
@@ -133,7 +145,7 @@ class DevCurrentMonthSeedRunnerTest {
         verify(transactionRepository).saveAll(captor.capture());
 
         List<Transaction> generated = captor.getValue();
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
         assertThat(generated)
@@ -166,6 +178,11 @@ class DevCurrentMonthSeedRunnerTest {
     // Point le plus important : un runner mal garde injecterait de fausses donnees en prod.
     @Configuration
     static class ProfileGuardTestConfig {
+
+        @Bean
+        Clock clock() {
+            return Clock.systemDefaultZone();
+        }
 
         @Bean
         UserRepository userRepository() {

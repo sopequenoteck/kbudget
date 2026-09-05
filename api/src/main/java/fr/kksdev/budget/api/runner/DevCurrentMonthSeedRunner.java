@@ -18,8 +18,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +72,7 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
+    private final Clock clock;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -82,7 +83,7 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
         }
 
         User user = devUser.get();
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDate today = LocalDate.now(clock);
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
         // Garde d'idempotence : deux demarrages successifs ne doivent rien creer de plus.
