@@ -56,8 +56,6 @@ class DevCurrentMonthSeedRunnerTest {
      * ou il s'execute. Le 12 mars 2026 laisse onze jours ecoules, assez pour que
      * les dix ecritures tombent a leur jour prevu sans etre ramenees a today.
      */
-    /** Le 12 mars laisse onze jours ecoules : assez pour que les dix ecritures
-     *  tombent a leur jour prevu, sans etre ramenees a today. */
     private static final LocalDate REFERENCE_DAY = LocalDate.of(2026, Month.MARCH, 12);
     private static final Clock FIXED_CLOCK =
             Clock.fixed(REFERENCE_DAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
