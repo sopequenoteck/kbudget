@@ -19,7 +19,7 @@ instance. No prior knowledge of the project is assumed.
 comes with the stack. Roughly 1 GB of RAM and 2 GB of disk are enough to start.
 
 ```bash
-git clone https://github.com/sopequenoteck/budget.git
+git clone https://github.com/sopequenoteck/kbudget.git
 cd budget
 cp .env.example .env
 ```
