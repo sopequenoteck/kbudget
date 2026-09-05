@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -55,9 +56,14 @@ class DevCurrentMonthSeedRunnerTest {
      * ou il s'execute. Le 12 mars 2026 laisse onze jours ecoules, assez pour que
      * les dix ecritures tombent a leur jour prevu sans etre ramenees a today.
      */
+    /** Le 12 mars laisse onze jours ecoules : assez pour que les dix ecritures
+     *  tombent a leur jour prevu, sans etre ramenees a today. */
+    private static final LocalDate REFERENCE_DAY = LocalDate.of(2026, Month.MARCH, 12);
+    private static final Clock FIXED_CLOCK =
+            Clock.fixed(REFERENCE_DAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+
     @Spy
-    private final Clock clock = Clock.fixed(
-            LocalDate.of(2026, 3, 12).atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+    private final Clock clock = FIXED_CLOCK;
 
     @InjectMocks
     private DevCurrentMonthSeedRunner devCurrentMonthSeedRunner;
@@ -181,7 +187,7 @@ class DevCurrentMonthSeedRunnerTest {
 
         @Bean
         Clock clock() {
-            return Clock.systemDefaultZone();
+            return FIXED_CLOCK;
         }
 
         @Bean
