@@ -115,13 +115,9 @@ class ApiContractIT {
     // ------------------------------------------------------------------
 
     private void collectContract(JsonNode root, JsonNode schemas, Set<String> responseLines, Set<String> requestLines) {
-        Iterator<Map.Entry<String, JsonNode>> pathEntries = root.path("paths").fields();
-        while (pathEntries.hasNext()) {
-            Map.Entry<String, JsonNode> pathEntry = pathEntries.next();
+        for (Map.Entry<String, JsonNode> pathEntry : root.path("paths").properties()) {
             String path = pathEntry.getKey();
-            Iterator<Map.Entry<String, JsonNode>> methodEntries = pathEntry.getValue().fields();
-            while (methodEntries.hasNext()) {
-                Map.Entry<String, JsonNode> methodEntry = methodEntries.next();
+            for (Map.Entry<String, JsonNode> methodEntry : pathEntry.getValue().properties()) {
                 String method = methodEntry.getKey();
                 if (!HTTP_METHODS.contains(method)) {
                     continue;
@@ -134,9 +130,7 @@ class ApiContractIT {
     }
 
     private void collectResponseLines(JsonNode operation, JsonNode schemas, String method, String path, Set<String> out) {
-        Iterator<Map.Entry<String, JsonNode>> responseEntries = operation.path("responses").fields();
-        while (responseEntries.hasNext()) {
-            Map.Entry<String, JsonNode> responseEntry = responseEntries.next();
+        for (Map.Entry<String, JsonNode> responseEntry : operation.path("responses").properties()) {
             String code = responseEntry.getKey();
             Iterator<JsonNode> contentEntries = responseEntry.getValue().path("content").elements();
             while (contentEntries.hasNext()) {
@@ -194,9 +188,7 @@ class ApiContractIT {
         }
         JsonNode properties = schema.path("properties");
         if (properties.isObject() && properties.size() > 0) {
-            Iterator<Map.Entry<String, JsonNode>> propEntries = properties.fields();
-            while (propEntries.hasNext()) {
-                Map.Entry<String, JsonNode> prop = propEntries.next();
+            for (Map.Entry<String, JsonNode> prop : properties.properties()) {
                 String childPrefix = prefix.isEmpty() ? prop.getKey() : prefix + "." + prop.getKey();
                 collectFields(prop.getValue(), schemas, childPrefix, visited, depth + 1, out);
             }
