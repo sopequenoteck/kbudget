@@ -130,7 +130,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                     Text('Vérification de l\'invitation…'),
                   ],
                 ),
-                error: (_, __) => Column(
+                error: (_, _) => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     PhosphorIcon(
@@ -267,7 +267,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           ),
           const SizedBox(height: AppSpacing.space4),
           DropdownButtonFormField<String>(
-            value: _selectedCurrency,
+            initialValue: _selectedCurrency,
             decoration: const InputDecoration(
               labelText: 'Devise principale',
               prefixIcon: PhosphorIcon(

@@ -63,7 +63,7 @@ class _MockUserProfileRepository implements UserProfileRepository {
 
   @override
   Future<AuthResponse> changePassword(ChangePasswordRequest req) async =>
-      AuthResponse(
+      const AuthResponse(
         accessToken: 'mock-token',
         refreshToken: 'mock-refresh',
         email: 'kelly@example.com',

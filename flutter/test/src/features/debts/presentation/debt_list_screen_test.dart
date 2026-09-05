@@ -156,7 +156,7 @@ void main() {
         routes: [
           GoRoute(
             path: '/debts',
-            builder: (_, __) => ProviderScope(
+            builder: (_, _) => ProviderScope(
               overrides: [
                 debtRepositoryProvider.overrideWithValue(mockDebtRepo),
                 categoryRepositoryProvider
