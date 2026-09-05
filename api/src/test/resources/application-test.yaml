@@ -14,6 +14,11 @@ spring:
     show-sql: false
 
 app:
+  # Les taches planifiees ne tournent pas pendant les tests : checkDebtReminders
+  # demarre avec le contexte et lit debts/users, ce qui interbloque tout
+  # TRUNCATE concurrent (KKS-356).
+  scheduling:
+    enabled: false
   jwt:
     secret: test-secret-key-budget-app-min-256-bits-long-enough-for-hmac-sha
     expiration: 86400000

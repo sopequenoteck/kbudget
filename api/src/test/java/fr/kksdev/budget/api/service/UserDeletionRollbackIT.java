@@ -40,6 +40,9 @@ class UserDeletionRollbackIT {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
         registry.add("app.admin-emails", () -> "");
+        // Sans profil "test" ici : la propriete doit etre posee a la main.
+        // Une tache planifiee qui lit users pendant le TRUNCATE interbloque (KKS-356).
+        registry.add("app.scheduling.enabled", () -> "false");
         registry.add("app.jwt.secret", () -> "test-secret-key-budget-app-min-256-bits-long-enough-for-hmac-sha");
     }
 
