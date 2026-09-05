@@ -188,15 +188,33 @@ Ces questions figurent dans le
 
 ## Ce que ce document ne couvre pas
 
-**Il n'existe aucun controle automatique.** Aucun test ne detecte aujourd'hui la
-suppression d'un champ de reponse entre deux versions — la regle 1 repose
-entierement sur la relecture. Un test de non-regression de contrat, capturant le
-schema des reponses pour comparer d'une version a l'autre, a ete ecarte de ce
-ticket et fait l'objet d'un ticket dedie : il demande sa propre conception
-(format du snapshot, traitement des ajouts legitimes, endroit ou le faire
-tourner), et bacle il produirait un test fragile que personne ne maintiendrait.
+**Les regles 1 et 2 sont verifiees automatiquement** par
+[`ApiContractIT`](../api/src/test/java/fr/kksdev/budget/api/contract/ApiContractIT.java)
+(KKS-350). Le test recupere le schema OpenAPI expose par springdoc
+(`GET /v3/api-docs`), en extrait une projection — champs de reponse d'un cote,
+champs de requete devenus obligatoires de l'autre — et la compare a un snapshot
+versionne, [`api-contract.txt`](../api/src/test/resources/api-contract.txt).
 
-En attendant, la discipline est humaine. C'est la raison d'etre de la checklist.
+Les deux sens de comparaison sont inverses : pour les reponses, le snapshot
+doit rester inclus dans le contrat courant (un champ du snapshot absent du
+courant = champ retire ou renomme, echec) ; pour les requetes, c'est le
+courant qui doit rester inclus dans le snapshot (un champ obligatoire du
+courant absent du snapshot = nouvelle obligation apparue, echec). Un ajout de
+champ de reponse ou un allegement d'une contrainte de requete passent en
+silence — ce sont des evolutions legitimes.
+
+Quand une rupture est assumee (regle 6), le snapshot se regenere puis se relit
+au diff avant de committer :
+
+```bash
+JAVA_HOME=<jdk21> mvn -pl api test -Dtest=ApiContractIT -Dcontract.update=true
+```
+
+**Ce que le test ne couvre pas : les reponses d'erreur.** springdoc ne
+documente que les 200 — l'API ne porte aucune annotation `@ApiResponse` sur
+les 4xx. Le contrat de [`api-errors.md`](api-errors.md) reste donc sans
+garde-fou automatique ; la discipline humaine et la checklist restent la seule
+protection sur ce point.
 
 ---
 
