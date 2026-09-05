@@ -5,6 +5,40 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Tests API et Flutter executables par une pull request de fork (KKS-358)** :
+  le depot est public, mais `ci-api.yml` n'avait qu'un seul job et il tournait
+  sur le runner self-hosted. Une PR de fork touchant `api/` ne declenchait donc
+  **aucun test**, et cote Flutter le seul job accessible verifiait les en-tetes
+  de licence. Un contributeur externe ouvrait une PR backend et voyait une CI
+  vide.
+  - `api-tests` et `flutter-tests` ajoutes sur `ubuntu-latest`. Mesure sur la
+    pull request qui les introduit — elle modifie les trois fichiers de
+    workflow, qui figurent chacun dans leur propre `paths`, donc elle execute
+    sa propre modification : 620 tests unitaires et 34 d'integration cote API,
+    917 tests cote Flutter.
+  - `api-tests` ne tourne pas dans un container, contrairement au job
+    d'analyse : deux tests d'integration demarrent un PostgreSQL via
+    Testcontainers et ont besoin d'un Docker joignable. Le gate de release le
+    savait deja, ce job en reprend l'etape.
+  - **Le runner self-hosted ne gagne aucun job.** Il a le socket Docker et
+    n'execute pas de code externe non approuve : c'est voulu et cela ne change
+    pas.
+  - Sonar reste self-hosted, le serveur vivant sur un reseau prive. Une PR de
+    fork n'aura donc pas de Quality Gate — c'est desormais **ecrit dans
+    `CONTRIBUTING.md`** au lieu d'etre decouvert.
+  - KKS-312 avait fait ce travail pour Angular seulement. Le commentaire de
+    `ci-app.yml` l'annoncait pourtant comme un principe general, jamais applique
+    aux deux autres stacks.
+
+### Changed
+
+- Les trois en-tetes de workflow CI affirmaient encore « Repo PRIVE ». Le
+  reglage d'approbation des contributeurs externes qu'elles documentent n'est
+  pas devenu obsolete avec l'ouverture du depot : il en est devenu la seule
+  protection du runner.
+
 ## [6.5.2] - 2026-09-05
 
 > **Rien ne change pour une instance qui tourne.** Trois nettoyages : du code
