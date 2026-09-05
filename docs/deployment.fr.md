@@ -21,7 +21,7 @@ demarrer.
 
 ```bash
 git clone https://github.com/sopequenoteck/kbudget.git
-cd budget
+cd kbudget
 cp .env.example .env
 ```
 
@@ -181,7 +181,7 @@ BACKUP_DIR=/mnt/nas RETENTION_DAYS=30 ./deploy/backup.sh
 Chaque jour a 3h, depuis le repertoire qui contient `docker-compose.yml` :
 
 ```cron
-0 3 * * * cd /chemin/vers/budget && ./deploy/backup.sh >> backups/backup.log 2>&1
+0 3 * * * cd /chemin/vers/kbudget && ./deploy/backup.sh >> backups/backup.log 2>&1
 ```
 
 > Une sauvegarde qu'on n'a jamais restauree est une hypothese, pas une

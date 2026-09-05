@@ -78,7 +78,7 @@ server, no external service.
 
 ```bash
 git clone https://github.com/sopequenoteck/kbudget.git
-cd budget
+cd kbudget
 cp .env.example .env
 ```
 
