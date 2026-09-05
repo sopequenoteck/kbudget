@@ -20,7 +20,7 @@ comes with the stack. Roughly 1 GB of RAM and 2 GB of disk are enough to start.
 
 ```bash
 git clone https://github.com/sopequenoteck/kbudget.git
-cd budget
+cd kbudget
 cp .env.example .env
 ```
 
@@ -173,7 +173,7 @@ BACKUP_DIR=/mnt/nas RETENTION_DAYS=30 ./deploy/backup.sh
 Daily at 03:00, from the directory holding `docker-compose.yml`:
 
 ```cron
-0 3 * * * cd /path/to/budget && ./deploy/backup.sh >> backups/backup.log 2>&1
+0 3 * * * cd /path/to/kbudget && ./deploy/backup.sh >> backups/backup.log 2>&1
 ```
 
 > A backup that has never been restored is a hypothesis, not a backup. Restore

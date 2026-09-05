@@ -1,26 +1,26 @@
-## Ce que fait cette PR
+## What this PR does
 
-<!-- Une ou deux phrases. Le detail va dans les commits. -->
+<!-- One or two sentences. The detail belongs in the commits. -->
 
-## Compatibilite d'API
+## API compatibility
 
-Ne cocher que si la PR touche l'API, ses DTOs, une migration Flyway ou le
-parsing cote client. Les regles sont dans
-[`docs/api-compatibility.md`](../docs/api-compatibility.md).
+Only fill this in if the PR touches the API, its DTOs, a Flyway migration or
+client-side parsing. The rules live in
+[`docs/api-compatibility.md`](https://github.com/sopequenoteck/kbudget/blob/main/docs/api-compatibility.md).
 
-- [ ] Aucun champ de reponse retire ou renomme — on ajoute, on ne retire pas
-- [ ] Aucun champ de requete devenu obligatoire
-- [ ] Les migrations Flyway n'invalident aucune reponse deja servie
-- [ ] Les nouvelles valeurs d'enum sont tolerees par les clients anciens
-- [ ] **Si rupture assumee** : `minClientVersion` relevee, note de migration
-      dans le `CHANGELOG`, version majeure
+- [ ] No response field removed or renamed — we add, we do not take away
+- [ ] No request field became mandatory
+- [ ] No Flyway migration invalidates a response already being served
+- [ ] New enum values are tolerated by older clients
+- [ ] **If the break is deliberate**: `minClientVersion` raised, migration note
+      in the `CHANGELOG`, major version
 
-> Une seule version d'API est servie a la fois. La compatibilite descendante ne
-> repose sur aucun mecanisme, seulement sur cette relecture.
+> One API version is served at a time. Backward compatibility rests on no
+> mechanism at all — only on this review.
 
-## Verifications
+## Checks
 
-- [ ] Tests passes sur les stacks touchees
-- [ ] Documentation mise a jour si le comportement change
-- [ ] Version incrementee dans les **quatre** fichiers si c'est une release
+- [ ] Tests pass on the stacks this touches
+- [ ] Documentation updated if the behaviour changed
+- [ ] Version bumped in **all four** files if this is a release
       (`VERSION`, `api/pom.xml`, `app/package.json`, `flutter/pubspec.yaml`)

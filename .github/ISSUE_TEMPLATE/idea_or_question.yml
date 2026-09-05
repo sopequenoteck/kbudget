@@ -1,0 +1,39 @@
+name: Idea or question
+description: Propose a change, or ask something the documentation does not answer.
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issue tracking for this project lives on Linear, not here. This tracker
+        is the way in for people outside the project: what deserves a ticket
+        gets one created on the other side, and this issue stays as the thread
+        of the conversation.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What are you trying to do?
+      description: |
+        The situation, before the solution. What you were trying to achieve
+        often points somewhere different from what you first thought to ask for.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to see?
+      description: If you have a shape in mind, describe it. If not, say so — that is fine.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Before you post
+      description: |
+        Two things save everyone time, and one of them can save you a rejected
+        pull request.
+      options:
+        - label: I read the [constitution](https://github.com/sopequenoteck/kbudget/blob/main/.specify/memory/constitution.md) and this does not contradict it.
+        - label: If this concerns the Flutter app, I know it is not held to parity with Angular — see principle 8. **Ask before porting a screen.**
+        - label: This is not a security vulnerability. Those go through [SECURITY.md](https://github.com/sopequenoteck/kbudget/blob/main/SECURITY.md), privately.

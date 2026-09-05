@@ -5,6 +5,64 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.5.0] - 2026-09-05
+
+> **Le depot a change de nom** : `sopequenoteck/budget` devient
+> `sopequenoteck/kbudget`, et l'ancienne URL ne redirige pas. Si vous avez un
+> clone, corrigez son remote :
+> `git remote set-url origin https://github.com/sopequenoteck/kbudget.git`
+>
+> **Rien ne change pour une instance qui tourne.** Les images, leurs tags et le
+> compose de reference sont inchanges — les paquets appartiennent au compte, pas
+> au depot.
+
+### Added
+
+- **Modeles d'issue pour les contributeurs externes** : le depot n'en avait
+  aucun, et `CONTRIBUTING.md` se contredisait — il invitait a ouvrir une
+  discussion alors que les Discussions sont desactivees, et ailleurs a ouvrir
+  une issue. Trois formulaires desormais : rapport de bug (version, composant,
+  mode d'installation), idee ou question, et format d'export bancaire non
+  reconnu — un cas que `CONTRIBUTING` appelait deja sans offrir de chemin.
+  - **Chaque modele qui invite a joindre un fichier ouvre sur le meme
+    avertissement.** C'est une application de budget : une capture, un log ou un
+    export porte des montants et des numeros de compte reels. Une issue se
+    corrige apres coup, la notification par courriel non. La case
+    d'anonymisation est obligatoire la ou le risque existe.
+  - Le suivi reste sur Linear. GitHub Issues devient la porte d'entree de qui
+    n'y a pas acces : ce qui merite un ticket en recoit un, l'issue reste le fil
+    de la conversation.
+
+### Changed
+
+- **Le depot GitHub s'appelle desormais `sopequenoteck/kbudget`** : il etait le
+  seul artefact a porter l'ancien nom `budget`, alors que les images
+  (`k-budget-api`, `k-budget-app`), le paquet npm et le projet Flutter portaient
+  deja le bon. **L'ancienne URL ne redirige pas** — le depot a ete recree, pas
+  renomme. Les 26 liens de la documentation sont a jour ; les images publiees,
+  leurs tags et les cles de projet Sonar sont inchanges.
+- `release.yml` declare `org.opencontainers.image.source` sur les deux images :
+  la liaison entre un paquet GHCR et son depot vit desormais dans le code, au
+  lieu d'etre posee automatiquement par le premier push — elle survivait donc au
+  renommage et continuait de pointer vers l'ancien depot.
+- **`.specify/` et `docs/features/` ne sont plus versionnes**, a l'exception de
+  `.specify/memory/constitution.md` qui reste la reference du projet. Ce sont
+  des artefacts de sessions de travail : 1318 fichiers, qui portaient 113 lignes
+  de chemins de machine personnelle et n'apportent rien a qui decouvre le
+  projet. La constitution reste en place : six fichiers y renvoient par des
+  liens, et elle fait autorite sur toute autre documentation.
+- Le modele de pull request passe **en anglais**, a contenu constant. Il faisait
+  face a un README et un CONTRIBUTING anglais : une case a cocher qu'on ne lit
+  pas se coche sans comprendre, ce qui aurait vide la relecture de compatibilite
+  d'API de sa fonction.
+
+### Fixed
+
+- **La premiere commande d'installation echouait.** Les quatre guides faisaient
+  cloner `kbudget.git` puis `cd budget` — le dossier cree porte le nom du depot.
+  Le renommage n'avait remplace que les URLs, pas les chemins de dossier qui en
+  decoulent.
+
 ## [6.4.0] - 2026-09-04
 
 > `docker compose up -d` suffit desormais : PostgreSQL est embarque, les images
@@ -610,7 +668,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...HEAD
+[6.5.0]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/sopequenoteck/kbudget/compare/v6.3.1...v6.4.0
 [6.3.1]: https://github.com/sopequenoteck/kbudget/compare/v6.3.0...v6.3.1
 [6.3.0]: https://github.com/sopequenoteck/kbudget/compare/v6.2.0...v6.3.0

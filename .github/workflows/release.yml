@@ -119,6 +119,11 @@ jobs:
         with:
           context: ./api
           push: true
+          # Declare le depot source dans l'image : c'est ce label qui lie le
+          # paquet GHCR au depot. Sans lui, GitHub pose la liaison au premier
+          # push et elle reste celle du depot qui a publie en premier — ce qui
+          # a survecu au renommage de `budget` en `kbudget` (KKS-353).
+          labels: org.opencontainers.image.source=https://github.com/sopequenoteck/kbudget
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/sopequenoteck/k-budget-api:latest
@@ -135,6 +140,11 @@ jobs:
         with:
           context: ./app
           push: true
+          # Declare le depot source dans l'image : c'est ce label qui lie le
+          # paquet GHCR au depot. Sans lui, GitHub pose la liaison au premier
+          # push et elle reste celle du depot qui a publie en premier — ce qui
+          # a survecu au renommage de `budget` en `kbudget` (KKS-353).
+          labels: org.opencontainers.image.source=https://github.com/sopequenoteck/kbudget
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/sopequenoteck/k-budget-app:latest

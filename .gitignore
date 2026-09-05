@@ -47,3 +47,14 @@ node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json
 # externe, ports, images non epinglees), pas le projet. Voir
 # docker-compose.override.yml.example (KKS-320).
 docker-compose.override.yml
+
+# Artefacts de sessions de travail (devflow / speckit) : specs, plans, tasks et
+# preuves d'execution. Ils decrivent le chemin parcouru, pas le projet, et
+# portaient des chemins de machine personnelle. Conserves en local.
+# La constitution reste versionnee : elle fait autorite et la documentation y
+# renvoie par des liens (README, CONTRIBUTING, CLAUDE.md, docs/).
+/.specify/*
+!/.specify/memory/
+/.specify/memory/*
+!/.specify/memory/constitution.md
+/docs/features/

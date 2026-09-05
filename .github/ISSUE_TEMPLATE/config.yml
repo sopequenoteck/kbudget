@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/sopequenoteck/kbudget/security/advisories/new
+    about: Report it privately as a draft advisory — never in a public issue.
+  - name: Deployment and operations
+    url: https://github.com/sopequenoteck/kbudget/blob/main/docs/deployment.md
+    about: Installing, upgrading, backing up and restoring an instance.
+  - name: Contributing guide
+    url: https://github.com/sopequenoteck/kbudget/blob/main/CONTRIBUTING.md
+    about: How the project works, what it accepts, and what it does not.
