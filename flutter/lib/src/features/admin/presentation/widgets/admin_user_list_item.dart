@@ -81,7 +81,7 @@ class AdminUserListItem extends StatelessWidget {
             )
           : isDisabled
               ? IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.lock_open_outlined,
                     size: 20,
                     color: AppColors.success,

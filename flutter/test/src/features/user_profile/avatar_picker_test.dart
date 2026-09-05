@@ -11,7 +11,7 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
-            home: Scaffold(
+            home: const Scaffold(
               body: AvatarPicker(
                 currentAvatarUrl: null,
                 userInitials: 'KS',
@@ -30,7 +30,7 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
-            home: Scaffold(
+            home: const Scaffold(
               body: AvatarPicker(
                 currentAvatarUrl: null,
                 userInitials: 'AB',
@@ -50,7 +50,7 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
-            home: Scaffold(
+            home: const Scaffold(
               body: AvatarPicker(
                 currentAvatarUrl: null,
                 userInitials: 'ABC',
@@ -71,8 +71,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
-          home: Scaffold(
-            body: const AvatarCircle(
+          home: const Scaffold(
+            body: AvatarCircle(
               avatarUrl: null,
               initials: 'TS',
             ),

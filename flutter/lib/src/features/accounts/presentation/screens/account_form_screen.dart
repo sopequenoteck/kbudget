@@ -421,7 +421,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const SizedBox(height: AppSpacing.space6),
 
           // Type selector
-          _SectionHeader('TYPE DE COMPTE'),
+          const _SectionHeader('TYPE DE COMPTE'),
           const SizedBox(height: AppSpacing.space2),
           AccountTypeSelector(
             selectedType: _selectedType,
@@ -431,7 +431,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const SizedBox(height: AppSpacing.space6),
 
           // Bank selector
-          _SectionHeader('BANQUE'),
+          const _SectionHeader('BANQUE'),
           const SizedBox(height: AppSpacing.space2),
           BankSelectPicker(
             selectedBankCode: _selectedBankCode,
@@ -442,7 +442,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
           // Emoji + Color row (masqué si une banque connue est sélectionnée)
           if (_selectedBankCode == 'OTHER') ...[
-            _SectionHeader('PERSONNALISATION'),
+            const _SectionHeader('PERSONNALISATION'),
             const SizedBox(height: AppSpacing.space2),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +502,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             const SizedBox(height: AppSpacing.space0),
 
           // Name field
-          _SectionHeader('DÉTAILS'),
+          const _SectionHeader('DÉTAILS'),
           const SizedBox(height: AppSpacing.space2),
           AppFormField(
             label: l10n.accountFormNameField,

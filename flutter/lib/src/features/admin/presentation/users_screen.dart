@@ -190,7 +190,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.space2),
         itemCount: invState.items.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final invitation = invState.items[index];
           final isMutating = invState.mutatingIds.contains(invitation.id);
@@ -244,7 +244,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.space2),
         itemCount: usersState.items.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final user = usersState.items[index];
           final isMutating = usersState.mutatingIds.contains(user.id);

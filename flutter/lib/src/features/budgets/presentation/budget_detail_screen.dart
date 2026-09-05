@@ -267,7 +267,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
       data: (_) {
         if (filteredTx == null || filteredTx.isEmpty) {
           return [
-            SliverFillRemaining(
+            const SliverFillRemaining(
               hasScrollBody: false,
               child: EmptyStateWidget(
                 icon: PhosphorIconsRegular.receipt,

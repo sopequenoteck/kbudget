@@ -162,13 +162,13 @@ void main() {
       routes: [
         GoRoute(
           path: '/budget-detail',
-          builder: (_, __) => Scaffold(
+          builder: (_, _) => Scaffold(
             body: BudgetDetailScreen(categoryId: categoryId, month: month),
           ),
         ),
         GoRoute(
           path: RouteNames.budgets,
-          builder: (_, __) => const Scaffold(body: Text('Budgets')),
+          builder: (_, _) => const Scaffold(body: Text('Budgets')),
         ),
       ],
     );
