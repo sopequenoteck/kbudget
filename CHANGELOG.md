@@ -5,6 +5,55 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.5.2] - 2026-09-05
+
+> **Rien ne change pour une instance qui tourne.** Trois nettoyages : du code
+> mort qui appelait une route inexistante, des donnees de developpement qui
+> vieillissaient, et un garde-fou sur les en-tetes de licence.
+
+### Added
+
+- **Donnees de developpement generees pour le mois courant (KKS-355)** :
+  `R__dev_seed.sql` est une migration repeatable, elle ne rejoue que si son
+  checksum change. Depuis KKS-354 ses dates sont relatives, donc une base
+  recreee est fraiche — mais une base conservee plusieurs mois se retrouve sans
+  aucune transaction sur le mois en cours, et le dashboard n'affiche rien.
+  - `DevCurrentMonthSeedRunner` genere dix ecritures sur les jours ecoules, en
+    reutilisant les categories et le compte du seed. Idempotent, et **aucune
+    date future** — y compris le 1er du mois.
+  - `@Profile("dev")` n'est pas un detail de configuration : le profil `prod`
+    est le defaut du projet, un runner mal garde injecterait de fausses
+    transactions chez un self-hoster. Le test enregistre la classe dans un
+    contexte Spring reel et verifie que le bean n'existe pas ailleurs.
+  - Le runner a introduit `ClockConfig`, une horloge injectable. Le test la fixe
+    au 12 mars 2026 : jusque-la, lance un 1er du mois, il verifiait un
+    comportement tout autre sans que ce soit ni visible ni voulu.
+- **Un job CI verifie les en-tetes de licence MPL** : `app_localizations.dart`
+  est genere par `flutter gen-l10n` mais versionne — une regeneration efface son
+  en-tete, silencieusement. La MPL-2.0 etant un copyleft **par fichier**, un
+  fichier sans en-tete n'est plus couvert. Le job tourne sur `ubuntu-latest` et
+  non sur le runner self-hosted : une verification de conformite doit s'executer
+  meme sur une pull request de fork.
+
+### Removed
+
+- **La chaine `register` cote Flutter (KKS-352)** : l'inscription publique a ete
+  retiree du projet — la constitution impose l'onboarding par invitation
+  (principe VII) — et `POST /auth/register` n'existe plus cote API. Flutter
+  gardait la chaine complete, du notifier au data source.
+  - Aucun ecran ne l'appelait, donc rien ne cassait. Le cout etait ailleurs : un
+    contributeur lisant `AuthRepository` en aurait conclu que l'inscription
+    publique est supportee, alors que la constitution l'exclut.
+  - **Trois tests couvraient cette chaine morte** et partent avec elle. Ils
+    passaient, et verifiaient du code qui aurait renvoye un `404` — du vert sur
+    du mort, qui decourage precisement d'aller regarder.
+
+### Changed
+
+- `dart fix` applique a la base Flutter : wildcards `(_, __)` devenus `(_, _)`,
+  constructeurs `const` la ou ils sont possibles, variables locales sans
+  souligne initial. `flutter analyze` passe de 30 signalements a 3.
+
 ## [6.5.1] - 2026-09-05
 
 > Deux correctifs qui ne changent rien a l'application, mais beaucoup a ce
@@ -722,7 +771,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...HEAD
+[6.5.2]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...v6.5.2
 [6.5.1]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...v6.5.1
 [6.5.0]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/sopequenoteck/kbudget/compare/v6.3.1...v6.4.0
