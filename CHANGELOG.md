@@ -5,6 +5,23 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Le depot GitHub s'appelle desormais `sopequenoteck/kbudget`** : il etait le
+  seul artefact a porter l'ancien nom `budget`, alors que les images
+  (`k-budget-api`, `k-budget-app`), le paquet npm et le projet Flutter portaient
+  deja le bon. **L'ancienne URL ne redirige pas** — le depot a ete recree, pas
+  renomme. Les 26 liens de la documentation sont a jour ; les images publiees,
+  leurs tags et les cles de projet Sonar sont inchanges.
+- `release.yml` declare `org.opencontainers.image.source` sur les deux images :
+  la liaison entre un paquet GHCR et son depot vit desormais dans le code, au
+  lieu d'etre posee automatiquement par le premier push — elle survivait donc au
+  renommage et continuait de pointer vers l'ancien depot.
+- **`.specify/` et `docs/features/` ne sont plus versionnes**, a l'exception de
+  `.specify/memory/constitution.md` qui reste la reference du projet. Ce sont
+  des artefacts de sessions de travail : ils portaient des chemins de machine
+  personnelle et n'apportent rien a qui decouvre le projet.
+
 ## [6.4.0] - 2026-09-04
 
 > `docker compose up -d` suffit desormais : PostgreSQL est embarque, les images
