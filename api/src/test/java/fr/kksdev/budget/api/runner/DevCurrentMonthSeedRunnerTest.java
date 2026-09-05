@@ -63,7 +63,7 @@ class DevCurrentMonthSeedRunnerTest {
                 .build();
     }
 
-    private Account buildDefaultAccount(UUID userId) {
+    private Account buildDefaultAccount() {
         return Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Compte Courant")
@@ -120,7 +120,7 @@ class DevCurrentMonthSeedRunnerTest {
     @Test
     void should_generate_about_ten_transactions_with_no_future_date_when_month_is_empty() {
         User devUser = buildDevUser();
-        Account account = buildDefaultAccount(devUser.getId());
+        Account account = buildDefaultAccount();
         when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
         when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any())).thenReturn(false);
         when(accountRepository.findByUserIdAndIsDefaultTrue(devUser.getId())).thenReturn(Optional.of(account));
@@ -136,19 +136,19 @@ class DevCurrentMonthSeedRunnerTest {
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
-        assertThat(generated).hasSizeGreaterThanOrEqualTo(8);
-        assertThat(generated).allSatisfy(transaction -> {
-            assertThat(transaction.getDate()).isAfterOrEqualTo(firstDayOfMonth);
-            assertThat(transaction.getDate()).isBeforeOrEqualTo(today);
-            assertThat(transaction.getUser()).isEqualTo(devUser);
-            assertThat(transaction.getAccount()).isEqualTo(account);
-        });
+        assertThat(generated)
+                .hasSizeGreaterThanOrEqualTo(8)
+                .allSatisfy(transaction -> assertThat(transaction)
+                        .extracting(Transaction::getUser, Transaction::getAccount)
+                        .containsExactly(devUser, account))
+                .extracting(Transaction::getDate)
+                .allSatisfy(date -> assertThat(date).isBetween(firstDayOfMonth, today));
     }
 
     @Test
     void should_not_create_duplicate_transactions_when_run_twice() {
         User devUser = buildDevUser();
-        Account account = buildDefaultAccount(devUser.getId());
+        Account account = buildDefaultAccount();
         when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
         // Premier run : mois vide. Second run : la garde d'idempotence doit court-circuiter.
         when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any()))

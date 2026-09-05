@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,29 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
 
     private static final String DEV_USER_EMAIL = "dev@local.test";
 
+    // Categories du seed de dev, designees par leur nom : le runner les retrouve a
+    // l'execution plutot que de les recreer.
+    private static final String CAT_SALAIRE = "Salaire";
+    private static final String CAT_LOGEMENT = "Logement";
+    private static final String CAT_ALIMENTATION = "Alimentation";
+    private static final String CAT_TRANSPORT = "Transport";
+    private static final String CAT_RESTAURANT = "Restaurant";
+    private static final String CAT_COURSES = "Courses";
+    private static final String CAT_LOISIRS = "Loisirs";
+
+    /** Les ecritures du mois, en table plutot qu'en suite d'appels : plus lisible a relire. */
+    private static final List<SeedEntry> SEED_ENTRIES = List.of(
+            new SeedEntry(CAT_SALAIRE, new BigDecimal("2800.00"), "Salaire", TransactionType.RECETTE, 1),
+            new SeedEntry(CAT_LOGEMENT, new BigDecimal("750.00"), "Loyer", TransactionType.DEPENSE, 1),
+            new SeedEntry(CAT_ALIMENTATION, new BigDecimal("67.40"), "Carrefour Market", TransactionType.DEPENSE, 3),
+            new SeedEntry(CAT_TRANSPORT, new BigDecimal("1.90"), "Ticket metro", TransactionType.DEPENSE, 4),
+            new SeedEntry(CAT_ALIMENTATION, new BigDecimal("12.50"), "Boulangerie", TransactionType.DEPENSE, 5),
+            new SeedEntry(CAT_RESTAURANT, new BigDecimal("14.90"), "Dejeuner kebab", TransactionType.DEPENSE, 6),
+            new SeedEntry(CAT_COURSES, new BigDecimal("43.20"), "Lidl", TransactionType.DEPENSE, 8),
+            new SeedEntry(CAT_TRANSPORT, new BigDecimal("48.00"), "Plein essence", TransactionType.DEPENSE, 10),
+            new SeedEntry(CAT_LOISIRS, new BigDecimal("32.00"), "Cinema", TransactionType.DEPENSE, 12),
+            new SeedEntry(CAT_ALIMENTATION, new BigDecimal("58.90"), "Courses semaine", TransactionType.DEPENSE, 14));
+
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
@@ -58,7 +82,7 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
         }
 
         User user = devUser.get();
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
         // Garde d'idempotence : deux demarrages successifs ne doivent rien creer de plus.
@@ -89,28 +113,21 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
     private List<Transaction> buildTransactions(User user, Account account, Map<String, Category> categoriesByName,
                                                  LocalDate firstDayOfMonth, LocalDate today) {
         List<Transaction> transactions = new ArrayList<>();
-
-        addIfCategoryPresent(transactions, categoriesByName, "Salaire", user, account,
-                new BigDecimal("2800.00"), "Salaire", TransactionType.RECETTE, dayOfMonth(firstDayOfMonth, today, 1));
-        addIfCategoryPresent(transactions, categoriesByName, "Logement", user, account,
-                new BigDecimal("750.00"), "Loyer", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 1));
-        addIfCategoryPresent(transactions, categoriesByName, "Alimentation", user, account,
-                new BigDecimal("67.40"), "Carrefour Market", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 3));
-        addIfCategoryPresent(transactions, categoriesByName, "Transport", user, account,
-                new BigDecimal("1.90"), "Ticket metro", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 4));
-        addIfCategoryPresent(transactions, categoriesByName, "Alimentation", user, account,
-                new BigDecimal("12.50"), "Boulangerie", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 5));
-        addIfCategoryPresent(transactions, categoriesByName, "Restaurant", user, account,
-                new BigDecimal("14.90"), "Dejeuner kebab", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 6));
-        addIfCategoryPresent(transactions, categoriesByName, "Courses", user, account,
-                new BigDecimal("43.20"), "Lidl", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 8));
-        addIfCategoryPresent(transactions, categoriesByName, "Transport", user, account,
-                new BigDecimal("48.00"), "Plein essence", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 10));
-        addIfCategoryPresent(transactions, categoriesByName, "Loisirs", user, account,
-                new BigDecimal("32.00"), "Cinema", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 12));
-        addIfCategoryPresent(transactions, categoriesByName, "Alimentation", user, account,
-                new BigDecimal("58.90"), "Courses semaine", TransactionType.DEPENSE, dayOfMonth(firstDayOfMonth, today, 14));
-
+        for (SeedEntry entry : SEED_ENTRIES) {
+            Category category = categoriesByName.get(entry.categoryName());
+            if (category == null) {
+                continue;
+            }
+            transactions.add(Transaction.builder()
+                    .montant(entry.montant())
+                    .libelle(entry.libelle())
+                    .type(entry.type())
+                    .date(dayOfMonth(firstDayOfMonth, today, entry.dayOffset()))
+                    .user(user)
+                    .category(category)
+                    .account(account)
+                    .build());
+        }
         return transactions;
     }
 
@@ -124,21 +141,12 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
         return candidate.isAfter(today) ? today : candidate;
     }
 
-    private void addIfCategoryPresent(List<Transaction> transactions, Map<String, Category> categoriesByName,
-                                       String categoryName, User user, Account account, BigDecimal montant,
-                                       String libelle, TransactionType type, LocalDate date) {
-        Category category = categoriesByName.get(categoryName);
-        if (category == null) {
-            return;
-        }
-        transactions.add(Transaction.builder()
-                .montant(montant)
-                .libelle(libelle)
-                .type(type)
-                .date(date)
-                .user(user)
-                .category(category)
-                .account(account)
-                .build());
+    /**
+     * Une ecriture a generer. Les categories sont designees par leur nom : celles du seed
+     * de dev, qu'on retrouve a l'execution plutot que de les recreer. Une entree dont la
+     * categorie manque est simplement ignoree.
+     */
+    private record SeedEntry(String categoryName, BigDecimal montant, String libelle,
+                             TransactionType type, int dayOffset) {
     }
 }
