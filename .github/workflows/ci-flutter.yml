@@ -11,9 +11,10 @@ name: CI - Flutter
 # PRÉREQUIS INFRA (hors repo) :
 #   - Runner self-hosted labellisé [self-hosted, kbudget-ci] sur VM 105,
 #     avec accès au réseau Docker ci-stack_ci-net (pour joindre SonarQube).
-#   - Repo PRIVÉ. Settings → Actions → "Require approval for all external
-#     contributors" : le runner a le socket Docker, ne jamais exécuter de code
-#     de fork non approuvé (risque RCE sur l'infra homelab).
+#   - Dépôt PUBLIC. Settings → Actions → "Require approval for all external
+#     contributors" doit rester actif : le runner a le socket Docker, exécuter
+#     du code de fork non approuvé donnerait une RCE sur l'infra homelab.
+#     Depuis l'ouverture du dépôt, ce réglage est la seule chose qui l'empêche.
 #   - Secret repo SONAR_TOKEN, variable repo SONAR_HOST_URL (ex http://sonarqube:9000).
 #   - Plugin sonar-flutter installé sur le serveur SonarQube (analyse Dart).
 
@@ -39,6 +40,33 @@ permissions:
   contents: read
 
 jobs:
+  # Tests sur runner GitHub : c'est le seul job de tests qu'une PR de fork peut
+  # executer, le self-hosted n'acceptant pas de code externe non approuve (cf.
+  # PREREQUIS INFRA). Sans lui, une PR de fork touchant flutter/ ne verifiait
+  # que les en-tetes de licence.
+  flutter-tests:
+    name: Tests Flutter (runner GitHub)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      # Meme tag que flutter-analysis, et pour la meme raison : voir le
+      # commentaire d'epinglage ci-dessous. Les deux doivent rester alignes,
+      # sans quoi les deux jobs testeraient des SDK differents.
+      image: ghcr.io/cirruslabs/flutter:3.41.2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances + code generation
+        working-directory: flutter
+        # .g.dart / .freezed.dart gitignorés : régénérés dans le checkout CI.
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Tests
+        working-directory: flutter
+        run: flutter test
+
   flutter-analysis:
     name: Analyse Flutter
     runs-on: [self-hosted, kbudget-ci]

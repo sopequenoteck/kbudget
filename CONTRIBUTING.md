@@ -49,9 +49,15 @@ the build fails early with instructions instead.
 | Angular | `cd app && npm test && npx ng lint` |
 | Flutter | `cd flutter && flutter analyze && flutter test` |
 
-CI replays all three. The **Tests APP (runner GitHub)** job runs on GitHub's
-own infrastructure rather than the private runner — that is the one that gives
-a fork's pull request usable feedback.
+CI replays all three. Three jobs — **Tests API**, **Tests APP** and **Tests
+Flutter**, each suffixed *(runner GitHub)* — run on GitHub's own infrastructure,
+so a pull request opened from a fork gets a real result without waiting for
+anyone. A fourth, **En-tetes de licence MPL**, runs there too.
+
+The Sonar analysis jobs are the exception: the SonarQube server sits on a
+private network, so they run on a self-hosted runner that never executes
+unapproved code from a fork. **A fork's pull request therefore gets no Quality
+Gate** — a maintainer runs it before merging. Nothing is expected of you there.
 
 ### Test naming
 
