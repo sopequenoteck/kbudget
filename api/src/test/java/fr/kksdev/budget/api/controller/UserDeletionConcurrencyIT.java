@@ -164,7 +164,7 @@ class UserDeletionConcurrencyIT {
 
             DeletionResult rejected = results.stream().filter(result -> result.status() == 403).findFirst().orElseThrow();
             assertThat(rejected.body()).contains("LAST_ADMIN_DELETION_FORBIDDEN");
-            assertThat(rejected.body()).contains("Au moins un administrateur actif doit exister.");
+            assertThat(rejected.body()).contains("At least one active administrator must remain.");
             assertThat(userRepository.countActiveAdmins()).isEqualTo(1);
 
             User protectedAdmin = userRepository.findByEmail(rejected.email()).orElseThrow();

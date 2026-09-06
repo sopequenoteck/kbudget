@@ -194,7 +194,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("L'ordre de navigation ne doit pas contenir de doublons");
+                .hasMessage("Navigation order must not contain duplicates");
     }
 
     @Test
@@ -213,7 +213,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("L'ordre de navigation doit contenir exactement les fonctionnalités activées");
+                .hasMessage("Navigation order must contain exactly the enabled features");
     }
 
     @Test
@@ -232,7 +232,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("L'ordre de navigation doit contenir exactement les fonctionnalités activées");
+                .hasMessage("Navigation order must contain exactly the enabled features");
     }
 
     @Test
@@ -323,7 +323,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Au moins une devise requise");
+                .hasMessage("At least one currency is required");
     }
 
     @Test
@@ -338,7 +338,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Timezone invalide");
+                .hasMessageContaining("Invalid timezone");
     }
 
     @Test
@@ -353,7 +353,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("La liste de devises ne doit pas contenir de doublons");
+                .hasMessage("The currency list must not contain duplicates");
     }
 
     @Test

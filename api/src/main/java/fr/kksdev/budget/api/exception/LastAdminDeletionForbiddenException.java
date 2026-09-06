@@ -2,6 +2,6 @@ package fr.kksdev.budget.api.exception;
 
 public class LastAdminDeletionForbiddenException extends RuntimeException {
     public LastAdminDeletionForbiddenException() {
-        super("Au moins un administrateur actif doit exister.");
+        super("At least one active administrator must remain.");
     }
 }

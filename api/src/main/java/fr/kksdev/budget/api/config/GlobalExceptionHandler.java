@@ -36,7 +36,7 @@ import java.util.Locale;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final String INVALID_REQUEST_MESSAGE = "Requete invalide";
+    private static final String INVALID_REQUEST_MESSAGE = "Invalid request";
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
@@ -53,27 +53,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
-        return error(HttpStatus.FORBIDDEN, "ACCESS_DENIED", ex.getMessage(), "Acces refuse");
+        return error(HttpStatus.FORBIDDEN, "ACCESS_DENIED", ex.getMessage(), "Access denied");
     }
 
     @ExceptionHandler(FeatureDisabledException.class)
     public ResponseEntity<ErrorResponse> handleFeatureDisabled(FeatureDisabledException ex) {
         log.warn("Feature disabled: {}", ex.getMessage());
-        return error(HttpStatus.FORBIDDEN, "FEATURE_DISABLED", ex.getMessage(), "Fonctionnalite desactivee");
+        return error(HttpStatus.FORBIDDEN, "FEATURE_DISABLED", ex.getMessage(), "Feature disabled");
     }
 
     @ExceptionHandler(CsvProfileNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCsvProfileNotFound(CsvProfileNotFoundException ex) {
         log.warn("CSV profile not found: {}", ex.getMessage());
         return error(HttpStatus.UNPROCESSABLE_CONTENT, "CSV_PROFILE_NOT_FOUND", ex.getMessage(),
-                "Profil CSV introuvable");
+                "CSV profile not found");
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
         log.warn("Conflict: {}", ex.getMessage());
         String code = isSpecializedConflict(ex.getMessage()) ? ex.getMessage() : "CONFLICT";
-        return error(HttpStatus.CONFLICT, code, resolveConflictMessage(ex.getMessage()), "Conflit de donnees");
+        return error(HttpStatus.CONFLICT, code, resolveConflictMessage(ex.getMessage()), "Data conflict");
     }
 
     private boolean isSpecializedConflict(String value) {
@@ -82,8 +82,8 @@ public class GlobalExceptionHandler {
 
     private String resolveConflictMessage(String errorCode) {
         return switch (errorCode == null ? "" : errorCode) {
-            case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "Impossible de désactiver le dernier admin actif.";
-            case "EMAIL_ALREADY_EXISTS" -> "Cet email est déjà utilisé par un autre utilisateur.";
+            case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "The last active administrator cannot be disabled.";
+            case "EMAIL_ALREADY_EXISTS" -> "This email is already used by another user.";
             default -> errorCode;
         };
     }
@@ -91,13 +91,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
         log.warn("Entity not found: {}", ex.getMessage());
-        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), "Ressource introuvable");
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), "Resource not found");
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
         log.warn("No handler for {} {}", ex.getHttpMethod(), ex.getResourcePath());
-        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", "Ressource introuvable", "Ressource introuvable");
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found", "Resource not found");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -112,7 +112,7 @@ public class GlobalExceptionHandler {
                 .map(fieldError -> new ValidationErrorDetail(
                         fieldError.getField(),
                         validationCode(fieldError.getCode()),
-                        nonBlank(fieldError.getDefaultMessage(), "Valeur invalide")
+                        nonBlank(fieldError.getDefaultMessage(), "Invalid value")
                 ))
                 .toList();
         String message = details.stream()
@@ -135,21 +135,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidImageFormat(InvalidImageFormatException ex) {
         log.warn("Invalid image format: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", nonBlank(ex.getMessage(), "Format d'image invalide")));
+                .body(new ErrorResponse("INVALID_IMAGE_FORMAT", nonBlank(ex.getMessage(), "Invalid image format")));
     }
 
     @ExceptionHandler(FileTooLargeException.class)
     public ResponseEntity<ErrorResponse> handleFileTooLarge(FileTooLargeException ex) {
         log.warn("File too large: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(new ErrorResponse("FILE_TOO_LARGE", nonBlank(ex.getMessage(), "Fichier trop volumineux")));
+                .body(new ErrorResponse("FILE_TOO_LARGE", nonBlank(ex.getMessage(), "File too large")));
     }
 
     @ExceptionHandler(AvatarNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAvatarNotFound(AvatarNotFoundException ex) {
         log.warn("Avatar not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("AVATAR_NOT_FOUND", nonBlank(ex.getMessage(), "Avatar introuvable")));
+                .body(new ErrorResponse("AVATAR_NOT_FOUND", nonBlank(ex.getMessage(), "Avatar not found")));
     }
 
     @ExceptionHandler(PasswordIncorrectException.class)
@@ -222,7 +222,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("Unexpected error", ex);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
-                "Une erreur interne est survenue", "Une erreur interne est survenue");
+                "An internal error occurred", "An internal error occurred");
     }
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message, String fallback) {

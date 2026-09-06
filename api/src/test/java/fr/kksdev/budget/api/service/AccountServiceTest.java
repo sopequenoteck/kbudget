@@ -200,7 +200,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.deleteAccount(accountId, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Impossible de supprimer un compte avec des transactions rattachées");
+                .hasMessage("Cannot delete an account with linked transactions");
     }
 
     @Test
@@ -214,7 +214,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Impossible de désactiver le compte par défaut");
+                .hasMessage("Cannot disable the default account");
     }
 
     @Test
@@ -280,7 +280,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.getAccountById(accountId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Compte non trouvé");
+                .hasMessage("Account not found");
     }
 
     @Test
@@ -291,7 +291,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.createAccount(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Un compte avec ce nom existe déjà");
+                .hasMessage("An account with this name already exists");
     }
 
     @Test
@@ -377,7 +377,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("La devise d'un compte ne peut pas être modifiée");
+                .hasMessage("An account currency cannot be changed");
     }
 
     @Test
@@ -408,7 +408,7 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Le virement entre comptes de devises différentes n'est pas autorisé");
+                .hasMessage("Transfers between accounts with different currencies are not allowed");
     }
 
     // -------------------------------------------------------------------------

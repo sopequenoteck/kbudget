@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -28,10 +22,16 @@ import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
+import { ApiErrorService } from '../../../../core/services/api-error';
 import { APP_LOCALE } from '../../../../core/constants/locale.constants';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
-import { CategoryRule, ImportDraftSummary, ImportHistoryEntry, ImportProfile } from '../../../../core/models/import.model';
+import {
+  CategoryRule,
+  ImportDraftSummary,
+  ImportHistoryEntry,
+  ImportProfile,
+} from '../../../../core/models/import.model';
 
 @Component({
   selector: 'app-import-settings',
@@ -60,6 +60,7 @@ export class ImportSettings {
   private readonly importService = inject(ImportService);
   private readonly categoryService = inject(CategoryService);
   private readonly categoryRuleService = inject(CategoryRuleService);
+  private readonly apiError = inject(ApiErrorService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly logger = inject(DevLogger);
@@ -309,7 +310,7 @@ export class ImportSettings {
         // don't reset uploading — navigation is in progress
       } else {
         this.uploadError.set(
-          httpErr?.error?.message ?? "Erreur lors de l'import. Veuillez réessayer.",
+          this.apiError.label(httpErr, "Erreur lors de l'import. Veuillez réessayer."),
         );
         this.uploading.set(false);
       }

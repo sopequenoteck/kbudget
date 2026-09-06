@@ -47,7 +47,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponse create(TransactionRequest request, UUID userId) {
         if (request.type() == TransactionType.AJUSTEMENT) {
-            throw new IllegalArgumentException("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance");
+            throw new IllegalArgumentException("Adjustment transactions can only be created through the adjust-balance endpoint");
         }
 
         Account account = resolveAccount(request.accountId(), userId);
@@ -99,12 +99,12 @@ public class TransactionService {
 
         if (transaction.getType() == TransactionType.AJUSTEMENT) {
             log.warn("Tentative de modification d'une transaction d'ajustement: id={}, userId={}", id, userId);
-            throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées");
+            throw new AccessDeniedException("Adjustment transactions cannot be updated");
         }
 
         // Interdire le changement de type sur les transactions liées à une dette
         if (transaction.getDebt() != null && request.type() != transaction.getType()) {
-            throw new IllegalArgumentException("Le type d'une transaction liée à une dette ne peut pas être modifié");
+            throw new IllegalArgumentException("The type of a debt-linked transaction cannot be changed");
         }
 
         // Propager le montant si c'est une transaction de virement
@@ -144,7 +144,7 @@ public class TransactionService {
 
         if (transaction.getType() == TransactionType.AJUSTEMENT) {
             log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
-            throw new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées");
+            throw new AccessDeniedException("Adjustment transactions cannot be deleted");
         }
 
         TransactionType deletedType = transaction.getType();
@@ -255,14 +255,14 @@ public class TransactionService {
     private Account resolveAccount(UUID accountId, UUID userId) {
         if (accountId == null) {
             return accountRepository.findByUserIdAndIsDefaultTrue(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("Aucun compte par défaut trouvé"));
+                    .orElseThrow(() -> new EntityNotFoundException("No default account found"));
         }
         return accountRepository.findById(accountId)
                 .filter(a -> a.getUser().getId().equals(userId))
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
-                    return new EntityNotFoundException("Compte non trouvé ou inactif");
+                    return new EntityNotFoundException("Account not found or inactive");
                 });
     }
 
@@ -271,7 +271,7 @@ public class TransactionService {
                 .filter(t -> t.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Transaction non trouvée: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Transaction non trouvée");
+                    return new EntityNotFoundException("Transaction not found");
                 });
     }
 
@@ -283,7 +283,7 @@ public class TransactionService {
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
     }
 

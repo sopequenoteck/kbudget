@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { AuthService } from './auth';
 import { ApiService } from './api';
 import { AuthResponse } from '../models/auth.model';
+import { ERROR_MESSAGES, LOGIN_ERROR_OVERRIDES } from '../constants/error-messages.constants';
 
 function createJwt(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256' }));
@@ -88,18 +89,38 @@ describe('AuthService', () => {
       expect(service.isAuthenticated()).toBe(true);
     });
 
-    it('should_return_error_message_when_login_returns_400', () => {
-      // Arrange
+    it('should_return_credentials_message_when_login_returns_bad_request', () => {
+      // Arrange — le serveur refuse des identifiants par un
+      // `IllegalArgumentException`, donc par un `BAD_REQUEST`. Le `message`
+      // est un champ de diagnostic (KKS-324) : il n'est jamais affiche, et
+      // deviendra anglais. Le libelle vient de `LOGIN_ERROR_OVERRIDES`.
       const httpError = new HttpErrorResponse({
         status: 400,
-        error: { message: 'Email ou mot de passe incorrect' },
+        error: { error: 'BAD_REQUEST', message: 'Invalid email or password' },
       });
       apiService.post.mockReturnValue(throwError(() => httpError));
 
       // Act & Assert
       service.login({ email: 'test@test.com', password: 'wrong' }).subscribe({
         error: (msg: string) => {
-          expect(msg).toBe('Email ou mot de passe incorrect');
+          expect(msg).toBe(LOGIN_ERROR_OVERRIDES['BAD_REQUEST']);
+          expect(msg).not.toBe('Invalid email or password');
+        },
+      });
+    });
+
+    it('should_return_catalogue_label_when_login_returns_a_known_code', () => {
+      // Arrange
+      const httpError = new HttpErrorResponse({
+        status: 429,
+        error: { error: 'TOO_MANY_REQUESTS', message: 'Too many attempts' },
+      });
+      apiService.post.mockReturnValue(throwError(() => httpError));
+
+      // Act & Assert
+      service.login({ email: 'test@test.com', password: 'pass' }).subscribe({
+        error: (msg: string) => {
+          expect(msg).toBe(ERROR_MESSAGES['TOO_MANY_REQUESTS']);
         },
       });
     });
@@ -325,7 +346,11 @@ describe('AuthService', () => {
       localStorage.setItem('budget_token', token);
       localStorage.setItem(
         'budget_user',
-        JSON.stringify({ name: 'Restored User', email: 'restored@test.com', mustResetCredentials: false }),
+        JSON.stringify({
+          name: 'Restored User',
+          email: 'restored@test.com',
+          mustResetCredentials: false,
+        }),
       );
 
       // Act — recreate service to trigger constructor
@@ -438,7 +463,10 @@ describe('AuthService', () => {
       // Arrange
       localStorage.setItem('budget_token', validToken());
       localStorage.setItem('budget_refresh_token', 'some-refresh');
-      localStorage.setItem('budget_user', JSON.stringify({ name: 'User', email: 'user@test.com', mustResetCredentials: false }));
+      localStorage.setItem(
+        'budget_user',
+        JSON.stringify({ name: 'User', email: 'user@test.com', mustResetCredentials: false }),
+      );
 
       // Act
       TestBed.resetTestingModule();

@@ -5,7 +5,7 @@ public class FeatureDisabledException extends RuntimeException {
     private final String featureName;
 
     public FeatureDisabledException(String featureName) {
-        super("Fonctionnalité " + featureName + " désactivée");
+        super("Feature " + featureName + " is disabled");
         this.featureName = featureName;
     }
 

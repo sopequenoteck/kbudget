@@ -66,7 +66,7 @@ public class AccountService {
     @Transactional
     public AccountResponse createAccount(AccountRequest request, UUID userId) {
         if (accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrue(request.nom(), userId)) {
-            throw new IllegalArgumentException("Un compte avec ce nom existe déjà");
+            throw new IllegalArgumentException("An account with this name already exists");
         }
 
         AccountType type = request.type();
@@ -110,16 +110,16 @@ public class AccountService {
         Account account = findByIdAndUser(id, userId);
 
         if (accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot(request.nom(), userId, id)) {
-            throw new IllegalArgumentException("Un compte avec ce nom existe déjà");
+            throw new IllegalArgumentException("An account with this name already exists");
         }
 
         if (request.currency() != null && request.currency() != account.getCurrency()) {
-            throw new IllegalArgumentException("La devise d'un compte ne peut pas être modifiée");
+            throw new IllegalArgumentException("An account currency cannot be changed");
         }
 
         // Gérer actif si présent dans la requête
         if (request.actif() != null && !request.actif() && Boolean.TRUE.equals(account.getIsDefault())) {
-            throw new IllegalArgumentException("Impossible de désactiver le compte par défaut");
+            throw new IllegalArgumentException("Cannot disable the default account");
         }
 
         if (request.bankCode() != null) {
@@ -155,15 +155,15 @@ public class AccountService {
         Account account = findByIdAndUser(id, userId);
 
         if (Boolean.TRUE.equals(account.getIsDefault())) {
-            throw new IllegalArgumentException("Impossible de supprimer le compte par défaut");
+            throw new IllegalArgumentException("Cannot delete the default account");
         }
 
         if (transactionRepository.existsByAccountId(id)) {
-            throw new IllegalArgumentException("Impossible de supprimer un compte avec des transactions rattachées");
+            throw new IllegalArgumentException("Cannot delete an account with linked transactions");
         }
 
         if (subscriptionRepository.existsByAccountId(id)) {
-            throw new IllegalArgumentException("Impossible de supprimer un compte avec des abonnements rattachés");
+            throw new IllegalArgumentException("Cannot delete an account with linked subscriptions");
         }
 
         accountRepository.delete(account);
@@ -175,7 +175,7 @@ public class AccountService {
         Account account = findByIdAndUser(id, userId);
 
         if (!Boolean.TRUE.equals(account.getActif())) {
-            throw new IllegalArgumentException("Impossible de définir un compte inactif comme compte par défaut");
+            throw new IllegalArgumentException("Cannot set an inactive account as the default account");
         }
 
         // Retirer le défaut de l'ancien compte
@@ -195,26 +195,26 @@ public class AccountService {
     @Transactional
     public TransferResponse transfer(TransferRequest request, UUID userId) {
         if (request.fromAccountId().equals(request.toAccountId())) {
-            throw new IllegalArgumentException("Les comptes source et destination doivent être différents");
+            throw new IllegalArgumentException("Source and destination accounts must be different");
         }
 
         Account fromAccount = findByIdAndUser(request.fromAccountId(), userId);
         Account toAccount = findByIdAndUser(request.toAccountId(), userId);
 
         if (!Boolean.TRUE.equals(fromAccount.getActif())) {
-            throw new IllegalArgumentException("Le compte source est inactif");
+            throw new IllegalArgumentException("The source account is inactive");
         }
         if (!Boolean.TRUE.equals(toAccount.getActif())) {
-            throw new IllegalArgumentException("Le compte destination est inactif");
+            throw new IllegalArgumentException("The destination account is inactive");
         }
 
         if (fromAccount.getCurrency() != toAccount.getCurrency()) {
-            throw new IllegalArgumentException("Le virement entre comptes de devises différentes n'est pas autorisé");
+            throw new IllegalArgumentException("Transfers between accounts with different currencies are not allowed");
         }
 
         Category virementCategory = categoryService.findSystemCategoryByNom("Virement", userId);
         if (virementCategory == null) {
-            throw new IllegalStateException("Catégorie système 'Virement' introuvable");
+            throw new IllegalStateException("System category 'Virement' not found");
         }
         UUID transferId = UUID.randomUUID();
         LocalDate today = LocalDate.now();
@@ -264,7 +264,7 @@ public class AccountService {
         Account account = findByIdAndUser(accountId, userId);
 
         if (!Boolean.TRUE.equals(account.getActif())) {
-            throw new IllegalArgumentException("Impossible d'ajuster le solde d'un compte inactif");
+            throw new IllegalArgumentException("Cannot adjust the balance of an inactive account");
         }
 
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(accountId);
@@ -379,7 +379,7 @@ public class AccountService {
                 .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Compte non trouvé");
+                    return new EntityNotFoundException("Account not found");
                 });
     }
 

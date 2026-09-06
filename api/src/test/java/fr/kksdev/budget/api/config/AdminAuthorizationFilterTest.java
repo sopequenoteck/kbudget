@@ -80,7 +80,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
-                "ACCESS_DENIED", "Accès refusé");
+                "ACCESS_DENIED", "Access denied");
         verify(filterChain, never()).doFilter(any(), any());
     }
 
@@ -109,7 +109,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
-                "ACCESS_DENIED", "Accès refusé");
+                "ACCESS_DENIED", "Access denied");
         verify(filterChain, never()).doFilter(any(), any());
     }
 
@@ -144,7 +144,7 @@ class AdminAuthorizationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
 
         verify(errorWriter).write(response, org.springframework.http.HttpStatus.FORBIDDEN,
-                "ACCESS_DENIED", "Accès refusé");
+                "ACCESS_DENIED", "Access denied");
         verify(filterChain, never()).doFilter(any(), any());
     }
 

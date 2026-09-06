@@ -129,7 +129,7 @@ class ExchangeRateServiceTest {
 
         assertThatThrownBy(() -> exchangeRateService.upsert(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Le taux doit être strictement positif");
+                .hasMessage("The rate must be strictly positive");
     }
 
     @Test
@@ -138,7 +138,7 @@ class ExchangeRateServiceTest {
 
         assertThatThrownBy(() -> exchangeRateService.upsert(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Le taux doit être strictement positif");
+                .hasMessage("The rate must be strictly positive");
     }
 
     @Test

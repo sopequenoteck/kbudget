@@ -30,7 +30,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse create(CategoryRequest request, UUID userId) {
         if (categoryRepository.existsByNomIgnoreCaseAndUserId(request.nom(), userId)) {
-            throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
+            throw new IllegalArgumentException("A category with this name already exists");
         }
 
         Category category = Category.builder()
@@ -63,11 +63,11 @@ public class CategoryService {
 
         if (Boolean.TRUE.equals(category.getIsSystem())) {
             log.warn("Tentative de modification d'une catégorie système: id={}, userId={}", id, userId);
-            throw new IllegalArgumentException("Les catégories système ne peuvent pas être modifiées");
+            throw new IllegalArgumentException("System categories cannot be updated");
         }
 
         if (categoryRepository.existsByNomIgnoreCaseAndUserIdAndIdNot(request.nom(), userId, id)) {
-            throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
+            throw new IllegalArgumentException("A category with this name already exists");
         }
 
         category.setNom(request.nom());
@@ -85,7 +85,7 @@ public class CategoryService {
 
         if (Boolean.TRUE.equals(category.getIsSystem())) {
             log.warn("Tentative de suppression d'une catégorie système: id={}, userId={}", id, userId);
-            throw new IllegalArgumentException("Les catégories système ne peuvent pas être supprimées");
+            throw new IllegalArgumentException("System categories cannot be deleted");
         }
 
         categoryRepository.delete(category);
@@ -173,7 +173,7 @@ public class CategoryService {
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
     }
 
