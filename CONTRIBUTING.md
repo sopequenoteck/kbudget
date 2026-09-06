@@ -125,9 +125,17 @@ checklist. It is not decorative.
 
 Two of those rules are now enforced by a test. `ApiContractIT` compares the
 OpenAPI schema against a versioned snapshot and fails the build if a response
-field disappears, or if a request field becomes mandatory. **Error responses
-are not covered** — springdoc only documents the 200s — so the contract in
-[`docs/api-errors.md`](docs/api-errors.md) still rests on review alone.
+field disappears, or if a request field becomes mandatory.
+
+**That snapshot still covers the 200s only**, because springdoc emits nothing
+for error responses. The contract in
+[`docs/api-errors.md`](docs/api-errors.md) is guarded by two other tests
+instead. `ValidationErrorCodeContractTest` pins the `details[].code` values to
+the real DTOs and the real validator — those codes are derived from the name
+of the annotation that failed, so they are written nowhere and a change of
+constraint would silently rename them. `ExceptionHandlerInventoryTest` keeps a
+versioned inventory of the declared handlers, so a new error code cannot reach
+clients without showing up in a diff.
 
 ## Contributor Licence Agreement
 
