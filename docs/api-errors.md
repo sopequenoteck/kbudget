@@ -54,6 +54,8 @@ Pour `VALIDATION_ERROR`, `details` permet d'associer chaque contrainte au champ 
 
 Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devient `NOT_NULL`). `details` est absent pour toutes les autres erreurs.
 
+**Le code derive du nom de l'annotation qui a echoue, il n'est ecrit nulle part.** Remplacer `@Size` par une autre contrainte de longueur change donc la valeur servie, sans qu'aucune signature ni aucun DTO expose ne bouge. Ce lien est verrouille par `ValidationErrorCodeContractTest`, qui part des DTOs et du validateur reels. Dans le cas ou la contrainte n'est pas identifiable, le code retombe sur `INVALID_VALUE`.
+
 ## Matrice des erreurs gerees
 
 | Categorie | HTTP | `error` | Message public |

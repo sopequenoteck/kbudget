@@ -207,14 +207,32 @@ Quand une rupture est assumee (regle 6), le snapshot se regenere puis se relit
 au diff avant de committer :
 
 ```bash
-JAVA_HOME=<jdk21> mvn -pl api test -Dtest=ApiContractIT -Dcontract.update=true
+cd api && JAVA_HOME=<jdk21> mvn test -Dtest=ApiContractIT -Dcontract.update=true
 ```
 
-**Ce que le test ne couvre pas : les reponses d'erreur.** springdoc ne
+**Ce que ce snapshot ne couvre pas : les reponses d'erreur.** springdoc ne
 documente que les 200 — l'API ne porte aucune annotation `@ApiResponse` sur
-les 4xx. Le contrat de [`api-errors.md`](api-errors.md) reste donc sans
-garde-fou automatique ; la discipline humaine et la checklist restent la seule
-protection sur ce point.
+les 4xx, et les declarer sur les 100 operations ajouterait plus de mille lignes
+repetitives au snapshot pour un signal deja obtenu autrement.
+
+Le contrat de [`api-errors.md`](api-errors.md) est donc tenu par deux tests
+distincts (KKS-357) :
+
+- `ValidationErrorCodeContractTest` verrouille les valeurs de
+  `details[].code` sur les DTOs et le validateur reels. Ces codes derivent du
+  nom de l'annotation qui a echoue et ne sont ecrits nulle part : remplacer
+  `@Size` par une autre contrainte de longueur les renommerait sans qu'aucune
+  signature ne bouge.
+- `ExceptionHandlerInventoryTest` tient un inventaire versionne des handlers
+  declares, dans
+  [`api-error-handlers.txt`](../api/src/test/resources/api-error-handlers.txt).
+  **La comparaison y est stricte dans les deux sens**, a l'inverse du contrat
+  de succes : un handler retire fait retomber son exception sur un `500`, un
+  handler ajoute sert un code que personne n'a vu passer. Les deux doivent se
+  remarquer.
+
+Les codes eux-memes restent verifies par les tests de leurs emetteurs
+(`GlobalExceptionHandlerTest` et les tests des filtres de securite).
 
 ---
 
