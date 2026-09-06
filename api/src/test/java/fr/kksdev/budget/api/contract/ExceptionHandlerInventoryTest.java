@@ -62,6 +62,11 @@ class ExceptionHandlerInventoryTest {
      */
     private static final Path SNAPSHOT_PATH = Path.of("src/test/resources/api-error-handlers.txt");
 
+    private static final String SNAPSHOT_HEADER = """
+            # Handlers declares par GlobalExceptionHandler (KKS-357).
+            # Regenerer : cd api && mvn test -Dtest=ExceptionHandlerInventoryTest -Dcontract.update=true
+            """;
+
     @Test
     void should_match_snapshot_when_listing_declared_exception_handlers() {
         Set<String> current = collectHandlers();
@@ -131,9 +136,7 @@ class ExceptionHandlerInventoryTest {
     }
 
     private void writeSnapshot(Set<String> lines) {
-        StringBuilder content = new StringBuilder(
-                "# Handlers declares par GlobalExceptionHandler (KKS-357).\n"
-                        + "# Regenerer : cd api && mvn test -Dtest=ExceptionHandlerInventoryTest -Dcontract.update=true\n");
+        StringBuilder content = new StringBuilder(SNAPSHOT_HEADER);
         lines.forEach(line -> content.append(line).append('\n'));
         try {
             Files.writeString(SNAPSHOT_PATH, content.toString(), StandardCharsets.UTF_8);
