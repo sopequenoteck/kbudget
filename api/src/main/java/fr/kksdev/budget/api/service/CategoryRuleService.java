@@ -38,18 +38,18 @@ public class CategoryRuleService {
     @Transactional
     public CategoryRuleResponse create(String pattern, UUID categoryId, UUID userId) {
         if (pattern == null || pattern.isBlank()) {
-            throw new IllegalArgumentException("Le pattern ne peut pas être vide");
+            throw new IllegalArgumentException("The pattern must not be empty");
         }
 
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
 
         if (categoryRuleRepository.existsByUserIdAndPatternIgnoreCase(userId, pattern)) {
-            throw new ConflictException("Une règle avec ce pattern existe déjà: " + pattern);
+            throw new ConflictException("A rule with this pattern already exists: " + pattern);
         }
 
         CategoryRule rule = CategoryRule.builder()
@@ -69,14 +69,14 @@ public class CategoryRuleService {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
                     log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
-                    return new EntityNotFoundException("Règle de catégorisation non trouvée");
+                    return new EntityNotFoundException("Category rule not found");
                 });
 
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
 
         rule.setPattern(pattern);
@@ -93,7 +93,7 @@ public class CategoryRuleService {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
                     log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
-                    return new EntityNotFoundException("Règle de catégorisation non trouvée");
+                    return new EntityNotFoundException("Category rule not found");
                 });
 
         categoryRuleRepository.delete(rule);

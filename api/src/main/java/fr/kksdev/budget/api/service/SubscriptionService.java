@@ -126,7 +126,7 @@ public class SubscriptionService {
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
-                    return new EntityNotFoundException("Compte non trouvé ou inactif");
+                    return new EntityNotFoundException("Account not found or inactive");
                 });
     }
 
@@ -135,7 +135,7 @@ public class SubscriptionService {
                 .filter(s -> s.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Abonnement non trouvé: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Abonnement non trouvé");
+                    return new EntityNotFoundException("Subscription not found");
                 });
     }
 
@@ -147,7 +147,7 @@ public class SubscriptionService {
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
     }
 

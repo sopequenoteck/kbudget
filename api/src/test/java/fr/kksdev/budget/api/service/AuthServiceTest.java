@@ -106,7 +106,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Email ou mot de passe incorrect");
+                .hasMessage("Invalid email or password");
 
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
@@ -124,7 +124,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Email ou mot de passe incorrect");
+                .hasMessage("Invalid email or password");
 
         verify(jwtUtil, never()).generateToken(anyString(), any());
     }

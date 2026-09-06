@@ -36,10 +36,10 @@ public class ExchangeRateService {
     @Transactional
     public ExchangeRateResponse upsert(ExchangeRateRequest request, UUID userId) {
         if (request.baseCurrency() == request.targetCurrency()) {
-            throw new IllegalArgumentException("Les devises de base et cible doivent être différentes");
+            throw new IllegalArgumentException("Base and target currencies must be different");
         }
         if (request.rate().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Le taux doit être strictement positif");
+            throw new IllegalArgumentException("The rate must be strictly positive");
         }
 
         ExchangeRate rate = exchangeRateRepository
@@ -69,7 +69,7 @@ public class ExchangeRateService {
     public void delete(UUID userId, Currency baseCurrency, Currency targetCurrency) {
         ExchangeRate rate = exchangeRateRepository
                 .findByUserIdAndBaseCurrencyAndTargetCurrency(userId, baseCurrency, targetCurrency)
-                .orElseThrow(() -> new EntityNotFoundException("Taux non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException("Exchange rate not found"));
         exchangeRateRepository.delete(rate);
         log.info("Taux supprimé: {}/{} pour userId={}", baseCurrency, targetCurrency, userId);
     }

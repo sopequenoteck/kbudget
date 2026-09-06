@@ -178,12 +178,12 @@ class DebtControllerTest {
     @Test
     void should_return_404_when_debt_not_found() throws Exception {
         when(debtService.getById(debtId, userId))
-                .thenThrow(new EntityNotFoundException("Dette non trouvée"));
+                .thenThrow(new EntityNotFoundException("Debt not found"));
 
         mockMvc.perform(get("/v1/debts/{id}", debtId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Dette non trouvée"));
+                .andExpect(jsonPath("$.message").value("Debt not found"));
     }
 
     @Test
@@ -258,7 +258,7 @@ class DebtControllerTest {
     @Test
     void should_return_400_when_debt_already_repaid() throws Exception {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Cette dette est déjà remboursée"));
+                .thenThrow(new IllegalArgumentException("This debt is already repaid"));
 
         mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
@@ -298,7 +298,7 @@ class DebtControllerTest {
     @Test
     void should_return_404_when_repay_debt_not_found() throws Exception {
         when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
-                .thenThrow(new EntityNotFoundException("Dette non trouvée"));
+                .thenThrow(new EntityNotFoundException("Debt not found"));
 
         mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
                         .header("Authorization", BEARER_TOKEN)
@@ -451,7 +451,7 @@ class DebtControllerTest {
     @Test
     void should_return_400_when_snooze_no_existing_reminder() throws Exception {
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Cette dette n'a pas de rappel configuré"));
+                .thenThrow(new IllegalArgumentException("This debt has no reminder configured"));
 
         mockMvc.perform(post("/v1/debts/{id}/snooze", debtId)
                         .header("Authorization", BEARER_TOKEN)
@@ -465,7 +465,7 @@ class DebtControllerTest {
     @Test
     void should_return_404_when_snooze_debt_not_found() throws Exception {
         when(debtService.snooze(eq(debtId), any(DebtSnoozeRequest.class), eq(userId)))
-                .thenThrow(new EntityNotFoundException("Dette non trouvée"));
+                .thenThrow(new EntityNotFoundException("Debt not found"));
 
         mockMvc.perform(post("/v1/debts/{id}/snooze", debtId)
                         .header("Authorization", BEARER_TOKEN)

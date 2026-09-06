@@ -24,6 +24,7 @@ import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
+import { ApiErrorService } from '../../../../core/services/api-error';
 import { Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
@@ -56,6 +57,7 @@ export class Accounts {
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
+  private readonly apiError = inject(ApiErrorService);
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
 
@@ -134,7 +136,7 @@ export class Accounts {
       this.deleteError.set(null);
     } catch (err: unknown) {
       const httpErr = err as { error?: { message?: string } };
-      const message = httpErr?.error?.message ?? 'Erreur lors de la suppression';
+      const message = this.apiError.label(httpErr, 'Erreur lors de la suppression');
       this.deleteError.set(message);
       this.logger.error('Failed to delete account', err);
     }

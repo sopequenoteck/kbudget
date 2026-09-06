@@ -33,12 +33,12 @@ public class AuthService {
         User user = userRepository.findByEmailAndDisabledAtIsNull(request.email())
                 .orElseThrow(() -> {
                     log.error("Login failed for email: {}", request.email());
-                    return new IllegalArgumentException("Email ou mot de passe incorrect");
+                    return new IllegalArgumentException("Invalid email or password");
                 });
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             log.error("Login failed for email: {}", request.email());
-            throw new IllegalArgumentException("Email ou mot de passe incorrect");
+            throw new IllegalArgumentException("Invalid email or password");
         }
 
         log.info("User logged in: {}", user.getEmail());
@@ -54,7 +54,7 @@ public class AuthService {
     @Transactional
     public AuthResponse firstLoginReset(UUID userId, FirstLoginResetRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (!user.isPasswordResetRequired()) {
             log.warn("First-login-reset refused: flag already cleared for userId={}", userId);

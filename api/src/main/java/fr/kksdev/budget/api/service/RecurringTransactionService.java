@@ -73,13 +73,13 @@ public class RecurringTransactionService {
         Transaction recurring = findRecurringByIdAndUser(id, userId);
 
         if (!Boolean.TRUE.equals(recurring.getRecurringActive())) {
-            throw new IllegalStateException("La transaction récurrente est désactivée");
+            throw new IllegalStateException("The recurring transaction is disabled");
         }
 
         Account account = recurring.getAccount();
         if (account == null || !Boolean.TRUE.equals(account.getActif())) {
             account = accountRepository.findByUserIdAndIsDefaultTrue(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("Aucun compte par défaut trouvé"));
+                    .orElseThrow(() -> new EntityNotFoundException("No default account found"));
         }
 
         Transaction newTransaction = Transaction.builder()
@@ -116,7 +116,7 @@ public class RecurringTransactionService {
         Transaction recurring = findRecurringByIdAndUser(id, userId);
 
         if (!Boolean.TRUE.equals(recurring.getRecurringActive())) {
-            throw new IllegalStateException("La transaction récurrente est désactivée");
+            throw new IllegalStateException("The recurring transaction is disabled");
         }
 
         recurring.setNextOccurrence(advanceDate(recurring.getNextOccurrence(), recurring.getFrequency()));
@@ -130,7 +130,7 @@ public class RecurringTransactionService {
         Transaction recurring = findRecurringByIdAndUser(id, userId);
 
         if (!Boolean.TRUE.equals(recurring.getRecurringActive())) {
-            throw new IllegalStateException("La transaction récurrente est déjà désactivée");
+            throw new IllegalStateException("The recurring transaction is already disabled");
         }
 
         recurring.setRecurringActive(false);
@@ -153,21 +153,21 @@ public class RecurringTransactionService {
                 .filter(t -> Boolean.TRUE.equals(t.getIsRecurring()))
                 .orElseThrow(() -> {
                     log.error("Transaction récurrente non trouvée: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Transaction récurrente non trouvée");
+                    return new EntityNotFoundException("Recurring transaction not found");
                 });
     }
 
     private Account resolveAccount(UUID accountId, UUID userId) {
         if (accountId == null) {
             return accountRepository.findByUserIdAndIsDefaultTrue(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("Aucun compte par défaut trouvé"));
+                    .orElseThrow(() -> new EntityNotFoundException("No default account found"));
         }
         return accountRepository.findById(accountId)
                 .filter(a -> a.getUser().getId().equals(userId))
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
-                    return new EntityNotFoundException("Compte non trouvé ou inactif");
+                    return new EntityNotFoundException("Account not found or inactive");
                 });
     }
 
@@ -177,7 +177,7 @@ public class RecurringTransactionService {
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
     }
 

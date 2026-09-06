@@ -73,6 +73,87 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorLoadingData => 'Impossible de charger les données';
 
   @override
+  String get errorCodeBadRequest => 'La demande n\'a pas pu être traitée.';
+
+  @override
+  String get errorCodeValidation =>
+      'Veuillez vérifier les informations saisies.';
+
+  @override
+  String get errorCodeMalformedRequest => 'Requête invalide.';
+
+  @override
+  String get errorCodePasswordIncorrect => 'Mot de passe incorrect';
+
+  @override
+  String get errorCodeCurrentPasswordIncorrect =>
+      'Mot de passe actuel incorrect';
+
+  @override
+  String get errorCodePasswordUnchanged =>
+      'Le nouveau mot de passe doit être différent de l\'actuel';
+
+  @override
+  String get errorCodeConfirmationRequired => 'Confirmation explicite requise.';
+
+  @override
+  String get errorCodeUnauthenticated => 'Authentification requise';
+
+  @override
+  String get errorCodeTokenExpired =>
+      'Votre session a expiré. Veuillez vous reconnecter.';
+
+  @override
+  String get errorCodeTokenRevoked =>
+      'Votre session a été révoquée. Veuillez vous reconnecter.';
+
+  @override
+  String get errorCodeTokenReuseDetected =>
+      'Session interrompue par sécurité. Veuillez vous reconnecter.';
+
+  @override
+  String get errorCodeTokenInvalid =>
+      'Session invalide. Veuillez vous reconnecter.';
+
+  @override
+  String get errorCodeAccessDenied => 'Accès refusé';
+
+  @override
+  String get errorCodePasswordResetRequired =>
+      'Réinitialisation des identifiants requise';
+
+  @override
+  String get errorCodePasswordResetNotRequired =>
+      'La réinitialisation des identifiants n\'est pas requise pour ce compte.';
+
+  @override
+  String get errorCodeFeatureDisabled => 'Fonctionnalité désactivée';
+
+  @override
+  String get errorCodeLastAdminDeletionForbidden =>
+      'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.';
+
+  @override
+  String get errorCodeNotFound => 'Ressource introuvable';
+
+  @override
+  String get errorCodeConflict => 'Conflit de données';
+
+  @override
+  String get errorCodeLastAdminCannotBeDisabled =>
+      'Impossible de désactiver le dernier administrateur actif.';
+
+  @override
+  String get errorCodeEmailAlreadyExists => 'Email déjà utilisé';
+
+  @override
+  String get errorCodeTooManyRequests =>
+      'Trop de tentatives. Réessayez dans quelques instants.';
+
+  @override
+  String get errorCodeInternal => 'Une erreur interne est survenue';
+
+  @override
   String get amount => 'Montant';
 
   @override

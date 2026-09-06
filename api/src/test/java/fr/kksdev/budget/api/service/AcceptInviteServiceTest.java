@@ -107,7 +107,7 @@ class AcceptInviteServiceTest {
 
         assertThatThrownBy(() -> acceptInviteService.acceptInvite(request))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Invitation invalide.");
+                .hasMessage("Invalid invitation.");
 
         verify(userOnboardingService, never()).provisionUser(any());
     }
@@ -122,7 +122,7 @@ class AcceptInviteServiceTest {
 
         assertThatThrownBy(() -> acceptInviteService.acceptInvite(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Email déjà utilisé");
+                .hasMessage("Email already used");
 
         verify(userOnboardingService, never()).provisionUser(any());
         verify(invitationService, never()).markUsed(any());

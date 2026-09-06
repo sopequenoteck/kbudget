@@ -18,6 +18,6 @@ public class ApiAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        errorWriter.write(response, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Accès refusé");
+        errorWriter.write(response, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Access denied");
     }
 }

@@ -7,17 +7,12 @@ import { ApiService } from './api';
 import { AuthResponse, FirstLoginResetRequest, LoginRequest } from '../models/auth.model';
 import { UserInfo } from '../models/user.model';
 import { DevLogger } from './dev-logger';
-import { PASSWORD_MIN_LENGTH_MESSAGE } from '../constants/password.constants';
+import { ApiErrorService } from './api-error';
+import { LOGIN_ERROR_OVERRIDES } from '../constants/error-messages.constants';
 
 const STORAGE_TOKEN_KEY = 'budget_token';
 const STORAGE_REFRESH_TOKEN_KEY = 'budget_refresh_token';
 const STORAGE_USER_KEY = 'budget_user';
-
-interface ValidationErrorDetail {
-  field: string;
-  code: string;
-  message: string;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +21,7 @@ export class AuthService {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
+  private readonly apiError = inject(ApiErrorService);
 
   readonly currentUser = signal<UserInfo | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
@@ -61,7 +57,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.apiService.post<AuthResponse>('/auth/login', credentials).pipe(
       tap((response) => this.saveAuth(response)),
-      catchError((error) => throwError(() => this.mapAuthError(error))),
+      catchError((error) => throwError(() => this.mapAuthError(error, LOGIN_ERROR_OVERRIDES))),
     );
   }
 
@@ -205,55 +201,23 @@ export class AuthService {
   }
 
   /**
-   * Traduit une `VALIDATION_ERROR` a partir de `details`, jamais du `message`.
+   * Traduit une erreur d'authentification en libelle affichable.
    *
-   * Le `message` du serveur est technique et en anglais (« password: size must
-   * be between 12 and 100 ») : l'afficher tel quel sur un ecran francais est
-   * incomprehensible. `details` associe chaque contrainte a son champ, ce qui
-   * permet de formuler sans analyser la chaine.
+   * Delegue integralement a {@link ApiErrorService} (KKS-324) : le libelle
+   * derive du code porte par `error`, jamais du `message` du serveur, devenu
+   * un champ de diagnostic. Les branchements par statut HTTP qui vivaient ici
+   * ont disparu — le code seul suffit, c'est tout l'interet de la manoeuvre.
    *
-   * Seule la longueur du mot de passe est traitee ici, c'est le cas que les
-   * ecrans d'authentification produisent reellement. La traduction generale
-   * des codes d'erreur fait l'objet de KKS-324.
+   * Seul le journal reseau reste local : il documente une panne de transport,
+   * pas un libelle.
    */
-  private mapValidationError(error: HttpErrorResponse): string {
-    const details: ValidationErrorDetail[] = error.error?.details ?? [];
-    const passwordSize = details.find((d) => d.field === 'password' && d.code === 'SIZE');
-    if (passwordSize) {
-      return PASSWORD_MIN_LENGTH_MESSAGE;
-    }
-    return 'Veuillez vérifier les informations saisies.';
-  }
-
-  private mapAuthError(error: HttpErrorResponse): string {
-    if (error.status === 400) {
-      const errorCode = error.error?.error;
-      if (errorCode === 'PASSWORD_UNCHANGED') {
-        return 'Le nouveau mot de passe doit être différent de l\'actuel.';
-      }
-      if (errorCode === 'VALIDATION_ERROR') {
-        return this.mapValidationError(error);
-      }
-      return error.error?.message ?? 'Une erreur est survenue';
-    }
-    if (error.status === 403) {
-      const errorCode = error.error?.error;
-      if (errorCode === 'PASSWORD_RESET_REQUIRED') {
-        return 'Reset requis';
-      }
-      return error.error?.message ?? 'Accès refusé';
-    }
-    if (error.status === 409) {
-      const errorCode = error.error?.error;
-      if (errorCode === 'EMAIL_ALREADY_EXISTS') {
-        return 'Email déjà utilisé';
-      }
-      return error.error?.message ?? 'Conflit de données';
-    }
+  private mapAuthError(
+    error: HttpErrorResponse,
+    overrides: Readonly<Record<string, string>> = {},
+  ): string {
     if (error.status === 0) {
       this.logger.error('Erreur réseau', error);
-      return 'Impossible de contacter le serveur';
     }
-    return 'Une erreur est survenue';
+    return this.apiError.label(error, undefined, overrides);
   }
 }

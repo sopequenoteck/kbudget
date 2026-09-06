@@ -193,7 +193,7 @@ class PreferenceControllerTest {
     @Test
     void should_return400_when_navOrderHasDuplicates() throws Exception {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
-                .thenThrow(new IllegalArgumentException("L'ordre de navigation ne doit pas contenir de doublons"));
+                .thenThrow(new IllegalArgumentException("Navigation order must not contain duplicates"));
 
         mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
@@ -202,13 +202,13 @@ class PreferenceControllerTest {
                                 {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS"], "navOrder": ["SUBSCRIPTIONS", "SUBSCRIPTIONS"]}
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("L'ordre de navigation ne doit pas contenir de doublons"));
+                .andExpect(jsonPath("$.message").value("Navigation order must not contain duplicates"));
     }
 
     @Test
     void should_return400_when_navOrderMissingEnabledFeature() throws Exception {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
-                .thenThrow(new IllegalArgumentException("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
+                .thenThrow(new IllegalArgumentException("Navigation order must contain exactly the enabled features"));
 
         mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
@@ -217,13 +217,13 @@ class PreferenceControllerTest {
                                 {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS"], "navOrder": ["SUBSCRIPTIONS"]}
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
+                .andExpect(jsonPath("$.message").value("Navigation order must contain exactly the enabled features"));
     }
 
     @Test
     void should_return400_when_navOrderContainsDisabledFeature() throws Exception {
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
-                .thenThrow(new IllegalArgumentException("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
+                .thenThrow(new IllegalArgumentException("Navigation order must contain exactly the enabled features"));
 
         mockMvc.perform(put("/v1/users/me/preferences")
                         .header("Authorization", BEARER_TOKEN)
@@ -232,6 +232,6 @@ class PreferenceControllerTest {
                                 {"enabledFeatures": ["SUBSCRIPTIONS"], "navOrder": ["SUBSCRIPTIONS", "DEBTS"]}
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("L'ordre de navigation doit contenir exactement les fonctionnalités activées"));
+                .andExpect(jsonPath("$.message").value("Navigation order must contain exactly the enabled features"));
     }
 }
