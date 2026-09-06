@@ -32,8 +32,34 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
     `ci-app.yml` l'annoncait pourtant comme un principe general, jamais applique
     aux deux autres stacks.
 
+- **Les codes d'erreur servis aux clients sont verrouilles (KKS-357)** :
+  Angular et Flutter branchent leur logique sur le corps d'erreur — un `switch`
+  sur `error`, et pour la validation un `find` sur `details[].field` et
+  `details[].code`.
+  - `ValidationErrorCodeContractTest` part des DTOs et du validateur reels.
+    `details[].code` derive du **nom de l'annotation** Bean Validation qui a
+    echoue et n'est ecrit nulle part : remplacer `@Size` par une autre
+    contrainte de longueur renommait la valeur servie sans toucher au moindre
+    DTO expose. Le test a ete verifie en jouant ce scenario, il echoue sur
+    `expected: "SIZE" but was: "LENGTH"`.
+  - `ExceptionHandlerInventoryTest` tient un inventaire versionne des 24
+    handlers declares. Les tests de codes existants sont des listes tenues a la
+    main : ils protegent ce qu'ils enumerent, et rien n'obligeait un handler
+    nouvellement ajoute a y entrer.
+  - **Sa comparaison est stricte dans les deux sens, a l'inverse
+    d'`ApiContractIT`** : un champ de reponse ajoute est absorbe sans bruit par
+    un client ancien, un code d'erreur ajoute est un mot que personne n'a vu
+    passer. Les deux directions ont ete testees.
+  - Le volet OpenAPI du ticket est ecarte : declarer les reponses d'erreur sur
+    les 100 operations ajouterait plus de mille lignes repetitives a un
+    snapshot qui en compte 1050, pour un signal deja obtenu autrement.
+
 ### Changed
 
+- La commande de regeneration du snapshot de contrat, citee par `ApiContractIT`
+  et par `docs/api-compatibility.md`, etait impossible a executer : `mvn -pl
+  api` suppose un pom racine, que le depot n'a pas. Un contributeur l'aurait
+  copiee au moment precis ou son build est rouge.
 - Les trois en-tetes de workflow CI affirmaient encore « Repo PRIVE ». Le
   reglage d'approbation des contributeurs externes qu'elles documentent n'est
   pas devenu obsolete avec l'ouverture du depot : il en est devenu la seule
