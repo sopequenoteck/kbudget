@@ -544,4 +544,206 @@ class AccountServiceTest {
         assertThat(result.balances().get(0).currency()).isEqualTo(Currency.EUR);
         assertThat(result.balances().get(1).currency()).isEqualTo(Currency.USD);
     }
+
+    // -------------------------------------------------------------------------
+    // KKS-324 — couverture des messages d'erreur anglicisés
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_throw_when_updateAccountNameAlreadyExists() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var request = new AccountRequest("Livret A", AccountType.EPARGNE, null, null, null, null, null, null, null, null);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(accountRepository.existsByNomIgnoreCaseAndUserIdAndActifTrueAndIdNot("Livret A", userId, accountId)).thenReturn(true);
+
+        assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("An account with this name already exists");
+    }
+
+    @Test
+    void should_preventDelete_when_isDefaultAccount() {
+        var user = buildUser();
+        var account = buildAccount(user); // isDefault=true
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> accountService.deleteAccount(accountId, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot delete the default account");
+    }
+
+    @Test
+    void should_preventDelete_when_subscriptionsExist() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(accountId)
+                .nom("Test")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(false)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.existsByAccountId(accountId)).thenReturn(false);
+        when(subscriptionRepository.existsByAccountId(accountId)).thenReturn(true);
+
+        assertThatThrownBy(() -> accountService.deleteAccount(accountId, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot delete an account with linked subscriptions");
+    }
+
+    @Test
+    void should_throw_when_setDefaultOnInactiveAccount() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(accountId)
+                .nom("Compte inactif")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(false)
+                .actif(false)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> accountService.setDefault(accountId, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot set an inactive account as the default account");
+    }
+
+    @Test
+    void should_throw_when_transferSourceAndDestinationAreTheSame() {
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                accountId, accountId, new BigDecimal("100.00"), null);
+
+        assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Source and destination accounts must be different");
+    }
+
+    @Test
+    void should_throw_when_transferSourceAccountInactive() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte source")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(false)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte destination")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+
+        assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The source account is inactive");
+    }
+
+    @Test
+    void should_throw_when_transferDestinationAccountInactive() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte source")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte destination")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(false)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+
+        assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The destination account is inactive");
+    }
+
+    @Test
+    void should_throw_when_transferVirementCategoryMissing() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte source")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte destination")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+        when(categoryService.findSystemCategoryByNom("Virement", userId)).thenReturn(null);
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+
+        assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("System category 'Virement' not found");
+    }
+
+    @Test
+    void should_throw_when_adjustBalanceOnInactiveAccount() {
+        var user = buildUser();
+        var account = Account.builder()
+                .id(accountId)
+                .nom("Compte inactif")
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("🏦")
+                .couleur("#3b82f6")
+                .isDefault(false)
+                .actif(false)
+                .user(user)
+                .build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> accountService.adjustBalance(accountId, new BigDecimal("100.00"), userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot adjust the balance of an inactive account");
+    }
 }
