@@ -34,21 +34,21 @@ class GlobalExceptionHandlerTest {
         assertResponse(handler.handleAccessDenied(new AccessDeniedException("Acces interdit")), 403,
                 "ACCESS_DENIED", "Acces interdit");
         assertResponse(handler.handleFeatureDisabled(new FeatureDisabledException("DEBTS")), 403,
-                "FEATURE_DISABLED", "Fonctionnalité DEBTS désactivée");
+                "FEATURE_DISABLED", "Feature DEBTS is disabled");
         assertResponse(handler.handleCsvProfileNotFound(new CsvProfileNotFoundException("Profil absent")), 422,
                 "CSV_PROFILE_NOT_FOUND", "Profil absent");
-        assertResponse(handler.handleEntityNotFound(new EntityNotFoundException("Transaction non trouvée")), 404,
-                "NOT_FOUND", "Transaction non trouvée");
+        assertResponse(handler.handleEntityNotFound(new EntityNotFoundException("Transaction not found")), 404,
+                "NOT_FOUND", "Transaction not found");
         assertResponse(handler.handleHttpMessageNotReadable(
                         new HttpMessageNotReadableException("technical parser detail", (HttpInputMessage) null)), 400,
-                "MALFORMED_REQUEST", "Requete invalide");
+                "MALFORMED_REQUEST", "Invalid request");
     }
 
     @Test
     void should_return_404_when_route_is_not_mapped() {
         assertResponse(handler.handleNoResourceFound(
                         new NoResourceFoundException(HttpMethod.GET, "/api/route-inconnue", "/route-inconnue")),
-                404, "NOT_FOUND", "Ressource introuvable");
+                404, "NOT_FOUND", "Resource not found");
     }
 
     @Test
@@ -79,15 +79,15 @@ class GlobalExceptionHandlerTest {
     @Test
     void should_preserve_specialized_conflicts_and_normalize_other_conflicts() {
         assertResponse(handler.handleConflict(new ConflictException("LAST_ADMIN_CANNOT_BE_DISABLED")), 409,
-                "LAST_ADMIN_CANNOT_BE_DISABLED", "Impossible de désactiver le dernier admin actif.");
+                "LAST_ADMIN_CANNOT_BE_DISABLED", "The last active administrator cannot be disabled.");
         assertResponse(handler.handleConflict(new ConflictException("EMAIL_ALREADY_EXISTS")), 409,
-                "EMAIL_ALREADY_EXISTS", "Cet email est déjà utilisé par un autre utilisateur.");
+                "EMAIL_ALREADY_EXISTS", "This email is already used by another user.");
         assertResponse(handler.handleConflict(new ConflictException("Un import est deja actif")), 409,
                 "CONFLICT", "Un import est deja actif");
         assertResponse(handler.handleConflict(new ConflictException(null)), 409,
-                "CONFLICT", "Conflit de donnees");
+                "CONFLICT", "Data conflict");
         assertResponse(handler.handleConflict(new ConflictException("  ")), 409,
-                "CONFLICT", "Conflit de donnees");
+                "CONFLICT", "Data conflict");
     }
 
     @Test
@@ -123,9 +123,9 @@ class GlobalExceptionHandlerTest {
     @Test
     void should_use_non_blank_public_fallbacks() {
         assertResponse(handler.handleIllegalArgument(new IllegalArgumentException((String) null)), 400,
-                "BAD_REQUEST", "Requete invalide");
+                "BAD_REQUEST", "Invalid request");
         assertResponse(handler.handleEntityNotFound(new EntityNotFoundException(" ")), 404,
-                "NOT_FOUND", "Ressource introuvable");
+                "NOT_FOUND", "Resource not found");
     }
 
     @Test
@@ -136,7 +136,7 @@ class GlobalExceptionHandlerTest {
         var response = handler.handleGeneric(exception);
 
         assertResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "INTERNAL_ERROR",
-                "Une erreur interne est survenue");
+                "An internal error occurred");
         assertThat(response.getBody().message()).doesNotContain("JdbcInternalClass", "SELECT", "stack-marker");
     }
 

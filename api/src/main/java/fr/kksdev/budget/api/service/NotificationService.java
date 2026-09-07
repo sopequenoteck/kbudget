@@ -66,7 +66,7 @@ public class NotificationService {
     @Transactional
     public NotificationResponse markAsRead(UUID userId, UUID notificationId) {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification non trouvée"));
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
         notification.setRead(true);
         notification.setReadAt(LocalDateTime.now());
         notification = notificationRepository.save(notification);
@@ -83,7 +83,7 @@ public class NotificationService {
     @Transactional
     public void deleteNotification(UUID userId, UUID notificationId) {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification non trouvée"));
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
         notificationRepository.delete(notification);
         log.info("Notification supprimée: id={}, userId={}", notificationId, userId);
     }

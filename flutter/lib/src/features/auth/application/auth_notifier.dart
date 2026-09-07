@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/api_client.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
@@ -77,12 +78,12 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
           ? const AuthState.passwordResetRequired()
           : const AuthState.authenticated();
     } on DioException catch (e) {
-      final message = e.response?.statusCode == 401
-          ? 'Email ou mot de passe incorrect'
-          : 'Erreur de connexion';
-      state = AuthState.unauthenticated(error: message);
-    } on Exception catch (e) {
-      state = AuthState.unauthenticated(error: 'Erreur: $e');
+      // Le code d'erreur, pas le statut HTTP : le serveur distingue
+      // TOKEN_EXPIRED d'UNAUTHENTICATED, le ternaire sur 401 les confondait
+      // (KKS-324). La resolution du libelle appartient a l'ecran.
+      state = AuthState.loginFailed(errorCode: apiErrorCode(e));
+    } on Exception {
+      state = const AuthState.loginFailed();
     }
     _notifyListeners();
   }

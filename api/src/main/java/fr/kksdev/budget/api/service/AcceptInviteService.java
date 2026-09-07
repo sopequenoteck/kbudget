@@ -26,11 +26,11 @@ public class AcceptInviteService {
     @Transactional
     public AuthResponse acceptInvite(AcceptInviteRequest request) {
         Invitation invitation = invitationService.validatePublic(request.token())
-                .orElseThrow(() -> new EntityNotFoundException("Invitation invalide."));
+                .orElseThrow(() -> new EntityNotFoundException("Invalid invitation."));
 
         if (userRepository.existsByEmail(invitation.getEmail())) {
             log.warn("Invite acceptance failed: email already exists: {}", invitation.getEmail());
-            throw new IllegalArgumentException("Email déjà utilisé");
+            throw new IllegalArgumentException("Email already used");
         }
 
         User user = userOnboardingService.provisionUser(new UserOnboardingService.UserProvisioningRequest(

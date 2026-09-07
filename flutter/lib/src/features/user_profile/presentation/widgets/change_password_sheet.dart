@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/password_policy.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/change_password_request.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Bottom sheet de changement de mot de passe.
@@ -84,15 +86,20 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
         );
       }
     } on DioException catch (e) {
-      final code = e.response?.data?['error'] as String?;
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        final message = errorLabel(
+          l10n,
+          apiErrorCode(e),
+          fallback: 'Erreur lors du changement de mot de passe',
+          // Sur cet ecran, PASSWORD_INCORRECT designe l'ancien mot de passe,
+          // pas celui qu'on saisit : le libelle du catalogue serait ambigu.
+          overrides: {
+            'PASSWORD_INCORRECT': l10n.errorCodeCurrentPasswordIncorrect,
+          },
+        );
         setState(() {
-          _errorMessage = switch (code) {
-            'PASSWORD_INCORRECT' => 'Mot de passe actuel incorrect',
-            'PASSWORD_UNCHANGED' =>
-              'Le nouveau mot de passe doit être différent de l\'actuel',
-            _ => 'Erreur lors du changement de mot de passe',
-          };
+          _errorMessage = message;
         });
       }
     } on Exception {

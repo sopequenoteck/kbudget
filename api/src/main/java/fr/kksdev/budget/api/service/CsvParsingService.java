@@ -68,7 +68,7 @@ public class CsvParsingService {
             parser.close();
         } catch (IOException e) {
             log.error("Erreur lecture CSV: {}", e.getMessage());
-            throw new IllegalArgumentException("Impossible de lire le fichier CSV: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the CSV file: " + e.getMessage());
         }
 
         // Apply categorization rules to pre-fill categories
@@ -119,7 +119,7 @@ public class CsvParsingService {
                     amount = new BigDecimal(rawCredit).abs();
                     type = TransactionType.RECETTE;
                 } else {
-                    throw new IllegalArgumentException("Aucun montant trouvé dans les colonnes débit/crédit");
+                    throw new IllegalArgumentException("No amount found in the debit/credit columns");
                 }
             }
 

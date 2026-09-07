@@ -149,7 +149,7 @@ class NotificationServiceTest {
 
         assertThatThrownBy(() -> notificationService.markAsRead(userId, notificationId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Notification non trouvée");
+                .hasMessage("Notification not found");
     }
 
     @Test
@@ -158,7 +158,7 @@ class NotificationServiceTest {
 
         assertThatThrownBy(() -> notificationService.markAsRead(userId, notificationId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Notification non trouvée");
+                .hasMessage("Notification not found");
     }
 
     @Test
@@ -179,7 +179,7 @@ class NotificationServiceTest {
 
         assertThatThrownBy(() -> notificationService.deleteNotification(userId, notificationId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Notification non trouvée");
+                .hasMessage("Notification not found");
     }
 
     @Test

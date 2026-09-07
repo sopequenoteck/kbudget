@@ -74,13 +74,13 @@ public class ImportService {
 
         ImportProfileRegistry.ImportProfileConfig profile = csvParsingService.detectProfile(account.getBankCode())
                 .orElseThrow(() -> new CsvProfileNotFoundException(
-                        "Aucun profil d'import disponible pour la banque: " + account.getBankCode()));
+                        "No import profile available for bank: " + account.getBankCode()));
 
         List<ImportDraftLine> parsedLines;
         try {
             parsedLines = csvParsingService.parse(file.getInputStream(), profile, userId);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Impossible de lire le fichier: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
         }
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
@@ -96,7 +96,7 @@ public class ImportService {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
 
         if (draft.getStatus() != ImportDraftStatus.PENDING) {
-            throw new IllegalArgumentException("L'import n'est pas en attente de confirmation, statut: " + draft.getStatus());
+            throw new IllegalArgumentException("Import is not awaiting confirmation, status: " + draft.getStatus());
         }
 
         List<ImportDraftLine> allLines = importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId);
@@ -106,7 +106,7 @@ public class ImportService {
                 .anyMatch(l -> l.getStatus() == ImportLineStatus.NEEDS_REVIEW
                         || l.getStatus() == ImportLineStatus.DUPLICATE);
         if (hasBlockingLines) {
-            throw new IllegalArgumentException("Des lignes nécessitent une révision avant confirmation");
+            throw new IllegalArgumentException("Some lines require review before confirmation");
         }
 
         List<ImportDraftLine> readyLines = allLines.stream()
@@ -158,14 +158,14 @@ public class ImportService {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
 
         if (draft.getStatus() != ImportDraftStatus.PENDING) {
-            throw new IllegalArgumentException("Le brouillon n'est plus modifiable");
+            throw new IllegalArgumentException("The draft is no longer editable");
         }
 
         ImportDraftLine line = importDraftLineRepository.findById(lineId)
                 .filter(l -> l.getDraft().getId().equals(draftId))
                 .orElseThrow(() -> {
                     log.error("Ligne d'import non trouvée: id={}, draftId={}", lineId, draftId);
-                    return new EntityNotFoundException("Ligne d'import non trouvée");
+                    return new EntityNotFoundException("Import line not found");
                 });
 
         boolean suggestRule = false;
@@ -175,7 +175,7 @@ public class ImportService {
                     .filter(c -> c.getUser().getId().equals(userId))
                     .orElseThrow(() -> {
                         log.error("Catégorie non trouvée: id={}, userId={}", request.categoryId(), userId);
-                        return new EntityNotFoundException("Catégorie non trouvée");
+                        return new EntityNotFoundException("Category not found");
                     });
             line.setCategory(category);
 
@@ -210,7 +210,7 @@ public class ImportService {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
 
         if (draft.getStatus() != ImportDraftStatus.PENDING) {
-            throw new IllegalArgumentException("L'import n'est pas en attente de modification, statut: " + draft.getStatus());
+            throw new IllegalArgumentException("Import is not awaiting modification, status: " + draft.getStatus());
         }
 
         List<ImportDraftLine> allLines = importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId);
@@ -220,8 +220,8 @@ public class ImportService {
             category = categoryRepository.findById(request.categoryId())
                     .filter(c -> c.getUser().getId().equals(userId))
                     .orElseThrow(() -> {
-                        log.error("Catégorie non trouvée: id={}, userId={}", request.categoryId(), userId);
-                        return new jakarta.persistence.EntityNotFoundException("Catégorie non trouvée");
+                        log.error("Category not found: id={}, userId={}", request.categoryId(), userId);
+                        return new jakarta.persistence.EntityNotFoundException("Category not found");
                     });
         }
 
@@ -273,7 +273,7 @@ public class ImportService {
         try {
             return csvParsingService.preview(file.getInputStream(), separator, encoding, skipHeaderLines);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Impossible de lire le fichier: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
         }
     }
 
@@ -303,7 +303,7 @@ public class ImportService {
         try {
             parsedLines = csvParsingService.parse(file.getInputStream(), profile, userId);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Impossible de lire le fichier: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
         }
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
@@ -357,7 +357,7 @@ public class ImportService {
         ImportProfile profile = importProfileRepository.findByIdAndUserId(profileId, userId)
                 .orElseThrow(() -> {
                     log.error("Profil d'import non trouvé: id={}, userId={}", profileId, userId);
-                    return new EntityNotFoundException("Profil d'import non trouvé");
+                    return new EntityNotFoundException("Import profile not found");
                 });
         importProfileRepository.delete(profile);
         log.info("Profil d'import supprimé: {}", profileId);
@@ -399,16 +399,16 @@ public class ImportService {
                 .filter(d -> d.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Draft d'import non trouvé: id={}, userId={}", draftId, userId);
-                    return new EntityNotFoundException("Draft d'import non trouvé");
+                    return new EntityNotFoundException("Import draft not found");
                 });
     }
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Le fichier est vide");
+            throw new IllegalArgumentException("The file is empty");
         }
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("Le fichier dépasse la taille maximale autorisée (5MB)");
+            throw new IllegalArgumentException("The file exceeds the maximum allowed size (5MB)");
         }
         String originalFilename = file.getOriginalFilename();
         String contentType = file.getContentType();
@@ -417,7 +417,7 @@ public class ImportService {
                 || "application/csv".equalsIgnoreCase(contentType)
                 || "text/plain".equalsIgnoreCase(contentType);
         if (!validExtension && !validContentType) {
-            throw new IllegalArgumentException("Le fichier doit être au format CSV");
+            throw new IllegalArgumentException("The file must be in CSV format");
         }
     }
 
@@ -425,7 +425,7 @@ public class ImportService {
         try {
             return ImportLineStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Statut de ligne invalide: " + status);
+            throw new IllegalArgumentException("Invalid line status: " + status);
         }
     }
 
@@ -437,7 +437,7 @@ public class ImportService {
         };
         if (!valid) {
             throw new IllegalArgumentException(
-                    "Transition de statut invalide: " + current + " → " + next);
+                    "Invalid status transition: " + current + " → " + next);
         }
     }
 
@@ -458,11 +458,11 @@ public class ImportService {
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
-                    return new IllegalArgumentException("Compte non trouvé ou inactif");
+                    return new IllegalArgumentException("Account not found or inactive");
                 });
         importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING)
                 .ifPresent(existing -> {
-                    throw new ConflictException("Un import en cours existe déjà pour ce compte: " + existing.getId());
+                    throw new ConflictException("An import is already in progress for this account: " + existing.getId());
                 });
         return account;
     }

@@ -40,7 +40,7 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("Utilisateur non trouvé: userId={}", userId);
-                    return new EntityNotFoundException("Utilisateur non trouvé");
+                    return new EntityNotFoundException("User not found");
                 });
     }
 

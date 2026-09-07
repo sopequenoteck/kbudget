@@ -141,12 +141,12 @@ class CategoryControllerTest {
     @Test
     void should_return_404_when_category_not_found() throws Exception {
         when(categoryService.getById(categoryId, userId))
-                .thenThrow(new EntityNotFoundException("Catégorie non trouvée"));
+                .thenThrow(new EntityNotFoundException("Category not found"));
 
         mockMvc.perform(get("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Catégorie non trouvée"));
+                .andExpect(jsonPath("$.message").value("Category not found"));
     }
 
     @Test
@@ -170,7 +170,7 @@ class CategoryControllerTest {
     @Test
     void should_return_400_when_create_with_duplicate_name() throws Exception {
         when(categoryService.create(any(CategoryRequest.class), any(UUID.class)))
-                .thenThrow(new IllegalArgumentException("Une catégorie avec ce nom existe déjà"));
+                .thenThrow(new IllegalArgumentException("A category with this name already exists"));
 
         mockMvc.perform(post("/v1/categories")
                         .header("Authorization", BEARER_TOKEN)
@@ -181,7 +181,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_400_when_deleteSystemCategory() throws Exception {
-        doThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être supprimées"))
+        doThrow(new IllegalArgumentException("System categories cannot be deleted"))
                 .when(categoryService).delete(categoryId, userId);
 
         mockMvc.perform(delete("/v1/categories/{id}", categoryId)
@@ -192,7 +192,7 @@ class CategoryControllerTest {
     @Test
     void should_return_400_when_updateSystemCategory() throws Exception {
         when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Les catégories système ne peuvent pas être modifiées"));
+                .thenThrow(new IllegalArgumentException("System categories cannot be updated"));
 
         mockMvc.perform(put("/v1/categories/{id}", categoryId)
                         .header("Authorization", BEARER_TOKEN)

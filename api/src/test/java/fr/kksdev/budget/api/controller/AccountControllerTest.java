@@ -120,7 +120,7 @@ class AccountControllerTest {
     @Test
     void should_return400_when_duplicateName() throws Exception {
         when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Un compte avec ce nom existe déjà"));
+                .thenThrow(new IllegalArgumentException("An account with this name already exists"));
 
         mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
@@ -132,7 +132,7 @@ class AccountControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Un compte avec ce nom existe déjà"));
+                .andExpect(jsonPath("$.message").value("An account with this name already exists"));
     }
 
     @Test
@@ -170,13 +170,13 @@ class AccountControllerTest {
 
     @Test
     void should_return400_when_deleteWithTransactions() throws Exception {
-        doThrow(new IllegalArgumentException("Impossible de supprimer un compte avec des transactions rattachées"))
+        doThrow(new IllegalArgumentException("Cannot delete an account with linked transactions"))
                 .when(accountService).deleteAccount(accountId, userId);
 
         mockMvc.perform(delete("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Impossible de supprimer un compte avec des transactions rattachées"));
+                .andExpect(jsonPath("$.message").value("Cannot delete an account with linked transactions"));
     }
 
     @Test
@@ -198,12 +198,12 @@ class AccountControllerTest {
     @Test
     void should_return404_when_accountNotFound() throws Exception {
         when(accountService.getAccountById(accountId, userId))
-                .thenThrow(new EntityNotFoundException("Compte non trouvé"));
+                .thenThrow(new EntityNotFoundException("Account not found"));
 
         mockMvc.perform(get("/v1/accounts/{id}", accountId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Compte non trouvé"));
+                .andExpect(jsonPath("$.message").value("Account not found"));
     }
 
     @Test
@@ -254,7 +254,7 @@ class AccountControllerTest {
         UUID sameId = UUID.randomUUID();
 
         when(accountService.transfer(any(), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Les comptes source et destination doivent être différents"));
+                .thenThrow(new IllegalArgumentException("Source and destination accounts must be different"));
 
         mockMvc.perform(post("/v1/accounts/transfer")
                         .header("Authorization", BEARER_TOKEN)
@@ -267,13 +267,13 @@ class AccountControllerTest {
                                 }
                                 """.formatted(sameId, sameId)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Les comptes source et destination doivent être différents"));
+                .andExpect(jsonPath("$.message").value("Source and destination accounts must be different"));
     }
 
     @Test
     void should_return400_when_transferInactiveAccount() throws Exception {
         when(accountService.transfer(any(), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Le compte source est inactif"));
+                .thenThrow(new IllegalArgumentException("The source account is inactive"));
 
         mockMvc.perform(post("/v1/accounts/transfer")
                         .header("Authorization", BEARER_TOKEN)
@@ -286,7 +286,7 @@ class AccountControllerTest {
                                 }
                                 """.formatted(UUID.randomUUID(), UUID.randomUUID())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Le compte source est inactif"));
+                .andExpect(jsonPath("$.message").value("The source account is inactive"));
     }
 
     // --- Adjust Balance tests (T032) ---
@@ -357,7 +357,7 @@ class AccountControllerTest {
     @Test
     void should_rejectAdjustment_when_accountInactive() throws Exception {
         when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Impossible d'ajuster le solde d'un compte inactif"));
+                .thenThrow(new IllegalArgumentException("Cannot adjust the balance of an inactive account"));
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
@@ -366,13 +366,13 @@ class AccountControllerTest {
                                 { "newBalance": 750.00 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Impossible d'ajuster le solde d'un compte inactif"));
+                .andExpect(jsonPath("$.message").value("Cannot adjust the balance of an inactive account"));
     }
 
     @Test
     void should_rejectAdjustment_when_accountNotFound() throws Exception {
         when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
-                .thenThrow(new EntityNotFoundException("Compte non trouvé"));
+                .thenThrow(new EntityNotFoundException("Account not found"));
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
                         .header("Authorization", BEARER_TOKEN)
@@ -381,7 +381,7 @@ class AccountControllerTest {
                                 { "newBalance": 750.00 }
                                 """))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Compte non trouvé"));
+                .andExpect(jsonPath("$.message").value("Account not found"));
     }
 
     @Test

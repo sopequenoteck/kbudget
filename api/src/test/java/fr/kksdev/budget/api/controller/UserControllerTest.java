@@ -411,7 +411,7 @@ class UserControllerTest {
                                 """))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("LAST_ADMIN_DELETION_FORBIDDEN"))
-                .andExpect(jsonPath("$.message").value("Au moins un administrateur actif doit exister."));
+                .andExpect(jsonPath("$.message").value("At least one active administrator must remain."));
     }
 
     // ---- Helpers ----

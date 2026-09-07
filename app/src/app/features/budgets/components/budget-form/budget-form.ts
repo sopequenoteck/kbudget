@@ -29,6 +29,7 @@ import { BudgetService } from '../../../../core/services/budget';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { ApiErrorService } from '../../../../core/services/api-error';
 import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
@@ -65,6 +66,7 @@ export class BudgetForm {
   private readonly preferenceService = inject(PreferenceService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly apiError = inject(ApiErrorService);
 
   readonly budget = computed(() => this.modalService.editingEntity() as Budget | null);
   readonly saved = output<void>();
@@ -207,7 +209,7 @@ export class BudgetForm {
     } catch (err: unknown) {
       this.errorMessage.set(
         err instanceof HttpErrorResponse
-          ? (err.error?.message ?? 'Erreur serveur')
+          ? this.apiError.label(err, 'Erreur serveur')
           : err instanceof Error
             ? err.message
             : 'Erreur lors de la sauvegarde',
@@ -235,7 +237,7 @@ export class BudgetForm {
     } catch (err: unknown) {
       this.errorMessage.set(
         err instanceof HttpErrorResponse
-          ? (err.error?.message ?? 'Erreur serveur')
+          ? this.apiError.label(err, 'Erreur serveur')
           : err instanceof Error
             ? err.message
             : 'Erreur lors de la suppression',

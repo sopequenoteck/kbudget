@@ -26,6 +26,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SubscriptionPaymentService {
+    private static final String SUBSCRIPTION_NOT_FOUND = "Subscription not found";
+
 
     private final SubscriptionRepository subscriptionRepository;
     private final TransactionRepository transactionRepository;
@@ -37,16 +39,16 @@ public class SubscriptionPaymentService {
     public SubscriptionPaymentResponse pay(UUID subscriptionId, UUID userId) {
         Subscription sub = subscriptionRepository.findById(subscriptionId)
                 .filter(s -> s.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Abonnement non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException(SUBSCRIPTION_NOT_FOUND));
 
         if (!Boolean.TRUE.equals(sub.getActif())) {
-            throw new IllegalStateException("L'abonnement est inactif");
+            throw new IllegalStateException("The subscription is inactive");
         }
 
         Account account = sub.getAccount();
         if (account == null || !Boolean.TRUE.equals(account.getActif())) {
             account = accountRepository.findByUserIdAndIsDefaultTrue(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("Aucun compte par défaut trouvé"));
+                    .orElseThrow(() -> new EntityNotFoundException("No default account found"));
         }
 
         Transaction payment = Transaction.builder()
@@ -80,7 +82,7 @@ public class SubscriptionPaymentService {
     public List<SubscriptionPaymentResponse> getPayments(UUID subscriptionId, UUID userId) {
         subscriptionRepository.findById(subscriptionId)
                 .filter(s -> s.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Abonnement non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException(SUBSCRIPTION_NOT_FOUND));
 
         return transactionRepository.findBySubscriptionIdAndUserIdOrderByDateDesc(subscriptionId, userId)
                 .stream()
@@ -94,7 +96,7 @@ public class SubscriptionPaymentService {
     public Map<String, Object> getTotalPaid(UUID subscriptionId, UUID userId) {
         Subscription sub = subscriptionRepository.findById(subscriptionId)
                 .filter(s -> s.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Abonnement non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException(SUBSCRIPTION_NOT_FOUND));
 
         BigDecimal total = transactionRepository.sumBySubscriptionIdAndUserId(subscriptionId, userId);
         long count = transactionRepository.countBySubscriptionIdAndUserId(subscriptionId, userId);

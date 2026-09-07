@@ -18,7 +18,7 @@ class ApiErrorWriterTest {
     void should_write_the_unified_error_contract() throws Exception {
         var response = new MockHttpServletResponse();
 
-        writer.write(response, HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "Authentification requise");
+        writer.write(response, HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "Authentication required");
 
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(response.getContentType()).startsWith(MediaType.APPLICATION_JSON_VALUE);
@@ -26,7 +26,7 @@ class ApiErrorWriterTest {
 
         JsonNode body = objectMapper.readTree(response.getContentAsByteArray());
         assertThat(body.get("error").asText()).isEqualTo("UNAUTHENTICATED");
-        assertThat(body.get("message").asText()).isEqualTo("Authentification requise");
+        assertThat(body.get("message").asText()).isEqualTo("Authentication required");
         assertThat(body.size()).isEqualTo(2);
     }
 }

@@ -213,7 +213,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.getById(debtId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Dette non trouvée");
+                .hasMessage("Debt not found");
     }
 
     @Test
@@ -333,7 +333,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("montant dépasse");
+                .hasMessageContaining("amount exceeds");
     }
 
     @Test
@@ -347,7 +347,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("déjà remboursée");
+                .hasMessageContaining("already repaid");
     }
 
     @Test
@@ -364,7 +364,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("inactif");
+                .hasMessageContaining("inactive");
     }
 
     @Test
@@ -510,7 +510,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.update(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Taux de change indisponible");
+                .hasMessageContaining("Exchange rate unavailable");
     }
 
     @Test
@@ -568,7 +568,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.snooze(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("pas de rappel");
+                .hasMessageContaining("no reminder configured");
     }
 
     // -------------------------------------------------------------------------
@@ -649,6 +649,6 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("montant du remboursement doit être positif");
+                .hasMessageContaining("repayment amount must be positive");
     }
 }

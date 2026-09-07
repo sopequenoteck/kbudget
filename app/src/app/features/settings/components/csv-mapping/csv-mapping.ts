@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +11,7 @@ import {
 
 import { ImportService } from '../../../../core/services/import';
 import { DevLogger } from '../../../../core/services/dev-logger';
+import { ApiErrorService } from '../../../../core/services/api-error';
 import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/models/import.model';
 
 @Component({
@@ -38,6 +33,7 @@ export class CsvMapping {
   private readonly importService = inject(ImportService);
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
+  private readonly apiError = inject(ApiErrorService);
 
   // File & account (passed via router state)
   protected file: File | null = null;
@@ -85,9 +81,7 @@ export class CsvMapping {
 
   constructor() {
     const nav = this.router.getCurrentNavigation();
-    const state = nav?.extras?.state as
-      | { file?: File; accountId?: string }
-      | undefined;
+    const state = nav?.extras?.state as { file?: File; accountId?: string } | undefined;
 
     if (state?.file && state?.accountId) {
       this.file = state.file;
@@ -141,7 +135,8 @@ export class CsvMapping {
       headers.find((h) => terms.some((t) => normalize(h).includes(t))) ?? '';
 
     if (!this.dateColumn()) this.dateColumn.set(find('date'));
-    if (!this.labelColumn()) this.labelColumn.set(find('libelle', 'label', 'detail', 'description'));
+    if (!this.labelColumn())
+      this.labelColumn.set(find('libelle', 'label', 'detail', 'description'));
     if (!this.amountColumn()) this.amountColumn.set(find('montant', 'amount', 'valeur'));
     if (!this.debitColumn()) this.debitColumn.set(find('debit', 'debiteur'));
     if (!this.creditColumn()) this.creditColumn.set(find('credit', 'crediteur'));
@@ -162,7 +157,8 @@ export class CsvMapping {
   isValid(): boolean {
     if (!this.dateColumn() || !this.labelColumn()) return false;
     if (this.amountMode() === 'single' && !this.amountColumn()) return false;
-    if (this.amountMode() === 'split' && (!this.debitColumn() || !this.creditColumn())) return false;
+    if (this.amountMode() === 'split' && (!this.debitColumn() || !this.creditColumn()))
+      return false;
     if (this.saveAsProfile() && !this.profileName().trim()) return false;
     return true;
   }
@@ -197,7 +193,7 @@ export class CsvMapping {
       this.logger.error('Failed to import with mapping', err);
       const httpErr = err as { error?: { message?: string } };
       this.importError.set(
-        httpErr?.error?.message ?? "Erreur lors de l'import. Vérifiez le mapping et réessayez.",
+        this.apiError.label(httpErr, "Erreur lors de l'import. Vérifiez le mapping et réessayez."),
       );
       this.importing.set(false);
     }

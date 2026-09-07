@@ -23,7 +23,7 @@ class ApiSecurityErrorHandlersTest {
         handler.commence(new MockHttpServletRequest(), response,
                 new InsufficientAuthenticationException("internal detail"));
 
-        assertError(response, 401, "UNAUTHENTICATED", "Authentification requise");
+        assertError(response, 401, "UNAUTHENTICATED", "Authentication required");
     }
 
     @Test
@@ -33,7 +33,7 @@ class ApiSecurityErrorHandlersTest {
 
         handler.handle(new MockHttpServletRequest(), response, new AccessDeniedException("internal detail"));
 
-        assertError(response, 403, "ACCESS_DENIED", "Accès refusé");
+        assertError(response, 403, "ACCESS_DENIED", "Access denied");
     }
 
     private void assertError(MockHttpServletResponse response, int status, String code, String message)

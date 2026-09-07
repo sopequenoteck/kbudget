@@ -8,9 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/domain/models/delete_account_request.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -72,13 +74,11 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
       }
     } on DioException catch (e) {
       if (!mounted) return;
-      final code = e.response?.data?['error'] as String?;
-      final message = switch (code) {
-        'PASSWORD_INCORRECT' => 'Mot de passe incorrect',
-        'LAST_ADMIN_DELETION_FORBIDDEN' =>
-          'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.',
-        _ => 'Erreur lors de la suppression',
-      };
+      final message = errorLabel(
+        AppLocalizations.of(context)!,
+        apiErrorCode(e),
+        fallback: 'Erreur lors de la suppression',
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );

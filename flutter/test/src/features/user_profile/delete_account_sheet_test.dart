@@ -1,15 +1,31 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/delete_account_sheet.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/localization/app_localizations_fr.dart';
 import 'package:k_budget/src/theme/app_theme.dart' show AppTheme;
+import 'package:mockito/mockito.dart';
+
+import '../../../helpers/mocks.mocks.dart';
 
 void main() {
   group('DeleteAccountSheet', () {
-    Widget buildTestApp() {
+    late MockUserProfileRepository mockUserProfileRepo;
+
+    setUp(() {
+      mockUserProfileRepo = MockUserProfileRepository();
+    });
+
+    Widget buildTestApp({List<Override> overrides = const []}) {
       return ProviderScope(
+        overrides: overrides,
         child: MaterialApp(
           theme: AppTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
               builder: (context) => TextButton(
@@ -22,8 +38,11 @@ void main() {
       );
     }
 
-    Future<void> openSheet(WidgetTester tester) async {
-      await tester.pumpWidget(buildTestApp());
+    Future<void> openSheet(
+      WidgetTester tester, {
+      List<Override> overrides = const [],
+    }) async {
+      await tester.pumpWidget(buildTestApp(overrides: overrides));
       await tester.pump();
       await tester.tap(find.text('Ouvrir'));
       await tester.pumpAndSettle();
@@ -42,68 +61,74 @@ void main() {
     });
 
     testWidgets(
-        'should_disableSubmitButton_when_passwordEmptyAndCheckboxUnchecked',
-        (tester) async {
-      await openSheet(tester);
+      'should_disableSubmitButton_when_passwordEmptyAndCheckboxUnchecked',
+      (tester) async {
+        await openSheet(tester);
 
-      // Le bouton "Supprimer mon compte" doit être désactivé initialement
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Supprimer mon compte'),
-      );
-      expect(button.onPressed, isNull);
-    });
-
-    testWidgets('should_disableSubmitButton_when_passwordFilledButCheckboxUnchecked',
-        (tester) async {
-      await openSheet(tester);
-
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Mot de passe actuel'),
-        'mon_mot_de_passe',
-      );
-      await tester.pump();
-
-      // Checkbox toujours décochée → bouton désactivé
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Supprimer mon compte'),
-      );
-      expect(button.onPressed, isNull);
-    });
-
-    testWidgets('should_disableSubmitButton_when_checkboxCheckedButPasswordEmpty',
-        (tester) async {
-      await openSheet(tester);
-
-      // Cocher la checkbox uniquement
-      await tester.tap(find.byType(Checkbox));
-      await tester.pump();
-
-      // Mot de passe vide → bouton désactivé
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Supprimer mon compte'),
-      );
-      expect(button.onPressed, isNull);
-    });
+        // Le bouton "Supprimer mon compte" doit être désactivé initialement
+        final button = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+        );
+        expect(button.onPressed, isNull);
+      },
+    );
 
     testWidgets(
-        'should_enableSubmitButton_when_passwordFilledAndCheckboxChecked',
-        (tester) async {
-      await openSheet(tester);
+      'should_disableSubmitButton_when_passwordFilledButCheckboxUnchecked',
+      (tester) async {
+        await openSheet(tester);
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Mot de passe actuel'),
-        'mon_mot_de_passe',
-      );
-      await tester.pump();
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Mot de passe actuel'),
+          'mon_mot_de_passe',
+        );
+        await tester.pump();
 
-      await tester.tap(find.byType(Checkbox));
-      await tester.pump();
+        // Checkbox toujours décochée → bouton désactivé
+        final button = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+        );
+        expect(button.onPressed, isNull);
+      },
+    );
 
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Supprimer mon compte'),
-      );
-      expect(button.onPressed, isNotNull);
-    });
+    testWidgets(
+      'should_disableSubmitButton_when_checkboxCheckedButPasswordEmpty',
+      (tester) async {
+        await openSheet(tester);
+
+        // Cocher la checkbox uniquement
+        await tester.tap(find.byType(Checkbox));
+        await tester.pump();
+
+        // Mot de passe vide → bouton désactivé
+        final button = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+        );
+        expect(button.onPressed, isNull);
+      },
+    );
+
+    testWidgets(
+      'should_enableSubmitButton_when_passwordFilledAndCheckboxChecked',
+      (tester) async {
+        await openSheet(tester);
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Mot de passe actuel'),
+          'mon_mot_de_passe',
+        );
+        await tester.pump();
+
+        await tester.tap(find.byType(Checkbox));
+        await tester.pump();
+
+        final button = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+        );
+        expect(button.onPressed, isNotNull);
+      },
+    );
 
     testWidgets('should_dismissSheet_when_cancelTapped', (tester) async {
       await openSheet(tester);
@@ -130,8 +155,9 @@ void main() {
       expect(textField.obscureText, isTrue);
     });
 
-    testWidgets('should_togglePasswordVisibility_when_iconTapped',
-        (tester) async {
+    testWidgets('should_togglePasswordVisibility_when_iconTapped', (
+      tester,
+    ) async {
       await openSheet(tester);
 
       // Vérifier obscureText = true initialement
@@ -155,5 +181,54 @@ void main() {
       );
       expect(textFieldAfter.obscureText, isFalse);
     });
+
+    testWidgets(
+      'should_showCatalogueLabel_when_deleteAccountFailsWithKnownCode',
+      (tester) async {
+        // KKS-324 : le libelle vient du catalogue derive du code, plus du
+        // switch local fige sur trois cas.
+        when(mockUserProfileRepo.deleteAccount(any)).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(),
+            response: Response(
+              requestOptions: RequestOptions(),
+              statusCode: 403,
+              data: {
+                'error': 'LAST_ADMIN_DELETION_FORBIDDEN',
+                'message': 'peu importe',
+              },
+            ),
+          ),
+        );
+
+        await openSheet(
+          tester,
+          overrides: [
+            userProfileRepositoryProvider.overrideWith(
+              (_) async => mockUserProfileRepo,
+            ),
+          ],
+        );
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Mot de passe actuel'),
+          'mon_mot_de_passe',
+        );
+        await tester.pump();
+        await tester.tap(find.byType(Checkbox));
+        await tester.pump();
+
+        await tester.tap(
+          find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+        );
+        await tester.pumpAndSettle();
+
+        final l10n = AppLocalizationsFr();
+        expect(
+          find.text(l10n.errorCodeLastAdminDeletionForbidden),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

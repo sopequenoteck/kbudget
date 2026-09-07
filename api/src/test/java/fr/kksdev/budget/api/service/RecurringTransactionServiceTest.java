@@ -247,7 +247,7 @@ class RecurringTransactionServiceTest {
 
         assertThatThrownBy(() -> recurringTransactionService.validate(recurringId, userId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("La transaction récurrente est désactivée");
+                .hasMessage("The recurring transaction is disabled");
     }
 
     @Test
@@ -318,7 +318,7 @@ class RecurringTransactionServiceTest {
 
         assertThatThrownBy(() -> recurringTransactionService.skip(recurringId, userId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("La transaction récurrente est désactivée");
+                .hasMessage("The recurring transaction is disabled");
     }
 
     @Test
@@ -359,6 +359,6 @@ class RecurringTransactionServiceTest {
 
         assertThatThrownBy(() -> recurringTransactionService.deactivate(recurringId, userId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("La transaction récurrente est déjà désactivée");
+                .hasMessage("The recurring transaction is already disabled");
     }
 }

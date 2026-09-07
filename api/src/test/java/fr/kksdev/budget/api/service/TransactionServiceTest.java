@@ -210,7 +210,7 @@ class TransactionServiceTest {
 
         assertThatThrownBy(() -> transactionService.getById(transactionId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Transaction non trouvée");
+                .hasMessage("Transaction not found");
     }
 
     @Test
@@ -223,7 +223,7 @@ class TransactionServiceTest {
 
         assertThatThrownBy(() -> transactionService.getById(transactionId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Transaction non trouvée");
+                .hasMessage("Transaction not found");
     }
 
     @Test
@@ -330,7 +330,7 @@ class TransactionServiceTest {
 
         assertThatThrownBy(() -> transactionService.update(transactionId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("type d'une transaction liée à une dette");
+                .hasMessageContaining("type of a debt-linked transaction");
     }
 
     @Test

@@ -179,7 +179,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.create(request, userId))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Un budget existe déjà pour cette catégorie");
+                .hasMessage("A budget already exists for this category");
 
         verify(budgetRepository, never()).save(any());
     }
@@ -256,7 +256,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.update(budgetId, request, userId))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Un budget existe déjà pour cette catégorie");
+                .hasMessage("A budget already exists for this category");
 
         verify(budgetRepository, never()).save(any());
     }
@@ -292,7 +292,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.delete(budgetId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Budget non trouvé");
+                .hasMessage("Budget not found");
     }
 
     @Test
@@ -302,7 +302,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.create(request, userId))
                 .isInstanceOf(FeatureDisabledException.class)
-                .hasMessage("Fonctionnalité BUDGETS désactivée");
+                .hasMessage("Feature BUDGETS is disabled");
     }
 
     @Test
@@ -790,7 +790,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.getHistory(currentMonth, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Seuls les mois passés sont autorisés");
+                .hasMessage("Only past months are allowed");
     }
 
     @Test
@@ -799,7 +799,7 @@ class BudgetServiceTest {
 
         assertThatThrownBy(() -> budgetService.getHistory(futureMonth, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Seuls les mois passés sont autorisés");
+                .hasMessage("Only past months are allowed");
     }
 
     @Test

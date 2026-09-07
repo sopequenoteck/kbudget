@@ -43,7 +43,7 @@ public class InvitationService {
     @Transactional
     public void revoke(Long id, User admin) {
         Invitation invitation = invitationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Invitation introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("Invitation not found"));
         invitation.setRevokedAt(Instant.now());
         log.info("Admin action: invitation.revoke by {} target=invitation:{}", admin.getEmail(), id);
     }

@@ -23,11 +23,26 @@ interface ValidationErrorDetail {
 ```json
 {
   "error": "NOT_FOUND",
-  "message": "Transaction non trouvee"
+  "message": "Transaction not found"
 }
 ```
 
-`error` est un identifiant machine stable. `message` est destine a l'affichage et peut reprendre un message metier ou de validation. Un consommateur doit brancher sa logique sur `error`, jamais sur `message`.
+`error` est un identifiant machine stable : c'est le **seul** champ sur lequel un
+client doit brancher quoi que ce soit, sa logique comme son affichage.
+
+**`message` est un champ de diagnostic** (KKS-324). Il est destine aux journaux
+et au debogage, jamais a l'ecran. Il est redige en anglais technique, sa
+formulation n'est couverte par aucune garantie de compatibilite, et il peut
+changer sans preavis. Tout client derive donc le texte qu'il presente a
+l'utilisateur du code porte par `error`, via son propre catalogue de libelles —
+c'est ce que font le client Angular (`ApiErrorService`) et le client Flutter
+(`errorLabel`). Un code absent du catalogue tombe sur un libelle generique : la
+politique de compatibilite interdit de retirer un champ de reponse, pas
+d'ajouter un code.
+
+`message` n'est pas non plus un identifiant : deux erreurs distinctes peuvent
+partager le meme texte, et le meme code peut porter des textes differents selon
+l'appel.
 
 ### Validation des champs
 
@@ -58,36 +73,36 @@ Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devi
 
 ## Matrice des erreurs gerees
 
-| Categorie | HTTP | `error` | Message public |
+| Categorie | HTTP | `error` | `message` servi (diagnostic) |
 |---|---:|---|---|
 | Argument ou etat invalide | 400 | `BAD_REQUEST` | Message metier, avec fallback public |
 | Validation Bean Validation | 400 | `VALIDATION_ERROR` | Message agrege et `details` structures par champ |
-| Corps JSON illisible | 400 | `MALFORMED_REQUEST` | `Requete invalide` |
+| Corps JSON illisible | 400 | `MALFORMED_REQUEST` | `Invalid request` |
 | Format d'image | 400 | `INVALID_IMAGE_FORMAT` | Message specialise existant |
 | Format d'export | 400 | `INVALID_EXPORT_FORMAT` | Message specialise existant |
 | Mot de passe inchange | 400 | `PASSWORD_UNCHANGED` | Message specialise existant |
 | Confirmation manquante | 400 | `CONFIRMATION_REQUIRED` | Message specialise existant |
 | Mot de passe incorrect | 401 | `PASSWORD_INCORRECT` | Message specialise existant |
-| Authentification absente ou invalide | 401 | `UNAUTHENTICATED` | `Authentification requise` |
+| Authentification absente ou invalide | 401 | `UNAUTHENTICATED` | `Authentication required` |
 | Refresh token expire | 401 | `TOKEN_EXPIRED` | Message specialise existant |
 | Refresh token revoque | 401 | `TOKEN_REVOKED` | Message specialise existant |
 | Reutilisation de refresh token | 401 | `TOKEN_REUSE_DETECTED` | Message specialise existant |
 | Refresh token invalide | 401 | `TOKEN_INVALID` | Message specialise existant |
-| Acces refuse | 403 | `ACCESS_DENIED` | `Accès refusé` ou message public du handler |
+| Acces refuse | 403 | `ACCESS_DENIED` | `Access denied` ou message du handler |
 | Reset obligatoire avant acces | 403 | `PASSWORD_RESET_REQUIRED` | Message public specialise |
 | Fonctionnalite desactivee | 403 | `FEATURE_DISABLED` | Message metier, avec fallback public |
 | Reset non requis | 403 | `PASSWORD_RESET_NOT_REQUIRED` | Message specialise existant |
 | Suppression du dernier admin | 403 | `LAST_ADMIN_DELETION_FORBIDDEN` | Message specialise existant |
 | Ressource absente | 404 | `NOT_FOUND` | Message metier, avec fallback public |
-| Route inconnue | 404 | `NOT_FOUND` | `Ressource introuvable` |
+| Route inconnue | 404 | `NOT_FOUND` | `Resource not found` |
 | Avatar absent | 404 | `AVATAR_NOT_FOUND` | Message specialise existant |
 | Conflit metier generique | 409 | `CONFLICT` | Message metier, avec fallback public |
-| Desactivation du dernier admin | 409 | `LAST_ADMIN_CANNOT_BE_DISABLED` | `Impossible de désactiver le dernier admin actif.` |
-| Email deja utilise | 409 | `EMAIL_ALREADY_EXISTS` | `Cet email est déjà utilisé par un autre utilisateur.` |
+| Desactivation du dernier admin | 409 | `LAST_ADMIN_CANNOT_BE_DISABLED` | `The last active administrator cannot be disabled.` |
+| Email deja utilise | 409 | `EMAIL_ALREADY_EXISTS` | `This email is already used by another user.` |
 | Fichier trop volumineux | 413 | `FILE_TOO_LARGE` | Message specialise existant |
 | Profil CSV absent | 422 | `CSV_PROFILE_NOT_FOUND` | Message metier, avec fallback public |
-| Trop de tentatives d'authentification | 429 | `TOO_MANY_REQUESTS` | `Trop de tentatives. Réessayez dans quelques instants.` |
-| Erreur inattendue | 500 | `INTERNAL_ERROR` | `Une erreur interne est survenue` |
+| Trop de tentatives d'authentification | 429 | `TOO_MANY_REQUESTS` | `Too many attempts. Please try again shortly.` |
+| Erreur inattendue | 500 | `INTERNAL_ERROR` | `An internal error occurred` |
 
 Les erreurs 500 sont journalisees avec leur trace complete cote serveur. Le corps public ne reprend jamais le message, la cause, le type ou la trace de l'exception.
 
@@ -111,7 +126,7 @@ Au-dela du quota, la reponse suit le contrat unifie :
 
 ```json
 HTTP 429
-{ "error": "TOO_MANY_REQUESTS", "message": "Trop de tentatives. Réessayez dans quelques instants." }
+{ "error": "TOO_MANY_REQUESTS", "message": "Too many attempts. Please try again shortly." }
 ```
 
 **La limitation porte sur l'IP, jamais sur le compte.** Verrouiller un compte

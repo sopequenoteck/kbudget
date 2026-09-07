@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -20,6 +13,7 @@ import {
 
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
+import { ApiErrorService } from '../../../../core/services/api-error';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
 import {
@@ -33,7 +27,9 @@ import {
   selector: 'app-accept-invite',
   standalone: true,
   imports: [ReactiveFormsModule, FormField, AuthShell],
-  viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser, phosphorCoin, phosphorGlobe })],
+  viewProviders: [
+    provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser, phosphorCoin, phosphorGlobe }),
+  ],
   templateUrl: './accept-invite.html',
   styleUrl: './accept-invite.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +37,7 @@ import {
 export class AcceptInvite implements OnInit {
   private readonly invitationService = inject(InvitationService);
   private readonly authService = inject(AuthService);
+  private readonly apiError = inject(ApiErrorService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
@@ -51,10 +48,22 @@ export class AcceptInvite implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly timezones = [
-    'Europe/Paris', 'Europe/London', 'Europe/Berlin', 'Europe/Madrid',
-    'Europe/Rome', 'Europe/Brussels', 'Africa/Casablanca', 'Africa/Lome',
-    'Africa/Tunis', 'Africa/Lagos', 'Africa/Abidjan', 'America/New_York',
-    'America/Chicago', 'America/Los_Angeles', 'Asia/Tokyo', 'Asia/Shanghai',
+    'Europe/Paris',
+    'Europe/London',
+    'Europe/Berlin',
+    'Europe/Madrid',
+    'Europe/Rome',
+    'Europe/Brussels',
+    'Africa/Casablanca',
+    'Africa/Lome',
+    'Africa/Tunis',
+    'Africa/Lagos',
+    'Africa/Abidjan',
+    'America/New_York',
+    'America/Chicago',
+    'America/Los_Angeles',
+    'Asia/Tokyo',
+    'Asia/Shanghai',
   ];
 
   readonly currencies = [
@@ -71,7 +80,14 @@ export class AcceptInvite implements OnInit {
   readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
 
   readonly form = this.fb.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(PASSWORD_MIN_LENGTH),
+        Validators.maxLength(PASSWORD_MAX_LENGTH),
+      ],
+    ],
     displayName: ['', [Validators.required, Validators.maxLength(100)]],
     currency: ['EUR', [Validators.required]],
     timezone: [this.detectTimezone(), [Validators.required]],
@@ -116,7 +132,7 @@ export class AcceptInvite implements OnInit {
       if (httpErr?.status === 404) {
         this.error.set('Lien invalide, expiré, déjà utilisé ou révoqué.');
       } else if (httpErr?.status === 400) {
-        this.error.set(httpErr.error?.message ?? 'Données invalides. Vérifiez le formulaire.');
+        this.error.set(this.apiError.label(httpErr, 'Données invalides. Vérifiez le formulaire.'));
       } else {
         this.error.set('Une erreur est survenue. Veuillez réessayer.');
       }

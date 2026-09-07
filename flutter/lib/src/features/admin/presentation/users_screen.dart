@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_list_state.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_notifier.dart';
 import 'package:k_budget/src/features/admin/application/invitation_list_state.dart';
@@ -16,6 +17,7 @@ import 'package:k_budget/src/features/admin/presentation/invite_dialog.dart';
 import 'package:k_budget/src/features/admin/presentation/widgets/admin_user_list_item.dart';
 import 'package:k_budget/src/features/admin/presentation/widgets/invitation_list_item.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class UsersScreen extends ConsumerStatefulWidget {
   const UsersScreen({super.key});
@@ -97,19 +99,15 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
       await ref.read(adminUsersNotifierProvider.notifier).disable(id);
     } on DioException catch (e) {
       if (!mounted) return;
-      final errorCode = e.response?.data?['error'] as String?;
-      if (e.response?.statusCode == 409 &&
-          errorCode == 'LAST_ADMIN_CANNOT_BE_DISABLED') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Impossible de désactiver le dernier administrateur actif.'),
-          ),
-        );
-        return;
-      }
+      // Le code seul suffit : tester en plus `statusCode == 409` doublait le
+      // contrat sans rien y ajouter (KKS-324).
+      final message = errorLabel(
+        AppLocalizations.of(context)!,
+        apiErrorCode(e),
+        fallback: 'Erreur lors de la désactivation',
+      );
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la désactivation')),
+        SnackBar(content: Text(message)),
       );
     } on Exception {
       if (!mounted) return;

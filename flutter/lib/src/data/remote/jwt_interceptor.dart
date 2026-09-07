@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 
 /// Dio interceptor that manages JWT authentication.
@@ -59,9 +60,7 @@ class JwtInterceptor extends Interceptor {
     if (err.response?.statusCode == 403) {
       // Discriminer du 403 ordinaire (ex: ACCESS_DENIED sur une route admin) :
       // seul le code d'erreur PASSWORD_RESET_REQUIRED doit rediriger.
-      final body = err.response?.data;
-      final errorCode = body is Map ? body['error'] as String? : null;
-      if (errorCode == 'PASSWORD_RESET_REQUIRED') {
+      if (apiErrorCode(err) == 'PASSWORD_RESET_REQUIRED') {
         onPasswordResetRequired?.call();
       }
       return handler.next(err);

@@ -42,7 +42,7 @@ public class AdminUserService {
     public void disable(UUID userId, User admin) {
         activeAdminInvariantLock.acquire();
         User target = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         guardLastActiveAdmin(target);
         target.setDisabledAt(LocalDateTime.now());
         userRepository.save(target);
@@ -53,7 +53,7 @@ public class AdminUserService {
     public void enable(UUID userId, User admin) {
         activeAdminInvariantLock.acquire();
         User target = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         target.setDisabledAt(null);
         userRepository.save(target);
         log.info("Admin action: user.enable by {} target=user:{}", admin.getEmail(), userId);

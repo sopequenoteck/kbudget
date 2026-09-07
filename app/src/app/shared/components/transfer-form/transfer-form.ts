@@ -23,6 +23,7 @@ import { AccountService } from '../../../core/services/account';
 import { TransactionService } from '../../../core/services/transaction';
 import { ModalService } from '../../../core/services/modal.service';
 import { DevLogger } from '../../../core/services/dev-logger';
+import { ApiErrorService } from '../../../core/services/api-error';
 import { Account, TransferRequest } from '../../../core/models/account.model';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
@@ -40,6 +41,7 @@ export class TransferForm {
   private readonly transactionService = inject(TransactionService);
   private readonly modalService = inject(ModalService);
   private readonly logger = inject(DevLogger);
+  private readonly apiError = inject(ApiErrorService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -105,7 +107,7 @@ export class TransferForm {
       this.saved.emit();
     } catch (err: unknown) {
       const httpErr = err as { error?: { message?: string } };
-      const message = httpErr?.error?.message ?? 'Erreur lors du virement';
+      const message = this.apiError.label(httpErr, 'Erreur lors du virement');
       this.errorMessage.set(message);
       this.logger.error('Transfer failed:', err);
     } finally {
