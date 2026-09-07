@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +46,7 @@ class ImportServiceTest {
 
     /** Date fixe : un test date verifie sinon un comportement different
      * selon le jour ou il tourne (meme raison que ClockConfig, KKS-355). */
-    private static final LocalDate FIXED_DATE = LocalDate.of(2026, 3, 12);
+    private static final LocalDate FIXED_DATE = LocalDate.of(2026, Month.MARCH, 12);
 
     @Mock
     private AccountRepository accountRepository;
