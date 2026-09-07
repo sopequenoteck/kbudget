@@ -38,6 +38,8 @@ public class GlobalExceptionHandler {
 
     private static final String INVALID_REQUEST_MESSAGE = "Invalid request";
 
+    private static final String RESOURCE_NOT_FOUND_MESSAGE = "Resource not found";
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
@@ -91,13 +93,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
         log.warn("Entity not found: {}", ex.getMessage());
-        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), "Resource not found");
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), RESOURCE_NOT_FOUND_MESSAGE);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
         log.warn("No handler for {} {}", ex.getHttpMethod(), ex.getResourcePath());
-        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found", "Resource not found");
+        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", RESOURCE_NOT_FOUND_MESSAGE, RESOURCE_NOT_FOUND_MESSAGE);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

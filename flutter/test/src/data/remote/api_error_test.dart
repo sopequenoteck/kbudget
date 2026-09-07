@@ -113,5 +113,46 @@ void main() {
 
       expect(label, 'Repli contextuel');
     });
+
+    // Table couvrant chaque branche du switch de errorLabel. La regression
+    // reelle a empecher : un code du catalogue qui retombe sur le libelle
+    // generique, signe qu'un getter AppLocalizations a ete oublie.
+    final catalogueLabels = <String, String Function(AppLocalizations)>{
+      'BAD_REQUEST': (l) => l.errorCodeBadRequest,
+      'VALIDATION_ERROR': (l) => l.errorCodeValidation,
+      'MALFORMED_REQUEST': (l) => l.errorCodeMalformedRequest,
+      'PASSWORD_INCORRECT': (l) => l.errorCodePasswordIncorrect,
+      'PASSWORD_UNCHANGED': (l) => l.errorCodePasswordUnchanged,
+      'CONFIRMATION_REQUIRED': (l) => l.errorCodeConfirmationRequired,
+      'UNAUTHENTICATED': (l) => l.errorCodeUnauthenticated,
+      'TOKEN_EXPIRED': (l) => l.errorCodeTokenExpired,
+      'TOKEN_REVOKED': (l) => l.errorCodeTokenRevoked,
+      'TOKEN_REUSE_DETECTED': (l) => l.errorCodeTokenReuseDetected,
+      'TOKEN_INVALID': (l) => l.errorCodeTokenInvalid,
+      'ACCESS_DENIED': (l) => l.errorCodeAccessDenied,
+      'PASSWORD_RESET_REQUIRED': (l) => l.errorCodePasswordResetRequired,
+      'PASSWORD_RESET_NOT_REQUIRED': (l) => l.errorCodePasswordResetNotRequired,
+      'FEATURE_DISABLED': (l) => l.errorCodeFeatureDisabled,
+      'LAST_ADMIN_DELETION_FORBIDDEN': (l) =>
+          l.errorCodeLastAdminDeletionForbidden,
+      'NOT_FOUND': (l) => l.errorCodeNotFound,
+      'CONFLICT': (l) => l.errorCodeConflict,
+      'LAST_ADMIN_CANNOT_BE_DISABLED': (l) =>
+          l.errorCodeLastAdminCannotBeDisabled,
+      'EMAIL_ALREADY_EXISTS': (l) => l.errorCodeEmailAlreadyExists,
+      'TOO_MANY_REQUESTS': (l) => l.errorCodeTooManyRequests,
+      'INTERNAL_ERROR': (l) => l.errorCodeInternal,
+    };
+
+    for (final entry in catalogueLabels.entries) {
+      final code = entry.key;
+      test('should_returnCatalogueLabel_when_codeIs$code', () {
+        final label = errorLabel(l10n, code);
+
+        expect(label, entry.value(l10n));
+        expect(label, isNotEmpty);
+        expect(label, isNot(l10n.errorGeneric));
+      });
+    }
   });
 }

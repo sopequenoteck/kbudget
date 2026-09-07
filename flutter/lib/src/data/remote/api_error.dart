@@ -45,6 +45,19 @@ String? apiErrorCode(DioException e) {
 /// Un `switch` exhaustif plutot qu'une table de closures : les getters de
 /// [AppLocalizations] sont generes, l'analyseur signale ici un getter disparu
 /// la ou une table repousserait l'erreur a l'execution.
+///
+/// **Le catalogue couvre 22 des 27 codes servis par l'API, deliberement.**
+/// Manquent `AVATAR_NOT_FOUND`, `CSV_PROFILE_NOT_FOUND`, `FILE_TOO_LARGE`,
+/// `INVALID_EXPORT_FORMAT` et `INVALID_IMAGE_FORMAT` : aucun ecran Flutter ne
+/// passe par cette fonction pour les afficher. L'upload d'avatar a son propre
+/// `_mapError` dans `avatar_picker.dart`, et l'import CSV comme l'export n'ont
+/// pas de surface Flutter. Le principe VIII de la constitution n'impose aucune
+/// parite avec Angular, dont le catalogue les couvre tous.
+///
+/// Ces cinq codes retombent donc sur [AppLocalizations.errorGeneric]. Ce n'est
+/// pas un oubli : ajouter des branches sans site consommateur creerait le code
+/// mort que ce ticket a precisement supprime (`error_dto.dart`). A ajouter le
+/// jour ou un ecran Flutter en aura besoin, pas avant.
 String errorLabel(
   AppLocalizations l10n,
   String? code, {

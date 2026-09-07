@@ -91,7 +91,7 @@ export class ApiErrorService {
     if (typeof body !== 'object' || body === null || Array.isArray(body)) {
       return null;
     }
-    return body as ApiErrorBody;
+    return body;
   }
 
   private extractCode(error: unknown): string | null {
