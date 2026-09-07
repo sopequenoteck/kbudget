@@ -43,6 +43,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ImportServiceTest {
 
+    /** Date fixe : un test date verifie sinon un comportement different
+     * selon le jour ou il tourne (meme raison que ClockConfig, KKS-355). */
+    private static final LocalDate FIXED_DATE = LocalDate.of(2026, 3, 12);
+
     @Mock
     private AccountRepository accountRepository;
 
@@ -116,7 +120,7 @@ class ImportServiceTest {
                 .rawLabel("CARREFOUR")
                 .cleanLabel("Carrefour")
                 .amount(new BigDecimal("10.00"))
-                .date(LocalDate.now())
+                .date(FIXED_DATE)
                 .transactionType(TransactionType.DEPENSE)
                 .status(status)
                 .build();
@@ -140,7 +144,9 @@ class ImportServiceTest {
                 .thenReturn(Optional.empty());
         when(csvParsingService.detectProfile("SG")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> importService.upload(validCsvFile(), accountId, userId))
+        var file = validCsvFile();
+
+        assertThatThrownBy(() -> importService.upload(file, accountId, userId))
                 .isInstanceOf(CsvProfileNotFoundException.class)
                 .hasMessage("No import profile available for bank: SG");
     }
@@ -208,7 +214,9 @@ class ImportServiceTest {
     void should_throw_when_accountNotFoundOrInactiveOnUpload() {
         when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> importService.upload(validCsvFile(), accountId, userId))
+        var file = validCsvFile();
+
+        assertThatThrownBy(() -> importService.upload(file, accountId, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Account not found or inactive");
     }
@@ -223,7 +231,9 @@ class ImportServiceTest {
         when(importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING))
                 .thenReturn(Optional.of(existingDraft));
 
-        assertThatThrownBy(() -> importService.upload(validCsvFile(), accountId, userId))
+        var file = validCsvFile();
+
+        assertThatThrownBy(() -> importService.upload(file, accountId, userId))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("An import is already in progress for this account: " + draftId);
     }

@@ -742,7 +742,9 @@ class AccountServiceTest {
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
 
-        assertThatThrownBy(() -> accountService.adjustBalance(accountId, new BigDecimal("100.00"), userId))
+        var amount = new BigDecimal("100.00");
+
+        assertThatThrownBy(() -> accountService.adjustBalance(accountId, amount, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Cannot adjust the balance of an inactive account");
     }
