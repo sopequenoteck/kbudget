@@ -145,7 +145,9 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
       }
 
       const nextDate = this.getNextRenewalRaw(sub);
-      const diffDays = Math.round((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round(
+        (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
 
       if (diffDays === 0) {
         add('today', "Aujourd'hui", 'today', sub);
@@ -210,7 +212,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     this.activeCurrency.set(currency);
 
     const current = this.preferenceService.currencies();
-    const reordered = [currency, ...current.filter((c) => c !== currency)];
+    const reordered = [currency, ...current.filter(c => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
     if (this.persistTimeout) clearTimeout(this.persistTimeout);
@@ -244,16 +246,15 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     const nextDate = this.getNextRenewalRaw(subscription);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const diffDays = Math.round((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(
+      (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (diffDays === 0) return "aujourd'hui";
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'short',
-    }).format(nextDate);
+    return new Intl.DateTimeFormat(this.languageService.displayLocale(), { day: 'numeric', month: 'short' }).format(nextDate);
   }
 
   formatAmount(subscription: Subscription): string {

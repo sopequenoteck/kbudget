@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, inject } from '@angular/core';
 import { LanguageService } from '../../../core/services/language';
 
 @Component({
@@ -64,13 +64,10 @@ export class MonthSelector {
   readonly monthChange = output<{ month: number; year: number }>();
 
   readonly monthLabel = computed(() =>
-    new Date(this.year(), this.month() - 1).toLocaleDateString(
-      this.languageService.displayLocale(),
-      {
-        month: 'long',
-        year: 'numeric',
-      },
-    ),
+    new Date(this.year(), this.month() - 1).toLocaleDateString(this.languageService.displayLocale(), {
+      month: 'long',
+      year: 'numeric',
+    }),
   );
 
   prevMonth(): void {

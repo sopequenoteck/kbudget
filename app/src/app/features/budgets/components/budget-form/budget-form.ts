@@ -32,12 +32,7 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { ApiErrorService } from '../../../../core/services/api-error';
 import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
-import {
-  isFieldInvalid,
-  validateForm,
-  normalizeDecimal,
-  decimalMin,
-} from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
@@ -110,10 +105,7 @@ export class BudgetForm {
 
   readonly form = new FormGroup({
     categoryId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    montant: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, decimalMin(0.01)],
-    }),
+    montant: new FormControl('', { nonNullable: true, validators: [Validators.required, decimalMin(0.01)] }),
     frequence: new FormControl('MENSUEL', { nonNullable: true, validators: [Validators.required] }),
     currency: new FormControl('EUR', { nonNullable: true }),
     seuilNotification: new FormControl(80, {
@@ -147,12 +139,7 @@ export class BudgetForm {
   readonly currencySymbol = computed(() => {
     const currency = this.form.get('currency')?.value || 'EUR';
     return (0)
-      .toLocaleString(this.languageService.displayLocale(), {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })
+      .toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -236,10 +223,7 @@ export class BudgetForm {
   async onDelete(): Promise<void> {
     const b = this.budget();
     if (!b) return;
-    const amount = b.montant.toLocaleString(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency: b.currency,
-    });
+    const amount = b.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: b.currency });
     const ok = await this.confirmService.confirm({
       title: `${b.category.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer ce budget ?',

@@ -11,12 +11,7 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorArrowLeft,
-  phosphorCheckCircle,
-  phosphorPlus,
-  phosphorSquaresFour,
-} from '@ng-icons/phosphor-icons/regular';
+import { phosphorArrowLeft, phosphorCheckCircle, phosphorPlus, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
 import { BudgetService } from '../../../../core/services/budget';

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -19,11 +25,7 @@ import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
-import {
-  ImportDraft,
-  ImportDraftLine,
-  ImportLineUpdate,
-} from '../../../../core/models/import.model';
+import { ImportDraft, ImportDraftLine, ImportLineUpdate } from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
 
 const BATCH_ERROR = "L'action groupée a échoué : aucune ligne n'a été modifiée.";
@@ -408,10 +410,6 @@ export class ImportReview {
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString(this.languageService.displayLocale(), {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    return d.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

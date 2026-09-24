@@ -11,6 +11,7 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { ApiErrorService } from '../../../../core/services/api-error';
 import { Budget } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 function category(id: string): Category {
   return { id, nom: id, icone: '🏷', couleur: '#000000' } as Category;
@@ -36,9 +37,13 @@ describe('BudgetForm', () => {
   const setup = (): BudgetForm => {
     TestBed.configureTestingModule({
       providers: [
+        provideTranslocoTesting(),
         { provide: CategoryService, useValue: { getAll: vi.fn().mockReturnValue(of([])) } },
         { provide: BudgetService, useValue: { getAll: vi.fn().mockReturnValue(of([])) } },
-        { provide: PreferenceService, useValue: { currencies: signal(['EUR']) } },
+        {
+          provide: PreferenceService,
+          useValue: { currencies: signal(['EUR']), language: signal(null) },
+        },
         { provide: ModalService, useValue: { editingEntity } },
         { provide: ConfirmService, useValue: {} },
         { provide: ApiErrorService, useValue: {} },

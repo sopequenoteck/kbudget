@@ -20,11 +20,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { DevLogger } from '../../core/services/dev-logger';
 import { Debt, DebtType } from '../../core/models/debt.model';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  phosphorHandCoins,
-  phosphorHandshake,
-  phosphorClock,
-} from '@ng-icons/phosphor-icons/regular';
+import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
@@ -165,7 +161,9 @@ export class Debts implements AfterViewInit, OnDestroy {
 
       const dueDate = new Date(debt.dueDate);
       dueDate.setHours(0, 0, 0, 0);
-      const diffDays = Math.round((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round(
+        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
 
       if (diffDays < 0) {
         add('overdue', 'En retard', 'overdue', debt);
@@ -229,7 +227,7 @@ export class Debts implements AfterViewInit, OnDestroy {
     this.activeCurrency.set(currency);
 
     const current = this.preferenceService.currencies();
-    const reordered = [currency, ...current.filter((c) => c !== currency)];
+    const reordered = [currency, ...current.filter(c => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
     if (this.persistTimeout) clearTimeout(this.persistTimeout);
@@ -271,17 +269,16 @@ export class Debts implements AfterViewInit, OnDestroy {
     today.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0);
 
-    const diffDays = Math.round((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(
+      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (diffDays < 0) return `${Math.abs(diffDays)} j. en retard`;
     if (diffDays === 0) return "aujourd'hui";
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'short',
-    }).format(dueDate);
+    return new Intl.DateTimeFormat(this.languageService.displayLocale(), { day: 'numeric', month: 'short' }).format(dueDate);
   }
 
   getAmountClass(debt: Debt): string {

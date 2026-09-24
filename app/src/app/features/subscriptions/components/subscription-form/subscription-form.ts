@@ -6,8 +6,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
 } from '@angular/core';
@@ -42,51 +40,17 @@ import {
   Subscription,
   SubscriptionRequest,
 } from '../../../../core/models/subscription.model';
-import {
-  isFieldInvalid,
-  validateForm,
-  normalizeDecimal,
-  decimalMin,
-} from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
-// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite des arguments et
-// ne rappellerait jamais `transform` au seul changement de langue.
-@Pipe({ name: 'shortDate', standalone: true, pure: false })
-export class ShortDatePipe implements PipeTransform {
-  private readonly languageService = inject(LanguageService);
-
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'short',
-    });
-  }
-}
-
 @Component({
   selector: 'app-subscription-form',
-  imports: [
-    ReactiveFormsModule,
-    CategorySelect,
-    InlineDatePicker,
-    SelectPicker,
-    NgIcon,
-    ShortDatePipe,
-  ],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -159,13 +123,15 @@ export class SubscriptionForm {
 
   readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
 
-  readonly dateDebutSignal = toSignal(this.form.get('dateDebut')!.valueChanges, {
-    initialValue: this.form.get('dateDebut')!.value,
-  });
+  readonly dateDebutSignal = toSignal(
+    this.form.get('dateDebut')!.valueChanges,
+    { initialValue: this.form.get('dateDebut')!.value }
+  );
 
-  private readonly accountIdSignal = toSignal(this.form.get('accountId')!.valueChanges, {
-    initialValue: this.form.get('accountId')!.value,
-  });
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
 
   readonly selectedAccount = computed(() => {
     const accountId = this.accountIdSignal();
@@ -179,12 +145,7 @@ export class SubscriptionForm {
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? 'EUR';
     return (0)
-      .toLocaleString(this.languageService.displayLocale(), {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })
+      .toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .replace('0', '')
       .trim();
   });
@@ -196,9 +157,10 @@ export class SubscriptionForm {
   readonly categories = this.allCategories.asReadonly();
   readonly categoryCreating = signal(false);
 
-  private readonly categoryIdSignal = toSignal(this.form.get('categoryId')!.valueChanges, {
-    initialValue: this.form.get('categoryId')!.value,
-  });
+  private readonly categoryIdSignal = toSignal(
+    this.form.get('categoryId')!.valueChanges,
+    { initialValue: this.form.get('categoryId')!.value }
+  );
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.categoryIdSignal();
@@ -219,12 +181,9 @@ export class SubscriptionForm {
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     // Fetch initial des catégories
-    this.categoryService
-      .getAll()
-      .pipe(takeUntilDestroyed())
-      .subscribe((cats) => {
-        this.allCategories.set(cats);
-      });
+    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
+      this.allCategories.set(cats);
+    });
 
     // Reset categoryCreating quand l'expand catégorie se ferme (T-037 equivalent)
     effect(() => {
@@ -256,10 +215,8 @@ export class SubscriptionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update((cats) =>
-      [...cats, cat].sort((a, b) =>
-        a.nom.localeCompare(b.nom, this.languageService.displayLocale()),
-      ),
+    this.allCategories.update(cats =>
+      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, this.languageService.displayLocale()))
     );
   }
 
@@ -326,10 +283,7 @@ export class SubscriptionForm {
     const sub = this.subscription();
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
-    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency,
-    });
+    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency });
     const ok = await this.confirmService.confirm({
       title: `${sub.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cet abonnement ?',

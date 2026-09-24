@@ -8,8 +8,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
   viewChild,
@@ -50,52 +48,17 @@ import {
 } from '../../../../core/models/transaction.model';
 import { RecurringTransactionRequest } from '../../../../core/models/recurring-transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
-import {
-  isFieldInvalid,
-  validateForm,
-  normalizeDecimal,
-  decimalMin,
-} from '../../../../shared/utils/form.utils';
+import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
 
 type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' | null;
 
-// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite des arguments et
-// ne rappellerait jamais `transform` au seul changement de langue.
-@Pipe({ name: 'shortDate', standalone: true, pure: false })
-export class ShortDatePipe implements PipeTransform {
-  private readonly languageService = inject(LanguageService);
-
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'short',
-    });
-  }
-}
-
 @Component({
   selector: 'app-transaction-form',
-  imports: [
-    ReactiveFormsModule,
-    Autocomplete,
-    CategorySelect,
-    InlineDatePicker,
-    SelectPicker,
-    NgIcon,
-    ShortDatePipe,
-  ],
+  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -135,9 +98,7 @@ export class TransactionForm {
 
   readonly amountInput = viewChild<ElementRef<HTMLInputElement>>('amountInput');
 
-  readonly isEditing = computed(
-    () => this.transaction() !== null && !this.modalService.asRecurring(),
-  );
+  readonly isEditing = computed(() => this.transaction() !== null && !this.modalService.asRecurring());
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly libelleSuggestions = signal<string[]>([]);
@@ -147,13 +108,7 @@ export class TransactionForm {
   readonly amountWidth: Signal<string>;
 
   readonly frequencyOptions: SelectPickerItem[] = [
-    {
-      id: Frequency.HEBDOMADAIRE,
-      label: 'Hebdomadaire',
-      icon: null,
-      secondaryText: null,
-      color: null,
-    },
+    { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
     { id: Frequency.MENSUEL, label: 'Mensuel', icon: null, secondaryText: null, color: null },
     { id: Frequency.ANNUEL, label: 'Annuel', icon: null, secondaryText: null, color: null },
   ];
@@ -189,9 +144,10 @@ export class TransactionForm {
     nextOccurrence: [{ value: '', disabled: true }],
   });
 
-  private readonly accountIdSignal = toSignal(this.form.get('accountId')!.valueChanges, {
-    initialValue: this.form.get('accountId')!.value,
-  });
+  private readonly accountIdSignal = toSignal(
+    this.form.get('accountId')!.valueChanges,
+    { initialValue: this.form.get('accountId')!.value }
+  );
 
   readonly selectedAccount = computed(() => {
     const accountId = this.accountIdSignal();
@@ -203,24 +159,17 @@ export class TransactionForm {
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0)
-      .toLocaleString(this.languageService.displayLocale(), {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })
-      .replace('0', '')
-      .trim();
+    return (0).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
   });
 
   private readonly allCategories = signal<Category[]>([]);
 
   readonly categories = this.allCategories.asReadonly();
 
-  private readonly categoryIdSignal = toSignal(this.form.get('categoryId')!.valueChanges, {
-    initialValue: this.form.get('categoryId')!.value,
-  });
+  private readonly categoryIdSignal = toSignal(
+    this.form.get('categoryId')!.valueChanges,
+    { initialValue: this.form.get('categoryId')!.value }
+  );
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.categoryIdSignal();
@@ -233,13 +182,15 @@ export class TransactionForm {
 
   readonly today = this.localDate();
 
-  readonly dateSignal = toSignal(this.form.get('date')!.valueChanges, {
-    initialValue: this.form.get('date')!.value,
-  });
+  readonly dateSignal = toSignal(
+    this.form.get('date')!.valueChanges,
+    { initialValue: this.form.get('date')!.value }
+  );
 
-  readonly nextOccurrenceSignal = toSignal(this.form.get('nextOccurrence')!.valueChanges, {
-    initialValue: this.form.get('nextOccurrence')!.value,
-  });
+  readonly nextOccurrenceSignal = toSignal(
+    this.form.get('nextOccurrence')!.valueChanges,
+    { initialValue: this.form.get('nextOccurrence')!.value }
+  );
 
   onDateSelected(isoDate: string): void {
     this.form.patchValue({ date: isoDate });
@@ -262,12 +213,9 @@ export class TransactionForm {
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     // Fetch initial des catégories
-    this.categoryService
-      .getAll()
-      .pipe(takeUntilDestroyed())
-      .subscribe((cats) => {
-        this.allCategories.set(cats);
-      });
+    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
+      this.allCategories.set(cats);
+    });
 
     // Toggle récurrence
     effect(() => {
@@ -336,10 +284,8 @@ export class TransactionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update((cats) =>
-      [...cats, cat].sort((a, b) =>
-        a.nom.localeCompare(b.nom, this.languageService.displayLocale()),
-      ),
+    this.allCategories.update(cats =>
+      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, this.languageService.displayLocale()))
     );
   }
 
@@ -359,6 +305,7 @@ export class TransactionForm {
   toggleSection(section: ExpandableSection): void {
     this.expandedSection.update((current) => (current === section ? null : section));
   }
+
 
   async onSubmit(): Promise<void> {
     if (!validateForm(this.form)) return;
@@ -419,10 +366,7 @@ export class TransactionForm {
     const tx = this.transaction();
     if (!tx) return;
     const currency = tx.account?.currency ?? 'EUR';
-    const amount = tx.montant.toLocaleString(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency,
-    });
+    const amount = tx.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency });
     let message = 'Voulez-vous vraiment supprimer cette transaction ?';
     if (tx.transferId) {
       message += '\nLa contrepartie du virement sera aussi supprimée.';

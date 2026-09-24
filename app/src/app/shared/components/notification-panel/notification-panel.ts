@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-  output,
-  computed,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, computed, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LanguageService } from '../../../core/services/language';
 import { Router } from '@angular/router';
@@ -25,10 +16,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification';
-import {
-  type NotificationModel,
-  type NotificationType,
-} from '../../../core/models/notification.model';
+import { type NotificationModel, type NotificationType } from '../../../core/models/notification.model';
 import { DebtService } from '../../../core/services/debt';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
@@ -86,11 +74,7 @@ export class NotificationPanel {
       const date = new Date(dateStr);
       if (date.toDateString() === today.toDateString()) return "Aujourd'hui";
       if (date.toDateString() === yesterday.toDateString()) return 'Hier';
-      return date.toLocaleDateString(this.languageService.displayLocale(), {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
+      return date.toLocaleDateString(this.languageService.displayLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
     };
 
     for (const notification of notifications) {
@@ -206,7 +190,7 @@ export class NotificationPanel {
       this.toastService.success('Occurrence passée');
       this.notificationService.markAsRead(notification.id);
     } catch {
-      this.toastService.error("Impossible de passer l'occurrence");
+      this.toastService.error('Impossible de passer l\'occurrence');
     }
   }
 
@@ -217,7 +201,7 @@ export class NotificationPanel {
       this.toastService.success('Paiement enregistré');
       this.notificationService.markAsRead(notification.id);
     } catch {
-      this.toastService.error("Impossible d'enregistrer le paiement");
+      this.toastService.error('Impossible d\'enregistrer le paiement');
     }
   }
 

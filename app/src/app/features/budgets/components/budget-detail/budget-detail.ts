@@ -107,7 +107,10 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
-    return this.selectedMonth === now.getMonth() + 1 && this.selectedYear === now.getFullYear();
+    return (
+      this.selectedMonth === now.getMonth() + 1 &&
+      this.selectedYear === now.getFullYear()
+    );
   });
 
   readonly overviewBudgetId = computed(() => {
@@ -317,16 +320,8 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const budgetId = this.overviewBudgetId();
     const item = this.budgetItem();
     if (!budgetId) return;
-    const title = item
-      ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: item.currency })}`
-      : 'Ce budget';
-    const ok = await this.confirmService.confirm({
-      title,
-      message: 'Voulez-vous vraiment supprimer ce budget ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
-      icon: 'phosphorChartPie',
-    });
+    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: item.currency })}` : 'Ce budget';
+    const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
     if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(budgetId));

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -23,11 +29,6 @@ import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe'
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
-
-const FREQUENCY_SUFFIXES: Partial<Record<Frequency, string>> = {
-  [Frequency.ANNUEL]: '/an',
-  [Frequency.HEBDOMADAIRE]: '/sem',
-};
 
 @Component({
   selector: 'app-subscription-detail',
@@ -175,18 +176,9 @@ export class SubscriptionDetail {
     const sub = this.subscription();
     if (!sub) return;
 
-    const freq = FREQUENCY_SUFFIXES[sub.frequence] ?? '/mois';
-    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency: sub.currency,
-    });
-    const ok = await this.confirmService.confirm({
-      title: `${sub.nom} — ${amount}${freq}`,
-      message: 'Voulez-vous vraiment supprimer cet abonnement ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
-      icon: 'phosphorRepeat',
-    });
+    const freq = sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
+    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: sub.currency });
+    const ok = await this.confirmService.confirm({ title: `${sub.nom} — ${amount}${freq}`, message: 'Voulez-vous vraiment supprimer cet abonnement ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorRepeat' });
     if (!ok) return;
 
     try {
@@ -211,12 +203,9 @@ export class SubscriptionDetail {
 
   getFrequencyLabel(freq: Frequency): string {
     switch (freq) {
-      case Frequency.HEBDOMADAIRE:
-        return 'Hebdomadaire';
-      case Frequency.MENSUEL:
-        return 'Mensuel';
-      case Frequency.ANNUEL:
-        return 'Annuel';
+      case Frequency.HEBDOMADAIRE: return 'Hebdomadaire';
+      case Frequency.MENSUEL: return 'Mensuel';
+      case Frequency.ANNUEL: return 'Annuel';
     }
   }
 

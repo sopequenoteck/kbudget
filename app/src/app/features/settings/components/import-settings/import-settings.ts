@@ -198,11 +198,7 @@ export class ImportSettings {
 
   formatDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString(this.languageService.displayLocale(), {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    return d.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   private async loadRules(): Promise<void> {

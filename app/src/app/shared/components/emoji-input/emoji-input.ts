@@ -9,7 +9,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-
 import { LanguageService } from '../../../core/services/language';
 
 const PICKER_HEIGHT = 435;
@@ -113,8 +112,6 @@ export class EmojiInput implements AfterViewChecked {
     const pickerEl = new Picker({
       data,
       theme,
-      // emoji-mart ne sert que le fr et l'en (D8, KKS-373) : les deux langues
-      // supportees par LanguageService y correspondent directement.
       locale: this.languageService.activeLanguage(),
       onEmojiSelect: (emoji: { native: string }) => {
         if (emoji.native) {

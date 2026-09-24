@@ -75,7 +75,9 @@ export class DebtDetail {
     return Math.round(((d.montant - d.montantRestant) / d.montant) * 100);
   });
 
-  readonly paymentsTotal = computed(() => this.payments().reduce((acc, p) => acc + p.amount, 0));
+  readonly paymentsTotal = computed(() =>
+    this.payments().reduce((acc, p) => acc + p.amount, 0),
+  );
 
   readonly skeletonItems = Array(4);
 
@@ -147,18 +149,8 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    const amount = d.montantRestant.toLocaleString(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency: d.currency,
-    });
-    const ok = await this.confirmService.confirm({
-      title: `${d.personne} — ${amount} restants`,
-      message:
-        'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
-      icon: 'phosphorHandCoins',
-    });
+    const amount = d.montantRestant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: d.currency });
+    const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
     if (!ok) return;
 
     try {

@@ -12,7 +12,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorTray, phosphorWarning, phosphorChartPie } from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorTray,
+  phosphorWarning,
+  phosphorChartPie,
+} from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 
 import { BudgetService } from '../../../../core/services/budget';
@@ -80,17 +84,17 @@ export class BudgetList implements AfterViewInit, OnDestroy {
 
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
-    return this.selectedMonth() === now.getMonth() + 1 && this.selectedYear() === now.getFullYear();
+    return (
+      this.selectedMonth() === now.getMonth() + 1 &&
+      this.selectedYear() === now.getFullYear()
+    );
   });
 
   readonly selectedMonthLabel = computed(() =>
-    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString(
-      this.languageService.displayLocale(),
-      {
-        month: 'long',
-        year: 'numeric',
-      },
-    ),
+    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString(this.languageService.displayLocale(), {
+      month: 'long',
+      year: 'numeric',
+    }),
   );
 
   readonly activeItems = computed(() =>
@@ -103,8 +107,8 @@ export class BudgetList implements AfterViewInit, OnDestroy {
 
   readonly activeCount = computed(() => this.activeItems().length);
 
-  readonly overBudgetCount = computed(
-    () => this.activeItems().filter((item) => item.percentage > 100).length,
+  readonly overBudgetCount = computed(() =>
+    this.activeItems().filter((item) => item.percentage > 100).length,
   );
 
   readonly unbudgetedTotal = computed(() => this.monthData()?.unbudgetedTotal ?? 0);
@@ -158,7 +162,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
     const convert = (amount: number): number =>
       this.conversionService.convert(amount, from, to) ?? amount;
 
-    return data.items.map((item) => {
+    return data.items.map(item => {
       if (isOverviewItem(item)) {
         return {
           ...item,
@@ -248,7 +252,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
     this.activeCurrency.set(currency);
 
     const current = this.preferenceService.currencies();
-    const reordered = [currency, ...current.filter((c) => c !== currency)];
+    const reordered = [currency, ...current.filter(c => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
     if (this.persistTimeout) clearTimeout(this.persistTimeout);

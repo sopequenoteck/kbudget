@@ -3,9 +3,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { AmountPipe } from './amount.pipe';
 import { RelativeDatePipe } from './relative-date.pipe';
-// Un des trois ShortDatePipe prives (KKS-373) : celui de DebtForm, choisi
-// arbitrairement — les trois partagent le meme correctif.
-import { ShortDatePipe } from '../../features/debts/components/debt-form/debt-form';
+import { ShortDatePipe } from './short-date.pipe';
 import { PreferenceService } from '../../core/services/preference';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
