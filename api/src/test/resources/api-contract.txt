@@ -209,6 +209,7 @@ RESPONSE GET /v1/exchange-rates 200 [].targetCurrency: string
 RESPONSE GET /v1/exchange-rates 200 [].updatedAt: string
 RESPONSE GET /v1/imports/drafts 200 [].accountId: string
 RESPONSE GET /v1/imports/drafts 200 [].accountName: string
+RESPONSE GET /v1/imports/drafts 200 [].alreadyImportedCount: integer
 RESPONSE GET /v1/imports/drafts 200 [].createdAt: string
 RESPONSE GET /v1/imports/drafts 200 [].duplicateCount: integer
 RESPONSE GET /v1/imports/drafts 200 [].expiresAt: string
@@ -221,6 +222,7 @@ RESPONSE GET /v1/imports/drafts 200 [].status: string
 RESPONSE GET /v1/imports/drafts 200 [].totalLines: integer
 RESPONSE GET /v1/imports/drafts/{draftId} 200 accountId: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 accountName: string
+RESPONSE GET /v1/imports/drafts/{draftId} 200 alreadyImportedCount: integer
 RESPONSE GET /v1/imports/drafts/{draftId} 200 createdAt: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 duplicateCount: integer
 RESPONSE GET /v1/imports/drafts/{draftId} 200 expiresAt: string
@@ -235,6 +237,7 @@ RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].duplicateTransactionId: st
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].id: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].lineNumber: integer
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].rawLabel: string
+RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].skipReason: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].status: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].statusMessage: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].suggestRule: boolean
@@ -721,6 +724,7 @@ RESPONSE POST /v1/debts/{id}/snooze 200 rembourse: boolean
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderDate: string
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderTime: string
 RESPONSE POST /v1/debts/{id}/snooze 200 sens: string
+RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 alreadyImportedCount: integer
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 historyId: string
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 importedCount: integer
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 skippedCount: integer
@@ -738,6 +742,7 @@ RESPONSE POST /v1/imports/rules 200 id: string
 RESPONSE POST /v1/imports/rules 200 pattern: string
 RESPONSE POST /v1/imports/upload 200 accountId: string
 RESPONSE POST /v1/imports/upload 200 accountName: string
+RESPONSE POST /v1/imports/upload 200 alreadyImportedCount: integer
 RESPONSE POST /v1/imports/upload 200 createdAt: string
 RESPONSE POST /v1/imports/upload 200 duplicateCount: integer
 RESPONSE POST /v1/imports/upload 200 expiresAt: string
@@ -752,6 +757,7 @@ RESPONSE POST /v1/imports/upload 200 lines[].duplicateTransactionId: string
 RESPONSE POST /v1/imports/upload 200 lines[].id: string
 RESPONSE POST /v1/imports/upload 200 lines[].lineNumber: integer
 RESPONSE POST /v1/imports/upload 200 lines[].rawLabel: string
+RESPONSE POST /v1/imports/upload 200 lines[].skipReason: string
 RESPONSE POST /v1/imports/upload 200 lines[].status: string
 RESPONSE POST /v1/imports/upload 200 lines[].statusMessage: string
 RESPONSE POST /v1/imports/upload 200 lines[].suggestRule: boolean
@@ -765,6 +771,7 @@ RESPONSE POST /v1/imports/upload 200 status: string
 RESPONSE POST /v1/imports/upload 200 totalLines: integer
 RESPONSE POST /v1/imports/upload-with-mapping 200 accountId: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 accountName: string
+RESPONSE POST /v1/imports/upload-with-mapping 200 alreadyImportedCount: integer
 RESPONSE POST /v1/imports/upload-with-mapping 200 createdAt: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 duplicateCount: integer
 RESPONSE POST /v1/imports/upload-with-mapping 200 expiresAt: string
@@ -779,6 +786,7 @@ RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].duplicateTransactionId
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].id: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].lineNumber: integer
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].rawLabel: string
+RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].skipReason: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].status: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].statusMessage: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].suggestRule: boolean
@@ -971,6 +979,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].duplicateTransactio
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].id: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].lineNumber: integer
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].rawLabel: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].skipReason: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].status: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].statusMessage: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].suggestRule: boolean
@@ -984,6 +993,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 duplicateTransactio
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 id: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 lineNumber: integer
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 rawLabel: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 skipReason: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 status: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 statusMessage: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 suggestRule: boolean
