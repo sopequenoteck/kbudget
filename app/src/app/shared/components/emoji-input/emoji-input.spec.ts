@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { EmojiInput } from './emoji-input';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 // Mock des dynamic imports emoji-mart pour éviter les erreurs réseau en test
 vi.mock('@emoji-mart/data', () => ({ default: {} }));
@@ -12,6 +13,7 @@ describe('EmojiInput', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [EmojiInput],
+      providers: [provideTranslocoTesting()],
     });
   });
 

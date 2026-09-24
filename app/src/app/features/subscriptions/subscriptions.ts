@@ -25,7 +25,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { DevLogger } from '../../core/services/dev-logger';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 
 interface SubscriptionGroup {
   label: string;
@@ -50,6 +50,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -133,7 +134,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     const sorted = [...subs].sort((a, b) => {
       if (!a.actif && b.actif) return 1;
       if (a.actif && !b.actif) return -1;
-      if (!a.actif) return a.nom.localeCompare(b.nom, APP_LOCALE);
+      if (!a.actif) return a.nom.localeCompare(b.nom, this.languageService.displayLocale());
       return this.getNextRenewalRaw(a).getTime() - this.getNextRenewalRaw(b).getTime();
     });
 
@@ -144,9 +145,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
       }
 
       const nextDate = this.getNextRenewalRaw(sub);
-      const diffDays = Math.round(
-        (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const diffDays = Math.round((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 0) {
         add('today', "Aujourd'hui", 'today', sub);
@@ -211,7 +210,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     this.activeCurrency.set(currency);
 
     const current = this.preferenceService.currencies();
-    const reordered = [currency, ...current.filter(c => c !== currency)];
+    const reordered = [currency, ...current.filter((c) => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
     if (this.persistTimeout) clearTimeout(this.persistTimeout);
@@ -245,19 +244,20 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     const nextDate = this.getNextRenewalRaw(subscription);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const diffDays = Math.round(
-      (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const diffDays = Math.round((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return "aujourd'hui";
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short' }).format(nextDate);
+    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
+      day: 'numeric',
+      month: 'short',
+    }).format(nextDate);
   }
 
   formatAmount(subscription: Subscription): string {
-    const formatted = new Intl.NumberFormat(APP_LOCALE, {
+    const formatted = new Intl.NumberFormat(this.languageService.displayLocale(), {
       style: 'currency',
       currency: subscription.currency || 'EUR',
     }).format(subscription.montant);

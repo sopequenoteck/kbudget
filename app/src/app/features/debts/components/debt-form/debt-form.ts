@@ -39,15 +39,24 @@ import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
-import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import {
+  isFieldInvalid,
+  validateForm,
+  normalizeDecimal,
+  decimalMin,
+} from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
 
-@Pipe({ name: 'shortDate', standalone: true })
+// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite des arguments et
+// ne rappellerait jamais `transform` au seul changement de langue.
+@Pipe({ name: 'shortDate', standalone: true, pure: false })
 export class ShortDatePipe implements PipeTransform {
+  private readonly languageService = inject(LanguageService);
+
   transform(value: string): string {
     if (!value) return '';
     const date = new Date(value + 'T00:00:00');
@@ -58,13 +67,23 @@ export class ShortDatePipe implements PipeTransform {
     if (days === 0) return "Aujourd'hui";
     if (days === -1) return 'Hier';
     if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString(this.languageService.displayLocale(), {
+      day: 'numeric',
+      month: 'short',
+    });
   }
 }
 
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [
+    ReactiveFormsModule,
+    CategorySelect,
+    InlineDatePicker,
+    SelectPicker,
+    NgIcon,
+    ShortDatePipe,
+  ],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -90,6 +109,7 @@ export class DebtForm {
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly languageService = inject(LanguageService);
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -140,23 +160,22 @@ export class DebtForm {
 
   readonly rembourse = toSignal(this.form.get('rembourse')!.valueChanges, { initialValue: false });
 
-  private readonly reminderDateValue = toSignal(this.form.get('reminderDate')!.valueChanges, { initialValue: '' });
+  private readonly reminderDateValue = toSignal(this.form.get('reminderDate')!.valueChanges, {
+    initialValue: '',
+  });
   readonly hasReminderDate = computed(() => !!this.reminderDateValue());
 
-  readonly dateSignal = toSignal(
-    this.form.get('date')!.valueChanges,
-    { initialValue: this.form.get('date')!.value }
-  );
+  readonly dateSignal = toSignal(this.form.get('date')!.valueChanges, {
+    initialValue: this.form.get('date')!.value,
+  });
 
-  readonly reminderDateSignal = toSignal(
-    this.form.get('reminderDate')!.valueChanges,
-    { initialValue: this.form.get('reminderDate')!.value }
-  );
+  readonly reminderDateSignal = toSignal(this.form.get('reminderDate')!.valueChanges, {
+    initialValue: this.form.get('reminderDate')!.value,
+  });
 
-  private readonly accountIdSignal = toSignal(
-    this.form.get('accountId')!.valueChanges,
-    { initialValue: this.form.get('accountId')!.value }
-  );
+  private readonly accountIdSignal = toSignal(this.form.get('accountId')!.valueChanges, {
+    initialValue: this.form.get('accountId')!.value,
+  });
 
   readonly selectedAccount = computed(() => {
     const accountId = this.accountIdSignal();
@@ -168,9 +187,15 @@ export class DebtForm {
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
   readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
+    const currency =
+      this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
     return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(this.languageService.displayLocale(), {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
       .replace('0', '')
       .trim();
   });
@@ -182,10 +207,9 @@ export class DebtForm {
   readonly categories = this.allCategories.asReadonly();
   readonly categoryCreating = signal(false);
 
-  private readonly categoryIdSignal = toSignal(
-    this.form.get('categoryId')!.valueChanges,
-    { initialValue: this.form.get('categoryId')!.value }
-  );
+  private readonly categoryIdSignal = toSignal(this.form.get('categoryId')!.valueChanges, {
+    initialValue: this.form.get('categoryId')!.value,
+  });
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.categoryIdSignal();
@@ -206,9 +230,12 @@ export class DebtForm {
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     // Fetch initial des catégories
-    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
-      this.allCategories.set(cats);
-    });
+    this.categoryService
+      .getAll()
+      .pipe(takeUntilDestroyed())
+      .subscribe((cats) => {
+        this.allCategories.set(cats);
+      });
 
     // Reset categoryCreating quand l'expand catégorie se ferme (T-037 equivalent)
     effect(() => {
@@ -254,8 +281,10 @@ export class DebtForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    this.allCategories.update((cats) =>
+      [...cats, cat].sort((a, b) =>
+        a.nom.localeCompare(b.nom, this.languageService.displayLocale()),
+      ),
     );
   }
 
@@ -302,7 +331,7 @@ export class DebtForm {
       accountId: raw.accountId || null,
       includeInBalance: raw.includeInBalance,
       reminderDate: raw.reminderDate || null,
-      reminderTime: raw.reminderDate ? (raw.reminderTime || '09:00') : null,
+      reminderTime: raw.reminderDate ? raw.reminderTime || '09:00' : null,
     };
 
     try {
@@ -325,7 +354,10 @@ export class DebtForm {
     const d = this.debt();
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
-    const amount = d.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
+    const amount = d.montant.toLocaleString(this.languageService.displayLocale(), {
+      style: 'currency',
+      currency,
+    });
     const ok = await this.confirmService.confirm({
       title: `${d.personne} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cette dette ?',

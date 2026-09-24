@@ -37,7 +37,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 
 @Component({
   selector: 'app-transactions',
@@ -70,6 +70,7 @@ export class Transactions implements AfterViewInit {
   private readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   private readonly searchInput = viewChild<ElementRef>('searchInput');
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
   readonly isStuck = signal(false);
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -97,17 +98,16 @@ export class Transactions implements AfterViewInit {
   readonly categoryFilter = signal<string | null>(null);
   readonly accountFilter = signal<string | null>(null);
 
-  readonly hasActiveFilters = computed(() =>
-    this.typeFilter() !== null ||
-    this.categoryFilter() !== null ||
-    this.accountFilter() !== null
+  readonly hasActiveFilters = computed(
+    () =>
+      this.typeFilter() !== null || this.categoryFilter() !== null || this.accountFilter() !== null,
   );
 
   readonly secondaryCurrency = computed(() => {
     const all = this.preferenceService.currencies();
     if (all.length < 2) return null;
     const active = this.activeCurrency();
-    return all.find(c => c !== active) ?? null;
+    return all.find((c) => c !== active) ?? null;
   });
 
   readonly baseSummary = computed((): MonthlySummary | null => {
@@ -149,7 +149,10 @@ export class Transactions implements AfterViewInit {
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
-    return date.toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(this.languageService.displayLocale(), {
+      month: 'long',
+      year: 'numeric',
+    });
   });
 
   readonly filteredTransactions = computed(() => {
@@ -162,24 +165,26 @@ export class Transactions implements AfterViewInit {
         const d = new Date(t.date);
         return d.getMonth() + 1 === month && d.getFullYear() === year;
       })
-      .filter(t => {
+      .filter((t) => {
         const type = this.typeFilter();
         return type === null || t.type === type;
       })
-      .filter(t => {
+      .filter((t) => {
         const catId = this.categoryFilter();
         return catId === null || t.category?.id === catId;
       })
-      .filter(t => {
+      .filter((t) => {
         const accId = this.accountFilter();
         return accId === null || t.account?.id === accId;
       })
-      .filter(t => {
+      .filter((t) => {
         const q = this.searchQuery().trim().toLowerCase();
         if (!q) return true;
-        return t.libelle.toLowerCase().includes(q)
-          || (t.category?.nom?.toLowerCase().includes(q) ?? false)
-          || (t.note?.toLowerCase().includes(q) ?? false);
+        return (
+          t.libelle.toLowerCase().includes(q) ||
+          (t.category?.nom?.toLowerCase().includes(q) ?? false) ||
+          (t.note?.toLowerCase().includes(q) ?? false)
+        );
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   });
@@ -227,7 +232,7 @@ export class Transactions implements AfterViewInit {
     const month = this.selectedMonth();
     const year = this.selectedYear();
 
-    const monthTransactions = all.filter(t => {
+    const monthTransactions = all.filter((t) => {
       const d = new Date(t.date);
       return d.getMonth() + 1 === month && d.getFullYear() === year;
     });
@@ -243,23 +248,36 @@ export class Transactions implements AfterViewInit {
       }
     }
 
-    return [...countMap.values()]
-      .sort((a, b) => b.count - a.count)
-      .map(v => v.category);
+    return [...countMap.values()].sort((a, b) => b.count - a.count).map((v) => v.category);
   });
 
   readonly emptyStateConfig = computed(() => {
     if (this.searchQuery().trim()) {
-      return { icon: 'phosphorMagnifyingGlass', message: 'Aucune transaction trouvée', ctaLabel: undefined };
+      return {
+        icon: 'phosphorMagnifyingGlass',
+        message: 'Aucune transaction trouvée',
+        ctaLabel: undefined,
+      };
     }
     if (this.hasActiveFilters()) {
       const type = this.typeFilter();
-      const label = type === TransactionType.DEPENSE ? 'dépense'
-        : type === TransactionType.RECETTE ? 'recette'
-        : 'transaction';
-      return { icon: 'phosphorFunnel', message: `Aucune ${label} en ${this.selectedMonthLabel()}`, ctaLabel: 'Réinitialiser les filtres' };
+      const label =
+        type === TransactionType.DEPENSE
+          ? 'dépense'
+          : type === TransactionType.RECETTE
+            ? 'recette'
+            : 'transaction';
+      return {
+        icon: 'phosphorFunnel',
+        message: `Aucune ${label} en ${this.selectedMonthLabel()}`,
+        ctaLabel: 'Réinitialiser les filtres',
+      };
     }
-    return { icon: 'phosphorReceipt', message: `Aucune transaction en ${this.selectedMonthLabel()}`, ctaLabel: 'Ajouter une transaction' };
+    return {
+      icon: 'phosphorReceipt',
+      message: `Aucune transaction en ${this.selectedMonthLabel()}`,
+      ctaLabel: 'Ajouter une transaction',
+    };
   });
 
   constructor() {
@@ -294,7 +312,9 @@ export class Transactions implements AfterViewInit {
     try {
       const [transactions, summary, categories, accounts] = await Promise.all([
         firstValueFrom(this.transactionService.getAll()),
-        firstValueFrom(this.transactionService.getSummary(this.selectedMonth(), this.selectedYear())),
+        firstValueFrom(
+          this.transactionService.getSummary(this.selectedMonth(), this.selectedYear()),
+        ),
         firstValueFrom(this.categoryService.getAll()),
         firstValueFrom(this.accountService.getAll()),
       ]);
@@ -332,7 +352,7 @@ export class Transactions implements AfterViewInit {
     this.activeCurrency.set(currency);
 
     const current = this.preferenceService.currencies();
-    const reordered = [currency, ...current.filter(c => c !== currency)];
+    const reordered = [currency, ...current.filter((c) => c !== currency)];
     this.preferenceService.setCurrencies(reordered);
 
     if (this.persistTimeout) clearTimeout(this.persistTimeout);

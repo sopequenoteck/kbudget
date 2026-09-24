@@ -33,7 +33,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -84,6 +84,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly Math = Math;
   readonly budgetAmount = budgetAmount;
@@ -106,10 +107,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
   readonly isCurrentMonth = computed(() => {
     const now = new Date();
-    return (
-      this.selectedMonth === now.getMonth() + 1 &&
-      this.selectedYear === now.getFullYear()
-    );
+    return this.selectedMonth === now.getMonth() + 1 && this.selectedYear === now.getFullYear();
   });
 
   readonly overviewBudgetId = computed(() => {
@@ -170,7 +168,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       } else if (txDate.getTime() === yesterday.getTime()) {
         add('yesterday', 'Hier', tx);
       } else {
-        const label = new Intl.DateTimeFormat(APP_LOCALE, {
+        const label = new Intl.DateTimeFormat(this.languageService.displayLocale(), {
           day: 'numeric',
           month: 'long',
         }).format(txDate);
@@ -273,7 +271,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(APP_LOCALE, {
+    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
       day: 'numeric',
       month: 'long',
     }).format(date);
@@ -319,8 +317,16 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const budgetId = this.overviewBudgetId();
     const item = this.budgetItem();
     if (!budgetId) return;
-    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(APP_LOCALE, { style: 'currency', currency: item.currency })}` : 'Ce budget';
-    const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
+    const title = item
+      ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: item.currency })}`
+      : 'Ce budget';
+    const ok = await this.confirmService.confirm({
+      title,
+      message: 'Voulez-vous vraiment supprimer ce budget ?',
+      confirmLabel: 'Supprimer',
+      variant: 'danger',
+      icon: 'phosphorChartPie',
+    });
     if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(budgetId));

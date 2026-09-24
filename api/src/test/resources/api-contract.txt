@@ -476,6 +476,7 @@ RESPONSE GET /v1/users/me/export 200 preferences.currencies[]: string
 RESPONSE GET /v1/users/me/export 200 preferences.enabledFeatures[]: string
 RESPONSE GET /v1/users/me/export 200 preferences.enabledNotificationTypes[]: string
 RESPONSE GET /v1/users/me/export 200 preferences.id: string
+RESPONSE GET /v1/users/me/export 200 preferences.language: string
 RESPONSE GET /v1/users/me/export 200 preferences.navOrder[]: string
 RESPONSE GET /v1/users/me/export 200 preferences.textScale: string
 RESPONSE GET /v1/users/me/export 200 preferences.timezone: string
@@ -517,6 +518,7 @@ RESPONSE GET /v1/users/me/export 200 user.passwordResetRequired: boolean
 RESPONSE GET /v1/users/me/preferences 200 currencies[]: string
 RESPONSE GET /v1/users/me/preferences 200 enabledFeatures[]: string
 RESPONSE GET /v1/users/me/preferences 200 enabledNotificationTypes[]: string
+RESPONSE GET /v1/users/me/preferences 200 language: string
 RESPONSE GET /v1/users/me/preferences 200 navOrder[]: string
 RESPONSE GET /v1/users/me/preferences 200 textScale: string
 RESPONSE GET /v1/users/me/preferences 200 timezone: string
@@ -1046,6 +1048,7 @@ RESPONSE PUT /v1/users/me 200 name: string
 RESPONSE PUT /v1/users/me/preferences 200 currencies[]: string
 RESPONSE PUT /v1/users/me/preferences 200 enabledFeatures[]: string
 RESPONSE PUT /v1/users/me/preferences 200 enabledNotificationTypes[]: string
+RESPONSE PUT /v1/users/me/preferences 200 language: string
 RESPONSE PUT /v1/users/me/preferences 200 navOrder[]: string
 RESPONSE PUT /v1/users/me/preferences 200 textScale: string
 RESPONSE PUT /v1/users/me/preferences 200 timezone: string

@@ -8,6 +8,7 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Subscription, Frequency } from '../../../../core/models/subscription.model';
 import { SubscriptionPaymentResponse } from '../../../../core/models/subscription-payment.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const flushAsync = () => new Promise((r) => setTimeout(r, 0));
 
@@ -101,6 +102,7 @@ describe('SubscriptionDetail', () => {
     TestBed.configureTestingModule({
       imports: [SubscriptionDetail],
       providers: [
+        provideTranslocoTesting(),
         { provide: SubscriptionService, useValue: subscriptionServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
@@ -192,7 +194,9 @@ describe('SubscriptionDetail', () => {
 
     // Assert
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe('Aucun paiement enregistré');
+    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe(
+      'Aucun paiement enregistré',
+    );
     expect(compiled.querySelectorAll('.payment-item').length).toBe(0);
   });
 

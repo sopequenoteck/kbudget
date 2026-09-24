@@ -8,10 +8,15 @@ import {
   signal,
 } from '@angular/core';
 import { DecimalPipe, NgClass } from '@angular/common';
-import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
-import {filter, firstValueFrom} from 'rxjs';
+import {
+  phosphorWarningCircle,
+  phosphorTrendUp,
+  phosphorTrendDown,
+  phosphorReceipt,
+} from '@ng-icons/phosphor-icons/regular';
+import { filter, firstValueFrom } from 'rxjs';
 
 import { TransactionService } from '../../core/services/transaction';
 import { AccountService } from '../../core/services/account';
@@ -21,7 +26,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
 import { RecurringTransactionService } from '../../core/services/recurring-transaction';
 import { DevLogger } from '../../core/services/dev-logger';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -34,15 +39,28 @@ import { type BudgetOverview } from '../../core/models/budget.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {AuthService} from '../../core/services/auth';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../core/services/auth';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
-  providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
+  imports: [
+    DecimalPipe,
+    NgClass,
+    RouterLink,
+    NgIcon,
+    ListItem,
+    AmountPipe,
+    RelativeDatePipe,
+    CurrencyPillSelector,
+    BudgetSummary,
+    EmptyState,
+  ],
+  providers: [
+    provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt }),
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +77,7 @@ export class Dashboard {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -86,7 +105,7 @@ export class Dashboard {
     const active = this.activeCurrency();
     const primary = this.preferenceService.primaryCurrency();
     if (active !== primary) return primary;
-    return all.find(c => c !== active) ?? null;
+    return all.find((c) => c !== active) ?? null;
   });
 
   // -- Comptes bancaires (total balance) --
@@ -148,7 +167,10 @@ export class Dashboard {
   readonly budgetOverview = signal<BudgetOverview | null>(null);
   readonly budgetLoading = signal(true);
   readonly budgetCurrentMonth = computed(() => {
-    return new Date().toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
+    return new Date().toLocaleDateString(this.languageService.displayLocale(), {
+      month: 'long',
+      year: 'numeric',
+    });
   });
 
   // -- Dernières transactions --
@@ -242,11 +264,11 @@ export class Dashboard {
       totalSpent: convert(ov.totalSpent),
       currency: to,
       unbudgetedTotal: convert(ov.unbudgetedTotal),
-      unbudgetedItems: ov.unbudgetedItems.map(item => ({
+      unbudgetedItems: ov.unbudgetedItems.map((item) => ({
         ...item,
         montantDepense: convert(item.montantDepense),
       })),
-      items: ov.items.map(item => ({
+      items: ov.items.map((item) => ({
         ...item,
         montantBudget: convert(item.montantBudget),
         montantBudgetNormalise: convert(item.montantBudgetNormalise),
@@ -271,7 +293,9 @@ export class Dashboard {
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    return prev.toLocaleDateString(APP_LOCALE, { month: 'short' }).replace('.', '');
+    return prev
+      .toLocaleDateString(this.languageService.displayLocale(), { month: 'short' })
+      .replace('.', '');
   });
 
   readonly sortedBudgetItems = computed(() => {
@@ -288,13 +312,13 @@ export class Dashboard {
 
   readonly overdueCount = computed(() => {
     const today = new Date().toISOString().split('T')[0];
-    return this.recurringService.recurringTransactions()
-      .filter(r => r.recurringActive && r.nextOccurrence < today)
-      .length;
+    return this.recurringService
+      .recurringTransactions()
+      .filter((r) => r.recurringActive && r.nextOccurrence < today).length;
   });
 
   readonly exceededBudgetCount = computed(() => {
-    return (this.budgetOverview()?.items ?? []).filter(b => b.percentage > 100).length;
+    return (this.budgetOverview()?.items ?? []).filter((b) => b.percentage > 100).length;
   });
 
   readonly greeting = computed(() => {
@@ -307,10 +331,13 @@ export class Dashboard {
     if (overdue > 0) return `${prefix} · ${overdue} charge${overdue > 1 ? 's' : ''} en retard`;
 
     const exceeded = this.exceededBudgetCount();
-    if (exceeded > 0) return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
+    if (exceeded > 0)
+      return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
 
     const net = this.netDuMois();
-    const hasTransactions = (this.currentSummary()?.totalRecettes ?? 0) > 0 || (this.currentSummary()?.totalDepenses ?? 0) > 0;
+    const hasTransactions =
+      (this.currentSummary()?.totalRecettes ?? 0) > 0 ||
+      (this.currentSummary()?.totalDepenses ?? 0) > 0;
     if (hasTransactions) return `${prefix} · Mois ${net >= 0 ? 'positif' : 'négatif'}`;
 
     return `${prefix} · Mois calme`;
@@ -368,10 +395,18 @@ export class Dashboard {
 
       await Promise.all([
         firstValueFrom(this.accountService.getAll()).then((data) => this.accounts.set(data)),
-        firstValueFrom(this.transactionService.getSummary(now.getMonth() + 1, now.getFullYear())).then((data) => this.currentSummary.set(data[0] ?? null)),
-        firstValueFrom(this.transactionService.getSummary(prev.getMonth() + 1, prev.getFullYear())).then((data) => this.previousSummary.set(data[0] ?? null)),
-        firstValueFrom(this.budgetService.getOverview()).then((data) => this.budgetOverview.set(data)),
-        firstValueFrom(this.transactionService.getAll()).then((data) => this.transactions.set(data)),
+        firstValueFrom(
+          this.transactionService.getSummary(now.getMonth() + 1, now.getFullYear()),
+        ).then((data) => this.currentSummary.set(data[0] ?? null)),
+        firstValueFrom(
+          this.transactionService.getSummary(prev.getMonth() + 1, prev.getFullYear()),
+        ).then((data) => this.previousSummary.set(data[0] ?? null)),
+        firstValueFrom(this.budgetService.getOverview()).then((data) =>
+          this.budgetOverview.set(data),
+        ),
+        firstValueFrom(this.transactionService.getAll()).then((data) =>
+          this.transactions.set(data),
+        ),
         this.exchangeRateService.loadRates(),
         this.recurringService.loadActive(),
       ]);
@@ -485,7 +520,7 @@ export class Dashboard {
     const converted = this.conversionService.convert(t.montant, txCurrency, target);
     if (converted === null) return '';
 
-    const formatted = new Intl.NumberFormat(APP_LOCALE, {
+    const formatted = new Intl.NumberFormat(this.languageService.displayLocale(), {
       style: 'currency',
       currency: target,
     }).format(Math.abs(converted));

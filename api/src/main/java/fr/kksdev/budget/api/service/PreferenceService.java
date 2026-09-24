@@ -83,6 +83,9 @@ public class PreferenceService {
         if (request.textScale() != null) {
             preference.setTextScale(request.textScale());
         }
+        if (request.language() != null) {
+            preference.setLanguage(request.language());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
@@ -203,7 +206,8 @@ public class PreferenceService {
                 preference.getCurrencies(),
                 preference.getEnabledNotificationTypes(),
                 preference.getTimezone(),
-                preference.getTextScale()
+                preference.getTextScale(),
+                preference.getLanguage()
         );
     }
 }

@@ -42,15 +42,24 @@ import {
   Subscription,
   SubscriptionRequest,
 } from '../../../../core/models/subscription.model';
-import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
+import {
+  isFieldInvalid,
+  validateForm,
+  normalizeDecimal,
+  decimalMin,
+} from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
-@Pipe({ name: 'shortDate', standalone: true })
+// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite des arguments et
+// ne rappellerait jamais `transform` au seul changement de langue.
+@Pipe({ name: 'shortDate', standalone: true, pure: false })
 export class ShortDatePipe implements PipeTransform {
+  private readonly languageService = inject(LanguageService);
+
   transform(value: string): string {
     if (!value) return '';
     const date = new Date(value + 'T00:00:00');
@@ -61,13 +70,23 @@ export class ShortDatePipe implements PipeTransform {
     if (days === 0) return "Aujourd'hui";
     if (days === -1) return 'Hier';
     if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString(this.languageService.displayLocale(), {
+      day: 'numeric',
+      month: 'short',
+    });
   }
 }
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [
+    ReactiveFormsModule,
+    CategorySelect,
+    InlineDatePicker,
+    SelectPicker,
+    NgIcon,
+    ShortDatePipe,
+  ],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -92,6 +111,7 @@ export class SubscriptionForm {
   private readonly currencyService = inject(CurrencyService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly languageService = inject(LanguageService);
 
   readonly subscription = computed(() => this.modalService.editingEntity() as Subscription | null);
   readonly frequence = input(Frequency.MENSUEL);
@@ -139,15 +159,13 @@ export class SubscriptionForm {
 
   readonly actif = toSignal(this.form.get('actif')!.valueChanges, { initialValue: true });
 
-  readonly dateDebutSignal = toSignal(
-    this.form.get('dateDebut')!.valueChanges,
-    { initialValue: this.form.get('dateDebut')!.value }
-  );
+  readonly dateDebutSignal = toSignal(this.form.get('dateDebut')!.valueChanges, {
+    initialValue: this.form.get('dateDebut')!.value,
+  });
 
-  private readonly accountIdSignal = toSignal(
-    this.form.get('accountId')!.valueChanges,
-    { initialValue: this.form.get('accountId')!.value }
-  );
+  private readonly accountIdSignal = toSignal(this.form.get('accountId')!.valueChanges, {
+    initialValue: this.form.get('accountId')!.value,
+  });
 
   readonly selectedAccount = computed(() => {
     const accountId = this.accountIdSignal();
@@ -161,7 +179,12 @@ export class SubscriptionForm {
   readonly currencySymbol = computed(() => {
     const currency = this.selectedAccount()?.currency ?? 'EUR';
     return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(this.languageService.displayLocale(), {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
       .replace('0', '')
       .trim();
   });
@@ -173,10 +196,9 @@ export class SubscriptionForm {
   readonly categories = this.allCategories.asReadonly();
   readonly categoryCreating = signal(false);
 
-  private readonly categoryIdSignal = toSignal(
-    this.form.get('categoryId')!.valueChanges,
-    { initialValue: this.form.get('categoryId')!.value }
-  );
+  private readonly categoryIdSignal = toSignal(this.form.get('categoryId')!.valueChanges, {
+    initialValue: this.form.get('categoryId')!.value,
+  });
 
   readonly selectedCategory = computed(() => {
     const categoryId = this.categoryIdSignal();
@@ -197,9 +219,12 @@ export class SubscriptionForm {
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
 
     // Fetch initial des catégories
-    this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {
-      this.allCategories.set(cats);
-    });
+    this.categoryService
+      .getAll()
+      .pipe(takeUntilDestroyed())
+      .subscribe((cats) => {
+        this.allCategories.set(cats);
+      });
 
     // Reset categoryCreating quand l'expand catégorie se ferme (T-037 equivalent)
     effect(() => {
@@ -231,8 +256,10 @@ export class SubscriptionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+    this.allCategories.update((cats) =>
+      [...cats, cat].sort((a, b) =>
+        a.nom.localeCompare(b.nom, this.languageService.displayLocale()),
+      ),
     );
   }
 
@@ -299,7 +326,10 @@ export class SubscriptionForm {
     const sub = this.subscription();
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
-    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
+    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), {
+      style: 'currency',
+      currency,
+    });
     const ok = await this.confirmService.confirm({
       title: `${sub.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cet abonnement ?',

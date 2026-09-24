@@ -25,7 +25,7 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -60,6 +60,7 @@ export class DebtDetail {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
@@ -74,9 +75,7 @@ export class DebtDetail {
     return Math.round(((d.montant - d.montantRestant) / d.montant) * 100);
   });
 
-  readonly paymentsTotal = computed(() =>
-    this.payments().reduce((acc, p) => acc + p.amount, 0),
-  );
+  readonly paymentsTotal = computed(() => this.payments().reduce((acc, p) => acc + p.amount, 0));
 
   readonly skeletonItems = Array(4);
 
@@ -148,8 +147,18 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    const amount = d.montantRestant.toLocaleString(APP_LOCALE, { style: 'currency', currency: d.currency });
-    const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
+    const amount = d.montantRestant.toLocaleString(this.languageService.displayLocale(), {
+      style: 'currency',
+      currency: d.currency,
+    });
+    const ok = await this.confirmService.confirm({
+      title: `${d.personne} — ${amount} restants`,
+      message:
+        'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.',
+      confirmLabel: 'Supprimer',
+      variant: 'danger',
+      icon: 'phosphorHandCoins',
+    });
     if (!ok) return;
 
     try {
@@ -201,6 +210,6 @@ export class DebtDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(new Date(date));
   }
 }

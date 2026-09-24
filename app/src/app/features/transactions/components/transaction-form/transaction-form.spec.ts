@@ -16,6 +16,7 @@ import { type Category } from '../../../../core/models/category.model';
 import { type AccountSummary } from '../../../../core/models/account.model';
 import { CategoryService } from '../../../../core/services/category';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const makeTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
   id: 'tx-1',
@@ -141,6 +142,7 @@ describe('TransactionForm', () => {
     TestBed.configureTestingModule({
       imports: [TransactionForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: TransactionService, useValue: transactionServiceMock },
         { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
         { provide: TransactionLibelleService, useValue: libelleServiceMock },

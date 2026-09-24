@@ -7,6 +7,7 @@ import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockDebt: Debt = {
   id: 'debt-1',
@@ -94,6 +95,7 @@ describe('DebtDetail', () => {
     TestBed.configureTestingModule({
       imports: [DebtDetail],
       providers: [
+        provideTranslocoTesting(),
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },

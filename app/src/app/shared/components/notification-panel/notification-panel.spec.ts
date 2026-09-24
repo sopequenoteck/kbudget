@@ -11,6 +11,7 @@ import { type NotificationModel } from '../../../core/models/notification.model'
 import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const makeNotification = (overrides: Partial<NotificationModel> = {}): NotificationModel => ({
   id: 'notif-1',
@@ -137,6 +138,7 @@ describe('NotificationPanel', () => {
     TestBed.configureTestingModule({
       imports: [NotificationPanel],
       providers: [
+        provideTranslocoTesting(),
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
@@ -184,7 +186,7 @@ describe('NotificationPanel', () => {
       id: 'notif-debt-reminder',
       type: 'DEBT_REMINDER',
       title: 'Rappel dette',
-      message: 'Rappel : Bob vous doit de l\'argent',
+      message: "Rappel : Bob vous doit de l'argent",
       entityType: 'DEBT',
       entityId: 'debt-1',
     });

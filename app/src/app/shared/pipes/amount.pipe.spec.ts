@@ -1,8 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+
 import { AmountPipe } from './amount.pipe';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 describe('AmountPipe', () => {
-  const pipe = new AmountPipe();
+  let pipe: AmountPipe;
+
+  beforeEach(() => {
+    // KKS-373 (D8) : le pipe injecte LanguageService (impur, suit la
+    // langue active) — TestBed remplace l'instanciation directe par `new`.
+    TestBed.configureTestingModule({
+      providers: [provideTranslocoTesting()],
+    });
+    pipe = TestBed.runInInjectionContext(() => new AmountPipe());
+  });
 
   // Helper : normalise les espaces insécables en espaces normaux pour assertions lisibles
   const normalize = (s: string) => s.replace(/[\u00A0\u202F\u2009]/g, ' ');

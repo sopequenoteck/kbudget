@@ -5,6 +5,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 import { CategorySelect } from './category-select';
 import { Category } from '../../../core/models/category.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 // ---------------------------------------------------------------------------
 // Données de test
@@ -29,6 +30,7 @@ describe('CategorySelect', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideAnimationsAsync('noop'),
+        provideTranslocoTesting(),
       ],
     });
     const fixture = TestBed.createComponent(CategorySelect);

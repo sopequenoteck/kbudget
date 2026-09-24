@@ -6,7 +6,8 @@ import { of, throwError } from 'rxjs';
 import { AuthService } from './auth';
 import { ApiService } from './api';
 import { AuthResponse } from '../models/auth.model';
-import { ERROR_MESSAGES, LOGIN_ERROR_OVERRIDES } from '../constants/error-messages.constants';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
+import frCatalog from '../../../../public/i18n/fr.json';
 
 function createJwt(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256' }));
@@ -52,6 +53,7 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthService,
+        provideTranslocoTesting(),
         { provide: ApiService, useValue: apiService },
         { provide: Router, useValue: router },
       ],
@@ -93,7 +95,8 @@ describe('AuthService', () => {
       // Arrange — le serveur refuse des identifiants par un
       // `IllegalArgumentException`, donc par un `BAD_REQUEST`. Le `message`
       // est un champ de diagnostic (KKS-324) : il n'est jamais affiche, et
-      // deviendra anglais. Le libelle vient de `LOGIN_ERROR_OVERRIDES`.
+      // deviendra anglais. Le libelle vient de `LOGIN_ERROR_OVERRIDES`
+      // (KKS-373 : une cle du catalogue, `auth.feedback.invalidCredentials`).
       const httpError = new HttpErrorResponse({
         status: 400,
         error: { error: 'BAD_REQUEST', message: 'Invalid email or password' },
@@ -103,7 +106,7 @@ describe('AuthService', () => {
       // Act & Assert
       service.login({ email: 'test@test.com', password: 'wrong' }).subscribe({
         error: (msg: string) => {
-          expect(msg).toBe(LOGIN_ERROR_OVERRIDES['BAD_REQUEST']);
+          expect(msg).toBe(frCatalog.auth.feedback.invalidCredentials);
           expect(msg).not.toBe('Invalid email or password');
         },
       });
@@ -120,7 +123,7 @@ describe('AuthService', () => {
       // Act & Assert
       service.login({ email: 'test@test.com', password: 'pass' }).subscribe({
         error: (msg: string) => {
-          expect(msg).toBe(ERROR_MESSAGES['TOO_MANY_REQUESTS']);
+          expect(msg).toBe(frCatalog.errors.api.tooManyRequests);
         },
       });
     });
@@ -358,6 +361,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -383,6 +387,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -415,6 +420,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -446,6 +452,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -473,6 +480,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -496,6 +504,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -521,6 +530,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -573,6 +583,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],
@@ -597,6 +608,7 @@ describe('AuthService', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
+          provideTranslocoTesting(),
           { provide: ApiService, useValue: apiService },
           { provide: Router, useValue: router },
         ],

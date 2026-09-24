@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -29,7 +23,7 @@ import { ConversionService } from '../../../../core/services/conversion';
 import { PreferenceService } from '../../../../core/services/preference';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -82,6 +76,7 @@ export class RecurringList {
   private readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   readonly preferenceService = inject(PreferenceService);
+  private readonly languageService = inject(LanguageService);
 
   readonly skeletonItems = Array(5);
 
@@ -128,9 +123,10 @@ export class RecurringList {
     for (const item of items) {
       const monthly = this.toMonthlyAmount(item.montant, item.frequency);
       const currency = item.account?.currency ?? primary;
-      const converted = currency === primary
-        ? monthly
-        : (this.conversionService.convert(monthly, currency, primary) ?? monthly);
+      const converted =
+        currency === primary
+          ? monthly
+          : (this.conversionService.convert(monthly, currency, primary) ?? monthly);
 
       if (item.type === TransactionType.DEPENSE) {
         totalExpenses += converted;
@@ -185,7 +181,10 @@ export class RecurringList {
     if (diffDays === 0) return "aujourd'hui";
     if (diffDays === 1) return 'demain';
     if (diffDays <= 30) return `dans ${diffDays} j.`;
-    return next.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: 'short' });
+    return next.toLocaleDateString(this.languageService.displayLocale(), {
+      day: '2-digit',
+      month: 'short',
+    });
   }
 
   getValueClass(item: RecurringTransactionResponse): string {
@@ -202,7 +201,9 @@ export class RecurringList {
       for (const item of items) {
         await firstValueFrom(this.service.validate(item.id));
       }
-      this.toastService.success(`${items.length} transaction${items.length > 1 ? 's' : ''} validée${items.length > 1 ? 's' : ''}`);
+      this.toastService.success(
+        `${items.length} transaction${items.length > 1 ? 's' : ''} validée${items.length > 1 ? 's' : ''}`,
+      );
     } catch {
       this.toastService.error('Erreur lors de la validation');
     } finally {

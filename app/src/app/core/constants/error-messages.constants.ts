@@ -1,102 +1,104 @@
-import { PASSWORD_MIN_LENGTH_MESSAGE } from './password.constants';
+import { PASSWORD_MIN_LENGTH } from './password.constants';
 
 /**
- * Catalogue des libelles d'erreur, tenu par le client (KKS-324).
+ * Codes d'erreur que l'API peut emettre (KKS-324), verrouilles par les tests
+ * de KKS-357. Chacun a une cle dans les deux catalogues Transloco sous
+ * `errors.api.`, obtenue par {@link errorCodeToKey} (KKS-373).
  *
- * Le champ `message` d'une reponse d'erreur est un champ de **diagnostic** :
- * il n'est ni traduit, ni stable, ni redige pour un ecran. Le seul contrat
- * public est `error`, un code machine dont les 27 valeurs sont verrouillees
- * par les tests de KKS-357 — un renommage cote serveur casse le build.
- *
- * Une table plate `Record<string, string>`, pas un `enum` ni une union de
- * litteraux : c'est la forme qu'un fichier de traduction consommera
- * directement quand KKS-325 introduira une bibliotheque i18n, et c'est la
- * forme qui absorbe sans casser un code que le serveur ajouterait apres coup.
- *
- * Ce fichier est le point d'extraction unique. Ajouter un libelle ailleurs
- * annule le benefice de la centralisation.
+ * Les libelles eux-memes ne vivent plus ici : ils ont ete deplaces a
+ * l'identique dans `app/public/i18n/fr.json` et traduits dans `en.json`.
+ * Ce fichier ne tient plus que la liste des codes et le mecanisme de
+ * derivation de cle, seul point encore partage par `ApiErrorService` et par
+ * les tests qui garantissent la completude des catalogues.
  */
-export const ERROR_MESSAGES: Readonly<Record<string, string>> = {
+export const ERROR_CODES: readonly string[] = [
   // 400
-  BAD_REQUEST: "La demande n'a pas pu être traitée.",
-  VALIDATION_ERROR: 'Veuillez vérifier les informations saisies.',
-  MALFORMED_REQUEST: 'Requête invalide.',
-  INVALID_IMAGE_FORMAT: 'Seuls les formats JPG et PNG sont acceptés.',
-  INVALID_EXPORT_FORMAT: "Format d'export invalide. Formats acceptés : json, csv.",
-  PASSWORD_UNCHANGED: "Le nouveau mot de passe doit être différent de l'actuel.",
-  CONFIRMATION_REQUIRED: 'Confirmation explicite requise.',
+  'BAD_REQUEST',
+  'VALIDATION_ERROR',
+  'MALFORMED_REQUEST',
+  'INVALID_IMAGE_FORMAT',
+  'INVALID_EXPORT_FORMAT',
+  'PASSWORD_UNCHANGED',
+  'CONFIRMATION_REQUIRED',
   // 401
-  PASSWORD_INCORRECT: 'Mot de passe incorrect.',
-  UNAUTHENTICATED: 'Authentification requise.',
-  TOKEN_EXPIRED: 'Votre session a expiré. Veuillez vous reconnecter.',
-  TOKEN_REVOKED: 'Votre session a été révoquée. Veuillez vous reconnecter.',
-  TOKEN_REUSE_DETECTED: 'Session interrompue par sécurité. Veuillez vous reconnecter.',
-  TOKEN_INVALID: 'Session invalide. Veuillez vous reconnecter.',
+  'PASSWORD_INCORRECT',
+  'UNAUTHENTICATED',
+  'TOKEN_EXPIRED',
+  'TOKEN_REVOKED',
+  'TOKEN_REUSE_DETECTED',
+  'TOKEN_INVALID',
   // 403
-  ACCESS_DENIED: 'Accès refusé',
-  PASSWORD_RESET_REQUIRED: 'Reset requis',
-  FEATURE_DISABLED: 'Fonctionnalité désactivée',
-  PASSWORD_RESET_NOT_REQUIRED:
-    "La réinitialisation des identifiants n'est pas requise pour ce compte.",
-  LAST_ADMIN_DELETION_FORBIDDEN: 'Au moins un administrateur actif doit exister.',
+  'ACCESS_DENIED',
+  'PASSWORD_RESET_REQUIRED',
+  'FEATURE_DISABLED',
+  'PASSWORD_RESET_NOT_REQUIRED',
+  'LAST_ADMIN_DELETION_FORBIDDEN',
   // 404
-  NOT_FOUND: 'Ressource introuvable',
-  AVATAR_NOT_FOUND: 'Avatar introuvable',
+  'NOT_FOUND',
+  'AVATAR_NOT_FOUND',
   // 409
-  CONFLICT: 'Conflit de données',
-  LAST_ADMIN_CANNOT_BE_DISABLED: 'Impossible de désactiver le dernier administrateur actif.',
-  EMAIL_ALREADY_EXISTS: 'Email déjà utilisé',
+  'CONFLICT',
+  'LAST_ADMIN_CANNOT_BE_DISABLED',
+  'EMAIL_ALREADY_EXISTS',
   // 413
-  FILE_TOO_LARGE: 'Fichier trop volumineux. La taille maximale est 2 MB.',
+  'FILE_TOO_LARGE',
   // 422
-  CSV_PROFILE_NOT_FOUND: 'Profil CSV introuvable',
+  'CSV_PROFILE_NOT_FOUND',
   // 429
-  TOO_MANY_REQUESTS: 'Trop de tentatives. Réessayez dans quelques instants.',
+  'TOO_MANY_REQUESTS',
   // 500
-  INTERNAL_ERROR: 'Une erreur interne est survenue',
+  'INTERNAL_ERROR',
+] as const;
+
+/**
+ * Convertit mecaniquement un code d'erreur SCREAMING_SNAKE_CASE en cle
+ * `errors.api.<lowerCamelCase>`, sans rien retrancher (`docs/i18n.md`) :
+ * `INTERNAL_ERROR` -> `errors.api.internalError`.
+ */
+export function errorCodeToKey(code: string): string {
+  const element = code
+    .toLowerCase()
+    .replace(/_([a-z0-9])/g, (_match, char: string) => char.toUpperCase());
+  return `errors.api.${element}`;
+}
+
+/**
+ * Libelles propres a l'ecran de connexion, sous forme de **cle** de
+ * traduction (KKS-373) — plus une chaine litterale.
+ *
+ * `POST /auth/login` refuse des identifiants par un `IllegalArgumentException`,
+ * donc par un `BAD_REQUEST` — le meme code que 35 autres sites de `throw`. Le
+ * catalogue lui donne a juste titre un libelle general ; sur ce seul endpoint,
+ * il n'a qu'un sens possible. Sans cette table, le chemin d'erreur le plus
+ * frequent de l'application afficherait le libelle general de `BAD_REQUEST`.
+ *
+ * Introduire un code serveur dedie serait la vraie correction : elle sort du
+ * perimetre de KKS-324, qui n'ajoute, ne retire ni ne renomme aucun code.
+ */
+export const LOGIN_ERROR_OVERRIDES: Readonly<Record<string, string>> = {
+  BAD_REQUEST: 'auth.feedback.invalidCredentials',
 };
 
-/** Libelle servi quand aucun code exploitable n'est disponible. */
-export const GENERIC_ERROR_MESSAGE = 'Une erreur est survenue';
-
-/**
- * Libelle du statut 0 — requete jamais partie, ou reponse jamais revenue.
- * Distinct du libelle generique : l'utilisateur peut agir dessus (reseau).
- */
-export const NETWORK_ERROR_MESSAGE = 'Impossible de contacter le serveur';
-
-/** Libelle de repli d'une `VALIDATION_ERROR` dont aucun detail n'est reconnu. */
-export const VALIDATION_ERROR_MESSAGE = ERROR_MESSAGES['VALIDATION_ERROR'];
+/** Cle et parametres ICU d'un affinage de `VALIDATION_ERROR` par `field:code`. */
+interface ValidationDetailTranslation {
+  readonly key: string;
+  readonly params?: Readonly<Record<string, unknown>>;
+}
 
 /**
  * Affinage d'une `VALIDATION_ERROR` a partir de `details`, par couple
- * `field:code`.
+ * `field:code` (KKS-351, generalise par KKS-324, deplace en cle par KKS-373).
  *
  * `VALIDATION_ERROR` est un code unique couvrant toutes les contraintes de
- * tous les champs : le traduire seul degraderait l'existant, `auth.ts` sachant
- * deja formuler la contrainte de longueur du mot de passe (KKS-351).
+ * tous les champs : le traduire seul degraderait l'existant, l'ecran de
+ * connexion sachant deja formuler la contrainte de longueur du mot de passe.
  *
  * La table demarre avec la seule entree que les ecrans produisent reellement.
  * En inventer d'autres serait de la sur-ingenierie : `details[].code` derive du
  * nom de l'annotation Bean Validation, une entree ecrite d'avance se
  * desynchroniserait sans qu'aucun test ne rougisse.
  */
-export const VALIDATION_DETAIL_MESSAGES: Readonly<Record<string, string>> = {
-  'password:SIZE': PASSWORD_MIN_LENGTH_MESSAGE,
-};
-
-/**
- * Libelles propres a l'ecran de connexion.
- *
- * `POST /auth/login` refuse des identifiants par un `IllegalArgumentException`,
- * donc par un `BAD_REQUEST` — le meme code que 35 autres sites de `throw`. Le
- * catalogue lui donne a juste titre un libelle general ; sur ce seul endpoint,
- * il n'a qu'un sens possible. Sans cette table, le chemin d'erreur le plus
- * frequent de l'application afficherait « La demande n'a pas pu être traitée. »
- *
- * Introduire un code serveur dedie serait la vraie correction : elle sort du
- * perimetre de KKS-324, qui n'ajoute, ne retire ni ne renomme aucun code.
- */
-export const LOGIN_ERROR_OVERRIDES: Readonly<Record<string, string>> = {
-  BAD_REQUEST: 'Email ou mot de passe incorrect',
-};
+export const VALIDATION_DETAIL_TRANSLATIONS: Readonly<Record<string, ValidationDetailTranslation>> =
+  {
+    'password:SIZE': { key: 'auth.form.passwordMinLength', params: { min: PASSWORD_MIN_LENGTH } },
+  };

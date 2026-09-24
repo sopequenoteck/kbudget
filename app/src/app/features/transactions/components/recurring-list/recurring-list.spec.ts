@@ -12,6 +12,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 // ---------------------------------------------------------------------------
 // Données de test
@@ -112,6 +113,7 @@ function createMockPreferenceService() {
     primaryCurrency: signal('EUR'),
     currencies: signal(['EUR']),
     enabledFeatures: signal([]),
+    language: signal<string | null>(null),
   };
 }
 
@@ -152,6 +154,7 @@ describe('RecurringList', () => {
     TestBed.configureTestingModule({
       imports: [RecurringList],
       providers: [
+        provideTranslocoTesting(),
         { provide: RecurringTransactionService, useValue: mockService },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: Router, useValue: routerMock },

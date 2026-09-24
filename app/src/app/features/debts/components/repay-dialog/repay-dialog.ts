@@ -23,10 +23,14 @@ import { Account } from '../../../../core/models/account.model';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
-import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
+import {
+  isFieldInvalid,
+  validateForm,
+  normalizeDecimal,
+} from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 type ExpandableSection = 'account' | null;
 
@@ -46,6 +50,7 @@ export class RepayDialog {
   private readonly accountService = inject(AccountService);
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
+  private readonly languageService = inject(LanguageService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -82,10 +87,9 @@ export class RepayDialog {
     accountId: ['', [Validators.required]],
   });
 
-  private readonly accountIdSignal = toSignal(
-    this.form.get('accountId')!.valueChanges,
-    { initialValue: this.form.get('accountId')!.value }
-  );
+  private readonly accountIdSignal = toSignal(this.form.get('accountId')!.valueChanges, {
+    initialValue: this.form.get('accountId')!.value,
+  });
 
   readonly selectedAccount = computed(() => {
     const accountId = this.accountIdSignal();
@@ -101,7 +105,12 @@ export class RepayDialog {
   readonly currencySymbol = computed(() => {
     const currency = this.activeCurrency();
     return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+      .toLocaleString(this.languageService.displayLocale(), {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
       .replace('0', '')
       .trim();
   });
@@ -109,30 +118,34 @@ export class RepayDialog {
   constructor() {
     this.amountWidth = createAmountWidth(this.form.get('amount')!, 22);
 
-    effect(() => {
-      const d = this.debt();
-      if (!d) return;
-      const maxAmount = d.montantRestant;
-      const formatted = maxAmount % 1 === 0 ? String(maxAmount) : maxAmount.toFixed(2);
-      this.form.patchValue({ amount: formatted });
-      this.form.get('amount')!.setValidators([
-        Validators.required,
-        Validators.min(0.01),
-        Validators.max(maxAmount),
-      ]);
-      this.form.get('amount')!.updateValueAndValidity();
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const d = this.debt();
+        if (!d) return;
+        const maxAmount = d.montantRestant;
+        const formatted = maxAmount % 1 === 0 ? String(maxAmount) : maxAmount.toFixed(2);
+        this.form.patchValue({ amount: formatted });
+        this.form
+          .get('amount')!
+          .setValidators([Validators.required, Validators.min(0.01), Validators.max(maxAmount)]);
+        this.form.get('amount')!.updateValueAndValidity();
+      },
+      { allowSignalWrites: true },
+    );
 
-    effect(() => {
-      const accounts = this.activeAccounts();
-      if (accounts.length === 0) return;
-      const d = this.debt();
-      const debtAccountId = d?.account?.id;
-      const preselect = debtAccountId
-        ? (accounts.find((a) => a.id === debtAccountId)?.id ?? accounts[0]?.id ?? '')
-        : (accounts[0]?.id ?? '');
-      this.form.patchValue({ accountId: preselect });
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const accounts = this.activeAccounts();
+        if (accounts.length === 0) return;
+        const d = this.debt();
+        const debtAccountId = d?.account?.id;
+        const preselect = debtAccountId
+          ? (accounts.find((a) => a.id === debtAccountId)?.id ?? accounts[0]?.id ?? '')
+          : (accounts[0]?.id ?? '');
+        this.form.patchValue({ accountId: preselect });
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -171,7 +184,10 @@ export class RepayDialog {
       } else {
         const reste = updatedDebt.montantRestant;
         const currency = updatedDebt.currency || 'EUR';
-        const formatter = new Intl.NumberFormat(APP_LOCALE, { style: 'currency', currency });
+        const formatter = new Intl.NumberFormat(this.languageService.displayLocale(), {
+          style: 'currency',
+          currency,
+        });
         this.toastService.success(`Remboursement enregistré. Reste : ${formatter.format(reste)}`);
       }
     } catch (err: unknown) {

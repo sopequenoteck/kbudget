@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { ConversionService } from '../../core/services/conversion';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: '€',
@@ -12,13 +12,16 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   MAD: 'MAD',
 };
 
+// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite des arguments et
+// ne rappellerait jamais `transform` au seul changement de langue.
 @Pipe({
   name: 'convertAmount',
   standalone: true,
-  pure: true,
+  pure: false,
 })
 export class ConvertAmountPipe implements PipeTransform {
   private readonly conversionService = inject(ConversionService);
+  private readonly languageService = inject(LanguageService);
 
   transform(amount: number, fromCurrency: string, toCurrency: string): string {
     if (!fromCurrency || fromCurrency === toCurrency) return '';
@@ -28,7 +31,7 @@ export class ConvertAmountPipe implements PipeTransform {
 
     const symbol = CURRENCY_SYMBOLS[toCurrency] ?? toCurrency;
     const decimals = toCurrency === 'XOF' ? 0 : 2;
-    const formatted = converted.toLocaleString(APP_LOCALE, {
+    const formatted = converted.toLocaleString(this.languageService.displayLocale(), {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });

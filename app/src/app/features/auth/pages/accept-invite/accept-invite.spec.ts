@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AcceptInvite } from './accept-invite';
 import { AuthService } from '../../../../core/services/auth';
 import { InvitationService } from '../../../../core/services/invitation.service';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 describe('AcceptInvite', () => {
   let component: AcceptInvite;
@@ -13,6 +14,7 @@ describe('AcceptInvite', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        provideTranslocoTesting(),
         { provide: AuthService, useValue: { acceptInvite: vi.fn() } },
         { provide: InvitationService, useValue: { lookup: vi.fn() } },
         { provide: Router, useValue: { navigateByUrl: vi.fn() } },

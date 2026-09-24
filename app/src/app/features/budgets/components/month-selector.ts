@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { APP_LOCALE } from '../../../core/constants/locale.constants';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { LanguageService } from '../../../core/services/language';
 
 @Component({
   selector: 'app-month-selector',
@@ -57,15 +57,20 @@ import { APP_LOCALE } from '../../../core/constants/locale.constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonthSelector {
+  private readonly languageService = inject(LanguageService);
+
   readonly month = input.required<number>();
   readonly year = input.required<number>();
   readonly monthChange = output<{ month: number; year: number }>();
 
   readonly monthLabel = computed(() =>
-    new Date(this.year(), this.month() - 1).toLocaleDateString(APP_LOCALE, {
-      month: 'long',
-      year: 'numeric',
-    }),
+    new Date(this.year(), this.month() - 1).toLocaleDateString(
+      this.languageService.displayLocale(),
+      {
+        month: 'long',
+        year: 'numeric',
+      },
+    ),
   );
 
   prevMonth(): void {

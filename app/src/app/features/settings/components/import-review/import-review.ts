@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -23,9 +17,13 @@ import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
-import { ImportDraft, ImportDraftLine, ImportLineUpdate } from '../../../../core/models/import.model';
+import {
+  ImportDraft,
+  ImportDraftLine,
+  ImportLineUpdate,
+} from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
 
 interface SuggestRuleBanner {
@@ -61,6 +59,7 @@ export class ImportReview {
   private readonly categoryService = inject(CategoryService);
   private readonly categoryRuleService = inject(CategoryRuleService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly draft = signal<ImportDraft | null>(null);
   readonly categories = signal<Category[]>([]);
@@ -374,6 +373,10 @@ export class ImportReview {
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString(this.languageService.displayLocale(), {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 }

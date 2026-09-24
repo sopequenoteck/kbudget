@@ -10,10 +10,10 @@ import {
   signal,
 } from '@angular/core';
 
+import { LanguageService } from '../../../core/services/language';
+
 const PICKER_HEIGHT = 435;
 const PICKER_SPACING = 8;
-
-const EMOJI_LOCALE = 'fr';
 
 const EMOJI_PICKER_THEME: Record<string, Record<string, string>> = {
   dark: {
@@ -43,6 +43,7 @@ const EMOJI_PICKER_THEME: Record<string, Record<string, string>> = {
 })
 export class EmojiInput implements AfterViewChecked {
   private readonly el = inject(ElementRef);
+  private readonly languageService = inject(LanguageService);
 
   readonly value = input('');
   readonly valueChange = output<string>();
@@ -112,7 +113,9 @@ export class EmojiInput implements AfterViewChecked {
     const pickerEl = new Picker({
       data,
       theme,
-      locale: EMOJI_LOCALE,
+      // emoji-mart ne sert que le fr et l'en (D8, KKS-373) : les deux langues
+      // supportees par LanguageService y correspondent directement.
+      locale: this.languageService.activeLanguage(),
       onEmojiSelect: (emoji: { native: string }) => {
         if (emoji.native) {
           this.valueChange.emit(emoji.native);

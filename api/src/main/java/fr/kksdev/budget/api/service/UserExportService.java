@@ -146,6 +146,7 @@ public class UserExportService {
                         : List.of(),
                 pref.getTimezone(),
                 pref.getTextScale() != null ? pref.getTextScale().name() : null,
+                pref.getLanguage(),
                 pref.getUpdatedAt()
         );
     }

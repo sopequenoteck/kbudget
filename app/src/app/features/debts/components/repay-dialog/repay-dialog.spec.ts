@@ -9,6 +9,7 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -104,6 +105,7 @@ describe('RepayDialog', () => {
     TestBed.configureTestingModule({
       imports: [RepayDialog],
       providers: [
+        provideTranslocoTesting(),
         { provide: DebtService, useValue: debtServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: ModalService, useValue: modalServiceMock },

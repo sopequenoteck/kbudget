@@ -10,6 +10,7 @@ import { AccountService } from '../../../../core/services/account';
 import { CategoryService } from '../../../../core/services/category';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -121,6 +122,7 @@ describe('DebtForm', () => {
     TestBed.configureTestingModule({
       imports: [DebtForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: CurrencyService, useValue: currencyServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
@@ -153,7 +155,9 @@ describe('DebtForm', () => {
 
   it('should_auto_set_include_in_balance_when_account_selected', async () => {
     // Désactiver le compte par défaut pour partir d'un état sans sélection
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -172,7 +176,9 @@ describe('DebtForm', () => {
   });
 
   it('should_hide_patrimoine_toggle_when_account_selected', async () => {
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();

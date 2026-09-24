@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -66,7 +67,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
-                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, null
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -77,7 +78,23 @@ class PreferenceControllerTest {
                 .andExpect(jsonPath("$.enabledFeatures[0]").value("SUBSCRIPTIONS"))
                 .andExpect(jsonPath("$.enabledFeatures[1]").value("DEBTS"))
                 .andExpect(jsonPath("$.navOrder.length()").value(2))
-                .andExpect(jsonPath("$.navOrder[0]").value("SUBSCRIPTIONS"));
+                .andExpect(jsonPath("$.navOrder[0]").value("SUBSCRIPTIONS"))
+                .andExpect(jsonPath("$.language").value(nullValue()));
+    }
+
+    @Test
+    void should_returnLanguageField_when_userHasChosenALanguage() throws Exception {
+        var response = new UserPreferenceResponse(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, "en"
+        );
+        when(preferenceService.getPreferences(userId)).thenReturn(response);
+
+        mockMvc.perform(get("/v1/users/me/preferences")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.language").value("en"));
     }
 
     @Test
@@ -85,7 +102,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
                 List.of(Feature.BUDGETS, Feature.SUBSCRIPTIONS),
-                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, null
         );
         when(preferenceService.getPreferences(userId)).thenReturn(response);
 
@@ -112,7 +129,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS),
-                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, null
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -130,7 +147,7 @@ class PreferenceControllerTest {
 
     @Test
     void should_return200_when_disableAllFeatures() throws Exception {
-        var response = new UserPreferenceResponse(List.of(), List.of(), List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM);
+        var response = new UserPreferenceResponse(List.of(), List.of(), List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, null);
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
 
@@ -173,7 +190,7 @@ class PreferenceControllerTest {
         var response = new UserPreferenceResponse(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.BUDGETS),
                 List.of(Feature.BUDGETS, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, null
         );
         when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
                 .thenReturn(response);
@@ -233,5 +250,62 @@ class PreferenceControllerTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Navigation order must contain exactly the enabled features"));
+    }
+
+    // === US4: PUT /users/me/preferences (language, KKS-373) ===
+
+    @Test
+    void should_return200_when_validLanguageProvided() throws Exception {
+        var response = new UserPreferenceResponse(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, "en"
+        );
+        when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(put("/v1/users/me/preferences")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS"], "language": "en"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.language").value("en"));
+    }
+
+    @Test
+    void should_return200_when_languageSyntacticallyValidButUnsupportedByAnyClient() throws Exception {
+        var response = new UserPreferenceResponse(
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
+                List.of(Currency.EUR), List.of(), "Europe/Paris", TextScale.MEDIUM, "pt-BR"
+        );
+        when(preferenceService.updatePreferences(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(put("/v1/users/me/preferences")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS"], "language": "pt-BR"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.language").value("pt-BR"));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"", "eng", "FR", "fr-fr", "not-a-lang"})
+    void should_return400WithValidationError_when_languagePatternInvalid(String invalidLanguage) throws Exception {
+        mockMvc.perform(put("/v1/users/me/preferences")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"enabledFeatures": ["SUBSCRIPTIONS", "DEBTS"], "language": "%s"}
+                                """.formatted(invalidLanguage)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+
+        org.mockito.Mockito.verifyNoInteractions(preferenceService);
     }
 }
