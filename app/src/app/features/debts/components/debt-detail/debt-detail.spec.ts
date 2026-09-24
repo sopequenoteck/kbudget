@@ -6,6 +6,7 @@ import { DebtDetail } from './debt-detail';
 import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
@@ -43,6 +44,11 @@ describe('DebtDetail', () => {
     getById: ReturnType<typeof vi.fn>;
     getPayments: ReturnType<typeof vi.fn>;
     refreshTrigger: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+  };
+
+  let confirmServiceMock: {
+    confirm: ReturnType<typeof vi.fn>;
   };
 
   let modalServiceMock: {
@@ -68,6 +74,11 @@ describe('DebtDetail', () => {
       getById: vi.fn().mockReturnValue(of(mockDebt)),
       getPayments: vi.fn().mockReturnValue(of([])),
       refreshTrigger: vi.fn().mockReturnValue(0),
+      delete: vi.fn().mockReturnValue(of(undefined)),
+    };
+
+    confirmServiceMock = {
+      confirm: vi.fn().mockResolvedValue(true),
     };
 
     modalServiceMock = {
@@ -99,6 +110,7 @@ describe('DebtDetail', () => {
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
       ],
@@ -220,5 +232,51 @@ describe('DebtDetail', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance.progressPercent()).toBe(100);
+  });
+
+  it('should_delete_debt_when_confirmed', async () => {
+    confirmServiceMock.confirm.mockResolvedValue(true);
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(debtServiceMock.delete).toHaveBeenCalledWith('debt-1');
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Dette supprimée');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/debts']);
+  });
+
+  it('should_not_delete_debt_when_not_confirmed', async () => {
+    confirmServiceMock.confirm.mockResolvedValue(false);
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(debtServiceMock.delete).not.toHaveBeenCalled();
+  });
+
+  it('should_show_error_toast_when_delete_fails', async () => {
+    confirmServiceMock.confirm.mockResolvedValue(true);
+    debtServiceMock.delete.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Erreur lors de la suppression');
+  });
+
+  it('should_format_date_using_display_locale', async () => {
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const result = fixture.componentInstance.formatDate('2026-03-15');
+    expect(result).toContain('2026');
   });
 });

@@ -33,19 +33,29 @@ function budgetOn(id: string, categoryId: string): Budget {
 
 describe('BudgetForm', () => {
   const editingEntity = signal<Budget | null>(null);
+  let budgetServiceMock: { getAll: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
+  let confirmServiceMock: { confirm: ReturnType<typeof vi.fn> };
+  let modalServiceMock: { editingEntity: typeof editingEntity; closeModal: ReturnType<typeof vi.fn> };
 
   const setup = (): BudgetForm => {
+    budgetServiceMock = {
+      getAll: vi.fn().mockReturnValue(of([])),
+      delete: vi.fn().mockReturnValue(of(undefined)),
+    };
+    confirmServiceMock = { confirm: vi.fn().mockResolvedValue(true) };
+    modalServiceMock = { editingEntity, closeModal: vi.fn() };
+
     TestBed.configureTestingModule({
       providers: [
         provideTranslocoTesting(),
         { provide: CategoryService, useValue: { getAll: vi.fn().mockReturnValue(of([])) } },
-        { provide: BudgetService, useValue: { getAll: vi.fn().mockReturnValue(of([])) } },
+        { provide: BudgetService, useValue: budgetServiceMock },
         {
           provide: PreferenceService,
           useValue: { currencies: signal(['EUR']), language: signal(null) },
         },
-        { provide: ModalService, useValue: { editingEntity } },
-        { provide: ConfirmService, useValue: {} },
+        { provide: ModalService, useValue: modalServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
         { provide: ApiErrorService, useValue: {} },
       ],
     });
@@ -71,5 +81,26 @@ describe('BudgetForm', () => {
     const form = setup();
 
     expect(form.availableCategories().map((c) => c.id)).toEqual(['courses', 'transport']);
+  });
+
+  it('should_delete_budget_when_confirmed', async () => {
+    editingEntity.set(budgetOn('b1', 'courses'));
+    const form = setup();
+
+    await form.onDelete();
+
+    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(budgetServiceMock.delete).toHaveBeenCalledWith('b1');
+    expect(modalServiceMock.closeModal).toHaveBeenCalled();
+  });
+
+  it('should_not_delete_budget_when_not_confirmed', async () => {
+    editingEntity.set(budgetOn('b1', 'courses'));
+    const form = setup();
+    confirmServiceMock.confirm.mockResolvedValue(false);
+
+    await form.onDelete();
+
+    expect(budgetServiceMock.delete).not.toHaveBeenCalled();
   });
 });

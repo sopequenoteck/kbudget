@@ -26,6 +26,7 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { DevLogger } from '../../core/services/dev-logger';
 import { LanguageService } from '../../core/services/language';
+import { formatUpcomingDays, formatCurrencyAmount } from '../../shared/utils/locale-format.utils';
 
 interface SubscriptionGroup {
   label: string;
@@ -250,19 +251,11 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
       (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
 
-    if (diffDays === 0) return "aujourd'hui";
-    if (diffDays === 1) return 'demain';
-    if (diffDays <= 30) return `dans ${diffDays} j.`;
-
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), { day: 'numeric', month: 'short' }).format(nextDate);
+    return formatUpcomingDays(diffDays, nextDate, this.languageService.displayLocale());
   }
 
   formatAmount(subscription: Subscription): string {
-    const formatted = new Intl.NumberFormat(this.languageService.displayLocale(), {
-      style: 'currency',
-      currency: subscription.currency || 'EUR',
-    }).format(subscription.montant);
-
+    const formatted = formatCurrencyAmount(subscription.montant, subscription.currency || 'EUR', this.languageService.displayLocale());
     return subscription.frequence === Frequency.MENSUEL ? `${formatted}/mois` : `${formatted}/an`;
   }
 

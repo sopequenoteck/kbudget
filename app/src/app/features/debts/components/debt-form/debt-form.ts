@@ -39,6 +39,7 @@ import { Category } from '../../../../core/models/category.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
@@ -151,13 +152,7 @@ export class DebtForm {
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
-    return (0)
-      .toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR'), this.languageService.displayLocale()));
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
@@ -238,9 +233,7 @@ export class DebtForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, this.languageService.displayLocale()))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -309,7 +302,7 @@ export class DebtForm {
     const d = this.debt();
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
-    const amount = d.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency });
+    const amount = formatCurrencyAmount(d.montant, currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({
       title: `${d.personne} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cette dette ?',

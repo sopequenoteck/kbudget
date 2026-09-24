@@ -373,4 +373,36 @@ describe('NotificationPanel', () => {
 
     expect(component.getIconForType('RECURRING_TRANSACTION_DUE')).toBe('phosphorRepeat');
   });
+
+  it('should_group_notification_under_localized_date_when_older_than_yesterday', () => {
+    const oldDate = new Date();
+    oldDate.setDate(oldDate.getDate() - 10);
+    const oldNotification = makeNotification({
+      id: 'notif-old',
+      createdAt: oldDate.toISOString(),
+    });
+    notificationServiceMock = createNotificationServiceMock([oldNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups.length).toBe(1);
+    expect(groups[0].label).not.toBe("Aujourd'hui");
+    expect(groups[0].label).not.toBe('Hier');
+    expect(groups[0].label).toContain(String(oldDate.getFullYear()));
+  });
+
+  it('should_group_notification_under_today_when_created_today', () => {
+    const todayNotification = makeNotification({ id: 'notif-today' });
+    notificationServiceMock = createNotificationServiceMock([todayNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups[0].label).toBe("Aujourd'hui");
+  });
 });

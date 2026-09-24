@@ -50,6 +50,7 @@ import { RecurringTransactionRequest } from '../../../../core/models/recurring-t
 import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
@@ -157,10 +158,7 @@ export class TransactionForm {
 
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? 'EUR', this.languageService.displayLocale()));
 
   private readonly allCategories = signal<Category[]>([]);
 
@@ -284,9 +282,7 @@ export class TransactionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, this.languageService.displayLocale()))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   onLibelleQuery(q: string): void {
@@ -366,7 +362,7 @@ export class TransactionForm {
     const tx = this.transaction();
     if (!tx) return;
     const currency = tx.account?.currency ?? 'EUR';
-    const amount = tx.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency });
+    const amount = formatCurrencyAmount(tx.montant, currency, this.languageService.displayLocale());
     let message = 'Voulez-vous vraiment supprimer cette transaction ?';
     if (tx.transferId) {
       message += '\nLa contrepartie du virement sera aussi supprimée.';

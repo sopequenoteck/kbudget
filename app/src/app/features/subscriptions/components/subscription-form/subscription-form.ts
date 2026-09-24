@@ -42,6 +42,7 @@ import {
 } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
@@ -142,13 +143,7 @@ export class SubscriptionForm {
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0)
-      .toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? 'EUR', this.languageService.displayLocale()));
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
@@ -215,9 +210,7 @@ export class SubscriptionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, this.languageService.displayLocale()))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -283,7 +276,7 @@ export class SubscriptionForm {
     const sub = this.subscription();
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
-    const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency });
+    const amount = formatCurrencyAmount(sub.montant, currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({
       title: `${sub.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cet abonnement ?',

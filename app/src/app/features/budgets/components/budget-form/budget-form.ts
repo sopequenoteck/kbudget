@@ -34,6 +34,7 @@ import { Budget, BudgetRequest, FREQUENCIES } from '../../../../core/models/budg
 import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 
@@ -136,13 +137,7 @@ export class BudgetForm {
     return this.frequencies.find((f) => f.value === val)?.label ?? val;
   });
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.form.get('currency')?.value || 'EUR';
-    return (0)
-      .toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.form.get('currency')?.value || 'EUR', this.languageService.displayLocale()));
 
   constructor() {
     this.loadCategories();
@@ -223,7 +218,7 @@ export class BudgetForm {
   async onDelete(): Promise<void> {
     const b = this.budget();
     if (!b) return;
-    const amount = b.montant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: b.currency });
+    const amount = formatCurrencyAmount(b.montant, b.currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({
       title: `${b.category.nom} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer ce budget ?',

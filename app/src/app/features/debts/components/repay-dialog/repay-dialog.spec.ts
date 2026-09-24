@@ -227,6 +227,24 @@ describe('RepayDialog', () => {
     expect(savedEmitted).toBe(true);
   });
 
+  it('should_show_remaining_balance_toast_when_repayment_is_partial', async () => {
+    setup(mockDebt);
+    debtServiceMock.repay.mockReturnValue(
+      of({ ...mockDebt, montantRestant: 50, rembourse: false }),
+    );
+    const fixture = TestBed.createComponent(RepayDialog);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    await component.onSubmit();
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith(
+      expect.stringContaining('Remboursement enregistré. Reste :'),
+    );
+  });
+
   it('should_not_call_repay_when_form_is_invalid', async () => {
     setup(mockDebt);
     const fixture = TestBed.createComponent(RepayDialog);

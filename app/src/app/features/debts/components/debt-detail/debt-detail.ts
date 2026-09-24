@@ -31,6 +31,7 @@ import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
+import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 
 @Component({
   selector: 'app-debt-detail',
@@ -149,7 +150,7 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    const amount = d.montantRestant.toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: d.currency });
+    const amount = formatCurrencyAmount(d.montantRestant, d.currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
     if (!ok) return;
 

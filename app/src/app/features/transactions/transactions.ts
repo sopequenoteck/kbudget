@@ -38,6 +38,7 @@ import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
+import { formatMonthYearLabel } from '../../shared/utils/locale-format.utils';
 
 @Component({
   selector: 'app-transactions',
@@ -150,7 +151,7 @@ export class Transactions implements AfterViewInit {
 
   readonly selectedMonthLabel = computed(() => {
     const date = new Date(this.selectedYear(), this.selectedMonth() - 1);
-    return date.toLocaleDateString(this.languageService.displayLocale(), { month: 'long', year: 'numeric' });
+    return formatMonthYearLabel(date, this.languageService.displayLocale());
   });
 
   readonly filteredTransactions = computed(() => {

@@ -26,6 +26,7 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
+import { formatUpcomingDays } from '../../shared/utils/locale-format.utils';
 
 interface DebtGroup {
   label: string;
@@ -274,11 +275,8 @@ export class Debts implements AfterViewInit, OnDestroy {
     );
 
     if (diffDays < 0) return `${Math.abs(diffDays)} j. en retard`;
-    if (diffDays === 0) return "aujourd'hui";
-    if (diffDays === 1) return 'demain';
-    if (diffDays <= 30) return `dans ${diffDays} j.`;
 
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), { day: 'numeric', month: 'short' }).format(dueDate);
+    return formatUpcomingDays(diffDays, dueDate, this.languageService.displayLocale());
   }
 
   getAmountClass(debt: Debt): string {
