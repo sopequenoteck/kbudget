@@ -137,6 +137,13 @@ constraint would silently rename them. `ExceptionHandlerInventoryTest` keeps a
 versioned inventory of the declared handlers, so a new error code cannot reach
 clients without showing up in a diff.
 
+### Interface text
+
+Translation keys, string-writing rules and the English–French glossary are in
+[`docs/i18n.md`](docs/i18n.md). Read it before adding a key or a translation:
+the key structure is a closed list, and some terms are easy to get wrong — a
+*recurring transaction* is not a *subscription*, and *lent* is never *loan*.
+
 ## Contributor Licence Agreement
 
 **Every pull request must be covered by the [CLA](CLA.md).** An automated check
