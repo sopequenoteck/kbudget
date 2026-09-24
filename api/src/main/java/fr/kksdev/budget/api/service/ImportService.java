@@ -10,6 +10,7 @@ import fr.kksdev.budget.api.dto.response.ImportDraftSummaryResponse;
 import fr.kksdev.budget.api.dto.response.ImportHistoryResponse;
 import fr.kksdev.budget.api.dto.response.ImportProfileResponse;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
+import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.enums.ImportProfileSource;
@@ -30,6 +31,7 @@ import fr.kksdev.budget.api.repository.ImportHistoryRepository;
 import fr.kksdev.budget.api.repository.ImportProfileRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.MerchantKey;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -186,14 +188,18 @@ public class ImportService {
                         log.error("Catégorie non trouvée: id={}, userId={}", request.categoryId(), userId);
                         return new EntityNotFoundException("Category not found");
                     });
+            boolean changed = line.getCategory() == null || !line.getCategory().getId().equals(category.getId());
             line.setCategory(category);
+            line.setCategorySource(CategorySource.USER);
 
-            // Suggest creating a rule if no existing rule matches this label
-            String cleanLabel = line.getCleanLabel();
-            if (cleanLabel != null && !cleanLabel.isBlank()) {
-                boolean ruleExists = categoryRuleService.getAllByUser(userId).stream()
-                        .anyMatch(r -> cleanLabel.toLowerCase().contains(r.pattern().toLowerCase()));
-                suggestRule = !ruleExists;
+            String merchantKey = MerchantKey.of(line.getCleanLabel());
+            if (changed && !merchantKey.isEmpty()) {
+                // KKS-383 : la correction vaut pour tout le commercant, dans ce brouillon
+                // et dans les suivants. La regle est creee ici, plus besoin de la suggerer.
+                propagateCategory(line, merchantKey, draftId);
+                categoryRuleService.rememberCorrection(merchantKey, category, userId);
+            } else if (merchantKey.isEmpty()) {
+                suggestRule = !categoryRuleService.hasMatchingRule(line.getCleanLabel(), userId);
             }
         }
 
@@ -249,6 +255,7 @@ public class ImportService {
         for (ImportDraftLine line : matchedLines) {
             if (category != null) {
                 line.setCategory(category);
+                line.setCategorySource(CategorySource.USER);
             }
             if (newStatus != null) {
                 validateStatusTransition(line.getStatus(), newStatus);
@@ -442,7 +449,35 @@ public class ImportService {
         }
     }
 
+    /**
+     * Applique la categorie choisie aux lignes du meme commercant et du meme sens
+     * qui n'ont pas encore de categorie, ou seulement celle devinee par l'historique.
+     * Une categorie posee par une regle ou par l'utilisateur n'est jamais ecrasee.
+     */
+    private void propagateCategory(ImportDraftLine corrected, String merchantKey, UUID draftId) {
+        List<ImportDraftLine> propagated = importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId).stream()
+                .filter(l -> !l.getId().equals(corrected.getId()))
+                .filter(l -> !isAlreadyImported(l))
+                .filter(l -> l.getTransactionType() == corrected.getTransactionType())
+                .filter(l -> l.getCategory() == null || l.getCategorySource() == CategorySource.HISTORY)
+                .filter(l -> merchantKey.equals(MerchantKey.of(l.getCleanLabel())))
+                .toList();
+        propagated.forEach(l -> {
+            l.setCategory(corrected.getCategory());
+            l.setCategorySource(CategorySource.USER);
+        });
+        importDraftLineRepository.saveAll(propagated);
+        if (!propagated.isEmpty()) {
+            log.info("Category propagated to {} lines of the same merchant in draft {}", propagated.size(), draftId);
+        }
+    }
+
     private void validateStatusTransition(ImportLineStatus current, ImportLineStatus next) {
+        // Redemander le statut courant ne change rien : l'ecran de revue envoie READY
+        // avec chaque categorie, y compris pour une ligne deja READY (KKS-383).
+        if (current == next) {
+            return;
+        }
         boolean valid = switch (next) {
             case READY -> current == ImportLineStatus.NEEDS_REVIEW || current == ImportLineStatus.DUPLICATE;
             case SKIPPED -> true;

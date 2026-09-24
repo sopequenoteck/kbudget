@@ -11,7 +11,9 @@ public record CategoryRuleResponse(
         UUID categoryId,
         String categoryName,
         String categoryIcon,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        /** MANUAL (saisie) ou AUTO (creee par une correction pendant la revue) — KKS-383. */
+        String origin
 ) {
     public static CategoryRuleResponse from(CategoryRule rule) {
         return new CategoryRuleResponse(
@@ -20,7 +22,8 @@ public record CategoryRuleResponse(
                 rule.getCategory().getId(),
                 rule.getCategory().getNom(),
                 rule.getCategory().getIcone(),
-                rule.getCreatedAt()
+                rule.getCreatedAt(),
+                rule.getOrigin() != null ? rule.getOrigin().name() : null
         );
     }
 }

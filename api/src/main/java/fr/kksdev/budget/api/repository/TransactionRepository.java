@@ -76,6 +76,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByUserIdAndAccountIdAndIdIn(UUID userId, UUID accountId, Collection<UUID> ids);
 
+    List<Transaction> findByUserIdAndCategoryIsNotNullAndIsRecurringFalse(UUID userId);
+
     boolean existsByUserIdAndDateBetween(UUID userId, LocalDate from, LocalDate to);
 
     @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt " +

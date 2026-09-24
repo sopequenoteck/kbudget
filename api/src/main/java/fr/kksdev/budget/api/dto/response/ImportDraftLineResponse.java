@@ -21,7 +21,9 @@ public record ImportDraftLineResponse(
         UUID duplicateTransactionId,
         boolean suggestRule,
         /** Raison d'un SKIPPED decide par l'import (ex. ALREADY_IMPORTED), null sinon (KKS-382). */
-        String skipReason
+        String skipReason,
+        /** Origine de la categorie : RULE, HISTORY ou USER, null sans categorie (KKS-383). */
+        String categorySource
 ) {
     public static ImportDraftLineResponse from(ImportDraftLine line) {
         return from(line, false);
@@ -42,7 +44,8 @@ public record ImportDraftLineResponse(
                 line.getCategory() != null ? line.getCategory().getNom() : null,
                 line.getDuplicateTransactionId(),
                 suggestRule,
-                line.getSkipReason() != null ? line.getSkipReason().name() : null
+                line.getSkipReason() != null ? line.getSkipReason().name() : null,
+                line.getCategory() != null && line.getCategorySource() != null ? line.getCategorySource().name() : null
         );
     }
 }
