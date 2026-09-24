@@ -1,14 +1,29 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { LanguageService } from '../../core/services/language';
 
-const longDateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
+// Cache par locale (KKS-373, D8) : le format long change de langue sans
+// reconstruire un `Intl.DateTimeFormat` a chaque rendu.
+const longDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
-@Pipe({ name: 'relativeDate', standalone: true, pure: true })
+function getLongDateFormatter(locale: string): Intl.DateTimeFormat {
+  let formatter = longDateFormatterCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    longDateFormatterCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
+// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite de `value` et ne
+// rappellerait jamais `transform` au seul changement de langue.
+@Pipe({ name: 'relativeDate', standalone: true, pure: false })
 export class RelativeDatePipe implements PipeTransform {
+  private readonly languageService = inject(LanguageService);
+
   transform(value: string | null | undefined): string {
     if (!value) {
       return '';
@@ -49,6 +64,6 @@ export class RelativeDatePipe implements PipeTransform {
       return `il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
     }
 
-    return longDateFormatter.format(date);
+    return getLongDateFormatter(this.languageService.displayLocale()).format(date);
   }
 }

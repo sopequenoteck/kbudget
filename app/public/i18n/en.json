@@ -1,0 +1,45 @@
+{
+  "auth": {
+    "feedback": {
+      "invalidCredentials": "Incorrect email or password"
+    },
+    "form": {
+      "passwordMinLength": "{min} characters minimum"
+    }
+  },
+  "errors": {
+    "api": {
+      "badRequest": "The request could not be processed.",
+      "validationError": "Please check the information you entered.",
+      "malformedRequest": "Invalid request.",
+      "invalidImageFormat": "Only JPG and PNG formats are accepted.",
+      "invalidExportFormat": "Invalid export format. Accepted formats: JSON, CSV.",
+      "passwordUnchanged": "The new password must be different from the current one.",
+      "confirmationRequired": "Explicit confirmation required.",
+      "passwordIncorrect": "Incorrect password.",
+      "unauthenticated": "Authentication required.",
+      "tokenExpired": "Your session has expired. Please sign in again.",
+      "tokenRevoked": "Your session has been revoked. Please sign in again.",
+      "tokenReuseDetected": "Session interrupted for security reasons. Please sign in again.",
+      "tokenInvalid": "Invalid session. Please sign in again.",
+      "accessDenied": "Access denied",
+      "passwordResetRequired": "Credentials reset required",
+      "featureDisabled": "Feature disabled",
+      "passwordResetNotRequired": "Credentials reset is not required for this account.",
+      "lastAdminDeletionForbidden": "At least one active administrator must exist.",
+      "notFound": "Resource not found",
+      "avatarNotFound": "Avatar not found",
+      "conflict": "Data conflict",
+      "lastAdminCannotBeDisabled": "The last active administrator cannot be disabled.",
+      "emailAlreadyExists": "Email already in use",
+      "fileTooLarge": "File too large. The maximum size is 2 MB.",
+      "csvProfileNotFound": "Import profile not found",
+      "tooManyRequests": "Too many attempts. Please try again shortly.",
+      "internalError": "An internal error occurred"
+    },
+    "client": {
+      "generic": "An error occurred",
+      "network": "Unable to reach the server"
+    }
+  }
+}

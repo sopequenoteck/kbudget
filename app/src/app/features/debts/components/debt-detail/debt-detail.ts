@@ -25,12 +25,13 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
+import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 
 @Component({
   selector: 'app-debt-detail',
@@ -60,6 +61,7 @@ export class DebtDetail {
   readonly preferenceService = inject(PreferenceService);
   readonly conversionService = inject(ConversionService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
@@ -148,7 +150,7 @@ export class DebtDetail {
     const d = this.debt();
     if (!d) return;
 
-    const amount = d.montantRestant.toLocaleString(APP_LOCALE, { style: 'currency', currency: d.currency });
+    const amount = formatCurrencyAmount(d.montantRestant, d.currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
     if (!ok) return;
 
@@ -201,6 +203,6 @@ export class DebtDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(new Date(date));
   }
 }

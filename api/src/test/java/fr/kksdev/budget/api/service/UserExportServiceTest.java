@@ -126,6 +126,36 @@ class UserExportServiceTest {
     }
 
     @Test
+    void should_exportNullLanguage_when_userHasNotChosenALanguage() {
+        stubAllRepositoriesEmpty();
+        UserPreference preference = UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .build();
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.preferences()).isNotNull();
+        assertThat(response.preferences().language()).isNull();
+    }
+
+    @Test
+    void should_exportLanguage_when_userHasChosenALanguage() {
+        stubAllRepositoriesEmpty();
+        UserPreference preference = UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .language("fr")
+                .build();
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.preferences().language()).isEqualTo("fr");
+    }
+
+    @Test
     void should_include_invitations_in_export() {
         when(accountRepository.findByUserId(userId)).thenReturn(List.of());
         when(categoryRepository.findByUserIdOrderByNomAsc(userId)).thenReturn(List.of());

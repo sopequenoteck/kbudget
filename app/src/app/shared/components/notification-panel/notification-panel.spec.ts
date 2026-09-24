@@ -11,6 +11,7 @@ import { type NotificationModel } from '../../../core/models/notification.model'
 import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const makeNotification = (overrides: Partial<NotificationModel> = {}): NotificationModel => ({
   id: 'notif-1',
@@ -137,6 +138,7 @@ describe('NotificationPanel', () => {
     TestBed.configureTestingModule({
       imports: [NotificationPanel],
       providers: [
+        provideTranslocoTesting(),
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
@@ -184,7 +186,7 @@ describe('NotificationPanel', () => {
       id: 'notif-debt-reminder',
       type: 'DEBT_REMINDER',
       title: 'Rappel dette',
-      message: 'Rappel : Bob vous doit de l\'argent',
+      message: "Rappel : Bob vous doit de l'argent",
       entityType: 'DEBT',
       entityId: 'debt-1',
     });
@@ -370,5 +372,37 @@ describe('NotificationPanel', () => {
     const component = fixture.componentInstance;
 
     expect(component.getIconForType('RECURRING_TRANSACTION_DUE')).toBe('phosphorRepeat');
+  });
+
+  it('should_group_notification_under_localized_date_when_older_than_yesterday', () => {
+    const oldDate = new Date();
+    oldDate.setDate(oldDate.getDate() - 10);
+    const oldNotification = makeNotification({
+      id: 'notif-old',
+      createdAt: oldDate.toISOString(),
+    });
+    notificationServiceMock = createNotificationServiceMock([oldNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups.length).toBe(1);
+    expect(groups[0].label).not.toBe("Aujourd'hui");
+    expect(groups[0].label).not.toBe('Hier');
+    expect(groups[0].label).toContain(String(oldDate.getFullYear()));
+  });
+
+  it('should_group_notification_under_today_when_created_today', () => {
+    const todayNotification = makeNotification({ id: 'notif-today' });
+    notificationServiceMock = createNotificationServiceMock([todayNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups[0].label).toBe("Aujourd'hui");
   });
 });

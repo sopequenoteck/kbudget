@@ -25,8 +25,9 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { isFieldInvalid, validateForm, normalizeDecimal } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 type ExpandableSection = 'account' | null;
 
@@ -46,6 +47,7 @@ export class RepayDialog {
   private readonly accountService = inject(AccountService);
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
+  private readonly languageService = inject(LanguageService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -98,13 +100,7 @@ export class RepayDialog {
 
   readonly activeCurrency = computed(() => this.selectedAccount()?.currency || this.debtCurrency());
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.activeCurrency();
-    return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.activeCurrency(), this.languageService.displayLocale()));
 
   constructor() {
     this.amountWidth = createAmountWidth(this.form.get('amount')!, 22);
@@ -171,8 +167,8 @@ export class RepayDialog {
       } else {
         const reste = updatedDebt.montantRestant;
         const currency = updatedDebt.currency || 'EUR';
-        const formatter = new Intl.NumberFormat(APP_LOCALE, { style: 'currency', currency });
-        this.toastService.success(`Remboursement enregistré. Reste : ${formatter.format(reste)}`);
+        const formatted = formatCurrencyAmount(reste, currency, this.languageService.displayLocale());
+        this.toastService.success(`Remboursement enregistré. Reste : ${formatted}`);
       }
     } catch (err: unknown) {
       this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors du remboursement');

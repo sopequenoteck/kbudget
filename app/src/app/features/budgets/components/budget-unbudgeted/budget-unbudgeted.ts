@@ -21,7 +21,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -68,6 +68,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -196,7 +197,7 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(APP_LOCALE, {
+    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
       day: 'numeric',
       month: 'long',
     }).format(date);

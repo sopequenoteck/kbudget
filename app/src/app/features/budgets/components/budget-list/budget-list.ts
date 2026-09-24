@@ -26,7 +26,8 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { formatMonthYearLabel } from '../../../../shared/utils/locale-format.utils';
 import {
   type Budget,
   type BudgetOverview,
@@ -59,6 +60,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly Math = Math;
   readonly isOverviewItem = isOverviewItem;
@@ -90,10 +92,10 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   });
 
   readonly selectedMonthLabel = computed(() =>
-    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString(APP_LOCALE, {
-      month: 'long',
-      year: 'numeric',
-    }),
+    formatMonthYearLabel(
+      new Date(this.selectedYear(), this.selectedMonth() - 1),
+      this.languageService.displayLocale(),
+    ),
   );
 
   readonly activeItems = computed(() =>

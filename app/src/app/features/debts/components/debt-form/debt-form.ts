@@ -6,8 +6,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
 } from '@angular/core';
@@ -41,26 +39,12 @@ import { Category } from '../../../../core/models/category.model';
 import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
-
-@Pipe({ name: 'shortDate', standalone: true })
-export class ShortDatePipe implements PipeTransform {
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
-  }
-}
 
 @Component({
   selector: 'app-debt-form',
@@ -90,6 +74,7 @@ export class DebtForm {
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly languageService = inject(LanguageService);
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -167,13 +152,7 @@ export class DebtForm {
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
-    return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR'), this.languageService.displayLocale()));
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
@@ -254,9 +233,7 @@ export class DebtForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -325,7 +302,7 @@ export class DebtForm {
     const d = this.debt();
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
-    const amount = d.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
+    const amount = formatCurrencyAmount(d.montant, currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({
       title: `${d.personne} — ${amount}`,
       message: 'Voulez-vous vraiment supprimer cette dette ?',

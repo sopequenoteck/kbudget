@@ -13,10 +13,14 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { CurrencyService } from '../../core/services/currency';
 import { DevLogger } from '../../core/services/dev-logger';
 import { Frequency, Subscription } from '../../core/models/subscription.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 // jsdom ne fournit pas IntersectionObserver
 beforeAll(() => {
-  if (typeof (globalThis as unknown as { IntersectionObserver?: unknown }).IntersectionObserver === 'undefined') {
+  if (
+    typeof (globalThis as unknown as { IntersectionObserver?: unknown }).IntersectionObserver ===
+    'undefined'
+  ) {
     class IOStub {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       observe(): void {}
@@ -24,7 +28,9 @@ beforeAll(() => {
       unobserve(): void {}
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       disconnect(): void {}
-      takeRecords(): unknown[] { return []; }
+      takeRecords(): unknown[] {
+        return [];
+      }
     }
     (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver = IOStub;
   }
@@ -81,6 +87,7 @@ function createMocks() {
       currencies: vi.fn().mockReturnValue(['EUR']),
       setCurrencies: vi.fn(),
       update: vi.fn(),
+      language: vi.fn().mockReturnValue(null),
     },
     modalService: {
       editingEntity: signal(null),
@@ -120,6 +127,7 @@ describe('Subscriptions', () => {
     TestBed.configureTestingModule({
       imports: [Subscriptions],
       providers: [
+        provideTranslocoTesting(),
         { provide: SubscriptionService, useValue: mocks.subscriptionService },
         { provide: PreferenceService, useValue: mocks.preferenceService },
         { provide: ModalService, useValue: mocks.modalService },
@@ -224,7 +232,9 @@ describe('Subscriptions', () => {
     });
 
     it('should_set_error_on_api_failure', async () => {
-      mocks.subscriptionService.getAll.mockReturnValue(throwError(() => new Error('Network error')));
+      mocks.subscriptionService.getAll.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
 
       await component.loadData();
       expect(component.error()).toBe(true);
