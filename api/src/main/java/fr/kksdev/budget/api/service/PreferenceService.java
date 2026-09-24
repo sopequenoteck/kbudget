@@ -76,7 +76,7 @@ public class PreferenceService {
             try {
                 ZoneId.of(request.timezone());
             } catch (DateTimeException e) {
-                throw new IllegalArgumentException("Timezone invalide: " + request.timezone());
+                throw new IllegalArgumentException("Invalid timezone: " + request.timezone());
             }
             preference.setTimezone(request.timezone());
         }
@@ -129,13 +129,13 @@ public class PreferenceService {
         Set<Feature> navOrderSet = new HashSet<>();
         for (Feature feature : navOrder) {
             if (!navOrderSet.add(feature)) {
-                throw new IllegalArgumentException("L'ordre de navigation ne doit pas contenir de doublons");
+                throw new IllegalArgumentException("Navigation order must not contain duplicates");
             }
         }
 
         Set<Feature> enabledSet = new HashSet<>(enabledFeatures);
         if (!navOrderSet.equals(enabledSet)) {
-            throw new IllegalArgumentException("L'ordre de navigation doit contenir exactement les fonctionnalités activées");
+            throw new IllegalArgumentException("Navigation order must contain exactly the enabled features");
         }
     }
 
@@ -186,12 +186,12 @@ public class PreferenceService {
 
     private void validateCurrencies(List<Currency> currencies) {
         if (currencies.isEmpty()) {
-            throw new IllegalArgumentException("Au moins une devise requise");
+            throw new IllegalArgumentException("At least one currency is required");
         }
         Set<Currency> seen = new HashSet<>();
         for (Currency currency : currencies) {
             if (!seen.add(currency)) {
-                throw new IllegalArgumentException("La liste de devises ne doit pas contenir de doublons");
+                throw new IllegalArgumentException("The currency list must not contain duplicates");
             }
         }
     }

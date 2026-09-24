@@ -11,8 +11,26 @@ sealed class AuthState with _$AuthState {
   const factory AuthState.initial() = AuthInitial;
   const factory AuthState.authenticating() = AuthAuthenticating;
   const factory AuthState.authenticated() = AuthAuthenticated;
-  const factory AuthState.unauthenticated({String? error}) =
+  /// Non authentifie, avec le **code** d'erreur eventuel — jamais un libelle.
+  ///
+  /// Un `Notifier` Riverpod n'a pas de `BuildContext` et ne peut donc pas
+  /// resoudre un texte localise. Le state porte la donnee, le widget porte le
+  /// texte : c'est deja le pattern du reste de l'application (KKS-324).
+  const factory AuthState.unauthenticated({String? errorCode}) =
       AuthUnauthenticated;
+
+  /// Une tentative de connexion vient d'échouer, avec le **code** d'erreur
+  /// éventuel — jamais un libellé.
+  ///
+  /// Distinct d'[AuthState.unauthenticated] : ce dernier est aussi l'état du
+  /// premier rendu de l'écran de connexion et de l'état après déconnexion,
+  /// où aucun message d'erreur ne doit apparaître. `errorCode` nullable ne
+  /// suffit pas à distinguer ces deux cas — un échec sans code exploitable
+  /// (serveur injoignable) est indiscernable d'un premier rendu. Un variant
+  /// dédié rend l'échec visible dans les `is`, là où un champ optionnel
+  /// s'oublie (KKS-309, même raisonnement que
+  /// [AuthState.passwordResetRequired]).
+  const factory AuthState.loginFailed({String? errorCode}) = AuthLoginFailed;
 
   /// Authentifié mais bloqué avant le dashboard : le compte a été provisionné
   /// par un admin (ou est l'admin seed) et doit passer par l'écran de

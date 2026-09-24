@@ -60,7 +60,7 @@ public class AuthController {
     @GetMapping("/invitations/{token}")
     public ResponseEntity<InviteLookupResponse> lookupInvitation(@PathVariable UUID token) {
         Invitation invitation = invitationService.validatePublic(token)
-                .orElseThrow(() -> new EntityNotFoundException("Invitation invalide."));
+                .orElseThrow(() -> new EntityNotFoundException("Invalid invitation."));
         return ResponseEntity.ok(new InviteLookupResponse(invitation.getEmail()));
     }
 

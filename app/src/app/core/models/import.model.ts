@@ -20,6 +20,10 @@ export interface ImportDraftLine {
   categoryName: string | null;
   duplicateTransactionId: string | null;
   suggestRule?: boolean;
+  /** KKS-382 : 'ALREADY_IMPORTED' si l'import a ecarte la ligne lui-meme. */
+  skipReason?: string | null;
+  /** KKS-383 : origine de la categorie ('RULE', 'HISTORY', 'USER'). */
+  categorySource?: string | null;
 }
 
 export interface CategoryRule {

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,6 +71,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<Transaction> findByDebtIdOrderByDateDesc(UUID debtId);
 
     List<Transaction> findByUserIdAndAccountIdAndDateBetween(UUID userId, UUID accountId, LocalDate from, LocalDate to);
+
+    List<Transaction> findByUserIdAndAccountIdAndImportFingerprintIn(UUID userId, UUID accountId, Collection<String> fingerprints);
+
+    List<Transaction> findByUserIdAndAccountIdAndIdIn(UUID userId, UUID accountId, Collection<UUID> ids);
+
+    List<Transaction> findByUserIdAndCategoryIsNotNullAndIsRecurringFalse(UUID userId);
 
     boolean existsByUserIdAndDateBetween(UUID userId, LocalDate from, LocalDate to);
 

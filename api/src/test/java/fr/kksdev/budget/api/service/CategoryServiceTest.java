@@ -92,7 +92,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.create(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Une catégorie avec ce nom existe déjà");
+                .hasMessage("A category with this name already exists");
     }
 
     @Test
@@ -103,7 +103,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.create(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Une catégorie avec ce nom existe déjà");
+                .hasMessage("A category with this name already exists");
     }
 
     @Test
@@ -144,7 +144,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.getById(categoryId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Catégorie non trouvée");
+                .hasMessage("Category not found");
     }
 
     @Test
@@ -183,7 +183,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.update(categoryId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Une catégorie avec ce nom existe déjà");
+                .hasMessage("A category with this name already exists");
     }
 
     @Test
@@ -197,7 +197,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.update(catId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Les catégories système ne peuvent pas être modifiées");
+                .hasMessage("System categories cannot be updated");
         verify(categoryRepository, never()).save(any());
     }
 
@@ -223,7 +223,7 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> categoryService.delete(catId, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Les catégories système ne peuvent pas être supprimées");
+                .hasMessage("System categories cannot be deleted");
         verify(categoryRepository, never()).delete(any());
     }
 

@@ -100,7 +100,7 @@ class InvitationServiceTest {
 
         assertThatThrownBy(() -> invitationService.revoke(99L, admin))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Invitation introuvable");
+                .hasMessageContaining("Invitation not found");
     }
 
     @Test

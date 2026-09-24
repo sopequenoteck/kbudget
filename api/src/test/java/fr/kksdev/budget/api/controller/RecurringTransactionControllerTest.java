@@ -163,12 +163,12 @@ class RecurringTransactionControllerTest {
     @Test
     void should_return404_when_validateNonexistentRecurrence() throws Exception {
         when(recurringTransactionService.validate(eq(recurringId), any(UUID.class)))
-                .thenThrow(new EntityNotFoundException("Transaction récurrente non trouvée"));
+                .thenThrow(new EntityNotFoundException("Recurring transaction not found"));
 
         mockMvc.perform(post("/v1/transactions/recurring/{id}/validate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Transaction récurrente non trouvée"));
+                .andExpect(jsonPath("$.message").value("Recurring transaction not found"));
     }
 
     @Test
@@ -193,12 +193,12 @@ class RecurringTransactionControllerTest {
     @Test
     void should_return400_when_skipInactiveRecurrence() throws Exception {
         when(recurringTransactionService.skip(eq(recurringId), any(UUID.class)))
-                .thenThrow(new IllegalStateException("La transaction récurrente est désactivée"));
+                .thenThrow(new IllegalStateException("The recurring transaction is disabled"));
 
         mockMvc.perform(patch("/v1/transactions/recurring/{id}/skip", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("La transaction récurrente est désactivée"));
+                .andExpect(jsonPath("$.message").value("The recurring transaction is disabled"));
     }
 
     @Test
@@ -219,11 +219,11 @@ class RecurringTransactionControllerTest {
     @Test
     void should_return404_when_deactivateNonexistent() throws Exception {
         when(recurringTransactionService.deactivate(eq(recurringId), any(UUID.class)))
-                .thenThrow(new EntityNotFoundException("Transaction récurrente non trouvée"));
+                .thenThrow(new EntityNotFoundException("Recurring transaction not found"));
 
         mockMvc.perform(patch("/v1/transactions/recurring/{id}/deactivate", recurringId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Transaction récurrente non trouvée"));
+                .andExpect(jsonPath("$.message").value("Recurring transaction not found"));
     }
 }

@@ -178,7 +178,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> subscriptionService.getById(subscriptionId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Abonnement non trouvé");
+                .hasMessage("Subscription not found");
     }
 
     @Test

@@ -149,19 +149,19 @@ class NotificationControllerTest {
     void should_return_404_when_notification_not_found() throws Exception {
         UUID randomId = UUID.randomUUID();
         when(notificationService.markAsRead(eq(userId), eq(randomId)))
-                .thenThrow(new EntityNotFoundException("Notification non trouvée"));
+                .thenThrow(new EntityNotFoundException("Notification not found"));
 
         mockMvc.perform(put("/v1/notifications/{id}/read", randomId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Notification non trouvée"));
+                .andExpect(jsonPath("$.message").value("Notification not found"));
     }
 
     @Test
     void should_return_403_when_marking_other_user_notification_as_read() throws Exception {
         UUID otherNotificationId = UUID.randomUUID();
         when(notificationService.markAsRead(eq(userId), eq(otherNotificationId)))
-                .thenThrow(new org.springframework.security.access.AccessDeniedException("Accès refusé"));
+                .thenThrow(new org.springframework.security.access.AccessDeniedException("Access denied"));
 
         mockMvc.perform(put("/v1/notifications/{id}/read", otherNotificationId)
                         .header("Authorization", BEARER_TOKEN))
@@ -171,7 +171,7 @@ class NotificationControllerTest {
     @Test
     void should_return_403_when_deleting_other_user_notification() throws Exception {
         UUID otherNotificationId = UUID.randomUUID();
-        doThrow(new org.springframework.security.access.AccessDeniedException("Accès refusé"))
+        doThrow(new org.springframework.security.access.AccessDeniedException("Access denied"))
                 .when(notificationService).deleteNotification(eq(userId), eq(otherNotificationId));
 
         mockMvc.perform(delete("/v1/notifications/{id}", otherNotificationId)

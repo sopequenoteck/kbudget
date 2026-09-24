@@ -120,7 +120,7 @@ class AdminInvitationControllerTest {
 
     @Test
     void should_return_404_when_revoke_nonexistent_invitation() throws Exception {
-        doThrow(new EntityNotFoundException("Invitation introuvable"))
+        doThrow(new EntityNotFoundException("Invitation not found"))
                 .when(invitationService).revoke(eq(99L), any(User.class));
 
         mockMvc.perform(delete("/v1/admin/invitations/99")

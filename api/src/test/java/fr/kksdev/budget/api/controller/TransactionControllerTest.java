@@ -162,12 +162,12 @@ class TransactionControllerTest {
     @Test
     void should_return_404_when_transaction_not_found() throws Exception {
         when(transactionService.getById(transactionId, userId))
-                .thenThrow(new EntityNotFoundException("Transaction non trouvée"));
+                .thenThrow(new EntityNotFoundException("Transaction not found"));
 
         mockMvc.perform(get("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Transaction non trouvée"));
+                .andExpect(jsonPath("$.message").value("Transaction not found"));
     }
 
     @Test
@@ -210,38 +210,38 @@ class TransactionControllerTest {
     @Test
     void should_return403_when_updatingAdjustmentTransaction() throws Exception {
         when(transactionService.update(eq(transactionId), any(TransactionRequest.class), eq(userId)))
-                .thenThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être modifiées"));
+                .thenThrow(new AccessDeniedException("Adjustment transactions cannot be updated"));
 
         mockMvc.perform(put("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("100.00", "Test", "DEPENSE", "2026-02-19")))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent pas être modifiées"));
+                .andExpect(jsonPath("$.message").value("Adjustment transactions cannot be updated"));
     }
 
     @Test
     void should_return403_when_deletingAdjustmentTransaction() throws Exception {
-        doThrow(new AccessDeniedException("Les transactions d'ajustement ne peuvent pas être supprimées"))
+        doThrow(new AccessDeniedException("Adjustment transactions cannot be deleted"))
                 .when(transactionService).delete(transactionId, userId);
 
         mockMvc.perform(delete("/v1/transactions/{id}", transactionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent pas être supprimées"));
+                .andExpect(jsonPath("$.message").value("Adjustment transactions cannot be deleted"));
     }
 
     @Test
     void should_return400_when_creatingAdjustmentDirectly() throws Exception {
         when(transactionService.create(any(TransactionRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
+                .thenThrow(new IllegalArgumentException("Adjustment transactions can only be created through the adjust-balance endpoint"));
 
         mockMvc.perform(post("/v1/transactions")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson("250.00", "Ajustement", "AJUSTEMENT", "2026-02-19")))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Les transactions d'ajustement ne peuvent être créées que via l'endpoint adjust-balance"));
+                .andExpect(jsonPath("$.message").value("Adjustment transactions can only be created through the adjust-balance endpoint"));
     }
 
     // --- T-020 [US5] : 401 sans JWT ---

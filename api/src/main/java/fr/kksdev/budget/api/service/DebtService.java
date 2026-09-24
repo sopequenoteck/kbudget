@@ -135,7 +135,7 @@ public class DebtService {
             if (debt.getCurrency() != newCurrency) {
                 BigDecimal rate = findPivotRate(userId, debt.getCurrency(), newCurrency);
                 if (rate == null) {
-                    throw new IllegalArgumentException("Taux de change indisponible pour " + debt.getCurrency() + " → " + newCurrency);
+                    throw new IllegalArgumentException("Exchange rate unavailable for " + debt.getCurrency() + " → " + newCurrency);
                 }
                 // request.montant() est dans la devise source (ancienne) — conversion vers la nouvelle devise du compte
                 debt.setMontant(request.montant().multiply(rate).setScale(2, RoundingMode.HALF_UP));
@@ -170,10 +170,10 @@ public class DebtService {
     public DebtResponse repay(UUID debtId, DebtRepayRequest request, UUID userId) {
         Debt debt = debtRepository.findByIdForUpdate(debtId)
                 .filter(d -> d.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Dette non trouvée"));
+                .orElseThrow(() -> new EntityNotFoundException("Debt not found"));
 
         if (Boolean.TRUE.equals(debt.getRembourse())) {
-            throw new IllegalArgumentException("Cette dette est déjà remboursée");
+            throw new IllegalArgumentException("This debt is already repaid");
         }
 
         BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
@@ -181,17 +181,17 @@ public class DebtService {
 
         BigDecimal amount = request.amount() != null ? request.amount() : montantRestant;
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Le montant du remboursement doit être positif");
+            throw new IllegalArgumentException("The repayment amount must be positive");
         }
         if (amount.compareTo(montantRestant) > 0) {
-            throw new IllegalArgumentException("Le montant dépasse le montant restant (" + montantRestant + ")");
+            throw new IllegalArgumentException("The amount exceeds the remaining amount (" + montantRestant + ")");
         }
 
         Account account = accountRepository.findById(request.accountId())
                 .filter(a -> a.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Compte non trouvé"));
+                .orElseThrow(() -> new EntityNotFoundException("Account not found"));
         if (!Boolean.TRUE.equals(account.getActif())) {
-            throw new IllegalArgumentException("Le compte est inactif");
+            throw new IllegalArgumentException("The account is inactive");
         }
 
         TransactionType txType = debt.getSens() == DebtType.EMPRUNT
@@ -238,7 +238,7 @@ public class DebtService {
         Debt debt = findByIdAndUser(debtId, userId);
 
         if (debt.getReminderDate() == null || debt.getReminderTime() == null) {
-            throw new IllegalArgumentException("Cette dette n'a pas de rappel configuré");
+            throw new IllegalArgumentException("This debt has no reminder configured");
         }
 
         debt.setReminderDate(request.reminderDate());
@@ -265,7 +265,7 @@ public class DebtService {
         boolean hasDate = request.reminderDate() != null;
         boolean hasTime = request.reminderTime() != null;
         if (hasDate ^ hasTime) {
-            throw new IllegalArgumentException("reminderDate et reminderTime doivent être fournis ensemble");
+            throw new IllegalArgumentException("reminderDate and reminderTime must be provided together");
         }
     }
 
@@ -277,7 +277,7 @@ public class DebtService {
                 .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Compte non trouvé: id={}, userId={}", accountId, userId);
-                    return new EntityNotFoundException("Compte non trouvé");
+                    return new EntityNotFoundException("Account not found");
                 });
     }
 
@@ -286,7 +286,7 @@ public class DebtService {
                 .filter(d -> d.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Dette non trouvée: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Dette non trouvée");
+                    return new EntityNotFoundException("Debt not found");
                 });
     }
 
@@ -298,7 +298,7 @@ public class DebtService {
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
     }
 

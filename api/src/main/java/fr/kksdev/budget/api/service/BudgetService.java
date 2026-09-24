@@ -60,9 +60,9 @@ public class BudgetService {
         checkFeatureEnabled(userId);
         Category category = categoryRepository.findById(request.categoryId())
                 .filter(c -> c.getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Catégorie non trouvée"));
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
         if (budgetRepository.existsByCategoryIdAndUserId(request.categoryId(), userId)) {
-            throw new ConflictException("Un budget existe déjà pour cette catégorie");
+            throw new ConflictException("A budget already exists for this category");
         }
         Budget budget = Budget.builder()
                 .montant(request.montant())
@@ -119,9 +119,9 @@ public class BudgetService {
         if (!request.categoryId().equals(budget.getCategory().getId())) {
             Category newCategory = categoryRepository.findById(request.categoryId())
                     .filter(c -> c.getUser().getId().equals(userId))
-                    .orElseThrow(() -> new EntityNotFoundException("Catégorie non trouvée"));
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found"));
             if (budgetRepository.existsByCategoryIdAndUserId(request.categoryId(), userId)) {
-                throw new ConflictException("Un budget existe déjà pour cette catégorie");
+                throw new ConflictException("A budget already exists for this category");
             }
             budget.setCategory(newCategory);
         }
@@ -210,12 +210,12 @@ public class BudgetService {
         try {
             targetMonth = YearMonth.parse(month);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Format de mois invalide. Utilisez YYYY-MM");
+            throw new IllegalArgumentException("Invalid month format. Use YYYY-MM");
         }
 
         YearMonth currentMonth = YearMonth.now();
         if (!targetMonth.isBefore(currentMonth)) {
-            throw new IllegalArgumentException("Seuls les mois passés sont autorisés");
+            throw new IllegalArgumentException("Only past months are allowed");
         }
 
         Currency primaryCurrency = getPrimaryCurrency(userId);
@@ -371,7 +371,7 @@ public class BudgetService {
         return budgetRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> {
                     log.error("Budget non trouvé: id={}, userId={}", id, userId);
-                    return new EntityNotFoundException("Budget non trouvé");
+                    return new EntityNotFoundException("Budget not found");
                 });
     }
 

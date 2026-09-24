@@ -7,10 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -77,6 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authNotifierProvider);
     final isLoading = authState is AuthAuthenticating;
 
@@ -172,13 +175,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onFieldSubmitted: (_) => _handleLogin(),
                     ),
                     const SizedBox(height: AppSpacing.space6),
-                    if (authState is AuthUnauthenticated &&
-                        authState.error != null)
+                    if (authState is AuthLoginFailed)
                       Padding(
                         padding: const EdgeInsets.only(
                             bottom: AppSpacing.space4),
                         child: Text(
-                          authState.error!,
+                          // Le serveur refuse des identifiants par un
+                          // BAD_REQUEST, code partage par des dizaines de
+                          // causes ailleurs : sur cet ecran il n'en a qu'une.
+                          // Un code absent signale un corps de reponse non
+                          // exploitable (serveur injoignable, timeout, 502
+                          // de proxy) : le libelle reseau est alors plus
+                          // pertinent qu'« identifiants invalides ».
+                          errorLabel(
+                            l10n,
+                            authState.errorCode,
+                            fallback: authState.errorCode == null
+                                ? l10n.errorNetwork
+                                : l10n.loginInvalidCredentials,
+                            overrides: {
+                              'BAD_REQUEST': l10n.loginInvalidCredentials,
+                            },
+                          ),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                           ),

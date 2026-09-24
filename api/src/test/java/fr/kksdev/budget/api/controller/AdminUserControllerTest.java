@@ -81,7 +81,7 @@ class AdminUserControllerTest {
         mockMvc.perform(get("/v1/admin/users"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"))
-                .andExpect(jsonPath("$.message").value("Authentification requise"))
+                .andExpect(jsonPath("$.message").value("Authentication required"))
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
@@ -93,7 +93,7 @@ class AdminUserControllerTest {
         mockMvc.perform(get("/v1/admin/users").header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("ACCESS_DENIED"))
-                .andExpect(jsonPath("$.message").value("Accès refusé"))
+                .andExpect(jsonPath("$.message").value("Access denied"))
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
@@ -114,7 +114,7 @@ class AdminUserControllerTest {
     @Test
     void should_return_404_when_user_not_found_on_disable() throws Exception {
         UUID targetId = UUID.randomUUID();
-        doThrow(new EntityNotFoundException("Utilisateur introuvable"))
+        doThrow(new EntityNotFoundException("User not found"))
                 .when(adminUserService).disable(eq(targetId), any(User.class));
 
         mockMvc.perform(patch("/v1/admin/users/" + targetId + "/disable")
@@ -131,7 +131,7 @@ class AdminUserControllerTest {
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("LAST_ADMIN_CANNOT_BE_DISABLED"))
-                .andExpect(jsonPath("$.message").value("Impossible de désactiver le dernier admin actif."));
+                .andExpect(jsonPath("$.message").value("The last active administrator cannot be disabled."));
     }
 
     // ---- PATCH /admin/users/{id}/enable ----
@@ -151,7 +151,7 @@ class AdminUserControllerTest {
     @Test
     void should_return_404_when_user_not_found_on_enable() throws Exception {
         UUID targetId = UUID.randomUUID();
-        doThrow(new EntityNotFoundException("Utilisateur introuvable"))
+        doThrow(new EntityNotFoundException("User not found"))
                 .when(adminUserService).enable(eq(targetId), any(User.class));
 
         mockMvc.perform(patch("/v1/admin/users/" + targetId + "/enable")

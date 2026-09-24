@@ -37,7 +37,7 @@ public class AvatarStorageService {
         try {
             Files.createDirectories(Path.of(storageProperties.getAvatars().getPath()));
         } catch (IOException e) {
-            throw new RuntimeException("Impossible de créer le dossier de stockage des avatars", e);
+            throw new RuntimeException("Unable to create the avatar storage directory", e);
         }
     }
 
@@ -61,7 +61,7 @@ public class AvatarStorageService {
                     .toFile(avatarPath.toFile());
         } catch (IOException e) {
             log.error("Erreur lors du stockage de l'avatar pour userId={}", user.getId(), e);
-            throw new RuntimeException("Erreur lors du stockage de l'avatar", e);
+            throw new RuntimeException("Failed to store the avatar", e);
         }
 
         user.setAvatarPath(avatarPath.toString());
@@ -83,7 +83,7 @@ public class AvatarStorageService {
             return Files.readAllBytes(path);
         } catch (IOException e) {
             log.error("Erreur lors de la lecture de l'avatar pour userId={}", user.getId(), e);
-            throw new RuntimeException("Erreur lors de la lecture de l'avatar", e);
+            throw new RuntimeException("Failed to read the avatar", e);
         }
     }
 
@@ -97,7 +97,7 @@ public class AvatarStorageService {
             }
             return hex.substring(0, 8);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 non disponible", e);
+            throw new RuntimeException("SHA-256 is not available", e);
         }
     }
 
@@ -110,7 +110,7 @@ public class AvatarStorageService {
             Files.deleteIfExists(Path.of(user.getAvatarPath()));
         } catch (IOException e) {
             log.error("Erreur lors de la suppression de l'avatar pour userId={}", user.getId(), e);
-            throw new RuntimeException("Erreur lors de la suppression de l'avatar", e);
+            throw new RuntimeException("Failed to delete the avatar", e);
         }
         user.setAvatarPath(null);
         userRepository.save(user);

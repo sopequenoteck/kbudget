@@ -142,3 +142,8 @@ joint SonarQube par le reseau Docker interne `ci-stack_ci-net`. Cette
 dependance-la n'a rien a voir avec DT-006 et ne peut pas etre levee sans
 exposer Sonar.
 
+**API et Flutter avaient le meme manque**, traite seulement le 2026-09-05
+(KKS-358) : `ci-api.yml` n'avait alors qu'un seul job, self-hosted, donc une
+pull request de fork touchant `api/` ne declenchait aucun test. La correction
+ci-dessus ne portait que sur APP.
+

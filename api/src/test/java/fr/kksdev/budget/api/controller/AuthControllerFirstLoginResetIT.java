@@ -270,7 +270,7 @@ class AuthControllerFirstLoginResetIT {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHENTICATED"))
-                .andExpect(jsonPath("$.message").value("Authentification requise"))
+                .andExpect(jsonPath("$.message").value("Authentication required"))
                 .andExpect(jsonPath("$.length()").value(2));
     }
 

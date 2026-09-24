@@ -1,6 +1,8 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportSkipReason;
 import fr.kksdev.budget.api.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -59,9 +61,18 @@ public class ImportDraftLine {
     @Column(name = "status_message", length = 500)
     private String statusMessage;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "skip_reason", length = 30)
+    private ImportSkipReason skipReason;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    /** Origine de la categorie (KKS-383), nulle tant que la ligne n'en a pas. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_source", length = 20)
+    private CategorySource categorySource;
 
     @Column(name = "duplicate_transaction_id")
     private UUID duplicateTransactionId;

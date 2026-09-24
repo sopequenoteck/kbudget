@@ -8,6 +8,15 @@ import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/mocks.mocks.dart';
 
+DioException _dioError(int statusCode, Object? data) => DioException(
+      requestOptions: RequestOptions(),
+      response: Response(
+        requestOptions: RequestOptions(),
+        statusCode: statusCode,
+        data: data,
+      ),
+    );
+
 void main() {
   late MockAuthRepository mockAuthRepo;
   late ProviderContainer container;
@@ -80,25 +89,36 @@ void main() {
       expect(state(), isA<AuthAuthenticated>());
     });
 
-    test('should_showError_when_loginFails401', () async {
+    test('should_exposeErrorCode_when_loginFailsWithBadRequest', () async {
       when(mockAuthRepo.login('test@test.com', 'wrong'))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
-          requestOptions: RequestOptions(),
-          statusCode: 401,
-        ),
-      ));
+          .thenThrow(_dioError(400, {'error': 'BAD_REQUEST'}));
 
       await notifier().login('test@test.com', 'wrong');
 
       final s = state();
-      expect(s, isA<AuthUnauthenticated>());
-      expect((s as AuthUnauthenticated).error,
-          'Email ou mot de passe incorrect');
+      expect(s, isA<AuthLoginFailed>());
+      expect((s as AuthLoginFailed).errorCode, 'BAD_REQUEST');
     });
 
-    test('should_showGenericError_when_loginFailsNetwork', () async {
+    test('should_distinguishTokenExpired_from_unauthenticated', () async {
+      // Les deux etaient servis sous un meme 401, donc sous un meme texte :
+      // le serveur les distingue, le client le doit aussi (KKS-324).
+      when(mockAuthRepo.login('a@test.com', 'p'))
+          .thenThrow(_dioError(401, {'error': 'TOKEN_EXPIRED'}));
+      await notifier().login('a@test.com', 'p');
+      final expired = (state() as AuthLoginFailed).errorCode;
+
+      when(mockAuthRepo.login('b@test.com', 'p'))
+          .thenThrow(_dioError(401, {'error': 'UNAUTHENTICATED'}));
+      await notifier().login('b@test.com', 'p');
+      final unauthenticated = (state() as AuthLoginFailed).errorCode;
+
+      expect(expired, 'TOKEN_EXPIRED');
+      expect(unauthenticated, 'UNAUTHENTICATED');
+      expect(expired, isNot(unauthenticated));
+    });
+
+    test('should_exposeNullCode_when_loginFailsNetwork', () async {
       when(mockAuthRepo.login('test@test.com', 'pass'))
           .thenThrow(DioException(
         requestOptions: RequestOptions(),
@@ -108,8 +128,21 @@ void main() {
       await notifier().login('test@test.com', 'pass');
 
       final s = state();
-      expect(s, isA<AuthUnauthenticated>());
-      expect((s as AuthUnauthenticated).error, 'Erreur de connexion');
+      expect(s, isA<AuthLoginFailed>());
+      expect((s as AuthLoginFailed).errorCode, isNull);
+    });
+
+    test('should_exposeNullCode_when_errorBodyIsNotAMap', () async {
+      // Un 502 de reverse proxy renvoie du HTML : aucun code exploitable,
+      // aucune exception levee.
+      when(mockAuthRepo.login('test@test.com', 'pass'))
+          .thenThrow(_dioError(502, '<html>Bad Gateway</html>'));
+
+      await notifier().login('test@test.com', 'pass');
+
+      final s = state();
+      expect(s, isA<AuthLoginFailed>());
+      expect((s as AuthLoginFailed).errorCode, isNull);
     });
 
     test('should_beUnauthenticated_when_forceUnauthenticatedCalled', () async {

@@ -49,6 +49,6 @@ public class AdminUserController {
     private User resolveCurrentUser(Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur authentifié introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
     }
 }

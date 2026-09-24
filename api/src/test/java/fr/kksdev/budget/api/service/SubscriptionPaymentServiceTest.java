@@ -230,7 +230,7 @@ class SubscriptionPaymentServiceTest {
 
         assertThatThrownBy(() -> subscriptionPaymentService.pay(subscriptionId, userId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("L'abonnement est inactif");
+                .hasMessage("The subscription is inactive");
 
         verify(transactionRepository, never()).save(any());
     }
@@ -241,7 +241,7 @@ class SubscriptionPaymentServiceTest {
 
         assertThatThrownBy(() -> subscriptionPaymentService.pay(subscriptionId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Abonnement non trouvé");
+                .hasMessage("Subscription not found");
 
         verify(transactionRepository, never()).save(any());
     }

@@ -122,14 +122,14 @@ class BudgetControllerTest {
     @Test
     void should_return_409_when_duplicate_category() throws Exception {
         when(budgetService.create(any(), any(UUID.class)))
-                .thenThrow(new ConflictException("Un budget existe déjà pour cette catégorie"));
+                .thenThrow(new ConflictException("A budget already exists for this category"));
 
         mockMvc.perform(post("/v1/budgets")
                         .header("Authorization", BEARER_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "80", "true")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Un budget existe déjà pour cette catégorie"));
+                .andExpect(jsonPath("$.message").value("A budget already exists for this category"));
     }
 
     @Test
@@ -191,12 +191,12 @@ class BudgetControllerTest {
     @Test
     void should_return_404_when_not_found() throws Exception {
         when(budgetService.getById(eq(budgetId), eq(userId)))
-                .thenThrow(new EntityNotFoundException("Budget non trouvé"));
+                .thenThrow(new EntityNotFoundException("Budget not found"));
 
         mockMvc.perform(get("/v1/budgets/{id}", budgetId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Budget non trouvé"));
+                .andExpect(jsonPath("$.message").value("Budget not found"));
     }
 
     @Test
@@ -250,7 +250,7 @@ class BudgetControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(budgetJson(categoryId.toString(), "500.00", "MENSUEL", "EUR", "80", "true")))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Fonctionnalité Budgets désactivée"));
+                .andExpect(jsonPath("$.message").value("Feature Budgets is disabled"));
     }
 
     // --- US2 Overview tests ---
@@ -348,24 +348,24 @@ class BudgetControllerTest {
     @Test
     void should_return_400_for_current_month() throws Exception {
         when(budgetService.getHistory(eq("2026-03"), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Seuls les mois passés sont autorisés"));
+                .thenThrow(new IllegalArgumentException("Only past months are allowed"));
 
         mockMvc.perform(get("/v1/budgets/history")
                         .header("Authorization", BEARER_TOKEN)
                         .param("month", "2026-03"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Seuls les mois passés sont autorisés"));
+                .andExpect(jsonPath("$.message").value("Only past months are allowed"));
     }
 
     @Test
     void should_return_400_for_invalid_month_format() throws Exception {
         when(budgetService.getHistory(eq("invalid"), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Format de mois invalide. Utilisez YYYY-MM"));
+                .thenThrow(new IllegalArgumentException("Invalid month format. Use YYYY-MM"));
 
         mockMvc.perform(get("/v1/budgets/history")
                         .header("Authorization", BEARER_TOKEN)
                         .param("month", "invalid"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Format de mois invalide. Utilisez YYYY-MM"));
+                .andExpect(jsonPath("$.message").value("Invalid month format. Use YYYY-MM"));
     }
 }

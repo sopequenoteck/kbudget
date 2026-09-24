@@ -128,13 +128,13 @@ class ExchangeRateControllerTest {
 
     @Test
     void should_return404_when_deletingNonExistent() throws Exception {
-        doThrow(new EntityNotFoundException("Taux non trouvé"))
+        doThrow(new EntityNotFoundException("Exchange rate not found"))
                 .when(exchangeRateService).delete(userId, Currency.EUR, Currency.XOF);
 
         mockMvc.perform(delete("/v1/exchange-rates/EUR/XOF")
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Taux non trouvé"));
+                .andExpect(jsonPath("$.message").value("Exchange rate not found"));
     }
 
     @Test
@@ -154,7 +154,7 @@ class ExchangeRateControllerTest {
 
     @Test
     void should_return400_when_sameCurrency() throws Exception {
-        doThrow(new IllegalArgumentException("Les devises de base et cible doivent être différentes"))
+        doThrow(new IllegalArgumentException("Base and target currencies must be different"))
                 .when(exchangeRateService).upsert(any(), eq(userId));
 
         mockMvc.perform(put("/v1/exchange-rates")
@@ -168,6 +168,6 @@ class ExchangeRateControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Les devises de base et cible doivent être différentes"));
+                .andExpect(jsonPath("$.message").value("Base and target currencies must be different"));
     }
 }

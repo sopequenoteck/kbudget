@@ -120,13 +120,13 @@ class AuthControllerTest {
         var request = new LoginRequest("test@mail.com", "wrongpassword");
 
         when(authService.login(any(LoginRequest.class)))
-                .thenThrow(new IllegalArgumentException("Email ou mot de passe incorrect"));
+                .thenThrow(new IllegalArgumentException("Invalid email or password"));
 
         mockMvc.perform(post("/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Email ou mot de passe incorrect"));
+                .andExpect(jsonPath("$.message").value("Invalid email or password"));
     }
 
     // ---- FR-009 : GET /auth/invitations/{token} ----
@@ -245,7 +245,7 @@ class AuthControllerTest {
     @Test
     void should_return_404_when_token_invalid_on_accept() throws Exception {
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class)))
-                .thenThrow(new EntityNotFoundException("Invitation invalide."));
+                .thenThrow(new EntityNotFoundException("Invalid invitation."));
 
         mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -260,7 +260,7 @@ class AuthControllerTest {
     @Test
     void should_return_400_when_email_already_exists_on_accept() throws Exception {
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class)))
-                .thenThrow(new IllegalArgumentException("Email déjà utilisé"));
+                .thenThrow(new IllegalArgumentException("Email already used"));
 
         mockMvc.perform(post("/v1/auth/accept-invite")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -270,6 +270,6 @@ class AuthControllerTest {
                                 + "\"currency\":\"EUR\","
                                 + "\"timezone\":\"Europe/Paris\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Email déjà utilisé"));
+                .andExpect(jsonPath("$.message").value("Email already used"));
     }
 }

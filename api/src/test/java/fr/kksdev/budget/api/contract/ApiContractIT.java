@@ -299,7 +299,7 @@ class ApiContractIT {
         }
         message.append("Si la rupture est assumee (regle 6 de docs/api-compatibility.md), regenere le\n")
                 .append("snapshot puis relis le diff avant de committer :\n")
-                .append("  JAVA_HOME=<jdk21> mvn -pl api test -Dtest=ApiContractIT -Dcontract.update=true\n");
+                .append("  cd api && JAVA_HOME=<jdk21> mvn test -Dtest=ApiContractIT -Dcontract.update=true\n");
         return message.toString();
     }
 }

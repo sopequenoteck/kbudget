@@ -68,7 +68,7 @@ public class AdminAuthorizationFilter extends OncePerRequestFilter {
 
         if (!isAdmin) {
             log.warn("Admin access denied: user={} path={}", userId, servletPath);
-            errorWriter.write(response, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Accès refusé");
+            errorWriter.write(response, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Access denied");
             return;
         }
 

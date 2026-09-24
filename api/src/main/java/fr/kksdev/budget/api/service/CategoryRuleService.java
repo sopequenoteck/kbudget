@@ -1,6 +1,8 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.response.CategoryRuleResponse;
+import fr.kksdev.budget.api.enums.CategoryRuleOrigin;
+import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.model.Category;
@@ -9,6 +11,7 @@ import fr.kksdev.budget.api.model.ImportDraftLine;
 import fr.kksdev.budget.api.repository.CategoryRepository;
 import fr.kksdev.budget.api.repository.CategoryRuleRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.MerchantKey;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,18 +41,18 @@ public class CategoryRuleService {
     @Transactional
     public CategoryRuleResponse create(String pattern, UUID categoryId, UUID userId) {
         if (pattern == null || pattern.isBlank()) {
-            throw new IllegalArgumentException("Le pattern ne peut pas être vide");
+            throw new IllegalArgumentException("The pattern must not be empty");
         }
 
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
 
         if (categoryRuleRepository.existsByUserIdAndPatternIgnoreCase(userId, pattern)) {
-            throw new ConflictException("Une règle avec ce pattern existe déjà: " + pattern);
+            throw new ConflictException("A rule with this pattern already exists: " + pattern);
         }
 
         CategoryRule rule = CategoryRule.builder()
@@ -69,14 +72,14 @@ public class CategoryRuleService {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
                     log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
-                    return new EntityNotFoundException("Règle de catégorisation non trouvée");
+                    return new EntityNotFoundException("Category rule not found");
                 });
 
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
                     log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
-                    return new EntityNotFoundException("Catégorie non trouvée");
+                    return new EntityNotFoundException("Category not found");
                 });
 
         rule.setPattern(pattern);
@@ -93,7 +96,7 @@ public class CategoryRuleService {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
                     log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
-                    return new EntityNotFoundException("Règle de catégorisation non trouvée");
+                    return new EntityNotFoundException("Category rule not found");
                 });
 
         categoryRuleRepository.delete(rule);
@@ -118,8 +121,9 @@ public class CategoryRuleService {
             }
 
             for (CategoryRule rule : rules) {
-                if (cleanLabel.toLowerCase().contains(rule.getPattern().toLowerCase())) {
+                if (matches(rule, cleanLabel)) {
                     line.setCategory(rule.getCategory());
+                    line.setCategorySource(CategorySource.RULE);
                     if (line.getStatus() == ImportLineStatus.NEEDS_REVIEW) {
                         line.setStatus(ImportLineStatus.READY);
                     }
@@ -127,5 +131,46 @@ public class CategoryRuleService {
                 }
             }
         }
+    }
+
+    public boolean hasMatchingRule(String cleanLabel, UUID userId) {
+        return cleanLabel != null && categoryRuleRepository.findByUserIdOrderByCreatedAtAsc(userId).stream()
+                .anyMatch(rule -> matches(rule, cleanLabel));
+    }
+
+    /**
+     * Retient une correction faite pendant la revue (KKS-383) : une regle AUTO
+     * sur la cle commercant, creee ou reorientee vers la nouvelle categorie.
+     * Une regle saisie par l'utilisateur sur le meme motif n'est jamais modifiee.
+     */
+    @Transactional
+    public void rememberCorrection(String merchantKey, Category category, UUID userId) {
+        if (merchantKey == null || merchantKey.isBlank()) {
+            return;
+        }
+        categoryRuleRepository.findFirstByUserIdAndPatternIgnoreCase(userId, merchantKey)
+                .ifPresentOrElse(existing -> {
+                    if (existing.getOrigin() == CategoryRuleOrigin.AUTO
+                            && !existing.getCategory().getId().equals(category.getId())) {
+                        existing.setCategory(category);
+                        categoryRuleRepository.save(existing);
+                        log.info("Auto category rule updated: id={}, userId={}", existing.getId(), userId);
+                    }
+                }, () -> {
+                    CategoryRule rule = categoryRuleRepository.save(CategoryRule.builder()
+                            .user(userRepository.getReferenceById(userId))
+                            .pattern(merchantKey)
+                            .category(category)
+                            .origin(CategoryRuleOrigin.AUTO)
+                            .build());
+                    log.info("Auto category rule created: id={}, userId={}", rule.getId(), userId);
+                });
+    }
+
+    private static boolean matches(CategoryRule rule, String cleanLabel) {
+        if (rule.getOrigin() == CategoryRuleOrigin.AUTO) {
+            return MerchantKey.containsWords(MerchantKey.of(cleanLabel), rule.getPattern());
+        }
+        return cleanLabel.toLowerCase().contains(rule.getPattern().toLowerCase());
     }
 }

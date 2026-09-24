@@ -218,6 +218,144 @@ abstract class AppLocalizations {
   /// **'Impossible de charger les données'**
   String get errorLoadingData;
 
+  /// No description provided for @errorCodeBadRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'La demande n\'a pas pu être traitée.'**
+  String get errorCodeBadRequest;
+
+  /// No description provided for @errorCodeValidation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez vérifier les informations saisies.'**
+  String get errorCodeValidation;
+
+  /// No description provided for @errorCodeMalformedRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Requête invalide.'**
+  String get errorCodeMalformedRequest;
+
+  /// No description provided for @errorCodePasswordIncorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe incorrect'**
+  String get errorCodePasswordIncorrect;
+
+  /// No description provided for @errorCodeCurrentPasswordIncorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel incorrect'**
+  String get errorCodeCurrentPasswordIncorrect;
+
+  /// No description provided for @errorCodePasswordUnchanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nouveau mot de passe doit être différent de l\'actuel'**
+  String get errorCodePasswordUnchanged;
+
+  /// No description provided for @errorCodeConfirmationRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmation explicite requise.'**
+  String get errorCodeConfirmationRequired;
+
+  /// No description provided for @errorCodeUnauthenticated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Authentification requise'**
+  String get errorCodeUnauthenticated;
+
+  /// No description provided for @errorCodeTokenExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre session a expiré. Veuillez vous reconnecter.'**
+  String get errorCodeTokenExpired;
+
+  /// No description provided for @errorCodeTokenRevoked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre session a été révoquée. Veuillez vous reconnecter.'**
+  String get errorCodeTokenRevoked;
+
+  /// No description provided for @errorCodeTokenReuseDetected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session interrompue par sécurité. Veuillez vous reconnecter.'**
+  String get errorCodeTokenReuseDetected;
+
+  /// No description provided for @errorCodeTokenInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session invalide. Veuillez vous reconnecter.'**
+  String get errorCodeTokenInvalid;
+
+  /// No description provided for @errorCodeAccessDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès refusé'**
+  String get errorCodeAccessDenied;
+
+  /// No description provided for @errorCodePasswordResetRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialisation des identifiants requise'**
+  String get errorCodePasswordResetRequired;
+
+  /// No description provided for @errorCodePasswordResetNotRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'La réinitialisation des identifiants n\'est pas requise pour ce compte.'**
+  String get errorCodePasswordResetNotRequired;
+
+  /// No description provided for @errorCodeFeatureDisabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fonctionnalité désactivée'**
+  String get errorCodeFeatureDisabled;
+
+  /// No description provided for @errorCodeLastAdminDeletionForbidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.'**
+  String get errorCodeLastAdminDeletionForbidden;
+
+  /// No description provided for @errorCodeNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ressource introuvable'**
+  String get errorCodeNotFound;
+
+  /// No description provided for @errorCodeConflict.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conflit de données'**
+  String get errorCodeConflict;
+
+  /// No description provided for @errorCodeLastAdminCannotBeDisabled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de désactiver le dernier administrateur actif.'**
+  String get errorCodeLastAdminCannotBeDisabled;
+
+  /// No description provided for @errorCodeEmailAlreadyExists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email déjà utilisé'**
+  String get errorCodeEmailAlreadyExists;
+
+  /// No description provided for @errorCodeTooManyRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de tentatives. Réessayez dans quelques instants.'**
+  String get errorCodeTooManyRequests;
+
+  /// No description provided for @errorCodeInternal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur interne est survenue'**
+  String get errorCodeInternal;
+
   /// No description provided for @amount.
   ///
   /// In fr, this message translates to:

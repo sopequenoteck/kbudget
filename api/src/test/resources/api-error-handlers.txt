@@ -1,0 +1,26 @@
+# Handlers declares par GlobalExceptionHandler (KKS-357).
+# Regenerer : cd api && mvn test -Dtest=ExceptionHandlerInventoryTest -Dcontract.update=true
+AccessDeniedException -> handleAccessDenied
+AvatarNotFoundException -> handleAvatarNotFound
+ConfirmationRequiredException -> handleConfirmationRequired
+ConflictException -> handleConflict
+CsvProfileNotFoundException -> handleCsvProfileNotFound
+EntityNotFoundException -> handleEntityNotFound
+Exception -> handleGeneric
+FeatureDisabledException -> handleFeatureDisabled
+FileTooLargeException -> handleFileTooLarge
+HttpMessageNotReadableException -> handleHttpMessageNotReadable
+IllegalArgumentException -> handleIllegalArgument
+IllegalStateException -> handleIllegalState
+InvalidExportFormatException -> handleInvalidExportFormat
+InvalidImageFormatException -> handleInvalidImageFormat
+LastAdminDeletionForbiddenException -> handleLastAdminDeletionForbidden
+MethodArgumentNotValidException -> handleValidation
+NoResourceFoundException -> handleNoResourceFound
+PasswordIncorrectException -> handlePasswordIncorrect
+PasswordResetNotRequiredException -> handlePasswordResetNotRequired
+PasswordUnchangedException -> handlePasswordUnchanged
+TokenExpiredException -> handleTokenExpired
+TokenInvalidException -> handleTokenInvalid
+TokenReusedException -> handleTokenReused
+TokenRevokedException -> handleTokenRevoked

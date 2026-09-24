@@ -84,7 +84,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         log.warn("Rate limit exceeded: ip={} path={}", ip, path(request));
         errorWriter.write(response, HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS",
-                "Trop de tentatives. Réessayez dans quelques instants.");
+                "Too many attempts. Please try again shortly.");
     }
 
     private Bucket newBucket() {

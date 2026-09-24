@@ -170,12 +170,12 @@ class SubscriptionControllerTest {
     @Test
     void should_return_404_when_subscription_not_found() throws Exception {
         when(subscriptionService.getById(subscriptionId, userId))
-                .thenThrow(new EntityNotFoundException("Abonnement non trouvé"));
+                .thenThrow(new EntityNotFoundException("Subscription not found"));
 
         mockMvc.perform(get("/v1/subscriptions/{id}", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Abonnement non trouvé"));
+                .andExpect(jsonPath("$.message").value("Subscription not found"));
     }
 
     @Test
@@ -206,7 +206,7 @@ class SubscriptionControllerTest {
     @Test
     void should_return400_when_payInactiveSubscription() throws Exception {
         when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
-                .thenThrow(new IllegalStateException("L'abonnement est inactif"));
+                .thenThrow(new IllegalStateException("The subscription is inactive"));
 
         mockMvc.perform(post("/v1/subscriptions/{id}/pay", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
@@ -216,12 +216,12 @@ class SubscriptionControllerTest {
     @Test
     void should_return404_when_payNonexistentSubscription() throws Exception {
         when(subscriptionPaymentService.pay(eq(subscriptionId), any(UUID.class)))
-                .thenThrow(new EntityNotFoundException("Abonnement non trouvé"));
+                .thenThrow(new EntityNotFoundException("Subscription not found"));
 
         mockMvc.perform(post("/v1/subscriptions/{id}/pay", subscriptionId)
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Abonnement non trouvé"));
+                .andExpect(jsonPath("$.message").value("Subscription not found"));
     }
 
     @Test

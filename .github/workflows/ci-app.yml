@@ -11,9 +11,10 @@ name: CI - APP (Angular)
 # PRÉREQUIS INFRA (hors repo) :
 #   - Runner self-hosted labellisé [self-hosted, kbudget-ci] sur VM 105,
 #     avec accès au réseau Docker ci-stack_ci-net (pour joindre SonarQube).
-#   - Repo PRIVÉ. Settings → Actions → "Require approval for all external
-#     contributors" : le runner a le socket Docker, ne jamais exécuter de code
-#     de fork non approuvé (risque RCE sur l'infra homelab).
+#   - Dépôt PUBLIC. Settings → Actions → "Require approval for all external
+#     contributors" doit rester actif : le runner a le socket Docker, exécuter
+#     du code de fork non approuvé donnerait une RCE sur l'infra homelab.
+#     Depuis l'ouverture du dépôt, ce réglage est la seule chose qui l'empêche.
 #   - Secret repo SONAR_TOKEN, variable repo SONAR_HOST_URL (ex http://sonarqube:9000).
 
 on:
@@ -38,10 +39,12 @@ permissions:
   contents: read
 
 jobs:
-  # Tests sur runner GitHub : c'est le seul job qu'une PR de fork peut executer,
-  # le self-hosted ayant le socket Docker (cf. PREREQUIS INFRA ci-dessus). Il ne
-  # depend d'aucune infra maison, donc un contributeur externe obtient un retour
-  # sur sa PR et peut reproduire l'echec en local.
+  # Tests sur runner GitHub : c'est le seul job de ce workflow qu'une PR de fork
+  # peut executer, le self-hosted ayant le socket Docker (cf. PREREQUIS INFRA
+  # ci-dessus). Il ne depend d'aucune infra maison, donc un contributeur externe
+  # obtient un retour sur sa PR et peut reproduire l'echec en local.
+  #
+  # ci-api.yml et ci-flutter.yml ont chacun leur equivalent depuis KKS-358.
   app-tests:
     name: Tests APP (runner GitHub)
     runs-on: ubuntu-latest
