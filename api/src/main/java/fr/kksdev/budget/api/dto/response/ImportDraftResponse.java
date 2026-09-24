@@ -17,6 +17,8 @@ public record ImportDraftResponse(
         int reviewCount,
         int duplicateCount,
         int skippedCount,
+        /** Sous-ensemble de skippedCount : lignes ecartees car deja importees (KKS-382). */
+        int alreadyImportedCount,
         String profileName,
         String profileSource,
         LocalDateTime createdAt,
@@ -35,6 +37,7 @@ public record ImportDraftResponse(
                 draft.getReviewCount(),
                 draft.getDuplicateCount(),
                 draft.getSkippedCount(),
+                draft.getAlreadyImportedCount(),
                 null,
                 draft.getProfileSource() != null ? draft.getProfileSource().name() : null,
                 draft.getCreatedAt(),

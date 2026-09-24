@@ -1619,10 +1619,11 @@ Response `201` :
   "status": "PENDING",
   "fileName": "releve_mars.csv",
   "totalLines": 160,
-  "readyCount": 153,
+  "readyCount": 151,
   "reviewCount": 0,
-  "duplicateCount": 7,
-  "skippedCount": 0,
+  "duplicateCount": 2,
+  "skippedCount": 7,
+  "alreadyImportedCount": 7,
   "profileName": "Societe Generale",
   "profileSource": "REGISTRY",
   "createdAt": "2026-03-20T14:30:00",
@@ -1641,11 +1642,44 @@ Response `201` :
       "categoryId": null,
       "categoryName": null,
       "duplicateTransactionId": null,
-      "suggestRule": false
+      "suggestRule": false,
+      "skipReason": null
+    },
+    {
+      "id": "uuid",
+      "lineNumber": 2,
+      "rawLabel": "FRAIS BANCAIRES TEST",
+      "cleanLabel": "FRAIS BANCAIRES TEST",
+      "amount": 45.00,
+      "date": "2026-03-03",
+      "transactionType": "DEPENSE",
+      "status": "SKIPPED",
+      "statusMessage": null,
+      "categoryId": null,
+      "categoryName": null,
+      "duplicateTransactionId": "uuid-transaction-existante",
+      "suggestRule": false,
+      "skipReason": "ALREADY_IMPORTED"
     }
   ]
 }
 ```
+
+**Lignes deja importees (KKS-382)** : une ligne d'un releve precedent est ecartee
+d'office — `status: "SKIPPED"`, `skipReason: "ALREADY_IMPORTED"`,
+`duplicateTransactionId` pointant sur la transaction existante. Elle ne bloque pas
+la confirmation et ne peut pas etre reactivee. `alreadyImportedCount` est un
+sous-ensemble de `skippedCount`. Une ligne est reconnue :
+
+- par son **empreinte** (date comptable, montant, sens, libelle brut), posee sur
+  chaque transaction importee : la reconnaissance survit au renommage ou au
+  changement de date de la transaction ;
+- a defaut d'empreinte (import anterieur), par date, montant, sens et libelle
+  nettoye identique. L'empreinte lui est alors posee a la confirmation.
+
+Deux lignes identiques d'un meme releve sont deux operations : elles ne sont
+ecartees que si la base en contient autant. Un libelle seulement proche
+(Jaro-Winkler >= 0,85) donne toujours `DUPLICATE`, bloquant.
 
 Erreur `409` : brouillon actif existant pour ce compte.
 Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
@@ -1656,13 +1690,18 @@ Response `200` :
 
 ```json
 {
-  "importedCount": 153,
-  "skippedCount": 7,
-  "historyId": "uuid"
+  "importedCount": 151,
+  "skippedCount": 9,
+  "historyId": "uuid",
+  "alreadyImportedCount": 7
 }
 ```
 
-Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues.
+Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues. Les lignes deja
+importees ne bloquent jamais.
+
+Les actions groupees ignorent les lignes deja importees : un « tout
+selectionner » ne les modifie pas et n'echoue pas sur elles.
 
 ### Mettre a jour une ligne `PUT /api/v1/imports/drafts/{draftId}/lines/{lineId}`
 

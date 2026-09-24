@@ -16,6 +16,8 @@ public record ImportDraftSummaryResponse(
         int reviewCount,
         int duplicateCount,
         int skippedCount,
+        /** Sous-ensemble de skippedCount : lignes ecartees car deja importees (KKS-382). */
+        int alreadyImportedCount,
         LocalDateTime createdAt,
         LocalDateTime expiresAt
 ) {
@@ -31,6 +33,7 @@ public record ImportDraftSummaryResponse(
                 draft.getReviewCount(),
                 draft.getDuplicateCount(),
                 draft.getSkippedCount(),
+                draft.getAlreadyImportedCount(),
                 draft.getCreatedAt(),
                 draft.getExpiresAt()
         );

@@ -64,6 +64,11 @@ public class ImportDraft {
     @Builder.Default
     private Integer skippedCount = 0;
 
+    /** Sous-ensemble de skippedCount : lignes ecartees d'office car deja importees (KKS-382). */
+    @Column(name = "already_imported_count", nullable = false)
+    @Builder.Default
+    private Integer alreadyImportedCount = 0;
+
     @Column(name = "profile_id")
     private UUID profileId;
 

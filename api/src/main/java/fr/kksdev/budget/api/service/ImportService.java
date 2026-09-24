@@ -13,6 +13,7 @@ import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.enums.ImportProfileSource;
+import fr.kksdev.budget.api.enums.ImportSkipReason;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.model.Account;
@@ -42,7 +43,9 @@ import org.springframework.data.domain.PageRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -117,8 +120,13 @@ public class ImportService {
                 .filter(l -> l.getStatus() == ImportLineStatus.SKIPPED)
                 .count();
 
+        List<ImportDraftLine> alreadyImportedLines = allLines.stream()
+                .filter(ImportService::isAlreadyImported)
+                .toList();
+
         List<Transaction> transactions = buildTransactionsFromLines(draft, readyLines);
         transactionRepository.saveAll(transactions);
+        backfillFingerprints(draft, alreadyImportedLines, userId);
 
         // Create import history
         ImportHistory history = ImportHistory.builder()
@@ -133,9 +141,10 @@ public class ImportService {
         draft.setStatus(ImportDraftStatus.COMPLETED);
         importDraftRepository.save(draft);
 
-        log.info("Import confirmé: {} transactions créées, {} ignorées pour le draft {}", readyLines.size(), skippedCount, draftId);
+        log.info("Import confirmé: {} transactions créées, {} ignorées dont {} déjà importées pour le draft {}",
+                readyLines.size(), skippedCount, alreadyImportedLines.size(), draftId);
 
-        return new ImportConfirmResponse(readyLines.size(), skippedCount, history.getId());
+        return new ImportConfirmResponse(readyLines.size(), skippedCount, history.getId(), alreadyImportedLines.size());
     }
 
     public ImportDraftResponse getDraft(UUID draftId, UUID userId) {
@@ -230,8 +239,11 @@ public class ImportService {
             newStatus = parseLineStatus(request.status());
         }
 
+        // Une ligne deja importee n'a rien a recevoir : la reactiver creerait un
+        // doublon, et un "tout selectionner + valider" ne doit pas echouer sur elle.
         List<ImportDraftLine> matchedLines = allLines.stream()
                 .filter(l -> request.lineIds().contains(l.getId()))
+                .filter(l -> !isAlreadyImported(l))
                 .toList();
 
         for (ImportDraftLine line : matchedLines) {
@@ -379,6 +391,7 @@ public class ImportService {
                 .reviewCount(reviewCount)
                 .duplicateCount(duplicateCount)
                 .skippedCount(skippedCount)
+                .alreadyImportedCount((int) lines.stream().filter(ImportService::isAlreadyImported).count())
                 .profileId(profileId)
                 .profileSource(profileSource)
                 .expiresAt(LocalDateTime.now().plusDays(DRAFT_EXPIRY_DAYS))
@@ -451,6 +464,7 @@ public class ImportService {
         draft.setReviewCount((int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.NEEDS_REVIEW).count());
         draft.setDuplicateCount((int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.DUPLICATE).count());
         draft.setSkippedCount((int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.SKIPPED).count());
+        draft.setAlreadyImportedCount((int) lines.stream().filter(ImportService::isAlreadyImported).count());
     }
 
     private Account validateAccountForImport(UUID accountId, UUID userId) {
@@ -477,8 +491,43 @@ public class ImportService {
                         .category(line.getCategory())
                         .account(draft.getAccount())
                         .user(draft.getUser())
+                        .importFingerprint(DeduplicationService.fingerprintOf(line))
                         .build())
                 .toList();
+    }
+
+    /**
+     * Une transaction reconnue par son libelle, faute d'empreinte (import anterieur
+     * a KKS-382), recoit celle de sa ligne : au prochain releve, elle sera reconnue
+     * meme si elle a ete renommee entre-temps.
+     */
+    private void backfillFingerprints(ImportDraft draft, List<ImportDraftLine> alreadyImportedLines, UUID userId) {
+        Map<UUID, ImportDraftLine> lineByTransactionId = new HashMap<>();
+        alreadyImportedLines.stream()
+                .filter(l -> l.getDuplicateTransactionId() != null)
+                .forEach(l -> lineByTransactionId.put(l.getDuplicateTransactionId(), l));
+        if (lineByTransactionId.isEmpty()) {
+            return;
+        }
+
+        List<Transaction> toBackfill = transactionRepository
+                .findByUserIdAndAccountIdAndIdIn(userId, draft.getAccount().getId(), lineByTransactionId.keySet())
+                .stream()
+                .filter(t -> t.getImportFingerprint() == null)
+                .toList();
+        toBackfill.forEach(t -> t.setImportFingerprint(
+                DeduplicationService.fingerprintOf(lineByTransactionId.get(t.getId()))));
+        transactionRepository.saveAll(toBackfill);
+
+        if (!toBackfill.isEmpty()) {
+            log.info("Import fingerprint backfilled on {} previously imported transactions for draft {}",
+                    toBackfill.size(), draft.getId());
+        }
+    }
+
+    private static boolean isAlreadyImported(ImportDraftLine line) {
+        return line.getStatus() == ImportLineStatus.SKIPPED
+                && line.getSkipReason() == ImportSkipReason.ALREADY_IMPORTED;
     }
 
     private ImportDraftResponse buildResponseWithProfileName(ImportDraft draft, String profileName) {
@@ -496,6 +545,7 @@ public class ImportService {
                 draft.getReviewCount(),
                 draft.getDuplicateCount(),
                 draft.getSkippedCount(),
+                draft.getAlreadyImportedCount(),
                 profileName,
                 draft.getProfileSource() != null ? draft.getProfileSource().name() : null,
                 draft.getCreatedAt(),

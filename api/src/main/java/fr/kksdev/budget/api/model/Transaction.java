@@ -76,6 +76,15 @@ public class Transaction {
     @JoinColumn(name = "subscription_id")
     private Subscription subscription;
 
+    /**
+     * Empreinte de la ligne de releve dont vient la transaction (KKS-382).
+     * Calculee sur les donnees du fichier, jamais sur les champs modifiables :
+     * une transaction renommee ou recategorisee reste reconnue au reimport.
+     * Nulle pour une saisie manuelle ou un import anterieur a KKS-382.
+     */
+    @Column(name = "import_fingerprint", length = 64)
+    private String importFingerprint;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
