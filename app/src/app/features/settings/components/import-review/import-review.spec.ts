@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { ImportReview } from './import-review';
 import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { ImportDraft, ImportDraftLine } from '../../../../core/models/import.model';
+import { Category } from '../../../../core/models/category.model';
 
 function line(overrides: Partial<ImportDraftLine>): ImportDraftLine {
   return {
@@ -56,7 +57,7 @@ describe('ImportReview', () => {
   const readyLine = line({ id: 'ready', status: 'READY' });
   const reviewLine = line({ id: 'review', status: 'NEEDS_REVIEW' });
 
-  const setup = async (lines: ImportDraftLine[]) => {
+  const setup = async (lines: ImportDraftLine[], categories$ = of<Category[]>([])) => {
     importServiceMock = {
       getDraft: vi.fn().mockReturnValue(of(draft(lines))),
       updateLine: vi
@@ -73,7 +74,7 @@ describe('ImportReview', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'draft-1' } } } },
         { provide: ImportService, useValue: importServiceMock },
-        { provide: CategoryService, useValue: { getAll: vi.fn().mockReturnValue(of([])) } },
+        { provide: CategoryService, useValue: { getAll: vi.fn().mockReturnValue(categories$) } },
         { provide: CategoryRuleService, useValue: { create: vi.fn().mockReturnValue(of({})) } },
       ],
     });
@@ -189,5 +190,22 @@ describe('ImportReview', () => {
     await fixture.componentInstance.onCategoryChange(readyLine, '');
 
     expect(fixture.componentInstance.draft()?.lines).toHaveLength(1);
+  });
+
+  it('should_show_suggested_category_when_categories_load_after_draft', async () => {
+    const categories$ = new Subject<Category[]>();
+    const suggested = line({ id: 'suggested', categoryId: 'cat-2', categoryName: 'Loisirs' });
+    const fixture = await setup([suggested], categories$);
+
+    categories$.next([
+      { id: 'cat-1', nom: 'Courses', icone: '🛒', couleur: '#000000' } as Category,
+      { id: 'cat-2', nom: 'Loisirs', icone: '🎮', couleur: '#000000' } as Category,
+    ]);
+    categories$.complete();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.nativeElement.querySelector('#cat-suggested') as HTMLSelectElement;
+    expect(select.value).toBe('cat-2');
   });
 });
