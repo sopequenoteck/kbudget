@@ -175,8 +175,11 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | frequency | Enum | HEBDOMADAIRE / MENSUEL / ANNUEL (nullable, si isRecurring) |
 | nextOccurrence | LocalDate | Prochaine occurrence (nullable, si isRecurring) |
 | recurringActive | Boolean | Recurrence active (default true, si isRecurring) |
+| importFingerprint | String | Empreinte SHA-256 de la ligne de releve d'origine (nullable, non exposee) — KKS-382 |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+
+> `importFingerprint` porte sur les donnees du fichier (date comptable, montant, sens, libelle brut), jamais sur les champs modifiables : une transaction importee puis renommee reste reconnue au reimport. Nulle pour une saisie manuelle ; posee a posteriori sur un import anterieur des qu'un releve le reconnait par son libelle. Index `(account_id, import_fingerprint)`.
 
 ### Subscription
 
@@ -322,6 +325,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | reviewCount | Integer | Lignes a revoir |
 | duplicateCount | Integer | Doublons detectes |
 | skippedCount | Integer | Lignes ignorees |
+| alreadyImportedCount | Integer | Sous-ensemble de skippedCount : lignes ecartees d'office car deja importees (KKS-382) |
 | profileId | UUID | Identifiant du profil utilise (nullable) |
 | profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
 | createdAt | LocalDateTime | Date de creation |
@@ -344,7 +348,8 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | transactionType | Enum | DEPENSE / RECETTE / AJUSTEMENT |
 | status | Enum | READY / NEEDS_REVIEW / DUPLICATE / SKIPPED |
 | statusMessage | String | Message de statut (nullable) |
-| duplicateTransactionId | UUID | ID de la transaction doublon (nullable) |
+| skipReason | Enum | ImportSkipReason (ALREADY_IMPORTED) — SKIPPED decide par l'import, nullable si ignoree par l'utilisateur (KKS-382) |
+| duplicateTransactionId | UUID | ID de la transaction doublon ou deja importee (nullable) |
 | category | Category | FK → Category (nullable) |
 | createdAt | LocalDateTime | Date de creation |
 | updatedAt | LocalDateTime | Date de mise a jour |

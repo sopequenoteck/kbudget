@@ -56,6 +56,25 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Reimporter un releve ne bloque plus sur les lignes deja importees
+  (KKS-382)** : importer un releve qui chevauche le precedent marquait chaque
+  ligne commune `DUPLICATE`, et la confirmation restait bloquee tant qu'elles
+  n'etaient pas ecartees une a une. Mesure sur un releve reel : 240 lignes sur
+  294 a traiter a la main pour atteindre les 54 nouvelles — toutes des doublons
+  exacts, aucun faux positif.
+  - Une ligne deja importee est desormais ecartee d'office : `SKIPPED` avec
+    `skipReason: "ALREADY_IMPORTED"`, comptee dans `alreadyImportedCount`. Aucun
+    statut nouveau : un client ancien voit une ligne ignoree ordinaire.
+  - La reconnaissance repose sur une **empreinte** de la ligne de releve (date
+    comptable, montant, sens, libelle brut) posee sur la transaction importee.
+    Elle survit au renommage et au changement de date de la transaction. Les
+    imports anterieurs, sans empreinte, sont reconnus par leur libelle nettoye
+    et recoivent l'empreinte a la confirmation.
+  - Deux lignes identiques d'un meme releve sont deux operations reelles : elles
+    ne sont ecartees que si la base en contient autant.
+  - Un libelle seulement proche reste `DUPLICATE` et bloquant : c'est le seul
+    cas ou l'utilisateur doit encore trancher. Sur le meme releve reel, 2 lignes
+    au lieu de 240.
 - La commande de regeneration du snapshot de contrat, citee par `ApiContractIT`
   et par `docs/api-compatibility.md`, etait impossible a executer : `mvn -pl
   api` suppose un pom racine, que le depot n'a pas. Un contributeur l'aurait
