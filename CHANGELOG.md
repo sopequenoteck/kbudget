@@ -5,6 +5,43 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+> **Une migration de base (V38) : sauvegarder avant de mettre a jour.** Elle
+> ajoute une colonne nullable, sans valeur par defaut, et ne modifie aucune
+> donnee existante.
+
+### Added
+
+- **Infrastructure d'internationalisation d'Angular et preference de langue
+  (KKS-373)** : etape 1 sur 8 de KKS-325. **Aucun changement visible** : le
+  francais reste la langue par defaut, et aucun selecteur n'apparait avant
+  KKS-380.
+  - API : preference `language` sur `/users/me/preferences` et dans l'export.
+    C'est une chaine BCP 47 validee par motif (`en`, `fr`, `pt-BR`), pas un
+    enum : ajouter une langue communautaire ne doit demander aucune release de
+    l'API. Colonne nullable sans valeur par defaut, car `NULL` signifie « pas
+    choisi » et permettra a KKS-380 de retenir la langue du navigateur. Trois
+    champs de reponse ajoutes au contrat, aucun champ de requete.
+  - Angular : Transloco avec MessageFormat (ICU), catalogues `/i18n/en.json` et
+    `/i18n/fr.json` charges a l'execution et mis en cache par le service
+    worker, francais precharge avant le premier rendu. Une seule image sert
+    toutes les langues.
+  - La constante `APP_LOCALE` disparait au profit de `LanguageService`
+    (`fr-FR`, `en-GB`) : montants, dates et tris suivent la langue active, y
+    compris les valeurs deja affichees.
+  - Les messages d'erreur de KKS-324 passent dans les catalogues, a
+    l'identique.
+  - `docs/i18n.md` est corrige : il prescrivait de regler l'interpolation de
+    Transloco sur `{ }`, ce qui vide tout pluriel ICU. Un test verrouille desormais
+    ce comportement.
+
+### Changed
+
+- **Analyse Sonar d'Angular : le blame git est recalcule a chaque analyse
+  (KKS-373)** : `sonar.scm.forceReloadAll=true`. Le nouveau code est determine
+  par `git blame`, que Sonar ne recalculait que pour les fichiers de contenu
+  modifie. Or toutes les analyses ecrasent le meme projet : une PR d'arbre
+  identique a une autre etait notee sur l'historique de celle-ci.
+
 ## [6.6.0] - 2026-09-24
 
 > **Deux migrations de base (V36, V37) : sauvegarder avant de mettre a jour.**
