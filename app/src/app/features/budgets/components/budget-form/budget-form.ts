@@ -87,14 +87,14 @@ export class BudgetForm {
     const existing = this.existingBudgets();
 
     if (budget) {
-      const usedCategoryIds = existing
-        .filter((b) => b.id !== budget.id)
-        .map((b) => b.category.id);
-      return all.filter((cat) => !usedCategoryIds.includes(cat.id));
+      const usedCategoryIds = new Set(
+        existing.filter((b) => b.id !== budget.id).map((b) => b.category.id),
+      );
+      return all.filter((cat) => !usedCategoryIds.has(cat.id));
     }
 
-    const usedCategoryIds = existing.map((b) => b.category.id);
-    return all.filter((cat) => !usedCategoryIds.includes(cat.id));
+    const usedCategoryIds = new Set(existing.map((b) => b.category.id));
+    return all.filter((cat) => !usedCategoryIds.has(cat.id));
   });
 
   readonly noAvailableCategories = computed(() => this.availableCategories().length === 0);

@@ -13,5 +13,7 @@ public interface CategoryRuleRepository extends JpaRepository<CategoryRule, UUID
 
     boolean existsByUserIdAndPatternIgnoreCase(UUID userId, String pattern);
 
+    Optional<CategoryRule> findFirstByUserIdAndPatternIgnoreCase(UUID userId, String pattern);
+
     Optional<CategoryRule> findByIdAndUserId(UUID id, UUID userId);
 }

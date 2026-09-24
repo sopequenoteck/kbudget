@@ -56,6 +56,24 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Les lignes d'un releve arrivent categorisees par l'historique (KKS-383)** :
+  seules les regles saisies a la main pre-remplissaient la categorie, et aucun
+  compte n'en avait. Sur un releve reel, 104 transactions sur 130 etaient restees
+  sans categorie.
+  - Ordre : regle, puis categorie majoritaire des transactions passees chez le
+    meme commercant **au meme montant** — c'est ce qui distingue plusieurs
+    abonnements factures sous un meme libelle —, puis chez le meme commercant
+    tous montants. Meme sens exige, et seul l'historique de l'utilisateur est lu.
+  - Le commercant est compare par une cle normalisee (`MerchantKey`) : dates,
+    references, montants, mois, pays et prefixes de paiement retires,
+    `APPLE.COM/BILL` et `APPLE` confondus. **Le libelle affiche ne change pas** :
+    la reconnaissance des lignes deja importees (KKS-382) compare le libelle
+    nettoye, qui doit rester stable.
+  - Corriger une categorie pendant la revue la propage aux lignes du meme
+    commercant et cree une regle `AUTO`, reconnue par mots entiers. Une
+    categorie posee par une regle ou par l'utilisateur n'est jamais ecrasee.
+  - Nouveaux champs : `categorySource` sur les lignes, `origin` sur les regles.
+  - Sur le releve reel suivant : 32 lignes nouvelles sur 54 arrivent categorisees.
 - **Reimporter un releve ne bloque plus sur les lignes deja importees
   (KKS-382)** : importer un releve qui chevauche le precedent marquait chaque
   ligne commune `DUPLICATE`, et la confirmation restait bloquee tant qu'elles
@@ -83,6 +101,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   reglage d'approbation des contributeurs externes qu'elles documentent n'est
   pas devenu obsolete avec l'ouverture du depot : il en est devenu la seule
   protection du runner.
+
+### Fixed
+
+- **Revue d'import : une ligne prete ne pouvait pas recevoir de categorie
+  (KKS-383)**. L'ecran envoyait `status: READY` avec chaque categorie, et l'API
+  refusait la transition `READY` -> `READY` : reponse 400, modification annulee,
+  erreur seulement journalisee. Meme cause pour « Assigner » et « Valider » en
+  groupe des que la selection contenait une ligne prete — presque toujours.
+  Seules les lignes a verifier pouvaient donc etre categorisees pendant la revue.
+  - Redemander le statut courant est desormais sans effet cote API.
+  - L'ecran n'envoie plus de statut en categorisant une ligne prete, ni en
+    assignant une categorie en groupe (ce qui validait au passage les doublons
+    selectionnes), recharge le brouillon pour montrer la propagation, et
+    affiche les echecs au lieu de les taire.
 
 ## [6.5.2] - 2026-09-05
 

@@ -351,6 +351,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | skipReason | Enum | ImportSkipReason (ALREADY_IMPORTED) — SKIPPED decide par l'import, nullable si ignoree par l'utilisateur (KKS-382) |
 | duplicateTransactionId | UUID | ID de la transaction doublon ou deja importee (nullable) |
 | category | Category | FK → Category (nullable) |
+| categorySource | Enum | CategorySource (RULE / HISTORY / USER), nullable sans categorie — KKS-383 |
 | createdAt | LocalDateTime | Date de creation |
 | updatedAt | LocalDateTime | Date de mise a jour |
 
@@ -361,8 +362,13 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | id | UUID | Identifiant |
 | pattern | String | Motif de correspondance (max 200, insensible a la casse) |
 | category | Category | FK → Category a appliquer |
+| origin | Enum | CategoryRuleOrigin (MANUAL / AUTO, default MANUAL) — KKS-383 |
 | createdAt | LocalDateTime | Date de creation |
 | user | User | FK → User. UNIQUE(user_id, pattern) |
+
+> Une regle `MANUAL`, saisie par l'utilisateur, reconnait un libelle nettoye qui **contient** le motif. Une regle `AUTO` est creee quand l'utilisateur corrige une categorie pendant la revue : son motif est une cle commercant (`MerchantKey`), reconnue par **mots entiers** — une cle courte ne doit pas reconnaitre n'importe quel libelle qui la contient. Une correction ne modifie jamais une regle `MANUAL`.
+>
+> Ordre de categorisation d'une ligne a l'upload (`CategorySuggestionService`) : regle, puis categorie majoritaire des transactions passees de l'utilisateur chez le meme commercant **au meme montant**, puis chez le meme commercant tous montants. Meme sens exige (depense / recette) ; a egalite, la plus recente l'emporte. La cle commercant ne sert qu'a comparer : le libelle nettoye affiche, lui, ne change pas.
 
 ### ImportHistory
 
