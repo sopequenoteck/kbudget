@@ -104,7 +104,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS), null, null, null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.BUDGETS), null, null, null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).containsExactly(Feature.SUBSCRIPTIONS, Feature.BUDGETS);
@@ -120,7 +120,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null, null, null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS), null, null, null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.SUBSCRIPTIONS, Feature.DEBTS);
@@ -135,7 +135,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(), null, null, null, null, null);
+        var request = new UserPreferenceRequest(List.of(), null, null, null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.enabledFeatures()).isEmpty();
@@ -151,7 +151,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.BUDGETS, Feature.SUBSCRIPTIONS), null, null, null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.BUDGETS, Feature.SUBSCRIPTIONS), null, null, null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.navOrder()).containsExactly(Feature.BUDGETS, Feature.SUBSCRIPTIONS);
@@ -171,7 +171,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.BUDGETS),
                 List.of(Feature.BUDGETS, Feature.DEBTS, Feature.SUBSCRIPTIONS),
-                null, null, null, null
+                null, null, null, null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
@@ -189,7 +189,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.SUBSCRIPTIONS),
-                null, null, null, null
+                null, null, null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -208,7 +208,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
                 List.of(Feature.SUBSCRIPTIONS),
-                null, null, null, null
+                null, null, null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -227,7 +227,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS),
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS),
-                null, null, null, null
+                null, null, null, null, null
         );
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
@@ -247,7 +247,7 @@ class PreferenceServiceTest {
         var request = new UserPreferenceRequest(
                 List.of(Feature.SUBSCRIPTIONS, Feature.DEBTS, Feature.BUDGETS),
                 List.of(Feature.DEBTS, Feature.BUDGETS, Feature.SUBSCRIPTIONS),
-                null, null, null, null
+                null, null, null, null, null
         );
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
@@ -266,7 +266,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.XOF, Currency.EUR), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.XOF, Currency.EUR), null, null, null, null);
         preferenceService.updatePreferences(request, userId);
 
         verify(exchangeRateService).rebaseRates(userId, Currency.EUR, Currency.XOF);
@@ -287,7 +287,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.USD), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.USD), null, null, null, null);
         preferenceService.updatePreferences(request, userId);
 
         verify(exchangeRateService, never()).rebaseRates(any(), any(), any());
@@ -304,7 +304,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         doThrow(new RuntimeException("Rebase failed")).when(exchangeRateService).rebaseRates(any(), any(), any());
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.XOF), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.XOF), null, null, null, null);
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(RuntimeException.class)
@@ -319,7 +319,7 @@ class PreferenceServiceTest {
         );
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(), null, null, null, null);
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -334,7 +334,7 @@ class PreferenceServiceTest {
         );
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, "Invalid/Timezone", null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, "Invalid/Timezone", null, null);
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -349,7 +349,7 @@ class PreferenceServiceTest {
         );
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.EUR), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.EUR), null, null, null, null);
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -366,7 +366,7 @@ class PreferenceServiceTest {
         when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
         when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
 
-        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.USD), null, null, null);
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, List.of(Currency.EUR, Currency.XOF, Currency.USD), null, null, null, null);
         UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
 
         assertThat(response.currencies()).containsExactly(Currency.EUR, Currency.XOF, Currency.USD);
@@ -400,5 +400,91 @@ class PreferenceServiceTest {
         verify(userPreferenceRepository).save(captor.capture());
         UserPreference saved = captor.getValue();
         assertThat(saved.getTimezone()).isEqualTo("Europe/Paris");
+    }
+
+    // === US5: updatePreferences — language (KKS-373) ===
+
+    @Test
+    void should_returnNullLanguage_when_noLanguageChosen() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserPreferenceResponse response = preferenceService.getPreferences(userId);
+
+        assertThat(response.language()).isNull();
+    }
+
+    @Test
+    void should_persistAndReturnLanguage_when_validLanguageProvided() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, null, null, "en");
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.language()).isEqualTo("en");
+        assertThat(preference.getLanguage()).isEqualTo("en");
+    }
+
+    @Test
+    void should_keepLanguageUnchanged_when_requestOmitsLanguage() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        preference.setLanguage("fr");
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, null, null, null);
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.language()).isEqualTo("fr");
+    }
+
+    @Test
+    void should_acceptSyntacticallyValidButUnsupportedLanguage_when_noClientKnowsIt() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, null, null, "pt-BR");
+        UserPreferenceResponse response = preferenceService.updatePreferences(request, userId);
+
+        assertThat(response.language()).isEqualTo("pt-BR");
+    }
+
+    @Test
+    void should_isolateLanguagePerUser_when_twoUsersUpdateIndependently() {
+        UUID otherUserId = UUID.randomUUID();
+        var preferenceA = buildPreference(List.of(Feature.SUBSCRIPTIONS), List.of(Feature.SUBSCRIPTIONS));
+        var preferenceB = UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(User.builder().id(otherUserId).build())
+                .enabledFeatures(new ArrayList<>(List.of(Feature.SUBSCRIPTIONS)))
+                .navOrder(new ArrayList<>(List.of(Feature.SUBSCRIPTIONS)))
+                .currencies(new ArrayList<>(List.of(Currency.EUR)))
+                .build();
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preferenceA));
+        when(userPreferenceRepository.findByUserId(otherUserId)).thenReturn(Optional.of(preferenceB));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        var request = new UserPreferenceRequest(List.of(Feature.SUBSCRIPTIONS), null, null, null, null, null, "en");
+        preferenceService.updatePreferences(request, userId);
+
+        UserPreferenceResponse otherResponse = preferenceService.getPreferences(otherUserId);
+
+        assertThat(preferenceA.getLanguage()).isEqualTo("en");
+        assertThat(otherResponse.language()).isNull();
     }
 }

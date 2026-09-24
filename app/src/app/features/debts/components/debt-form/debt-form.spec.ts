@@ -8,8 +8,11 @@ import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
 import { AccountService } from '../../../../core/services/account';
 import { CategoryService } from '../../../../core/services/category';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
+import { Category } from '../../../../core/models/category.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -87,7 +90,15 @@ describe('DebtForm', () => {
     refreshTrigger: ReturnType<typeof vi.fn>;
   };
 
+  let confirmServiceMock: {
+    confirm: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
+    confirmServiceMock = {
+      confirm: vi.fn().mockResolvedValue(true),
+    };
+
     categoryServiceMock = {
       getAll: vi.fn().mockReturnValue(of([])),
       refreshTrigger: vi.fn().mockReturnValue(0),
@@ -121,11 +132,13 @@ describe('DebtForm', () => {
     TestBed.configureTestingModule({
       imports: [DebtForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: CurrencyService, useValue: currencyServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: CategoryService, useValue: categoryServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
       ],
     });
   };
@@ -153,7 +166,9 @@ describe('DebtForm', () => {
 
   it('should_auto_set_include_in_balance_when_account_selected', async () => {
     // Désactiver le compte par défaut pour partir d'un état sans sélection
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -172,7 +187,9 @@ describe('DebtForm', () => {
   });
 
   it('should_hide_patrimoine_toggle_when_account_selected', async () => {
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -314,5 +331,53 @@ describe('DebtForm', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.form.getRawValue().currency).toBe('USD');
+  });
+
+  it('should_insert_created_category_sorted_by_name', async () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const nouvelle: Category = { id: 'cat-2', nom: 'Alimentation', icone: '🍔', couleur: '#000' };
+    component.onCategoryCreated(nouvelle);
+
+    expect(component.categories().map((c) => c.nom)).toContain('Alimentation');
+  });
+
+  it('should_delete_debt_when_confirmed', async () => {
+    modalServiceMock = {
+      editingEntity: signal(mockDebt),
+      closeModal: vi.fn(),
+    };
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(debtServiceMock.delete).toHaveBeenCalledWith('debt-edit-1');
+    expect(modalServiceMock.closeModal).toHaveBeenCalled();
+  });
+
+  it('should_not_delete_debt_when_not_confirmed', async () => {
+    modalServiceMock = {
+      editingEntity: signal(mockDebt),
+      closeModal: vi.fn(),
+    };
+    confirmServiceMock.confirm.mockResolvedValue(false);
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(debtServiceMock.delete).not.toHaveBeenCalled();
   });
 });

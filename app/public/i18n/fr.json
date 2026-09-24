@@ -1,0 +1,45 @@
+{
+  "auth": {
+    "feedback": {
+      "invalidCredentials": "Email ou mot de passe incorrect"
+    },
+    "form": {
+      "passwordMinLength": "{min} caractères minimum"
+    }
+  },
+  "errors": {
+    "api": {
+      "badRequest": "La demande n'a pas pu être traitée.",
+      "validationError": "Veuillez vérifier les informations saisies.",
+      "malformedRequest": "Requête invalide.",
+      "invalidImageFormat": "Seuls les formats JPG et PNG sont acceptés.",
+      "invalidExportFormat": "Format d'export invalide. Formats acceptés : json, csv.",
+      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "confirmationRequired": "Confirmation explicite requise.",
+      "passwordIncorrect": "Mot de passe incorrect.",
+      "unauthenticated": "Authentification requise.",
+      "tokenExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+      "tokenRevoked": "Votre session a été révoquée. Veuillez vous reconnecter.",
+      "tokenReuseDetected": "Session interrompue par sécurité. Veuillez vous reconnecter.",
+      "tokenInvalid": "Session invalide. Veuillez vous reconnecter.",
+      "accessDenied": "Accès refusé",
+      "passwordResetRequired": "Reset requis",
+      "featureDisabled": "Fonctionnalité désactivée",
+      "passwordResetNotRequired": "La réinitialisation des identifiants n'est pas requise pour ce compte.",
+      "lastAdminDeletionForbidden": "Au moins un administrateur actif doit exister.",
+      "notFound": "Ressource introuvable",
+      "avatarNotFound": "Avatar introuvable",
+      "conflict": "Conflit de données",
+      "lastAdminCannotBeDisabled": "Impossible de désactiver le dernier administrateur actif.",
+      "emailAlreadyExists": "Email déjà utilisé",
+      "fileTooLarge": "Fichier trop volumineux. La taille maximale est 2 MB.",
+      "csvProfileNotFound": "Profil CSV introuvable",
+      "tooManyRequests": "Trop de tentatives. Réessayez dans quelques instants.",
+      "internalError": "Une erreur interne est survenue"
+    },
+    "client": {
+      "generic": "Une erreur est survenue",
+      "network": "Impossible de contacter le serveur"
+    }
+  }
+}

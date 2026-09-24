@@ -12,6 +12,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 // ---------------------------------------------------------------------------
 // Données de test
@@ -112,6 +113,7 @@ function createMockPreferenceService() {
     primaryCurrency: signal('EUR'),
     currencies: signal(['EUR']),
     enabledFeatures: signal([]),
+    language: signal<string | null>(null),
   };
 }
 
@@ -152,6 +154,7 @@ describe('RecurringList', () => {
     TestBed.configureTestingModule({
       imports: [RecurringList],
       providers: [
+        provideTranslocoTesting(),
         { provide: RecurringTransactionService, useValue: mockService },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: Router, useValue: routerMock },
@@ -264,6 +267,76 @@ describe('RecurringList', () => {
   // -------------------------------------------------------------------------
   // T012-6 : toast succès après validate
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Libellé de date relative — branches de getRelativeDate
+  // -------------------------------------------------------------------------
+
+  it('should_return_days_overdue_label_when_negative_diff_is_more_than_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(today.getDate() - 3);
+
+    expect(component.getRelativeDate(toDateStr(threeDaysAgo))).toBe('il y a 3 j.');
+  });
+
+  it('should_return_hier_label_when_negative_diff_is_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDate(toDateStr(yesterday))).toBe('hier');
+  });
+
+  it('should_return_aujourdhui_label_when_diff_is_zero', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDate(toDateStr(today))).toBe("aujourd'hui");
+  });
+
+  it('should_return_demain_label_when_diff_is_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDate(toDateStr(tomorrow))).toBe('demain');
+  });
+
+  it('should_return_days_count_label_when_diff_is_between_two_and_thirty', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const inTenDays = new Date(today);
+    inTenDays.setDate(today.getDate() + 10);
+
+    expect(component.getRelativeDate(toDateStr(inTenDays))).toBe('dans 10 j.');
+  });
+
+  it('should_return_short_localized_date_when_diff_is_more_than_thirty_days', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const inFortyFiveDays = new Date(today);
+    inFortyFiveDays.setDate(today.getDate() + 45);
+
+    const result = component.getRelativeDate(toDateStr(inFortyFiveDays));
+    expect(result).not.toContain('dans');
+    expect(result).not.toBe("aujourd'hui");
+    expect(result).not.toBe('demain');
+  });
 
   it('should_show_toast_after_successful_validate', async () => {
     const mockService = createMockService([overdueItem]);

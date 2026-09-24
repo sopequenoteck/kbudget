@@ -13,5 +13,6 @@ public record UserPreferenceResponse(
         List<Currency> currencies,
         List<NotificationType> enabledNotificationTypes,
         String timezone,
-        TextScale textScale
+        TextScale textScale,
+        String language
 ) {}

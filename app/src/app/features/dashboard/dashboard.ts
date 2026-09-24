@@ -21,7 +21,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
 import { RecurringTransactionService } from '../../core/services/recurring-transaction';
 import { DevLogger } from '../../core/services/dev-logger';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -59,6 +59,7 @@ export class Dashboard {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -148,7 +149,7 @@ export class Dashboard {
   readonly budgetOverview = signal<BudgetOverview | null>(null);
   readonly budgetLoading = signal(true);
   readonly budgetCurrentMonth = computed(() => {
-    return new Date().toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
+    return new Date().toLocaleDateString(this.languageService.displayLocale(), { month: 'long', year: 'numeric' });
   });
 
   // -- Dernières transactions --
@@ -271,7 +272,7 @@ export class Dashboard {
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    return prev.toLocaleDateString(APP_LOCALE, { month: 'short' }).replace('.', '');
+    return prev.toLocaleDateString(this.languageService.displayLocale(), { month: 'short' }).replace('.', '');
   });
 
   readonly sortedBudgetItems = computed(() => {
@@ -485,7 +486,7 @@ export class Dashboard {
     const converted = this.conversionService.convert(t.montant, txCurrency, target);
     if (converted === null) return '';
 
-    const formatted = new Intl.NumberFormat(APP_LOCALE, {
+    const formatted = new Intl.NumberFormat(this.languageService.displayLocale(), {
       style: 'currency',
       currency: target,
     }).format(Math.abs(converted));

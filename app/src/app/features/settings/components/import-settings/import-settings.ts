@@ -23,7 +23,7 @@ import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { ApiErrorService } from '../../../../core/services/api-error';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
 import {
@@ -64,6 +64,7 @@ export class ImportSettings {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   private readonly queryParams = toSignal(this.route.queryParamMap);
 
@@ -197,7 +198,7 @@ export class ImportSettings {
 
   formatDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   private async loadRules(): Promise<void> {

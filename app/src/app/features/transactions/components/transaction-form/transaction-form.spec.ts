@@ -16,6 +16,7 @@ import { type Category } from '../../../../core/models/category.model';
 import { type AccountSummary } from '../../../../core/models/account.model';
 import { CategoryService } from '../../../../core/services/category';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const makeTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
   id: 'tx-1',
@@ -141,6 +142,7 @@ describe('TransactionForm', () => {
     TestBed.configureTestingModule({
       imports: [TransactionForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: TransactionService, useValue: transactionServiceMock },
         { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
         { provide: TransactionLibelleService, useValue: libelleServiceMock },
@@ -272,5 +274,47 @@ describe('TransactionForm', () => {
     expect(component.form.get('isRecurring')!.value).toBe(true);
     // Le composant n'est pas en mode édition (asRecurring override isEditing)
     expect(component.isEditing()).toBe(false);
+  });
+
+  it('should_insert_created_category_sorted_by_name', () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const nouvelle: Category = { id: 'cat-2', nom: 'Alimentation', icone: '🍔', couleur: '#000' };
+    component.onCategoryCreated(nouvelle);
+
+    expect(component.categories().map((c) => c.nom)).toContain('Alimentation');
+  });
+
+  it('should_delete_transaction_when_confirmed', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirm.mockResolvedValue(true);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(transactionServiceMock.delete).toHaveBeenCalledWith('tx-1');
+    expect(modalServiceMock.closeModal).toHaveBeenCalled();
+  });
+
+  it('should_not_delete_transaction_when_not_confirmed', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirm.mockResolvedValue(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(transactionServiceMock.delete).not.toHaveBeenCalled();
   });
 });

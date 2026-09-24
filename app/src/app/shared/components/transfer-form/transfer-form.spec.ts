@@ -6,6 +6,7 @@ import { AccountService } from '../../../core/services/account';
 import { TransactionService } from '../../../core/services/transaction';
 import { ModalService } from '../../../core/services/modal.service';
 import { Account, AccountType } from '../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -71,6 +72,7 @@ describe('TransferForm', () => {
     TestBed.configureTestingModule({
       imports: [TransferForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: AccountService, useValue: accountServiceMock },
         { provide: TransactionService, useValue: transactionServiceMock },
         { provide: ModalService, useValue: modalServiceMock },

@@ -1,8 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+
 import { RelativeDatePipe } from './relative-date.pipe';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 describe('RelativeDatePipe', () => {
-  const pipe = new RelativeDatePipe();
+  let pipe: RelativeDatePipe;
+
+  beforeEach(() => {
+    // KKS-373 (D8) : le pipe injecte LanguageService (impur, suit la
+    // langue active) — TestBed remplace l'instanciation directe par `new`.
+    TestBed.configureTestingModule({
+      providers: [provideTranslocoTesting()],
+    });
+    pipe = TestBed.runInInjectionContext(() => new RelativeDatePipe());
+  });
 
   /** Retourne la date ISO (YYYY-MM-DD) de `n` jours avant aujourd'hui */
   function daysAgo(n: number): string {

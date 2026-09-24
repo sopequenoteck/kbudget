@@ -7,6 +7,7 @@ import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { ImportDraft, ImportDraftLine } from '../../../../core/models/import.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 function line(overrides: Partial<ImportDraftLine>): ImportDraftLine {
   return {
@@ -70,6 +71,7 @@ describe('ImportReview', () => {
     TestBed.configureTestingModule({
       imports: [ImportReview],
       providers: [
+        provideTranslocoTesting(),
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'draft-1' } } } },
         { provide: ImportService, useValue: importServiceMock },

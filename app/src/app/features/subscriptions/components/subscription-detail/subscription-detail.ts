@@ -26,9 +26,10 @@ import { SubscriptionPaymentResponse } from '../../../../core/models/subscriptio
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 @Component({
   selector: 'app-subscription-detail',
@@ -57,6 +58,7 @@ export class SubscriptionDetail {
   private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly subscription = signal<Subscription | null>(null);
   readonly payments = signal<SubscriptionPaymentResponse[]>([]);
@@ -176,7 +178,7 @@ export class SubscriptionDetail {
     if (!sub) return;
 
     const freq = sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
-    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency: sub.currency });
+    const amount = formatCurrencyAmount(sub.montant, sub.currency, this.languageService.displayLocale());
     const ok = await this.confirmService.confirm({ title: `${sub.nom} — ${amount}${freq}`, message: 'Voulez-vous vraiment supprimer cet abonnement ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorRepeat' });
     if (!ok) return;
 
@@ -213,6 +215,6 @@ export class SubscriptionDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(new Date(date));
   }
 }

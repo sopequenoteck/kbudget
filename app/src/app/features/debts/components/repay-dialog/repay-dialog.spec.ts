@@ -9,6 +9,7 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -104,6 +105,7 @@ describe('RepayDialog', () => {
     TestBed.configureTestingModule({
       imports: [RepayDialog],
       providers: [
+        provideTranslocoTesting(),
         { provide: DebtService, useValue: debtServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
@@ -223,6 +225,24 @@ describe('RepayDialog', () => {
       amount: 200,
     });
     expect(savedEmitted).toBe(true);
+  });
+
+  it('should_show_remaining_balance_toast_when_repayment_is_partial', async () => {
+    setup(mockDebt);
+    debtServiceMock.repay.mockReturnValue(
+      of({ ...mockDebt, montantRestant: 50, rembourse: false }),
+    );
+    const fixture = TestBed.createComponent(RepayDialog);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    await component.onSubmit();
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith(
+      expect.stringContaining('Remboursement enregistré. Reste :'),
+    );
   });
 
   it('should_not_call_repay_when_form_is_invalid', async () => {

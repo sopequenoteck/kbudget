@@ -26,6 +26,12 @@ export class PreferenceService {
   readonly enabledNotificationTypes = signal<NotificationType[]>(['SUBSCRIPTION_DUE', 'DEBT_DUE']);
   readonly timezone = signal<string>('Europe/Paris');
   readonly textScale = signal<string>('MEDIUM');
+  /**
+   * Langue choisie par l'utilisateur, `null` tant qu'il n'a rien choisi
+   * (KKS-373). Source de {@link LanguageService}. Aucune ecriture client
+   * dans ce lot : pas de `update...` correspondant a `updateTextScale`.
+   */
+  readonly language = signal<string | null>(null);
   readonly error = signal<string | null>(null);
 
   async loadPreferences(): Promise<void> {
@@ -36,9 +42,12 @@ export class PreferenceService {
       this.enabledFeatures.set(prefs.enabledFeatures);
       this.navOrder.set(prefs.navOrder);
       this.currencies.set(prefs.currencies ?? ['EUR']);
-      this.enabledNotificationTypes.set(prefs.enabledNotificationTypes ?? ['SUBSCRIPTION_DUE', 'DEBT_DUE']);
+      this.enabledNotificationTypes.set(
+        prefs.enabledNotificationTypes ?? ['SUBSCRIPTION_DUE', 'DEBT_DUE'],
+      );
       this.timezone.set(prefs.timezone ?? 'Europe/Paris');
       this.textScale.set(prefs.textScale ?? 'MEDIUM');
+      this.language.set(prefs.language ?? null);
       this.error.set(null);
     } catch (e) {
       this.logger.error('Failed to load preferences:', e);

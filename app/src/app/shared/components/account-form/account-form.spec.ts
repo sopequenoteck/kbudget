@@ -11,9 +11,16 @@ import { PreferenceService } from '../../../core/services/preference';
 import { ModalService } from '../../../core/services/modal.service';
 import { Account, AccountType } from '../../../core/models/account.model';
 import { BankResponse } from '../../../core/models/bank.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const MOCK_BANKS: BankResponse[] = [
-  { code: 'SG', name: 'Société Générale', country: 'FR', brandColor: '#e2001a', logoUrl: '/api/bank-logos/sg.svg' },
+  {
+    code: 'SG',
+    name: 'Société Générale',
+    country: 'FR',
+    brandColor: '#e2001a',
+    logoUrl: '/api/bank-logos/sg.svg',
+  },
   { code: 'OTHER', name: 'Autre', country: null, brandColor: null, logoUrl: null },
 ];
 
@@ -66,6 +73,7 @@ describe('AccountForm', () => {
 
   let preferenceServiceMock: {
     primaryCurrency: ReturnType<typeof signal<string>>;
+    language: ReturnType<typeof signal<string | null>>;
   };
 
   let modalServiceMock: {
@@ -88,7 +96,9 @@ describe('AccountForm', () => {
       error: signal(null),
       loadBanks: vi.fn().mockResolvedValue(undefined),
       getBankByCode: vi.fn((code: string) => MOCK_BANKS.find((b) => b.code === code)),
-      getBankLogoUrl: vi.fn((code: string) => MOCK_BANKS.find((b) => b.code === code)?.logoUrl ?? null),
+      getBankLogoUrl: vi.fn(
+        (code: string) => MOCK_BANKS.find((b) => b.code === code)?.logoUrl ?? null,
+      ),
     };
 
     currencyServiceMock = {
@@ -103,6 +113,7 @@ describe('AccountForm', () => {
 
     preferenceServiceMock = {
       primaryCurrency: signal('EUR'),
+      language: signal<string | null>(null),
     };
 
     modalServiceMock = {
@@ -114,6 +125,7 @@ describe('AccountForm', () => {
     TestBed.configureTestingModule({
       imports: [AccountForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: AccountService, useValue: accountServiceMock },
         { provide: BankService, useValue: bankServiceMock },
         { provide: CurrencyService, useValue: currencyServiceMock },
@@ -151,7 +163,9 @@ describe('AccountForm', () => {
     const allLegends: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('.account-form__section legend'),
     );
-    const personnalisationLegend = allLegends.find((el) => el.textContent?.includes('Personnalisation'));
+    const personnalisationLegend = allLegends.find((el) =>
+      el.textContent?.includes('Personnalisation'),
+    );
     expect(personnalisationLegend).toBeFalsy();
   });
 
@@ -174,7 +188,9 @@ describe('AccountForm', () => {
     const allLegends: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('.account-form__section legend'),
     );
-    const personnalisationLegend = allLegends.find((el) => el.textContent?.includes('Personnalisation'));
+    const personnalisationLegend = allLegends.find((el) =>
+      el.textContent?.includes('Personnalisation'),
+    );
     expect(personnalisationLegend).toBeTruthy();
   });
 
@@ -213,7 +229,9 @@ describe('AccountForm', () => {
 
     expect(accountServiceMock.create).toHaveBeenCalledTimes(1);
 
-    const [request] = accountServiceMock.create.mock.calls[0] as [Parameters<typeof accountServiceMock.create>[0]];
+    const [request] = accountServiceMock.create.mock.calls[0] as [
+      Parameters<typeof accountServiceMock.create>[0],
+    ];
     expect(request.bankCode).toBe('SG');
     // When a known bank is selected, bankCustomName and bankCustomLogo must not be set
     expect(request.bankCustomName).toBeUndefined();
@@ -235,7 +253,9 @@ describe('AccountForm', () => {
 
     expect(accountServiceMock.create).toHaveBeenCalledTimes(1);
 
-    const [request] = accountServiceMock.create.mock.calls[0] as [Parameters<typeof accountServiceMock.create>[0]];
+    const [request] = accountServiceMock.create.mock.calls[0] as [
+      Parameters<typeof accountServiceMock.create>[0],
+    ];
     expect(request.bankCode).toBe('OTHER');
     expect(request.bankCustomName).toBe('Ma banque perso');
     expect(request.bankCustomLogo).toBeUndefined();

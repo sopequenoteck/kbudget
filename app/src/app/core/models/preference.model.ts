@@ -45,6 +45,12 @@ export interface UserPreference {
   enabledNotificationTypes?: NotificationType[];
   timezone?: string;
   textScale?: string;
+  /**
+   * Code de langue BCP 47 restreint (KKS-373), `null` tant que l'utilisateur
+   * n'a pas choisi. Aucun client n'ecrit ce champ dans ce lot (FR-042) : il
+   * n'apparait donc pas dans `UserPreferenceRequest`.
+   */
+  language?: string | null;
 }
 
 export interface UserPreferenceRequest {

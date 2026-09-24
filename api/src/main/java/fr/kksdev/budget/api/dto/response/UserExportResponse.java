@@ -43,6 +43,7 @@ public record UserExportResponse(
             List<String> enabledNotificationTypes,
             String timezone,
             String textScale,
+            String language,
             LocalDateTime updatedAt
     ) {}
 

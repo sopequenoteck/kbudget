@@ -1,14 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { DevLogger } from './dev-logger';
 import { ApiErrorBody, ValidationErrorDetail } from '../models/api-error.model';
 import {
-  ERROR_MESSAGES,
-  GENERIC_ERROR_MESSAGE,
-  NETWORK_ERROR_MESSAGE,
-  VALIDATION_DETAIL_MESSAGES,
-  VALIDATION_ERROR_MESSAGE,
+  ERROR_CODES,
+  VALIDATION_DETAIL_TRANSLATIONS,
+  errorCodeToKey,
 } from '../constants/error-messages.constants';
 
 /**
@@ -20,11 +19,13 @@ import {
  * diagnostic — ce service ne le lit a aucun moment, y compris en repli.
  *
  * Le libelle derive du code porte par `error`, seule partie contractuelle du
- * corps d'erreur.
+ * corps d'erreur. Depuis KKS-373, la resolution passe par Transloco : les
+ * textes vivent dans les catalogues, ce service ne connait plus que les cles.
  */
 @Injectable({ providedIn: 'root' })
 export class ApiErrorService {
   private readonly logger = inject(DevLogger);
+  private readonly transloco = inject(TranslocoService);
 
   /**
    * Traduit une erreur HTTP en libelle affichable. Ne leve jamais.
@@ -32,23 +33,26 @@ export class ApiErrorService {
    * @param error l'erreur telle que recue — `HttpErrorResponse` ou n'importe quoi d'autre.
    * @param fallback libelle contextuel du site appelant (« Erreur lors du
    *   virement », « Erreur lors de la suppression »…). Sans lui, les sept sites
-   *   convergeraient vers un « Une erreur est survenue » indifferencie, ce qui
-   *   serait une regression d'UX presentee comme une amelioration.
-   * @param overrides libelles propres au site appelant, consultes **avant** le
-   *   catalogue. Un seul usage aujourd'hui : `BAD_REQUEST` couvre 35 sites de
-   *   `throw` heterogenes cote serveur et recoit donc un libelle general, mais
-   *   sur `/auth/login` il ne signifie qu'une chose — identifiants refuses.
-   *   Sans cette porte, le chemin d'erreur le plus frequent de l'application
-   *   perdrait sa precision au profit d'une formule vague.
+   *   convergeraient vers un libelle generique indifferencie, ce qui serait
+   *   une regression d'UX presentee comme une amelioration. Resolu **a
+   *   l'appel** (KKS-373, FR-029) : une valeur par defaut figee a l'import
+   *   aurait gele le libelle dans la langue chargee a ce moment-la.
+   * @param overrides cles de traduction propres au site appelant, consultees
+   *   **avant** le catalogue. Un seul usage aujourd'hui : `BAD_REQUEST` couvre
+   *   35 sites de `throw` heterogenes cote serveur et recoit donc un libelle
+   *   general, mais sur `/auth/login` il ne signifie qu'une chose —
+   *   identifiants refuses. Sans cette porte, le chemin d'erreur le plus
+   *   frequent de l'application perdrait sa precision au profit d'une formule
+   *   vague.
    */
   label(
     error: unknown,
-    fallback: string = GENERIC_ERROR_MESSAGE,
+    fallback: string = this.transloco.translate('errors.client.generic'),
     overrides: Readonly<Record<string, string>> = {},
   ): string {
     // Teste avant toute lecture de corps : sur un statut 0 il n'y en a pas.
     if (error instanceof HttpErrorResponse && error.status === 0) {
-      return NETWORK_ERROR_MESSAGE;
+      return this.transloco.translate('errors.client.network');
     }
 
     const code = this.extractCode(error);
@@ -57,15 +61,15 @@ export class ApiErrorService {
     }
 
     if (code in overrides) {
-      return overrides[code];
+      return this.transloco.translate(overrides[code]);
     }
 
     if (code === 'VALIDATION_ERROR') {
       return this.refineValidation(this.extractBody(error)?.details);
     }
 
-    if (code in ERROR_MESSAGES) {
-      return ERROR_MESSAGES[code];
+    if (ERROR_CODES.includes(code)) {
+      return this.transloco.translate(errorCodeToKey(code));
     }
 
     // Un client ancien face a un serveur recent est un fonctionnement nominal :
@@ -107,14 +111,15 @@ export class ApiErrorService {
    */
   private refineValidation(details: ValidationErrorDetail[] | undefined): string {
     if (!Array.isArray(details)) {
-      return VALIDATION_ERROR_MESSAGE;
+      return this.transloco.translate('errors.api.validationError');
     }
     for (const detail of details) {
       const key = `${detail?.field}:${detail?.code}`;
-      if (key in VALIDATION_DETAIL_MESSAGES) {
-        return VALIDATION_DETAIL_MESSAGES[key];
+      const translation = VALIDATION_DETAIL_TRANSLATIONS[key];
+      if (translation) {
+        return this.transloco.translate(translation.key, translation.params);
       }
     }
-    return VALIDATION_ERROR_MESSAGE;
+    return this.transloco.translate('errors.api.validationError');
   }
 }
