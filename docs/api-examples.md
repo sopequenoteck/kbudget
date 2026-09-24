@@ -1643,7 +1643,8 @@ Response `201` :
       "categoryName": null,
       "duplicateTransactionId": null,
       "suggestRule": false,
-      "skipReason": null
+      "skipReason": null,
+      "categorySource": null
     },
     {
       "id": "uuid",
@@ -1659,7 +1660,8 @@ Response `201` :
       "categoryName": null,
       "duplicateTransactionId": "uuid-transaction-existante",
       "suggestRule": false,
-      "skipReason": "ALREADY_IMPORTED"
+      "skipReason": "ALREADY_IMPORTED",
+      "categorySource": null
     }
   ]
 }
@@ -1680,6 +1682,11 @@ sous-ensemble de `skippedCount`. Une ligne est reconnue :
 Deux lignes identiques d'un meme releve sont deux operations : elles ne sont
 ecartees que si la base en contient autant. Un libelle seulement proche
 (Jaro-Winkler >= 0,85) donne toujours `DUPLICATE`, bloquant.
+
+**Categorie pre-remplie (KKS-383)** : `categorySource` indique d'ou vient la
+categorie — `RULE` (une regle), `HISTORY` (categorie majoritaire des transactions
+passees de l'utilisateur chez le meme commercant, d'abord au meme montant, puis
+tous montants), `USER` (choisie pendant la revue). `null` sans categorie.
 
 Erreur `409` : brouillon actif existant pour ce compte.
 Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
@@ -1714,6 +1721,16 @@ Request :
 }
 ```
 
+Redemander le statut courant d'une ligne est sans effet : `READY` sur une ligne
+deja `READY` n'est plus une erreur (KKS-383).
+
+**Correction de categorie (KKS-383)** : quand `categoryId` change la categorie
+d'une ligne, elle est propagee aux autres lignes du brouillon du meme commercant
+et du meme sens qui n'ont pas de categorie ou seulement celle de l'historique
+(`categorySource` passe a `USER`). Une regle `AUTO` est creee ou mise a jour
+sur la cle commercant : elle s'appliquera aux releves suivants. La reponse ne
+contient que la ligne modifiee — recharger le brouillon pour voir la propagation.
+
 ### Actions groupees `PUT /api/v1/imports/drafts/{draftId}/lines/batch`
 
 Request :
@@ -1746,9 +1763,14 @@ Response `201` :
   "categoryId": "uuid-categorie",
   "categoryName": "Courses",
   "categoryIcon": "shopping-cart",
-  "createdAt": "2026-03-20T14:30:00"
+  "createdAt": "2026-03-20T14:30:00",
+  "origin": "MANUAL"
 }
 ```
+
+`origin` : `MANUAL` pour une regle saisie (le libelle contient le motif), `AUTO`
+pour une regle creee par une correction pendant la revue (motif = cle commercant,
+reconnue par mots entiers). Une correction ne modifie jamais une regle `MANUAL`.
 
 ### Lister les regles `GET /api/v1/imports/rules`
 

@@ -26,6 +26,8 @@ import {
 } from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
 
+const BATCH_ERROR = "L'action groupée a échoué : aucune ligne n'a été modifiée.";
+
 interface SuggestRuleBanner {
   lineId: string;
   cleanLabel: string;
@@ -70,6 +72,8 @@ export class ImportReview {
   readonly confirmSuccess = signal(false);
   readonly deleteConfirm = signal(false);
   readonly suggestRuleBanner = signal<SuggestRuleBanner | null>(null);
+  /** Echec d'une modification de ligne ou d'une action groupee, affiche a l'utilisateur. */
+  readonly actionError = signal<string | null>(null);
 
   readonly selectedLineIds = signal<Set<string>>(new Set());
   readonly batchCategoryId = signal<string>('');
@@ -102,6 +106,21 @@ export class ImportReview {
       this.logger.error('Failed to load draft', err);
       this.error.set(true);
       this.loading.set(false);
+    }
+  }
+
+  /**
+   * Recharge le brouillon sans indicateur de chargement : une correction de
+   * categorie se propage cote API aux lignes du meme commercant (KKS-383),
+   * que la reponse de la ligne modifiee ne contient pas.
+   */
+  private async refreshDraft(): Promise<void> {
+    const d = this.draft();
+    if (!d) return;
+    try {
+      this.draft.set(await firstValueFrom(this.importService.getDraft(d.id)));
+    } catch (err) {
+      this.logger.error('Failed to refresh draft', err);
     }
   }
 
@@ -143,11 +162,19 @@ export class ImportReview {
   }
 
   async onCategoryChange(line: ImportDraftLine, categoryId: string): Promise<void> {
+    this.actionError.set(null);
+    if (!categoryId) {
+      // L'API ne retire pas une categorie : on reaffiche celle de la ligne.
+      await this.refreshDraft();
+      return;
+    }
     try {
+      // Seule une ligne a verifier change de statut en recevant une categorie.
       const updated = await this.updateDraftAfterLineChange(line.id, {
-        categoryId: categoryId || undefined,
-        status: categoryId ? 'READY' : 'NEEDS_REVIEW',
+        categoryId,
+        status: line.status === 'NEEDS_REVIEW' ? 'READY' : undefined,
       });
+      await this.refreshDraft();
       if (updated?.suggestRule && categoryId && updated.cleanLabel) {
         const cat = this.categories().find((c) => c.id === categoryId);
         this.suggestRuleBanner.set({
@@ -159,6 +186,8 @@ export class ImportReview {
       }
     } catch (err) {
       this.logger.error('Failed to update line', err);
+      this.actionError.set("La catégorie n'a pas pu être enregistrée.");
+      await this.refreshDraft();
     }
   }
 
@@ -283,6 +312,7 @@ export class ImportReview {
 
   async onBatchAssignCategory(): Promise<void> {
     const d = this.draft();
+    this.actionError.set(null);
     const catId = this.batchCategoryId();
     if (!d || !catId || this.selectedLineIds().size === 0) return;
     this.batchLoading.set(true);
@@ -290,13 +320,14 @@ export class ImportReview {
       const updated = await firstValueFrom(
         this.importService.batchUpdateLines(d.id, {
           lineIds: Array.from(this.selectedLineIds()),
+          // Categorie seule : un statut ici validerait aussi les doublons selectionnes.
           categoryId: catId,
-          status: 'READY',
         }),
       );
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch assign category', err);
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }
@@ -304,6 +335,7 @@ export class ImportReview {
 
   async onBatchSkip(): Promise<void> {
     const d = this.draft();
+    this.actionError.set(null);
     if (!d || this.selectedLineIds().size === 0) return;
     this.batchLoading.set(true);
     try {
@@ -316,6 +348,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch skip lines', err);
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }
@@ -323,6 +356,7 @@ export class ImportReview {
 
   async onBatchValidate(): Promise<void> {
     const d = this.draft();
+    this.actionError.set(null);
     if (!d || this.selectedLineIds().size === 0) return;
     this.batchLoading.set(true);
     try {
@@ -335,6 +369,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch validate lines', err);
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }

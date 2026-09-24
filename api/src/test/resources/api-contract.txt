@@ -231,6 +231,7 @@ RESPONSE GET /v1/imports/drafts/{draftId} 200 id: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].amount: number
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categoryId: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categoryName: string
+RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categorySource: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].cleanLabel: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].date: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].duplicateTransactionId: string
@@ -284,6 +285,7 @@ RESPONSE GET /v1/imports/rules 200 [].categoryId: string
 RESPONSE GET /v1/imports/rules 200 [].categoryName: string
 RESPONSE GET /v1/imports/rules 200 [].createdAt: string
 RESPONSE GET /v1/imports/rules 200 [].id: string
+RESPONSE GET /v1/imports/rules 200 [].origin: string
 RESPONSE GET /v1/imports/rules 200 [].pattern: string
 RESPONSE GET /v1/subscriptions 200 [].account.bankCustomLogo: string
 RESPONSE GET /v1/subscriptions 200 [].account.bankLogoUrl: string
@@ -739,6 +741,7 @@ RESPONSE POST /v1/imports/rules 200 categoryId: string
 RESPONSE POST /v1/imports/rules 200 categoryName: string
 RESPONSE POST /v1/imports/rules 200 createdAt: string
 RESPONSE POST /v1/imports/rules 200 id: string
+RESPONSE POST /v1/imports/rules 200 origin: string
 RESPONSE POST /v1/imports/rules 200 pattern: string
 RESPONSE POST /v1/imports/upload 200 accountId: string
 RESPONSE POST /v1/imports/upload 200 accountName: string
@@ -751,6 +754,7 @@ RESPONSE POST /v1/imports/upload 200 id: string
 RESPONSE POST /v1/imports/upload 200 lines[].amount: number
 RESPONSE POST /v1/imports/upload 200 lines[].categoryId: string
 RESPONSE POST /v1/imports/upload 200 lines[].categoryName: string
+RESPONSE POST /v1/imports/upload 200 lines[].categorySource: string
 RESPONSE POST /v1/imports/upload 200 lines[].cleanLabel: string
 RESPONSE POST /v1/imports/upload 200 lines[].date: string
 RESPONSE POST /v1/imports/upload 200 lines[].duplicateTransactionId: string
@@ -780,6 +784,7 @@ RESPONSE POST /v1/imports/upload-with-mapping 200 id: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].amount: number
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categoryId: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categoryName: string
+RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categorySource: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].cleanLabel: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].date: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].duplicateTransactionId: string
@@ -973,6 +978,7 @@ RESPONSE PUT /v1/exchange-rates 200 updatedAt: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].amount: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categoryId: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categoryName: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categorySource: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].cleanLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].date: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].duplicateTransactionId: string
@@ -987,6 +993,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].transactionType: st
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 amount: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categoryId: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categoryName: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categorySource: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 cleanLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 date: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 duplicateTransactionId: string
@@ -1003,6 +1010,7 @@ RESPONSE PUT /v1/imports/rules/{ruleId} 200 categoryId: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 categoryName: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 createdAt: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 id: string
+RESPONSE PUT /v1/imports/rules/{ruleId} 200 origin: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 pattern: string
 RESPONSE PUT /v1/notifications/{id}/read 200 createdAt: string
 RESPONSE PUT /v1/notifications/{id}/read 200 entityId: string

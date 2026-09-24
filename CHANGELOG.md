@@ -5,6 +5,25 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.6.0] - 2026-09-24
+
+> **Deux migrations de base (V36, V37) : sauvegarder avant de mettre a jour.**
+> Elles ne font qu'ajouter des colonnes et ne modifient aucune donnee existante.
+> Revenir a l'image 6.5.2 apres coup reste possible : verifie sur une base
+> migree en V37, la 6.5.2 demarre (Flyway ignore les migrations plus recentes,
+> la validation du schema passe) et ses ecritures restent valides, chaque
+> nouvelle colonne etant nullable ou dotee d'une valeur par defaut.
+> Une instance qui suit `latest` avec un outil de mise a jour automatique les
+> appliquerait sans sauvegarde : epingler la version d'abord
+> ([docs/deployment.md](docs/deployment.md#updating)).
+>
+> L'import de releves ne bloque plus sur les lignes deja importees et arrive
+> categorise par l'historique. Les messages d'erreur du serveur passent en
+> anglais : les clients 6.6.0 affichent leur propre libelle a partir du code, un
+> client web encore en cache peut en montrer quelques-uns en anglais jusqu'a son
+> rechargement. `MIN_CLIENT_VERSION` reste a 6.0.0, aucune variable
+> d'environnement nouvelle, aucun champ de reponse retire.
+
 ### Added
 
 - **Tests API et Flutter executables par une pull request de fork (KKS-358)** :
@@ -56,6 +75,39 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Les clients traduisent le code d'erreur, plus le message serveur (KKS-324)** :
+  le champ `message` d'une reponse d'erreur etait ce que l'utilisateur lisait
+  quand une operation echouait. Il devient un champ de diagnostic, en anglais
+  technique comme le demande le principe VI ; seul `error` est contractuel.
+  - Angular : un catalogue centralise couvre les 27 codes emis. Un code inconnu
+    retombe sur un libelle generique — un client ancien face a un serveur recent
+    est un fonctionnement nominal.
+  - Flutter : `auth_notifier` discrimine par code et non plus par statut HTTP, qui
+    confondait jeton expire, jeton revoque et mot de passe incorrect sous
+    « Email ou mot de passe incorrect ».
+  - Les clients ont ete livres avant le serveur : un client 6.5.x ne lisait deja
+    que les codes, sauf le client web, qui affichait le message a sept endroits.
+    Un client web 6.5.x encore en cache montre donc ces messages en anglais
+    jusqu'a son rechargement.
+
+- **Les lignes d'un releve arrivent categorisees par l'historique (KKS-383)** :
+  seules les regles saisies a la main pre-remplissaient la categorie, et aucun
+  compte n'en avait. Sur un releve reel, 104 transactions sur 130 etaient restees
+  sans categorie.
+  - Ordre : regle, puis categorie majoritaire des transactions passees chez le
+    meme commercant **au meme montant** — c'est ce qui distingue plusieurs
+    abonnements factures sous un meme libelle —, puis chez le meme commercant
+    tous montants. Meme sens exige, et seul l'historique de l'utilisateur est lu.
+  - Le commercant est compare par une cle normalisee (`MerchantKey`) : dates,
+    references, montants, mois, pays et prefixes de paiement retires,
+    `APPLE.COM/BILL` et `APPLE` confondus. **Le libelle affiche ne change pas** :
+    la reconnaissance des lignes deja importees (KKS-382) compare le libelle
+    nettoye, qui doit rester stable.
+  - Corriger une categorie pendant la revue la propage aux lignes du meme
+    commercant et cree une regle `AUTO`, reconnue par mots entiers. Une
+    categorie posee par une regle ou par l'utilisateur n'est jamais ecrasee.
+  - Nouveaux champs : `categorySource` sur les lignes, `origin` sur les regles.
+  - Sur le releve reel suivant : 32 lignes nouvelles sur 54 arrivent categorisees.
 - **Reimporter un releve ne bloque plus sur les lignes deja importees
   (KKS-382)** : importer un releve qui chevauche le precedent marquait chaque
   ligne commune `DUPLICATE`, et la confirmation restait bloquee tant qu'elles
@@ -83,6 +135,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   reglage d'approbation des contributeurs externes qu'elles documentent n'est
   pas devenu obsolete avec l'ouverture du depot : il en est devenu la seule
   protection du runner.
+
+### Fixed
+
+- **Revue d'import : une ligne prete ne pouvait pas recevoir de categorie
+  (KKS-383)**. L'ecran envoyait `status: READY` avec chaque categorie, et l'API
+  refusait la transition `READY` -> `READY` : reponse 400, modification annulee,
+  erreur seulement journalisee. Meme cause pour « Assigner » et « Valider » en
+  groupe des que la selection contenait une ligne prete — presque toujours.
+  Seules les lignes a verifier pouvaient donc etre categorisees pendant la revue.
+  - Redemander le statut courant est desormais sans effet cote API.
+  - L'ecran n'envoie plus de statut en categorisant une ligne prete, ni en
+    assignant une categorie en groupe (ce qui validait au passage les doublons
+    selectionnes), recharge le brouillon pour montrer la propagation, et
+    affiche les echecs au lieu de les taire.
 
 ## [6.5.2] - 2026-09-05
 
@@ -850,7 +916,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...HEAD
+[6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0
 [6.5.2]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...v6.5.2
 [6.5.1]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...v6.5.1
 [6.5.0]: https://github.com/sopequenoteck/kbudget/compare/v6.4.0...v6.5.0

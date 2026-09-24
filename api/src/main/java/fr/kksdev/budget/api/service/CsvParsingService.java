@@ -35,7 +35,7 @@ import java.util.UUID;
 public class CsvParsingService {
 
     private final LabelCleaningService labelCleaningService;
-    private final CategoryRuleService categoryRuleService;
+    private final CategorySuggestionService categorySuggestionService;
     private final ImportProfileRepository importProfileRepository;
 
     public List<ImportDraftLine> parse(InputStream inputStream, ImportProfileRegistry.ImportProfileConfig profile, UUID userId) {
@@ -71,8 +71,8 @@ public class CsvParsingService {
             throw new IllegalArgumentException("Unable to read the CSV file: " + e.getMessage());
         }
 
-        // Apply categorization rules to pre-fill categories
-        categoryRuleService.applyRules(lines, userId);
+        // Pre-fill categories: user rules, then the user's own history (KKS-383)
+        categorySuggestionService.suggest(lines, userId);
 
         return lines;
     }
