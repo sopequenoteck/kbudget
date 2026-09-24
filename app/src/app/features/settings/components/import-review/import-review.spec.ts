@@ -156,4 +156,38 @@ describe('ImportReview', () => {
     const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
     expect(alert.textContent).toContain("L'action groupée a échoué");
   });
+
+  it.each([
+    ['assign', (c: ImportReview) => c.onBatchAssignCategory()],
+    ['validate', (c: ImportReview) => c.onBatchValidate()],
+  ])('should_show_error_when_batch_%s_fails', async (_name, action) => {
+    const fixture = await setup([readyLine]);
+    importServiceMock.batchUpdateLines.mockReturnValue(throwError(() => new Error('400')));
+    const component = fixture.componentInstance;
+    component.selectedLineIds.set(new Set(['ready']));
+    component.batchCategoryId.set('cat-1');
+
+    await action(component);
+
+    expect(component.actionError()).toContain("L'action groupée a échoué");
+  });
+
+  it('should_reload_draft_without_request_when_category_is_cleared', async () => {
+    const fixture = await setup([readyLine]);
+    importServiceMock.getDraft.mockClear();
+
+    await fixture.componentInstance.onCategoryChange(readyLine, '');
+
+    expect(importServiceMock.updateLine).not.toHaveBeenCalled();
+    expect(importServiceMock.getDraft).toHaveBeenCalledWith('draft-1');
+  });
+
+  it('should_keep_current_draft_when_reload_fails', async () => {
+    const fixture = await setup([readyLine]);
+    importServiceMock.getDraft.mockReturnValue(throwError(() => new Error('503')));
+
+    await fixture.componentInstance.onCategoryChange(readyLine, '');
+
+    expect(fixture.componentInstance.draft()?.lines).toHaveLength(1);
+  });
 });

@@ -28,6 +28,8 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ImportDraft, ImportDraftLine, ImportLineUpdate } from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
 
+const BATCH_ERROR = "L'action groupée a échoué : aucune ligne n'a été modifiée.";
+
 interface SuggestRuleBanner {
   lineId: string;
   cleanLabel: string;
@@ -326,7 +328,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch assign category', err);
-      this.actionError.set("L'action groupée a échoué : aucune ligne n'a été modifiée.");
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }
@@ -347,7 +349,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch skip lines', err);
-      this.actionError.set("L'action groupée a échoué : aucune ligne n'a été modifiée.");
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }
@@ -368,7 +370,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch validate lines', err);
-      this.actionError.set("L'action groupée a échoué : aucune ligne n'a été modifiée.");
+      this.actionError.set(BATCH_ERROR);
     } finally {
       this.batchLoading.set(false);
     }
