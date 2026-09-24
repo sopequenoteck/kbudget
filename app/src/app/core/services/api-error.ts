@@ -68,7 +68,7 @@ export class ApiErrorService {
       return this.refineValidation(this.extractBody(error)?.details);
     }
 
-    if ((ERROR_CODES as readonly string[]).includes(code)) {
+    if (ERROR_CODES.includes(code)) {
       return this.transloco.translate(errorCodeToKey(code));
     }
 

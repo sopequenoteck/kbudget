@@ -1,11 +1,10 @@
 import {
-  ENVIRONMENT_INITIALIZER,
   EnvironmentProviders,
   Injectable,
   computed,
   effect,
   inject,
-  makeEnvironmentProviders,
+  provideEnvironmentInitializer,
 } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 
@@ -90,20 +89,14 @@ export class LanguageService {
  * qu'au hasard du premier pipe ou composant qui injecte le service, ce qui
  * retarderait la bascule de langue apres connexion.
  *
- * `ENVIRONMENT_INITIALIZER` (et non `provideAppInitializer`) : il s'execute
+ * `provideEnvironmentInitializer` (et non `provideAppInitializer`) : il s'execute
  * de facon synchrone a la creation de l'injecteur d'environnement, y compris
  * sous `TestBed`, ou les `APP_INITIALIZER` ne tournent jamais faute de
  * `ApplicationRef.bootstrap` — meme raison que `provideTranslocoTesting`
  * (`src/testing/transloco-testing.ts`).
  */
 export function provideLanguageBootstrap(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    {
-      provide: ENVIRONMENT_INITIALIZER,
-      multi: true,
-      useValue: () => {
-        inject(LanguageService);
-      },
-    },
-  ]);
+  return provideEnvironmentInitializer(() => {
+    inject(LanguageService);
+  });
 }

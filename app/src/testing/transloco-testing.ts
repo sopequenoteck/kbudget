@@ -1,9 +1,9 @@
 import {
-  ENVIRONMENT_INITIALIZER,
   EnvironmentProviders,
   Injectable,
   Provider,
   inject,
+  provideEnvironmentInitializer,
 } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import {
@@ -39,7 +39,7 @@ class StaticCatalogueLoader implements TranslocoLoader {
  * Le chargeur est synchrone (`of(...)`) : contrairement au chargeur HTTP de
  * production, il ne fait la aucune hypothese sur l'ordre d'execution d'un
  * `APP_INITIALIZER`, qui n'est pas garanti sous `TestBed`. Le chargement de
- * la langue active est declenche par un `ENVIRONMENT_INITIALIZER`, execute
+ * la langue active est declenche par `provideEnvironmentInitializer`, execute
  * de facon synchrone a la creation de l'injecteur — y compris sous
  * `TestBed` — de sorte qu'un `TestBed.inject(TranslocoService).translate(...)`
  * resout une cle reelle des la premiere ligne d'un spec.
@@ -58,13 +58,9 @@ export function provideTranslocoTesting(): (Provider | EnvironmentProviders)[] {
       loader: StaticCatalogueLoader,
     }),
     provideTranslocoMessageformat(),
-    {
-      provide: ENVIRONMENT_INITIALIZER,
-      multi: true,
-      useValue: () => {
-        const transloco = inject(TranslocoService);
-        transloco.load(transloco.getDefaultLang()).subscribe();
-      },
-    },
+    provideEnvironmentInitializer(() => {
+      const transloco = inject(TranslocoService);
+      transloco.load(transloco.getDefaultLang()).subscribe();
+    }),
   ];
 }

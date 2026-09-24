@@ -24,6 +24,11 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
 
+const FREQUENCY_SUFFIXES: Partial<Record<Frequency, string>> = {
+  [Frequency.ANNUEL]: '/an',
+  [Frequency.HEBDOMADAIRE]: '/sem',
+};
+
 @Component({
   selector: 'app-subscription-detail',
   standalone: true,
@@ -170,8 +175,7 @@ export class SubscriptionDetail {
     const sub = this.subscription();
     if (!sub) return;
 
-    const freq =
-      sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
+    const freq = FREQUENCY_SUFFIXES[sub.frequence] ?? '/mois';
     const amount = sub.montant.toLocaleString(this.languageService.displayLocale(), {
       style: 'currency',
       currency: sub.currency,

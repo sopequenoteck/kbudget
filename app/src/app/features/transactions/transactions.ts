@@ -39,6 +39,11 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
 
+const TYPE_FILTER_LABELS: Partial<Record<TransactionType, string>> = {
+  [TransactionType.DEPENSE]: 'dépense',
+  [TransactionType.RECETTE]: 'recette',
+};
+
 @Component({
   selector: 'app-transactions',
   standalone: true,
@@ -261,12 +266,7 @@ export class Transactions implements AfterViewInit {
     }
     if (this.hasActiveFilters()) {
       const type = this.typeFilter();
-      const label =
-        type === TransactionType.DEPENSE
-          ? 'dépense'
-          : type === TransactionType.RECETTE
-            ? 'recette'
-            : 'transaction';
+      const label = (type && TYPE_FILTER_LABELS[type]) ?? 'transaction';
       return {
         icon: 'phosphorFunnel',
         message: `Aucune ${label} en ${this.selectedMonthLabel()}`,
