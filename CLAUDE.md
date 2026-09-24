@@ -148,6 +148,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |
 | [`docs/api-errors.md`](docs/api-errors.md) | Contrat erreurs HTTP |
 | [`docs/api-compatibility.md`](docs/api-compatibility.md) | **Politique de compatibilite d'API** (KKS-315) — les six regles d'ecriture et la procedure de rupture assumee. A consulter avant toute modification de DTO, de migration Flyway ou de parsing client |
+| [`docs/i18n.md`](docs/i18n.md) | **Convention i18n et glossaire EN/FR** (KKS-328) — structure des cles `domaine.contexte.element`, listes fermees des domaines et contextes, passage Transloco → ARB, ICU, glossaire. A consulter avant toute cle ou traduction |
 | [`docs/deployment.md`](docs/deployment.md) | Deploiement Docker/bare-metal |
 | [`DESIGN.md`](DESIGN.md) | Reference design : principes, couleurs, patterns, tokens |
 | [`DESIGN-REFONTE.md`](DESIGN-REFONTE.md) | Changelog design : 20 sessions de decisions et justifications |
