@@ -157,7 +157,8 @@ class ImportReimportIT {
 
         assertThat(draft.alreadyImportedCount()).isZero();
         assertThat(draft.duplicateCount()).isEqualTo(1);
-        assertThatThrownBy(() -> importService.confirm(draft.id(), userId))
+        UUID draftId = draft.id();
+        assertThatThrownBy(() -> importService.confirm(draftId, userId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
