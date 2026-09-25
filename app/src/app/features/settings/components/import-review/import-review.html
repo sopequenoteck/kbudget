@@ -199,7 +199,9 @@
               >
                 <option value="">-- Aucune catégorie --</option>
                 @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+                  <option [value]="cat.id" [selected]="cat.id === line.categoryId">
+                    {{ cat.icone }} {{ cat.nom }}
+                  </option>
                 }
               </select>
               @if (line.status === 'NEEDS_REVIEW') {

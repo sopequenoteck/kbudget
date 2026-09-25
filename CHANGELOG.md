@@ -42,6 +42,23 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   modifie. Or toutes les analyses ecrasent le meme projet : une PR d'arbre
   identique a une autre etait notee sur l'historique de celle-ci.
 
+## [6.6.1] - 2026-09-25
+
+> **Aucune migration de base.** Un correctif d'affichage dans l'ecran de revue
+> d'import, rien d'autre.
+
+### Fixed
+
+- **Revue d'import : les categories proposees ne s'affichaient pas (KKS-388)** :
+  l'ecran chargeait le brouillon et la liste des categories en parallele. Quand
+  le brouillon arrivait le premier, chaque menu recevait une categorie absente
+  de ses options, se calait sur « Aucune categorie » et n'y revenait plus. Seul
+  l'affichage etait faux, la ligne gardait sa categorie cote serveur : une
+  confirmation enregistrait donc des categories que l'utilisateur n'avait pas
+  vues. Le defaut precede KKS-383, mais restait invisible tant que presque
+  aucune ligne n'arrivait categorisee. Chaque option se marque desormais
+  elle-meme comme selectionnee, quel que soit l'ordre d'arrivee des donnees.
+
 ## [6.6.0] - 2026-09-24
 
 > **Deux migrations de base (V36, V37) : sauvegarder avant de mettre a jour.**
@@ -953,7 +970,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...HEAD
+[6.6.1]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...v6.6.1
 [6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0
 [6.5.2]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...v6.5.2
 [6.5.1]: https://github.com/sopequenoteck/kbudget/compare/v6.5.0...v6.5.1
