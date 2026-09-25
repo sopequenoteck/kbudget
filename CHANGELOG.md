@@ -47,6 +47,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   textes changent : « 0 revenus » devient « 0 recettes » (le vocabulaire de
   l'application est Recette), et le bilan des recurrences affiche « 1 charge »
   au lieu de « 1 charges ».
+- **Dettes et abonnements dans les catalogues (KKS-378)** : etape 6 sur 8 de
+  KKS-325. Ecrans, detail, formulaires et dialogues de remboursement et de
+  report passent dans les catalogues. Emprunt et Pret se traduisent *Borrowed*
+  et *Lent*. Seuls les pluriels changent a l'ecran : « 1 pret », « 1 emprunt »,
+  « 1 paiement », « 1 abonnement ».
 
 ### Changed
 
