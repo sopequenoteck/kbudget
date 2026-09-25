@@ -187,6 +187,15 @@ Le reste du processus :
    et la publication des images. Un tag `vX.Y.Z` implique donc qu'une image
    `:X.Y.Z` existe
 
+## Zones sensibles (mode auto)
+
+Regles lues par Claude et par le classifier du mode auto. Elles etaient auparavant dans `~/.claude/settings.json`.
+
+- **Profil prod par defaut** : le profil Spring `prod` est actif sans option. Traiter `cd api && mvn clean install` visant `main` comme adjacent a un deploiement de production.
+- **Fichiers proteges** : `deploy/Caddyfile` et `deploy/nginx.conf` (proxy d'entree, frontiere de confiance `TRUSTED_PROXIES` et rate limiting), `app/src/environments/environment.prod.ts`, `.env`. Ne pas les modifier sans demande explicite.
+- **Donnees utilisateurs** : donnees financieres personnelles, multi-utilisateurs. Ne jamais croiser les frontieres entre utilisateurs ni exposer les donnees d'un utilisateur a un autre.
+- **Secrets CI** : `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `SONAR_TOKEN` sont des noms de secrets GitHub. Ne jamais en ecrire ni en rechercher les valeurs.
+
 ## Recent Changes
 
 > Historique complet : `git log --oneline`. Seules les 5 dernieres features sont listees ici.
