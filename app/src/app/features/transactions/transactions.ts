@@ -53,6 +53,11 @@ const DATE_GROUP_LABEL_KEYS: Record<DateGroupKey, string> = {
   older: 'transactions.list.older',
 };
 
+const FILTERED_EMPTY_MESSAGE_KEYS: Partial<Record<TransactionType, string>> = {
+  [TransactionType.DEPENSE]: 'transactions.empty.noExpenseInMonth',
+  [TransactionType.RECETTE]: 'transactions.empty.noIncomeInMonth',
+};
+
 interface EmptyStateConfig {
   readonly icon: string;
   readonly messageKey: string;
@@ -277,9 +282,7 @@ export class Transactions implements AfterViewInit {
     }
     if (this.hasActiveFilters()) {
       const type = this.typeFilter();
-      const messageKey = type === TransactionType.DEPENSE ? 'transactions.empty.noExpenseInMonth'
-        : type === TransactionType.RECETTE ? 'transactions.empty.noIncomeInMonth'
-        : 'transactions.empty.noneInMonth';
+      const messageKey = (type && FILTERED_EMPTY_MESSAGE_KEYS[type]) ?? 'transactions.empty.noneInMonth';
       return {
         icon: 'phosphorFunnel',
         messageKey,
