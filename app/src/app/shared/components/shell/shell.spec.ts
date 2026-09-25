@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { signal, computed } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { Shell } from './shell';
 import { AuthService } from '../../../core/services/auth';
@@ -80,6 +82,10 @@ describe('Shell', () => {
         ...provideTranslocoTesting(),
         provideRouter([]),
         provideNoopAnimations(),
+        // Les enfants du shell (formulaires, FAB) injectent des services HTTP
+        // reels : sans backend de test, jsdom emet de vraies requetes (CI).
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AuthService, useValue: authServiceMock },
         { provide: AvatarService, useValue: avatarServiceMock },
         { provide: PreferenceService, useValue: preferenceServiceMock },
