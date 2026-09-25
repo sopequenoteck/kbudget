@@ -12,6 +12,7 @@ import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { TransactionService } from '../../core/services/transaction';
 import { AccountService } from '../../core/services/account';
@@ -38,10 +39,24 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
+type GreetingPeriod = 'morning' | 'afternoon' | 'evening';
+
+const GREETING_KEYS: Record<GreetingPeriod, string> = {
+  morning: 'dashboard.summary.greetingMorning',
+  afternoon: 'dashboard.summary.greetingAfternoon',
+  evening: 'dashboard.summary.greetingEvening',
+};
+
+function getGreetingPeriod(hour: number): GreetingPeriod {
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
+  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState, TranslocoPipe],
   providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -298,23 +313,31 @@ export class Dashboard {
     return (this.budgetOverview()?.items ?? []).filter(b => b.percentage > 100).length;
   });
 
-  readonly greeting = computed(() => {
-    const hour = new Date().getHours();
+  readonly greetingSalutation = computed<{ key: string; params: Record<string, unknown> }>(() => {
+    const period = getGreetingPeriod(new Date().getHours());
     const name = this.userName()?.name;
-    const salut = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
-    const prefix = name ? `${salut} ${name}` : salut;
+    return { key: GREETING_KEYS[period], params: { hasName: name ? 'yes' : 'no', name: name ?? '' } };
+  });
 
+  readonly greetingStatus = computed<{ key: string; params?: Record<string, unknown> }>(() => {
     const overdue = this.overdueCount();
-    if (overdue > 0) return `${prefix} · ${overdue} charge${overdue > 1 ? 's' : ''} en retard`;
+    if (overdue > 0) {
+      return { key: 'recurring.summary.overdueCount', params: { count: overdue } };
+    }
 
     const exceeded = this.exceededBudgetCount();
-    if (exceeded > 0) return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
+    if (exceeded > 0) {
+      return { key: 'budgets.summary.exceededCount', params: { count: exceeded } };
+    }
 
-    const net = this.netDuMois();
     const hasTransactions = (this.currentSummary()?.totalRecettes ?? 0) > 0 || (this.currentSummary()?.totalDepenses ?? 0) > 0;
-    if (hasTransactions) return `${prefix} · Mois ${net >= 0 ? 'positif' : 'négatif'}`;
+    if (hasTransactions) {
+      return this.netDuMois() >= 0
+        ? { key: 'dashboard.summary.monthPositive' }
+        : { key: 'dashboard.summary.monthNegative' };
+    }
 
-    return `${prefix} · Mois calme`;
+    return { key: 'dashboard.summary.monthQuiet' };
   });
 
   constructor() {

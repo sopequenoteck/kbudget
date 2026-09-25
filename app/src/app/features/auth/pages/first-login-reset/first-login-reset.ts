@@ -8,17 +8,23 @@ import {
   phosphorLock,
   phosphorUser,
 } from '@ng-icons/phosphor-icons/regular';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MAX_LENGTH_MESSAGE,
-  PASSWORD_MIN_LENGTH_MESSAGE,
-  PASSWORD_PLACEHOLDER,
 } from '../../../../core/constants/password.constants';
 import { AuthService } from '../../../../core/services/auth';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
+
+const EMAIL_MAX_LENGTH = 255;
+const DISPLAY_NAME_MAX_LENGTH = 100;
+
+interface TranslationRef {
+  key: string;
+  params?: Record<string, unknown>;
+}
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const form = control.parent;
@@ -30,7 +36,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-first-login-reset',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField, AuthShell],
+  imports: [ReactiveFormsModule, FormField, AuthShell, TranslocoPipe],
   viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser })],
   templateUrl: './first-login-reset.html',
   styleUrl: './first-login-reset.scss',
@@ -44,16 +50,35 @@ export class FirstLoginResetComponent {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
-  readonly passwordMaxLengthMessage = PASSWORD_MAX_LENGTH_MESSAGE;
-  readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
+  readonly passwordMinLength = PASSWORD_MIN_LENGTH;
+  readonly passwordMaxLength = PASSWORD_MAX_LENGTH;
 
   readonly form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(EMAIL_MAX_LENGTH)]],
     password: ['', [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)]],
     passwordConfirm: ['', [Validators.required, passwordMatchValidator]],
-    displayName: ['', [Validators.required, Validators.maxLength(100)]],
+    displayName: ['', [Validators.required, Validators.maxLength(DISPLAY_NAME_MAX_LENGTH)]],
   });
+
+  getEmailErrorInfo(): TranslationRef {
+    if (this.form.controls.email.hasError('required')) {
+      return { key: 'auth.form.emailRequired' };
+    }
+    if (this.form.controls.email.hasError('maxlength')) {
+      return { key: 'common.validation.maxLength', params: { max: EMAIL_MAX_LENGTH } };
+    }
+    return { key: 'auth.form.emailInvalid' };
+  }
+
+  getPasswordErrorInfo(): TranslationRef {
+    if (this.form.controls.password.hasError('required')) {
+      return { key: 'auth.form.passwordRequired' };
+    }
+    if (this.form.controls.password.hasError('minlength')) {
+      return { key: 'auth.form.passwordMinLength', params: { min: this.passwordMinLength } };
+    }
+    return { key: 'common.validation.maxLength', params: { max: this.passwordMaxLength } };
+  }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {

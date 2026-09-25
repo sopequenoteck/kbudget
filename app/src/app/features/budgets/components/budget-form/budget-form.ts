@@ -12,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorChartPie,
@@ -43,7 +44,7 @@ type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | n
 @Component({
   selector: 'app-budget-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIcon],
+  imports: [ReactiveFormsModule, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorChartPie,
@@ -69,6 +70,7 @@ export class BudgetForm {
   private readonly confirmService = inject(ConfirmService);
   private readonly apiError = inject(ApiErrorService);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly budget = computed(() => this.modalService.editingEntity() as Budget | null);
   readonly saved = output<void>();
@@ -132,9 +134,9 @@ export class BudgetForm {
 
   readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
 
-  readonly frequencyLabel = computed(() => {
+  readonly frequencyLabelKey = computed(() => {
     const val = this.form.get('frequence')?.value ?? 'MENSUEL';
-    return this.frequencies.find((f) => f.value === val)?.label ?? val;
+    return this.frequencies.find((f) => f.value === val)?.labelKey ?? 'budgets.value.monthly';
   });
 
   readonly currencySymbol = computed(() => getCurrencySymbol(this.form.get('currency')?.value || 'EUR', this.languageService.displayLocale()));
@@ -179,7 +181,7 @@ export class BudgetForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('budgets.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -203,13 +205,7 @@ export class BudgetForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(
-        err instanceof HttpErrorResponse
-          ? this.apiError.label(err, 'Erreur serveur')
-          : err instanceof Error
-            ? err.message
-            : 'Erreur lors de la sauvegarde',
-      );
+      this.errorMessage.set(this.resolveErrorMessage(err, 'common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -219,11 +215,9 @@ export class BudgetForm {
     const b = this.budget();
     if (!b) return;
     const amount = formatCurrencyAmount(b.montant, b.currency, this.languageService.displayLocale());
-    const ok = await this.confirmService.confirm({
+    const ok = await this.confirmService.confirmDelete({
       title: `${b.category.nom} — ${amount}`,
-      message: 'Voulez-vous vraiment supprimer ce budget ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
+      message: this.transloco.translate('budgets.dialog.deleteMessage'),
       icon: 'phosphorChartPie',
     });
     if (!ok) return;
@@ -231,14 +225,20 @@ export class BudgetForm {
       await firstValueFrom(this.budgetService.delete(b.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(
-        err instanceof HttpErrorResponse
-          ? this.apiError.label(err, 'Erreur serveur')
-          : err instanceof Error
-            ? err.message
-            : 'Erreur lors de la suppression',
-      );
+      this.errorMessage.set(this.resolveErrorMessage(err, 'common.feedback.deleteError'));
     }
+  }
+
+  /** Deduit le libelle d'erreur affiche : code API traduit, message natif de
+   * l'erreur, ou repli du site appelant — sans ternaire imbrique (KKS-379). */
+  private resolveErrorMessage(err: unknown, fallbackKey: string): string {
+    if (err instanceof HttpErrorResponse) {
+      return this.apiError.label(err, this.transloco.translate('errors.client.serverError'));
+    }
+    if (err instanceof Error) {
+      return err.message;
+    }
+    return this.transloco.translate(fallbackKey);
   }
 
   onCancel(): void {

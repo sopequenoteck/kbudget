@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
@@ -45,16 +46,25 @@ import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 
+/**
+ * `labelKey` traduit un groupe "aujourd'hui"/"hier" ; `label` porte une date
+ * deja formatee dans la locale d'affichage (jamais les deux a la fois),
+ * pour que le template n'ait qu'a choisir entre traduire et afficher tel
+ * quel (KKS-379).
+ */
 interface TransactionGroup {
-  label: string;
+  key: string;
+  labelKey: string | null;
+  label: string | null;
   transactions: Transaction[];
 }
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -85,6 +95,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly Math = Math;
   readonly budgetAmount = budgetAmount;
@@ -157,8 +168,8 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
     const groups = new Map<string, TransactionGroup>();
 
-    const add = (key: string, label: string, tx: Transaction) => {
-      if (!groups.has(key)) groups.set(key, { label, transactions: [] });
+    const add = (key: string, labelKey: string | null, label: string | null, tx: Transaction) => {
+      if (!groups.has(key)) groups.set(key, { key, labelKey, label, transactions: [] });
       groups.get(key)!.transactions.push(tx);
     };
 
@@ -167,15 +178,15 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
       txDate.setHours(0, 0, 0, 0);
 
       if (txDate.getTime() === today.getTime()) {
-        add('today', "Aujourd'hui", tx);
+        add('today', 'common.value.today', null, tx);
       } else if (txDate.getTime() === yesterday.getTime()) {
-        add('yesterday', 'Hier', tx);
+        add('yesterday', 'common.value.yesterday', null, tx);
       } else {
         const label = new Intl.DateTimeFormat(this.languageService.displayLocale(), {
           day: 'numeric',
           month: 'long',
         }).format(txDate);
-        add(tx.date, label, tx);
+        add(tx.date, null, label, tx);
       }
     }
 
@@ -320,8 +331,14 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const budgetId = this.overviewBudgetId();
     const item = this.budgetItem();
     if (!budgetId) return;
-    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(this.languageService.displayLocale(), { style: 'currency', currency: item.currency })}` : 'Ce budget';
-    const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
+    const title = item
+      ? `${item.categoryNom} — ${formatCurrencyAmount(budgetAmount(item), item.currency, this.languageService.displayLocale())}`
+      : this.transloco.translate('budgets.action.create');
+    const ok = await this.confirmService.confirmDelete({
+      title,
+      message: this.transloco.translate('budgets.dialog.deleteMessage'),
+      icon: 'phosphorChartPie',
+    });
     if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(budgetId));

@@ -15,11 +15,11 @@ import {
   phosphorEyeSlash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_LENGTH_MESSAGE,
 } from '../../../core/constants/password.constants';
 import { UserService } from '../../../core/services/user';
 import { AuthResponse } from '../../../core/models/auth.model';
@@ -34,7 +34,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-change-password-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon],
+  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorX,
@@ -60,7 +60,7 @@ export class ChangePasswordDialogComponent {
 
   private resolveCallback: ((result: AuthResponse | null) => void) | null = null;
 
-  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
+  readonly passwordMinLength = PASSWORD_MIN_LENGTH;
 
   readonly form = this.fb.nonNullable.group({
     currentPassword: ['', Validators.required],

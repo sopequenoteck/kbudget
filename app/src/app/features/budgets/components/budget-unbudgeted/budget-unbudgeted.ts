@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorArrowLeft, phosphorCheckCircle, phosphorPlus, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
@@ -45,7 +46,7 @@ interface CategoryGroup {
 @Component({
   selector: 'app-budget-unbudgeted',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,

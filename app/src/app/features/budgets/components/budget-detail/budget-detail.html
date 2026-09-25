@@ -9,7 +9,7 @@
         [style.background-color]="item.categoryCouleur ? item.categoryCouleur + '26' : null"
       >{{ item.categoryIcone }}</span>
     }
-    {{ budgetItem()?.categoryNom ?? 'Budget' }}
+    {{ budgetItem()?.categoryNom ?? ('budgets.action.create' | transloco) }}
   </h1>
 </div>
 
@@ -37,11 +37,11 @@
 } @else if (!budgetItem()) {
   <app-empty-state
     icon="phosphorMagnifyingGlass"
-    message="Budget introuvable"
+    [message]="'budgets.empty.notFound' | transloco"
   />
 } @else {
   <div class="hero">
-    <span class="hero__label">DÉPENSÉ</span>
+    <span class="hero__label">{{ 'budgets.summary.spent' | transloco }}</span>
     <span class="hero__value" [class.over-budget]="budgetItem()!.percentage > 100">
       {{ budgetItem()!.montantDepense | amount: null : currency() }}
     </span>
@@ -54,31 +54,36 @@
         <span>{{ budgetAmount(budgetItem()!) | amount: null : currency() }}</span>
         <span class="hero__meta-dot">&middot;</span>
         <ng-icon [name]="remaining() >= 0 ? 'phosphorChartPie' : 'phosphorWarning'" size="14" />
-        <span>{{ remaining() >= 0 ? 'reste' : 'dépassement' }} {{ Math.abs(remaining()) | amount: null : currency() }}</span>
+        <span>
+          {{
+            (remaining() >= 0 ? 'budgets.detail.remaining' : 'budgets.detail.overBudget')
+              | transloco: { amount: (Math.abs(remaining()) | amount: null : currency()) }
+          }}
+        </span>
       </div>
     </div>
   </div>
 
   @if (isCurrentMonth() && overviewBudgetId()) {
     <div class="actions">
-      <button class="action-pill action-pill--danger" (click)="onDelete()" aria-label="Supprimer">
+      <button class="action-pill action-pill--danger" (click)="onDelete()" [attr.aria-label]="'common.action.delete' | transloco">
         <ng-icon name="phosphorTrash" size="16" />
       </button>
       <div class="actions__spacer"></div>
       <button class="action-pill" (click)="onToggleActive()">
         <ng-icon [name]="isActive() ? 'phosphorPause' : 'phosphorPlay'" size="16" />
-        <span>{{ isActive() ? 'Désactiver' : 'Activer' }}</span>
+        <span>{{ (isActive() ? 'budgets.action.deactivate' : 'budgets.action.activate') | transloco }}</span>
       </button>
       <button class="action-pill" (click)="onEdit()">
         <ng-icon name="phosphorPencilSimple" size="16" />
-        <span>Modifier</span>
+        <span>{{ 'common.action.edit' | transloco }}</span>
       </button>
     </div>
   }
 
   <div class="sticky-sentinel" #stickySentinel></div>
   <div class="section-header" [class.stuck]="isStuck()">
-    <h2 class="section-header__title">Transactions</h2>
+    <h2 class="section-header__title">{{ 'transactions.page.title' | transloco }}</h2>
     <span class="section-header__count">{{ categoryTransactions().length }}</span>
   </div>
 
@@ -114,11 +119,11 @@
   } @else if (categoryTransactions().length === 0) {
     <app-empty-state
       icon="phosphorReceipt"
-      message="Aucune transaction ce mois"
+      [message]="'budgets.empty.noTransactions' | transloco"
     />
   } @else {
-    @for (group of groupedTransactions(); track group.label) {
-      <div class="date-label">{{ group.label }}</div>
+    @for (group of groupedTransactions(); track group.key) {
+      <div class="date-label">{{ group.labelKey ? (group.labelKey | transloco) : group.label }}</div>
       <div class="transaction-group">
         @for (tx of group.transactions; track tx.id) {
           <div class="transaction-row">

@@ -1,6 +1,7 @@
 {
   "accounts": {
     "action": {
+      "createFirst": "Créer mon premier compte",
       "later": "Plus tard"
     },
     "dialog": {
@@ -8,10 +9,12 @@
       "editTitle": "Modifier le compte"
     },
     "empty": {
-      "bankNotFound": "Aucune banque trouvée"
+      "bankNotFound": "Aucune banque trouvée",
+      "title": "Aucun compte"
     },
     "feedback": {
-      "banksLoadError": "Impossible de charger les banques"
+      "banksLoadError": "Impossible de charger les banques",
+      "loadError": "Erreur de chargement des comptes"
     },
     "filter": {
       "bankSearchPlaceholder": "Rechercher une banque..."
@@ -46,6 +49,9 @@
       "bankGroupInternational": "International",
       "bankGroupWestAfrica": "Afrique de l'Ouest"
     },
+    "summary": {
+      "netWorth": "Patrimoine total"
+    },
     "value": {
       "cash": "Espèces",
       "current": "Courant",
@@ -55,17 +61,113 @@
     }
   },
   "auth": {
+    "action": {
+      "confirmCredentials": "Valider mes identifiants",
+      "createAccount": "Créer mon compte",
+      "signIn": "Se connecter"
+    },
     "feedback": {
-      "invalidCredentials": "Email ou mot de passe incorrect"
+      "checkingLink": "Vérification du lien...",
+      "creatingAccount": "Création du compte...",
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "invalidCredentials": "Email ou mot de passe incorrect",
+      "invalidFormData": "Données invalides. Vérifiez le formulaire.",
+      "invalidLink": "Lien invalide, expiré, déjà utilisé ou révoqué.",
+      "invalidLinkHint": "Demandez à un administrateur de vous envoyer un nouveau lien.",
+      "signingIn": "Connexion..."
     },
     "form": {
-      "passwordMinLength": "{min} caractères minimum"
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répétez votre mot de passe",
+      "currency": "Devise",
+      "displayName": "Nom d'affichage",
+      "displayNamePlaceholder": "Votre prénom ou pseudo",
+      "displayNameRequired": "Nom requis (100 caractères max)",
+      "email": "Email",
+      "emailAddress": "Adresse email",
+      "emailInvalid": "Email invalide",
+      "emailPlaceholder": "votre@email.com",
+      "emailRequired": "Email requis",
+      "finalEmail": "Email définitif",
+      "loginPasswordPlaceholder": "Votre mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "password": "Mot de passe",
+      "passwordMinLength": "{min} caractères minimum",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordPlaceholder": "Au moins {min} caractères",
+      "passwordRequired": "Mot de passe requis",
+      "timezone": "Fuseau horaire"
+    },
+    "page": {
+      "acceptInviteTagline": "Quelques informations pour finaliser l'inscription",
+      "acceptInviteTitle": "Créer votre compte",
+      "firstLoginNotice": "Vous êtes connecté avec les identifiants initiaux générés par le système. Définissez dès maintenant votre email définitif, un mot de passe personnel et votre nom d'affichage pour accéder à l'application.",
+      "firstLoginTagline": "Configurez vos identifiants",
+      "firstLoginTitle": "Premier accès",
+      "identitySectionTitle": "Votre identité",
+      "loginTagline": "Connectez-vous à votre compte",
+      "preferencesSectionTitle": "Préférences"
     }
   },
   "budgets": {
+    "action": {
+      "activate": "Activer",
+      "add": "Créer un budget",
+      "addAria": "Créer un budget",
+      "create": "Budget",
+      "deactivate": "Désactiver"
+    },
+    "detail": {
+      "overBudget": "dépassement {amount}",
+      "remaining": "reste {amount}"
+    },
     "dialog": {
       "createTitle": "Nouveau budget",
+      "deleteMessage": "Voulez-vous vraiment supprimer ce budget ?",
       "editTitle": "Modifier le budget"
+    },
+    "empty": {
+      "allCategoriesBudgeted": "Toutes les catégories ont déjà un budget.",
+      "noTransactions": "Aucune transaction ce mois",
+      "noUnbudgeted": "Toutes vos catégories ont un budget",
+      "notFound": "Budget introuvable",
+      "title": "Aucun budget pour cette période"
+    },
+    "feedback": {
+      "amountInvalid": "Montant invalide"
+    },
+    "form": {
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "categoryPlaceholder": "Choisir une catégorie",
+      "currencyAria": "Devise",
+      "frequencyAria": "Fréquence",
+      "thresholdAria": "Seuil d'alerte",
+      "thresholdPlaceholder": "Seuil d'alerte (%)"
+    },
+    "list": {
+      "activeCount": "{count, plural, one {# actif} other {# actifs}}",
+      "inactive": "Inactifs",
+      "transactionCount": "{count, plural, one {# transaction} other {# transactions}}"
+    },
+    "page": {
+      "byCategoryTitle": "Par catégorie",
+      "title": "Budgets",
+      "unbudgetedTitle": "Non budgété"
+    },
+    "summary": {
+      "activeCount": "{count, plural, one {# budget} other {# budgets}}",
+      "exceededCount": "{count, plural, one {# budget dépassé} other {# budgets dépassés}}",
+      "monthlyInCurrency": "Mensuel · en {currency}",
+      "overBudgetCount": "{count, plural, one {# en dépassement} other {# en dépassement}}",
+      "spent": "Dépensé",
+      "unbudgeted": "{amount} non budgété",
+      "unbudgetedCategoryCount": "{count, plural, one {# catégorie sans budget} other {# catégories sans budget}}"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
     }
   },
   "categories": {
@@ -111,7 +213,8 @@
       "reset": "Réinitialiser",
       "resetFilters": "Réinitialiser les filtres",
       "retry": "Réessayer",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "viewAll": "Voir tout"
     },
     "empty": {
       "noItems": "Aucun element disponible",
@@ -159,6 +262,34 @@
       "tomorrow": "Demain",
       "weeksAgo": "{count, plural, one {il y a # semaine} other {il y a # semaines}}",
       "yesterday": "Hier"
+    }
+  },
+  "compatibility": {
+    "page": {
+      "clientTitle": "Application à mettre à jour",
+      "clientTooOldCurrentVersionMessage": " Vous utilisez la version <strong>{currentVersion}</strong>.",
+      "clientTooOldHint": "Mettez l'application à jour depuis votre navigateur ou votre magasin d'applications, puis reconnectez-vous.",
+      "clientTooOldMessage": "Votre serveur exige au minimum la version <strong>{requiredVersion}</strong> de l'application.",
+      "requiredVersionMessage": " Cette application requiert au minimum la version <strong>{requiredVersion}</strong>.",
+      "serverTitle": "Serveur à mettre à jour",
+      "serverTooOldHint": "Mettez votre instance à jour, puis rechargez cette page. La procédure est décrite dans le guide de déploiement du projet.",
+      "serverVersionMessage": "Votre serveur est en version <strong>{currentVersion}</strong>.",
+      "serverVersionUnknownMessage": "Votre serveur est trop ancien pour indiquer sa version.",
+      "tagline": "Cette version de l'application et votre serveur ne peuvent pas fonctionner ensemble."
+    }
+  },
+  "dashboard": {
+    "page": {
+      "recentTransactionsTitle": "Dernières opérations"
+    },
+    "summary": {
+      "greetingAfternoon": "{hasName, select, yes {Bon après-midi {name}} other {Bon après-midi}}",
+      "greetingEvening": "{hasName, select, yes {Bonsoir {name}} other {Bonsoir}}",
+      "greetingMorning": "{hasName, select, yes {Bonjour {name}} other {Bonjour}}",
+      "monthNegative": "Mois négatif",
+      "monthPositive": "Mois positif",
+      "monthQuiet": "Mois calme",
+      "monthVariation": "{amount} ce mois"
     }
   },
   "debts": {
@@ -283,6 +414,7 @@
   },
   "exchangeRates": {
     "feedback": {
+      "conversionIncompleteHint": "Certains montants n'ont pas pu être convertis",
       "loadError": "Impossible de charger les taux de change"
     }
   },
@@ -340,6 +472,7 @@
     "summary": {
       "expenseCount": "{count, plural, one {# charge} other {# charges}}",
       "monthlyExpenses": "~{amount} /mois",
+      "overdueCount": "{count, plural, one {# charge en retard} other {# charges en retard}}",
       "title": "Bilan mensuel"
     },
     "value": {
@@ -444,7 +577,8 @@
       "noIncomeInMonth": "Aucune recette en {month}",
       "noResults": "Aucune transaction trouvée",
       "noneInMonth": "Aucune transaction en {month}",
-      "notEnoughAccounts": "Vous devez avoir au moins 2 comptes actifs pour effectuer un virement."
+      "notEnoughAccounts": "Vous devez avoir au moins 2 comptes actifs pour effectuer un virement.",
+      "title": "Aucune transaction"
     },
     "feedback": {
       "amountInvalid": "Montant invalide",

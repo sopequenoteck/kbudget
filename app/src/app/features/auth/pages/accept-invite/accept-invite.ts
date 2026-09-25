@@ -10,6 +10,7 @@ import {
   phosphorCoin,
   phosphorGlobe,
 } from '@ng-icons/phosphor-icons/regular';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
@@ -19,14 +20,12 @@ import { AuthShell } from '../../components/auth-shell/auth-shell';
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_LENGTH_MESSAGE,
-  PASSWORD_PLACEHOLDER,
 } from '../../../../core/constants/password.constants';
 
 @Component({
   selector: 'app-accept-invite',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField, AuthShell],
+  imports: [ReactiveFormsModule, FormField, AuthShell, TranslocoPipe],
   viewProviders: [
     provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser, phosphorCoin, phosphorGlobe }),
   ],
@@ -40,6 +39,7 @@ export class AcceptInvite implements OnInit {
   private readonly apiError = inject(ApiErrorService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   readonly token = input.required<string>();
 
@@ -76,8 +76,7 @@ export class AcceptInvite implements OnInit {
     { code: 'MAD', label: 'MAD - Dirham marocain' },
   ];
 
-  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
-  readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
+  readonly passwordMinLength = PASSWORD_MIN_LENGTH;
 
   readonly form = this.fb.nonNullable.group({
     password: [
@@ -99,7 +98,7 @@ export class AcceptInvite implements OnInit {
       const result = await firstValueFrom(this.invitationService.lookup(this.token()));
       this.email.set(result.email);
     } catch {
-      this.error.set('Lien invalide, expiré, déjà utilisé ou révoqué.');
+      this.error.set(this.transloco.translate('auth.feedback.invalidLink'));
     } finally {
       this.loading.set(false);
     }
@@ -130,11 +129,11 @@ export class AcceptInvite implements OnInit {
     } catch (err: unknown) {
       const httpErr = err as { status?: number; error?: { message?: string } };
       if (httpErr?.status === 404) {
-        this.error.set('Lien invalide, expiré, déjà utilisé ou révoqué.');
+        this.error.set(this.transloco.translate('auth.feedback.invalidLink'));
       } else if (httpErr?.status === 400) {
-        this.error.set(this.apiError.label(httpErr, 'Données invalides. Vérifiez le formulaire.'));
+        this.error.set(this.apiError.label(httpErr, this.transloco.translate('auth.feedback.invalidFormData')));
       } else {
-        this.error.set('Une erreur est survenue. Veuillez réessayer.');
+        this.error.set(this.transloco.translate('auth.feedback.genericError'));
       }
       this.loading.set(false);
     }
