@@ -10,7 +10,7 @@
       [attr.aria-controls]="listboxId"
       [attr.aria-activedescendant]="activeDescendantId()"
       [value]="searchTerm()"
-      placeholder="Rechercher une catégorie..."
+      [placeholder]="'categories.form.searchPlaceholder' | transloco"
       autocomplete="off"
       [disabled]="disabled()"
       (input)="onSearchInput($event)"
@@ -21,9 +21,9 @@
   @if (categories().length === 0 && searchTerm() === '') {
     <!-- Empty state premier usage (CL-006) -->
     <div class="cs__empty-state">
-      <span class="cs__empty-message">Aucune catégorie — créez-en une</span>
+      <span class="cs__empty-message">{{ 'categories.empty.title' | transloco }}</span>
       <button type="button" class="cs__create-btn" (click)="pushToCreate()">
-        + Créer
+        + {{ 'categories.action.create' | transloco }}
       </button>
     </div>
   } @else {
@@ -31,7 +31,7 @@
       class="cs__list"
       [id]="listboxId"
       role="listbox"
-      aria-label="Catégories"
+      [attr.aria-label]="'categories.list.regionAria' | transloco"
     >
       @for (item of filteredCategories(); track item.id; let i = $index) {
         <button
@@ -54,21 +54,21 @@
       }
 
       @if (filteredCategories().length === 0 && searchTerm()) {
-        <div class="cs__no-results">Aucune catégorie trouvée</div>
+        <div class="cs__no-results">{{ 'categories.list.noResults' | transloco }}</div>
       }
     </div>
 
     @if (showCreateButton()) {
       <button type="button" class="cs__create-btn" (click)="pushToCreate()">
-        + Créer « {{ searchTerm() }} »
+        + {{ 'categories.action.createNamed' | transloco: { name: searchTerm() } }}
       </button>
     }
   }
 } @else {
   <!-- Mode création -->
   <div class="cs__create-header">
-    <button type="button" class="cs__back-btn" (click)="popToList()" aria-label="Retour">
-      ← Retour
+    <button type="button" class="cs__back-btn" (click)="popToList()" [attr.aria-label]="'common.action.back' | transloco">
+      ← {{ 'common.action.back' | transloco }}
     </button>
     <button
       type="button"
@@ -76,7 +76,7 @@
       (click)="submitCategoryForm()"
       [disabled]="categoryForm()?.submitting()"
     >
-      ✓ Créer
+      ✓ {{ 'categories.action.create' | transloco }}
     </button>
   </div>
 

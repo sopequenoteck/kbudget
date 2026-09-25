@@ -343,4 +343,33 @@ describe('AccountForm', () => {
 
     expect(component.errorMessage()).toBeTruthy();
   });
+
+  it('should_use_server_message_when_delete_fails_with_error_instance', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+    accountServiceMock.delete.mockReturnValue({
+      subscribe: (obs: { error: (e: Error) => void }) => obs.error(new Error('Compte introuvable')),
+    });
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Compte introuvable');
+  });
+
+  it('should_use_french_fallback_message_when_delete_fails_without_error_instance', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+    accountServiceMock.delete.mockReturnValue({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      subscribe: (obs: { error: (e: any) => void }) => obs.error('boom'),
+    });
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Erreur lors de la suppression');
+  });
 });

@@ -2,18 +2,19 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { BottomNav } from './bottom-nav';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const items = [
-  { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
-  { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
-  { label: 'Abonnements', route: '/subscriptions', icon: 'phosphorArrowsClockwise', filledIcon: 'phosphorArrowsClockwiseFill' },
+  { labelKey: 'common.nav.home', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
+  { labelKey: 'common.nav.transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
+  { labelKey: 'common.nav.subscriptions', route: '/subscriptions', icon: 'phosphorArrowsClockwise', filledIcon: 'phosphorArrowsClockwiseFill' },
 ];
 
 describe('BottomNav', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [BottomNav],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), ...provideTranslocoTesting()],
     });
   });
 

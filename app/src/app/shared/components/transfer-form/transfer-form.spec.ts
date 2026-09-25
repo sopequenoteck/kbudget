@@ -152,4 +152,23 @@ describe('TransferForm', () => {
 
     expect(component.isInvalid('montant')).toBe(false);
   });
+
+  it('should_show_french_fallback_message_when_transfer_fails_without_known_code', async () => {
+    const { throwError } = await import('rxjs');
+    accountServiceMock.transfer = vi.fn().mockReturnValue(throwError(() => new Error('Network error')));
+
+    const fixture = TestBed.createComponent(TransferForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({
+      fromAccountId: 'acc-1',
+      toAccountId: 'acc-2',
+      montant: '100',
+    });
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Erreur lors du virement');
+  });
 });

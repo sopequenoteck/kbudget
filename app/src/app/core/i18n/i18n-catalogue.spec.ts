@@ -51,6 +51,10 @@ const ERRORS_ONLY_CONTEXTS = ['api', 'client'] as const;
 
 const LOWER_CAMEL_CASE = /^[a-z][a-zA-Z0-9]*$/;
 
+// « Never name the widget » (`docs/i18n.md`, Element) : KKS-374 a d'abord
+// livre `bankNameLabel`, que rien ne refusait.
+const WIDGET_WORD = /Button|Field|Picker|Switch|Label|Badge/;
+
 function flattenKeys(node: unknown, prefix = ''): string[] {
   if (typeof node !== 'object' || node === null) {
     return [prefix];
@@ -70,6 +74,9 @@ function isValidKey(key: string): boolean {
     return false;
   }
   if (!LOWER_CAMEL_CASE.test(element)) {
+    return false;
+  }
+  if (WIDGET_WORD.test(element)) {
     return false;
   }
   if (domain === 'errors') {
@@ -94,6 +101,10 @@ describe('catalogues i18n', () => {
     // Assert — SC-013 : domaine et contexte dans les listes fermees,
     // element en lowerCamelCase.
     expect(isValidKey(key)).toBe(true);
+  });
+
+  it('should_reject_key_when_element_names_the_widget', () => {
+    expect(isValidKey('accounts.form.bankNameLabel')).toBe(false);
   });
 
   it('should_not_be_empty', () => {

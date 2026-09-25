@@ -3,12 +3,12 @@
   <div class="rate-proposal-overlay" (click)="showRateProposal.set(false)">
     <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
     <div class="rate-proposal-dialog" (click)="$event.stopPropagation()">
-      <h4 class="rate-proposal-dialog__title">Taux de conversion manquant</h4>
+      <h4 class="rate-proposal-dialog__title">{{ 'accounts.form.rateProposalTitle' | transloco }}</h4>
       <p class="rate-proposal-dialog__description">
-        Aucun taux {{ primaryCurrency() }} → {{ proposedCurrency() }} n'est défini.
+        {{ 'accounts.form.rateProposalMessage' | transloco: { from: primaryCurrency(), to: proposedCurrency() } }}
       </p>
       <div class="rate-proposal-dialog__input">
-        <label class="rate-proposal-dialog__label" for="proposedRateInput">1 {{ primaryCurrency() }} =</label>
+        <label class="rate-proposal-dialog__label" for="proposedRateInput">{{ 'accounts.form.rate' | transloco: { currency: primaryCurrency() } }}</label>
         <input
           id="proposedRateInput"
           type="number"
@@ -17,15 +17,15 @@
           class="rate-proposal-dialog__field"
           [ngModel]="proposedRate()"
           (ngModelChange)="proposedRate.set($event)"
-          placeholder="Ex: 655.957"
+          [placeholder]="'accounts.form.ratePlaceholder' | transloco"
         />
         <span class="rate-proposal-dialog__currency">{{ proposedCurrency() }}</span>
       </div>
       <div class="rate-proposal-dialog__actions">
         <button type="button" class="btn-outline" (click)="showRateProposal.set(false)">
-          Plus tard
+          {{ 'accounts.action.later' | transloco }}
         </button>
-        <button type="button" class="btn-primary" (click)="saveProposedRate()">Enregistrer</button>
+        <button type="button" class="btn-primary" (click)="saveProposedRate()">{{ 'common.action.save' | transloco }}</button>
       </div>
     </div>
   </div>
@@ -49,7 +49,7 @@
     }
     <div class="account-form__preview-info">
       <span class="account-form__preview-name" [class.placeholder]="!form.get('nom')?.value">
-        {{ form.get('nom')?.value || 'Nom du compte' }}
+        {{ form.get('nom')?.value || ('accounts.form.name' | transloco) }}
       </span>
       <span class="account-form__preview-type">{{ typeLabels[selectedType()] }}</span>
     </div>
@@ -57,8 +57,8 @@
 
   <!-- Section 2 : Type de compte -->
   <fieldset class="account-form__section">
-    <legend class="account-form__section-title">Type de compte</legend>
-    <div class="type-cards" role="radiogroup" aria-label="Type de compte">
+    <legend class="account-form__section-title">{{ 'accounts.form.typeTitle' | transloco }}</legend>
+    <div class="type-cards" role="radiogroup" [attr.aria-label]="'accounts.form.typeTitle' | transloco">
       @for (t of accountTypes; track t) {
         <button
           type="button"
@@ -77,7 +77,7 @@
 
   <!-- Section: Banque -->
   <fieldset class="account-form__section">
-    <legend class="account-form__section-title">Banque</legend>
+    <legend class="account-form__section-title">{{ 'accounts.form.bankTitle' | transloco }}</legend>
     <app-bank-select
       [ngModel]="selectedBankCode()"
       (ngModelChange)="onBankCodeChange($event)"
@@ -88,15 +88,15 @@
   <!-- Section: Personnalisation banque (OTHER only) -->
   @if (!isKnownBank()) {
     <fieldset class="account-form__section">
-      <legend class="account-form__section-title">Personnalisation</legend>
+      <legend class="account-form__section-title">{{ 'accounts.form.customisationTitle' | transloco }}</legend>
 
       <div class="account-form__field">
-        <span class="account-form__label">Icône</span>
+        <span class="account-form__label">{{ 'accounts.form.icon' | transloco }}</span>
         <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
       </div>
 
       <div class="account-form__field">
-        <span id="accountColorLabel" class="account-form__label">Couleur</span>
+        <span id="accountColorLabel" class="account-form__label">{{ 'common.form.colour' | transloco }}</span>
         <div class="color-swatches" role="radiogroup" aria-labelledby="accountColorLabel">
           @for (color of accountColors; track color) {
             <button
@@ -105,18 +105,18 @@
               [class.active]="selectedColor() === color"
               [style.background-color]="color"
               (click)="selectColor(color)"
-              [attr.aria-label]="'Couleur ' + color"
+              [attr.aria-label]="'common.form.colourAria' | transloco: { color: color }"
             ></button>
           }
         </div>
       </div>
 
-      <app-form-field label="Nom de la banque (optionnel)" fieldId="bankCustomName">
+      <app-form-field [label]="'accounts.form.bankName' | transloco" fieldId="bankCustomName">
         <input
           id="bankCustomName"
           type="text"
           maxlength="100"
-          placeholder="Ex: Ma banque"
+          [placeholder]="'accounts.form.bankNamePlaceholder' | transloco"
           [ngModel]="bankCustomName()"
           (ngModelChange)="onBankCustomNameChange($event)"
           [ngModelOptions]="{standalone: true}"
@@ -124,15 +124,15 @@
       </app-form-field>
 
       <div class="account-form__field">
-        <span class="account-form__label">Logo personnalisé (optionnel)</span>
+        <span class="account-form__label">{{ 'accounts.form.customLogo' | transloco }}</span>
         @if (bankCustomLogo()) {
           <div class="bank-logo-preview">
-            <img [src]="bankCustomLogo()" alt="Logo personnalisé" class="bank-logo-preview__img" />
-            <button type="button" class="btn-outline btn-outline--sm" (click)="removeBankLogo()">Supprimer</button>
+            <img [src]="bankCustomLogo()" [alt]="'accounts.form.customLogoAria' | transloco" class="bank-logo-preview__img" />
+            <button type="button" class="btn-outline btn-outline--sm" (click)="removeBankLogo()">{{ 'common.action.delete' | transloco }}</button>
           </div>
         } @else {
           <label class="btn-outline btn-outline--sm bank-logo-upload">
-            Choisir un fichier
+            {{ 'accounts.form.chooseFile' | transloco }}
             <input type="file" accept="image/*" (change)="onBankLogoUpload($event)" hidden />
           </label>
         }
@@ -142,14 +142,16 @@
 
   <!-- Section 4 : Détails -->
   <fieldset class="account-form__section">
-    <legend class="account-form__section-title">Détails</legend>
+    <legend class="account-form__section-title">{{ 'accounts.form.detailsTitle' | transloco }}</legend>
 
     <app-form-field
-      label="Nom du compte"
+      [label]="'accounts.form.name' | transloco"
       fieldId="accountNom"
       [showError]="isInvalid('nom')"
       [errorMessage]="
-        form.get('nom')?.hasError('required') ? 'Nom requis' : '50 caractères maximum'
+        form.get('nom')?.hasError('required')
+          ? ('common.validation.nameRequired' | transloco)
+          : ('common.validation.maxLength' | transloco: { max: 50 })
       "
     >
       <input
@@ -157,21 +159,21 @@
         type="text"
         formControlName="nom"
         maxlength="50"
-        placeholder="Ex: Compte courant"
+        [placeholder]="'accounts.form.namePlaceholder' | transloco"
       />
     </app-form-field>
 
     @if (!isEditMode()) {
-      <app-form-field label="Devise" fieldId="currency">
+      <app-form-field [label]="'accounts.form.currency' | transloco" fieldId="currency">
         <app-select-picker
           formControlName="currency"
           [items]="currencyItems()"
-          placeholder="Devise par défaut"
+          [placeholder]="'accounts.form.currencyPlaceholder' | transloco"
           [clearable]="true"
         />
       </app-form-field>
 
-      <app-form-field label="Solde initial" fieldId="soldeInitial">
+      <app-form-field [label]="'accounts.form.openingBalance' | transloco" fieldId="soldeInitial">
         <div class="amount-input-wrapper">
           <input
             id="soldeInitial"
@@ -187,20 +189,20 @@
 
     @if (isEditMode()) {
       <div class="account-form__balance-info">
-        <span class="account-form__label">Solde actuel</span>
+        <span class="account-form__label">{{ 'accounts.form.currentBalance' | transloco }}</span>
         <span class="account-form__balance-value"
           >{{ account()?.solde }} {{ account()?.currency }}</span
         >
       </div>
 
-      <app-form-field label="Nouveau solde" fieldId="newBalance">
+      <app-form-field [label]="'accounts.form.newBalance' | transloco" fieldId="newBalance">
         <div class="amount-input-wrapper">
           <input
             id="newBalance"
             type="text"
             inputmode="decimal"
             formControlName="newBalance"
-            placeholder="Nouveau solde"
+            [placeholder]="'accounts.form.newBalance' | transloco"
           />
           <span class="amount-input-wrapper__suffix">{{ account()?.currency }}</span>
         </div>
@@ -212,10 +214,10 @@
           formControlName="actif"
           [attr.disabled]="canDeactivate() ? null : true"
         />
-        Compte actif
+        {{ 'accounts.form.active' | transloco }}
         @if (!canDeactivate()) {
           <span class="checkbox-field__hint"
-            >Définissez un autre compte par défaut avant de désactiver celui-ci</span
+            >{{ 'accounts.form.activeHint' | transloco }}</span
           >
         }
       </label>
@@ -225,11 +227,11 @@
   <!-- Section 5 : Actions -->
   <div class="form-actions">
     @if (isEditMode()) {
-      <button type="button" class="btn-danger" (click)="onDelete()">Supprimer</button>
+      <button type="button" class="btn-danger" (click)="onDelete()">{{ 'common.action.delete' | transloco }}</button>
     }
-    <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+    <button type="button" class="btn-outline" (click)="onCancel()">{{ 'common.action.cancel' | transloco }}</button>
     <button type="submit" class="btn-primary" [disabled]="submitting()">
-      {{ submitting() ? 'Enregistrement...' : isEditMode() ? 'Modifier' : 'Créer' }}
+      {{ submitting() ? ('common.feedback.saving' | transloco) : isEditMode() ? ('common.action.edit' | transloco) : ('common.action.create' | transloco) }}
     </button>
   </div>
 </form>

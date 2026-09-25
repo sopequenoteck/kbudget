@@ -11,6 +11,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorPlusBold,
@@ -28,23 +29,23 @@ import { PreferenceService } from '../../../core/services/preference';
 
 export interface SpeedDialItem {
   readonly type: ModalType;
-  readonly label: string;
+  readonly labelKey: string;
   readonly icon: string;
 }
 
 const BASE_ACTIONS: readonly SpeedDialItem[] = [
-  { type: 'transaction', label: 'Transaction', icon: 'phosphorCurrencyDollarBold' },
-  { type: 'subscription', label: 'Abonnement', icon: 'phosphorArrowsClockwiseBold' },
-  { type: 'debt', label: 'Dette', icon: 'phosphorHandshakeBold' },
+  { type: 'transaction', labelKey: 'transactions.action.create', icon: 'phosphorCurrencyDollarBold' },
+  { type: 'subscription', labelKey: 'subscriptions.action.create', icon: 'phosphorArrowsClockwiseBold' },
+  { type: 'debt', labelKey: 'debts.action.create', icon: 'phosphorHandshakeBold' },
 ] as const;
 
-const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', label: 'Virement', icon: 'phosphorArrowsLeftRightBold' };
-const BUDGET_ACTION: SpeedDialItem = { type: 'budget', label: 'Nouveau budget', icon: 'phosphorChartPieBold' };
+const TRANSFER_ACTION: SpeedDialItem = { type: 'transfer', labelKey: 'transactions.action.transfer', icon: 'phosphorArrowsLeftRightBold' };
+const BUDGET_ACTION: SpeedDialItem = { type: 'budget', labelKey: 'budgets.dialog.createTitle', icon: 'phosphorChartPieBold' };
 
 @Component({
   selector: 'app-fab',
   standalone: true,
-  imports: [NgIcon],
+  imports: [NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorPlusBold,

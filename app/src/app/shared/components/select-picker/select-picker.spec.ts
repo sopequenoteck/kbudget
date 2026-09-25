@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { SelectPicker } from './select-picker';
 import { SelectPickerItem } from './select-picker.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const mockItems: SelectPickerItem[] = [
   { id: 'acc-1', label: 'Compte courant', icon: '🏦', secondaryText: '150.00 €', color: '#3b82f6' },
@@ -13,12 +14,47 @@ describe('SelectPicker', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [SelectPicker],
+      providers: [...provideTranslocoTesting()],
     });
   });
 
   it('should create the component', () => {
     const fixture = TestBed.createComponent(SelectPicker);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should_render_french_default_placeholder_when_none_provided', () => {
+    const fixture = TestBed.createComponent(SelectPicker);
+    fixture.detectChanges();
+
+    const placeholder: HTMLElement = fixture.nativeElement.querySelector(
+      '.select-picker__placeholder',
+    );
+
+    expect(placeholder.textContent?.trim()).toBe('Selectionner...');
+  });
+
+  it('should_render_given_placeholder_when_provided', () => {
+    const fixture = TestBed.createComponent(SelectPicker);
+    fixture.componentRef.setInput('placeholder', 'Compte source');
+    fixture.detectChanges();
+
+    const placeholder: HTMLElement = fixture.nativeElement.querySelector(
+      '.select-picker__placeholder',
+    );
+
+    expect(placeholder.textContent?.trim()).toBe('Compte source');
+  });
+
+  it('should_render_french_default_empty_message_when_no_items', () => {
+    const fixture = TestBed.createComponent(SelectPicker);
+    fixture.detectChanges();
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+
+    const empty: HTMLElement = fixture.nativeElement.querySelector('.select-picker__empty');
+
+    expect(empty.textContent?.trim()).toBe('Aucun element disponible');
   });
 
   it('should write value via CVA', () => {

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { CategoryService } from '../../../core/services/category';
 import { ModalService } from '../../../core/services/modal.service';
@@ -19,7 +20,7 @@ import { EmojiInput } from '../emoji-input/emoji-input';
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [ReactiveFormsModule, EmojiInput],
+  imports: [ReactiveFormsModule, EmojiInput, TranslocoPipe],
   templateUrl: './category-form.html',
   styleUrl: './category-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +29,7 @@ export class CategoryForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly categoryService = inject(CategoryService);
   private readonly modalService = inject(ModalService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly category = input<Category | null>(null);
   readonly initialName = input('');
@@ -93,7 +95,8 @@ export class CategoryForm implements OnInit {
         : await firstValueFrom(this.categoryService.create(request));
       this.saved.emit(result);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      const message =
+        err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError');
       this.errorMessage.set(message);
     } finally {
       this.submitting.set(false);

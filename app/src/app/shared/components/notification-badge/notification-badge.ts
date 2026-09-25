@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { phosphorBell } from '@ng-icons/phosphor-icons/regular';
 import { NotificationService } from '../../../core/services/notification';
 
 @Component({
   selector: 'app-notification-badge',
   standalone: true,
-  imports: [NgIcon],
+  imports: [NgIcon, TranslocoPipe],
   providers: [provideIcons({ phosphorBell })],
   template: `
-    <button class="notification-badge" (click)="clicked.emit()" aria-label="Notifications">
+    <button class="notification-badge" (click)="clicked.emit()" [attr.aria-label]="'notifications.page.title' | transloco">
       <ng-icon name="phosphorBell" size="22" />
       @if (notificationService.hasUnread()) {
         <span class="badge">{{ notificationService.unreadCount() }}</span>

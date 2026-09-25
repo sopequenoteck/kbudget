@@ -5,27 +5,27 @@
       class="idp__nav-btn"
       type="button"
       (click)="prevMonth()"
-      aria-label="Mois précédent"
+      [attr.aria-label]="'common.action.previousMonthAria' | transloco"
     >‹</button>
 
     <button
       class="idp__month-label"
       type="button"
       (click)="goToToday()"
-      title="Revenir au mois actuel"
+      [attr.title]="'common.action.currentMonthHint' | transloco"
     >{{ monthLabel() }}</button>
 
     <button
       class="idp__nav-btn"
       type="button"
       (click)="nextMonth()"
-      aria-label="Mois suivant"
+      [attr.aria-label]="'common.action.nextMonthAria' | transloco"
     >›</button>
   </div>
 
-  <!-- Day headers: L M M J V S D -->
+  <!-- Day headers: initiales derivees de la locale active -->
   <div class="idp__grid">
-    @for (header of dayHeaders; track $index) {
+    @for (header of dayHeaders(); track $index) {
       <div class="idp__day-header">{{ header }}</div>
     }
 

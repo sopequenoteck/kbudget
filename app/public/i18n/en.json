@@ -1,10 +1,171 @@
 {
+  "accounts": {
+    "action": {
+      "later": "Later"
+    },
+    "dialog": {
+      "createTitle": "New account",
+      "editTitle": "Edit account"
+    },
+    "empty": {
+      "bankNotFound": "No bank found"
+    },
+    "feedback": {
+      "banksLoadError": "Unable to load banks"
+    },
+    "filter": {
+      "bankSearchPlaceholder": "Search for a bank…"
+    },
+    "form": {
+      "active": "Active account",
+      "activeHint": "Set another default account before deactivating this one",
+      "bankName": "Bank name (optional)",
+      "bankNamePlaceholder": "e.g. My bank",
+      "bankTitle": "Bank",
+      "chooseFile": "Choose a file",
+      "currency": "Currency",
+      "currencyPlaceholder": "Default currency",
+      "currentBalance": "Current balance",
+      "customLogoAria": "Custom logo",
+      "customLogo": "Custom logo (optional)",
+      "customisationTitle": "Customisation",
+      "detailsTitle": "Details",
+      "icon": "Icon",
+      "name": "Account name",
+      "namePlaceholder": "e.g. Current account",
+      "newBalance": "New balance",
+      "openingBalance": "Opening balance",
+      "ratePlaceholder": "e.g. 655.957",
+      "rate": "1 {currency} =",
+      "rateProposalMessage": "No {from} → {to} rate is defined.",
+      "rateProposalTitle": "Missing exchange rate",
+      "typeTitle": "Account type"
+    },
+    "list": {
+      "bankGroupFrance": "France",
+      "bankGroupInternational": "International",
+      "bankGroupWestAfrica": "West Africa"
+    },
+    "value": {
+      "cash": "Cash",
+      "current": "Current account",
+      "other": "Other",
+      "otherCustom": "Other / Custom",
+      "savings": "Savings"
+    }
+  },
   "auth": {
     "feedback": {
       "invalidCredentials": "Incorrect email or password"
     },
     "form": {
       "passwordMinLength": "{min} characters minimum"
+    }
+  },
+  "budgets": {
+    "dialog": {
+      "createTitle": "New budget",
+      "editTitle": "Edit budget"
+    }
+  },
+  "categories": {
+    "action": {
+      "create": "Create",
+      "createNamed": "Create \"{name}\""
+    },
+    "dialog": {
+      "createTitle": "New category",
+      "editTitle": "Edit category"
+    },
+    "empty": {
+      "title": "No categories yet — create one"
+    },
+    "form": {
+      "icon": "Icon",
+      "name": "Name",
+      "nameMaxLength": "30 characters maximum",
+      "namePlaceholder": "Category name",
+      "searchPlaceholder": "Search for a category…"
+    },
+    "list": {
+      "noResults": "No categories found",
+      "regionAria": "Categories"
+    }
+  },
+  "common": {
+    "action": {
+      "back": "Back",
+      "cancel": "Cancel",
+      "chooseEmojiAria": "Choose an emoji",
+      "clearSelectionAria": "Clear selection",
+      "close": "Close",
+      "confirm": "Confirm",
+      "create": "Create",
+      "currentMonthHint": "Back to current month",
+      "delete": "Delete",
+      "edit": "Edit",
+      "logout": "Sign out",
+      "nextMonthAria": "Next month",
+      "previousMonthAria": "Previous month",
+      "quickActionsAria": "Quick actions",
+      "save": "Save"
+    },
+    "empty": {
+      "noItems": "No items available"
+    },
+    "feedback": {
+      "deleteError": "Delete failed",
+      "saveError": "Save failed",
+      "saving": "Saving..."
+    },
+    "filter": {
+      "searchAria": "Search"
+    },
+    "form": {
+      "colourAria": "Colour {color}",
+      "colour": "Colour",
+      "searchPlaceholder": "Search...",
+      "selectPlaceholder": "Select..."
+    },
+    "list": {
+      "resultsCount": "{count} results"
+    },
+    "nav": {
+      "avatarAria": "Profile picture",
+      "budgets": "Budgets",
+      "debts": "Debts",
+      "home": "Home",
+      "settings": "Settings",
+      "subscriptions": "Subscriptions",
+      "transactions": "Transactions",
+      "userMenuAria": "User menu"
+    },
+    "validation": {
+      "maxLength": "{max} characters maximum",
+      "nameRequired": "Name required"
+    },
+    "value": {
+      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "weeksAgo": "{count, plural, one {# week ago} other {# weeks ago}}",
+      "yesterday": "Yesterday"
+    }
+  },
+  "debts": {
+    "action": {
+      "create": "Debt",
+      "repay": "Repay",
+      "snooze": "Snooze"
+    },
+    "dialog": {
+      "createTitle": "New debt",
+      "editTitle": "Edit debt",
+      "repayTitle": "Repayment"
+    },
+    "feedback": {
+      "loadError": "Unable to load debt",
+      "snoozed": "Reminder snoozed"
     }
   },
   "errors": {
@@ -39,7 +200,95 @@
     },
     "client": {
       "generic": "An error occurred",
-      "network": "Unable to reach the server"
+      "network": "Unable to reach the server",
+      "serverError": "Server error",
+      "timeout": "Response time exceeded",
+      "unknown": "Unknown error",
+      "unreachable": "Server unreachable"
+    }
+  },
+  "exchangeRates": {
+    "feedback": {
+      "loadError": "Unable to load exchange rates"
+    }
+  },
+  "notifications": {
+    "action": {
+      "deleteAllHint": "Clear history",
+      "markAllReadHint": "Mark all as read"
+    },
+    "empty": {
+      "title": "No notifications"
+    },
+    "page": {
+      "title": "Notifications"
+    }
+  },
+  "recurring": {
+    "action": {
+      "skip": "Skip",
+      "validate": "Validate"
+    },
+    "feedback": {
+      "loadError": "Unable to load recurring transactions",
+      "skipError": "Unable to skip the occurrence",
+      "skipped": "Occurrence skipped",
+      "validateError": "Unable to validate the transaction",
+      "validated": "Transaction created"
+    }
+  },
+  "settings": {
+    "feedback": {
+      "exchangeRatesStale": "Exchange rates are stale — reload the page",
+      "loadError": "Unable to load preferences",
+      "navOrderSaveError": "Unable to save the navigation order",
+      "saveError": "Unable to save preferences"
+    }
+  },
+  "subscriptions": {
+    "action": {
+      "create": "Subscription",
+      "pay": "Pay"
+    },
+    "dialog": {
+      "createTitle": "New subscription",
+      "editTitle": "Edit subscription"
+    },
+    "feedback": {
+      "payError": "Unable to record the payment",
+      "paid": "Payment recorded"
+    }
+  },
+  "transactions": {
+    "action": {
+      "create": "Transaction",
+      "transfer": "Transfer",
+      "transferSubmit": "Make the transfer"
+    },
+    "dialog": {
+      "createTitle": "New transaction",
+      "editTitle": "Edit transaction",
+      "transferCreateTitle": "New transfer",
+      "transferEditTitle": "Transfer"
+    },
+    "empty": {
+      "notEnoughAccounts": "You need at least 2 active accounts to make a transfer."
+    },
+    "feedback": {
+      "transferFailed": "Transfer failed",
+      "transferring": "Transferring..."
+    },
+    "form": {
+      "amount": "Amount",
+      "amountInvalid": "The amount must be greater than 0",
+      "note": "Note (optional)",
+      "transferAccountsMismatch": "The source and destination accounts must be different",
+      "transferFrom": "From",
+      "transferFromPlaceholder": "Source account",
+      "transferFromRequired": "Source account required",
+      "transferTo": "To",
+      "transferToPlaceholder": "Destination account",
+      "transferToRequired": "Destination account required"
     }
   }
 }

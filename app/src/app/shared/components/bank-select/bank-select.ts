@@ -9,17 +9,19 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { BankService } from '../../../core/services/bank';
 import { BankResponse } from '../../../core/models/bank.model';
 
 interface BankGroup {
-  label: string;
+  labelKey: string;
   banks: BankResponse[];
 }
 
 @Component({
   selector: 'app-bank-select',
   standalone: true,
+  imports: [TranslocoPipe],
   templateUrl: './bank-select.html',
   styleUrl: './bank-select.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,9 +58,15 @@ export class BankSelect implements ControlValueAccessor {
     const intlBanks = banks.filter((b) => b.country === null);
 
     const groups: BankGroup[] = [];
-    if (frBanks.length > 0) groups.push({ label: 'France', banks: frBanks });
-    if (tgBanks.length > 0) groups.push({ label: 'Afrique de l\'Ouest', banks: tgBanks });
-    if (intlBanks.length > 0) groups.push({ label: 'International', banks: intlBanks });
+    if (frBanks.length > 0) {
+      groups.push({ labelKey: 'accounts.list.bankGroupFrance', banks: frBanks });
+    }
+    if (tgBanks.length > 0) {
+      groups.push({ labelKey: 'accounts.list.bankGroupWestAfrica', banks: tgBanks });
+    }
+    if (intlBanks.length > 0) {
+      groups.push({ labelKey: 'accounts.list.bankGroupInternational', banks: intlBanks });
+    }
     return groups;
   });
 

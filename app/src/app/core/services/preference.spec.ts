@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { PreferenceService } from './preference';
 import { ApiService } from './api';
 import { type Feature, type UserPreference } from '../models/preference.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 const mockPreference: UserPreference = {
   enabledFeatures: ['SUBSCRIPTIONS', 'DEBTS'],
@@ -24,7 +25,11 @@ describe('PreferenceService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [PreferenceService, { provide: ApiService, useValue: apiService }],
+      providers: [
+        PreferenceService,
+        { provide: ApiService, useValue: apiService },
+        ...provideTranslocoTesting(),
+      ],
     });
 
     service = TestBed.inject(PreferenceService);
@@ -94,6 +99,20 @@ describe('PreferenceService', () => {
         enabledFeatures: ['SUBSCRIPTIONS'],
       });
     });
+
+    it('should_set_french_error_message_when_save_fails', async () => {
+      // Arrange
+      service.enabledFeatures.set(['SUBSCRIPTIONS']);
+      service.navOrder.set(['SUBSCRIPTIONS']);
+      apiService.put.mockReturnValue(throwError(() => new Error('fail')));
+
+      // Act
+      service.toggleFeature('DEBTS');
+      await Promise.resolve();
+
+      // Assert
+      expect(service.error()).toBe('Impossible de sauvegarder les préférences');
+    });
   });
 
   describe('isEnabled()', () => {
@@ -132,6 +151,57 @@ describe('PreferenceService', () => {
         enabledFeatures: initialFeatures,
         navOrder: newOrder,
       });
+    });
+
+    it('should_set_french_error_message_when_save_fails', async () => {
+      // Arrange
+      service.enabledFeatures.set(['SUBSCRIPTIONS']);
+      service.navOrder.set(['SUBSCRIPTIONS']);
+      apiService.put.mockReturnValue(throwError(() => new Error('fail')));
+
+      // Act
+      service.reorderNavigation(['SUBSCRIPTIONS']);
+      await Promise.resolve();
+
+      // Assert
+      expect(service.error()).toBe("Impossible de sauvegarder l'ordre de navigation");
+    });
+  });
+
+  describe('update()', () => {
+    it('should_set_french_error_message_when_save_fails', async () => {
+      // Arrange
+      apiService.put.mockReturnValue(throwError(() => new Error('fail')));
+
+      // Act
+      service.updateTimezone('Europe/London');
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Assert
+      expect(service.error()).toBe('Impossible de sauvegarder les préférences');
+    });
+
+    it('should_reload_rates_when_primary_currency_changes', async () => {
+      // Arrange
+      service.setCurrencies(['EUR']);
+      apiService.put.mockReturnValue(of({ ...mockPreference, currencies: ['XOF'] }));
+      apiService.get.mockReturnValue(of([]));
+
+      // Act
+      service.update({ currencies: ['XOF'] });
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Assert — declenche bien un rechargement des taux, la seule branche
+      // observable : `ExchangeRateService.loadRates()` avale ses propres
+      // erreurs (try/catch interne), si bien que le `.catch()` de ce site
+      // d'appel — et la cle `settings.feedback.exchangeRatesStale` qu'il
+      // traduit — ne sont jamais atteints en pratique (bug preexistant,
+      // hors perimetre de KKS-374).
+      expect(apiService.get).toHaveBeenCalledWith('/exchange-rates');
     });
   });
 });
