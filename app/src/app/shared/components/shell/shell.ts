@@ -14,6 +14,7 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { trigger, transition, style, animate, query } from '@angular/animations';
 import { filter, firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   phosphorGear,
   phosphorSignOut,
@@ -81,6 +82,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
     NotificationPanel,
     Toast,
     ConfirmDialog,
+    TranslocoPipe,
   ],
   providers: [
     provideIcons({
@@ -153,8 +155,18 @@ export class Shell {
   readonly DebtType = DebtType;
   readonly navItems = computed(() => {
     const fixed = [
-      { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
-      { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
+      {
+        labelKey: 'common.nav.home',
+        route: '/dashboard',
+        icon: 'phosphorHouse',
+        filledIcon: 'phosphorHouseFill',
+      },
+      {
+        labelKey: 'common.nav.transactions',
+        route: '/transactions',
+        icon: 'phosphorCurrencyDollar',
+        filledIcon: 'phosphorCurrencyDollarFill',
+      },
     ];
     const navOrder = this.preferenceService.navOrder();
     const enabled = this.preferenceService.enabledFeatures();
@@ -162,7 +174,12 @@ export class Shell {
       .filter((f: Feature) => enabled.includes(f))
       .map((f: Feature) => {
         const meta = FEATURES.find((m) => m.value === f)!;
-        return { label: meta.label, route: meta.route, icon: meta.icon, filledIcon: meta.filledIcon };
+        return {
+          labelKey: meta.labelKey,
+          route: meta.route,
+          icon: meta.icon,
+          filledIcon: meta.filledIcon,
+        };
       });
     return [...fixed, ...optional];
   });

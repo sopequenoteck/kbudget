@@ -4,7 +4,7 @@ export type Feature = 'SUBSCRIPTIONS' | 'DEBTS' | 'BUDGETS';
 
 export interface FeatureMetadata {
   readonly value: Feature;
-  readonly label: string;
+  readonly labelKey: string;
   readonly icon: string;
   readonly filledIcon: string;
   readonly description: string;
@@ -14,7 +14,7 @@ export interface FeatureMetadata {
 export const FEATURES: readonly FeatureMetadata[] = [
   {
     value: 'SUBSCRIPTIONS',
-    label: 'Abonnements',
+    labelKey: 'common.nav.subscriptions',
     icon: 'phosphorArrowsClockwise',
     filledIcon: 'phosphorArrowsClockwiseFill',
     description: 'Gérer vos abonnements récurrents',
@@ -22,7 +22,7 @@ export const FEATURES: readonly FeatureMetadata[] = [
   },
   {
     value: 'DEBTS',
-    label: 'Dettes',
+    labelKey: 'common.nav.debts',
     icon: 'phosphorHandshake',
     filledIcon: 'phosphorHandshakeFill',
     description: 'Suivre vos prêts et emprunts',
@@ -30,7 +30,7 @@ export const FEATURES: readonly FeatureMetadata[] = [
   },
   {
     value: 'BUDGETS',
-    label: 'Budgets',
+    labelKey: 'common.nav.budgets',
     icon: 'phosphorChartPie',
     filledIcon: 'phosphorChartPieFill',
     description: 'Suivre vos budgets par catégorie',

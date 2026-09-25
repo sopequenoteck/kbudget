@@ -9,12 +9,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ModalService } from '../../../core/services/modal.service';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [CdkTrapFocus],
+  imports: [CdkTrapFocus, TranslocoPipe],
   templateUrl: './modal.html',
   styleUrl: './modal.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

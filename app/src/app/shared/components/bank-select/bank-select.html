@@ -13,7 +13,7 @@
       </span>
     } @else {
       <span class="bank-select__selected">
-        <span class="bank-select__name">Autre</span>
+        <span class="bank-select__name">{{ 'accounts.value.other' | transloco }}</span>
       </span>
     }
     <span class="bank-select__chevron">&#9662;</span>
@@ -26,16 +26,16 @@
         <input
           type="text"
           class="bank-select__search-input"
-          placeholder="Rechercher une banque..."
+          [placeholder]="'accounts.filter.bankSearchPlaceholder' | transloco"
           [value]="searchQuery()"
           (input)="onSearchInput($event)"
           autocomplete="off"
         />
       </div>
       <div class="bank-select__list">
-        @for (group of filteredGroups(); track group.label) {
+        @for (group of filteredGroups(); track group.labelKey) {
           <div class="bank-select__group">
-            <div class="bank-select__group-label">{{ group.label }}</div>
+            <div class="bank-select__group-label">{{ group.labelKey | transloco }}</div>
             @for (bank of group.banks; track bank.code) {
               <div
                 class="bank-select__item"
@@ -58,11 +58,11 @@
           </div>
         }
         @if (filteredGroups().length === 0) {
-          <div class="bank-select__empty">Aucune banque trouvée</div>
+          <div class="bank-select__empty">{{ 'accounts.empty.bankNotFound' | transloco }}</div>
         }
         <!-- OTHER always visible -->
         <div class="bank-select__group">
-          <div class="bank-select__group-label">Autre</div>
+          <div class="bank-select__group-label">{{ 'accounts.value.other' | transloco }}</div>
           <div
             class="bank-select__item"
             [class.selected]="selectedCode() === 'OTHER'"
@@ -72,7 +72,7 @@
             role="option"
             [attr.aria-selected]="selectedCode() === 'OTHER'"
           >
-            <span class="bank-select__item-name">Autre / Personnalisé</span>
+            <span class="bank-select__item-name">{{ 'accounts.value.otherCustom' | transloco }}</span>
           </div>
         </div>
       </div>

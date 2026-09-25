@@ -28,6 +28,7 @@ import {
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import packageJson from '../../../../package.json';
 
@@ -68,7 +69,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [RouterLink, NgIcon, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [RouterLink, NgIcon, CdkDropList, CdkDrag, CdkDragHandle, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorSun,

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { TranslocoService } from '@jsverse/transloco';
 import { ApiService } from './api';
 import {
   RecurringTransactionRequest,
@@ -13,6 +14,7 @@ import { Transaction } from '../models/transaction.model';
 })
 export class RecurringTransactionService {
   private readonly api = inject(ApiService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly recurringTransactions = signal<RecurringTransactionResponse[]>([]);
   readonly loading = signal(false);
@@ -27,7 +29,7 @@ export class RecurringTransactionService {
       );
       this.recurringTransactions.set(data);
     } catch {
-      this.error.set('Impossible de charger les transactions récurrentes');
+      this.error.set(this.transloco.translate('recurring.feedback.loadError'));
     } finally {
       this.loading.set(false);
     }

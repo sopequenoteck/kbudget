@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { ApiService } from './api';
 import { ExchangeRateService } from './exchange-rate';
@@ -18,6 +19,7 @@ export class PreferenceService {
   private readonly apiService = inject(ApiService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly transloco = inject(TranslocoService);
 
   readonly enabledFeatures = signal<Feature[]>([]);
   readonly navOrder = signal<Feature[]>([]);
@@ -51,7 +53,7 @@ export class PreferenceService {
       this.error.set(null);
     } catch (e) {
       this.logger.error('Failed to load preferences:', e);
-      this.error.set('Impossible de charger les préférences');
+      this.error.set(this.transloco.translate('settings.feedback.loadError'));
     }
   }
 
@@ -75,7 +77,7 @@ export class PreferenceService {
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', request)).catch(
       (e) => {
         this.logger.error('Failed to update preferences:', e);
-        this.error.set('Impossible de sauvegarder les préférences');
+        this.error.set(this.transloco.translate('settings.feedback.saveError'));
       },
     );
   }
@@ -104,13 +106,13 @@ export class PreferenceService {
         const newPrimary = merged.currencies?.[0];
         if (newPrimary && newPrimary !== oldPrimary) {
           this.exchangeRateService.loadRates().catch(() => {
-            this.error.set('Taux de change périmés — rechargez la page');
+            this.error.set(this.transloco.translate('settings.feedback.exchangeRatesStale'));
           });
         }
       })
       .catch((e) => {
         this.logger.error('Failed to update preferences:', e);
-        this.error.set('Impossible de sauvegarder les préférences');
+        this.error.set(this.transloco.translate('settings.feedback.saveError'));
       });
   }
 
@@ -145,7 +147,7 @@ export class PreferenceService {
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', request)).catch(
       (e) => {
         this.logger.error('Failed to reorder navigation:', e);
-        this.error.set("Impossible de sauvegarder l'ordre de navigation");
+        this.error.set(this.transloco.translate('settings.feedback.navOrderSaveError'));
       },
     );
   }

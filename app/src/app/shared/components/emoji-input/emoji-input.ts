@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { LanguageService } from '../../../core/services/language';
 
 const PICKER_HEIGHT = 435;
@@ -35,6 +36,7 @@ const EMOJI_PICKER_THEME: Record<string, Record<string, string>> = {
 
 @Component({
   selector: 'app-emoji-input',
+  imports: [TranslocoPipe],
   templateUrl: './emoji-input.html',
   styleUrl: './emoji-input.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { LanguageService } from '../../../core/services/language';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorBellRinging,
   phosphorChecks,
@@ -28,7 +29,7 @@ import { SnoozeDialog } from '../../../features/debts/components/snooze-dialog/s
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, NgIcon, SnoozeDialog],
+  imports: [DatePipe, NgIcon, SnoozeDialog, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorBellRinging,
@@ -54,6 +55,7 @@ export class NotificationPanel {
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
+  private readonly transloco = inject(TranslocoService);
   readonly notificationService = inject(NotificationService);
   private readonly languageService = inject(LanguageService);
   readonly isOpen = input(false);
@@ -65,23 +67,38 @@ export class NotificationPanel {
 
   readonly groupedNotifications = computed(() => {
     const notifications = this.notificationService.notifications();
-    const groups: { label: string; notifications: NotificationModel[] }[] = [];
+    const groups: { labelKey: string | null; dateLabel: string; notifications: NotificationModel[] }[] = [];
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const getGroupLabel = (dateStr: string): string => {
+    // Le groupe porte une cle (`common.value.today`/`yesterday`) traduite par
+    // le pipe dans le template, ou une date deja formatee dans la locale
+    // active (`displayLocale()` est un signal, donc reactive) : ni l'une ni
+    // l'autre ne fige de texte dans ce computed (KKS-374).
+    const getGroupInfo = (dateStr: string): { labelKey: string | null; dateLabel: string } => {
       const date = new Date(dateStr);
-      if (date.toDateString() === today.toDateString()) return "Aujourd'hui";
-      if (date.toDateString() === yesterday.toDateString()) return 'Hier';
-      return date.toLocaleDateString(this.languageService.displayLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
+      if (date.toDateString() === today.toDateString()) {
+        return { labelKey: 'common.value.today', dateLabel: '' };
+      }
+      if (date.toDateString() === yesterday.toDateString()) {
+        return { labelKey: 'common.value.yesterday', dateLabel: '' };
+      }
+      return {
+        labelKey: null,
+        dateLabel: date.toLocaleDateString(this.languageService.displayLocale(), {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }),
+      };
     };
 
     for (const notification of notifications) {
-      const label = getGroupLabel(notification.createdAt);
-      let group = groups.find((g) => g.label === label);
+      const { labelKey, dateLabel } = getGroupInfo(notification.createdAt);
+      let group = groups.find((g) => g.labelKey === labelKey && g.dateLabel === dateLabel);
       if (!group) {
-        group = { label, notifications: [] };
+        group = { labelKey, dateLabel, notifications: [] };
         groups.push(group);
       }
       group.notifications.push(notification);
@@ -148,7 +165,7 @@ export class NotificationPanel {
       this.activeNotification.set(notification);
       this.modalService.openModal('repay', debt);
     } catch {
-      this.toastService.error('Impossible de charger la dette');
+      this.toastService.error(this.transloco.translate('debts.feedback.loadError'));
     }
   }
 
@@ -161,14 +178,14 @@ export class NotificationPanel {
       this.activeNotification.set(notification);
       this.showSnoozeDialog.set(true);
     } catch {
-      this.toastService.error('Impossible de charger la dette');
+      this.toastService.error(this.transloco.translate('debts.feedback.loadError'));
     }
   }
 
   onSnoozed(_updatedDebt: Debt, notification: NotificationModel): void {
     this.showSnoozeDialog.set(false);
     this.activeDebt.set(null);
-    this.toastService.success('Rappel reporté');
+    this.toastService.success(this.transloco.translate('debts.feedback.snoozed'));
     this.notificationService.markAsRead(notification.id);
   }
 
@@ -176,10 +193,10 @@ export class NotificationPanel {
     if (!notification.entityId) return;
     try {
       await firstValueFrom(this.recurringTransactionService.validate(notification.entityId));
-      this.toastService.success('Transaction créée');
+      this.toastService.success(this.transloco.translate('recurring.feedback.validated'));
       this.notificationService.markAsRead(notification.id);
     } catch {
-      this.toastService.error('Impossible de valider la transaction');
+      this.toastService.error(this.transloco.translate('recurring.feedback.validateError'));
     }
   }
 
@@ -187,10 +204,10 @@ export class NotificationPanel {
     if (!notification.entityId) return;
     try {
       await firstValueFrom(this.recurringTransactionService.skip(notification.entityId));
-      this.toastService.success('Occurrence passée');
+      this.toastService.success(this.transloco.translate('recurring.feedback.skipped'));
       this.notificationService.markAsRead(notification.id);
     } catch {
-      this.toastService.error('Impossible de passer l\'occurrence');
+      this.toastService.error(this.transloco.translate('recurring.feedback.skipError'));
     }
   }
 
@@ -198,10 +215,10 @@ export class NotificationPanel {
     if (!notification.entityId) return;
     try {
       await firstValueFrom(this.subscriptionService.pay(notification.entityId));
-      this.toastService.success('Paiement enregistré');
+      this.toastService.success(this.transloco.translate('subscriptions.feedback.paid'));
       this.notificationService.markAsRead(notification.id);
     } catch {
-      this.toastService.error('Impossible d\'enregistrer le paiement');
+      this.toastService.error(this.transloco.translate('subscriptions.feedback.payError'));
     }
   }
 

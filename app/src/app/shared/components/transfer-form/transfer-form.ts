@@ -15,6 +15,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { FormField } from '../form-field/form-field';
 import { SelectPicker } from '../select-picker/select-picker';
@@ -30,7 +31,7 @@ import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 @Component({
   selector: 'app-transfer-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField, SelectPicker],
+  imports: [ReactiveFormsModule, FormField, SelectPicker, TranslocoPipe],
   templateUrl: './transfer-form.html',
   styleUrl: './transfer-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,7 @@ export class TransferForm {
   private readonly modalService = inject(ModalService);
   private readonly logger = inject(DevLogger);
   private readonly apiError = inject(ApiErrorService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -107,7 +109,10 @@ export class TransferForm {
       this.saved.emit();
     } catch (err: unknown) {
       const httpErr = err as { error?: { message?: string } };
-      const message = this.apiError.label(httpErr, 'Erreur lors du virement');
+      const message = this.apiError.label(
+        httpErr,
+        this.transloco.translate('transactions.feedback.transferFailed'),
+      );
       this.errorMessage.set(message);
       this.logger.error('Transfer failed:', err);
     } finally {

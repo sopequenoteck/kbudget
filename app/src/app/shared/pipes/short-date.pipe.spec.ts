@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { ShortDatePipe } from './short-date.pipe';
 import { LanguageService } from '../../core/services/language';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 const toDateStr = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -16,7 +17,10 @@ describe('ShortDatePipe', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [{ provide: LanguageService, useValue: languageServiceMock }],
+      providers: [
+        { provide: LanguageService, useValue: languageServiceMock },
+        ...provideTranslocoTesting(),
+      ],
     });
 
     pipe = TestBed.runInInjectionContext(() => new ShortDatePipe());

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
@@ -31,10 +32,10 @@ const FIXED_RATES: Record<string, number> = {
   XOF_EUR: 1 / 655.957,
 };
 
-const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
-  [AccountType.COURANT]: 'Courant',
-  [AccountType.EPARGNE]: 'Épargne',
-  [AccountType.ESPECES]: 'Espèces',
+const ACCOUNT_TYPE_LABEL_KEYS: Record<AccountType, string> = {
+  [AccountType.COURANT]: 'accounts.value.current',
+  [AccountType.EPARGNE]: 'accounts.value.savings',
+  [AccountType.ESPECES]: 'accounts.value.cash',
 };
 
 const DEFAULT_ICONS: Record<AccountType, string> = {
@@ -53,7 +54,15 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
 @Component({
   selector: 'app-account-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker, BankSelect],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    FormField,
+    EmojiInput,
+    SelectPicker,
+    BankSelect,
+    TranslocoPipe,
+  ],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +75,7 @@ export class AccountForm {
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly preferenceService = inject(PreferenceService);
   private readonly modalService = inject(ModalService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly bankSelectRef = viewChild(BankSelect);
 
@@ -85,7 +95,7 @@ export class AccountForm {
   readonly isKnownBank = computed(() => this.bankSelectRef()?.isKnownBank() ?? false);
   readonly accountTypes = Object.values(AccountType);
   readonly AccountType = AccountType;
-  readonly typeLabels = ACCOUNT_TYPE_LABELS;
+  readonly typeLabels = ACCOUNT_TYPE_LABEL_KEYS;
   readonly defaultIcons = DEFAULT_ICONS;
   readonly accountColors = PALETTE_COLORS;
   readonly currencyItems = this.currencyService.currencyItems;
@@ -231,7 +241,9 @@ export class AccountForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(
+        err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'),
+      );
     } finally {
       this.submitting.set(false);
     }
@@ -278,7 +290,9 @@ export class AccountForm {
       await firstValueFrom(this.accountService.delete(acc.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(
+        err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'),
+      );
     }
   }
 

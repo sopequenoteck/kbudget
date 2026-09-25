@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { CategoryForm } from '../category-form/category-form';
 import { Category } from '../../../core/models/category.model';
@@ -19,7 +20,7 @@ import { normalize } from '../../utils/string.utils';
 @Component({
   selector: 'app-category-select',
   standalone: true,
-  imports: [CategoryForm],
+  imports: [CategoryForm, TranslocoPipe],
   templateUrl: './category-select.html',
   styleUrl: './category-select.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

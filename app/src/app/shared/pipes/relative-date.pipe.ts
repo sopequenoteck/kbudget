@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LanguageService } from '../../core/services/language';
 
 // Cache par locale (KKS-373, D8) : le format long change de langue sans
@@ -23,6 +24,7 @@ function getLongDateFormatter(locale: string): Intl.DateTimeFormat {
 @Pipe({ name: 'relativeDate', standalone: true, pure: false })
 export class RelativeDatePipe implements PipeTransform {
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   transform(value: string | null | undefined): string {
     if (!value) {
@@ -44,24 +46,24 @@ export class RelativeDatePipe implements PipeTransform {
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return "Aujourd'hui";
+      return this.transloco.translate('common.value.today');
     }
 
     if (diffDays === 1) {
-      return 'Hier';
+      return this.transloco.translate('common.value.yesterday');
     }
 
     if (diffDays === -1) {
-      return 'Demain';
+      return this.transloco.translate('common.value.tomorrow');
     }
 
     if (diffDays >= 2 && diffDays <= 7) {
-      return `il y a ${diffDays} jours`;
+      return this.transloco.translate('common.value.daysAgo', { count: diffDays });
     }
 
     if (diffDays >= 8 && diffDays <= 30) {
       const weeks = Math.floor(diffDays / 7);
-      return `il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
+      return this.transloco.translate('common.value.weeksAgo', { count: weeks });
     }
 
     return getLongDateFormatter(this.languageService.displayLocale()).format(date);

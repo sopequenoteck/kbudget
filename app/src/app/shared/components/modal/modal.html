@@ -25,7 +25,7 @@
             #closeBtn
             type="button"
             class="modal-close"
-            aria-label="Fermer"
+            [attr.aria-label]="'common.action.close' | transloco"
             (click)="closed.emit()"
           >
             &times;

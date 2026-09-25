@@ -3,24 +3,24 @@
   <div class="notification-overlay" (click)="onClose()"></div>
   <aside class="notification-panel">
     <div class="panel-header">
-      <h2>Notifications</h2>
+      <h2>{{ 'notifications.page.title' | transloco }}</h2>
       <div class="panel-actions">
         @if (notificationService.hasUnread()) {
-          <button class="action-btn" (click)="onMarkAllRead()" title="Tout marquer lu">
+          <button class="action-btn" (click)="onMarkAllRead()" [attr.title]="'notifications.action.markAllReadHint' | transloco">
             <ng-icon name="phosphorChecks" size="18" />
           </button>
         }
         @if (notificationService.notifications().length > 0) {
           @if (!confirmDeleteAll()) {
-            <button class="action-btn action-btn--danger" (click)="onDeleteAll()" title="Vider l'historique">
+            <button class="action-btn action-btn--danger" (click)="onDeleteAll()" [attr.title]="'notifications.action.deleteAllHint' | transloco">
               <ng-icon name="phosphorTrash" size="18" />
             </button>
           } @else {
-            <button class="action-btn action-btn--danger" (click)="executeDeleteAll()">Confirmer</button>
-            <button class="action-btn" (click)="cancelDeleteAll()">Annuler</button>
+            <button class="action-btn action-btn--danger" (click)="executeDeleteAll()">{{ 'common.action.confirm' | transloco }}</button>
+            <button class="action-btn" (click)="cancelDeleteAll()">{{ 'common.action.cancel' | transloco }}</button>
           }
         }
-        <button class="action-btn" (click)="onClose()" title="Fermer">
+        <button class="action-btn" (click)="onClose()" [attr.title]="'common.action.close' | transloco">
           <ng-icon name="phosphorX" size="18" />
         </button>
       </div>
@@ -29,12 +29,12 @@
       @if (notificationService.notifications().length === 0 && !notificationService.isLoading()) {
         <div class="empty-state">
           <ng-icon name="phosphorBellRinging" size="48" />
-          <p>Aucune notification</p>
+          <p>{{ 'notifications.empty.title' | transloco }}</p>
         </div>
       }
-      @for (group of groupedNotifications(); track group.label) {
+      @for (group of groupedNotifications(); track group.labelKey ?? group.dateLabel) {
         <div class="notification-group">
-          <div class="group-label">{{ group.label }}</div>
+          <div class="group-label">{{ group.labelKey ? (group.labelKey | transloco) : group.dateLabel }}</div>
           <div class="group-container">
           @for (notification of group.notifications; track notification.id) {
             <div
@@ -56,26 +56,26 @@
                 </div>
                 @if (notification.type === 'DEBT_DUE' || notification.type === 'DEBT_REMINDER') {
                   <div class="notification-actions">
-                    <button class="notification-action-btn" (click)="onRepayAction($event, notification)">Rembourser</button>
-                    <button class="notification-action-btn notification-action-btn--secondary" (click)="onSnoozeAction($event, notification)">Reporter</button>
+                    <button class="notification-action-btn" (click)="onRepayAction($event, notification)">{{ 'debts.action.repay' | transloco }}</button>
+                    <button class="notification-action-btn notification-action-btn--secondary" (click)="onSnoozeAction($event, notification)">{{ 'debts.action.snooze' | transloco }}</button>
                   </div>
                 }
                 @if (notification.type === 'RECURRING_TRANSACTION_DUE') {
                   <div class="notification-actions">
-                    <button class="notification-action-btn" (click)="onValidateRecurring(notification); $event.stopPropagation()">Valider</button>
-                    <button class="notification-action-btn notification-action-btn--secondary" (click)="onSkipRecurring(notification); $event.stopPropagation()">Passer</button>
+                    <button class="notification-action-btn" (click)="onValidateRecurring(notification); $event.stopPropagation()">{{ 'recurring.action.validate' | transloco }}</button>
+                    <button class="notification-action-btn notification-action-btn--secondary" (click)="onSkipRecurring(notification); $event.stopPropagation()">{{ 'recurring.action.skip' | transloco }}</button>
                   </div>
                 }
                 @if (notification.type === 'SUBSCRIPTION_DUE') {
                   <div class="notification-actions">
-                    <button class="notification-action-btn" (click)="onPaySubscription(notification); $event.stopPropagation()">Payer</button>
+                    <button class="notification-action-btn" (click)="onPaySubscription(notification); $event.stopPropagation()">{{ 'subscriptions.action.pay' | transloco }}</button>
                   </div>
                 }
               </div>
               <button
                 class="notification-delete"
                 (click)="onDelete($event, notification.id)"
-                title="Supprimer"
+                [attr.title]="'common.action.delete' | transloco"
               >
                 <ng-icon name="phosphorTrash" size="16" />
               </button>

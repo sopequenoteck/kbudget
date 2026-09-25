@@ -1,10 +1,171 @@
 {
+  "accounts": {
+    "action": {
+      "later": "Plus tard"
+    },
+    "dialog": {
+      "createTitle": "Nouveau compte",
+      "editTitle": "Modifier le compte"
+    },
+    "empty": {
+      "bankNotFound": "Aucune banque trouvée"
+    },
+    "feedback": {
+      "banksLoadError": "Impossible de charger les banques"
+    },
+    "filter": {
+      "bankSearchPlaceholder": "Rechercher une banque..."
+    },
+    "form": {
+      "active": "Compte actif",
+      "activeHint": "Définissez un autre compte par défaut avant de désactiver celui-ci",
+      "bankName": "Nom de la banque (optionnel)",
+      "bankNamePlaceholder": "Ex: Ma banque",
+      "bankTitle": "Banque",
+      "chooseFile": "Choisir un fichier",
+      "currency": "Devise",
+      "currencyPlaceholder": "Devise par défaut",
+      "currentBalance": "Solde actuel",
+      "customLogoAria": "Logo personnalisé",
+      "customLogo": "Logo personnalisé (optionnel)",
+      "customisationTitle": "Personnalisation",
+      "detailsTitle": "Détails",
+      "icon": "Icône",
+      "name": "Nom du compte",
+      "namePlaceholder": "Ex: Compte courant",
+      "newBalance": "Nouveau solde",
+      "openingBalance": "Solde initial",
+      "ratePlaceholder": "Ex: 655.957",
+      "rate": "1 {currency} =",
+      "rateProposalMessage": "Aucun taux {from} → {to} n'est défini.",
+      "rateProposalTitle": "Taux de conversion manquant",
+      "typeTitle": "Type de compte"
+    },
+    "list": {
+      "bankGroupFrance": "France",
+      "bankGroupInternational": "International",
+      "bankGroupWestAfrica": "Afrique de l'Ouest"
+    },
+    "value": {
+      "cash": "Espèces",
+      "current": "Courant",
+      "other": "Autre",
+      "otherCustom": "Autre / Personnalisé",
+      "savings": "Épargne"
+    }
+  },
   "auth": {
     "feedback": {
       "invalidCredentials": "Email ou mot de passe incorrect"
     },
     "form": {
       "passwordMinLength": "{min} caractères minimum"
+    }
+  },
+  "budgets": {
+    "dialog": {
+      "createTitle": "Nouveau budget",
+      "editTitle": "Modifier le budget"
+    }
+  },
+  "categories": {
+    "action": {
+      "create": "Créer",
+      "createNamed": "Créer « {name} »"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle catégorie",
+      "editTitle": "Modifier la catégorie"
+    },
+    "empty": {
+      "title": "Aucune catégorie — créez-en une"
+    },
+    "form": {
+      "icon": "Icone",
+      "name": "Nom",
+      "nameMaxLength": "30 caracteres maximum",
+      "namePlaceholder": "Nom de la categorie",
+      "searchPlaceholder": "Rechercher une catégorie..."
+    },
+    "list": {
+      "noResults": "Aucune catégorie trouvée",
+      "regionAria": "Catégories"
+    }
+  },
+  "common": {
+    "action": {
+      "back": "Retour",
+      "cancel": "Annuler",
+      "chooseEmojiAria": "Choisir un emoji",
+      "clearSelectionAria": "Effacer la selection",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "create": "Créer",
+      "currentMonthHint": "Revenir au mois actuel",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "logout": "Déconnexion",
+      "nextMonthAria": "Mois suivant",
+      "previousMonthAria": "Mois précédent",
+      "quickActionsAria": "Actions rapides",
+      "save": "Enregistrer"
+    },
+    "empty": {
+      "noItems": "Aucun element disponible"
+    },
+    "feedback": {
+      "deleteError": "Erreur lors de la suppression",
+      "saveError": "Erreur lors de la sauvegarde",
+      "saving": "Enregistrement..."
+    },
+    "filter": {
+      "searchAria": "Rechercher"
+    },
+    "form": {
+      "colourAria": "Couleur {color}",
+      "colour": "Couleur",
+      "searchPlaceholder": "Rechercher...",
+      "selectPlaceholder": "Selectionner..."
+    },
+    "list": {
+      "resultsCount": "{count} resultats"
+    },
+    "nav": {
+      "avatarAria": "Photo de profil",
+      "budgets": "Budgets",
+      "debts": "Dettes",
+      "home": "Accueil",
+      "settings": "Paramètres",
+      "subscriptions": "Abonnements",
+      "transactions": "Transactions",
+      "userMenuAria": "Menu utilisateur"
+    },
+    "validation": {
+      "maxLength": "{max} caractères maximum",
+      "nameRequired": "Nom requis"
+    },
+    "value": {
+      "daysAgo": "{count, plural, one {il y a # jour} other {il y a # jours}}",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "weeksAgo": "{count, plural, one {il y a # semaine} other {il y a # semaines}}",
+      "yesterday": "Hier"
+    }
+  },
+  "debts": {
+    "action": {
+      "create": "Dette",
+      "repay": "Rembourser",
+      "snooze": "Reporter"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle dette",
+      "editTitle": "Modifier la dette",
+      "repayTitle": "Remboursement"
+    },
+    "feedback": {
+      "loadError": "Impossible de charger la dette",
+      "snoozed": "Rappel reporté"
     }
   },
   "errors": {
@@ -39,7 +200,95 @@
     },
     "client": {
       "generic": "Une erreur est survenue",
-      "network": "Impossible de contacter le serveur"
+      "network": "Impossible de contacter le serveur",
+      "serverError": "Erreur serveur",
+      "timeout": "Délai de réponse dépassé",
+      "unknown": "Erreur inconnue",
+      "unreachable": "Serveur injoignable"
+    }
+  },
+  "exchangeRates": {
+    "feedback": {
+      "loadError": "Impossible de charger les taux de change"
+    }
+  },
+  "notifications": {
+    "action": {
+      "deleteAllHint": "Vider l'historique",
+      "markAllReadHint": "Tout marquer lu"
+    },
+    "empty": {
+      "title": "Aucune notification"
+    },
+    "page": {
+      "title": "Notifications"
+    }
+  },
+  "recurring": {
+    "action": {
+      "skip": "Passer",
+      "validate": "Valider"
+    },
+    "feedback": {
+      "loadError": "Impossible de charger les transactions récurrentes",
+      "skipError": "Impossible de passer l'occurrence",
+      "skipped": "Occurrence passée",
+      "validateError": "Impossible de valider la transaction",
+      "validated": "Transaction créée"
+    }
+  },
+  "settings": {
+    "feedback": {
+      "exchangeRatesStale": "Taux de change périmés — rechargez la page",
+      "loadError": "Impossible de charger les préférences",
+      "navOrderSaveError": "Impossible de sauvegarder l'ordre de navigation",
+      "saveError": "Impossible de sauvegarder les préférences"
+    }
+  },
+  "subscriptions": {
+    "action": {
+      "create": "Abonnement",
+      "pay": "Payer"
+    },
+    "dialog": {
+      "createTitle": "Nouvel abonnement",
+      "editTitle": "Modifier l'abonnement"
+    },
+    "feedback": {
+      "payError": "Impossible d'enregistrer le paiement",
+      "paid": "Paiement enregistré"
+    }
+  },
+  "transactions": {
+    "action": {
+      "create": "Transaction",
+      "transfer": "Virement",
+      "transferSubmit": "Effectuer le virement"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle transaction",
+      "editTitle": "Modifier la transaction",
+      "transferCreateTitle": "Nouveau virement",
+      "transferEditTitle": "Virement"
+    },
+    "empty": {
+      "notEnoughAccounts": "Vous devez avoir au moins 2 comptes actifs pour effectuer un virement."
+    },
+    "feedback": {
+      "transferFailed": "Erreur lors du virement",
+      "transferring": "Virement..."
+    },
+    "form": {
+      "amount": "Montant",
+      "amountInvalid": "Le montant doit être supérieur à 0",
+      "note": "Note (optionnel)",
+      "transferAccountsMismatch": "Les comptes source et destination doivent être différents",
+      "transferFrom": "Depuis",
+      "transferFromPlaceholder": "Compte source",
+      "transferFromRequired": "Compte source requis",
+      "transferTo": "Vers",
+      "transferToPlaceholder": "Compte destination",
+      "transferToRequired": "Compte destination requis"
     }
   }
 }

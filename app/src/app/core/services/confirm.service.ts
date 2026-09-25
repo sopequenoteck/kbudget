@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 
 export type ConfirmVariant = 'default' | 'danger';
 
@@ -13,6 +14,8 @@ export interface ConfirmConfig {
 
 @Injectable({ providedIn: 'root' })
 export class ConfirmService {
+  private readonly transloco = inject(TranslocoService);
+
   readonly isOpen = signal(false);
   readonly config = signal<ConfirmConfig | null>(null);
 
@@ -29,8 +32,8 @@ export class ConfirmService {
     this.config.set({
       title: options.title,
       message: options.message,
-      confirmLabel: options.confirmLabel ?? 'Confirmer',
-      cancelLabel: options.cancelLabel ?? 'Annuler',
+      confirmLabel: options.confirmLabel ?? this.transloco.translate('common.action.confirm'),
+      cancelLabel: options.cancelLabel ?? this.transloco.translate('common.action.cancel'),
       variant: options.variant ?? 'default',
       icon: options.icon ?? '',
     });

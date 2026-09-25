@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
 import { LanguageService } from '../../core/services/language';
 
 // Date courte relative des formulaires de transaction, d'abonnement et de
@@ -8,6 +9,7 @@ import { LanguageService } from '../../core/services/language';
 @Pipe({ name: 'shortDate', standalone: true, pure: false })
 export class ShortDatePipe implements PipeTransform {
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   transform(value: string): string {
     if (!value) return '';
@@ -16,9 +18,9 @@ export class ShortDatePipe implements PipeTransform {
     today.setHours(0, 0, 0, 0);
     const diff = date.getTime() - today.getTime();
     const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
+    if (days === 0) return this.transloco.translate('common.value.today');
+    if (days === -1) return this.transloco.translate('common.value.yesterday');
+    if (days === 1) return this.transloco.translate('common.value.tomorrow');
     return date.toLocaleDateString(this.languageService.displayLocale(), {
       day: 'numeric',
       month: 'short',

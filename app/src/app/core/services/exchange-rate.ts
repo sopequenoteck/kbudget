@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 import { ApiService } from './api';
 import { ExchangeRate } from '../models/exchange-rate.model';
 import { DevLogger } from './dev-logger';
@@ -10,6 +11,7 @@ import { DevLogger } from './dev-logger';
 export class ExchangeRateService {
   private readonly api = inject(ApiService);
   private readonly logger = inject(DevLogger);
+  private readonly transloco = inject(TranslocoService);
 
   private readonly _rates = signal<ExchangeRate[]>([]);
   private readonly _loading = signal(false);
@@ -27,7 +29,7 @@ export class ExchangeRateService {
       this._error.set(null);
     } catch (e) {
       this.logger.error('Failed to load exchange rates:', e);
-      this._error.set('Impossible de charger les taux de change');
+      this._error.set(this.transloco.translate('exchangeRates.feedback.loadError'));
     } finally {
       this._loading.set(false);
     }
