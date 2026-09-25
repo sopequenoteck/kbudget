@@ -33,6 +33,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   - `docs/i18n.md` est corrige : il prescrivait de regler l'interpolation de
     Transloco sur `{ }`, ce qui vide tout pluriel ICU. Un test verrouille desormais
     ce comportement.
+- **Textes partages d'Angular dans les catalogues (KKS-374)** : etape 2 sur 8
+  de KKS-325, **aucun changement visible**. Les textes de `shared/` et `core/`
+  (formulaires de compte, de categorie et de virement, navigation, bouton +,
+  modales, notifications, selecteurs) passent dans les catalogues, et fixent le
+  vocabulaire `common.*` que les etapes par domaine reutiliseront. Le
+  calendrier tire noms de mois et initiales de jour de la langue active.
+  Restent en francais jusqu'a leur etape : les descriptions des
+  fonctionnalites optionnelles et les regles de mot de passe.
 
 ### Changed
 
