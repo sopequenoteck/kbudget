@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { TransactionForm } from './transaction-form';
@@ -316,5 +316,77 @@ describe('TransactionForm', () => {
     await fixture.componentInstance.onDelete();
 
     expect(transactionServiceMock.delete).not.toHaveBeenCalled();
+  });
+
+  it('should_reject_submit_when_amount_is_invalid_despite_form_validity', async () => {
+    // Garde-fou defensif de onSubmit (deja present avant KKS-377) : on
+    // desactive le controle montant pour l'exclure de la validite du
+    // formulaire tout en lui laissant une valeur non numerique.
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ libelle: 'Test' });
+    component.form.get('montant')!.disable();
+    component.form.get('montant')!.setValue('abc');
+    fixture.detectChanges();
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Montant invalide');
+    expect(transactionServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should_set_error_message_when_submit_fails', async () => {
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+    transactionServiceMock.create = vi.fn().mockReturnValue(throwError(() => 'network down'));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ libelle: 'Test', montant: '10' });
+    fixture.detectChanges();
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Erreur lors de la sauvegarde');
+    expect(component.submitting()).toBe(false);
+  });
+
+  it('should_include_transfer_counterpart_message_when_deleting_transfer_transaction', async () => {
+    const existingTransaction = makeTransaction({ transferId: 'transfer-1' });
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirm.mockResolvedValue(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    const confirmArgs = confirmServiceMock.confirm.mock.calls[0][0];
+    expect(confirmArgs.message).toContain('La contrepartie du virement sera aussi supprimée.');
+  });
+
+  it('should_set_error_message_when_delete_fails', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirm.mockResolvedValue(true);
+    transactionServiceMock.delete = vi.fn().mockReturnValue(throwError(() => 'server error'));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Erreur lors de la suppression');
   });
 });

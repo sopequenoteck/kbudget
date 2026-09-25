@@ -16,6 +16,7 @@ import {
   phosphorPause,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { RecurringTransactionService } from '../../../../core/services/recurring-transaction';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
@@ -34,7 +35,7 @@ import { LanguageService } from '../../../../core/services/language';
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
 interface RecurringGroup {
-  label: string;
+  labelKey: string;
   status: RecurringStatus;
   items: RecurringTransactionResponse[];
 }
@@ -46,22 +47,36 @@ interface MonthlySummary {
   expenseCount: number;
 }
 
+/** Soit une clé de traduction (avec parametres ICU), soit une date deja
+ * formatee pour la locale d'affichage (au-dela de 30 jours). */
+interface RelativeDateInfo {
+  readonly key?: string;
+  readonly params?: { count: number };
+  readonly formatted?: string;
+}
+
 const STATUS_ORDER: Record<RecurringStatus, number> = {
   overdue: 0,
   today: 1,
   upcoming: 2,
 };
 
-const STATUS_LABELS: Record<RecurringStatus, string> = {
-  overdue: 'En retard',
-  today: "Aujourd'hui",
-  upcoming: 'À venir',
+const STATUS_LABEL_KEYS: Record<RecurringStatus, string> = {
+  overdue: 'recurring.value.overdue',
+  today: 'common.value.today',
+  upcoming: 'recurring.value.upcoming',
+};
+
+const FREQUENCY_LABEL_KEYS: Record<Frequency, string> = {
+  [Frequency.MENSUEL]: 'recurring.value.monthly',
+  [Frequency.ANNUEL]: 'recurring.value.yearly',
+  [Frequency.HEBDOMADAIRE]: 'recurring.value.weekly',
 };
 
 @Component({
   selector: 'app-recurring-list',
   standalone: true,
-  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe, EmptyState],
+  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -83,6 +98,7 @@ export class RecurringList {
   private readonly exchangeRateService = inject(ExchangeRateService);
   readonly preferenceService = inject(PreferenceService);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly skeletonItems = Array(5);
 
@@ -114,7 +130,7 @@ export class RecurringList {
 
     const result: RecurringGroup[] = [];
     for (const [status, items] of groups) {
-      result.push({ label: STATUS_LABELS[status], status, items });
+      result.push({ labelKey: STATUS_LABEL_KEYS[status], status, items });
     }
     return result;
   });
@@ -160,18 +176,11 @@ export class RecurringList {
     return 'upcoming';
   }
 
-  getFrequencyLabel(frequency: Frequency): string {
-    switch (frequency) {
-      case Frequency.MENSUEL:
-        return 'Mensuel';
-      case Frequency.ANNUEL:
-        return 'Annuel';
-      case Frequency.HEBDOMADAIRE:
-        return 'Hebdomadaire';
-    }
+  getFrequencyLabelKey(frequency: Frequency): string {
+    return FREQUENCY_LABEL_KEYS[frequency];
   }
 
-  getRelativeDate(nextOccurrence: string): string {
+  getRelativeDateInfo(nextOccurrence: string): RelativeDateInfo {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const next = new Date(nextOccurrence);
@@ -181,12 +190,15 @@ export class RecurringList {
 
     if (diffDays < 0) {
       const absDays = Math.abs(diffDays);
-      return absDays === 1 ? 'hier' : `il y a ${absDays} j.`;
+      if (absDays === 1) return { key: 'recurring.list.yesterday' };
+      return { key: 'recurring.list.daysOverdue', params: { count: absDays } };
     }
-    if (diffDays === 0) return "aujourd'hui";
-    if (diffDays === 1) return 'demain';
-    if (diffDays <= 30) return `dans ${diffDays} j.`;
-    return next.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: 'short' });
+    if (diffDays === 0) return { key: 'recurring.list.today' };
+    if (diffDays === 1) return { key: 'recurring.list.tomorrow' };
+    if (diffDays <= 30) return { key: 'recurring.list.daysUntil', params: { count: diffDays } };
+    return {
+      formatted: next.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: 'short' }),
+    };
   }
 
   getValueClass(item: RecurringTransactionResponse): string {
@@ -203,9 +215,9 @@ export class RecurringList {
       for (const item of items) {
         await firstValueFrom(this.service.validate(item.id));
       }
-      this.toastService.success(`${items.length} transaction${items.length > 1 ? 's' : ''} validée${items.length > 1 ? 's' : ''}`);
+      this.toastService.success(this.transloco.translate('recurring.feedback.validatedCount', { count: items.length }));
     } catch {
-      this.toastService.error('Erreur lors de la validation');
+      this.toastService.error(this.transloco.translate('recurring.feedback.validationError'));
     } finally {
       this.actionInProgress.set(null);
     }
@@ -216,9 +228,9 @@ export class RecurringList {
     try {
       await firstValueFrom(this.service.validate(item.id));
       this.selectedItem.set(null);
-      this.toastService.success('Transaction validée');
+      this.toastService.success(this.transloco.translate('recurring.feedback.validatedOne'));
     } catch {
-      this.toastService.error('Erreur lors de la validation');
+      this.toastService.error(this.transloco.translate('recurring.feedback.validationError'));
     } finally {
       this.actionInProgress.set(null);
     }
@@ -229,9 +241,9 @@ export class RecurringList {
     try {
       await firstValueFrom(this.service.skip(item.id));
       this.selectedItem.set(null);
-      this.toastService.success('Occurrence passée');
+      this.toastService.success(this.transloco.translate('recurring.feedback.skipped'));
     } catch {
-      this.toastService.error('Erreur lors du passage');
+      this.toastService.error(this.transloco.translate('recurring.feedback.skipFailed'));
     } finally {
       this.actionInProgress.set(null);
     }
@@ -242,9 +254,9 @@ export class RecurringList {
     try {
       await firstValueFrom(this.service.deactivate(item.id));
       this.selectedItem.set(null);
-      this.toastService.success('Récurrence désactivée');
+      this.toastService.success(this.transloco.translate('recurring.feedback.deactivated'));
     } catch {
-      this.toastService.error('Erreur lors de la désactivation');
+      this.toastService.error(this.transloco.translate('recurring.feedback.deactivateError'));
     } finally {
       this.actionInProgress.set(null);
     }

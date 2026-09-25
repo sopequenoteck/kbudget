@@ -2,8 +2,8 @@
   <div class="hero__top-row">
     <div class="hero__nav">
       <span class="hero__nav-label">{{ selectedMonthLabel() }}</span>
-      <button class="hero__nav-btn" (click)="prevMonth()" aria-label="Mois précédent">◀</button>
-      <button class="hero__nav-btn" (click)="nextMonth()" aria-label="Mois suivant">▶</button>
+      <button class="hero__nav-btn" (click)="prevMonth()" [attr.aria-label]="'common.action.previousMonthAria' | transloco">◀</button>
+      <button class="hero__nav-btn" (click)="nextMonth()" [attr.aria-label]="'common.action.nextMonthAria' | transloco">▶</button>
     </div>
     <app-currency-pill-selector
       [currencies]="preferenceService.currencies()"
@@ -12,7 +12,7 @@
     />
   </div>
   <div class="hero__amount">
-    <span class="hero__amount-label">Solde</span>
+    <span class="hero__amount-label">{{ 'transactions.summary.balance' | transloco }}</span>
     <span class="hero__amount-value" [class.hero__amount-value--positive]="convertedSolde() > 0" [class.hero__amount-value--negative]="convertedSolde() < 0">
       {{ convertedSolde() | amount: null : activeCurrency() }}
     </span>
@@ -24,7 +24,7 @@
         @if (convertedRecettes() > 0) {
           <span>{{ convertedRecettes() | amount: 'RECETTE' : activeCurrency() }}</span>
         } @else {
-          <span>0 revenus</span>
+          <span>{{ 'transactions.summary.noIncome' | transloco }}</span>
         }
       </div>
       @if (secondaryRecettes() !== null && secondaryCurrency(); as sec) {
@@ -37,7 +37,7 @@
         @if (convertedDepenses() > 0) {
           <span class="hero__meta-line--expense">{{ convertedDepenses() | amount: 'DEPENSE' : activeCurrency() }}</span>
         } @else {
-          <span>0 dépenses</span>
+          <span>{{ 'transactions.summary.noExpense' | transloco }}</span>
         }
       </div>
       @if (secondaryDepenses() !== null && secondaryCurrency(); as sec) {
@@ -53,37 +53,37 @@
     <div class="section-header__search-wrapper">
       <input class="section-header__search-input input-naked"
         type="text"
-        placeholder="Rechercher..."
+        [placeholder]="'common.form.searchPlaceholder' | transloco"
         [value]="searchQuery()"
         (input)="searchQuery.set($any($event.target).value)"
         (keydown.escape)="toggleSearch()"
         #searchInput />
-      <button class="section-header__search-clear" (click)="toggleSearch()" aria-label="Fermer">
+      <button class="section-header__search-clear" (click)="toggleSearch()" [attr.aria-label]="'common.action.close' | transloco">
         <ng-icon name="phosphorX" size="16" />
       </button>
     </div>
   } @else {
-    <h2 class="section-header__title">Transactions</h2>
+    <h2 class="section-header__title">{{ 'transactions.page.title' | transloco }}</h2>
   }
   <div class="section-header__actions">
     @if (!searchOpen()) {
       <button class="section-header__action-btn"
         (click)="toggleSearch()"
-        aria-label="Rechercher">
+        [attr.aria-label]="'common.filter.searchAria' | transloco">
         <ng-icon name="phosphorMagnifyingGlass" size="20" />
       </button>
     }
     <button class="section-header__action-btn"
       [class.active]="filterOpen() || hasActiveFilters()"
       (click)="toggleFilter()"
-      aria-label="Filtrer">
+      [attr.aria-label]="'common.filter.filterAria' | transloco">
       <ng-icon name="phosphorFunnel" size="20" />
       @if (hasActiveFilters()) {
         <span class="section-header__filter-dot"></span>
       }
     </button>
     <span class="section-header__separator"></span>
-    <a class="section-header__action-btn" routerLink="/transactions/recurring" aria-label="Récurrences">
+    <a class="section-header__action-btn" routerLink="/transactions/recurring" [attr.aria-label]="'recurring.page.title' | transloco">
       <ng-icon name="phosphorArrowsClockwise" size="20" />
     </a>
   </div>
@@ -92,9 +92,9 @@
 @if (filterOpen()) {
   <div class="filter-panel">
     <div class="filter-panel__row">
-      <button class="filter-chip" [class.active]="typeFilter() === null" (click)="setTypeFilter(null)">Tout</button>
-      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.DEPENSE" (click)="setTypeFilter(TransactionType.DEPENSE)">Dépenses</button>
-      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.RECETTE" (click)="setTypeFilter(TransactionType.RECETTE)">Recettes</button>
+      <button class="filter-chip" [class.active]="typeFilter() === null" (click)="setTypeFilter(null)">{{ 'common.filter.all' | transloco }}</button>
+      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.DEPENSE" (click)="setTypeFilter(TransactionType.DEPENSE)">{{ 'transactions.filter.expense' | transloco }}</button>
+      <button class="filter-chip" [class.active]="typeFilter() === TransactionType.RECETTE" (click)="setTypeFilter(TransactionType.RECETTE)">{{ 'transactions.filter.income' | transloco }}</button>
     </div>
 
     @if (monthCategories().length > 0) {
@@ -118,7 +118,7 @@
     }
 
     @if (hasActiveFilters()) {
-      <button class="filter-panel__reset" (click)="resetFilters()">Réinitialiser</button>
+      <button class="filter-panel__reset" (click)="resetFilters()">{{ 'common.action.reset' | transloco }}</button>
     }
   </div>
 }
@@ -141,19 +141,19 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>Erreur de chargement</p>
-    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+    <p>{{ 'common.feedback.loadError' | transloco }}</p>
+    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (groupedTransactions().length === 0) {
   <app-empty-state
     [icon]="emptyStateConfig().icon"
-    [message]="emptyStateConfig().message"
-    [ctaLabel]="emptyStateConfig().ctaLabel"
-    (ctaClick)="emptyStateConfig().ctaLabel === 'Réinitialiser les filtres' ? resetFilters() : onAddTransaction()"
+    [message]="emptyStateConfig().messageKey | transloco: emptyStateConfig().messageParams"
+    [ctaLabel]="emptyStateConfig().ctaLabelKey ? (emptyStateConfig().ctaLabelKey! | transloco) : undefined"
+    (ctaClick)="emptyStateConfig().isResetCta ? resetFilters() : onAddTransaction()"
   />
 } @else {
-  @for (group of groupedTransactions(); track group.label) {
-    <div class="date-label">{{ group.label }}</div>
+  @for (group of groupedTransactions(); track group.key) {
+    <div class="date-label">{{ dateGroupLabelKeys[group.key] | transloco }}</div>
     <div class="list-group">
       @for (transaction of group.transactions; track transaction.id) {
         <button type="button" class="list-row" (click)="onTransactionPressed(transaction)">

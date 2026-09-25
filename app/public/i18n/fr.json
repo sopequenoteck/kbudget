@@ -108,6 +108,9 @@
       "nextMonthAria": "Mois suivant",
       "previousMonthAria": "Mois précédent",
       "quickActionsAria": "Actions rapides",
+      "reset": "Réinitialiser",
+      "resetFilters": "Réinitialiser les filtres",
+      "retry": "Réessayer",
       "save": "Enregistrer"
     },
     "empty": {
@@ -115,10 +118,13 @@
     },
     "feedback": {
       "deleteError": "Erreur lors de la suppression",
+      "loadError": "Erreur de chargement",
       "saveError": "Erreur lors de la sauvegarde",
       "saving": "Enregistrement..."
     },
     "filter": {
+      "all": "Tout",
+      "filterAria": "Filtrer",
       "searchAria": "Rechercher"
     },
     "form": {
@@ -226,15 +232,54 @@
   },
   "recurring": {
     "action": {
+      "deactivate": "Désactiver la récurrence",
+      "markAsPaid": "Marquer comme payée",
+      "payAll": "Tout payé",
       "skip": "Passer",
+      "skipOccurrence": "Passer cette occurrence",
       "validate": "Valider"
     },
+    "detail": {
+      "next": "Prochaine :"
+    },
+    "empty": {
+      "title": "Aucune transaction récurrente"
+    },
     "feedback": {
+      "created": "Transaction récurrente créée",
+      "deactivateError": "Erreur lors de la désactivation",
+      "deactivated": "Récurrence désactivée",
       "loadError": "Impossible de charger les transactions récurrentes",
       "skipError": "Impossible de passer l'occurrence",
+      "skipFailed": "Erreur lors du passage",
       "skipped": "Occurrence passée",
       "validateError": "Impossible de valider la transaction",
-      "validated": "Transaction créée"
+      "validated": "Transaction créée",
+      "validatedCount": "{count, plural, one {# transaction validée} other {# transactions validées}}",
+      "validatedOne": "Transaction validée",
+      "validationError": "Erreur lors de la validation"
+    },
+    "list": {
+      "daysOverdue": "{count, plural, one {il y a # j.} other {il y a # j.}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "today": "aujourd'hui",
+      "tomorrow": "demain",
+      "yesterday": "hier"
+    },
+    "page": {
+      "title": "Récurrences"
+    },
+    "summary": {
+      "expenseCount": "{count, plural, one {# charge} other {# charges}}",
+      "monthlyExpenses": "~{amount} /mois",
+      "title": "Bilan mensuel"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "overdue": "En retard",
+      "upcoming": "À venir",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
     }
   },
   "settings": {
@@ -261,34 +306,74 @@
   },
   "transactions": {
     "action": {
+      "add": "Ajouter une transaction",
       "create": "Transaction",
       "transfer": "Virement",
       "transferSubmit": "Effectuer le virement"
     },
     "dialog": {
       "createTitle": "Nouvelle transaction",
+      "deleteMessage": "Voulez-vous vraiment supprimer cette transaction ?",
+      "deleteTransferMessage": "La contrepartie du virement sera aussi supprimée.",
       "editTitle": "Modifier la transaction",
       "transferCreateTitle": "Nouveau virement",
       "transferEditTitle": "Virement"
     },
     "empty": {
+      "noExpenseInMonth": "Aucune dépense en {month}",
+      "noIncomeInMonth": "Aucune recette en {month}",
+      "noResults": "Aucune transaction trouvée",
+      "noneInMonth": "Aucune transaction en {month}",
       "notEnoughAccounts": "Vous devez avoir au moins 2 comptes actifs pour effectuer un virement."
     },
     "feedback": {
+      "amountInvalid": "Montant invalide",
       "transferFailed": "Erreur lors du virement",
       "transferring": "Virement..."
     },
+    "filter": {
+      "expense": "Dépenses",
+      "income": "Recettes"
+    },
     "form": {
+      "account": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
       "amount": "Montant",
       "amountInvalid": "Le montant doit être supérieur à 0",
+      "category": "Catégorie",
+      "dateAria": "Date",
+      "frequencyPlaceholder": "Fréquence",
+      "isRecurring": "Transaction récurrente",
+      "descriptionPlaceholder": "Libellé",
       "note": "Note (optionnel)",
+      "noteAria": "Note",
+      "notePlaceholder": "Ajouter une note...",
+      "recurringAria": "Récurrence",
       "transferAccountsMismatch": "Les comptes source et destination doivent être différents",
       "transferFrom": "Depuis",
       "transferFromPlaceholder": "Compte source",
       "transferFromRequired": "Compte source requis",
       "transferTo": "Vers",
       "transferToPlaceholder": "Compte destination",
-      "transferToRequired": "Compte destination requis"
+      "transferToRequired": "Compte destination requis",
+      "typeAria": "Type de transaction"
+    },
+    "list": {
+      "lastWeek": "Semaine dernière",
+      "older": "Plus ancien",
+      "thisWeek": "Cette semaine"
+    },
+    "page": {
+      "title": "Transactions"
+    },
+    "summary": {
+      "balance": "Solde",
+      "noExpense": "0 dépenses",
+      "noIncome": "0 recettes"
+    },
+    "value": {
+      "expense": "Dépense",
+      "income": "Recette"
     }
   }
 }
