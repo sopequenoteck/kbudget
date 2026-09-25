@@ -41,6 +41,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   calendrier tire noms de mois et initiales de jour de la langue active.
   Restent en francais jusqu'a leur etape : les descriptions des
   fonctionnalites optionnelles et les regles de mot de passe.
+- **Transactions et recurrences dans les catalogues (KKS-377)** : etape 5 sur 8
+  de KKS-325. L'ecran des transactions, le formulaire de transaction et la
+  liste des recurrences passent dans les catalogues, pluriels compris. Deux
+  textes changent : « 0 revenus » devient « 0 recettes » (le vocabulaire de
+  l'application est Recette), et le bilan des recurrences affiche « 1 charge »
+  au lieu de « 1 charges ».
 
 ### Changed
 
