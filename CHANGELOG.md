@@ -58,6 +58,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   total » *Total net worth*. A l'ecran, seuls changent les pluriels (« 1
   budget », « 1 actif », « 1 transaction ») et « 0 revenus », devenu « 0
   recettes » sur le tableau de bord comme sur l'ecran des transactions.
+- **Import CSV dans les catalogues (KKS-376)** : etape 4 sur 8 de KKS-325.
+  Profils d'import, brouillons, regles de categorisation, correspondance des
+  colonnes et revue passent dans les catalogues ; les noms de banques restent
+  des donnees. Seuls les accords changent a l'ecran (« 1 transaction », « 2
+  lignes selectionnees » au lieu de « ligne(s) selectionnee(s) »).
 
 ### Changed
 
@@ -66,6 +71,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   par `git blame`, que Sonar ne recalculait que pour les fichiers de contenu
   modifie. Or toutes les analyses ecrasent le meme projet : une PR d'arbre
   identique a une autre etait notee sur l'historique de celle-ci.
+
+### Security
+
+- **Revue d'import : le bandeau de suggestion de regle echappe le libelle du
+  releve (KKS-376)**. Il affiche ce libelle et le nom de categorie en gras via
+  du HTML traduit ; sans echappement, un releve contenant du balisage (`<img>`,
+  `<a>`) l'aurait fait rendre par la page. Trouve a la relecture de l'etape
+  d'extraction, avant toute livraison : aucune version publiee n'est touchee.
 
 ## [6.6.1] - 2026-09-25
 
