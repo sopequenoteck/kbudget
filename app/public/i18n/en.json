@@ -114,7 +114,8 @@
       "save": "Save"
     },
     "empty": {
-      "noItems": "No items available"
+      "noItems": "No items available",
+      "noPayments": "No payments recorded"
     },
     "feedback": {
       "deleteError": "Delete failed",
@@ -151,7 +152,9 @@
       "nameRequired": "Name required"
     },
     "value": {
+      "active": "Active",
       "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+      "inactive": "Inactive",
       "today": "Today",
       "tomorrow": "Tomorrow",
       "weeksAgo": "{count, plural, one {# week ago} other {# weeks ago}}",
@@ -160,18 +163,83 @@
   },
   "debts": {
     "action": {
+      "add": "Add a debt",
       "create": "Debt",
       "repay": "Repay",
       "snooze": "Snooze"
     },
+    "detail": {
+      "due": "Due {date}",
+      "initial": "Initial {amount}",
+      "paymentCount": "{count, plural, one {# payment} other {# payments}}",
+      "payments": "Payments",
+      "reminderAt": "{date} at {time}",
+      "repaidAmount": "{amount} repaid"
+    },
     "dialog": {
       "createTitle": "New debt",
+      "deleteFormMessage": "Are you sure you want to delete this debt?",
+      "deleteMessage": "Are you sure you want to delete this debt?\nRecorded repayments will be kept.",
+      "deleteTitle": "{person} — {amount} remaining",
       "editTitle": "Edit debt",
-      "repayTitle": "Repayment"
+      "remaining": "Remaining: {amount}",
+      "reminderDatePast": "The date cannot be in the past",
+      "reminderDateRequired": "The date is required",
+      "reminderTimeRequired": "The time is required",
+      "repayTitle": "Repayment",
+      "snoozeTitle": "Snooze the reminder",
+      "snoozing": "Snoozing..."
+    },
+    "empty": {
+      "title": "No debts"
     },
     "feedback": {
+      "amountInvalid": "Invalid amount",
+      "deleted": "Debt deleted",
       "loadError": "Unable to load debt",
-      "snoozed": "Reminder snoozed"
+      "repaid": "Debt repaid!",
+      "repayError": "Repayment failed",
+      "repaymentRecorded": "Repayment recorded. Remaining: {amount}",
+      "snoozed": "Reminder snoozed",
+      "snoozeError": "Failed to snooze the reminder"
+    },
+    "form": {
+      "account": "Account",
+      "accountAria": "Account",
+      "accountPlaceholder": "Select an account",
+      "category": "Category",
+      "categoryAria": "Category",
+      "currencyPlaceholder": "Default currency",
+      "dateAria": "Date",
+      "personPlaceholder": "Person",
+      "reminderAria": "Reminder",
+      "reminderDate": "Reminder date",
+      "reminderTime": "Reminder time",
+      "typeAria": "Debt direction"
+    },
+    "list": {
+      "daysOverdue": "{count, plural, one {# day overdue} other {# days overdue}}",
+      "daysUntil": "{count, plural, one {in # day} other {in # days}}",
+      "later": "Later",
+      "noDueDate": "No due date",
+      "overdue": "Overdue",
+      "repaid": "Repaid",
+      "thisMonth": "This month",
+      "thisWeek": "This week",
+      "today": "today",
+      "tomorrow": "tomorrow"
+    },
+    "summary": {
+      "borrowedCount": "{count, plural, one {# borrowed} other {# borrowed}}",
+      "lentCount": "{count, plural, one {# lent} other {# lent}}",
+      "net": "Net balance",
+      "outstandingCount": "{count, plural, one {# outstanding} other {# outstanding}}"
+    },
+    "value": {
+      "borrowed": "Borrowed",
+      "lent": "Lent",
+      "notRepaid": "Not repaid",
+      "repaid": "Repaid"
     }
   },
   "errors": {
@@ -292,16 +360,68 @@
   },
   "subscriptions": {
     "action": {
+      "activate": "Activate",
+      "add": "Add a subscription",
       "create": "Subscription",
+      "deactivate": "Deactivate",
       "pay": "Pay"
+    },
+    "detail": {
+      "history": "History",
+      "paymentCount": "{count, plural, one {# payment} other {# payments}}"
     },
     "dialog": {
       "createTitle": "New subscription",
+      "deleteMessage": "Are you sure you want to delete this subscription?",
       "editTitle": "Edit subscription"
     },
+    "empty": {
+      "title": "No subscriptions"
+    },
     "feedback": {
+      "activated": "Subscription activated",
+      "amountInvalid": "Invalid amount",
+      "deactivated": "Subscription deactivated",
+      "deleted": "Subscription deleted",
+      "deleteFailed": "Deletion failed",
+      "paid": "Payment recorded",
       "payError": "Unable to record the payment",
-      "paid": "Payment recorded"
+      "payFailed": "Payment failed",
+      "updateFailed": "Update failed"
+    },
+    "form": {
+      "account": "Account",
+      "accountAria": "Account",
+      "accountPlaceholder": "Select an account",
+      "category": "Category",
+      "categoryAria": "Category",
+      "currencyPlaceholder": "Default currency",
+      "frequencyAria": "Frequency",
+      "namePlaceholder": "Name",
+      "startDateAria": "Start date"
+    },
+    "list": {
+      "activeCount": "{count, plural, one {# active} other {# active}}",
+      "daysUntil": "{count, plural, one {in # day} other {in # days}}",
+      "inactive": "Inactive",
+      "later": "Later",
+      "nextMonth": "Next month",
+      "thisMonth": "This month",
+      "thisWeek": "This week",
+      "today": "today",
+      "tomorrow": "tomorrow"
+    },
+    "summary": {
+      "activeCount": "{count, plural, one {# subscription} other {# subscriptions}}",
+      "monthlyTotal": "Monthly total"
+    },
+    "value": {
+      "monthly": "Monthly",
+      "perMonth": "/month",
+      "perWeek": "/week",
+      "perYear": "/year",
+      "weekly": "Weekly",
+      "yearly": "Yearly"
     }
   },
   "transactions": {

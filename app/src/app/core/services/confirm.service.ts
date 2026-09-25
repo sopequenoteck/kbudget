@@ -21,6 +21,21 @@ export class ConfirmService {
 
   private resolveCallback: ((value: boolean) => void) | null = null;
 
+  /**
+   * Raccourci pour la confirmation de suppression : applique systematiquement
+   * `variant: 'danger'` et le libelle `common.action.delete`, repetes a
+   * l'identique dans chaque `onDelete` (KKS-378).
+   */
+  confirmDelete(options: { title: string; message: string; icon?: string }): Promise<boolean> {
+    return this.confirm({
+      title: options.title,
+      message: options.message,
+      confirmLabel: this.transloco.translate('common.action.delete'),
+      variant: 'danger',
+      icon: options.icon,
+    });
+  }
+
   confirm(options: {
     title: string;
     message: string;

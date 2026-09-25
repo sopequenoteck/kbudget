@@ -13,6 +13,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -36,7 +37,7 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
-import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
+import { Debt, DebtRequest, DebtType, DEBT_TYPE_LABEL_KEYS } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
@@ -48,7 +49,7 @@ type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminde
 
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -75,6 +76,9 @@ export class DebtForm {
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly DEBT_TYPE_LABEL_KEYS = DEBT_TYPE_LABEL_KEYS;
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -263,7 +267,7 @@ export class DebtForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('debts.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -292,7 +296,7 @@ export class DebtForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -303,11 +307,9 @@ export class DebtForm {
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
     const amount = formatCurrencyAmount(d.montant, currency, this.languageService.displayLocale());
-    const ok = await this.confirmService.confirm({
+    const ok = await this.confirmService.confirmDelete({
       title: `${d.personne} — ${amount}`,
-      message: 'Voulez-vous vraiment supprimer cette dette ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
+      message: this.transloco.translate('debts.dialog.deleteFormMessage'),
       icon: 'phosphorHandCoins',
     });
     if (!ok) return;
@@ -315,7 +317,7 @@ export class DebtForm {
       await firstValueFrom(this.debtService.delete(d.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

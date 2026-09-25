@@ -13,6 +13,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -39,6 +40,7 @@ import {
   Frequency,
   Subscription,
   SubscriptionRequest,
+  SUBSCRIPTION_FREQUENCY_LABEL_KEYS,
 } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
@@ -51,7 +53,7 @@ type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -77,6 +79,7 @@ export class SubscriptionForm {
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly subscription = computed(() => this.modalService.editingEntity() as Subscription | null);
   readonly frequence = input(Frequency.MENSUEL);
@@ -84,6 +87,7 @@ export class SubscriptionForm {
   readonly cancelled = output<void>();
 
   readonly Frequency = Frequency;
+  readonly SUBSCRIPTION_FREQUENCY_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_LABEL_KEYS;
   readonly currentFrequency = signal(Frequency.MENSUEL);
   readonly isEditing = computed(() => this.subscription() !== null);
   readonly submitting = signal(false);
@@ -240,7 +244,7 @@ export class SubscriptionForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('subscriptions.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -266,7 +270,7 @@ export class SubscriptionForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -277,11 +281,9 @@ export class SubscriptionForm {
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
     const amount = formatCurrencyAmount(sub.montant, currency, this.languageService.displayLocale());
-    const ok = await this.confirmService.confirm({
+    const ok = await this.confirmService.confirmDelete({
       title: `${sub.nom} — ${amount}`,
-      message: 'Voulez-vous vraiment supprimer cet abonnement ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
+      message: this.transloco.translate('subscriptions.dialog.deleteMessage'),
       icon: 'phosphorRepeat',
     });
     if (!ok) return;
@@ -289,7 +291,7 @@ export class SubscriptionForm {
       await firstValueFrom(this.subscriptionService.delete(sub.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

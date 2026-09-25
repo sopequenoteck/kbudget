@@ -8,11 +8,11 @@
     <div class="bsheet__handle"></div>
     <div class="bsheet__top-title">
       <ng-icon name="phosphorRepeat" size="16" />
-      <span>Abonnement</span>
+      <span>{{ 'subscriptions.action.create' | transloco }}</span>
     </div>
-    <div class="bsheet__type-toggle" role="group" aria-label="Fréquence">
-      <button type="button" [class.active]="currentFrequency() === Frequency.MENSUEL" (click)="onFrequencyChange(Frequency.MENSUEL)">Mensuel</button>
-      <button type="button" [class.active]="currentFrequency() === Frequency.ANNUEL" (click)="onFrequencyChange(Frequency.ANNUEL)">Annuel</button>
+    <div class="bsheet__type-toggle" role="group" [attr.aria-label]="'subscriptions.form.frequencyAria' | transloco">
+      <button type="button" [class.active]="currentFrequency() === Frequency.MENSUEL" (click)="onFrequencyChange(Frequency.MENSUEL)">{{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[Frequency.MENSUEL] | transloco }}</button>
+      <button type="button" [class.active]="currentFrequency() === Frequency.ANNUEL" (click)="onFrequencyChange(Frequency.ANNUEL)">{{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[Frequency.ANNUEL] | transloco }}</button>
     </div>
   </div>
 
@@ -34,7 +34,7 @@
       class="bsheet__libelle input-naked"
       type="text"
       formControlName="nom"
-      placeholder="Nom"
+      [placeholder]="'subscriptions.form.namePlaceholder' | transloco"
       autocomplete="off"
       maxlength="255"
     />
@@ -44,7 +44,7 @@
   <div class="bsheet__meta-row">
     <div class="bsheet__icons">
       @if (isEditing()) {
-        <button type="button" class="bsheet__icon-btn" [class.active]="actif()" (click)="toggleActif()" aria-label="Actif">
+        <button type="button" class="bsheet__icon-btn" [class.active]="actif()" (click)="toggleActif()" [attr.aria-label]="'common.value.active' | transloco">
           <ng-icon
             [name]="actif() ? 'phosphorToggleRight' : 'phosphorToggleLeft'"
             size="18"
@@ -54,17 +54,17 @@
       }
     </div>
     <div class="bsheet__meta-pills">
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date de début">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" [attr.aria-label]="'subscriptions.form.startDateAria' | transloco">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
         <span>{{ (form.get('dateDebut')?.value ?? '') | shortDate }}</span>
       </button>
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" [attr.aria-label]="'subscriptions.form.categoryAria' | transloco">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
-        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+        <span>{{ selectedCategoryName() ?? ('subscriptions.form.category' | transloco) }}</span>
       </button>
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" [attr.aria-label]="'subscriptions.form.accountAria' | transloco">
         <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
-        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+        <span>{{ selectedAccountName() ?? ('subscriptions.form.account' | transloco) }}</span>
       </button>
     </div>
   </div>
@@ -88,12 +88,12 @@
   }
   @if (expandedSection() === 'account') {
     <div class="bsheet__expand" @expandCollapse>
-      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
+      <app-select-picker formControlName="accountId" [items]="accountItems()" [placeholder]="'subscriptions.form.accountPlaceholder' | transloco" [clearable]="true" />
     </div>
   }
   @if (expandedSection() === 'currency' && showCurrencyPicker()) {
     <div class="bsheet__expand" @expandCollapse>
-      <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
+      <app-select-picker formControlName="currency" [items]="currencyItems()" [placeholder]="'subscriptions.form.currencyPlaceholder' | transloco" [clearable]="true" />
     </div>
   }
 
@@ -106,12 +106,12 @@
         </button>
       } @else {
         <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
-          Annuler
+          {{ 'common.action.cancel' | transloco }}
         </button>
       }
     </div>
     <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
-      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
+      {{ submitting() ? '...' : (isEditing() ? ('common.action.edit' | transloco) : ('common.action.save' | transloco)) }}
     </button>
   </div>
 </form>

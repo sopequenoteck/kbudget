@@ -8,11 +8,11 @@
     <div class="bsheet__handle"></div>
     <div class="bsheet__top-title">
       <ng-icon name="phosphorHandCoins" size="16" />
-      <span>Dette</span>
+      <span>{{ 'debts.action.create' | transloco }}</span>
     </div>
-    <div class="bsheet__type-toggle" role="group" aria-label="Sens de la dette">
-      <button type="button" [class.active]="currentSens() === DebtType.EMPRUNT" (click)="onSensChange(DebtType.EMPRUNT)">Emprunt</button>
-      <button type="button" [class.active]="currentSens() === DebtType.PRET" (click)="onSensChange(DebtType.PRET)">Prêt</button>
+    <div class="bsheet__type-toggle" role="group" [attr.aria-label]="'debts.form.typeAria' | transloco">
+      <button type="button" [class.active]="currentSens() === DebtType.EMPRUNT" (click)="onSensChange(DebtType.EMPRUNT)">{{ DEBT_TYPE_LABEL_KEYS[DebtType.EMPRUNT] | transloco }}</button>
+      <button type="button" [class.active]="currentSens() === DebtType.PRET" (click)="onSensChange(DebtType.PRET)">{{ DEBT_TYPE_LABEL_KEYS[DebtType.PRET] | transloco }}</button>
     </div>
   </div>
 
@@ -40,7 +40,7 @@
       class="bsheet__libelle input-naked"
       type="text"
       formControlName="personne"
-      placeholder="Personne"
+      [placeholder]="'debts.form.personPlaceholder' | transloco"
       autocomplete="off"
       maxlength="255"
     />
@@ -55,7 +55,7 @@
         [class.active]="expandedSection() === 'reminder'"
         [class.has-reminder]="hasReminderDate()"
         (click)="toggleSection('reminder')"
-        aria-label="Rappel"
+        [attr.aria-label]="'debts.form.reminderAria' | transloco"
       >
         <ng-icon
           name="phosphorBell"
@@ -66,17 +66,17 @@
       </button>
     </div>
     <div class="bsheet__meta-pills">
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" aria-label="Date">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'date'" (click)="toggleSection('date')" [attr.aria-label]="'debts.form.dateAria' | transloco">
         <ng-icon name="phosphorCalendarBlank" size="16" style="color: var(--color-primary); opacity: 0.7" />
         <span>{{ (form.get('date')?.value ?? '') | shortDate }}</span>
       </button>
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" aria-label="Catégorie">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" [attr.aria-label]="'debts.form.categoryAria' | transloco">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
-        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+        <span>{{ selectedCategoryName() ?? ('debts.form.category' | transloco) }}</span>
       </button>
-      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" aria-label="Compte">
+      <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" [attr.aria-label]="'debts.form.accountAria' | transloco">
         <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
-        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+        <span>{{ selectedAccountName() ?? ('debts.form.account' | transloco) }}</span>
       </button>
     </div>
   </div>
@@ -100,7 +100,7 @@
   }
   @if (expandedSection() === 'account') {
     <div class="bsheet__expand" @expandCollapse>
-      <app-select-picker formControlName="accountId" [items]="accountItems()" placeholder="Sélectionner un compte" [clearable]="true" />
+      <app-select-picker formControlName="accountId" [items]="accountItems()" [placeholder]="'debts.form.accountPlaceholder' | transloco" [clearable]="true" />
     </div>
   }
   @if (expandedSection() === 'reminder') {
@@ -113,7 +113,7 @@
   }
   @if (expandedSection() === 'currency' && showCurrencyPicker()) {
     <div class="bsheet__expand" @expandCollapse>
-      <app-select-picker formControlName="currency" [items]="currencyItems()" placeholder="Devise par défaut" [clearable]="true" />
+      <app-select-picker formControlName="currency" [items]="currencyItems()" [placeholder]="'debts.form.currencyPlaceholder' | transloco" [clearable]="true" />
     </div>
   }
 
@@ -126,16 +126,16 @@
         </button>
         <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="rembourse()" [disabled]="categoryCreating()" (click)="toggleRembourse()">
           <ng-icon [name]="rembourse() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
-          {{ rembourse() ? 'Remboursé' : 'Non remboursé' }}
+          {{ (rembourse() ? 'debts.value.repaid' : 'debts.value.notRepaid') | transloco }}
         </button>
       } @else {
         <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" [disabled]="categoryCreating()" (click)="cancelled.emit()">
-          Annuler
+          {{ 'common.action.cancel' | transloco }}
         </button>
       }
     </div>
     <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting() || categoryCreating()">
-      {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
+      {{ submitting() ? '...' : (isEditing() ? ('common.action.edit' | transloco) : ('common.action.save' | transloco)) }}
     </button>
   </div>
 </form>

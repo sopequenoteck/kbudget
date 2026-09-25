@@ -17,6 +17,7 @@ import {
   phosphorTrash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { DebtService } from '../../../../core/services/debt';
 import { PreferenceService } from '../../../../core/services/preference';
@@ -26,7 +27,7 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
-import { Debt, DebtType, DebtPaymentResponse } from '../../../../core/models/debt.model';
+import { Debt, DebtType, DebtPaymentResponse, DEBT_TYPE_LABEL_KEYS } from '../../../../core/models/debt.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
@@ -36,7 +37,7 @@ import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.uti
 @Component({
   selector: 'app-debt-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, SnoozeDialog, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, SnoozeDialog, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -62,6 +63,9 @@ export class DebtDetail {
   readonly conversionService = inject(ConversionService);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly DEBT_TYPE_LABEL_KEYS = DEBT_TYPE_LABEL_KEYS;
 
   readonly debt = signal<Debt | null>(null);
   readonly loading = signal(true);
@@ -151,16 +155,20 @@ export class DebtDetail {
     if (!d) return;
 
     const amount = formatCurrencyAmount(d.montantRestant, d.currency, this.languageService.displayLocale());
-    const ok = await this.confirmService.confirm({ title: `${d.personne} — ${amount} restants`, message: 'Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorHandCoins' });
+    const ok = await this.confirmService.confirmDelete({
+      title: this.transloco.translate('debts.dialog.deleteTitle', { person: d.personne, amount }),
+      message: this.transloco.translate('debts.dialog.deleteMessage'),
+      icon: 'phosphorHandCoins',
+    });
     if (!ok) return;
 
     try {
       await firstValueFrom(this.debtService.delete(d.id));
-      this.toastService.success('Dette supprimée');
+      this.toastService.success(this.transloco.translate('debts.feedback.deleted'));
       this.router.navigate(['/debts']);
     } catch (err: unknown) {
       this.logger.error('Failed to delete debt', err);
-      this.toastService.error('Erreur lors de la suppression');
+      this.toastService.error(this.transloco.translate('common.feedback.deleteError'));
     }
   }
 
@@ -178,7 +186,7 @@ export class DebtDetail {
   onSnoozed(updatedDebt: Debt): void {
     this.debt.set(updatedDebt);
     this.showSnoozeDialog.set(false);
-    this.toastService.success('Rappel reporté');
+    this.toastService.success(this.transloco.translate('debts.feedback.snoozed'));
   }
 
   retry(): void {

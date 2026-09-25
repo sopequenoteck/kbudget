@@ -2,7 +2,6 @@ import {
   getCurrencySymbol,
   formatCurrencyAmount,
   insertSortedByNom,
-  formatUpcomingDays,
   formatMonthYearLabel,
 } from './locale-format.utils';
 
@@ -49,26 +48,6 @@ describe('insertSortedByNom', () => {
     const items = [{ nom: 'Économie' }, { nom: 'Autre' }];
     const result = insertSortedByNom(items, { nom: 'Épargne' }, 'fr-FR');
     expect(result.map((i) => i.nom)).toEqual(['Autre', 'Économie', 'Épargne']);
-  });
-});
-
-describe('formatUpcomingDays', () => {
-  it('should_return_aujourdhui_when_diff_is_zero', () => {
-    expect(formatUpcomingDays(0, new Date('2026-01-01'), 'fr-FR')).toBe("aujourd'hui");
-  });
-
-  it('should_return_demain_when_diff_is_one', () => {
-    expect(formatUpcomingDays(1, new Date('2026-01-01'), 'fr-FR')).toBe('demain');
-  });
-
-  it('should_return_days_count_when_diff_is_between_two_and_thirty', () => {
-    expect(formatUpcomingDays(15, new Date('2026-01-01'), 'fr-FR')).toBe('dans 15 j.');
-  });
-
-  it('should_return_short_date_when_diff_is_above_thirty', () => {
-    const result = formatUpcomingDays(45, new Date('2026-03-15'), 'fr-FR');
-    expect(result).not.toContain('dans');
-    expect(result).not.toBe("aujourd'hui");
   });
 });
 

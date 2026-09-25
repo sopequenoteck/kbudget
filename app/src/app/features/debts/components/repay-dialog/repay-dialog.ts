@@ -13,6 +13,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorArrowCircleDown, phosphorWallet } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { ModalService } from '../../../../core/services/modal.service';
 import { DebtService } from '../../../../core/services/debt';
@@ -34,7 +35,7 @@ type ExpandableSection = 'account' | null;
 @Component({
   selector: 'app-repay-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIcon, AmountPipe, SelectPicker],
+  imports: [ReactiveFormsModule, NgIcon, AmountPipe, SelectPicker, TranslocoPipe],
   providers: [provideIcons({ phosphorArrowCircleDown, phosphorWallet })],
   templateUrl: './repay-dialog.html',
   styleUrl: './repay-dialog.scss',
@@ -48,6 +49,7 @@ export class RepayDialog {
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -145,7 +147,7 @@ export class RepayDialog {
     const amount = normalizeDecimal(raw.amount);
 
     if (isNaN(amount) || amount < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('debts.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -163,15 +165,15 @@ export class RepayDialog {
       this.modalService.closeModal();
       this.saved.emit();
       if (updatedDebt.montantRestant === 0) {
-        this.toastService.success('Dette remboursée !');
+        this.toastService.success(this.transloco.translate('debts.feedback.repaid'));
       } else {
         const reste = updatedDebt.montantRestant;
         const currency = updatedDebt.currency || 'EUR';
         const formatted = formatCurrencyAmount(reste, currency, this.languageService.displayLocale());
-        this.toastService.success(`Remboursement enregistré. Reste : ${formatted}`);
+        this.toastService.success(this.transloco.translate('debts.feedback.repaymentRecorded', { amount: formatted }));
       }
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors du remboursement');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('debts.feedback.repayError'));
     } finally {
       this.submitting.set(false);
     }

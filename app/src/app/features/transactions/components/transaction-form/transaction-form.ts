@@ -364,11 +364,9 @@ export class TransactionForm {
     if (tx.transferId) {
       message += '\n' + this.transloco.translate('transactions.dialog.deleteTransferMessage');
     }
-    const ok = await this.confirmService.confirm({
+    const ok = await this.confirmService.confirmDelete({
       title: `${tx.libelle} — ${amount}`,
       message,
-      confirmLabel: this.transloco.translate('common.action.delete'),
-      variant: 'danger',
       icon: 'phosphorReceipt',
     });
     if (!ok) return;

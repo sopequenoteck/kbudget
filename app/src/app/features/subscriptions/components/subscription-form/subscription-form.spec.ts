@@ -2,14 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
-import { DebtForm } from './debt-form';
+import { SubscriptionForm } from './subscription-form';
 import { CurrencyService } from '../../../../core/services/currency';
-import { DebtService } from '../../../../core/services/debt';
+import { SubscriptionService } from '../../../../core/services/subscription';
 import { ModalService } from '../../../../core/services/modal.service';
 import { AccountService } from '../../../../core/services/account';
 import { CategoryService } from '../../../../core/services/category';
 import { ConfirmService } from '../../../../core/services/confirm.service';
-import { Debt, DebtType } from '../../../../core/models/debt.model';
+import { Frequency, Subscription } from '../../../../core/models/subscription.model';
 import { Category } from '../../../../core/models/category.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
@@ -41,17 +41,14 @@ const mockAccounts: Account[] = [
   },
 ];
 
-const mockDebt: Debt = {
-  id: 'debt-edit-1',
-  personne: 'Charlie',
-  montant: 500,
-  montantRestant: 300,
-  sens: DebtType.PRET,
-  date: '2026-02-10',
-  dueDate: '2026-12-31',
-  rembourse: false,
+const mockSubscription: Subscription = {
+  id: 'sub-edit-1',
+  nom: 'Netflix',
+  montant: 15.99,
+  frequence: Frequency.ANNUEL,
+  dateDebut: '2026-02-10',
+  actif: true,
   category: null,
-  currency: 'EUR',
   account: {
     id: 'acc-1',
     nom: 'Courant',
@@ -59,18 +56,16 @@ const mockDebt: Debt = {
     couleur: '#3b82f6',
     currency: 'EUR',
   },
-  includeInBalance: true,
-  reminderDate: '2026-06-01',
-  reminderTime: '09:00',
+  currency: 'EUR',
 };
 
-describe('DebtForm', () => {
+describe('SubscriptionForm', () => {
   let currencyServiceMock: {
     loadIfEmpty: ReturnType<typeof vi.fn>;
     currencyItems: ReturnType<typeof signal>;
   };
 
-  let debtServiceMock: {
+  let subscriptionServiceMock: {
     create: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     delete: ReturnType<typeof vi.fn>;
@@ -114,9 +109,9 @@ describe('DebtForm', () => {
       ]),
     };
 
-    debtServiceMock = {
-      create: vi.fn().mockReturnValue(of(mockDebt)),
-      update: vi.fn().mockReturnValue(of(mockDebt)),
+    subscriptionServiceMock = {
+      create: vi.fn().mockReturnValue(of(mockSubscription)),
+      update: vi.fn().mockReturnValue(of(mockSubscription)),
       delete: vi.fn().mockReturnValue(of(undefined)),
     };
 
@@ -132,11 +127,11 @@ describe('DebtForm', () => {
 
   const setupTestBed = () => {
     TestBed.configureTestingModule({
-      imports: [DebtForm],
+      imports: [SubscriptionForm],
       providers: [
         provideTranslocoTesting(),
         { provide: CurrencyService, useValue: currencyServiceMock },
-        { provide: DebtService, useValue: debtServiceMock },
+        { provide: SubscriptionService, useValue: subscriptionServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: CategoryService, useValue: categoryServiceMock },
@@ -147,77 +142,31 @@ describe('DebtForm', () => {
 
   it('should_create_the_component', () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     expect(fixture.componentInstance).toBeTruthy();
   });
 
   it('should_force_currency_when_account_selected', async () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    // Pas de compte par défaut (isDefault=true sur acc-1) → on force acc-2 USD
     component.form.patchValue({ accountId: 'acc-2' });
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(component.form.getRawValue().currency).toBe('USD');
-  });
-
-  it('should_auto_set_include_in_balance_when_account_selected', async () => {
-    // Désactiver le compte par défaut pour partir d'un état sans sélection
-    accountServiceMock.getAll.mockReturnValue(
-      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
-    );
-    setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const component = fixture.componentInstance;
-    // Pas de compte sélectionné initialement
-    expect(component.form.getRawValue().includeInBalance).toBe(false);
-
-    // Sélectionner un compte
-    component.form.patchValue({ accountId: 'acc-1' });
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(component.form.getRawValue().includeInBalance).toBe(true);
-  });
-
-  it('should_hide_patrimoine_toggle_when_account_selected', async () => {
-    accountServiceMock.getAll.mockReturnValue(
-      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
-    );
-    setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const component = fixture.componentInstance;
-    // Sans compte, aucune sélection
-    expect(component.selectedAccount()).toBeNull();
-
-    // Sélectionner un compte via setValue pour déclencher valueChanges
-    component.form.get('accountId')!.setValue('acc-1');
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(component.form.get('accountId')!.value).toBe('acc-1');
-    expect(component.selectedAccount()?.id).toBe('acc-1');
+    expect(component.selectedAccount()?.currency).toBe('USD');
   });
 
   it('should_prefill_fields_when_editing', async () => {
-    // Configurer le mock AVANT setupTestBed pour que le TestBed utilise la bonne valeur
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -225,22 +174,20 @@ describe('DebtForm', () => {
     const component = fixture.componentInstance;
     const values = component.form.getRawValue();
 
-    expect(values.personne).toBe('Charlie');
-    expect(values.montant).toBe('500.00');
-    expect(values.date).toBe('2026-02-10');
-    expect(values.rembourse).toBe(false);
-    expect(values.currency).toBe('EUR');
-    expect(values.reminderDate).toBe('2026-06-01');
-    expect(values.reminderTime).toBe('09:00');
+    expect(values.nom).toBe('Netflix');
+    expect(values.montant).toBe('15.99');
+    expect(values.dateDebut).toBe('2026-02-10');
+    expect(values.actif).toBe(true);
+    expect(values.accountId).toBe('acc-1');
   });
 
-  it('should_be_in_edit_mode_when_debt_is_provided', async () => {
+  it('should_be_in_edit_mode_when_subscription_is_provided', async () => {
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -248,9 +195,9 @@ describe('DebtForm', () => {
     expect(fixture.componentInstance.isEditing()).toBe(true);
   });
 
-  it('should_be_in_create_mode_when_no_debt_provided', () => {
+  it('should_be_in_create_mode_when_no_subscription_provided', () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.isEditing()).toBe(false);
@@ -258,29 +205,29 @@ describe('DebtForm', () => {
 
   it('should_call_create_when_no_editing_entity', async () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
     component.form.patchValue({
-      personne: 'Nouveau',
-      montant: '100',
-      date: '2026-03-01',
+      nom: 'Spotify',
+      montant: '9.99',
+      dateDebut: '2026-03-01',
     });
 
     await component.onSubmit();
 
-    expect(debtServiceMock.create).toHaveBeenCalled();
+    expect(subscriptionServiceMock.create).toHaveBeenCalled();
   });
 
   it('should_call_update_when_editing_entity_exists', async () => {
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -288,24 +235,24 @@ describe('DebtForm', () => {
     const component = fixture.componentInstance;
     await component.onSubmit();
 
-    expect(debtServiceMock.update).toHaveBeenCalledWith('debt-edit-1', expect.any(Object));
+    expect(subscriptionServiceMock.update).toHaveBeenCalledWith('sub-edit-1', expect.any(Object));
   });
 
-  it('should_require_personne_field', () => {
+  it('should_require_nom_field', () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    component.form.patchValue({ personne: '' });
-    component.form.get('personne')!.markAsTouched();
+    component.form.patchValue({ nom: '' });
+    component.form.get('nom')!.markAsTouched();
 
-    expect(component.isInvalid('personne')).toBe(true);
+    expect(component.isInvalid('nom')).toBe(true);
   });
 
   it('should_require_montant_field', () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
@@ -315,46 +262,26 @@ describe('DebtForm', () => {
     expect(component.isInvalid('montant')).toBe(true);
   });
 
-  it('should_not_set_currency_when_account_id_cleared', async () => {
-    setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const component = fixture.componentInstance;
-    // Sélectionner un compte USD
-    component.form.patchValue({ accountId: 'acc-2' });
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.form.getRawValue().currency).toBe('USD');
-
-    // Vider le compte — aucune mise à jour de devise (logique seulement si accountId truthy)
-    component.form.patchValue({ accountId: '' });
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.form.getRawValue().currency).toBe('USD');
-  });
-
   it('should_insert_created_category_sorted_by_name', async () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    const nouvelle: Category = { id: 'cat-2', nom: 'Alimentation', icone: '🍔', couleur: '#000' };
+    const nouvelle: Category = { id: 'cat-2', nom: 'Loisirs', icone: '🎮', couleur: '#000', isSystem: false };
     component.onCategoryCreated(nouvelle);
 
-    expect(component.categories().map((c) => c.nom)).toContain('Alimentation');
+    expect(component.categories().map((c) => c.nom)).toContain('Loisirs');
   });
 
-  it('should_delete_debt_when_confirmed', async () => {
+  it('should_delete_subscription_when_confirmed', async () => {
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -362,25 +289,25 @@ describe('DebtForm', () => {
     await fixture.componentInstance.onDelete();
 
     expect(confirmServiceMock.confirmDelete).toHaveBeenCalled();
-    expect(debtServiceMock.delete).toHaveBeenCalledWith('debt-edit-1');
+    expect(subscriptionServiceMock.delete).toHaveBeenCalledWith('sub-edit-1');
     expect(modalServiceMock.closeModal).toHaveBeenCalled();
   });
 
-  it('should_not_delete_debt_when_not_confirmed', async () => {
+  it('should_not_delete_subscription_when_not_confirmed', async () => {
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
     confirmServiceMock.confirmDelete.mockResolvedValue(false);
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
     await fixture.componentInstance.onDelete();
 
-    expect(debtServiceMock.delete).not.toHaveBeenCalled();
+    expect(subscriptionServiceMock.delete).not.toHaveBeenCalled();
   });
 
   // ---------------------------------------------------------------------
@@ -389,12 +316,12 @@ describe('DebtForm', () => {
 
   it('should_set_translated_invalid_amount_message_when_amount_parses_to_nan', async () => {
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    component.form.patchValue({ personne: 'Test', date: '2026-03-01' });
+    component.form.patchValue({ nom: 'Spotify', dateDebut: '2026-03-01' });
     // Le montant desactive echappe a decimalMin (exclu de form.invalid) mais
     // reste dans getRawValue(), ce qui declenche la verification manuelle.
     component.form.get('montant')!.disable();
@@ -403,18 +330,18 @@ describe('DebtForm', () => {
     await component.onSubmit();
 
     expect(component.errorMessage()).toBe('Montant invalide');
-    expect(debtServiceMock.create).not.toHaveBeenCalled();
+    expect(subscriptionServiceMock.create).not.toHaveBeenCalled();
   });
 
   it('should_fallback_to_translated_save_error_when_thrown_value_is_not_an_error', async () => {
-    debtServiceMock.create.mockReturnValue(throwError(() => 'boom'));
+    subscriptionServiceMock.create.mockReturnValue(throwError(() => 'boom'));
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    component.form.patchValue({ personne: 'Test', montant: '10', date: '2026-03-01' });
+    component.form.patchValue({ nom: 'Spotify', montant: '9.99', dateDebut: '2026-03-01' });
 
     await component.onSubmit();
 
@@ -423,12 +350,12 @@ describe('DebtForm', () => {
 
   it('should_fallback_to_translated_delete_error_when_thrown_value_is_not_an_error', async () => {
     modalServiceMock = {
-      editingEntity: signal(mockDebt),
+      editingEntity: signal(mockSubscription),
       closeModal: vi.fn(),
     };
-    debtServiceMock.delete.mockReturnValue(throwError(() => 'boom'));
+    subscriptionServiceMock.delete.mockReturnValue(throwError(() => 'boom'));
     setupTestBed();
-    const fixture = TestBed.createComponent(DebtForm);
+    const fixture = TestBed.createComponent(SubscriptionForm);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();

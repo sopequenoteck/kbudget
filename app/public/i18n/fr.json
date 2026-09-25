@@ -114,7 +114,8 @@
       "save": "Enregistrer"
     },
     "empty": {
-      "noItems": "Aucun element disponible"
+      "noItems": "Aucun element disponible",
+      "noPayments": "Aucun paiement enregistré"
     },
     "feedback": {
       "deleteError": "Erreur lors de la suppression",
@@ -151,7 +152,9 @@
       "nameRequired": "Nom requis"
     },
     "value": {
+      "active": "Actif",
       "daysAgo": "{count, plural, one {il y a # jour} other {il y a # jours}}",
+      "inactive": "Inactif",
       "today": "Aujourd'hui",
       "tomorrow": "Demain",
       "weeksAgo": "{count, plural, one {il y a # semaine} other {il y a # semaines}}",
@@ -160,18 +163,83 @@
   },
   "debts": {
     "action": {
+      "add": "Ajouter une dette",
       "create": "Dette",
       "repay": "Rembourser",
       "snooze": "Reporter"
     },
+    "detail": {
+      "due": "Échéance {date}",
+      "initial": "Initial {amount}",
+      "paymentCount": "{count, plural, one {# paiement} other {# paiements}}",
+      "payments": "Paiements",
+      "reminderAt": "{date} à {time}",
+      "repaidAmount": "{amount} remboursé"
+    },
     "dialog": {
       "createTitle": "Nouvelle dette",
+      "deleteFormMessage": "Voulez-vous vraiment supprimer cette dette ?",
+      "deleteMessage": "Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.",
+      "deleteTitle": "{person} — {amount} restants",
       "editTitle": "Modifier la dette",
-      "repayTitle": "Remboursement"
+      "remaining": "Restant : {amount}",
+      "reminderDatePast": "La date ne peut pas être dans le passé",
+      "reminderDateRequired": "La date est requise",
+      "reminderTimeRequired": "L'heure est requise",
+      "repayTitle": "Remboursement",
+      "snoozeTitle": "Reporter le rappel",
+      "snoozing": "Report..."
+    },
+    "empty": {
+      "title": "Aucune dette"
     },
     "feedback": {
+      "amountInvalid": "Montant invalide",
+      "deleted": "Dette supprimée",
       "loadError": "Impossible de charger la dette",
-      "snoozed": "Rappel reporté"
+      "repaid": "Dette remboursée !",
+      "repayError": "Erreur lors du remboursement",
+      "repaymentRecorded": "Remboursement enregistré. Reste : {amount}",
+      "snoozed": "Rappel reporté",
+      "snoozeError": "Erreur lors du report du rappel"
+    },
+    "form": {
+      "account": "Compte",
+      "accountAria": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "currencyPlaceholder": "Devise par défaut",
+      "dateAria": "Date",
+      "personPlaceholder": "Personne",
+      "reminderAria": "Rappel",
+      "reminderDate": "Date du rappel",
+      "reminderTime": "Heure du rappel",
+      "typeAria": "Sens de la dette"
+    },
+    "list": {
+      "daysOverdue": "{count, plural, one {# j. en retard} other {# j. en retard}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "later": "Plus tard",
+      "noDueDate": "Sans échéance",
+      "overdue": "En retard",
+      "repaid": "Remboursées",
+      "thisMonth": "Ce mois-ci",
+      "thisWeek": "Cette semaine",
+      "today": "aujourd'hui",
+      "tomorrow": "demain"
+    },
+    "summary": {
+      "borrowedCount": "{count, plural, one {# emprunt} other {# emprunts}}",
+      "lentCount": "{count, plural, one {# prêt} other {# prêts}}",
+      "net": "Solde net",
+      "outstandingCount": "{count, plural, one {# en cours} other {# en cours}}"
+    },
+    "value": {
+      "borrowed": "Emprunt",
+      "lent": "Prêt",
+      "notRepaid": "Non remboursé",
+      "repaid": "Remboursé"
     }
   },
   "errors": {
@@ -292,16 +360,68 @@
   },
   "subscriptions": {
     "action": {
+      "activate": "Activer",
+      "add": "Ajouter un abonnement",
       "create": "Abonnement",
+      "deactivate": "Désactiver",
       "pay": "Payer"
+    },
+    "detail": {
+      "history": "Historique",
+      "paymentCount": "{count, plural, one {# paiement} other {# paiements}}"
     },
     "dialog": {
       "createTitle": "Nouvel abonnement",
+      "deleteMessage": "Voulez-vous vraiment supprimer cet abonnement ?",
       "editTitle": "Modifier l'abonnement"
     },
+    "empty": {
+      "title": "Aucun abonnement"
+    },
     "feedback": {
+      "activated": "Abonnement activé",
+      "amountInvalid": "Montant invalide",
+      "deactivated": "Abonnement désactivé",
+      "deleted": "Abonnement supprimé",
+      "deleteFailed": "Échec de la suppression",
+      "paid": "Paiement enregistré",
       "payError": "Impossible d'enregistrer le paiement",
-      "paid": "Paiement enregistré"
+      "payFailed": "Échec du paiement",
+      "updateFailed": "Échec de la mise à jour"
+    },
+    "form": {
+      "account": "Compte",
+      "accountAria": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "currencyPlaceholder": "Devise par défaut",
+      "frequencyAria": "Fréquence",
+      "namePlaceholder": "Nom",
+      "startDateAria": "Date de début"
+    },
+    "list": {
+      "activeCount": "{count, plural, one {# actif} other {# actifs}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "inactive": "Inactifs",
+      "later": "Plus tard",
+      "nextMonth": "Mois prochain",
+      "thisMonth": "Ce mois-ci",
+      "thisWeek": "Cette semaine",
+      "today": "aujourd'hui",
+      "tomorrow": "demain"
+    },
+    "summary": {
+      "activeCount": "{count, plural, one {# abonnement} other {# abonnements}}",
+      "monthlyTotal": "Total mensuel"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "perMonth": "/mois",
+      "perWeek": "/sem",
+      "perYear": "/an",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
     }
   },
   "transactions": {

@@ -21,12 +21,12 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>Erreur de chargement</p>
-    <button class="btn-outline" (click)="retry()">Réessayer</button>
+    <p>{{ 'common.feedback.loadError' | transloco }}</p>
+    <button class="btn-outline" (click)="retry()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (debt(); as d) {
   <div class="page-header">
-    <button class="page-header__back" (click)="onBack()" aria-label="Retour">
+    <button class="page-header__back" (click)="onBack()" [attr.aria-label]="'common.action.back' | transloco">
       <ng-icon name="phosphorArrowLeft" size="20" />
     </button>
     <h1 class="page-header__title">{{ d.personne }}</h1>
@@ -35,9 +35,9 @@
   <section class="hero">
     <div class="hero__top">
       <div class="hero__tags">
-        <span class="badge-type">{{ d.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt' }}</span>
+        <span class="badge-type">{{ DEBT_TYPE_LABEL_KEYS[d.sens] | transloco }}</span>
         @if (d.rembourse) {
-          <span class="badge-status">Remboursé</span>
+          <span class="badge-status">{{ 'debts.value.repaid' | transloco }}</span>
         }
         @if (d.category) {
           <span class="hero__category">{{ d.category.icone }} {{ d.category.nom }}</span>
@@ -54,23 +54,29 @@
     }
 
     <span class="hero__secondary">
-      Initial {{ d.montant | amount: null : (d.currency || 'EUR') }}
+      {{ 'debts.detail.initial' | transloco: { amount: (d.montant | amount: null : (d.currency || 'EUR')) } }}
       @if (payments().length > 0) {
-        · {{ paymentsTotal() | amount: null : (d.currency || 'EUR') }} remboursé · {{ payments().length }} paiement{{ payments().length > 1 ? 's' : '' }}
+        · {{ 'debts.detail.repaidAmount' | transloco: { amount: (paymentsTotal() | amount: null : (d.currency || 'EUR')) } }} · {{ 'debts.detail.paymentCount' | transloco: { count: payments().length } }}
       }
     </span>
 
     @if (d.dueDate) {
       <div class="hero__due" [class.hero__due--overdue]="isOverdue()">
         <ng-icon name="phosphorCalendar" size="14" />
-        <span>Échéance {{ formatDate(d.dueDate) }}</span>
+        <span>{{ 'debts.detail.due' | transloco: { date: formatDate(d.dueDate) } }}</span>
       </div>
     }
 
     @if (d.reminderDate) {
       <div class="hero__reminder">
         <ng-icon name="phosphorBell" size="14" />
-        <span>{{ formatDate(d.reminderDate) }}@if (d.reminderTime) { à {{ d.reminderTime }}}</span>
+        <span>
+          @if (d.reminderTime) {
+            {{ 'debts.detail.reminderAt' | transloco: { date: formatDate(d.reminderDate), time: d.reminderTime } }}
+          } @else {
+            {{ formatDate(d.reminderDate) }}
+          }
+        </span>
       </div>
     }
 
@@ -87,31 +93,31 @@
   </section>
 
   <div class="detail-actions">
-    <button class="action-btn action-btn--danger action-btn--icon-only" (click)="onDelete()" aria-label="Supprimer">
+    <button class="action-btn action-btn--danger action-btn--icon-only" (click)="onDelete()" [attr.aria-label]="'common.action.delete' | transloco">
       <ng-icon name="phosphorTrash" size="18" />
     </button>
     <div class="detail-actions__spacer"></div>
     @if (d.reminderDate) {
       <button class="action-btn" (click)="showSnoozeDialog.set(true)">
         <ng-icon name="phosphorBell" size="18" />
-        Reporter
+        {{ 'debts.action.snooze' | transloco }}
       </button>
     }
     <button class="action-btn" (click)="onEdit()">
       <ng-icon name="phosphorPencilSimple" size="18" />
-      Modifier
+      {{ 'common.action.edit' | transloco }}
     </button>
     @if (!d.rembourse) {
       <button class="action-btn action-btn--primary" (click)="onRepay()">
         <ng-icon name="phosphorArrowCircleDown" size="18" />
-        Rembourser
+        {{ 'debts.action.repay' | transloco }}
       </button>
     }
   </div>
 
   <section class="detail-payments">
     <div class="payments-header">
-      <h2>Paiements</h2>
+      <h2>{{ 'debts.detail.payments' | transloco }}</h2>
       @if (payments().length > 0) {
         <span class="payments-count">{{ payments().length }}</span>
       }
@@ -140,7 +146,7 @@
         }
       </div>
     } @else if (payments().length === 0) {
-      <p class="payments-empty">Aucun paiement enregistré</p>
+      <p class="payments-empty">{{ 'common.empty.noPayments' | transloco }}</p>
     } @else {
       <ul class="payments-list">
         @for (payment of payments(); track payment.id) {

@@ -160,8 +160,8 @@ describe('Subscriptions', () => {
     });
   });
 
-  describe('getRelativeDate', () => {
-    it('should_return_a_relative_label_for_monthly', () => {
+  describe('getRelativeDateInfo', () => {
+    it('should_return_a_relative_date_key_for_monthly', () => {
       const sub: Subscription = {
         id: '1',
         nom: 'Test',
@@ -173,12 +173,11 @@ describe('Subscriptions', () => {
         account: null,
         currency: 'EUR',
       };
-      const result = component.getRelativeDate(sub);
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      const result = component.getRelativeDateInfo(sub);
+      expect(result.key ?? result.formatted).toBeTruthy();
     });
 
-    it('should_return_inactif_for_inactive_subscription', () => {
+    it('should_return_inactive_key_for_inactive_subscription', () => {
       const sub: Subscription = {
         id: '4',
         nom: 'Inactive',
@@ -190,21 +189,79 @@ describe('Subscriptions', () => {
         account: null,
         currency: 'EUR',
       };
-      expect(component.getRelativeDate(sub)).toBe('Inactif');
+      expect(component.getRelativeDateInfo(sub)).toEqual({ key: 'common.value.inactive' });
     });
   });
 
   describe('formatAmount', () => {
-    it('should_format_monthly', () => {
+    it('should_format_currency_without_frequency_suffix', () => {
       const result = component.formatAmount(mockSubscriptions[0]);
-      expect(result).toContain('/mois');
+      expect(result).not.toContain('/mois');
+      expect(result).not.toContain('/an');
       expect(result).toContain('€');
     });
+  });
 
-    it('should_format_annual', () => {
-      const result = component.formatAmount(mockSubscriptions[1]);
-      expect(result).toContain('/an');
-      expect(result).toContain('€');
+  describe('SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS', () => {
+    it('should_expose_the_shared_frequency_short_label_keys', () => {
+      expect(component.SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[mockSubscriptions[0].frequence]).toBe(
+        'subscriptions.value.perMonth',
+      );
+      expect(component.SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[mockSubscriptions[1].frequence]).toBe(
+        'subscriptions.value.perYear',
+      );
+    });
+  });
+
+  describe('groupedSubscriptions', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should_group_a_subscription_due_within_the_week_as_thisWeek', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 2, 13));
+
+      component.subscriptions.set([
+        {
+          id: 'week-1',
+          nom: 'ThisWeek',
+          montant: 5,
+          frequence: Frequency.MENSUEL,
+          dateDebut: '2025-03-16',
+          actif: true,
+          category: null,
+          account: null,
+          currency: 'EUR',
+        },
+      ]);
+
+      const groups = component.groupedSubscriptions();
+      expect(groups.map((g) => g.labelKey)).toEqual(['subscriptions.list.thisWeek']);
+      expect(groups[0].items.map((s) => s.id)).toEqual(['week-1']);
+    });
+
+    it('should_group_a_subscription_due_later_this_month_as_thisMonth', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 2, 13));
+
+      component.subscriptions.set([
+        {
+          id: 'month-1',
+          nom: 'ThisMonth',
+          montant: 5,
+          frequence: Frequency.MENSUEL,
+          dateDebut: '2025-03-28',
+          actif: true,
+          category: null,
+          account: null,
+          currency: 'EUR',
+        },
+      ]);
+
+      const groups = component.groupedSubscriptions();
+      expect(groups.map((g) => g.labelKey)).toEqual(['subscriptions.list.thisMonth']);
+      expect(groups[0].items.map((s) => s.id)).toEqual(['month-1']);
     });
   });
 

@@ -12,13 +12,14 @@ import {
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DebtService } from '../../core/services/debt';
 import { ModalService } from '../../core/services/modal.service';
 import { PreferenceService } from '../../core/services/preference';
 import { ConversionService } from '../../core/services/conversion';
 import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { DevLogger } from '../../core/services/dev-logger';
-import { Debt, DebtType } from '../../core/models/debt.model';
+import { Debt, DebtType, DEBT_TYPE_LABEL_KEYS } from '../../core/models/debt.model';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -26,18 +27,35 @@ import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
-import { formatUpcomingDays } from '../../shared/utils/locale-format.utils';
+import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../shared/utils/relative-due-date.utils';
 
 interface DebtGroup {
-  label: string;
+  labelKey: string;
   status: string;
   items: Debt[];
 }
 
+const DEBT_DUE_DATE_KEYS: RelativeDueDateKeys = {
+  today: 'debts.list.today',
+  tomorrow: 'debts.list.tomorrow',
+  daysUntil: 'debts.list.daysUntil',
+  daysOverdue: 'debts.list.daysOverdue',
+};
+
+const DEBT_GROUP_LABEL_KEYS: Record<string, string> = {
+  overdue: 'debts.list.overdue',
+  today: 'common.value.today',
+  thisWeek: 'debts.list.thisWeek',
+  thisMonth: 'debts.list.thisMonth',
+  later: 'debts.list.later',
+  noDue: 'debts.list.noDueDate',
+  repaid: 'debts.list.repaid',
+};
+
 @Component({
   selector: 'app-debts',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',
@@ -58,6 +76,7 @@ export class Debts implements AfterViewInit, OnDestroy {
   private observer: IntersectionObserver | null = null;
 
   readonly skeletonItems = Array(5);
+  readonly DEBT_TYPE_LABEL_KEYS = DEBT_TYPE_LABEL_KEYS;
 
   readonly loading = signal(true);
   readonly error = signal(false);
@@ -133,8 +152,8 @@ export class Debts implements AfterViewInit, OnDestroy {
 
     const buckets = new Map<string, DebtGroup>();
 
-    const add = (key: string, label: string, status: string, debt: Debt) => {
-      if (!buckets.has(key)) buckets.set(key, { label, status, items: [] });
+    const add = (key: string, status: string, debt: Debt) => {
+      if (!buckets.has(key)) buckets.set(key, { labelKey: DEBT_GROUP_LABEL_KEYS[key], status, items: [] });
       buckets.get(key)!.items.push(debt);
     };
 
@@ -151,12 +170,12 @@ export class Debts implements AfterViewInit, OnDestroy {
 
     for (const debt of sorted) {
       if (debt.rembourse) {
-        add('repaid', 'Remboursées', 'repaid', debt);
+        add('repaid', 'repaid', debt);
         continue;
       }
 
       if (!debt.dueDate) {
-        add('noDue', 'Sans échéance', 'default', debt);
+        add('noDue', 'default', debt);
         continue;
       }
 
@@ -167,15 +186,15 @@ export class Debts implements AfterViewInit, OnDestroy {
       );
 
       if (diffDays < 0) {
-        add('overdue', 'En retard', 'overdue', debt);
+        add('overdue', 'overdue', debt);
       } else if (diffDays === 0) {
-        add('today', "Aujourd'hui", 'today', debt);
+        add('today', 'today', debt);
       } else if (dueDate <= endOfWeek) {
-        add('thisWeek', 'Cette semaine', 'default', debt);
+        add('thisWeek', 'default', debt);
       } else if (dueDate <= endOfMonth) {
-        add('thisMonth', 'Ce mois-ci', 'default', debt);
+        add('thisMonth', 'default', debt);
       } else {
-        add('later', 'Plus tard', 'default', debt);
+        add('later', 'default', debt);
       }
     }
 
@@ -248,12 +267,6 @@ export class Debts implements AfterViewInit, OnDestroy {
     return debt.category?.couleur ? debt.category.couleur + '26' : null;
   }
 
-  getSubtitle(debt: Debt): string {
-    const type = debt.sens === DebtType.EMPRUNT ? 'Emprunt' : 'Prêt';
-    const category = debt.category?.nom;
-    return category ? `${category} · ${type}` : type;
-  }
-
   isOverdue(debt: Debt): boolean {
     if (!debt.dueDate || debt.rembourse) return false;
     const dueDate = new Date(debt.dueDate);
@@ -263,20 +276,9 @@ export class Debts implements AfterViewInit, OnDestroy {
     return dueDate < today;
   }
 
-  getRelativeDate(debt: Debt): string {
-    if (!debt.dueDate || debt.rembourse) return '';
-    const dueDate = new Date(debt.dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dueDate.setHours(0, 0, 0, 0);
-
-    const diffDays = Math.round(
-      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (diffDays < 0) return `${Math.abs(diffDays)} j. en retard`;
-
-    return formatUpcomingDays(diffDays, dueDate, this.languageService.displayLocale());
+  getRelativeDateInfo(debt: Debt): RelativeDateInfo | null {
+    if (!debt.dueDate || debt.rembourse) return null;
+    return getRelativeDueDateInfo(new Date(debt.dueDate), new Date(), this.languageService.displayLocale(), DEBT_DUE_DATE_KEYS);
   }
 
   getAmountClass(debt: Debt): string {

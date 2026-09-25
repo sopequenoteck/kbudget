@@ -2,7 +2,7 @@
   @if (hasActiveSubscriptions()) {
     <div class="hero__amount">
       <div class="hero__amount-top">
-        <span class="hero__amount-label">Total mensuel</span>
+        <span class="hero__amount-label">{{ 'subscriptions.summary.monthlyTotal' | transloco }}</span>
         <app-currency-pill-selector
           [currencies]="preferenceService.currencies()"
           [activeCurrency]="activeCurrency()"
@@ -18,10 +18,10 @@
       <div class="hero__meta">
         <div class="hero__meta-line">
           <ng-icon name="phosphorCalendar" size="14" />
-          <span>{{ activeCurrencyAnnual() | amount: null : activeCurrency() }}/an</span>
+          <span>{{ activeCurrencyAnnual() | amount: null : activeCurrency() }}{{ 'subscriptions.value.perYear' | transloco }}</span>
           <span class="hero__meta-dot">&middot;</span>
           <ng-icon name="phosphorRepeat" size="14" />
-          <span>{{ activeCount() }} abonnements</span>
+          <span>{{ 'subscriptions.summary.activeCount' | transloco: { count: activeCount() } }}</span>
         </div>
       </div>
     </div>
@@ -30,8 +30,8 @@
 
 <div class="sticky-sentinel" #stickySentinel></div>
 <div class="section-header" [class.stuck]="isStuck()">
-  <h2 class="section-header__title">Abonnements</h2>
-  <span class="section-header__count">{{ activeCount() }} actifs</span>
+  <h2 class="section-header__title">{{ 'common.nav.subscriptions' | transloco }}</h2>
+  <span class="section-header__count">{{ 'subscriptions.list.activeCount' | transloco: { count: activeCount() } }}</span>
 </div>
 
 @if (loading()) {
@@ -52,21 +52,22 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>Erreur de chargement</p>
-    <button class="btn-outline" (click)="loadData()">Réessayer</button>
+    <p>{{ 'common.feedback.loadError' | transloco }}</p>
+    <button class="btn-outline" (click)="loadData()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (groupedSubscriptions().length === 0) {
   <app-empty-state
     icon="phosphorRepeat"
-    message="Aucun abonnement"
-    ctaLabel="Ajouter un abonnement"
+    [message]="'subscriptions.empty.title' | transloco"
+    [ctaLabel]="'subscriptions.action.add' | transloco"
     (ctaClick)="onAddSubscription()"
   />
 } @else {
-  @for (group of groupedSubscriptions(); track group.label) {
-    <div class="date-label" [class]="'date-label--' + group.status">{{ group.label }}</div>
+  @for (group of groupedSubscriptions(); track group.labelKey) {
+    <div class="date-label" [class]="'date-label--' + group.status">{{ group.labelKey | transloco }}</div>
     <div class="list-group">
       @for (subscription of group.items; track subscription.id) {
+        @let relDate = getRelativeDateInfo(subscription);
         <button type="button" class="list-row" [class.inactive]="!subscription.actif" (click)="onSubscriptionPressed(subscription)">
           <span
             class="list-row__icon"
@@ -75,12 +76,12 @@
           <div class="list-row__content">
             <span class="list-row__title">{{ subscription.nom }}</span>
             <span class="list-row__subtitle">
-              {{ getRelativeDate(subscription) }}
-              · {{ subscription.frequence === 'MENSUEL' ? 'Mensuel' : 'Annuel' }}
+              {{ relDate.key ? (relDate.key | transloco: relDate.params) : relDate.formatted }}
+              · {{ SUBSCRIPTION_FREQUENCY_LABEL_KEYS[subscription.frequence] | transloco }}
             </span>
           </div>
           <div class="list-row__right">
-            <span class="list-row__amount amount-expense">{{ formatAmount(subscription) }}</span>
+            <span class="list-row__amount amount-expense">{{ formatAmount(subscription) }}{{ SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[subscription.frequence] | transloco }}</span>
             @if (subscription.actif && (subscription.currency || 'EUR') !== preferenceService.primaryCurrency()) {
               <span class="list-row__converted">
                 {{ subscription.montant | convertAmount: (subscription.currency || 'EUR') : preferenceService.primaryCurrency() }}

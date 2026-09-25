@@ -12,10 +12,16 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { SubscriptionService } from '../../core/services/subscription';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
-import { Subscription, Frequency } from '../../core/models/subscription.model';
+import {
+  Subscription,
+  Frequency,
+  SUBSCRIPTION_FREQUENCY_LABEL_KEYS,
+  SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS,
+} from '../../core/models/subscription.model';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCalendar, phosphorRepeat } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
@@ -26,18 +32,34 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { DevLogger } from '../../core/services/dev-logger';
 import { LanguageService } from '../../core/services/language';
-import { formatUpcomingDays, formatCurrencyAmount } from '../../shared/utils/locale-format.utils';
+import { formatCurrencyAmount } from '../../shared/utils/locale-format.utils';
+import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../shared/utils/relative-due-date.utils';
 
 interface SubscriptionGroup {
-  label: string;
+  labelKey: string;
   status: string;
   items: Subscription[];
 }
 
+const SUBSCRIPTION_DUE_DATE_KEYS: RelativeDueDateKeys = {
+  today: 'subscriptions.list.today',
+  tomorrow: 'subscriptions.list.tomorrow',
+  daysUntil: 'subscriptions.list.daysUntil',
+};
+
+const SUBSCRIPTION_GROUP_LABEL_KEYS: Record<string, string> = {
+  today: 'common.value.today',
+  thisWeek: 'subscriptions.list.thisWeek',
+  thisMonth: 'subscriptions.list.thisMonth',
+  nextMonth: 'subscriptions.list.nextMonth',
+  later: 'subscriptions.list.later',
+  inactive: 'subscriptions.list.inactive',
+};
+
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorCalendar, phosphorRepeat })],
   templateUrl: './subscriptions.html',
   styleUrl: './subscriptions.scss',
@@ -58,6 +80,8 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   private observer: IntersectionObserver | null = null;
 
   readonly skeletonItems = Array(5);
+  readonly SUBSCRIPTION_FREQUENCY_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_LABEL_KEYS;
+  readonly SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS;
 
   readonly loading = signal(true);
   readonly error = signal(false);
@@ -126,8 +150,8 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
 
     const buckets = new Map<string, SubscriptionGroup>();
 
-    const add = (key: string, label: string, status: string, sub: Subscription) => {
-      if (!buckets.has(key)) buckets.set(key, { label, status, items: [] });
+    const add = (key: string, status: string, sub: Subscription) => {
+      if (!buckets.has(key)) buckets.set(key, { labelKey: SUBSCRIPTION_GROUP_LABEL_KEYS[key], status, items: [] });
       buckets.get(key)!.items.push(sub);
     };
 
@@ -141,7 +165,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
 
     for (const sub of sorted) {
       if (!sub.actif) {
-        add('inactive', 'Inactifs', 'inactive', sub);
+        add('inactive', 'inactive', sub);
         continue;
       }
 
@@ -151,15 +175,15 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
       );
 
       if (diffDays === 0) {
-        add('today', "Aujourd'hui", 'today', sub);
+        add('today', 'today', sub);
       } else if (diffDays <= 7) {
-        add('thisWeek', 'Cette semaine', 'default', sub);
+        add('thisWeek', 'default', sub);
       } else if (nextDate <= endOfMonth) {
-        add('thisMonth', 'Ce mois-ci', 'default', sub);
+        add('thisMonth', 'default', sub);
       } else if (nextDate <= endOfNextMonth) {
-        add('nextMonth', 'Mois prochain', 'default', sub);
+        add('nextMonth', 'default', sub);
       } else {
-        add('later', 'Plus tard', 'default', sub);
+        add('later', 'default', sub);
       }
     }
 
@@ -241,22 +265,15 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
     return nextDate;
   }
 
-  getRelativeDate(subscription: Subscription): string {
-    if (!subscription.actif) return 'Inactif';
+  getRelativeDateInfo(subscription: Subscription): RelativeDateInfo {
+    if (!subscription.actif) return { key: 'common.value.inactive' };
 
     const nextDate = this.getNextRenewalRaw(subscription);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.round(
-      (nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    return formatUpcomingDays(diffDays, nextDate, this.languageService.displayLocale());
+    return getRelativeDueDateInfo(nextDate, new Date(), this.languageService.displayLocale(), SUBSCRIPTION_DUE_DATE_KEYS);
   }
 
   formatAmount(subscription: Subscription): string {
-    const formatted = formatCurrencyAmount(subscription.montant, subscription.currency || 'EUR', this.languageService.displayLocale());
-    return subscription.frequence === Frequency.MENSUEL ? `${formatted}/mois` : `${formatted}/an`;
+    return formatCurrencyAmount(subscription.montant, subscription.currency || 'EUR', this.languageService.displayLocale());
   }
 
   onAddSubscription(): void {
