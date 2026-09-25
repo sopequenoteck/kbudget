@@ -52,6 +52,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   report passent dans les catalogues. Emprunt et Pret se traduisent *Borrowed*
   et *Lent*. Seuls les pluriels changent a l'ecran : « 1 pret », « 1 emprunt »,
   « 1 paiement », « 1 abonnement ».
+- **Budgets, tableau de bord, connexion et compatibilite dans les catalogues
+  (KKS-379)** : etape 7 sur 8 de KKS-325, la derniere extraction par domaine
+  avant la bascule. « Non budgete » se traduit *Unbudgeted*, « Patrimoine
+  total » *Total net worth*. A l'ecran, seuls changent les pluriels (« 1
+  budget », « 1 actif », « 1 transaction ») et « 0 revenus », devenu « 0
+  recettes » sur le tableau de bord comme sur l'ecran des transactions.
 
 ### Changed
 
