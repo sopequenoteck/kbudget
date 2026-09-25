@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { type BudgetOverview, type BudgetOverviewItem } from '../../../../core/models/budget.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
@@ -6,12 +7,12 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 @Component({
   selector: 'app-budget-summary',
   standalone: true,
-  imports: [AmountPipe],
+  imports: [AmountPipe, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (overview(); as ov) {
       <div class="budget-summary__subtitle">
-        <span>MENSUEL · EN {{ ov.currency }}</span>
+        <span>{{ 'budgets.summary.monthlyInCurrency' | transloco: { currency: ov.currency } }}</span>
         <span>{{ ov.totalSpent | amount: null : ov.currency }} / {{ ov.totalBudget | amount: null : ov.currency }}</span>
       </div>
     }

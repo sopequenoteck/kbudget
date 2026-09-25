@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorTray,
@@ -45,7 +46,7 @@ import { CurrencyPillSelector } from '../../../dashboard/components/currency-pil
 @Component({
   selector: 'app-budget-list',
   standalone: true,
-  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector],
+  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',

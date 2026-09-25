@@ -8,16 +8,16 @@
     <div class="bsheet__handle"></div>
     <div class="bsheet__top-title">
       <ng-icon name="phosphorChartPie" size="16" />
-      <span>Budget</span>
+      <span>{{ 'budgets.action.create' | transloco }}</span>
     </div>
   </div>
 
   @if (noAvailableCategories() && !isEditing()) {
     <!-- EMPTY STATE -->
     <div class="budget-form__empty-state">
-      <p class="budget-form__empty-text">Toutes les catégories ont déjà un budget.</p>
+      <p class="budget-form__empty-text">{{ 'budgets.empty.allCategoriesBudgeted' | transloco }}</p>
       <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="onCancel()">
-        Annuler
+        {{ 'common.action.cancel' | transloco }}
       </button>
     </div>
   } @else {
@@ -42,10 +42,10 @@
         [class.has-value]="!!form.get('categoryId')?.value"
         (click)="!isEditing() && toggleSection('category')"
         [class.active]="expandedSection() === 'category'"
-        aria-label="Catégorie"
+        [attr.aria-label]="'budgets.form.categoryAria' | transloco"
       >
         <ng-icon name="phosphorTag" size="18" [style.color]="selectedCategoryColor() ?? 'var(--text-tertiary)'" style="opacity: 0.8" />
-        <span>{{ selectedCategoryName() ?? 'Catégorie' }}</span>
+        <span>{{ selectedCategoryName() ?? ('budgets.form.category' | transloco) }}</span>
       </button>
     </div>
 
@@ -55,20 +55,20 @@
         @if (isEditing()) {
           <button type="button" class="bsheet__action-pill bsheet__action-pill--status" [class.done]="actif()" (click)="toggleActif()">
             <ng-icon [name]="actif() ? 'phosphorCheckCircle' : 'phosphorCircle'" size="16" />
-            {{ actif() ? 'Actif' : 'Inactif' }}
+            {{ (actif() ? 'common.value.active' : 'common.value.inactive') | transloco }}
           </button>
         }
       </div>
       <div class="bsheet__meta-pills">
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" aria-label="Fréquence">
+        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'frequency'" (click)="toggleSection('frequency')" [attr.aria-label]="'budgets.form.frequencyAria' | transloco">
           <ng-icon name="phosphorRepeat" size="16" style="color: var(--color-primary); opacity: 0.7" />
-          <span>{{ frequencyLabel() }}</span>
+          <span>{{ frequencyLabelKey() | transloco }}</span>
         </button>
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" aria-label="Devise">
+        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'currency'" (click)="toggleSection('currency')" [attr.aria-label]="'budgets.form.currencyAria' | transloco">
           <ng-icon name="phosphorCoins" size="16" style="color: var(--color-primary); opacity: 0.7" />
           <span>{{ form.get('currency')?.value || 'EUR' }}</span>
         </button>
-        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" aria-label="Seuil d'alerte">
+        <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'threshold'" (click)="toggleSection('threshold')" [attr.aria-label]="'budgets.form.thresholdAria' | transloco">
           <ng-icon name="phosphorWarning" size="16" style="color: var(--color-primary); opacity: 0.7" />
           <span>{{ form.get('seuilNotification')?.value }}%</span>
         </button>
@@ -79,7 +79,7 @@
     @if (expandedSection() === 'category') {
       <div class="bsheet__expand" @expandCollapse>
         <select formControlName="categoryId" class="budget-form__select">
-          <option value="" disabled>Choisir une catégorie</option>
+          <option value="" disabled>{{ 'budgets.form.categoryPlaceholder' | transloco }}</option>
           @for (cat of availableCategories(); track cat.id) {
             <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
           }
@@ -90,7 +90,7 @@
       <div class="bsheet__expand" @expandCollapse>
         <select formControlName="frequence" class="budget-form__select">
           @for (freq of frequencies; track freq.value) {
-            <option [value]="freq.value">{{ freq.label }}</option>
+            <option [value]="freq.value">{{ freq.labelKey | transloco }}</option>
           }
         </select>
       </div>
@@ -112,7 +112,7 @@
           class="bsheet__input input-naked"
           min="0"
           max="100"
-          placeholder="Seuil d'alerte (%)"
+          [placeholder]="'budgets.form.thresholdPlaceholder' | transloco"
         />
       </div>
     }
@@ -126,12 +126,12 @@
           </button>
         } @else {
           <button type="button" class="bsheet__action-pill bsheet__action-pill--cancel" (click)="onCancel()">
-            Annuler
+            {{ 'common.action.cancel' | transloco }}
           </button>
         }
       </div>
       <button type="submit" class="bsheet__action-pill bsheet__action-pill--primary" [disabled]="submitting()">
-        {{ submitting() ? '...' : isEditing() ? 'Modifier' : 'Enregistrer' }}
+        {{ submitting() ? '...' : (isEditing() ? ('common.action.edit' | transloco) : ('common.action.save' | transloco)) }}
       </button>
     </div>
   }

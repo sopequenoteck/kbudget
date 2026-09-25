@@ -2,7 +2,7 @@
   <button class="page-header__back" (click)="goBack()">
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">Non budgété</h1>
+  <h1 class="page-header__title">{{ 'budgets.page.unbudgetedTitle' | transloco }}</h1>
 </div>
 
 @if (loading()) {
@@ -12,13 +12,13 @@
 } @else if (unbudgetedItems().length === 0) {
   <app-empty-state
     icon="phosphorCheckCircle"
-    message="Toutes vos catégories ont un budget"
+    [message]="'budgets.empty.noUnbudgeted' | transloco"
   />
 } @else {
   <div class="hero">
     <div class="hero__body">
       <div class="hero__text">
-        <span class="hero__label">DÉPENSÉ</span>
+        <span class="hero__label">{{ 'budgets.summary.spent' | transloco }}</span>
         <span class="hero__value">
           {{ unbudgetedTotal() | amount: null : currency() }}
         </span>
@@ -28,7 +28,7 @@
         <div class="hero__meta">
           <div class="hero__meta-line">
             <ng-icon name="phosphorSquaresFour" size="14" />
-            <span>{{ unbudgetedItems().length }} catégories sans budget</span>
+            <span>{{ 'budgets.summary.unbudgetedCategoryCount' | transloco: { count: unbudgetedItems().length } }}</span>
           </div>
         </div>
       </div>
@@ -40,8 +40,8 @@
 
   <div class="sticky-sentinel" #stickySentinel></div>
   <div class="section-header" [class.stuck]="isStuck()">
-    <h2 class="section-header__title">Par catégorie</h2>
-    <span class="section-header__count">{{ totalTransactions() }} transactions</span>
+    <h2 class="section-header__title">{{ 'budgets.page.byCategoryTitle' | transloco }}</h2>
+    <span class="section-header__count">{{ 'budgets.list.transactionCount' | transloco: { count: totalTransactions() } }}</span>
   </div>
 
   @if (transactionsLoading()) {
@@ -62,7 +62,7 @@
         <button
           class="category-header__create"
           (click)="onCreateBudget()"
-          aria-label="Créer un budget"
+          [attr.aria-label]="'budgets.action.addAria' | transloco"
         >
           <ng-icon name="phosphorPlus" size="14" />
         </button>

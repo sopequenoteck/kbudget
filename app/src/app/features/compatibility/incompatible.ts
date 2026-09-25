@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { AuthShell } from '../auth/components/auth-shell/auth-shell';
 import { CompatibilityService } from '../../core/services/compatibility';
@@ -18,7 +19,7 @@ import { CompatibilityService } from '../../core/services/compatibility';
 @Component({
   selector: 'app-incompatible',
   standalone: true,
-  imports: [AuthShell],
+  imports: [AuthShell, TranslocoPipe],
   templateUrl: './incompatible.html',
   styleUrl: './incompatible.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,8 +33,8 @@ export class Incompatible {
     () => this.status()?.kind === 'clientTooOld',
   );
 
-  protected readonly title = computed(() =>
-    this.isClientTooOld() ? 'Application à mettre à jour' : 'Serveur à mettre à jour',
+  protected readonly titleKey = computed(() =>
+    this.isClientTooOld() ? 'compatibility.page.clientTitle' : 'compatibility.page.serverTitle',
   );
 
   /** Version en cause, ou null si le serveur est trop ancien pour l'annoncer. */

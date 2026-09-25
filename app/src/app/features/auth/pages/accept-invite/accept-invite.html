@@ -1,17 +1,17 @@
 <app-auth-shell
-  title="Créer votre compte"
-  tagline="Quelques informations pour finaliser l'inscription"
+  [title]="'auth.page.acceptInviteTitle' | transloco"
+  [tagline]="'auth.page.acceptInviteTagline' | transloco"
   size="md"
 >
   @if (loading() && !email() && !error()) {
-    <div class="accept-invite-loading">Vérification du lien...</div>
+    <div class="accept-invite-loading">{{ 'auth.feedback.checkingLink' | transloco }}</div>
   }
 
   @if (error()) {
     <div class="accept-invite-error">
       <p>{{ error() }}</p>
       <p class="accept-invite-error__hint">
-        Demandez à un administrateur de vous envoyer un nouveau lien.
+        {{ 'auth.feedback.invalidLinkHint' | transloco }}
       </p>
     </div>
   }
@@ -19,10 +19,10 @@
   @if (email() && !error()) {
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-section">
-        <span class="form-section__label">VOTRE IDENTITÉ</span>
+        <span class="form-section__label">{{ 'auth.page.identitySectionTitle' | transloco }}</span>
 
         <app-form-field
-          label="Adresse email"
+          [label]="'auth.form.emailAddress' | transloco"
           fieldId="accept-email"
           prefixIcon="phosphorEnvelope"
           [showError]="false"
@@ -37,10 +37,10 @@
         </app-form-field>
 
         <app-form-field
-          label="Nom d'affichage"
+          [label]="'auth.form.displayName' | transloco"
           fieldId="accept-displayname"
           prefixIcon="phosphorUser"
-          errorMessage="Nom requis (100 caractères max)"
+          [errorMessage]="'auth.form.displayNameRequired' | transloco"
           [showError]="form.controls.displayName.touched && form.controls.displayName.invalid"
         >
           <input
@@ -48,16 +48,16 @@
             type="text"
             formControlName="displayName"
             autocomplete="name"
-            placeholder="Votre prénom ou pseudo"
+            [placeholder]="'auth.form.displayNamePlaceholder' | transloco"
             [class.input-error]="form.controls.displayName.touched && form.controls.displayName.invalid"
           />
         </app-form-field>
 
         <app-form-field
-          label="Mot de passe"
+          [label]="'auth.form.password' | transloco"
           fieldId="accept-password"
           prefixIcon="phosphorLock"
-          [errorMessage]="passwordMinLengthMessage"
+          [errorMessage]="'auth.form.passwordMinLength' | transloco: { min: passwordMinLength }"
           [showError]="form.controls.password.touched && form.controls.password.invalid"
         >
           <input
@@ -65,18 +65,18 @@
             type="password"
             formControlName="password"
             autocomplete="new-password"
-            [placeholder]="passwordPlaceholder"
+            [placeholder]="'auth.form.passwordPlaceholder' | transloco: { min: passwordMinLength }"
             [class.input-error]="form.controls.password.touched && form.controls.password.invalid"
           />
         </app-form-field>
       </div>
 
       <div class="form-section">
-        <span class="form-section__label">PRÉFÉRENCES</span>
+        <span class="form-section__label">{{ 'auth.page.preferencesSectionTitle' | transloco }}</span>
 
         <div class="accept-invite-prefs-grid">
           <app-form-field
-            label="Devise"
+            [label]="'auth.form.currency' | transloco"
             fieldId="accept-currency"
             prefixIcon="phosphorCoin"
             [showError]="false"
@@ -89,7 +89,7 @@
           </app-form-field>
 
           <app-form-field
-            label="Fuseau horaire"
+            [label]="'auth.form.timezone' | transloco"
             fieldId="accept-timezone"
             prefixIcon="phosphorGlobe"
             [showError]="false"
@@ -106,9 +106,9 @@
       <div class="form-actions">
         <button type="submit" class="btn-primary" [disabled]="loading()">
           @if (loading()) {
-            Création du compte...
+            {{ 'auth.feedback.creatingAccount' | transloco }}
           } @else {
-            Créer mon compte
+            {{ 'auth.action.createAccount' | transloco }}
           }
         </button>
       </div>
