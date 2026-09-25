@@ -1,18 +1,18 @@
 <a class="section-back" routerLink="/settings">
   <span class="section-back__arrow">&#9664;</span>
-  <span>Paramètres</span>
+  <span>{{ 'common.nav.settings' | transloco }}</span>
 </a>
 
-<h2 class="import-title">Import CSV</h2>
+<h2 class="import-title">{{ 'imports.page.title' | transloco }}</h2>
 <p class="import-description">
-  Importez vos transactions depuis un relevé bancaire au format CSV.
+  {{ 'imports.page.description' | transloco }}
 </p>
 
 <!-- Brouillons en cours -->
 <section class="import-section">
   <h3 class="import-section__title">
     <ng-icon name="phosphorClockCounterClockwise" size="18" />
-    Brouillons en cours
+    {{ 'imports.page.draftsTitle' | transloco }}
   </h3>
 
   @if (draftsLoading()) {
@@ -20,7 +20,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (drafts().length === 0) {
-    <p class="inline-empty">Aucun brouillon en cours.</p>
+    <p class="inline-empty">{{ 'imports.empty.drafts' | transloco }}</p>
   } @else {
     <ul class="draft-list">
       @for (draft of drafts(); track draft.id) {
@@ -32,7 +32,7 @@
               <span class="draft-list__filename">{{ draft.fileName }}</span>
             }
             <span class="draft-list__meta">
-              {{ draft.totalLines }} ligne{{ draft.totalLines > 1 ? 's' : '' }} · {{ formatDate(draft.createdAt) }}
+              {{ 'imports.list.draftMeta' | transloco: { count: draft.totalLines, date: formatDate(draft.createdAt) } }}
             </span>
           </div>
           <div class="draft-list__actions">
@@ -42,14 +42,14 @@
               (click)="resumeDraft(draft.id)"
             >
               <ng-icon name="phosphorArrowCounterClockwise" size="14" />
-              Reprendre
+              {{ 'imports.action.resume' | transloco }}
             </button>
             <button
               type="button"
               class="btn-icon btn-icon--danger"
               [disabled]="deletingDraftId() === draft.id"
               (click)="deleteDraft(draft.id)"
-              title="Supprimer le brouillon"
+              [title]="'imports.action.deleteDraft' | transloco"
             >
               <ng-icon name="phosphorTrash" size="16" />
             </button>
@@ -64,7 +64,7 @@
 <section class="import-section">
   <h3 class="import-section__title">
     <ng-icon name="phosphorUploadSimple" size="18" />
-    Historique
+    {{ 'imports.page.historyTitle' | transloco }}
   </h3>
 
   @if (historyLoading()) {
@@ -72,7 +72,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (history().length === 0) {
-    <p class="inline-empty">Aucun import finalisé.</p>
+    <p class="inline-empty">{{ 'imports.empty.history' | transloco }}</p>
   } @else {
     <ul class="history-list">
       @for (entry of history(); track entry.id) {
@@ -83,7 +83,7 @@
               <span class="history-list__filename">{{ entry.fileName }}</span>
             }
             <span class="history-list__meta">
-              {{ entry.transactionCount }} transaction{{ entry.transactionCount > 1 ? 's' : '' }} · {{ formatDate(entry.importedAt) }}
+              {{ 'imports.list.historyMeta' | transloco: { count: entry.transactionCount, date: formatDate(entry.importedAt) } }}
             </span>
           </div>
         </li>
@@ -97,18 +97,18 @@
   <div class="import-section__header">
     <h3 class="import-section__title">
       <ng-icon name="phosphorFunnelSimple" size="18" />
-      Règles de catégorisation
+      {{ 'imports.page.rulesTitle' | transloco }}
     </h3>
-    <button type="button" class="btn-icon btn-icon--primary" (click)="openAddRuleForm()" title="Ajouter une règle">
+    <button type="button" class="btn-icon btn-icon--primary" (click)="openAddRuleForm()" [title]="'imports.action.addRule' | transloco">
       <ng-icon name="phosphorPlus" size="16" />
     </button>
   </div>
   <p class="import-section__hint">
-    Les règles permettent de catégoriser automatiquement les lignes dont le libellé contient le pattern défini.
+    {{ 'imports.page.rulesHint' | transloco }}
   </p>
 
   @if (rules().length === 0) {
-    <p class="inline-empty">Aucune règle définie.</p>
+    <p class="inline-empty">{{ 'imports.empty.rules' | transloco }}</p>
   } @else {
     <ul class="rule-list">
       @for (rule of rules(); track rule.id) {
@@ -123,7 +123,7 @@
               type="button"
               class="btn-icon btn-icon--sm"
               (click)="openEditRuleForm(rule)"
-              title="Modifier la règle"
+              [title]="'imports.action.editRule' | transloco"
             >
               <ng-icon name="phosphorPencilSimple" size="14" />
             </button>
@@ -131,7 +131,7 @@
               type="button"
               class="btn-icon btn-icon--danger btn-icon--sm"
               (click)="deleteRule(rule.id)"
-              title="Supprimer la règle"
+              [title]="'imports.action.deleteRule' | transloco"
             >
               <ng-icon name="phosphorTrash" size="14" />
             </button>
@@ -144,28 +144,28 @@
   @if (showRuleForm()) {
     <div class="rule-form">
       <h4 class="rule-form__title">
-        {{ editingRuleId() ? 'Modifier la règle' : 'Ajouter une règle' }}
+        {{ (editingRuleId() ? 'imports.action.editRule' : 'imports.action.addRule') | transloco }}
       </h4>
       <div class="form-group">
-        <label class="form-label" for="rule-pattern">Pattern</label>
+        <label class="form-label" for="rule-pattern">{{ 'imports.form.pattern' | transloco }}</label>
         <input
           id="rule-pattern"
           type="text"
           class="form-input"
-          placeholder="ex: CARREFOUR"
+          [placeholder]="'imports.form.patternPlaceholder' | transloco"
           [ngModel]="ruleFormPattern()"
           (ngModelChange)="ruleFormPattern.set($event)"
         />
       </div>
       <div class="form-group">
-        <label class="form-label" for="rule-category">Catégorie</label>
+        <label class="form-label" for="rule-category">{{ 'imports.form.category' | transloco }}</label>
         <select
           id="rule-category"
           class="form-select"
           [ngModel]="ruleFormCategoryId()"
           (ngModelChange)="ruleFormCategoryId.set($event)"
         >
-          <option value="">-- Sélectionner une catégorie --</option>
+          <option value="">{{ 'imports.form.categoryPlaceholder' | transloco }}</option>
           @for (cat of categories(); track cat.id) {
             <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
           }
@@ -176,7 +176,7 @@
       }
       <div class="rule-form__actions">
         <button type="button" class="btn-outline btn-outline--sm" (click)="cancelRuleForm()">
-          Annuler
+          {{ 'common.action.cancel' | transloco }}
         </button>
         <button
           type="button"
@@ -187,7 +187,7 @@
           @if (ruleFormSaving()) {
             <span class="spinner spinner--sm"></span>
           }
-          Enregistrer
+          {{ 'common.action.save' | transloco }}
         </button>
       </div>
     </div>
@@ -198,10 +198,10 @@
 <section class="import-section">
   <h3 class="import-section__title">
     <ng-icon name="phosphorGitBranch" size="18" />
-    Profils d'import
+    {{ 'imports.page.profilesTitle' | transloco }}
   </h3>
   <p class="import-section__hint">
-    Les profils pré-configurés sont fournis par le système. Vos profils personnalisés sont créés lors du mapping manuel.
+    {{ 'imports.page.profilesHint' | transloco }}
   </p>
 
   @if (profilesLoading()) {
@@ -209,7 +209,7 @@
       <div class="spinner spinner--sm"></div>
     </div>
   } @else if (profiles().length === 0) {
-    <p class="inline-empty">Aucun profil disponible.</p>
+    <p class="inline-empty">{{ 'imports.empty.profiles' | transloco }}</p>
   } @else {
     <ul class="profile-list">
       @for (profile of profiles(); track (profile.id ?? profile.name)) {
@@ -223,7 +223,7 @@
           <div class="profile-list__info">
             <span class="profile-list__name">{{ profile.name }}</span>
             <span class="profile-list__badge" [class.profile-list__badge--registry]="profile.source === 'REGISTRY'">
-              {{ profile.source === 'REGISTRY' ? 'Pré-configuré' : 'Personnalisé' }}
+              {{ IMPORT_PROFILE_SOURCE_LABEL_KEYS[profile.source] | transloco }}
             </span>
           </div>
           @if (profile.editable && profile.id) {
@@ -232,7 +232,7 @@
               class="btn-icon btn-icon--danger btn-icon--sm"
               [disabled]="deletingProfileId() === profile.id"
               (click)="deleteProfile(profile.id)"
-              title="Supprimer le profil"
+              [title]="'imports.action.deleteProfile' | transloco"
             >
               <ng-icon name="phosphorTrash" size="14" />
             </button>
@@ -247,14 +247,14 @@
 <section class="import-section">
   <h3 class="import-section__title">
     <ng-icon name="phosphorUploadSimple" size="18" />
-    Nouvel import
+    {{ 'imports.page.newImportTitle' | transloco }}
   </h3>
 
   <div class="import-form">
     <div class="form-group">
-      <label class="form-label" for="account-select">Compte de destination</label>
+      <label class="form-label" for="account-select">{{ 'imports.form.account' | transloco }}</label>
       @if (accounts().length === 0) {
-        <p class="form-hint">Aucun compte disponible.</p>
+        <p class="form-hint">{{ 'imports.empty.accounts' | transloco }}</p>
       } @else {
         <select
           id="account-select"
@@ -281,13 +281,13 @@
       @if (uploading()) {
         <div class="upload-zone__content">
           <div class="spinner"></div>
-          <p class="upload-zone__text">Import en cours...</p>
+          <p class="upload-zone__text">{{ 'imports.feedback.uploading' | transloco }}</p>
         </div>
       } @else {
         <div class="upload-zone__content">
           <span class="upload-zone__icon">&#8679;</span>
-          <p class="upload-zone__text">Cliquez pour sélectionner un fichier CSV</p>
-          <p class="upload-zone__hint">Formats acceptés : .csv, .txt</p>
+          <p class="upload-zone__text">{{ 'imports.form.uploadPrompt' | transloco }}</p>
+          <p class="upload-zone__hint">{{ 'imports.form.uploadHint' | transloco }}</p>
         </div>
       }
     </div>

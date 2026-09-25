@@ -130,3 +130,17 @@ export interface ImportProfile {
   source: 'REGISTRY' | 'CUSTOM';
   editable: boolean;
 }
+
+/** Cles de traduction du statut d'une ligne de brouillon (KKS-376). */
+export const IMPORT_LINE_STATUS_LABEL_KEYS: Record<ImportDraftLine['status'], string> = {
+  READY: 'imports.value.ready',
+  NEEDS_REVIEW: 'imports.value.needsReview',
+  DUPLICATE: 'imports.value.duplicate',
+  SKIPPED: 'imports.value.skipped',
+};
+
+/** Cles de traduction de l'origine d'un profil d'import (KKS-376). */
+export const IMPORT_PROFILE_SOURCE_LABEL_KEYS: Record<ImportProfile['source'], string> = {
+  REGISTRY: 'imports.value.registry',
+  CUSTOM: 'imports.value.custom',
+};

@@ -1,12 +1,11 @@
 <a class="section-back" routerLink="/settings/import">
   <span class="section-back__arrow">&#9664;</span>
-  <span>Import CSV</span>
+  <span>{{ 'imports.page.title' | transloco }}</span>
 </a>
 
-<h2 class="mapping-title">Mapping des colonnes</h2>
+<h2 class="mapping-title">{{ 'imports.page.mappingTitle' | transloco }}</h2>
 <p class="mapping-description">
-  Le format de votre fichier n'a pas été reconnu automatiquement. Configurez le mapping des colonnes
-  pour importer vos transactions.
+  {{ 'imports.page.mappingDescription' | transloco }}
 </p>
 
 @if (fileName()) {
@@ -19,13 +18,13 @@
 @if (!file && !fileName()) {
   <div class="mapping-warning">
     <ng-icon name="phosphorWarningCircle" size="18" />
-    <span>Aucun fichier trouvé. Veuillez retourner à la page d'import et réessayer.</span>
+    <span>{{ 'imports.empty.file' | transloco }}</span>
   </div>
 } @else {
 
   <!-- Preview table -->
   <section class="mapping-section">
-    <h3 class="mapping-section__title">Aperçu du fichier</h3>
+    <h3 class="mapping-section__title">{{ 'imports.page.previewTitle' | transloco }}</h3>
 
     @if (previewLoading()) {
       <div class="state-loading">
@@ -35,9 +34,9 @@
       <div class="mapping-error">{{ previewError() }}</div>
     } @else if (preview()) {
       <p class="mapping-section__hint">
-        {{ preview()!.totalRows }} ligne{{ preview()!.totalRows > 1 ? 's' : '' }} détectée{{ preview()!.totalRows > 1 ? 's' : '' }} ·
-        Séparateur : <code>{{ preview()!.detectedSeparator === '\t' ? '\\t' : preview()!.detectedSeparator }}</code> ·
-        Encodage : {{ preview()!.detectedEncoding }}
+        {{ 'imports.list.rowsDetected' | transloco: { count: preview()!.totalRows } }} ·
+        {{ 'imports.list.separator' | transloco }} <code>{{ preview()!.detectedSeparator === '\t' ? '\\t' : preview()!.detectedSeparator }}</code> ·
+        {{ 'imports.list.encodingInfo' | transloco: { encoding: preview()!.detectedEncoding } }}
       </p>
       <div class="preview-table-wrapper">
         <table class="preview-table">
@@ -64,11 +63,11 @@
 
   <!-- Parsing parameters -->
   <section class="mapping-section">
-    <h3 class="mapping-section__title">Paramètres de lecture</h3>
+    <h3 class="mapping-section__title">{{ 'imports.page.parsingTitle' | transloco }}</h3>
     <div class="mapping-grid">
 
       <div class="form-group">
-        <label class="form-label" for="separator">Séparateur</label>
+        <label class="form-label" for="separator">{{ 'imports.form.separator' | transloco }}</label>
         <select
           id="separator"
           class="form-select"
@@ -76,13 +75,13 @@
           (ngModelChange)="separator.set($event); onSeparatorChange()"
         >
           @for (sep of SEPARATORS; track sep.value) {
-            <option [value]="sep.value">{{ sep.label }}</option>
+            <option [value]="sep.value">{{ sep.labelKey | transloco }}</option>
           }
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="encoding">Encodage</label>
+        <label class="form-label" for="encoding">{{ 'imports.form.encoding' | transloco }}</label>
         <select
           id="encoding"
           class="form-select"
@@ -96,7 +95,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="date-format">Format de date</label>
+        <label class="form-label" for="date-format">{{ 'imports.form.dateFormat' | transloco }}</label>
         <select
           id="date-format"
           class="form-select"
@@ -110,20 +109,20 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="decimal-sep">Séparateur décimal</label>
+        <label class="form-label" for="decimal-sep">{{ 'imports.form.decimalSeparator' | transloco }}</label>
         <select
           id="decimal-sep"
           class="form-select"
           [ngModel]="decimalSeparator()"
           (ngModelChange)="decimalSeparator.set($event)"
         >
-          <option value=",">Virgule (,)</option>
-          <option value=".">Point (.)</option>
+          <option value=",">{{ 'imports.value.separatorComma' | transloco }}</option>
+          <option value=".">{{ 'imports.value.separatorDot' | transloco }}</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="skip-lines">Lignes d'en-tête à ignorer</label>
+        <label class="form-label" for="skip-lines">{{ 'imports.form.skipHeaderLines' | transloco }}</label>
         <input
           id="skip-lines"
           type="number"
@@ -140,22 +139,22 @@
 
   <!-- Column mapping -->
   <section class="mapping-section">
-    <h3 class="mapping-section__title">Mapping des colonnes</h3>
+    <h3 class="mapping-section__title">{{ 'imports.page.mappingTitle' | transloco }}</h3>
 
     @if (headers().length === 0) {
-      <p class="inline-empty">Chargez l'aperçu pour sélectionner les colonnes.</p>
+      <p class="inline-empty">{{ 'imports.empty.columns' | transloco }}</p>
     } @else {
       <div class="mapping-grid">
 
         <div class="form-group">
-          <label class="form-label" for="col-date">Colonne Date <span class="required">*</span></label>
+          <label class="form-label" for="col-date">{{ 'imports.form.dateColumn' | transloco }} <span class="required">*</span></label>
           <select
             id="col-date"
             class="form-select"
             [ngModel]="dateColumn()"
             (ngModelChange)="dateColumn.set($event)"
           >
-            <option value="">-- Sélectionner --</option>
+            <option value="">{{ 'imports.form.selectColumnOption' | transloco }}</option>
             @for (h of headers(); track h) {
               <option [value]="h">{{ h }}</option>
             }
@@ -163,14 +162,14 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="col-label">Colonne Libellé <span class="required">*</span></label>
+          <label class="form-label" for="col-label">{{ 'imports.form.labelColumn' | transloco }} <span class="required">*</span></label>
           <select
             id="col-label"
             class="form-select"
             [ngModel]="labelColumn()"
             (ngModelChange)="labelColumn.set($event)"
           >
-            <option value="">-- Sélectionner --</option>
+            <option value="">{{ 'imports.form.selectColumnOption' | transloco }}</option>
             @for (h of headers(); track h) {
               <option [value]="h">{{ h }}</option>
             }
@@ -178,7 +177,7 @@
         </div>
 
         <div class="form-group form-group--full">
-          <span class="form-label">Mode montant <span class="required">*</span></span>
+          <span class="form-label">{{ 'imports.form.amountMode' | transloco }} <span class="required">*</span></span>
           <div class="radio-group">
             <label class="radio-label">
               <input
@@ -188,7 +187,7 @@
                 [ngModel]="amountMode()"
                 (ngModelChange)="amountMode.set($event)"
               />
-              Colonne unique (montant signé)
+              {{ 'imports.value.amountModeSingle' | transloco }}
             </label>
             <label class="radio-label">
               <input
@@ -198,21 +197,21 @@
                 [ngModel]="amountMode()"
                 (ngModelChange)="amountMode.set($event)"
               />
-              Deux colonnes (débit / crédit)
+              {{ 'imports.value.amountModeSplit' | transloco }}
             </label>
           </div>
         </div>
 
         @if (amountMode() === 'single') {
           <div class="form-group">
-            <label class="form-label" for="col-amount">Colonne Montant <span class="required">*</span></label>
+            <label class="form-label" for="col-amount">{{ 'imports.form.amountColumn' | transloco }} <span class="required">*</span></label>
             <select
               id="col-amount"
               class="form-select"
               [ngModel]="amountColumn()"
               (ngModelChange)="amountColumn.set($event)"
             >
-              <option value="">-- Sélectionner --</option>
+              <option value="">{{ 'imports.form.selectColumnOption' | transloco }}</option>
               @for (h of headers(); track h) {
                 <option [value]="h">{{ h }}</option>
               }
@@ -220,28 +219,28 @@
           </div>
         } @else {
           <div class="form-group">
-            <label class="form-label" for="col-debit">Colonne Débit <span class="required">*</span></label>
+            <label class="form-label" for="col-debit">{{ 'imports.form.debitColumn' | transloco }} <span class="required">*</span></label>
             <select
               id="col-debit"
               class="form-select"
               [ngModel]="debitColumn()"
               (ngModelChange)="debitColumn.set($event)"
             >
-              <option value="">-- Sélectionner --</option>
+              <option value="">{{ 'imports.form.selectColumnOption' | transloco }}</option>
               @for (h of headers(); track h) {
                 <option [value]="h">{{ h }}</option>
               }
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="col-credit">Colonne Crédit <span class="required">*</span></label>
+            <label class="form-label" for="col-credit">{{ 'imports.form.creditColumn' | transloco }} <span class="required">*</span></label>
             <select
               id="col-credit"
               class="form-select"
               [ngModel]="creditColumn()"
               (ngModelChange)="creditColumn.set($event)"
             >
-              <option value="">-- Sélectionner --</option>
+              <option value="">{{ 'imports.form.selectColumnOption' | transloco }}</option>
               @for (h of headers(); track h) {
                 <option [value]="h">{{ h }}</option>
               }
@@ -255,7 +254,7 @@
 
   <!-- Save as profile -->
   <section class="mapping-section">
-    <h3 class="mapping-section__title">Profil d'import</h3>
+    <h3 class="mapping-section__title">{{ 'imports.page.profileTitle' | transloco }}</h3>
     <div class="form-group form-group--inline">
       <input
         id="save-profile"
@@ -265,17 +264,17 @@
         (ngModelChange)="saveAsProfile.set($event)"
       />
       <label class="form-label form-label--checkbox" for="save-profile">
-        Sauvegarder ce mapping comme profil réutilisable
+        {{ 'imports.form.saveAsProfile' | transloco }}
       </label>
     </div>
     @if (saveAsProfile()) {
       <div class="form-group" style="margin-top: var(--space-3);">
-        <label class="form-label" for="profile-name">Nom du profil <span class="required">*</span></label>
+        <label class="form-label" for="profile-name">{{ 'imports.form.profileName' | transloco }} <span class="required">*</span></label>
         <input
           id="profile-name"
           type="text"
           class="form-input"
-          placeholder="ex: Ma banque togolaise"
+          [placeholder]="'imports.form.profileNamePlaceholder' | transloco"
           [ngModel]="profileName()"
           (ngModelChange)="profileName.set($event)"
         />
@@ -290,7 +289,7 @@
 
   <!-- Actions -->
   <div class="mapping-actions">
-    <a class="btn-outline" routerLink="/settings/import">Annuler</a>
+    <a class="btn-outline" routerLink="/settings/import">{{ 'common.action.cancel' | transloco }}</a>
     <button
       type="button"
       class="btn-primary"
@@ -300,7 +299,7 @@
       @if (importing()) {
         <span class="spinner spinner--sm"></span>
       }
-      Importer
+      {{ 'imports.action.import' | transloco }}
     </button>
   </div>
 
