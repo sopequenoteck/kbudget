@@ -49,6 +49,7 @@ describe('DebtDetail', () => {
 
   let confirmServiceMock: {
     confirm: ReturnType<typeof vi.fn>;
+    confirmDelete: ReturnType<typeof vi.fn>;
   };
 
   let modalServiceMock: {
@@ -79,6 +80,7 @@ describe('DebtDetail', () => {
 
     confirmServiceMock = {
       confirm: vi.fn().mockResolvedValue(true),
+      confirmDelete: vi.fn().mockResolvedValue(true),
     };
 
     modalServiceMock = {
@@ -235,21 +237,21 @@ describe('DebtDetail', () => {
   });
 
   it('should_delete_debt_when_confirmed', async () => {
-    confirmServiceMock.confirm.mockResolvedValue(true);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
     const fixture = TestBed.createComponent(DebtDetail);
     fixture.detectChanges();
     await fixture.whenStable();
 
     await fixture.componentInstance.onDelete();
 
-    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(confirmServiceMock.confirmDelete).toHaveBeenCalled();
     expect(debtServiceMock.delete).toHaveBeenCalledWith('debt-1');
     expect(toastServiceMock.success).toHaveBeenCalledWith('Dette supprimée');
     expect(routerMock.navigate).toHaveBeenCalledWith(['/debts']);
   });
 
   it('should_not_delete_debt_when_not_confirmed', async () => {
-    confirmServiceMock.confirm.mockResolvedValue(false);
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
     const fixture = TestBed.createComponent(DebtDetail);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -260,7 +262,7 @@ describe('DebtDetail', () => {
   });
 
   it('should_show_error_toast_when_delete_fails', async () => {
-    confirmServiceMock.confirm.mockResolvedValue(true);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
     debtServiceMock.delete.mockReturnValue(throwError(() => new Error('fail')));
     const fixture = TestBed.createComponent(DebtDetail);
     fixture.detectChanges();
@@ -278,5 +280,30 @@ describe('DebtDetail', () => {
 
     const result = fixture.componentInstance.formatDate('2026-03-15');
     expect(result).toContain('2026');
+  });
+
+  it('should_expose_the_shared_debt_type_label_keys', async () => {
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.DEBT_TYPE_LABEL_KEYS[DebtType.EMPRUNT]).toBe('debts.value.borrowed');
+    expect(fixture.componentInstance.DEBT_TYPE_LABEL_KEYS[DebtType.PRET]).toBe('debts.value.lent');
+  });
+
+  it('should_show_translated_toast_and_update_debt_when_snoozed', async () => {
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.showSnoozeDialog.set(true);
+    const updated: Debt = { ...mockDebt, reminderDate: '2026-05-01', reminderTime: '10:00' };
+
+    component.onSnoozed(updated);
+
+    expect(component.debt()).toEqual(updated);
+    expect(component.showSnoozeDialog()).toBe(false);
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Rappel reporté');
   });
 });

@@ -30,17 +30,6 @@ export function insertSortedByNom<T extends { nom: string }>(
   return [...items, item].sort((a, b) => a.nom.localeCompare(b.nom, locale));
 }
 
-/**
- * Libellé du nombre de jours restants avant une échéance à venir (abonnements,
- * dettes). Au-delà de 30 jours, bascule sur une date courte localisée.
- */
-export function formatUpcomingDays(diffDays: number, date: Date, locale: string): string {
-  if (diffDays === 0) return "aujourd'hui";
-  if (diffDays === 1) return 'demain';
-  if (diffDays <= 30) return `dans ${diffDays} j.`;
-  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(date);
-}
-
 /** Libellé "mois année" localisé (ex: "mars 2026"). */
 export function formatMonthYearLabel(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });

@@ -31,6 +31,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 import { LanguageService } from '../../../../core/services/language';
+import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../../../shared/utils/relative-due-date.utils';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -47,13 +48,13 @@ interface MonthlySummary {
   expenseCount: number;
 }
 
-/** Soit une clé de traduction (avec parametres ICU), soit une date deja
- * formatee pour la locale d'affichage (au-dela de 30 jours). */
-interface RelativeDateInfo {
-  readonly key?: string;
-  readonly params?: { count: number };
-  readonly formatted?: string;
-}
+const RECURRING_DUE_DATE_KEYS: RelativeDueDateKeys = {
+  today: 'recurring.list.today',
+  tomorrow: 'recurring.list.tomorrow',
+  daysUntil: 'recurring.list.daysUntil',
+  yesterday: 'recurring.list.yesterday',
+  daysOverdue: 'recurring.list.daysOverdue',
+};
 
 const STATUS_ORDER: Record<RecurringStatus, number> = {
   overdue: 0,
@@ -181,24 +182,13 @@ export class RecurringList {
   }
 
   getRelativeDateInfo(nextOccurrence: string): RelativeDateInfo {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const next = new Date(nextOccurrence);
-    next.setHours(0, 0, 0, 0);
-    const diffMs = next.getTime() - today.getTime();
-    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      const absDays = Math.abs(diffDays);
-      if (absDays === 1) return { key: 'recurring.list.yesterday' };
-      return { key: 'recurring.list.daysOverdue', params: { count: absDays } };
-    }
-    if (diffDays === 0) return { key: 'recurring.list.today' };
-    if (diffDays === 1) return { key: 'recurring.list.tomorrow' };
-    if (diffDays <= 30) return { key: 'recurring.list.daysUntil', params: { count: diffDays } };
-    return {
-      formatted: next.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: 'short' }),
-    };
+    return getRelativeDueDateInfo(
+      new Date(nextOccurrence),
+      new Date(),
+      this.languageService.displayLocale(),
+      RECURRING_DUE_DATE_KEYS,
+      '2-digit',
+    );
   }
 
   getValueClass(item: RecurringTransactionResponse): string {

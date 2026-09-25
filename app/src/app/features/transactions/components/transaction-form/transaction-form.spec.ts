@@ -88,6 +88,7 @@ describe('TransactionForm', () => {
 
   let confirmServiceMock: {
     confirm: ReturnType<typeof vi.fn>;
+    confirmDelete: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -135,6 +136,7 @@ describe('TransactionForm', () => {
 
     confirmServiceMock = {
       confirm: vi.fn().mockResolvedValue(false),
+      confirmDelete: vi.fn().mockResolvedValue(false),
     };
   });
 
@@ -291,7 +293,7 @@ describe('TransactionForm', () => {
   it('should_delete_transaction_when_confirmed', async () => {
     const existingTransaction = makeTransaction();
     modalServiceMock.editingEntity = signal(existingTransaction);
-    confirmServiceMock.confirm.mockResolvedValue(true);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
 
     setupTestBed();
     const fixture = TestBed.createComponent(TransactionForm);
@@ -299,7 +301,7 @@ describe('TransactionForm', () => {
 
     await fixture.componentInstance.onDelete();
 
-    expect(confirmServiceMock.confirm).toHaveBeenCalled();
+    expect(confirmServiceMock.confirmDelete).toHaveBeenCalled();
     expect(transactionServiceMock.delete).toHaveBeenCalledWith('tx-1');
     expect(modalServiceMock.closeModal).toHaveBeenCalled();
   });
@@ -307,7 +309,7 @@ describe('TransactionForm', () => {
   it('should_not_delete_transaction_when_not_confirmed', async () => {
     const existingTransaction = makeTransaction();
     modalServiceMock.editingEntity = signal(existingTransaction);
-    confirmServiceMock.confirm.mockResolvedValue(false);
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
 
     setupTestBed();
     const fixture = TestBed.createComponent(TransactionForm);
@@ -363,7 +365,7 @@ describe('TransactionForm', () => {
   it('should_include_transfer_counterpart_message_when_deleting_transfer_transaction', async () => {
     const existingTransaction = makeTransaction({ transferId: 'transfer-1' });
     modalServiceMock.editingEntity = signal(existingTransaction);
-    confirmServiceMock.confirm.mockResolvedValue(false);
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
 
     setupTestBed();
     const fixture = TestBed.createComponent(TransactionForm);
@@ -371,14 +373,14 @@ describe('TransactionForm', () => {
 
     await fixture.componentInstance.onDelete();
 
-    const confirmArgs = confirmServiceMock.confirm.mock.calls[0][0];
+    const confirmArgs = confirmServiceMock.confirmDelete.mock.calls[0][0];
     expect(confirmArgs.message).toContain('La contrepartie du virement sera aussi supprimée.');
   });
 
   it('should_set_error_message_when_delete_fails', async () => {
     const existingTransaction = makeTransaction();
     modalServiceMock.editingEntity = signal(existingTransaction);
-    confirmServiceMock.confirm.mockResolvedValue(true);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
     transactionServiceMock.delete = vi.fn().mockReturnValue(throwError(() => 'server error'));
 
     setupTestBed();

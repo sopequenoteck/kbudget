@@ -274,6 +274,26 @@ describe('RepayDialog', () => {
     expect(component.errorMessage()).toBe('Solde insuffisant');
   });
 
+  it('should_set_translated_invalid_amount_message_when_amount_parses_to_nan', async () => {
+    setup(mockDebt);
+    const fixture = TestBed.createComponent(RepayDialog);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    // Le champ desactive echappe aux Validators.min/max (exclus de
+    // form.invalid) mais reste dans getRawValue(), ce qui declenche la
+    // verification manuelle.
+    component.form.get('amount')!.disable();
+    component.form.get('amount')!.setValue('abc');
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Montant invalide');
+    expect(debtServiceMock.repay).not.toHaveBeenCalled();
+  });
+
   it('should_emit_closed_when_cancel_clicked', async () => {
     setup(mockDebt);
     const fixture = TestBed.createComponent(RepayDialog);

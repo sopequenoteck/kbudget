@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { SnoozeDialog } from './snooze-dialog';
 import { DebtService } from '../../../../core/services/debt';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockDebt: Debt = {
   id: 'debt-1',
@@ -50,6 +51,7 @@ describe('SnoozeDialog', () => {
     TestBed.configureTestingModule({
       imports: [SnoozeDialog],
       providers: [
+        provideTranslocoTesting(),
         { provide: DebtService, useValue: debtServiceMock },
       ],
     });
