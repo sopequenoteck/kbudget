@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { TransactionService } from '../../core/services/transaction';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
@@ -40,10 +41,35 @@ import { CurrencyPillSelector } from '../dashboard/components/currency-pill-sele
 import { LanguageService } from '../../core/services/language';
 import { formatMonthYearLabel } from '../../shared/utils/locale-format.utils';
 
+type DateGroupKey = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'older';
+
+const DATE_GROUP_ORDER: readonly DateGroupKey[] = ['today', 'yesterday', 'thisWeek', 'lastWeek', 'older'];
+
+const DATE_GROUP_LABEL_KEYS: Record<DateGroupKey, string> = {
+  today: 'common.value.today',
+  yesterday: 'common.value.yesterday',
+  thisWeek: 'transactions.list.thisWeek',
+  lastWeek: 'transactions.list.lastWeek',
+  older: 'transactions.list.older',
+};
+
+const FILTERED_EMPTY_MESSAGE_KEYS: Partial<Record<TransactionType, string>> = {
+  [TransactionType.DEPENSE]: 'transactions.empty.noExpenseInMonth',
+  [TransactionType.RECETTE]: 'transactions.empty.noIncomeInMonth',
+};
+
+interface EmptyStateConfig {
+  readonly icon: string;
+  readonly messageKey: string;
+  readonly messageParams?: { month: string };
+  readonly ctaLabelKey?: string;
+  readonly isResetCta: boolean;
+}
+
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector],
+  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorMagnifyingGlass,
@@ -84,6 +110,7 @@ export class Transactions implements AfterViewInit {
   readonly accounts = signal<Account[]>([]);
 
   readonly skeletonItems = Array(5);
+  readonly dateGroupLabelKeys = DATE_GROUP_LABEL_KEYS;
 
   readonly activeCurrency = signal(this.preferenceService.primaryCurrency());
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -196,32 +223,31 @@ export class Transactions implements AfterViewInit {
     const weekStart = new Date(today.getTime() - today.getDay() * 86400000 + 86400000); // lundi
     const lastWeekStart = new Date(weekStart.getTime() - 7 * 86400000);
 
-    const groups = new Map<string, { label: string; total: number; transactions: Transaction[] }>();
-    const order = ["Aujourd'hui", 'Hier', 'Cette semaine', 'Semaine dernière', 'Plus ancien'];
-    for (const label of order) {
-      groups.set(label, { label, total: 0, transactions: [] });
+    const groups = new Map<DateGroupKey, { key: DateGroupKey; total: number; transactions: Transaction[] }>();
+    for (const key of DATE_GROUP_ORDER) {
+      groups.set(key, { key, total: 0, transactions: [] });
     }
 
     for (const t of transactions) {
       const d = new Date(t.date + 'T00:00:00');
-      let label: string;
+      let key: DateGroupKey;
       if (d.getTime() >= today.getTime()) {
-        label = "Aujourd'hui";
+        key = 'today';
       } else if (d.getTime() >= yesterday.getTime()) {
-        label = 'Hier';
+        key = 'yesterday';
       } else if (d.getTime() >= weekStart.getTime()) {
-        label = 'Cette semaine';
+        key = 'thisWeek';
       } else if (d.getTime() >= lastWeekStart.getTime()) {
-        label = 'Semaine dernière';
+        key = 'lastWeek';
       } else {
-        label = 'Plus ancien';
+        key = 'older';
       }
-      const group = groups.get(label)!;
+      const group = groups.get(key)!;
       group.transactions.push(t);
       group.total += t.type === TransactionType.RECETTE ? t.montant : -t.montant;
     }
 
-    return order.map((label) => groups.get(label)!).filter((g) => g.transactions.length > 0);
+    return DATE_GROUP_ORDER.map((key) => groups.get(key)!).filter((g) => g.transactions.length > 0);
   });
 
   readonly monthCategories = computed(() => {
@@ -250,18 +276,28 @@ export class Transactions implements AfterViewInit {
       .map(v => v.category);
   });
 
-  readonly emptyStateConfig = computed(() => {
+  readonly emptyStateConfig = computed((): EmptyStateConfig => {
     if (this.searchQuery().trim()) {
-      return { icon: 'phosphorMagnifyingGlass', message: 'Aucune transaction trouvée', ctaLabel: undefined };
+      return { icon: 'phosphorMagnifyingGlass', messageKey: 'transactions.empty.noResults', isResetCta: false };
     }
     if (this.hasActiveFilters()) {
       const type = this.typeFilter();
-      const label = type === TransactionType.DEPENSE ? 'dépense'
-        : type === TransactionType.RECETTE ? 'recette'
-        : 'transaction';
-      return { icon: 'phosphorFunnel', message: `Aucune ${label} en ${this.selectedMonthLabel()}`, ctaLabel: 'Réinitialiser les filtres' };
+      const messageKey = (type && FILTERED_EMPTY_MESSAGE_KEYS[type]) ?? 'transactions.empty.noneInMonth';
+      return {
+        icon: 'phosphorFunnel',
+        messageKey,
+        messageParams: { month: this.selectedMonthLabel() },
+        ctaLabelKey: 'common.action.resetFilters',
+        isResetCta: true,
+      };
     }
-    return { icon: 'phosphorReceipt', message: `Aucune transaction en ${this.selectedMonthLabel()}`, ctaLabel: 'Ajouter une transaction' };
+    return {
+      icon: 'phosphorReceipt',
+      messageKey: 'transactions.empty.noneInMonth',
+      messageParams: { month: this.selectedMonthLabel() },
+      ctaLabelKey: 'transactions.action.add',
+      isResetCta: false,
+    };
   });
 
   constructor() {

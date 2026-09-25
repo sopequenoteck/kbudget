@@ -16,6 +16,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -59,7 +60,7 @@ type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' 
 
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -88,8 +89,10 @@ export class TransactionForm {
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly TransactionType = TransactionType;
+  readonly Frequency = Frequency;
 
   readonly transaction = computed(() => this.modalService.editingEntity() as Transaction | null);
   readonly type = input(TransactionType.DEPENSE);
@@ -107,12 +110,6 @@ export class TransactionForm {
   readonly categoryCreating = signal(false);
 
   readonly amountWidth: Signal<string>;
-
-  readonly frequencyOptions: SelectPickerItem[] = [
-    { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
-    { id: Frequency.MENSUEL, label: 'Mensuel', icon: null, secondaryText: null, color: null },
-    { id: Frequency.ANNUEL, label: 'Annuel', icon: null, secondaryText: null, color: null },
-  ];
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -313,7 +310,7 @@ export class TransactionForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('transactions.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -331,7 +328,7 @@ export class TransactionForm {
           accountId: raw.accountId || undefined,
         };
         await firstValueFrom(this.recurringTransactionService.create(request));
-        this.toastService.success('Transaction récurrente créée');
+        this.toastService.success(this.transloco.translate('recurring.feedback.created'));
       } else {
         const request: TransactionRequest = {
           libelle: raw.libelle,
@@ -352,7 +349,7 @@ export class TransactionForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -363,14 +360,14 @@ export class TransactionForm {
     if (!tx) return;
     const currency = tx.account?.currency ?? 'EUR';
     const amount = formatCurrencyAmount(tx.montant, currency, this.languageService.displayLocale());
-    let message = 'Voulez-vous vraiment supprimer cette transaction ?';
+    let message = this.transloco.translate('transactions.dialog.deleteMessage');
     if (tx.transferId) {
-      message += '\nLa contrepartie du virement sera aussi supprimée.';
+      message += '\n' + this.transloco.translate('transactions.dialog.deleteTransferMessage');
     }
     const ok = await this.confirmService.confirm({
       title: `${tx.libelle} — ${amount}`,
       message,
-      confirmLabel: 'Supprimer',
+      confirmLabel: this.transloco.translate('common.action.delete'),
       variant: 'danger',
       icon: 'phosphorReceipt',
     });
@@ -379,7 +376,7 @@ export class TransactionForm {
       await firstValueFrom(this.transactionService.delete(tx.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

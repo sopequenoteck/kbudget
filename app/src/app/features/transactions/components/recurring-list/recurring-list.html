@@ -1,17 +1,18 @@
 <div class="page-header">
-  <button class="page-header__back" (click)="goBack()" aria-label="Retour">
+  <button class="page-header__back" (click)="goBack()" [attr.aria-label]="'common.action.back' | transloco">
     <ng-icon name="phosphorArrowLeft" size="20" />
   </button>
-  <h1 class="page-header__title">Récurrences</h1>
+  <h1 class="page-header__title">{{ 'recurring.page.title' | transloco }}</h1>
 </div>
 
 <app-modal [isOpen]="selectedItem() !== null" [title]="selectedItem()?.libelle ?? ''" (closed)="selectedItem.set(null)">
   @if (selectedItem(); as item) {
+    @let relDate = getRelativeDateInfo(item.nextOccurrence);
     <div class="action-sheet">
       <div class="action-sheet__summary">
-        <span class="action-sheet__frequency">{{ getFrequencyLabel(item.frequency) }}</span>
+        <span class="action-sheet__frequency">{{ getFrequencyLabelKey(item.frequency) | transloco }}</span>
         <span class="action-sheet__amount">{{ item.montant | amount: item.type }}</span>
-        <span class="action-sheet__date">Prochaine : {{ getRelativeDate(item.nextOccurrence) }}</span>
+        <span class="action-sheet__date">{{ 'recurring.detail.next' | transloco }} {{ relDate.key ? (relDate.key | transloco: relDate.params) : relDate.formatted }}</span>
       </div>
       <div class="action-sheet__actions">
         <button
@@ -20,7 +21,7 @@
           (click)="onValidate(item)"
         >
           <ng-icon name="phosphorCheck" size="20" />
-          Marquer comme payée
+          {{ 'recurring.action.markAsPaid' | transloco }}
         </button>
         <button
           class="action-sheet__btn"
@@ -28,7 +29,7 @@
           (click)="onSkip(item)"
         >
           <ng-icon name="phosphorSkipForward" size="20" />
-          Passer cette occurrence
+          {{ 'recurring.action.skipOccurrence' | transloco }}
         </button>
         <button
           class="action-sheet__btn action-sheet__btn--danger"
@@ -36,7 +37,7 @@
           (click)="onDeactivate(item)"
         >
           <ng-icon name="phosphorPause" size="20" />
-          Désactiver la récurrence
+          {{ 'recurring.action.deactivate' | transloco }}
         </button>
       </div>
     </div>
@@ -61,43 +62,44 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>Erreur de chargement</p>
-    <button class="btn-outline" (click)="reload()">Réessayer</button>
+    <p>{{ 'common.feedback.loadError' | transloco }}</p>
+    <button class="btn-outline" (click)="reload()">{{ 'common.action.retry' | transloco }}</button>
   </div>
 } @else if (sortedRecurringTransactions().length === 0) {
   <app-empty-state
     icon="phosphorRepeat"
-    message="Aucune transaction récurrente"
+    [message]="'recurring.empty.title' | transloco"
   />
 } @else {
   @if (monthlySummary(); as summary) {
     <div class="monthly-summary">
       <div class="monthly-summary__row">
-        <span>BILAN MENSUEL</span>
+        <span>{{ 'recurring.summary.title' | transloco }}</span>
         <span [class]="summary.net >= 0 ? 'amount-income' : 'amount-expense'">{{ summary.net >= 0 ? '+' : '' }}{{ summary.net | number:'1.2-2' }} €</span>
       </div>
       <div class="monthly-summary__row">
-        <span>{{ summary.expenseCount }} CHARGES</span>
-        <span>~{{ summary.totalExpenses | amount }} /mois</span>
+        <span>{{ 'recurring.summary.expenseCount' | transloco: { count: summary.expenseCount } }}</span>
+        <span>{{ 'recurring.summary.monthlyExpenses' | transloco: { amount: (summary.totalExpenses | amount) } }}</span>
       </div>
     </div>
   }
 
-  @for (group of groupedByStatus(); track group.label) {
+  @for (group of groupedByStatus(); track group.status) {
     <div class="date-label" [class]="'date-label--' + group.status">
-      <span>{{ group.label }}</span>
+      <span>{{ group.labelKey | transloco }}</span>
       @if (group.status === 'overdue') {
         <button
           class="date-label__action"
           [disabled]="actionInProgress() !== null"
           (click)="onValidateAll(group.items)"
         >
-          Tout payé
+          {{ 'recurring.action.payAll' | transloco }}
         </button>
       }
     </div>
     <div class="recurring-group">
       @for (item of group.items; track item.id) {
+        @let itemRelDate = getRelativeDateInfo(item.nextOccurrence);
         <button type="button" class="transaction-row" (click)="onItemPressed(item)">
           <span
             class="transaction-row__icon"
@@ -106,7 +108,7 @@
           <div class="transaction-row__content">
             <span class="transaction-row__title">{{ item.libelle }}</span>
             <span class="transaction-row__subtitle">
-              {{ getFrequencyLabel(item.frequency) }} · {{ getRelativeDate(item.nextOccurrence) }}
+              {{ getFrequencyLabelKey(item.frequency) | transloco }} · {{ itemRelDate.key ? (itemRelDate.key | transloco: itemRelDate.params) : itemRelDate.formatted }}
             </span>
           </div>
           <div class="transaction-row__right">

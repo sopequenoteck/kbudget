@@ -14,27 +14,10 @@ import { CurrencyService } from '../../core/services/currency';
 import { DevLogger } from '../../core/services/dev-logger';
 import { Frequency, Subscription } from '../../core/models/subscription.model';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
+import { stubIntersectionObserver } from '../../../testing/intersection-observer-stub';
 
 // jsdom ne fournit pas IntersectionObserver
-beforeAll(() => {
-  if (
-    typeof (globalThis as unknown as { IntersectionObserver?: unknown }).IntersectionObserver ===
-    'undefined'
-  ) {
-    class IOStub {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      observe(): void {}
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      unobserve(): void {}
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      disconnect(): void {}
-      takeRecords(): unknown[] {
-        return [];
-      }
-    }
-    (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver = IOStub;
-  }
-});
+beforeAll(() => stubIntersectionObserver());
 
 const mockSubscriptions: Subscription[] = [
   {
