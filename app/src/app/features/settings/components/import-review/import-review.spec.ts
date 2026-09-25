@@ -53,6 +53,7 @@ describe('ImportReview', () => {
     getDraft: ReturnType<typeof vi.fn>;
     updateLine: ReturnType<typeof vi.fn>;
     batchUpdateLines: ReturnType<typeof vi.fn>;
+    confirm: ReturnType<typeof vi.fn>;
   };
 
   const readyLine = line({ id: 'ready', status: 'READY' });
@@ -67,6 +68,7 @@ describe('ImportReview', () => {
           of(line({ id, categoryId: 'cat-1', categoryName: 'Courses' })),
         ),
       batchUpdateLines: vi.fn().mockReturnValue(of([])),
+      confirm: vi.fn().mockReturnValue(of({ importedCount: 1, skippedCount: 0, historyId: 'hist-1' })),
     };
 
     TestBed.configureTestingModule({
@@ -209,5 +211,41 @@ describe('ImportReview', () => {
 
     const select = fixture.nativeElement.querySelector('#cat-suggested') as HTMLSelectElement;
     expect(select.value).toBe('cat-2');
+  });
+
+  it('should_escape_html_in_suggest_rule_banner_to_prevent_injection', async () => {
+    const malicious = '<img src=x onerror=alert(1)>Café & Co';
+    const categories$ = of<Category[]>([
+      { id: 'cat-1', nom: 'Courses', icone: '🛒', couleur: '#000000' } as Category,
+    ]);
+    const fixture = await setup([readyLine], categories$);
+
+    importServiceMock.updateLine.mockReturnValue(
+      of(
+        line({
+          id: 'ready',
+          categoryId: 'cat-1',
+          categoryName: 'Courses',
+          suggestRule: true,
+          cleanLabel: malicious,
+        }),
+      ),
+    );
+    await fixture.componentInstance.onCategoryChange(readyLine, 'cat-1');
+    fixture.detectChanges();
+
+    const banner = fixture.nativeElement.querySelector('.suggest-rule-banner__text') as HTMLElement;
+    expect(banner.querySelector('img')).toBeNull();
+    expect(banner.textContent).toContain(malicious);
+  });
+
+  it('should_show_translated_error_when_confirm_fails', async () => {
+    const fixture = await setup([readyLine]);
+    importServiceMock.confirm.mockReturnValue(throwError(() => new Error('500')));
+
+    await fixture.componentInstance.confirmImport();
+
+    expect(fixture.componentInstance.confirmError()).toBe("Erreur lors de la confirmation de l'import.");
+    expect(fixture.componentInstance.confirming()).toBe(false);
   });
 });

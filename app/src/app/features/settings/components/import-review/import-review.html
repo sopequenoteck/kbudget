@@ -1,6 +1,6 @@
 <a class="section-back" routerLink="/settings/accounts">
   <span class="section-back__arrow">&#9664;</span>
-  <span>Comptes</span>
+  <span>{{ 'imports.page.backToAccounts' | transloco }}</span>
 </a>
 
 @if (loading()) {
@@ -9,37 +9,37 @@
   </div>
 } @else if (error()) {
   <div class="state-error">
-    <p>Erreur de chargement du brouillon</p>
-    <a class="btn-outline" routerLink="/settings/accounts">Retour</a>
+    <p>{{ 'imports.feedback.loadError' | transloco }}</p>
+    <a class="btn-outline" routerLink="/settings/accounts">{{ 'common.action.back' | transloco }}</a>
   </div>
 } @else if (confirmSuccess()) {
   <div class="state-success">
     <ng-icon name="phosphorCheckCircle" size="40" />
-    <p>Import confirmé avec succès !</p>
-    <p class="state-success__hint">Redirection vers les comptes...</p>
+    <p>{{ 'imports.feedback.confirmSuccess' | transloco }}</p>
+    <p class="state-success__hint">{{ 'imports.feedback.redirecting' | transloco }}</p>
   </div>
 } @else if (draft()) {
   <div class="review-header">
-    <h2 class="review-title">Revue d'import</h2>
+    <h2 class="review-title">{{ 'imports.page.reviewTitle' | transloco }}</h2>
     <div class="review-meta">
       @if (draft()!.fileName) {
         <span class="review-meta__item">
-          <strong>Fichier :</strong> {{ draft()!.fileName }}
+          <strong>{{ 'imports.detail.file' | transloco }}</strong> {{ draft()!.fileName }}
         </span>
       }
       <span class="review-meta__item">
-        <strong>Compte :</strong> {{ draft()!.accountName }}
+        <strong>{{ 'imports.detail.account' | transloco }}</strong> {{ draft()!.accountName }}
       </span>
       @if (draft()!.profileName) {
         <span class="review-meta__item">
-          <strong>Profil :</strong> {{ draft()!.profileName }}
+          <strong>{{ 'imports.detail.profile' | transloco }}</strong> {{ draft()!.profileName }}
           @if (draft()!.profileSource) {
             ({{ draft()!.profileSource }})
           }
         </span>
       }
       <span class="review-meta__item">
-        <strong>Date :</strong> {{ formatDate(draft()!.createdAt) }}
+        <strong>{{ 'imports.detail.date' | transloco }}</strong> {{ formatDate(draft()!.createdAt) }}
       </span>
     </div>
   </div>
@@ -47,19 +47,19 @@
   <div class="review-progress">
     <div class="progress-item progress-item--ready">
       <span class="progress-item__count">{{ draft()!.readyCount }}</span>
-      <span class="progress-item__label">prêtes</span>
+      <span class="progress-item__label">{{ 'imports.list.ready' | transloco }}</span>
     </div>
     <div class="progress-item progress-item--review">
       <span class="progress-item__count">{{ draft()!.reviewCount }}</span>
-      <span class="progress-item__label">à vérifier</span>
+      <span class="progress-item__label">{{ 'imports.list.review' | transloco }}</span>
     </div>
     <div class="progress-item progress-item--duplicate">
       <span class="progress-item__count">{{ draft()!.duplicateCount }}</span>
-      <span class="progress-item__label">doublons</span>
+      <span class="progress-item__label">{{ 'imports.list.duplicate' | transloco }}</span>
     </div>
     <div class="progress-item progress-item--skipped">
       <span class="progress-item__count">{{ draft()!.skippedCount }}</span>
-      <span class="progress-item__label">ignorées</span>
+      <span class="progress-item__label">{{ 'imports.list.skipped' | transloco }}</span>
     </div>
   </div>
 
@@ -69,7 +69,7 @@
 
   @if (hasSelection()) {
     <div class="batch-bar">
-      <span class="batch-bar__count">{{ selectedLineIds().size }} ligne(s) sélectionnée(s)</span>
+      <span class="batch-bar__count">{{ 'imports.list.selectedCount' | transloco: { count: selectedLineIds().size } }}</span>
       <div class="batch-bar__actions">
         <div class="batch-bar__category-group">
           <select
@@ -77,7 +77,7 @@
             [ngModel]="batchCategoryId()"
             (ngModelChange)="batchCategoryId.set($event)"
           >
-            <option value="">-- Catégorie --</option>
+            <option value="">{{ 'imports.form.categoryPlaceholder' | transloco }}</option>
             @for (cat of categories(); track cat.id) {
               <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
             }
@@ -88,7 +88,7 @@
             [disabled]="!batchCategoryId() || batchLoading()"
             (click)="onBatchAssignCategory()"
           >
-            Assigner
+            {{ 'imports.action.assign' | transloco }}
           </button>
         </div>
         <button
@@ -97,7 +97,7 @@
           [disabled]="batchLoading()"
           (click)="onBatchValidate()"
         >
-          Valider
+          {{ 'imports.action.validate' | transloco }}
         </button>
         <button
           type="button"
@@ -105,7 +105,7 @@
           [disabled]="batchLoading()"
           (click)="onBatchSkip()"
         >
-          Ignorer
+          {{ 'imports.action.skip' | transloco }}
         </button>
         <button
           type="button"
@@ -113,7 +113,7 @@
           [disabled]="batchLoading()"
           (click)="clearSelection()"
         >
-          Annuler
+          {{ 'common.action.cancel' | transloco }}
         </button>
       </div>
     </div>
@@ -126,7 +126,7 @@
         [checked]="allSelected()"
         (change)="toggleSelectAll()"
       />
-      <span>Tout sélectionner</span>
+      <span>{{ 'imports.action.selectAll' | transloco }}</span>
     </label>
   </div>
 
@@ -175,7 +175,7 @@
             [class.line-item__status--skipped]="line.status === 'SKIPPED'"
           >
             <ng-icon [name]="statusIcon(line.status)" size="14" />
-            {{ statusLabel(line.status) }}
+            {{ IMPORT_LINE_STATUS_LABEL_KEYS[line.status] | transloco }}
           </span>
         </div>
 
@@ -188,7 +188,7 @@
         @if (line.status === 'NEEDS_REVIEW' || line.status === 'READY') {
           <div class="line-item__category">
             <label class="line-item__category-label" [for]="'cat-' + line.id">
-              Catégorie
+              {{ 'imports.form.category' | transloco }}
             </label>
             <div class="line-item__category-row">
               <select
@@ -197,7 +197,7 @@
                 [value]="line.categoryId ?? ''"
                 (change)="onCategoryChange(line, $any($event.target).value)"
               >
-                <option value="">-- Aucune catégorie --</option>
+                <option value="">{{ 'imports.form.noCategoryOption' | transloco }}</option>
                 @for (cat of categories(); track cat.id) {
                   <option [value]="cat.id" [selected]="cat.id === line.categoryId">
                     {{ cat.icone }} {{ cat.nom }}
@@ -209,25 +209,24 @@
                   type="button"
                   class="btn-skip"
                   (click)="onSkipLine(line)"
-                  title="Ignorer cette ligne"
+                  [title]="'imports.action.skipLineAria' | transloco"
                 >
-                  Ignorer
+                  {{ 'imports.action.skip' | transloco }}
                 </button>
               }
             </div>
             @if (suggestRuleBanner() && suggestRuleBanner()!.lineId === line.id) {
               <div class="suggest-rule-banner">
-                <span class="suggest-rule-banner__text">
-                  Créer une règle pour catégoriser automatiquement les libellés contenant
-                  <strong>{{ suggestRuleBanner()!.cleanLabel }}</strong>
-                  en <strong>{{ suggestRuleBanner()!.categoryName }}</strong> ?
-                </span>
+                <span
+                  class="suggest-rule-banner__text"
+                  [innerHTML]="'imports.dialog.suggestRuleMessage' | transloco: suggestRuleMessageParams()!"
+                ></span>
                 <div class="suggest-rule-banner__actions">
                   <button type="button" class="btn-rule-yes" (click)="acceptSuggestRule()">
-                    Oui
+                    {{ 'imports.action.acceptSuggestRule' | transloco }}
                   </button>
                   <button type="button" class="btn-rule-no" (click)="dismissSuggestRule()">
-                    Non merci
+                    {{ 'imports.action.dismissSuggestRule' | transloco }}
                   </button>
                 </div>
               </div>
@@ -238,24 +237,24 @@
         @if (line.status === 'DUPLICATE') {
           <div class="line-item__duplicate-hint">
             <ng-icon name="phosphorMinusCircle" size="12" />
-            <span>Doublon détecté — ID transaction existante : <code>{{ line.duplicateTransactionId }}</code></span>
+            <span>{{ 'imports.detail.duplicateHint' | transloco }} <code>{{ line.duplicateTransactionId }}</code></span>
           </div>
           <div class="line-item__actions">
             <button
               type="button"
               class="btn-import-anyway"
               (click)="onForceImportLine(line)"
-              title="Importer quand même"
+              [title]="'imports.action.forceImport' | transloco"
             >
-              Importer quand même
+              {{ 'imports.action.forceImport' | transloco }}
             </button>
             <button
               type="button"
               class="btn-skip"
               (click)="onSkipLine(line)"
-              title="Ignorer cette ligne"
+              [title]="'imports.action.skipLineAria' | transloco"
             >
-              Ignorer
+              {{ 'imports.action.skip' | transloco }}
             </button>
           </div>
         }
@@ -266,9 +265,9 @@
               type="button"
               class="btn-skip"
               (click)="onSkipLine(line)"
-              title="Marquer comme ignorée"
+              [title]="'imports.action.markSkippedAria' | transloco"
             >
-              Ignorer
+              {{ 'imports.action.skip' | transloco }}
             </button>
           </div>
         }
@@ -291,25 +290,25 @@
         <span class="spinner spinner--sm"></span>
       }
       @if (!canConfirm()) {
-        Résoudre {{ draft()!.reviewCount + draft()!.duplicateCount }} ligne(s) d'abord
+        {{ 'imports.action.resolveLinesFirst' | transloco: { count: draft()!.reviewCount + draft()!.duplicateCount } }}
       } @else {
-        Confirmer l'import ({{ draft()!.readyCount }} transactions)
+        {{ 'imports.action.confirmImport' | transloco: { count: draft()!.readyCount } }}
       }
     </button>
 
     @if (!deleteConfirm()) {
       <button type="button" class="btn-delete" (click)="requestDelete()">
         <ng-icon name="phosphorTrash" size="16" />
-        Supprimer le brouillon
+        {{ 'imports.action.deleteDraft' | transloco }}
       </button>
     }
 
     @if (deleteConfirm()) {
       <div class="delete-confirm">
-        <p>Supprimer ce brouillon d'import ?</p>
+        <p>{{ 'imports.dialog.deleteDraftMessage' | transloco }}</p>
         <div class="delete-confirm__actions">
-          <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">Annuler</button>
-          <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">Supprimer</button>
+          <button class="btn-outline btn-outline--sm" (click)="cancelDelete()">{{ 'common.action.cancel' | transloco }}</button>
+          <button class="btn-danger btn-danger--sm" (click)="confirmDelete()">{{ 'common.action.delete' | transloco }}</button>
         </div>
       </div>
     }

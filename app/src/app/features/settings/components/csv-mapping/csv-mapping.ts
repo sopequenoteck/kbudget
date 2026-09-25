@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorUploadSimple,
   phosphorArrowCounterClockwise,
@@ -17,7 +18,7 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
 @Component({
   selector: 'app-csv-mapping',
   standalone: true,
-  imports: [RouterLink, NgIcon, FormsModule],
+  imports: [RouterLink, NgIcon, FormsModule, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorUploadSimple,
@@ -34,6 +35,7 @@ export class CsvMapping {
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
   private readonly apiError = inject(ApiErrorService);
+  private readonly transloco = inject(TranslocoService);
 
   // File & account (passed via router state)
   protected file: File | null = null;
@@ -73,10 +75,10 @@ export class CsvMapping {
   readonly DATE_FORMATS = ['dd/MM/yyyy', 'yyyy-MM-dd', 'MM/dd/yyyy', 'dd-MM-yyyy', 'MM/yyyy'];
   readonly ENCODINGS = ['UTF-8', 'ISO-8859-1', 'windows-1252'];
   readonly SEPARATORS = [
-    { label: 'Point-virgule (;)', value: ';' },
-    { label: 'Virgule (,)', value: ',' },
-    { label: 'Tabulation (\\t)', value: '\t' },
-    { label: 'Pipe (|)', value: '|' },
+    { labelKey: 'imports.value.separatorSemicolon', value: ';' },
+    { labelKey: 'imports.value.separatorComma', value: ',' },
+    { labelKey: 'imports.value.separatorTab', value: '\t' },
+    { labelKey: 'imports.value.separatorPipe', value: '|' },
   ];
 
   constructor() {
@@ -123,7 +125,7 @@ export class CsvMapping {
       this.autoSelectColumns(result.headers);
     } catch (err) {
       this.logger.error('Failed to preview CSV', err);
-      this.previewError.set('Impossible de prévisualiser le fichier. Vérifiez les paramètres.');
+      this.previewError.set(this.transloco.translate('imports.feedback.previewError'));
     } finally {
       this.previewLoading.set(false);
     }
@@ -193,7 +195,7 @@ export class CsvMapping {
       this.logger.error('Failed to import with mapping', err);
       const httpErr = err as { error?: { message?: string } };
       this.importError.set(
-        this.apiError.label(httpErr, "Erreur lors de l'import. Vérifiez le mapping et réessayez."),
+        this.apiError.label(httpErr, this.transloco.translate('imports.feedback.mappingImportError')),
       );
       this.importing.set(false);
     }

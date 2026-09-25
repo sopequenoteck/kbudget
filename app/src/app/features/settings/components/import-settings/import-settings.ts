@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorUploadSimple,
   phosphorClockCounterClockwise,
@@ -31,12 +32,13 @@ import {
   ImportDraftSummary,
   ImportHistoryEntry,
   ImportProfile,
+  IMPORT_PROFILE_SOURCE_LABEL_KEYS,
 } from '../../../../core/models/import.model';
 
 @Component({
   selector: 'app-import-settings',
   standalone: true,
-  imports: [RouterLink, NgIcon, FormsModule],
+  imports: [RouterLink, NgIcon, FormsModule, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorUploadSimple,
@@ -65,6 +67,9 @@ export class ImportSettings {
   private readonly route = inject(ActivatedRoute);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly IMPORT_PROFILE_SOURCE_LABEL_KEYS = IMPORT_PROFILE_SOURCE_LABEL_KEYS;
 
   private readonly queryParams = toSignal(this.route.queryParamMap);
 
@@ -246,11 +251,11 @@ export class ImportSettings {
     const categoryId = this.ruleFormCategoryId();
 
     if (!pattern) {
-      this.ruleFormError.set('Le pattern est requis.');
+      this.ruleFormError.set(this.transloco.translate('imports.form.patternRequired'));
       return;
     }
     if (!categoryId) {
-      this.ruleFormError.set('La catégorie est requise.');
+      this.ruleFormError.set(this.transloco.translate('imports.form.categoryRequired'));
       return;
     }
 
@@ -268,7 +273,7 @@ export class ImportSettings {
       this.editingRuleId.set(null);
     } catch (err) {
       this.logger.error('Failed to save rule', err);
-      this.ruleFormError.set('Erreur lors de la sauvegarde de la règle.');
+      this.ruleFormError.set(this.transloco.translate('imports.feedback.ruleSaveError'));
     } finally {
       this.ruleFormSaving.set(false);
     }
@@ -285,7 +290,7 @@ export class ImportSettings {
   private async uploadFile(file: File): Promise<void> {
     const accountId = this.selectedAccountId();
     if (!accountId) {
-      this.uploadError.set('Veuillez sélectionner un compte.');
+      this.uploadError.set(this.transloco.translate('imports.form.accountRequired'));
       return;
     }
 
@@ -299,9 +304,7 @@ export class ImportSettings {
       this.logger.error('Failed to upload CSV', err);
       const httpErr = err as { status?: number; error?: { message?: string } };
       if (httpErr?.status === 409) {
-        this.uploadError.set(
-          "Un brouillon d'import existe déjà pour ce compte. Supprimez-le avant d'en créer un nouveau.",
-        );
+        this.uploadError.set(this.transloco.translate('imports.feedback.draftExists'));
         this.uploading.set(false);
       } else if (httpErr?.status === 422) {
         // Format not recognized — navigate to manual mapping
@@ -311,7 +314,7 @@ export class ImportSettings {
         // don't reset uploading — navigation is in progress
       } else {
         this.uploadError.set(
-          this.apiError.label(httpErr, "Erreur lors de l'import. Veuillez réessayer."),
+          this.apiError.label(httpErr, this.transloco.translate('imports.feedback.uploadError')),
         );
         this.uploading.set(false);
       }

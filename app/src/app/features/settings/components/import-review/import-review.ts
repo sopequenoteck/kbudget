@@ -9,6 +9,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorArrowUp,
   phosphorArrowDown,
@@ -25,10 +26,14 @@ import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
-import { ImportDraft, ImportDraftLine, ImportLineUpdate } from '../../../../core/models/import.model';
+import {
+  ImportDraft,
+  ImportDraftLine,
+  ImportLineUpdate,
+  IMPORT_LINE_STATUS_LABEL_KEYS,
+} from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
-
-const BATCH_ERROR = "L'action groupée a échoué : aucune ligne n'a été modifiée.";
+import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
 
 interface SuggestRuleBanner {
   lineId: string;
@@ -40,7 +45,7 @@ interface SuggestRuleBanner {
 @Component({
   selector: 'app-import-review',
   standalone: true,
-  imports: [RouterLink, NgIcon, AmountPipe, FormsModule],
+  imports: [RouterLink, NgIcon, AmountPipe, FormsModule, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowUp,
@@ -64,6 +69,9 @@ export class ImportReview {
   private readonly categoryRuleService = inject(CategoryRuleService);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly IMPORT_LINE_STATUS_LABEL_KEYS = IMPORT_LINE_STATUS_LABEL_KEYS;
 
   readonly draft = signal<ImportDraft | null>(null);
   readonly categories = signal<Category[]>([]);
@@ -87,6 +95,21 @@ export class ImportReview {
     if (!d || d.lines.length === 0) return false;
     const sel = this.selectedLineIds();
     return d.lines.every((l) => sel.has(l.id));
+  });
+
+  /**
+   * Parametres du bandeau de suggestion, echappes avant interpolation dans
+   * le `[innerHTML]` du template (KKS-376) : `cleanLabel` vient du releve
+   * importe, `categoryName` est saisi par l'utilisateur — MessageFormat ne
+   * les echappe pas, et le sanitizer d'Angular laisse passer `<a>`, `<img>`...
+   */
+  readonly suggestRuleMessageParams = computed(() => {
+    const banner = this.suggestRuleBanner();
+    if (!banner) return null;
+    return {
+      cleanLabel: escapeHtml(banner.cleanLabel),
+      categoryName: escapeHtml(banner.categoryName),
+    };
   });
 
   constructor() {
@@ -188,7 +211,7 @@ export class ImportReview {
       }
     } catch (err) {
       this.logger.error('Failed to update line', err);
-      this.actionError.set("La catégorie n'a pas pu être enregistrée.");
+      this.actionError.set(this.transloco.translate('imports.feedback.categoryUpdateError'));
       await this.refreshDraft();
     }
   }
@@ -244,7 +267,7 @@ export class ImportReview {
       }, 500);
     } catch (err) {
       this.logger.error('Failed to confirm import', err);
-      this.confirmError.set("Erreur lors de la confirmation de l'import.");
+      this.confirmError.set(this.transloco.translate('imports.feedback.confirmError'));
       this.confirming.set(false);
     }
   }
@@ -329,7 +352,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch assign category', err);
-      this.actionError.set(BATCH_ERROR);
+      this.actionError.set(this.transloco.translate('imports.feedback.batchActionError'));
     } finally {
       this.batchLoading.set(false);
     }
@@ -350,7 +373,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch skip lines', err);
-      this.actionError.set(BATCH_ERROR);
+      this.actionError.set(this.transloco.translate('imports.feedback.batchActionError'));
     } finally {
       this.batchLoading.set(false);
     }
@@ -371,7 +394,7 @@ export class ImportReview {
       this.applyBatchResult(updated);
     } catch (err) {
       this.logger.error('Failed to batch validate lines', err);
-      this.actionError.set(BATCH_ERROR);
+      this.actionError.set(this.transloco.translate('imports.feedback.batchActionError'));
     } finally {
       this.batchLoading.set(false);
     }
@@ -389,21 +412,6 @@ export class ImportReview {
         return 'phosphorXCircle';
       default:
         return 'phosphorCheckCircle';
-    }
-  }
-
-  statusLabel(status: string): string {
-    switch (status) {
-      case 'READY':
-        return 'Prête';
-      case 'NEEDS_REVIEW':
-        return 'À vérifier';
-      case 'DUPLICATE':
-        return 'Doublon';
-      case 'SKIPPED':
-        return 'Ignorée';
-      default:
-        return status;
     }
   }
 
