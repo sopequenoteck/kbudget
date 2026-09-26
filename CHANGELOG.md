@@ -69,6 +69,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   La liste des comptes affiche desormais « Courant », « Epargne » ou « Especes »
   au lieu du code interne (`COURANT`) ; « 1 compte » et « 1 categorie » au
   singulier.
+- **Noms de devises dans les catalogues (KKS-393)** : ils venaient de quatre
+  sources qui ne concordaient pas, dont le nom francais servi par l'API. Deux
+  libelles changent : « Dollar US » (au lieu de « Dollar americain ») et « Franc
+  CFA (BCEAO) » (au lieu de « Franc CFA ») dans les reglages des devises. Le
+  champ `name` de `/currencies` reste servi, mais les clients ne l'affichent
+  plus.
 
 ### Changed
 
