@@ -80,11 +80,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     boolean existsByUserIdAndDateBetween(UUID userId, LocalDate from, LocalDate to);
 
-    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt " +
+    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt, c.system_key " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "WHERE t.user_id = :userId AND t.is_recurring = false " +
             "AND t.date >= :since AND t.category_id IS NOT NULL " +
-            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, c.is_system " +
+            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, c.is_system, c.system_key " +
             "ORDER BY cnt DESC LIMIT :limit",
             nativeQuery = true)
     List<Object[]> findMostUsedCategories(
@@ -92,14 +92,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("since") LocalDate since,
             @Param("limit") int limit);
 
-    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
+    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency, c.system_key " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +
             "WHERE t.user_id = :userId AND t.type = 'DEPENSE' AND t.is_recurring = false " +
             "AND t.date >= :startDate AND t.date <= :endDate " +
             "AND t.category_id IS NOT NULL " +
             "AND t.category_id NOT IN (SELECT b.category_id FROM budgets b WHERE b.user_id = :userId AND b.actif = true) " +
-            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, a.currency",
+            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, a.currency, c.system_key",
             nativeQuery = true)
     List<Object[]> findUnbudgetedSpendingByMonth(
             @Param("userId") UUID userId,

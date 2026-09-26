@@ -31,6 +31,7 @@ import { SubscriptionPaymentResponse } from '../../../../core/models/subscriptio
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
@@ -39,7 +40,7 @@ import { LanguageService } from '../../../../core/services/language';
 @Component({
   selector: 'app-subscription-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,

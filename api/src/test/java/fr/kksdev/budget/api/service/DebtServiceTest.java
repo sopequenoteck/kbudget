@@ -7,6 +7,7 @@ import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -116,7 +117,7 @@ class DebtServiceTest {
         var saved = buildDebt(user);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
@@ -157,7 +158,7 @@ class DebtServiceTest {
                 null, null, null, null, null);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
@@ -403,7 +404,7 @@ class DebtServiceTest {
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(debtRepository.save(any(Debt.class))).thenAnswer(inv -> {
             Debt d = inv.getArgument(0);
             d.setId(debtId);
@@ -427,7 +428,7 @@ class DebtServiceTest {
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(debtRepository.save(any(Debt.class))).thenAnswer(inv -> {
             Debt d = inv.getArgument(0);
             d.setId(debtId);

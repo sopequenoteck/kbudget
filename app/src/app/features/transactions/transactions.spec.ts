@@ -235,6 +235,27 @@ describe('Transactions', () => {
     });
   });
 
+  it('should_match_a_transaction_on_the_translated_category_name_when_category_is_a_system_category', async () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que la recherche ne depend plus du `nom` brut cote serveur (KKS-395).
+    const tx = makeTransaction({
+      libelle: 'Netflix',
+      category: {
+        id: 'sys-1',
+        nom: 'Abonnement-legacy',
+        icone: '🔄',
+        couleur: '#000000',
+        isSystem: true,
+        systemKey: 'SUBSCRIPTION',
+      },
+    });
+    const fixture = await createFixture([tx]);
+    fixture.componentInstance.searchQuery.set('abonnement');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.filteredTransactions().map((t) => t.id)).toEqual([tx.id]);
+  });
+
   it('should_set_no_expense_message_when_type_filter_is_depense', async () => {
     const fixture = await createFixture([]);
     fixture.componentInstance.setTypeFilter(TransactionType.DEPENSE);

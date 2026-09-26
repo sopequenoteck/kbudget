@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { TransactionService } from '../../core/services/transaction';
 import { PreferenceService } from '../../core/services/preference';
 import { ModalService } from '../../core/services/modal.service';
@@ -25,6 +25,8 @@ import { Category } from '../../core/models/category.model';
 import { Account } from '../../core/models/account.model';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../shared/pipes/category-name.pipe';
+import { categoryDisplayName } from '../../shared/utils/category-name.utils';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorMagnifyingGlass,
@@ -69,7 +71,7 @@ interface EmptyStateConfig {
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, RouterLink, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorMagnifyingGlass,
@@ -98,6 +100,7 @@ export class Transactions implements AfterViewInit {
   private readonly searchInput = viewChild<ElementRef>('searchInput');
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
   readonly isStuck = signal(false);
 
   readonly selectedMonth = signal(new Date().getMonth() + 1);
@@ -185,6 +188,7 @@ export class Transactions implements AfterViewInit {
     const all = this.transactions();
     const month = this.selectedMonth();
     const year = this.selectedYear();
+    const lang = this.languageService.activeLanguage();
 
     return all
       .filter((t) => {
@@ -206,8 +210,11 @@ export class Transactions implements AfterViewInit {
       .filter(t => {
         const q = this.searchQuery().trim().toLowerCase();
         if (!q) return true;
+        const categoryName = t.category
+          ? categoryDisplayName(t.category.nom, t.category.systemKey, this.transloco, lang)
+          : '';
         return t.libelle.toLowerCase().includes(q)
-          || (t.category?.nom?.toLowerCase().includes(q) ?? false)
+          || categoryName.toLowerCase().includes(q)
           || (t.note?.toLowerCase().includes(q) ?? false);
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

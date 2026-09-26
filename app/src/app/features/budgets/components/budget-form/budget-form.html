@@ -81,7 +81,7 @@
         <select formControlName="categoryId" class="budget-form__select">
           <option value="" disabled>{{ 'budgets.form.categoryPlaceholder' | transloco }}</option>
           @for (cat of availableCategories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom | categoryName: cat.systemKey }}</option>
           }
         </select>
       </div>

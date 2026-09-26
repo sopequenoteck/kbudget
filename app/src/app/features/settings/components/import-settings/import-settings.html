@@ -116,7 +116,7 @@
           <span class="rule-list__pattern">{{ rule.pattern }}</span>
           <span class="rule-list__arrow">→</span>
           <span class="rule-list__category">
-            {{ rule.categoryIcon }} {{ rule.categoryName }}
+            {{ rule.categoryIcon }} {{ rule.categoryName | categoryName: rule.categorySystemKey }}
           </span>
           <div class="rule-list__actions">
             <button
@@ -167,7 +167,7 @@
         >
           <option value="">{{ 'imports.form.categoryPlaceholder' | transloco }}</option>
           @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+            <option [value]="cat.id">{{ cat.icone }} {{ cat.nom | categoryName: cat.systemKey }}</option>
           }
         </select>
       </div>

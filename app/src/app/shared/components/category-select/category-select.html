@@ -49,7 +49,7 @@
             class="cs__item-icon"
             [style.background-color]="item.couleur + '26'"
           >{{ item.icone }}</span>
-          <span class="cs__item-name">{{ item.nom }}</span>
+          <span class="cs__item-name">{{ item.nom | categoryName: item.systemKey }}</span>
         </button>
       }
 

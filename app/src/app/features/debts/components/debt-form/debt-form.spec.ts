@@ -151,6 +151,29 @@ describe('DebtForm', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
+  it('should_display_the_translated_name_when_selected_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    const systemCategory: Category = {
+      id: 'sys-1',
+      nom: 'Virement-legacy',
+      icone: '🔁',
+      couleur: '#000000',
+      isSystem: true,
+      systemKey: 'TRANSFER',
+    };
+    categoryServiceMock.getAll.mockReturnValue(of([systemCategory]));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    fixture.componentInstance.form.patchValue({ categoryId: 'sys-1' });
+    fixture.detectChanges();
+
+    const pill = fixture.nativeElement.querySelector('button[aria-label="Catégorie"] span');
+    expect(pill.textContent.trim()).toBe('Virement');
+  });
+
   it('should_force_currency_when_account_selected', async () => {
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);

@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -212,7 +213,7 @@ public class AccountService {
             throw new IllegalArgumentException("Transfers between accounts with different currencies are not allowed");
         }
 
-        Category virementCategory = categoryService.findSystemCategoryByNom("Virement", userId);
+        Category virementCategory = categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId);
         if (virementCategory == null) {
             throw new IllegalStateException("System category 'Virement' not found");
         }

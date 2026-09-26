@@ -48,12 +48,13 @@ import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../.
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, TranslocoPipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,

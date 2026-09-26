@@ -171,6 +171,31 @@ describe('TransactionForm', () => {
     expect(toggle).not.toBeNull();
   });
 
+  it('should_display_the_translated_name_when_selected_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+    const systemCategory: Category = {
+      id: 'sys-1',
+      nom: 'Abonnement-legacy',
+      icone: '🔄',
+      couleur: '#000000',
+      isSystem: true,
+      systemKey: 'SUBSCRIPTION',
+    };
+    categoryServiceMock.getAll.mockReturnValue(of([systemCategory]));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+    fixture.componentInstance.form.patchValue({ categoryId: 'sys-1' });
+    fixture.detectChanges();
+
+    const pill = fixture.nativeElement.querySelector('button[aria-label="Catégorie"] span');
+    expect(pill.textContent.trim()).toBe('Abonnement');
+  });
+
   it('should_hide_recurring_toggle_in_edit_mode', () => {
     // modalService.editingEntity contient une entité et asRecurring = false → mode édition
     modalServiceMock.editingEntity = signal(makeTransaction());

@@ -27,6 +27,7 @@ import { ApiErrorService } from '../../../../core/services/api-error';
 import { LanguageService } from '../../../../core/services/language';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import {
   CategoryRule,
   ImportDraftSummary,
@@ -38,7 +39,7 @@ import {
 @Component({
   selector: 'app-import-settings',
   standalone: true,
-  imports: [RouterLink, NgIcon, FormsModule, TranslocoPipe],
+  imports: [RouterLink, NgIcon, FormsModule, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorUploadSimple,

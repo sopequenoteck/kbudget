@@ -208,6 +208,12 @@
     },
     "page": {
       "title": "Catégories"
+    },
+    "value": {
+      "adjustment": "Ajustement",
+      "debt": "Dette",
+      "subscription": "Abonnement",
+      "transfer": "Virement"
     }
   },
   "common": {

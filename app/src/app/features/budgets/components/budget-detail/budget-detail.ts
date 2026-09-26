@@ -45,8 +45,10 @@ import {
 import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
 
 /**
  * `labelKey` traduit un groupe "aujourd'hui"/"hier" ; `label` porte une date
@@ -64,7 +66,7 @@ interface TransactionGroup {
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -250,6 +252,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
             categoryNom: b.category.nom,
             categoryIcone: b.category.icone,
             categoryCouleur: b.category.couleur,
+            categorySystemKey: b.category.systemKey ?? null,
             montantBudget: b.montant,
             montantBudgetNormalise: b.montant,
             currency: b.currency,
@@ -332,7 +335,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const item = this.budgetItem();
     if (!budgetId) return;
     const title = item
-      ? `${item.categoryNom} — ${formatCurrencyAmount(budgetAmount(item), item.currency, this.languageService.displayLocale())}`
+      ? `${categoryDisplayName(item.categoryNom, item.categorySystemKey, this.transloco, this.languageService.activeLanguage())} — ${formatCurrencyAmount(budgetAmount(item), item.currency, this.languageService.displayLocale())}`
       : this.transloco.translate('budgets.action.create');
     const ok = await this.confirmService.confirmDelete({
       title,

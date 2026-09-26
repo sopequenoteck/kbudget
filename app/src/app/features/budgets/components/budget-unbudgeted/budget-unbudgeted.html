@@ -55,7 +55,7 @@
           class="category-header__icon"
           [style.background-color]="group.categoryCouleur ? group.categoryCouleur + '26' : null"
         >{{ group.categoryIcone }}</span>
-        <span class="category-header__name">{{ group.categoryNom }}</span>
+        <span class="category-header__name">{{ group.categoryNom | categoryName: group.categorySystemKey }}</span>
         <span class="category-header__amount amount-expense">
           {{ group.montantDepense | amount: null : currency() }}
         </span>

@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -292,7 +293,7 @@ public class DebtService {
 
     private Category resolveCategory(UUID categoryId, UUID userId) {
         if (categoryId == null) {
-            return categoryService.findSystemCategoryByNom("Dette", userId);
+            return categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId);
         }
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))

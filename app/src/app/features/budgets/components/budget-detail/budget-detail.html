@@ -9,7 +9,7 @@
         [style.background-color]="item.categoryCouleur ? item.categoryCouleur + '26' : null"
       >{{ item.categoryIcone }}</span>
     }
-    {{ budgetItem()?.categoryNom ?? ('budgets.action.create' | transloco) }}
+    {{ budgetItem() ? (budgetItem()!.categoryNom | categoryName: budgetItem()!.categorySystemKey) : ('budgets.action.create' | transloco) }}
   </h1>
 </div>
 

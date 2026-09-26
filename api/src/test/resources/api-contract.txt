@@ -66,6 +66,7 @@ RESPONSE GET /v1/budgets 200 [].category.icone: string
 RESPONSE GET /v1/budgets 200 [].category.id: string
 RESPONSE GET /v1/budgets 200 [].category.isSystem: boolean
 RESPONSE GET /v1/budgets 200 [].category.nom: string
+RESPONSE GET /v1/budgets 200 [].category.systemKey: string
 RESPONSE GET /v1/budgets 200 [].currency: string
 RESPONSE GET /v1/budgets 200 [].frequence: string
 RESPONSE GET /v1/budgets 200 [].id: string
@@ -78,6 +79,7 @@ RESPONSE GET /v1/budgets/history 200 items[].categoryCouleur: string
 RESPONSE GET /v1/budgets/history 200 items[].categoryIcone: string
 RESPONSE GET /v1/budgets/history 200 items[].categoryId: string
 RESPONSE GET /v1/budgets/history 200 items[].categoryNom: string
+RESPONSE GET /v1/budgets/history 200 items[].categorySystemKey: string
 RESPONSE GET /v1/budgets/history 200 items[].createdAt: string
 RESPONSE GET /v1/budgets/history 200 items[].currency: string
 RESPONSE GET /v1/budgets/history 200 items[].montantBudget: number
@@ -92,6 +94,7 @@ RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].categoryCouleur: string
 RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].categoryIcone: string
 RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].categoryId: string
 RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].categoryNom: string
+RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].categorySystemKey: string
 RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].currency: string
 RESPONSE GET /v1/budgets/history 200 unbudgetedItems[].montantDepense: number
 RESPONSE GET /v1/budgets/history 200 unbudgetedTotal: number
@@ -101,6 +104,7 @@ RESPONSE GET /v1/budgets/overview 200 items[].categoryCouleur: string
 RESPONSE GET /v1/budgets/overview 200 items[].categoryIcone: string
 RESPONSE GET /v1/budgets/overview 200 items[].categoryId: string
 RESPONSE GET /v1/budgets/overview 200 items[].categoryNom: string
+RESPONSE GET /v1/budgets/overview 200 items[].categorySystemKey: string
 RESPONSE GET /v1/budgets/overview 200 items[].currency: string
 RESPONSE GET /v1/budgets/overview 200 items[].frequence: string
 RESPONSE GET /v1/budgets/overview 200 items[].montantBudget: number
@@ -115,6 +119,7 @@ RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].categoryCouleur: string
 RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].categoryIcone: string
 RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].categoryId: string
 RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].categoryNom: string
+RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].categorySystemKey: string
 RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].currency: string
 RESPONSE GET /v1/budgets/overview 200 unbudgetedItems[].montantDepense: number
 RESPONSE GET /v1/budgets/overview 200 unbudgetedTotal: number
@@ -124,6 +129,7 @@ RESPONSE GET /v1/budgets/{id} 200 category.icone: string
 RESPONSE GET /v1/budgets/{id} 200 category.id: string
 RESPONSE GET /v1/budgets/{id} 200 category.isSystem: boolean
 RESPONSE GET /v1/budgets/{id} 200 category.nom: string
+RESPONSE GET /v1/budgets/{id} 200 category.systemKey: string
 RESPONSE GET /v1/budgets/{id} 200 currency: string
 RESPONSE GET /v1/budgets/{id} 200 frequence: string
 RESPONSE GET /v1/budgets/{id} 200 id: string
@@ -136,16 +142,19 @@ RESPONSE GET /v1/categories 200 [].icone: string
 RESPONSE GET /v1/categories 200 [].id: string
 RESPONSE GET /v1/categories 200 [].isSystem: boolean
 RESPONSE GET /v1/categories 200 [].nom: string
+RESPONSE GET /v1/categories 200 [].systemKey: string
 RESPONSE GET /v1/categories/most-used 200 [].couleur: string
 RESPONSE GET /v1/categories/most-used 200 [].icone: string
 RESPONSE GET /v1/categories/most-used 200 [].id: string
 RESPONSE GET /v1/categories/most-used 200 [].isSystem: boolean
 RESPONSE GET /v1/categories/most-used 200 [].nom: string
+RESPONSE GET /v1/categories/most-used 200 [].systemKey: string
 RESPONSE GET /v1/categories/{id} 200 couleur: string
 RESPONSE GET /v1/categories/{id} 200 icone: string
 RESPONSE GET /v1/categories/{id} 200 id: string
 RESPONSE GET /v1/categories/{id} 200 isSystem: boolean
 RESPONSE GET /v1/categories/{id} 200 nom: string
+RESPONSE GET /v1/categories/{id} 200 systemKey: string
 RESPONSE GET /v1/currencies 200 [].code: string
 RESPONSE GET /v1/currencies 200 [].decimalPlaces: integer
 RESPONSE GET /v1/currencies 200 [].name: string
@@ -162,6 +171,7 @@ RESPONSE GET /v1/debts 200 [].category.icone: string
 RESPONSE GET /v1/debts 200 [].category.id: string
 RESPONSE GET /v1/debts 200 [].category.isSystem: boolean
 RESPONSE GET /v1/debts 200 [].category.nom: string
+RESPONSE GET /v1/debts 200 [].category.systemKey: string
 RESPONSE GET /v1/debts 200 [].currency: string
 RESPONSE GET /v1/debts 200 [].date: string
 RESPONSE GET /v1/debts 200 [].dueDate: string
@@ -186,6 +196,7 @@ RESPONSE GET /v1/debts/{id} 200 category.icone: string
 RESPONSE GET /v1/debts/{id} 200 category.id: string
 RESPONSE GET /v1/debts/{id} 200 category.isSystem: boolean
 RESPONSE GET /v1/debts/{id} 200 category.nom: string
+RESPONSE GET /v1/debts/{id} 200 category.systemKey: string
 RESPONSE GET /v1/debts/{id} 200 currency: string
 RESPONSE GET /v1/debts/{id} 200 date: string
 RESPONSE GET /v1/debts/{id} 200 dueDate: string
@@ -232,6 +243,7 @@ RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].amount: number
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categoryId: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categoryName: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categorySource: string
+RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].categorySystemKey: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].cleanLabel: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].date: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].duplicateTransactionId: string
@@ -283,6 +295,7 @@ RESPONSE GET /v1/imports/profiles 200 [].source: string
 RESPONSE GET /v1/imports/rules 200 [].categoryIcon: string
 RESPONSE GET /v1/imports/rules 200 [].categoryId: string
 RESPONSE GET /v1/imports/rules 200 [].categoryName: string
+RESPONSE GET /v1/imports/rules 200 [].categorySystemKey: string
 RESPONSE GET /v1/imports/rules 200 [].createdAt: string
 RESPONSE GET /v1/imports/rules 200 [].id: string
 RESPONSE GET /v1/imports/rules 200 [].origin: string
@@ -300,6 +313,7 @@ RESPONSE GET /v1/subscriptions 200 [].category.icone: string
 RESPONSE GET /v1/subscriptions 200 [].category.id: string
 RESPONSE GET /v1/subscriptions 200 [].category.isSystem: boolean
 RESPONSE GET /v1/subscriptions 200 [].category.nom: string
+RESPONSE GET /v1/subscriptions 200 [].category.systemKey: string
 RESPONSE GET /v1/subscriptions 200 [].currency: string
 RESPONSE GET /v1/subscriptions 200 [].dateDebut: string
 RESPONSE GET /v1/subscriptions 200 [].frequence: string
@@ -319,6 +333,7 @@ RESPONSE GET /v1/subscriptions/{id} 200 category.icone: string
 RESPONSE GET /v1/subscriptions/{id} 200 category.id: string
 RESPONSE GET /v1/subscriptions/{id} 200 category.isSystem: boolean
 RESPONSE GET /v1/subscriptions/{id} 200 category.nom: string
+RESPONSE GET /v1/subscriptions/{id} 200 category.systemKey: string
 RESPONSE GET /v1/subscriptions/{id} 200 currency: string
 RESPONSE GET /v1/subscriptions/{id} 200 dateDebut: string
 RESPONSE GET /v1/subscriptions/{id} 200 frequence: string
@@ -342,6 +357,7 @@ RESPONSE GET /v1/transactions 200 [].category.icone: string
 RESPONSE GET /v1/transactions 200 [].category.id: string
 RESPONSE GET /v1/transactions 200 [].category.isSystem: boolean
 RESPONSE GET /v1/transactions 200 [].category.nom: string
+RESPONSE GET /v1/transactions 200 [].category.systemKey: string
 RESPONSE GET /v1/transactions 200 [].date: string
 RESPONSE GET /v1/transactions 200 [].debtId: string
 RESPONSE GET /v1/transactions 200 [].id: string
@@ -363,6 +379,7 @@ RESPONSE GET /v1/transactions/recurring 200 [].category.icone: string
 RESPONSE GET /v1/transactions/recurring 200 [].category.id: string
 RESPONSE GET /v1/transactions/recurring 200 [].category.isSystem: boolean
 RESPONSE GET /v1/transactions/recurring 200 [].category.nom: string
+RESPONSE GET /v1/transactions/recurring 200 [].category.systemKey: string
 RESPONSE GET /v1/transactions/recurring 200 [].frequency: string
 RESPONSE GET /v1/transactions/recurring 200 [].id: string
 RESPONSE GET /v1/transactions/recurring 200 [].libelle: string
@@ -388,6 +405,7 @@ RESPONSE GET /v1/transactions/{id} 200 category.icone: string
 RESPONSE GET /v1/transactions/{id} 200 category.id: string
 RESPONSE GET /v1/transactions/{id} 200 category.isSystem: boolean
 RESPONSE GET /v1/transactions/{id} 200 category.nom: string
+RESPONSE GET /v1/transactions/{id} 200 category.systemKey: string
 RESPONSE GET /v1/transactions/{id} 200 date: string
 RESPONSE GET /v1/transactions/{id} 200 debtId: string
 RESPONSE GET /v1/transactions/{id} 200 id: string
@@ -432,6 +450,7 @@ RESPONSE GET /v1/users/me/export 200 categories[].icone: string
 RESPONSE GET /v1/users/me/export 200 categories[].id: string
 RESPONSE GET /v1/users/me/export 200 categories[].isSystem: boolean
 RESPONSE GET /v1/users/me/export 200 categories[].nom: string
+RESPONSE GET /v1/users/me/export 200 categories[].systemKey: string
 RESPONSE GET /v1/users/me/export 200 categories[].updatedAt: string
 RESPONSE GET /v1/users/me/export 200 categoryRules[].categoryId: string
 RESPONSE GET /v1/users/me/export 200 categoryRules[].createdAt: string
@@ -539,6 +558,7 @@ RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 category.icone: st
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 category.id: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 category.isSystem: boolean
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 category.nom: string
+RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 category.systemKey: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 frequency: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 id: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/deactivate 200 libelle: string
@@ -558,6 +578,7 @@ RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 category.icone: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 category.id: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 category.isSystem: boolean
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 category.nom: string
+RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 category.systemKey: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 frequency: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 id: string
 RESPONSE PATCH /v1/transactions/recurring/{id}/skip 200 libelle: string
@@ -642,6 +663,7 @@ RESPONSE POST /v1/budgets 200 category.icone: string
 RESPONSE POST /v1/budgets 200 category.id: string
 RESPONSE POST /v1/budgets 200 category.isSystem: boolean
 RESPONSE POST /v1/budgets 200 category.nom: string
+RESPONSE POST /v1/budgets 200 category.systemKey: string
 RESPONSE POST /v1/budgets 200 currency: string
 RESPONSE POST /v1/budgets 200 frequence: string
 RESPONSE POST /v1/budgets 200 id: string
@@ -654,6 +676,7 @@ RESPONSE POST /v1/categories 200 icone: string
 RESPONSE POST /v1/categories 200 id: string
 RESPONSE POST /v1/categories 200 isSystem: boolean
 RESPONSE POST /v1/categories 200 nom: string
+RESPONSE POST /v1/categories 200 systemKey: string
 RESPONSE POST /v1/debts 200 account.bankCustomLogo: string
 RESPONSE POST /v1/debts 200 account.bankLogoUrl: string
 RESPONSE POST /v1/debts 200 account.couleur: string
@@ -666,6 +689,7 @@ RESPONSE POST /v1/debts 200 category.icone: string
 RESPONSE POST /v1/debts 200 category.id: string
 RESPONSE POST /v1/debts 200 category.isSystem: boolean
 RESPONSE POST /v1/debts 200 category.nom: string
+RESPONSE POST /v1/debts 200 category.systemKey: string
 RESPONSE POST /v1/debts 200 currency: string
 RESPONSE POST /v1/debts 200 date: string
 RESPONSE POST /v1/debts 200 dueDate: string
@@ -690,6 +714,7 @@ RESPONSE POST /v1/debts/{id}/repay 200 category.icone: string
 RESPONSE POST /v1/debts/{id}/repay 200 category.id: string
 RESPONSE POST /v1/debts/{id}/repay 200 category.isSystem: boolean
 RESPONSE POST /v1/debts/{id}/repay 200 category.nom: string
+RESPONSE POST /v1/debts/{id}/repay 200 category.systemKey: string
 RESPONSE POST /v1/debts/{id}/repay 200 currency: string
 RESPONSE POST /v1/debts/{id}/repay 200 date: string
 RESPONSE POST /v1/debts/{id}/repay 200 dueDate: string
@@ -714,6 +739,7 @@ RESPONSE POST /v1/debts/{id}/snooze 200 category.icone: string
 RESPONSE POST /v1/debts/{id}/snooze 200 category.id: string
 RESPONSE POST /v1/debts/{id}/snooze 200 category.isSystem: boolean
 RESPONSE POST /v1/debts/{id}/snooze 200 category.nom: string
+RESPONSE POST /v1/debts/{id}/snooze 200 category.systemKey: string
 RESPONSE POST /v1/debts/{id}/snooze 200 currency: string
 RESPONSE POST /v1/debts/{id}/snooze 200 date: string
 RESPONSE POST /v1/debts/{id}/snooze 200 dueDate: string
@@ -739,6 +765,7 @@ RESPONSE POST /v1/imports/preview 200 totalRows: integer
 RESPONSE POST /v1/imports/rules 200 categoryIcon: string
 RESPONSE POST /v1/imports/rules 200 categoryId: string
 RESPONSE POST /v1/imports/rules 200 categoryName: string
+RESPONSE POST /v1/imports/rules 200 categorySystemKey: string
 RESPONSE POST /v1/imports/rules 200 createdAt: string
 RESPONSE POST /v1/imports/rules 200 id: string
 RESPONSE POST /v1/imports/rules 200 origin: string
@@ -755,6 +782,7 @@ RESPONSE POST /v1/imports/upload 200 lines[].amount: number
 RESPONSE POST /v1/imports/upload 200 lines[].categoryId: string
 RESPONSE POST /v1/imports/upload 200 lines[].categoryName: string
 RESPONSE POST /v1/imports/upload 200 lines[].categorySource: string
+RESPONSE POST /v1/imports/upload 200 lines[].categorySystemKey: string
 RESPONSE POST /v1/imports/upload 200 lines[].cleanLabel: string
 RESPONSE POST /v1/imports/upload 200 lines[].date: string
 RESPONSE POST /v1/imports/upload 200 lines[].duplicateTransactionId: string
@@ -785,6 +813,7 @@ RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].amount: number
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categoryId: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categoryName: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categorySource: string
+RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].categorySystemKey: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].cleanLabel: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].date: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].duplicateTransactionId: string
@@ -816,6 +845,7 @@ RESPONSE POST /v1/subscriptions 200 category.icone: string
 RESPONSE POST /v1/subscriptions 200 category.id: string
 RESPONSE POST /v1/subscriptions 200 category.isSystem: boolean
 RESPONSE POST /v1/subscriptions 200 category.nom: string
+RESPONSE POST /v1/subscriptions 200 category.systemKey: string
 RESPONSE POST /v1/subscriptions 200 currency: string
 RESPONSE POST /v1/subscriptions 200 dateDebut: string
 RESPONSE POST /v1/subscriptions 200 frequence: string
@@ -839,6 +869,7 @@ RESPONSE POST /v1/transactions 200 category.icone: string
 RESPONSE POST /v1/transactions 200 category.id: string
 RESPONSE POST /v1/transactions 200 category.isSystem: boolean
 RESPONSE POST /v1/transactions 200 category.nom: string
+RESPONSE POST /v1/transactions 200 category.systemKey: string
 RESPONSE POST /v1/transactions 200 date: string
 RESPONSE POST /v1/transactions 200 debtId: string
 RESPONSE POST /v1/transactions 200 id: string
@@ -859,6 +890,7 @@ RESPONSE POST /v1/transactions/recurring 200 category.icone: string
 RESPONSE POST /v1/transactions/recurring 200 category.id: string
 RESPONSE POST /v1/transactions/recurring 200 category.isSystem: boolean
 RESPONSE POST /v1/transactions/recurring 200 category.nom: string
+RESPONSE POST /v1/transactions/recurring 200 category.systemKey: string
 RESPONSE POST /v1/transactions/recurring 200 frequency: string
 RESPONSE POST /v1/transactions/recurring 200 id: string
 RESPONSE POST /v1/transactions/recurring 200 libelle: string
@@ -878,6 +910,7 @@ RESPONSE POST /v1/transactions/recurring/{id}/validate 200 category.icone: strin
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 category.id: string
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 category.isSystem: boolean
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 category.nom: string
+RESPONSE POST /v1/transactions/recurring/{id}/validate 200 category.systemKey: string
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 date: string
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 debtId: string
 RESPONSE POST /v1/transactions/recurring/{id}/validate 200 id: string
@@ -934,6 +967,7 @@ RESPONSE PUT /v1/budgets/{id} 200 category.icone: string
 RESPONSE PUT /v1/budgets/{id} 200 category.id: string
 RESPONSE PUT /v1/budgets/{id} 200 category.isSystem: boolean
 RESPONSE PUT /v1/budgets/{id} 200 category.nom: string
+RESPONSE PUT /v1/budgets/{id} 200 category.systemKey: string
 RESPONSE PUT /v1/budgets/{id} 200 currency: string
 RESPONSE PUT /v1/budgets/{id} 200 frequence: string
 RESPONSE PUT /v1/budgets/{id} 200 id: string
@@ -946,6 +980,7 @@ RESPONSE PUT /v1/categories/{id} 200 icone: string
 RESPONSE PUT /v1/categories/{id} 200 id: string
 RESPONSE PUT /v1/categories/{id} 200 isSystem: boolean
 RESPONSE PUT /v1/categories/{id} 200 nom: string
+RESPONSE PUT /v1/categories/{id} 200 systemKey: string
 RESPONSE PUT /v1/debts/{id} 200 account.bankCustomLogo: string
 RESPONSE PUT /v1/debts/{id} 200 account.bankLogoUrl: string
 RESPONSE PUT /v1/debts/{id} 200 account.couleur: string
@@ -958,6 +993,7 @@ RESPONSE PUT /v1/debts/{id} 200 category.icone: string
 RESPONSE PUT /v1/debts/{id} 200 category.id: string
 RESPONSE PUT /v1/debts/{id} 200 category.isSystem: boolean
 RESPONSE PUT /v1/debts/{id} 200 category.nom: string
+RESPONSE PUT /v1/debts/{id} 200 category.systemKey: string
 RESPONSE PUT /v1/debts/{id} 200 currency: string
 RESPONSE PUT /v1/debts/{id} 200 date: string
 RESPONSE PUT /v1/debts/{id} 200 dueDate: string
@@ -979,6 +1015,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].amount: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categoryId: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categoryName: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categorySource: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].categorySystemKey: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].cleanLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].date: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].duplicateTransactionId: string
@@ -994,6 +1031,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 amount: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categoryId: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categoryName: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categorySource: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 categorySystemKey: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 cleanLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 date: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 duplicateTransactionId: string
@@ -1008,6 +1046,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 transactionType: st
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 categoryIcon: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 categoryId: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 categoryName: string
+RESPONSE PUT /v1/imports/rules/{ruleId} 200 categorySystemKey: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 createdAt: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 id: string
 RESPONSE PUT /v1/imports/rules/{ruleId} 200 origin: string
@@ -1034,6 +1073,7 @@ RESPONSE PUT /v1/subscriptions/{id} 200 category.icone: string
 RESPONSE PUT /v1/subscriptions/{id} 200 category.id: string
 RESPONSE PUT /v1/subscriptions/{id} 200 category.isSystem: boolean
 RESPONSE PUT /v1/subscriptions/{id} 200 category.nom: string
+RESPONSE PUT /v1/subscriptions/{id} 200 category.systemKey: string
 RESPONSE PUT /v1/subscriptions/{id} 200 currency: string
 RESPONSE PUT /v1/subscriptions/{id} 200 dateDebut: string
 RESPONSE PUT /v1/subscriptions/{id} 200 frequence: string
@@ -1052,6 +1092,7 @@ RESPONSE PUT /v1/transactions/{id} 200 category.icone: string
 RESPONSE PUT /v1/transactions/{id} 200 category.id: string
 RESPONSE PUT /v1/transactions/{id} 200 category.isSystem: boolean
 RESPONSE PUT /v1/transactions/{id} 200 category.nom: string
+RESPONSE PUT /v1/transactions/{id} 200 category.systemKey: string
 RESPONSE PUT /v1/transactions/{id} 200 date: string
 RESPONSE PUT /v1/transactions/{id} 200 debtId: string
 RESPONSE PUT /v1/transactions/{id} 200 id: string

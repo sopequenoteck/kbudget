@@ -40,7 +40,7 @@
           {{ (sub.actif ? 'common.value.active' : 'common.value.inactive') | transloco }}
         </span>
         @if (sub.category) {
-          <span class="hero__category">{{ sub.category.icone }} {{ sub.category.nom }}</span>
+          <span class="hero__category">{{ sub.category.icone }} {{ sub.category.nom | categoryName: sub.category.systemKey }}</span>
         }
       </div>
       <span class="hero__date">{{ formatDate(sub.dateDebut) }}</span>

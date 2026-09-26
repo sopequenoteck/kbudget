@@ -14,8 +14,8 @@ import { Budget } from '../../../../core/models/budget.model';
 import { Category } from '../../../../core/models/category.model';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
-function category(id: string): Category {
-  return { id, nom: id, icone: '🏷', couleur: '#000000' } as Category;
+function category(id: string, systemKey: string | null = null): Category {
+  return { id, nom: id, icone: '🏷', couleur: '#000000', isSystem: !!systemKey, systemKey } as Category;
 }
 
 function budgetOn(id: string, categoryId: string): Budget {
@@ -135,6 +135,16 @@ describe('BudgetForm', () => {
     form.form.patchValue({ frequence: 'ANNUEL' });
 
     expect(form.frequencyLabelKey()).toBe('budgets.value.yearly');
+  });
+
+  it('should_show_the_translated_name_when_the_selected_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    const form = setup();
+    form.categories.update((cats) => [...cats, category('sys-1', 'SUBSCRIPTION')]);
+    form.form.patchValue({ categoryId: 'sys-1' });
+
+    expect(form.selectedCategoryName()).toBe('🏷 Abonnement');
   });
 
   it('should_create_budget_and_close_modal_on_submit', async () => {

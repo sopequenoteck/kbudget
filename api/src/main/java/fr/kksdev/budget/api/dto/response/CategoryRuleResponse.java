@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.CategoryRule;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,8 @@ public record CategoryRuleResponse(
         String pattern,
         UUID categoryId,
         String categoryName,
+        /** Cle stable de la categorie systeme, null pour une categorie utilisateur (KKS-395). */
+        String categorySystemKey,
         String categoryIcon,
         LocalDateTime createdAt,
         /** MANUAL (saisie) ou AUTO (creee par une correction pendant la revue) — KKS-383. */
@@ -21,6 +24,7 @@ public record CategoryRuleResponse(
                 rule.getPattern(),
                 rule.getCategory().getId(),
                 rule.getCategory().getNom(),
+                SystemCategoryKey.nameOf(rule.getCategory().getSystemKey()),
                 rule.getCategory().getIcone(),
                 rule.getCreatedAt(),
                 rule.getOrigin() != null ? rule.getOrigin().name() : null

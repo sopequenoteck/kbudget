@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.AccountSummary;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
@@ -141,7 +142,7 @@ public class SubscriptionService {
 
     private Category resolveCategory(UUID categoryId, UUID userId) {
         if (categoryId == null) {
-            return categoryService.findSystemCategoryByNom("Abonnement", userId);
+            return categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId);
         }
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))

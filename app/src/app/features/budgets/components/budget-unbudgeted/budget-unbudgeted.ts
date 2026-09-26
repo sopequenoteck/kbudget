@@ -31,6 +31,7 @@ import {
 import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 
@@ -39,6 +40,7 @@ interface CategoryGroup {
   categoryNom: string;
   categoryIcone: string;
   categoryCouleur: string;
+  categorySystemKey?: string | null;
   montantDepense: number;
   transactions: Transaction[];
 }
@@ -46,7 +48,7 @@ interface CategoryGroup {
 @Component({
   selector: 'app-budget-unbudgeted',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,

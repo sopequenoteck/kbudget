@@ -52,16 +52,17 @@ BEGIN
     -- 2. Categories systeme (reproduit CategoryService.seedSystemCategories)
     --    is_system = true, idempotent : INSERT uniquement si la categorie n'existe pas deja
     --    (l'index unique est sur LOWER(nom), user_id — index partiel, pas de contrainte nommee)
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Abonnement', '🔄', '#6366f1', true, v_user_id
+    --    system_key renseigne depuis V39 (KKS-395)
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Abonnement', '🔄', '#6366f1', true, 'SUBSCRIPTION', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'abonnement' AND user_id = v_user_id);
 
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Dette', '💰', '#ef4444', true, v_user_id
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Dette', '💰', '#ef4444', true, 'DEBT', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'dette' AND user_id = v_user_id);
 
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Virement', '🔄', '#8b5cf6', true, v_user_id
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Virement', '🔄', '#8b5cf6', true, 'TRANSFER', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'virement' AND user_id = v_user_id);
 
     -- 3. Compte principal EUR (reproduit AccountService.createDefaultAccount)
@@ -306,15 +307,15 @@ BEGIN
         VALUES (gen_random_uuid(), v_other, 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'EUR', 'Europe/Paris', 'MEDIUM')
         ON CONFLICT (user_id) DO NOTHING;
 
-        INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-        SELECT gen_random_uuid(), c.nom, c.icone, c.couleur, c.is_system, v_other
+        INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+        SELECT gen_random_uuid(), c.nom, c.icone, c.couleur, c.is_system, c.system_key, v_other
         FROM (VALUES
-            ('Abonnement', '🔄', '#6366f1', true),
-            ('Dette',      '💰', '#ef4444', true),
-            ('Virement',   '🔄', '#8b5cf6', true),
-            ('Courses',    '🧺', '#14b8a6', false),
-            ('Salaire',    '💼', '#10b981', false)
-        ) AS c(nom, icone, couleur, is_system)
+            ('Abonnement', '🔄', '#6366f1', true,  'SUBSCRIPTION'),
+            ('Dette',      '💰', '#ef4444', true,  'DEBT'),
+            ('Virement',   '🔄', '#8b5cf6', true,  'TRANSFER'),
+            ('Courses',    '🧺', '#14b8a6', false, NULL),
+            ('Salaire',    '💼', '#10b981', false, NULL)
+        ) AS c(nom, icone, couleur, is_system, system_key)
         WHERE NOT EXISTS (
             SELECT 1 FROM categories x WHERE LOWER(x.nom) = LOWER(c.nom) AND x.user_id = v_other
         );

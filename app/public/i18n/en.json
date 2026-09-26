@@ -208,6 +208,12 @@
     },
     "page": {
       "title": "Categories"
+    },
+    "value": {
+      "adjustment": "Balance adjustment",
+      "debt": "Debt",
+      "subscription": "Subscription",
+      "transfer": "Transfer"
     }
   },
   "common": {

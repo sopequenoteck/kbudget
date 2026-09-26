@@ -101,7 +101,7 @@
       <div class="filter-panel__row filter-panel__row--scroll">
         @for (cat of monthCategories(); track cat.id) {
           <button class="filter-chip" [class.active]="categoryFilter() === cat.id" (click)="setCategoryFilter(cat.id)">
-            {{ cat.icone }} {{ cat.nom }}
+            {{ cat.icone }} {{ cat.nom | categoryName: cat.systemKey }}
           </button>
         }
       </div>
@@ -163,7 +163,7 @@
           >{{ getIcon(transaction) }}</span>
           <div class="list-row__content">
             <span class="list-row__title">{{ transaction.libelle }}</span>
-            <span class="list-row__subtitle">{{ transaction.category?.nom ?? '' }}</span>
+            <span class="list-row__subtitle">{{ (transaction.category?.nom ?? '') | categoryName: transaction.category?.systemKey }}</span>
           </div>
           <div class="list-row__right">
             <span class="list-row__amount" [class]="getValueClass(transaction)">
