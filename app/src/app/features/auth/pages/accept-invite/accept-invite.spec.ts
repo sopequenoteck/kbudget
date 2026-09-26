@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { AcceptInvite } from './accept-invite';
 import { AuthService } from '../../../../core/services/auth';
@@ -11,6 +11,7 @@ import { provideTranslocoTesting } from '../../../../../testing/transloco-testin
 
 describe('AcceptInvite', () => {
   let component: AcceptInvite;
+  let fixture: ComponentFixture<AcceptInvite>;
   let invitationServiceMock: { lookup: ReturnType<typeof vi.fn>; accept: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -26,7 +27,7 @@ describe('AcceptInvite', () => {
       ],
     });
 
-    const fixture = TestBed.createComponent(AcceptInvite);
+    fixture = TestBed.createComponent(AcceptInvite);
     fixture.componentRef.setInput('token', 'un-token');
     component = fixture.componentInstance;
   });
@@ -112,5 +113,31 @@ describe('AcceptInvite', () => {
     await component.onSubmit();
 
     expect(component.error()).toBe('Une erreur est survenue. Veuillez réessayer.');
+  });
+
+  // ---------------------------------------------------------------------
+  // Selecteur de devise — symbole + nom traduit (KKS-393)
+  // ---------------------------------------------------------------------
+
+  it('should_render_currency_options_with_symbol_and_translated_french_name', async () => {
+    invitationServiceMock.lookup.mockReturnValue(of({ email: 'alice@example.com' }));
+
+    await component.ngOnInit();
+    fixture.detectChanges();
+
+    const options = Array.from(
+      fixture.nativeElement.querySelectorAll('#accept-currency option'),
+    ).map((o) => (o as HTMLOptionElement).textContent);
+
+    // "Dollar américain" devient "Dollar US", changement assume par KKS-393.
+    expect(options).toEqual([
+      '€ - Euro',
+      '$ - Dollar US',
+      'CFA - Franc CFA (BCEAO)',
+      '£ - Livre sterling',
+      'CHF - Franc suisse',
+      'CA$ - Dollar canadien',
+      'MAD - Dirham marocain',
+    ]);
   });
 });

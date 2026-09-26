@@ -89,6 +89,38 @@ describe('CurrencyList', () => {
     expect(el.querySelector('.dialog__title')?.textContent).toBe('Ajouter une devise');
   });
 
+  it('should_render_the_translated_name_of_a_currency_from_the_catalogue', () => {
+    // KKS-393 : "Franc CFA" devient "Franc CFA (BCEAO)", changement assume.
+    const fixture = createFixture(['EUR', 'XOF']);
+    const el: HTMLElement = fixture.nativeElement;
+
+    const names = Array.from(el.querySelectorAll('.currency-item__name')).map(
+      (n) => n.textContent,
+    );
+    expect(names).toEqual(['Euro', 'Franc CFA (BCEAO)']);
+  });
+
+  it('should_fall_back_to_the_raw_code_for_a_currency_outside_the_closed_list', () => {
+    const fixture = createFixture(['ZZZ']);
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.currency-item__symbol')?.textContent).toBe('ZZZ');
+    expect(el.querySelector('.currency-item__name')?.textContent).toBe('ZZZ');
+  });
+
+  it('should_render_translated_names_in_the_add_currency_dialog', () => {
+    const fixture = createFixture(['EUR']);
+    fixture.componentInstance.showAddSheet.set(true);
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    const names = Array.from(el.querySelectorAll('.dialog__option span:last-child')).map(
+      (n) => n.textContent,
+    );
+    expect(names).toContain('Dollar US');
+    expect(names).toContain('Franc CFA (BCEAO)');
+  });
+
   it('should_render_french_remove_warning_dialog_with_currency_name_interpolated', () => {
     const fixture = createFixture(['EUR', 'USD'], [makeAccount({ currency: 'USD', actif: true })]);
     fixture.componentInstance.removeCurrency('USD');

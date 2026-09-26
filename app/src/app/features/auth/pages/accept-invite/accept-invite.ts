@@ -21,6 +21,11 @@ import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from '../../../../core/constants/password.constants';
+import {
+  CURRENCY_NAME_KEYS,
+  CURRENCY_SYMBOLS,
+  SUPPORTED_CURRENCIES,
+} from '../../../../core/models/currency.model';
 
 @Component({
   selector: 'app-accept-invite',
@@ -66,15 +71,13 @@ export class AcceptInvite implements OnInit {
     'Asia/Shanghai',
   ];
 
-  readonly currencies = [
-    { code: 'EUR', label: '€ - Euro' },
-    { code: 'XOF', label: 'CFA - Franc CFA (BCEAO)' },
-    { code: 'USD', label: '$ - Dollar américain' },
-    { code: 'GBP', label: '£ - Livre sterling' },
-    { code: 'CHF', label: 'CHF - Franc suisse' },
-    { code: 'CAD', label: 'CA$ - Dollar canadien' },
-    { code: 'MAD', label: 'MAD - Dirham marocain' },
-  ];
+  /** Devise proposee a l'inscription : symbole et cle de nom traduit,
+   * partages avec les reglages de devises (KKS-393). */
+  readonly currencies = SUPPORTED_CURRENCIES.map((code) => ({
+    code,
+    symbol: CURRENCY_SYMBOLS[code],
+    nameKey: CURRENCY_NAME_KEYS[code],
+  }));
 
   readonly passwordMinLength = PASSWORD_MIN_LENGTH;
 

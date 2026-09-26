@@ -83,7 +83,7 @@
           >
             <select id="accept-currency" formControlName="currency">
               @for (curr of currencies; track curr.code) {
-                <option [value]="curr.code">{{ curr.label }}</option>
+                <option [value]="curr.code">{{ curr.symbol }} - {{ curr.nameKey | transloco }}</option>
               }
             </select>
           </app-form-field>
