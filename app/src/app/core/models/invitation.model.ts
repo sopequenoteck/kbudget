@@ -27,6 +27,10 @@ export interface AcceptInviteRequest {
   displayName: string;
   currency: string;
   timezone: string;
+  /** Nom du compte cree pour le nouvel utilisateur, compose par le client
+   * dans sa langue (KKS-396). Optionnel : l'API ecrit un defaut anglais si
+   * absent. */
+  defaultAccountName?: string;
 }
 
 export interface InviteLookup {

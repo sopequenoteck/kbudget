@@ -40,7 +40,8 @@ public class AcceptInviteService {
                 request.currency(),
                 request.timezone(),
                 false,  // isAdmin
-                false   // passwordResetRequired
+                false,  // passwordResetRequired
+                request.defaultAccountName()
         ));
 
         invitationService.markUsed(invitation);

@@ -41,7 +41,8 @@ public class BootstrapSeedRunner implements ApplicationRunner {
                 Currency.EUR,
                 "Europe/Paris",
                 true,
-                true
+                true,
+                null
         ));
 
         log.warn(buildBanner(email, rawPassword));

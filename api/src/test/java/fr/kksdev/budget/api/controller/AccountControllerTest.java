@@ -30,12 +30,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -289,6 +292,60 @@ class AccountControllerTest {
                 .andExpect(jsonPath("$.message").value("The source account is inactive"));
     }
 
+    // --- KKS-396 : libelle de virement fourni par le client ---
+
+    @Test
+    void should_forwardLibelles_when_transferLibellesProvided() throws Exception {
+        UUID fromId = UUID.randomUUID();
+        UUID toId = UUID.randomUUID();
+        LocalDate transferDate = LocalDate.of(2026, Month.APRIL, 15);
+        var response = new TransferResponse(
+                UUID.randomUUID(),
+                new TransferResponse.TransactionResponseRef(
+                        UUID.randomUUID(), new BigDecimal("100.00"), "Loyer",
+                        TransactionType.DEPENSE, transferDate, fromId, "Compte Principal"),
+                new TransferResponse.TransactionResponseRef(
+                        UUID.randomUUID(), new BigDecimal("100.00"), "Reçu loyer",
+                        TransactionType.RECETTE, transferDate, toId, "Livret A"));
+
+        when(accountService.transfer(any(), eq(userId))).thenReturn(response);
+
+        mockMvc.perform(post("/v1/accounts/transfer")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "fromAccountId": "%s",
+                                    "toAccountId": "%s",
+                                    "montant": 100.00,
+                                    "libelleDebit": "Loyer",
+                                    "libelleCredit": "Reçu loyer"
+                                }
+                                """.formatted(fromId, toId)))
+                .andExpect(status().isCreated());
+
+        verify(accountService).transfer(argThat(r -> "Loyer".equals(r.libelleDebit())
+                && "Reçu loyer".equals(r.libelleCredit())), eq(userId));
+    }
+
+    @Test
+    void should_return400_when_transferLibelleDebitTooLong() throws Exception {
+        String tooLong = "a".repeat(256);
+
+        mockMvc.perform(post("/v1/accounts/transfer")
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "fromAccountId": "%s",
+                                    "toAccountId": "%s",
+                                    "montant": 100.00,
+                                    "libelleDebit": "%s"
+                                }
+                                """.formatted(UUID.randomUUID(), UUID.randomUUID(), tooLong)))
+                .andExpect(status().isBadRequest());
+    }
+
     // --- Adjust Balance tests (T032) ---
 
     @Test
@@ -299,7 +356,7 @@ class AccountControllerTest {
                 "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
-        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), any(), eq(userId)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -320,7 +377,7 @@ class AccountControllerTest {
                 "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
-        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("300.00")), any(), eq(userId)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -341,7 +398,7 @@ class AccountControllerTest {
                 "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
-        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("500.00")), any(), eq(userId)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -355,8 +412,43 @@ class AccountControllerTest {
     }
 
     @Test
+    void should_forwardLibelle_when_adjustBalanceLibelleProvided() throws Exception {
+        var response = new AccountResponse(
+                accountId, "Compte Principal", AccountType.COURANT,
+                BigDecimal.ZERO, new BigDecimal("750.00"),
+                "🏦", "#3b82f6", true, true, "EUR",
+                "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
+
+        when(accountService.adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 750.00, "libelle": "Correction manuelle" }
+                                """))
+                .andExpect(status().isOk());
+
+        verify(accountService).adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId);
+    }
+
+    @Test
+    void should_return400_when_adjustBalanceLibelleTooLong() throws Exception {
+        String tooLong = "a".repeat(256);
+
+        mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "newBalance": 750.00, "libelle": "%s" }
+                                """.formatted(tooLong)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void should_rejectAdjustment_when_accountInactive() throws Exception {
-        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), any(), eq(userId)))
                 .thenThrow(new IllegalArgumentException("Cannot adjust the balance of an inactive account"));
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -371,7 +463,7 @@ class AccountControllerTest {
 
     @Test
     void should_rejectAdjustment_when_accountNotFound() throws Exception {
-        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), any(BigDecimal.class), any(), eq(userId)))
                 .thenThrow(new EntityNotFoundException("Account not found"));
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -392,7 +484,7 @@ class AccountControllerTest {
                 "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
-        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), eq(userId)))
+        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("-100.00")), any(), eq(userId)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)

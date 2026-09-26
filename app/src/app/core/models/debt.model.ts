@@ -48,6 +48,10 @@ export interface DebtRequest {
 export interface DebtRepayRequest {
   accountId: string;
   amount?: number;
+  /** Libelle de la transaction de remboursement, compose par le client dans
+   * sa langue (KKS-396). Optionnel : l'API ecrit un defaut anglais si
+   * absent. */
+  libelle?: string;
 }
 
 export interface DebtPaymentResponse {

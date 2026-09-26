@@ -62,6 +62,20 @@ export interface TransferRequest {
   toAccountId: string;
   montant: number;
   note?: string;
+  /** Libelle de la transaction de debit (compte source), compose par le
+   * client dans sa langue (KKS-396). Optionnel : l'API ecrit un defaut
+   * anglais si absent. */
+  libelleDebit?: string;
+  /** Libelle de la transaction de credit (compte destination), meme regle
+   * que {@link libelleDebit} (KKS-396). */
+  libelleCredit?: string;
+}
+
+export interface AdjustBalanceRequest {
+  newBalance: number;
+  /** Libelle de la transaction d'ajustement, compose par le client dans sa
+   * langue (KKS-396). Optionnel : l'API ecrit un defaut anglais si absent. */
+  libelle?: string;
 }
 
 export interface TransferResponse {

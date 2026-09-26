@@ -15,6 +15,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
 import { ApiErrorService } from '../../../../core/services/api-error';
+import { LanguageService } from '../../../../core/services/language';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
 import {
@@ -45,6 +46,7 @@ export class AcceptInvite implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly transloco = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
 
   readonly token = input.required<string>();
 
@@ -117,6 +119,11 @@ export class AcceptInvite implements OnInit {
     const { password, displayName, currency, timezone } = this.form.getRawValue();
 
     try {
+      const defaultAccountName = this.transloco.translate(
+        'accounts.value.defaultAccountName',
+        {},
+        this.languageService.activeLanguage(),
+      );
       const response = await firstValueFrom(
         this.invitationService.accept({
           token: this.token(),
@@ -124,6 +131,7 @@ export class AcceptInvite implements OnInit {
           displayName,
           currency,
           timezone,
+          defaultAccountName,
         }),
       );
       // Stockage JWT via AuthService

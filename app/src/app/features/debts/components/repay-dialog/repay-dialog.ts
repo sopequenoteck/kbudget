@@ -158,6 +158,11 @@ export class RepayDialog {
     const request: DebtRepayRequest = {
       accountId: raw.accountId,
       amount,
+      libelle: this.transloco.translate(
+        'debts.value.repayment',
+        { person: d.personne },
+        this.languageService.activeLanguage(),
+      ),
     };
 
     try {

@@ -27,6 +27,7 @@ import { BankService } from '../../../core/services/bank';
 import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
+import { LanguageService } from '../../../core/services/language';
 import { ModalService } from '../../../core/services/modal.service';
 import { PALETTE_COLORS } from '../../../core/constants/palette.constants';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
@@ -73,6 +74,7 @@ export class AccountForm {
   private readonly currencyService = inject(CurrencyService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly preferenceService = inject(PreferenceService);
+  private readonly languageService = inject(LanguageService);
   private readonly modalService = inject(ModalService);
   private readonly transloco = inject(TranslocoService);
 
@@ -231,7 +233,14 @@ export class AccountForm {
         // Adjust balance if changed
         const newBalance = Number(raw.newBalance);
         if (!isNaN(newBalance) && newBalance !== acc.solde) {
-          await firstValueFrom(this.accountService.adjustBalance(acc.id, newBalance));
+          const libelle = this.transloco.translate(
+            'transactions.value.balanceAdjustment',
+            {},
+            this.languageService.activeLanguage(),
+          );
+          await firstValueFrom(
+            this.accountService.adjustBalance(acc.id, { newBalance, libelle }),
+          );
         }
       } else {
         await firstValueFrom(this.accountService.create(request));

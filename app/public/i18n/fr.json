@@ -64,6 +64,7 @@
       "cash": "Espèces",
       "current": "Courant",
       "default": "Défaut",
+      "defaultAccountName": "Compte Principal",
       "other": "Autre",
       "otherCustom": "Autre / Personnalisé",
       "savings": "Épargne"
@@ -399,7 +400,8 @@
       "borrowed": "Emprunt",
       "lent": "Prêt",
       "notRepaid": "Non remboursé",
-      "repaid": "Remboursé"
+      "repaid": "Remboursé",
+      "repayment": "Remboursement - {person}"
     }
   },
   "errors": {
@@ -865,8 +867,11 @@
       "noIncome": "0 recettes"
     },
     "value": {
+      "balanceAdjustment": "Ajustement de solde",
       "expense": "Dépense",
-      "income": "Recette"
+      "income": "Recette",
+      "transferFrom": "Virement depuis {account}",
+      "transferTo": "Virement vers {account}"
     }
   },
   "users": {

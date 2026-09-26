@@ -79,7 +79,7 @@ class ValidationErrorCodeContractTest {
 
     @Test
     void should_return_not_null_code_when_invitation_token_is_missing() {
-        var request = new AcceptInviteRequest(null, VALID_PASSWORD, DISPLAY_NAME, Currency.EUR, "Europe/Paris");
+        var request = new AcceptInviteRequest(null, VALID_PASSWORD, DISPLAY_NAME, Currency.EUR, "Europe/Paris", null);
 
         assertThat(codeFor(request, "token")).isEqualTo("NOT_NULL");
     }
@@ -97,7 +97,7 @@ class ValidationErrorCodeContractTest {
      */
     @Test
     void should_name_the_failing_field_after_the_dto_property() {
-        var request = new AcceptInviteRequest(UUID.randomUUID(), "court", DISPLAY_NAME, Currency.EUR, "Europe/Paris");
+        var request = new AcceptInviteRequest(UUID.randomUUID(), "court", DISPLAY_NAME, Currency.EUR, "Europe/Paris", null);
 
         assertThat(validate(request).details())
                 .extracting(ValidationErrorDetail::field)

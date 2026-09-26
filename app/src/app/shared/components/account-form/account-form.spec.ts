@@ -299,6 +299,52 @@ describe('AccountForm', () => {
     expect(request.bankCustomLogo).toBeUndefined();
   });
 
+  it('should_compose_balance_adjustment_label_when_balance_changes', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ newBalance: '250' });
+
+    await component.onSubmit();
+
+    expect(accountServiceMock.adjustBalance).toHaveBeenCalledWith('1', {
+      newBalance: 250,
+      libelle: 'Ajustement de solde',
+    });
+  });
+
+  it('should_translate_balance_adjustment_label_when_language_switches_to_en', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const preferenceService = TestBed.inject(PreferenceService);
+    preferenceService.language.set('en');
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ newBalance: '250' });
+
+    await component.onSubmit();
+
+    expect(accountServiceMock.adjustBalance).toHaveBeenCalledWith('1', {
+      newBalance: 250,
+      libelle: 'Balance adjustment',
+    });
+  });
+
   it('should_set_selected_bank_code_to_OTHER_by_default', () => {
     const fixture = TestBed.createComponent(AccountForm);
     fixture.detectChanges();

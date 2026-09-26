@@ -24,6 +24,13 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class CategoryService {
 
+    // KKS-396 : noms anglais des categories systeme, ecrits par l'API a la
+    // creation de l'utilisateur (principe VII, l'API ne traduit jamais).
+    private static final String SUBSCRIPTION_CATEGORY_NAME = "Subscription";
+    private static final String DEBT_CATEGORY_NAME = "Debt";
+    private static final String TRANSFER_CATEGORY_NAME = "Transfer";
+    private static final String ADJUSTMENT_CATEGORY_NAME = "Balance adjustment";
+
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
@@ -97,7 +104,7 @@ public class CategoryService {
     public void seedSystemCategories(User user) {
         try {
             Category abonnement = Category.builder()
-                    .nom("Abonnement")
+                    .nom(SUBSCRIPTION_CATEGORY_NAME)
                     .icone("\uD83D\uDD04")
                     .couleur("#6366f1")
                     .isSystem(true)
@@ -107,7 +114,7 @@ public class CategoryService {
             categoryRepository.save(abonnement);
 
             Category dette = Category.builder()
-                    .nom("Dette")
+                    .nom(DEBT_CATEGORY_NAME)
                     .icone("\uD83D\uDCB0")
                     .couleur("#ef4444")
                     .isSystem(true)
@@ -117,7 +124,7 @@ public class CategoryService {
             categoryRepository.save(dette);
 
             Category virement = Category.builder()
-                    .nom("Virement")
+                    .nom(TRANSFER_CATEGORY_NAME)
                     .icone("\uD83D\uDD04")
                     .couleur("#8b5cf6")
                     .isSystem(true)
@@ -141,7 +148,7 @@ public class CategoryService {
         }
 
         Category ajustement = Category.builder()
-                .nom("Ajustement")
+                .nom(ADJUSTMENT_CATEGORY_NAME)
                 .icone("⚖️")
                 .couleur("#6b7280")
                 .isSystem(true)

@@ -6,10 +6,17 @@ import { RepayDialog } from './repay-dialog';
 import { DebtService } from '../../../../core/services/debt';
 import { AccountService } from '../../../../core/services/account';
 import { ModalService } from '../../../../core/services/modal.service';
+import { PreferenceService } from '../../../../core/services/preference';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
+
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 const mockAccounts: Account[] = [
   {
@@ -223,8 +230,32 @@ describe('RepayDialog', () => {
     expect(debtServiceMock.repay).toHaveBeenCalledWith('debt-1', {
       accountId: 'acc-1',
       amount: 200,
+      libelle: 'Remboursement - Bob',
     });
     expect(savedEmitted).toBe(true);
+  });
+
+  it('should_translate_repayment_label_when_language_switches_to_en', async () => {
+    setup(mockDebt);
+    const fixture = TestBed.createComponent(RepayDialog);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const preferenceService = TestBed.inject(PreferenceService);
+    preferenceService.language.set('en');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    await component.onSubmit();
+
+    expect(debtServiceMock.repay).toHaveBeenCalledWith('debt-1', {
+      accountId: 'acc-1',
+      amount: 200,
+      libelle: 'Repayment - Bob',
+    });
   });
 
   it('should_show_remaining_balance_toast_when_repayment_is_partial', async () => {
