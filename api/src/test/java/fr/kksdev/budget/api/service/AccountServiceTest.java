@@ -21,6 +21,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +32,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -268,34 +272,23 @@ class AccountServiceTest {
     // anglais "Main account"
     // -------------------------------------------------------------------------
 
-    @Test
-    void should_useProvidedAccountName_when_defaultAccountNameGiven() {
+    @ParameterizedTest(name = "[{index}] defaultAccountName={0} -> nom={1}")
+    @MethodSource("defaultAccountNameCases")
+    void should_useExpectedAccountName_when_defaultAccountNameVaries(String defaultAccountName, String expectedName) {
         var user = buildUser();
         when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        accountService.createDefaultAccount(user, Currency.EUR, "Mon compte");
+        accountService.createDefaultAccount(user, Currency.EUR, defaultAccountName);
 
-        verify(accountRepository).save(argThat(account -> "Mon compte".equals(account.getNom())));
+        verify(accountRepository).save(argThat(account -> expectedName.equals(account.getNom())));
     }
 
-    @Test
-    void should_useDefaultEnglishAccountName_when_defaultAccountNameAbsent() {
-        var user = buildUser();
-        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        accountService.createDefaultAccount(user, Currency.EUR, null);
-
-        verify(accountRepository).save(argThat(account -> "Main account".equals(account.getNom())));
-    }
-
-    @Test
-    void should_useDefaultEnglishAccountName_when_defaultAccountNameBlank() {
-        var user = buildUser();
-        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        accountService.createDefaultAccount(user, Currency.EUR, "   ");
-
-        verify(accountRepository).save(argThat(account -> "Main account".equals(account.getNom())));
+    static Stream<Arguments> defaultAccountNameCases() {
+        return Stream.of(
+                Arguments.of("Mon compte", "Mon compte"),
+                Arguments.of(null, "Main account"),
+                Arguments.of("   ", "Main account")
+        );
     }
 
     @Test
@@ -864,8 +857,9 @@ class AccountServiceTest {
         assertThat(response.creditTransaction().libelle()).isEqualTo("Transfer from Compte source");
     }
 
-    @Test
-    void should_useProvidedLibelle_when_adjustBalanceLibelleGiven() {
+    @ParameterizedTest(name = "[{index}] libelle={0} -> libelle attendu={1}")
+    @MethodSource("adjustBalanceLibelleCases")
+    void should_useExpectedLibelle_when_adjustBalanceLibelleVaries(String libelle, String expectedLibelle) {
         var user = buildUser();
         var account = buildAccount(user);
         var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
@@ -877,44 +871,16 @@ class AccountServiceTest {
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        accountService.adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId);
+        accountService.adjustBalance(accountId, new BigDecimal("750.00"), libelle, userId);
 
-        verify(transactionRepository).save(argThat(tx -> "Correction manuelle".equals(tx.getLibelle())));
+        verify(transactionRepository).save(argThat(tx -> expectedLibelle.equals(tx.getLibelle())));
     }
 
-    @Test
-    void should_useDefaultEnglishLibelle_when_adjustBalanceLibelleAbsent() {
-        var user = buildUser();
-        var account = buildAccount(user);
-        var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
-
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-        when(transactionRepository.calculateBalanceByAccountId(accountId))
-                .thenReturn(BigDecimal.ZERO, new BigDecimal("750.00"));
-        when(categoryService.findOrCreateAdjustmentCategory(userId)).thenReturn(category);
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-
-        accountService.adjustBalance(accountId, new BigDecimal("750.00"), null, userId);
-
-        verify(transactionRepository).save(argThat(tx -> "Balance adjustment".equals(tx.getLibelle())));
-    }
-
-    @Test
-    void should_useDefaultEnglishLibelle_when_adjustBalanceLibelleBlank() {
-        var user = buildUser();
-        var account = buildAccount(user);
-        var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
-
-        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
-        when(transactionRepository.calculateBalanceByAccountId(accountId))
-                .thenReturn(BigDecimal.ZERO, new BigDecimal("750.00"));
-        when(categoryService.findOrCreateAdjustmentCategory(userId)).thenReturn(category);
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-
-        accountService.adjustBalance(accountId, new BigDecimal("750.00"), "   ", userId);
-
-        verify(transactionRepository).save(argThat(tx -> "Balance adjustment".equals(tx.getLibelle())));
+    static Stream<Arguments> adjustBalanceLibelleCases() {
+        return Stream.of(
+                Arguments.of("Correction manuelle", "Correction manuelle"),
+                Arguments.of(null, "Balance adjustment"),
+                Arguments.of("   ", "Balance adjustment")
+        );
     }
 }

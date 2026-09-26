@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -318,7 +319,7 @@ class UserExportServiceTest {
                 .montant(new BigDecimal("15.00"))
                 .libelle("Sans categorie")
                 .type(TransactionType.DEPENSE)
-                .date(LocalDate.of(2026, 4, 27))
+                .date(LocalDate.of(2026, Month.APRIL, 27))
                 .account(account)
                 .category(null)
                 .isRecurring(false)
@@ -354,7 +355,7 @@ class UserExportServiceTest {
                 .montant(new BigDecimal("15.00"))
                 .libelle("Sans type")
                 .type(null)
-                .date(LocalDate.of(2026, 4, 27))
+                .date(LocalDate.of(2026, Month.APRIL, 27))
                 .account(account)
                 .isRecurring(false)
                 .recurringActive(true)

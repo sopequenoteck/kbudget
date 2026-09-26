@@ -97,7 +97,7 @@ class BootstrapSeedRunnerTest {
     }
 
     @Test
-    void should_seed_account_with_default_english_name_when_no_default_account_name_provided() throws Exception {
+    void should_seed_account_with_default_english_name_when_no_default_account_name_provided() {
         // KKS-396 : le premier admin n'a aucun client pour fournir un nom de
         // compte, l'API retombe sur le defaut anglais.
         bootstrapSeedRunner.run(noArgs);

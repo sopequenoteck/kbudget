@@ -25,6 +25,9 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +38,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -395,12 +399,13 @@ class DebtServiceTest {
     // defaut anglais "Repayment - <personne>"
     // -------------------------------------------------------------------------
 
-    @Test
-    void should_useProvidedLibelle_when_repayLibelleGiven() {
+    @ParameterizedTest(name = "[{index}] libelle={0} -> libelle attendu={1}")
+    @MethodSource("repayLibelleCases")
+    void should_useExpectedLibelle_when_repayLibelleVaries(String libelle, String expectedLibelle) {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), "Remboursement partiel");
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), libelle);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -410,43 +415,15 @@ class DebtServiceTest {
 
         debtService.repay(debtId, request, userId);
 
-        verify(transactionRepository).save(argThat(tx -> "Remboursement partiel".equals(tx.getLibelle())));
+        verify(transactionRepository).save(argThat(tx -> expectedLibelle.equals(tx.getLibelle())));
     }
 
-    @Test
-    void should_useDefaultEnglishLibelle_when_repayLibelleAbsent() {
-        var user = buildUser();
-        var debt = buildDebt(user);
-        var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
-
-        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
-        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
-        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
-
-        debtService.repay(debtId, request, userId);
-
-        verify(transactionRepository).save(argThat(tx -> "Repayment - Alice".equals(tx.getLibelle())));
-    }
-
-    @Test
-    void should_useDefaultEnglishLibelle_when_repayLibelleBlank() {
-        var user = buildUser();
-        var debt = buildDebt(user);
-        var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), "   ");
-
-        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
-        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
-        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
-
-        debtService.repay(debtId, request, userId);
-
-        verify(transactionRepository).save(argThat(tx -> "Repayment - Alice".equals(tx.getLibelle())));
+    static Stream<Arguments> repayLibelleCases() {
+        return Stream.of(
+                Arguments.of("Remboursement partiel", "Remboursement partiel"),
+                Arguments.of(null, "Repayment - Alice"),
+                Arguments.of("   ", "Repayment - Alice")
+        );
     }
 
     // -------------------------------------------------------------------------

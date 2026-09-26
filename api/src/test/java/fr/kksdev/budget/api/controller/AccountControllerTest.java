@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -297,14 +298,15 @@ class AccountControllerTest {
     void should_forwardLibelles_when_transferLibellesProvided() throws Exception {
         UUID fromId = UUID.randomUUID();
         UUID toId = UUID.randomUUID();
+        LocalDate transferDate = LocalDate.of(2026, Month.APRIL, 15);
         var response = new TransferResponse(
                 UUID.randomUUID(),
                 new TransferResponse.TransactionResponseRef(
                         UUID.randomUUID(), new BigDecimal("100.00"), "Loyer",
-                        TransactionType.DEPENSE, LocalDate.now(), fromId, "Compte Principal"),
+                        TransactionType.DEPENSE, transferDate, fromId, "Compte Principal"),
                 new TransferResponse.TransactionResponseRef(
                         UUID.randomUUID(), new BigDecimal("100.00"), "Reçu loyer",
-                        TransactionType.RECETTE, LocalDate.now(), toId, "Livret A"));
+                        TransactionType.RECETTE, transferDate, toId, "Livret A"));
 
         when(accountService.transfer(any(), eq(userId))).thenReturn(response);
 
@@ -417,7 +419,7 @@ class AccountControllerTest {
                 "🏦", "#3b82f6", true, true, "EUR",
                 "OTHER", "Autre", null, "#6b7280", "/api/bank-logos/other.svg", null, null);
 
-        when(accountService.adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq("Correction manuelle"), eq(userId)))
+        when(accountService.adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId))
                 .thenReturn(response);
 
         mockMvc.perform(post("/v1/accounts/{id}/adjust-balance", accountId)
@@ -428,7 +430,7 @@ class AccountControllerTest {
                                 """))
                 .andExpect(status().isOk());
 
-        verify(accountService).adjustBalance(eq(accountId), eq(new BigDecimal("750.00")), eq("Correction manuelle"), eq(userId));
+        verify(accountService).adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId);
     }
 
     @Test

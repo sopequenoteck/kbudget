@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -227,7 +228,7 @@ class DebtControllerTest {
     void should_forwardLibelle_when_repayLibelleProvided() throws Exception {
         var response = new DebtResponse(
                 debtId, "Alice", new BigDecimal("100.00"),
-                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1),
+                DebtType.EMPRUNT, LocalDate.of(2026, Month.FEBRUARY, 1),
                 null, "EUR", false, new BigDecimal("50.00"),
                 null, null, false, null, null);
 
