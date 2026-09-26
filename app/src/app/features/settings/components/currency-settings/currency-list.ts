@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -14,21 +15,16 @@ import {
   phosphorPlus,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { Account } from '../../../../core/models/account.model';
+import {
+  SUPPORTED_CURRENCIES,
+  currencyNameKey,
+  currencySymbol,
+} from '../../../../core/models/currency.model';
+import { LanguageService } from '../../../../core/services/language';
 import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
-
-const CURRENCY_SYMBOLS: Record<string, string> = {
-  EUR: '€', XOF: 'CFA', USD: '$', GBP: '£', CHF: 'CHF', CAD: 'CA$', MAD: 'MAD',
-};
-
-const CURRENCY_NAMES: Record<string, string> = {
-  EUR: 'Euro', XOF: 'Franc CFA', USD: 'Dollar US', GBP: 'Livre sterling',
-  CHF: 'Franc suisse', CAD: 'Dollar canadien', MAD: 'Dirham marocain',
-};
-
-const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
 @Component({
   selector: 'app-currency-list',
@@ -56,8 +52,8 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
               <div class="currency-item__handle" cdkDragHandle>
                 <ng-icon name="phosphorDotsSixVertical" size="18" />
               </div>
-              <span class="currency-item__symbol">{{ CURRENCY_SYMBOLS[currency] || currency }}</span>
-              <span class="currency-item__name">{{ CURRENCY_NAMES[currency] || currency }}</span>
+              <span class="currency-item__symbol">{{ currencySymbol(currency) ?? currency }}</span>
+              <span class="currency-item__name">{{ (currencyNameKey(currency) ?? currency) | transloco }}</span>
               @if (i === 0) {
                 <span class="currency-item__badge">{{ 'exchangeRates.value.primary' | transloco }}</span>
               }
@@ -81,8 +77,8 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
           <p class="dialog__title">{{ 'exchangeRates.dialog.addCurrencyTitle' | transloco }}</p>
           @for (c of availableCurrenciesToAdd(); track c) {
             <button class="dialog__option" (click)="addCurrency(c); showAddSheet.set(false)">
-              <span class="dialog__option-symbol">{{ CURRENCY_SYMBOLS[c] }}</span>
-              <span>{{ CURRENCY_NAMES[c] }}</span>
+              <span class="dialog__option-symbol">{{ currencySymbol(c) ?? c }}</span>
+              <span>{{ (currencyNameKey(c) ?? c) | transloco }}</span>
             </button>
           }
         </div>
@@ -222,30 +218,39 @@ export class CurrencyList {
   readonly currencies = input.required<string[]>();
   readonly accounts = input.required<Account[]>();
 
+  private readonly transloco = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
+
   readonly currenciesChange = output<string[]>();
 
-  readonly CURRENCY_SYMBOLS = CURRENCY_SYMBOLS;
-  readonly CURRENCY_NAMES = CURRENCY_NAMES;
-  readonly AVAILABLE_CURRENCIES = AVAILABLE_CURRENCIES;
+  readonly currencySymbol = currencySymbol;
+  readonly currencyNameKey = currencyNameKey;
+  readonly SUPPORTED_CURRENCIES = SUPPORTED_CURRENCIES;
 
   readonly showAddSheet = signal(false);
   readonly showRemoveWarning = signal(false);
   readonly currencyToRemove = signal<string | null>(null);
 
   readonly availableCurrenciesToAdd = computed(() => {
-    const configured = this.currencies();
-    return AVAILABLE_CURRENCIES.filter((c) => !configured.includes(c));
+    const configured = new Set(this.currencies());
+    return SUPPORTED_CURRENCIES.filter((c) => !configured.has(c));
   });
 
   /**
    * Parametres du dialogue de retrait, echappes avant interpolation dans le
    * `[innerHTML]` du template : a defaut d'un nom connu, `currency` retombe
    * sur le code brut fourni en entree — pas une liste fermee cote client.
+   * Lit `activeLanguage()` avant de traduire pour se reevaluer au changement
+   * de langue (precedent budget-list, KKS-379) : `translate()` seul n'est
+   * pas un signal, `computed()` ne s'y abonnerait pas.
    */
   readonly removeMessageParams = computed(() => {
     const currency = this.currencyToRemove();
     if (!currency) return null;
-    return { currency: escapeHtml(CURRENCY_NAMES[currency] || currency) };
+    this.languageService.activeLanguage();
+    const key = currencyNameKey(currency);
+    const name = key ? this.transloco.translate(key) : currency;
+    return { currency: escapeHtml(name) };
   });
 
   onDrop(event: CdkDragDrop<string[]>): void {

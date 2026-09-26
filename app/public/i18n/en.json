@@ -472,7 +472,14 @@
       "ratesTitle": "Conversion rates"
     },
     "value": {
-      "primary": "Primary"
+      "cad": "Canadian Dollar",
+      "chf": "Swiss Franc",
+      "eur": "Euro",
+      "gbp": "Pound Sterling",
+      "mad": "Moroccan Dirham",
+      "primary": "Primary",
+      "usd": "US Dollar",
+      "xof": "CFA Franc (BCEAO)"
     }
   },
   "imports": {

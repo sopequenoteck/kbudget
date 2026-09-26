@@ -39,6 +39,13 @@ public record TransactionResponse(
         BigDecimal amount) {}
 ```
 
+Un champ peut aussi rester servi sans plus etre affiche. `CurrencyInfo.name`
+(`GET /currencies`) porte un nom de devise en francais ; depuis KKS-393, les
+clients affichent le nom tire de leur catalogue et ne gardent `name` qu'en
+repli pour un code inconnu. Il n'est pas retire pour autant : un client plus
+ancien l'affiche encore. Meme statut que `message` dans les erreurs
+([`api-errors.md`](api-errors.md)) : servi, non contractuel pour l'affichage.
+
 ### 2. Ne jamais rendre obligatoire un champ de requete qui ne l'etait pas
 
 Un nouveau champ obligatoire casse **tous** les clients anterieurs d'un coup :

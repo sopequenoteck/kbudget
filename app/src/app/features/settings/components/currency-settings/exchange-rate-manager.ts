@@ -22,14 +22,13 @@ import { firstValueFrom } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { ExchangeRate } from '../../../../core/models/exchange-rate.model';
+import { SUPPORTED_CURRENCIES } from '../../../../core/models/currency.model';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
 
 const FIXED_PARITY_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
 };
-
-const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 
 @Component({
   selector: 'app-exchange-rate-manager',
@@ -435,7 +434,7 @@ export class ExchangeRateManager {
   readonly rateDeleted = output<void>();
 
   readonly FIXED_PARITY_RATES = FIXED_PARITY_RATES;
-  readonly ALL_CURRENCIES = ALL_CURRENCIES;
+  readonly SUPPORTED_CURRENCIES = SUPPORTED_CURRENCIES;
 
   readonly showForm = signal(false);
   readonly editingRate = signal<ExchangeRate | null>(null);
@@ -448,9 +447,9 @@ export class ExchangeRateManager {
 
   readonly availableTargetCurrencies = computed(() => {
     const primary = this.primaryCurrency();
-    const existingTargets = this.rates().map((r) => r.targetCurrency);
-    return ALL_CURRENCIES.filter(
-      (c) => c !== primary && !existingTargets.includes(c),
+    const existingTargets = new Set(this.rates().map((r) => r.targetCurrency));
+    return SUPPORTED_CURRENCIES.filter(
+      (c) => c !== primary && !existingTargets.has(c),
     );
   });
 
