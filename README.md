@@ -16,8 +16,9 @@ machine, no telemetry.
   <img src="docs/screenshots/admin-users.png"  alt="User management" width="240">
 </p>
 
-> Screenshots are in French — the interface ships in French today, English is
-> coming with the internationalisation work.
+> Screenshots are still in French. The interface is available in English (the
+> default) and French, and follows your browser until you pick a language in
+> Settings.
 
 ## Why this exists
 

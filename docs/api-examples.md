@@ -1069,6 +1069,24 @@ Response `200` :
 }
 ```
 
+Request (choisir la langue de l'interface, code BCP 47 restreint) :
+
+```json
+{
+  "language": "fr"
+}
+```
+
+Un champ absent ou `null` laisse la preference inchangee : `PUT` ne sait donc
+pas revenir au choix automatique. C'est le role de l'endpoint suivant.
+
+### Revenir a la langue automatique `DELETE /api/v1/users/me/preferences/language`
+
+Remet `language` a `null` : le client suit alors la langue du navigateur
+(KKS-380). Aucun corps de requete.
+
+Response `204` (sans corps). Un `GET` suivant renvoie `"language": null`.
+
 ## Budgets
 
 ### Creer `POST /api/v1/budgets`

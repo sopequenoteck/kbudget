@@ -27,6 +27,7 @@ describe('Shell', () => {
     navOrder: ReturnType<typeof signal>;
     enabledFeatures: ReturnType<typeof signal>;
     language: ReturnType<typeof signal>;
+    loaded: ReturnType<typeof signal>;
     isLoaded: ReturnType<typeof vi.fn>;
     loadPreferences: ReturnType<typeof vi.fn>;
   };
@@ -57,6 +58,7 @@ describe('Shell', () => {
       navOrder: signal([]),
       enabledFeatures: signal([]),
       language: signal(null),
+      loaded: signal(false),
       isLoaded: vi.fn().mockReturnValue(false),
       loadPreferences: vi.fn(),
     };

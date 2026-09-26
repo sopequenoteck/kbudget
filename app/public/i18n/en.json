@@ -688,6 +688,7 @@
       "saveError": "Unable to save preferences"
     },
     "form": {
+      "language": "Language",
       "timezone": "Zone"
     },
     "list": {
@@ -712,6 +713,7 @@
     "value": {
       "envDev": "Dev",
       "envProd": "Prod",
+      "languageAuto": "Automatic ({language})",
       "offline": "Offline",
       "online": "Online",
       "textScaleLarge": "Large",

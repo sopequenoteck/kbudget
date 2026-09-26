@@ -43,8 +43,9 @@ export interface UserPreference {
   textScale?: string;
   /**
    * Code de langue BCP 47 restreint (KKS-373), `null` tant que l'utilisateur
-   * n'a pas choisi. Aucun client n'ecrit ce champ dans ce lot (FR-042) : il
-   * n'apparait donc pas dans `UserPreferenceRequest`.
+   * n'a pas choisi — l'app suit alors le navigateur (KKS-380). Choisi via
+   * `PUT /users/me/preferences` (`UserPreferenceRequest.language`), remis a
+   * `null` via `DELETE /users/me/preferences/language`.
    */
   language?: string | null;
 }
@@ -56,4 +57,7 @@ export interface UserPreferenceRequest {
   enabledNotificationTypes?: NotificationType[] | null;
   timezone?: string | null;
   textScale?: string | null;
+  /** `'en' | 'fr'` (KKS-380) — jamais `null` : la remise a `null` passe par
+   * `DELETE /users/me/preferences/language`, pas par ce champ. */
+  language?: string;
 }

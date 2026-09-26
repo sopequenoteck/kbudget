@@ -92,6 +92,14 @@ public class PreferenceService {
         return toResponse(preference);
     }
 
+    @Transactional
+    public void resetLanguage(UUID userId) {
+        UserPreference preference = getOrCreate(userId);
+        preference.setLanguage(null);
+        userPreferenceRepository.save(preference);
+        log.info("Language preference reset to automatic for userId={}", userId);
+    }
+
     public boolean isFeatureEnabled(UUID userId, Feature feature) {
         UserPreference preference = getOrCreate(userId);
         return preference.getEnabledFeatures().contains(feature);

@@ -136,6 +136,17 @@
         </div>
       </div>
     </div>
+    <div class="settings-row settings-row--last">
+      <ng-icon class="settings-row__icon-simple" name="phosphorGlobe" size="16" />
+      <span class="settings-row__title">{{ 'settings.form.language' | transloco }}</span>
+      <app-select-picker
+        class="settings-language-picker"
+        [items]="languageItems()"
+        [clearable]="false"
+        [ngModel]="languageSelectionId()"
+        (ngModelChange)="onLanguageSelect($event)"
+      />
+    </div>
   </div>
 </div>
 

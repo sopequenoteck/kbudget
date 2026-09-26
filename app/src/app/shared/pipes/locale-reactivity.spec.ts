@@ -46,7 +46,7 @@ class LocaleReactivityHost {
 }
 
 describe('Reactivite locale des pipes de formatage (KKS-373, SC-005)', () => {
-  it('should_update_rendered_amount_and_dates_when_language_switches_to_en_without_recreating_fixture', () => {
+  it('should_update_rendered_amount_and_dates_when_language_switches_to_en_without_recreating_fixture', async () => {
     // Arrange
     TestBed.configureTestingModule({
       providers: [provideTranslocoTesting()],
@@ -81,8 +81,15 @@ describe('Reactivite locale des pipes de formatage (KKS-373, SC-005)', () => {
     expect(relativeEl.textContent?.trim()).toBe(expectedRelativeFr);
     expect(shortEl.textContent?.trim()).toBe(expectedShortFr);
 
-    // Act — bascule de langue sans jamais recreer le fixture ni le composant
+    // Act — bascule de langue sans jamais recreer le fixture ni le composant.
+    // `activeLanguage` ne bascule qu'apres chargement du catalogue anglais
+    // (KKS-380) : il faut laisser la promesse de `LanguageService` se
+    // resoudre avant de relire le rendu.
     preferenceService.language.set('en');
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
     fixture.detectChanges();
 
     const expectedAmountEn = new Intl.NumberFormat('en-GB', {

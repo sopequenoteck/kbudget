@@ -14,6 +14,12 @@ import {
 } from '@jsverse/transloco';
 import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
 
+import {
+  BROWSER_LANGUAGES,
+  LANGUAGE_STORAGE,
+  createMemoryLanguageStorage,
+} from '../app/core/services/language';
+
 // Vrais catalogues (D10, FR-033) : un utilitaire qui les mockerait
 // prouverait la plomberie, jamais le contenu — et n'aurait pas detecte une
 // erreur de transcription lors du deplacement du catalogue d'erreurs
@@ -58,6 +64,14 @@ export function provideTranslocoTesting(): (Provider | EnvironmentProviders)[] {
       loader: StaticCatalogueLoader,
     }),
     provideTranslocoMessageformat(),
+    // KKS-380 : `LanguageService` resout desormais la langue depuis le
+    // navigateur et `localStorage`, plus depuis le francais fige. Ecrase ici
+    // les deux jetons — navigateur francais, stockage en memoire et vide —
+    // pour que la suite existante (des centaines d'assertions en francais)
+    // continue de s'executer en francais sans qu'aucune spec n'ait a le
+    // demander explicitement.
+    { provide: BROWSER_LANGUAGES, useValue: ['fr'] },
+    { provide: LANGUAGE_STORAGE, useFactory: createMemoryLanguageStorage },
     provideEnvironmentInitializer(() => {
       const transloco = inject(TranslocoService);
       transloco.load(transloco.getDefaultLang()).subscribe();

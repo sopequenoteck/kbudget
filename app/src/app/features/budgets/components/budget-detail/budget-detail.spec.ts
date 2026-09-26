@@ -125,6 +125,7 @@ describe('BudgetDetail', () => {
             currencies,
             primaryCurrency: computed(() => currencies()[0] ?? 'EUR'),
             language: signal<string | null>(null),
+            loaded: signal(false),
           },
         },
         { provide: ConversionService, useValue: { convert: vi.fn(() => null) } },

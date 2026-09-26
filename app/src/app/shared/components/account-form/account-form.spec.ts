@@ -74,6 +74,7 @@ describe('AccountForm', () => {
   let preferenceServiceMock: {
     primaryCurrency: ReturnType<typeof signal<string>>;
     language: ReturnType<typeof signal<string | null>>;
+    loaded: ReturnType<typeof signal<boolean>>;
   };
 
   let modalServiceMock: {
@@ -114,6 +115,7 @@ describe('AccountForm', () => {
     preferenceServiceMock = {
       primaryCurrency: signal('EUR'),
       language: signal<string | null>(null),
+      loaded: signal(false),
     };
 
     modalServiceMock = {
