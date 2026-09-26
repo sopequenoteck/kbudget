@@ -18,6 +18,8 @@ export interface ImportDraftLine {
   statusMessage: string | null;
   categoryId: string | null;
   categoryName: string | null;
+  /** Clef de la categorie systeme (KKS-395), `null` pour une categorie utilisateur. */
+  categorySystemKey?: string | null;
   duplicateTransactionId: string | null;
   suggestRule?: boolean;
   /** KKS-382 : 'ALREADY_IMPORTED' si l'import a ecarte la ligne lui-meme. */
@@ -31,6 +33,8 @@ export interface CategoryRule {
   pattern: string;
   categoryId: string;
   categoryName: string;
+  /** Clef de la categorie systeme (KKS-395), `null` pour une categorie utilisateur. */
+  categorySystemKey?: string | null;
   categoryIcon: string;
   createdAt: string;
 }

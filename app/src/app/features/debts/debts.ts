@@ -24,6 +24,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorHandCoins, phosphorHandshake, phosphorClock } from '@ng-icons/phosphor-icons/regular';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../shared/pipes/category-name.pipe';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
@@ -55,7 +56,7 @@ const DEBT_GROUP_LABEL_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-debts',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorHandCoins, phosphorHandshake, phosphorClock })],
   templateUrl: './debts.html',
   styleUrl: './debts.scss',

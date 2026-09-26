@@ -39,6 +39,7 @@ import {
 } from '../../../../core/models/budget.model';
 import { type Category } from '../../../../core/models/category.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../../../dashboard/components/currency-pill-selector';
@@ -46,7 +47,7 @@ import { CurrencyPillSelector } from '../../../dashboard/components/currency-pil
 @Component({
   selector: 'app-budget-list',
   standalone: true,
-  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
+  imports: [AmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',
@@ -285,6 +286,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
             categoryNom: b.category.nom,
             categoryIcone: b.category.icone,
             categoryCouleur: b.category.couleur,
+            categorySystemKey: b.category.systemKey ?? null,
             montantBudget: b.montant,
             montantBudgetNormalise: b.montant,
             currency: b.currency,

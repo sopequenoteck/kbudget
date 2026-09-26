@@ -79,7 +79,7 @@
           >
             <option value="">{{ 'imports.form.categoryPlaceholder' | transloco }}</option>
             @for (cat of categories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.icone }} {{ cat.nom }}</option>
+              <option [value]="cat.id">{{ cat.icone }} {{ cat.nom | categoryName: cat.systemKey }}</option>
             }
           </select>
           <button
@@ -200,7 +200,7 @@
                 <option value="">{{ 'imports.form.noCategoryOption' | transloco }}</option>
                 @for (cat of categories(); track cat.id) {
                   <option [value]="cat.id" [selected]="cat.id === line.categoryId">
-                    {{ cat.icone }} {{ cat.nom }}
+                    {{ cat.icone }} {{ cat.nom | categoryName: cat.systemKey }}
                   </option>
                 }
               </select>

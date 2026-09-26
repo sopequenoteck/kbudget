@@ -80,7 +80,7 @@
             <span class="list-row__title">{{ debt.personne }}</span>
             <span class="list-row__subtitle">
               @if (debt.category?.nom) {
-                {{ debt.category?.nom }} · {{ DEBT_TYPE_LABEL_KEYS[debt.sens] | transloco }}
+                {{ debt.category!.nom | categoryName: debt.category!.systemKey }} · {{ DEBT_TYPE_LABEL_KEYS[debt.sens] | transloco }}
               } @else {
                 {{ DEBT_TYPE_LABEL_KEYS[debt.sens] | transloco }}
               }

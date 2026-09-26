@@ -36,6 +36,8 @@ import { Category } from '../../../../core/models/category.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
 import { getCurrencySymbol, formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
 import { LanguageService } from '../../../../core/services/language';
 
@@ -44,7 +46,7 @@ type ExpandableSection = 'category' | 'frequency' | 'currency' | 'threshold' | n
 @Component({
   selector: 'app-budget-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIcon, TranslocoPipe],
+  imports: [ReactiveFormsModule, NgIcon, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorChartPie,
@@ -129,7 +131,8 @@ export class BudgetForm {
   readonly selectedCategoryName = computed(() => {
     const cat = this.selectedCategory();
     if (!cat) return null;
-    return `${cat.icone} ${cat.nom}`;
+    const nom = categoryDisplayName(cat.nom, cat.systemKey, this.transloco, this.languageService.activeLanguage());
+    return `${cat.icone} ${nom}`;
   });
 
   readonly selectedCategoryColor = computed(() => this.selectedCategory()?.couleur ?? null);
@@ -215,8 +218,14 @@ export class BudgetForm {
     const b = this.budget();
     if (!b) return;
     const amount = formatCurrencyAmount(b.montant, b.currency, this.languageService.displayLocale());
+    const categoryName = categoryDisplayName(
+      b.category.nom,
+      b.category.systemKey,
+      this.transloco,
+      this.languageService.activeLanguage(),
+    );
     const ok = await this.confirmService.confirmDelete({
-      title: `${b.category.nom} — ${amount}`,
+      title: `${categoryName} — ${amount}`,
       message: this.transloco.translate('budgets.dialog.deleteMessage'),
       icon: 'phosphorChartPie',
     });

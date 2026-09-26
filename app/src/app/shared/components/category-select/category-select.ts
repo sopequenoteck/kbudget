@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   forwardRef,
+  inject,
   input,
   OnDestroy,
   output,
@@ -11,16 +12,19 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { CategoryForm } from '../category-form/category-form';
 import { Category } from '../../../core/models/category.model';
+import { LanguageService } from '../../../core/services/language';
 import { normalize } from '../../utils/string.utils';
+import { categoryDisplayName } from '../../utils/category-name.utils';
+import { CategoryNamePipe } from '../../pipes/category-name.pipe';
 
 @Component({
   selector: 'app-category-select',
   standalone: true,
-  imports: [CategoryForm, TranslocoPipe],
+  imports: [CategoryForm, CategoryNamePipe, TranslocoPipe],
   templateUrl: './category-select.html',
   styleUrl: './category-select.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +37,9 @@ import { normalize } from '../../utils/string.utils';
   ],
 })
 export class CategorySelect implements ControlValueAccessor, OnDestroy {
+  private readonly transloco = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
+
   // --- Inputs ---
   readonly categories = input<Category[]>([]);
 
@@ -60,15 +67,25 @@ export class CategorySelect implements ControlValueAccessor, OnDestroy {
   readonly listboxId = `category-select-listbox-${Math.random().toString(36).slice(2)}`;
 
   // --- Computed ---
+  // Traduit sur le nom affiche (KKS-395) : une categorie systeme se recherche
+  // et se compare sur sa traduction, jamais sur son `nom` brut cote serveur.
+  private readonly displayNameOf = computed(() => {
+    const lang = this.languageService.activeLanguage();
+    return (c: Category) => categoryDisplayName(c.nom, c.systemKey, this.transloco, lang);
+  });
+
   readonly filteredCategories = computed(() => {
     const q = normalize(this.searchTerm());
     if (!q) return this.categories();
-    return this.categories().filter((c) => normalize(c.nom).includes(q));
+    const nameOf = this.displayNameOf();
+    return this.categories().filter((c) => normalize(nameOf(c)).includes(q));
   });
 
   readonly hasExactMatch = computed(() => {
     const q = normalize(this.searchTerm());
-    return !q || this.categories().some((c) => normalize(c.nom) === q);
+    if (!q) return true;
+    const nameOf = this.displayNameOf();
+    return this.categories().some((c) => normalize(nameOf(c)) === q);
   });
 
   readonly showCreateButton = computed(

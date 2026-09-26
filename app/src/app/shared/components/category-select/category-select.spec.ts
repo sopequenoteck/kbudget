@@ -308,6 +308,37 @@ describe('CategorySelect', () => {
   // FR-019 — Navigation clavier
   // =========================================================================
 
+  // =========================================================================
+  // KKS-395 — Categorie systeme
+  // =========================================================================
+
+  it('should_display_the_translated_name_when_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur.
+    const systemCategories: Category[] = [
+      { id: 'sys-1', nom: 'Abonnement-legacy', icone: '🔄', couleur: '#000000', isSystem: true, systemKey: 'SUBSCRIPTION' },
+    ];
+    const { fixture } = setup(systemCategories);
+
+    const item = fixture.nativeElement.querySelector('.cs__item') as HTMLElement;
+    expect(item.textContent).toContain('Abonnement');
+    expect(item.textContent).not.toContain('Abonnement-legacy');
+  });
+
+  it('should_filter_on_the_translated_name_when_searching_a_system_category', () => {
+    const systemCategories: Category[] = [
+      { id: 'sys-1', nom: 'Abonnement-legacy', icone: '🔄', couleur: '#000000', isSystem: true, systemKey: 'SUBSCRIPTION' },
+      ...MOCK_CATEGORIES,
+    ];
+    const { fixture, component } = setup(systemCategories);
+    component.searchTerm.set('abonnement');
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.cs__item');
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toContain('Abonnement');
+  });
+
   it('should_navigate_with_arrow_down_and_wrap_to_first', () => {
     const { fixture, component } = setup();
     fixture.detectChanges();

@@ -318,7 +318,8 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#4CAF50",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   "note": null,
   "account": {
@@ -345,7 +346,7 @@ Response `200` :
     "libelle": "Courses Carrefour",
     "type": "DEPENSE",
     "date": "2026-02-07",
-    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false },
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false, "systemKey": null },
     "note": null,
     "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" },
     "transferId": null,
@@ -928,7 +929,8 @@ Response `200` :
   "nom": "Alimentation",
   "icone": "🛒",
   "couleur": "#4CAF50",
-  "isSystem": false
+  "isSystem": false,
+  "systemKey": null
 }
 ```
 
@@ -957,14 +959,16 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#4CAF50",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   {
     "id": "d2e3f4a5-b6c7-8901-defa-234567890bcd",
-    "nom": "Transport",
-    "icone": "🚗",
-    "couleur": "#2196F3",
-    "isSystem": true
+    "nom": "Abonnement",
+    "icone": "🔄",
+    "couleur": "#6366f1",
+    "isSystem": true,
+    "systemKey": "SUBSCRIPTION"
   }
 ]
 ```
@@ -1118,7 +1122,8 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#f59e0b",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   "spent": 0.00,
   "updatedAt": "2026-03-08T10:00:00"
@@ -1138,7 +1143,7 @@ Response `200` :
     "frequence": "MENSUEL",
     "seuilNotification": 80,
     "actif": true,
-    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false },
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false, "systemKey": null },
     "spent": 320.50,
     "updatedAt": "2026-03-08T10:00:00"
   }
@@ -1173,6 +1178,7 @@ Response `200` :
       "budgetId": "uuid-budget",
       "categoryId": "uuid-category",
       "categoryNom": "Alimentation",
+      "categorySystemKey": null,
       "categoryIcone": "🛒",
       "categoryCouleur": "#f59e0b",
       "montantBudget": 400.00,
@@ -1187,6 +1193,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Courses",
+      "categorySystemKey": null,
       "categoryIcone": "🛍️",
       "categoryCouleur": "#6b7280",
       "montantDepense": 45.00,
@@ -1212,6 +1219,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Alimentation",
+      "categorySystemKey": null,
       "categoryIcone": "🛒",
       "categoryCouleur": "#f59e0b",
       "montantBudget": 400.00,
@@ -1226,6 +1234,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Courses",
+      "categorySystemKey": null,
       "categoryIcone": "🛍️",
       "categoryCouleur": "#6b7280",
       "montantDepense": 52.30,
@@ -1309,7 +1318,7 @@ Response `201` :
   "frequency": "MENSUEL",
   "nextOccurrence": "2026-04-01",
   "recurringActive": true,
-  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false },
+  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false, "systemKey": null },
   "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" }
 }
 ```
@@ -1659,6 +1668,7 @@ Response `201` :
       "statusMessage": null,
       "categoryId": null,
       "categoryName": null,
+      "categorySystemKey": null,
       "duplicateTransactionId": null,
       "suggestRule": false,
       "skipReason": null,
@@ -1676,6 +1686,7 @@ Response `201` :
       "statusMessage": null,
       "categoryId": null,
       "categoryName": null,
+      "categorySystemKey": null,
       "duplicateTransactionId": "uuid-transaction-existante",
       "suggestRule": false,
       "skipReason": "ALREADY_IMPORTED",
@@ -1780,6 +1791,7 @@ Response `201` :
   "pattern": "CARREFOUR",
   "categoryId": "uuid-categorie",
   "categoryName": "Courses",
+  "categorySystemKey": null,
   "categoryIcon": "shopping-cart",
   "createdAt": "2026-03-20T14:30:00",
   "origin": "MANUAL"

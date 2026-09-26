@@ -227,6 +227,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | icone | String | Icone (emoji ou identifiant) |
 | couleur | String | Couleur hexadecimale (#RRGGBB) |
 | isSystem | Boolean | Categorie systeme (non modifiable) |
+| systemKey | SystemCategoryKey | Cle stable d'une categorie systeme (`SUBSCRIPTION`, `DEBT`, `TRANSFER`, `ADJUSTMENT`), null pour une categorie utilisateur. Unique par utilisateur (KKS-395) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 

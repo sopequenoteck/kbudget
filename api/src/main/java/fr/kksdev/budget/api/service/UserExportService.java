@@ -175,6 +175,7 @@ public class UserExportService {
                 c.getIcone(),
                 c.getCouleur(),
                 c.getIsSystem() != null && c.getIsSystem(),
+                c.getSystemKey() != null ? c.getSystemKey().name() : null,
                 c.getUpdatedAt()
         );
     }

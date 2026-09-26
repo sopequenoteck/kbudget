@@ -11,9 +11,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 > ni l'anglais ni le francais. Un navigateur en francais continue d'afficher le
 > francais. Le choix se fait dans Reglages > Apparence > Langue.
 
-> **Une migration de base (V38) : sauvegarder avant de mettre a jour.** Elle
-> ajoute une colonne nullable, sans valeur par defaut, et ne modifie aucune
-> donnee existante.
+> **Deux migrations de base (V38, V39) : sauvegarder avant de mettre a jour.**
+> V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie aucune
+> donnee existante. V39 ajoute une colonne et la renseigne pour les categories
+> systeme existantes, sans modifier d'autre donnee.
 
 ### Added
 
@@ -90,6 +91,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   - API : `DELETE /users/me/preferences/language` remet la preference a `null`
     (retour au choix automatique) ; `PUT` ne le permettait pas, un `language`
     absent y signifiant « inchange ».
+- **Categories systeme traduites (KKS-395)** : « Abonnement », « Dette »,
+  « Virement » et « Ajustement » s'affichent dans la langue de l'interface.
+  L'API les retrouve desormais par une cle stable (`systemKey`), et non plus
+  par leur nom francais.
+  - API : nouveaux champs `systemKey` (categorie) et `categorySystemKey`
+    (budgets, regles et lignes d'import) dans les reponses ; `nom` reste servi.
 
 ### Changed
 

@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.CategoryRequest;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -100,6 +101,7 @@ public class CategoryService {
                     .icone("\uD83D\uDD04")
                     .couleur("#6366f1")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.SUBSCRIPTION)
                     .user(user)
                     .build();
             categoryRepository.save(abonnement);
@@ -109,6 +111,7 @@ public class CategoryService {
                     .icone("\uD83D\uDCB0")
                     .couleur("#ef4444")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.DEBT)
                     .user(user)
                     .build();
             categoryRepository.save(dette);
@@ -118,6 +121,7 @@ public class CategoryService {
                     .icone("\uD83D\uDD04")
                     .couleur("#8b5cf6")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.TRANSFER)
                     .user(user)
                     .build();
             categoryRepository.save(virement);
@@ -131,7 +135,7 @@ public class CategoryService {
 
     @Transactional
     public Category findOrCreateAdjustmentCategory(UUID userId) {
-        Category existing = findSystemCategoryByNom("Ajustement", userId);
+        Category existing = findSystemCategory(SystemCategoryKey.ADJUSTMENT, userId);
         if (existing != null) {
             return existing;
         }
@@ -141,6 +145,7 @@ public class CategoryService {
                 .icone("⚖️")
                 .couleur("#6b7280")
                 .isSystem(true)
+                .systemKey(SystemCategoryKey.ADJUSTMENT)
                 .user(userRepository.getReferenceById(userId))
                 .build();
         ajustement = categoryRepository.save(ajustement);
@@ -157,14 +162,14 @@ public class CategoryService {
                         (String) row[1],
                         (String) row[2],
                         (String) row[3],
-                        (Boolean) row[4]
+                        (Boolean) row[4],
+                        (String) row[6]
                 ))
                 .toList();
     }
 
-    public Category findSystemCategoryByNom(String nom, UUID userId) {
-        return categoryRepository.findByNomIgnoreCaseAndUserId(nom, userId)
-                .filter(c -> Boolean.TRUE.equals(c.getIsSystem()))
+    public Category findSystemCategory(SystemCategoryKey key, UUID userId) {
+        return categoryRepository.findByUserIdAndSystemKey(userId, key)
                 .orElse(null);
     }
 
@@ -183,7 +188,8 @@ public class CategoryService {
                 category.getNom(),
                 category.getIcone(),
                 category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
+                Boolean.TRUE.equals(category.getIsSystem()),
+                category.getSystemKey() != null ? category.getSystemKey().name() : null
         );
     }
 }

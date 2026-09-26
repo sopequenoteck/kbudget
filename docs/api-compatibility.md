@@ -46,6 +46,12 @@ repli pour un code inconnu. Il n'est pas retire pour autant : un client plus
 ancien l'affiche encore. Meme statut que `message` dans les erreurs
 ([`api-errors.md`](api-errors.md)) : servi, non contractuel pour l'affichage.
 
+Meme statut pour le `nom` d'une categorie systeme (`isSystem: true`) : il est
+en francais, et depuis KKS-395 les clients affichent la traduction de
+`systemKey` (`SUBSCRIPTION`, `DEBT`, `TRANSFER`, `ADJUSTMENT`), en ne gardant
+`nom` qu'en repli pour une cle inconnue. Les DTO qui exposent le nom a plat
+(budgets, regles et lignes d'import) portent `categorySystemKey`.
+
 ### 2. Ne jamais rendre obligatoire un champ de requete qui ne l'etait pas
 
 Un nouveau champ obligatoire casse **tous** les clients anterieurs d'un coup :

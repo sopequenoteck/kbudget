@@ -68,6 +68,8 @@ public record UserExportResponse(
             String icone,
             String couleur,
             boolean isSystem,
+            /** Cle stable de la categorie systeme, null pour une categorie utilisateur (KKS-395). */
+            String systemKey,
             LocalDateTime updatedAt
     ) {}
 

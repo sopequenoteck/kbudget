@@ -289,6 +289,24 @@ describe('BudgetList', () => {
     expect(budgetServiceMock.getHistory).toHaveBeenCalledWith('2026-04');
   });
 
+  it('should_display_the_translated_name_when_budget_item_is_a_system_category', async () => {
+    // Assert — `categoryNom` volontairement different de la traduction pour
+    // prouver que l'affichage ne depend plus du `nom` brut cote serveur
+    // (KKS-395).
+    const fixture = await createFixture(() => {
+      budgetServiceMock.getOverview.mockReturnValue(
+        of(
+          overview([
+            overviewItem({ categoryNom: 'Abonnement-legacy', categorySystemKey: 'SUBSCRIPTION' }),
+          ]),
+        ),
+      );
+    });
+
+    const name: HTMLElement = fixture.nativeElement.querySelector('.budget-row__name');
+    expect(name.textContent?.trim()).toBe('Abonnement');
+  });
+
   it('should_disable_the_create_button_when_every_category_already_has_a_budget', async () => {
     const fixture = await createFixture(() => {
       categoryServiceMock.getAll.mockReturnValue(of([category('courses')]));

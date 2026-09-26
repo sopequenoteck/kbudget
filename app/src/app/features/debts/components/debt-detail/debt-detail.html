@@ -40,7 +40,7 @@
           <span class="badge-status">{{ 'debts.value.repaid' | transloco }}</span>
         }
         @if (d.category) {
-          <span class="hero__category">{{ d.category.icone }} {{ d.category.nom }}</span>
+          <span class="hero__category">{{ d.category.icone }} {{ d.category.nom | categoryName: d.category.systemKey }}</span>
         }
       </div>
       <span class="hero__date">{{ formatDate(d.date) }}</span>

@@ -194,7 +194,13 @@ describe('Dashboard', () => {
           },
         },
         { provide: DevLogger, useValue: { error: vi.fn(), log: vi.fn(), warn: vi.fn() } },
-        { provide: LanguageService, useValue: { displayLocale: vi.fn().mockReturnValue('fr-FR') } },
+        {
+          provide: LanguageService,
+          useValue: {
+            displayLocale: vi.fn().mockReturnValue('fr-FR'),
+            activeLanguage: vi.fn().mockReturnValue('fr'),
+          },
+        },
         { provide: AuthService, useValue: { currentUser: signal<UserInfo | null>(userName) } },
       ],
     });

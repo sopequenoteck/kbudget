@@ -239,6 +239,31 @@ describe('ImportReview', () => {
     expect(banner.textContent).toContain(malicious);
   });
 
+  it('should_display_the_translated_name_when_a_category_option_is_a_system_category', async () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    const categories$ = of<Category[]>([
+      {
+        id: 'cat-sys',
+        nom: 'Virement-legacy',
+        icone: '🔁',
+        couleur: '#000000',
+        isSystem: true,
+        systemKey: 'TRANSFER',
+      } as Category,
+    ]);
+    const fixture = await setup([readyLine], categories$);
+    fixture.detectChanges();
+
+    const options = Array.from(
+      fixture.nativeElement.querySelectorAll('#cat-ready option'),
+    ) as HTMLOptionElement[];
+    const systemOption = options.find((o) => o.value === 'cat-sys');
+
+    expect(systemOption?.textContent).toContain('Virement');
+    expect(systemOption?.textContent).not.toContain('Virement-legacy');
+  });
+
   it('should_show_translated_error_when_confirm_fails', async () => {
     const fixture = await setup([readyLine]);
     importServiceMock.confirm.mockReturnValue(throwError(() => new Error('500')));

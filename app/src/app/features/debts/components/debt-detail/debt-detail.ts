@@ -31,13 +31,14 @@ import { Debt, DebtType, DebtPaymentResponse, DEBT_TYPE_LABEL_KEYS } from '../..
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
 
 @Component({
   selector: 'app-debt-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, SnoozeDialog, NgIcon, TranslocoPipe],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, SnoozeDialog, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,

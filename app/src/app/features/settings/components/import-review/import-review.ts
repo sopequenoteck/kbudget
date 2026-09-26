@@ -26,6 +26,7 @@ import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import {
   ImportDraft,
   ImportDraftLine,
@@ -34,6 +35,7 @@ import {
 } from '../../../../core/models/import.model';
 import { Category } from '../../../../core/models/category.model';
 import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
+import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
 
 interface SuggestRuleBanner {
   lineId: string;
@@ -45,7 +47,7 @@ interface SuggestRuleBanner {
 @Component({
   selector: 'app-import-review',
   standalone: true,
-  imports: [RouterLink, NgIcon, AmountPipe, FormsModule, TranslocoPipe],
+  imports: [RouterLink, NgIcon, AmountPipe, CategoryNamePipe, FormsModule, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowUp,
@@ -100,7 +102,8 @@ export class ImportReview {
   /**
    * Parametres du bandeau de suggestion, echappes avant interpolation dans
    * le `[innerHTML]` du template (KKS-376) : `cleanLabel` vient du releve
-   * importe, `categoryName` est saisi par l'utilisateur — MessageFormat ne
+   * importe, `categoryName` est saisi par l'utilisateur (ou traduit pour une
+   * categorie systeme, KKS-395) — MessageFormat ne
    * les echappe pas, et le sanitizer d'Angular laisse passer `<a>`, `<img>`...
    */
   readonly suggestRuleMessageParams = computed(() => {
@@ -202,11 +205,14 @@ export class ImportReview {
       await this.refreshDraft();
       if (updated?.suggestRule && categoryId && updated.cleanLabel) {
         const cat = this.categories().find((c) => c.id === categoryId);
+        const categoryName = cat
+          ? categoryDisplayName(cat.nom, cat.systemKey, this.transloco, this.languageService.activeLanguage())
+          : '';
         this.suggestRuleBanner.set({
           lineId: updated.id,
           cleanLabel: updated.cleanLabel,
           categoryId,
-          categoryName: cat?.nom ?? '',
+          categoryName,
         });
       }
     } catch (err) {

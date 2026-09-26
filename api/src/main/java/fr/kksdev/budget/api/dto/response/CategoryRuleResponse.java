@@ -10,6 +10,8 @@ public record CategoryRuleResponse(
         String pattern,
         UUID categoryId,
         String categoryName,
+        /** Cle stable de la categorie systeme, null pour une categorie utilisateur (KKS-395). */
+        String categorySystemKey,
         String categoryIcon,
         LocalDateTime createdAt,
         /** MANUAL (saisie) ou AUTO (creee par une correction pendant la revue) — KKS-383. */
@@ -21,6 +23,7 @@ public record CategoryRuleResponse(
                 rule.getPattern(),
                 rule.getCategory().getId(),
                 rule.getCategory().getNom(),
+                rule.getCategory().getSystemKey() != null ? rule.getCategory().getSystemKey().name() : null,
                 rule.getCategory().getIcone(),
                 rule.getCreatedAt(),
                 rule.getOrigin() != null ? rule.getOrigin().name() : null

@@ -8,6 +8,7 @@ import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Debt;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.DebtRepository;
@@ -715,7 +716,7 @@ class AccountServiceTest {
 
         when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
         when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
-        when(categoryService.findSystemCategoryByNom("Virement", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId)).thenReturn(null);
 
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
                 fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);

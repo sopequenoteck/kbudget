@@ -78,7 +78,7 @@
       </button>
       <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'category'" [class.has-value]="!!form.get('categoryId')?.value" (click)="toggleSection('category')" [attr.aria-label]="'transactions.form.category' | transloco">
         <ng-icon name="phosphorTag" size="16" [style.color]="selectedCategoryColor()" style="opacity: 0.7" />
-        <span>{{ selectedCategoryName() ?? ('transactions.form.category' | transloco) }}</span>
+        <span>{{ (selectedCategoryName() | categoryName: selectedCategory()?.systemKey) || ('transactions.form.category' | transloco) }}</span>
       </button>
       @if (hasAccounts()) {
         <button type="button" class="bsheet__tool-pill" [class.active]="expandedSection() === 'account'" (click)="toggleSection('account')" [attr.aria-label]="'transactions.form.account' | transloco">

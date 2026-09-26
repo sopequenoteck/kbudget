@@ -121,7 +121,7 @@
           >{{ item.categoryIcone }}</span>
           <div class="budget-row__body">
             <div class="budget-row__header">
-              <span class="budget-row__name">{{ item.categoryNom }}</span>
+              <span class="budget-row__name">{{ item.categoryNom | categoryName: item.categorySystemKey }}</span>
               <span class="budget-row__amount" [class.over-budget]="item.percentage > 100">
                 {{ item.montantDepense | amount: null : activeCurrency() }}
                 / {{ budgetAmount(item) | amount: null : activeCurrency() }}
@@ -156,7 +156,7 @@
           >{{ item.categoryIcone }}</span>
           <div class="budget-row__body">
             <div class="budget-row__header">
-              <span class="budget-row__name">{{ item.categoryNom }}</span>
+              <span class="budget-row__name">{{ item.categoryNom | categoryName: item.categorySystemKey }}</span>
               <span class="budget-row__amount">
                 {{ budgetAmount(item) | amount: null : activeCurrency() }}
               </span>

@@ -18,6 +18,8 @@ public record ImportDraftLineResponse(
         String statusMessage,
         UUID categoryId,
         String categoryName,
+        /** Cle stable de la categorie systeme, null pour une categorie utilisateur (KKS-395). */
+        String categorySystemKey,
         UUID duplicateTransactionId,
         boolean suggestRule,
         /** Raison d'un SKIPPED decide par l'import (ex. ALREADY_IMPORTED), null sinon (KKS-382). */
@@ -42,6 +44,8 @@ public record ImportDraftLineResponse(
                 line.getStatusMessage(),
                 line.getCategory() != null ? line.getCategory().getId() : null,
                 line.getCategory() != null ? line.getCategory().getNom() : null,
+                line.getCategory() != null && line.getCategory().getSystemKey() != null
+                        ? line.getCategory().getSystemKey().name() : null,
                 line.getDuplicateTransactionId(),
                 suggestRule,
                 line.getSkipReason() != null ? line.getSkipReason().name() : null,
