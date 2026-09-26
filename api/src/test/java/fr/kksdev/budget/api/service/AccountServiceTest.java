@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.dto.response.AccountResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.dto.response.TotalBalanceResponse;
 import fr.kksdev.budget.api.enums.DebtType;
@@ -247,7 +248,7 @@ class AccountServiceTest {
         var user = buildUser();
         when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        accountService.createDefaultAccount(user, Currency.EUR);
+        accountService.createDefaultAccount(user, Currency.EUR, null);
 
         verify(accountRepository).save(any(Account.class));
     }
@@ -257,9 +258,44 @@ class AccountServiceTest {
         var user = buildUser();
         when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        accountService.createDefaultAccount(user, Currency.XOF);
+        accountService.createDefaultAccount(user, Currency.XOF, null);
 
         verify(accountRepository).save(argThat(account -> Currency.XOF.equals(account.getCurrency())));
+    }
+
+    // -------------------------------------------------------------------------
+    // KKS-396 — nom du compte par defaut fourni par le client, sinon defaut
+    // anglais "Main account"
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_useProvidedAccountName_when_defaultAccountNameGiven() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.createDefaultAccount(user, Currency.EUR, "Mon compte");
+
+        verify(accountRepository).save(argThat(account -> "Mon compte".equals(account.getNom())));
+    }
+
+    @Test
+    void should_useDefaultEnglishAccountName_when_defaultAccountNameAbsent() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.createDefaultAccount(user, Currency.EUR, null);
+
+        verify(accountRepository).save(argThat(account -> "Main account".equals(account.getNom())));
+    }
+
+    @Test
+    void should_useDefaultEnglishAccountName_when_defaultAccountNameBlank() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.createDefaultAccount(user, Currency.EUR, "   ");
+
+        verify(accountRepository).save(argThat(account -> "Main account".equals(account.getNom())));
     }
 
     @Test
@@ -405,7 +441,7 @@ class AccountServiceTest {
         when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
 
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
-                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null, null, null);
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -625,7 +661,7 @@ class AccountServiceTest {
     @Test
     void should_throw_when_transferSourceAndDestinationAreTheSame() {
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
-                accountId, accountId, new BigDecimal("100.00"), null);
+                accountId, accountId, new BigDecimal("100.00"), null, null, null);
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -656,7 +692,7 @@ class AccountServiceTest {
         when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
 
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
-                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null, null, null);
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -687,7 +723,7 @@ class AccountServiceTest {
         when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
 
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
-                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null, null, null);
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -719,11 +755,11 @@ class AccountServiceTest {
         when(categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId)).thenReturn(null);
 
         var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
-                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null);
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null, null, null);
 
         assertThatThrownBy(() -> accountService.transfer(transferRequest, userId))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("System category 'Virement' not found");
+                .hasMessage("System category 'Transfer' not found");
     }
 
     @Test
@@ -745,8 +781,140 @@ class AccountServiceTest {
 
         var amount = new BigDecimal("100.00");
 
-        assertThatThrownBy(() -> accountService.adjustBalance(accountId, amount, userId))
+        assertThatThrownBy(() -> accountService.adjustBalance(accountId, amount, null, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Cannot adjust the balance of an inactive account");
+    }
+
+    // -------------------------------------------------------------------------
+    // KKS-396 — libelle fourni par le client pour le virement et l'ajustement,
+    // sinon defaut anglais
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_useProvidedLibelle_when_transferLibelleGiven() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte source")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte destination")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var category = Category.builder().id(UUID.randomUUID()).nom("Transfer").user(user).build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+        when(categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId)).thenReturn(category);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null,
+                "Remboursement loyer", "Reçu de mamie");
+
+        var response = accountService.transfer(transferRequest, userId);
+
+        assertThat(response.debitTransaction().libelle()).isEqualTo("Remboursement loyer");
+        assertThat(response.creditTransaction().libelle()).isEqualTo("Reçu de mamie");
+    }
+
+    @Test
+    void should_useDefaultEnglishLibelle_when_transferLibelleAbsent() {
+        var user = buildUser();
+        var fromAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte source")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var toAccount = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte destination")
+                .type(AccountType.COURANT)
+                .currency(Currency.EUR)
+                .actif(true)
+                .user(user)
+                .build();
+        var category = Category.builder().id(UUID.randomUUID()).nom("Transfer").user(user).build();
+
+        when(accountRepository.findById(fromAccount.getId())).thenReturn(Optional.of(fromAccount));
+        when(accountRepository.findById(toAccount.getId())).thenReturn(Optional.of(toAccount));
+        when(categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId)).thenReturn(category);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        var transferRequest = new fr.kksdev.budget.api.dto.request.TransferRequest(
+                fromAccount.getId(), toAccount.getId(), new BigDecimal("100.00"), null, null, "   ");
+
+        var response = accountService.transfer(transferRequest, userId);
+
+        assertThat(response.debitTransaction().libelle()).isEqualTo("Transfer to Compte destination");
+        assertThat(response.creditTransaction().libelle()).isEqualTo("Transfer from Compte source");
+    }
+
+    @Test
+    void should_useProvidedLibelle_when_adjustBalanceLibelleGiven() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId))
+                .thenReturn(BigDecimal.ZERO, new BigDecimal("750.00"));
+        when(categoryService.findOrCreateAdjustmentCategory(userId)).thenReturn(category);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        accountService.adjustBalance(accountId, new BigDecimal("750.00"), "Correction manuelle", userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Correction manuelle".equals(tx.getLibelle())));
+    }
+
+    @Test
+    void should_useDefaultEnglishLibelle_when_adjustBalanceLibelleAbsent() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId))
+                .thenReturn(BigDecimal.ZERO, new BigDecimal("750.00"));
+        when(categoryService.findOrCreateAdjustmentCategory(userId)).thenReturn(category);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        accountService.adjustBalance(accountId, new BigDecimal("750.00"), null, userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Balance adjustment".equals(tx.getLibelle())));
+    }
+
+    @Test
+    void should_useDefaultEnglishLibelle_when_adjustBalanceLibelleBlank() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var category = Category.builder().id(UUID.randomUUID()).nom("Balance adjustment").user(user).build();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId))
+                .thenReturn(BigDecimal.ZERO, new BigDecimal("750.00"));
+        when(categoryService.findOrCreateAdjustmentCategory(userId)).thenReturn(category);
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        accountService.adjustBalance(accountId, new BigDecimal("750.00"), "   ", userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Balance adjustment".equals(tx.getLibelle())));
     }
 }

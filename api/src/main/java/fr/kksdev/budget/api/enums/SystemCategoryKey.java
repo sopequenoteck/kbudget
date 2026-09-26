@@ -2,8 +2,9 @@ package fr.kksdev.budget.api.enums;
 
 /**
  * Cle stable d'une categorie systeme (KKS-395), independante du nom affiche.
- * L'API ne traduit jamais : le nom stocke reste francais, la cle permet au
- * client de retrouver et de traduire la categorie sans dependre du texte.
+ * L'API ne traduit jamais : le nom stocke est un defaut anglais fixe par le
+ * serveur (KKS-396), la cle permet au client de retrouver et de traduire la
+ * categorie sans dependre du texte.
  */
 public enum SystemCategoryKey {
     /** Categorie des abonnements crees automatiquement. */

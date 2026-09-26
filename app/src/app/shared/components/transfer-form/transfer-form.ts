@@ -25,6 +25,7 @@ import { TransactionService } from '../../../core/services/transaction';
 import { ModalService } from '../../../core/services/modal.service';
 import { DevLogger } from '../../../core/services/dev-logger';
 import { ApiErrorService } from '../../../core/services/api-error';
+import { LanguageService } from '../../../core/services/language';
 import { Account, TransferRequest } from '../../../core/models/account.model';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
 
@@ -44,6 +45,7 @@ export class TransferForm {
   private readonly logger = inject(DevLogger);
   private readonly apiError = inject(ApiErrorService);
   private readonly transloco = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -95,11 +97,24 @@ export class TransferForm {
     this.errorMessage.set('');
 
     const raw = this.form.getRawValue();
+    const lang = this.languageService.activeLanguage();
+    const fromAccount = this.activeAccounts().find((a) => a.id === raw.fromAccountId);
+    const toAccount = this.activeAccounts().find((a) => a.id === raw.toAccountId);
     const request: TransferRequest = {
       fromAccountId: raw.fromAccountId,
       toAccountId: raw.toAccountId,
       montant: Number(raw.montant),
       note: raw.note || undefined,
+      libelleDebit: toAccount
+        ? this.transloco.translate('transactions.value.transferTo', { account: toAccount.nom }, lang)
+        : undefined,
+      libelleCredit: fromAccount
+        ? this.transloco.translate(
+            'transactions.value.transferFrom',
+            { account: fromAccount.nom },
+            lang,
+          )
+        : undefined,
     };
 
     try {

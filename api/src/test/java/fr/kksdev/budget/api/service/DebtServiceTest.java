@@ -39,6 +39,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -266,7 +267,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -285,7 +286,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), null);
+        var request = new DebtRepayRequest(account.getId(), null, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -305,7 +306,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), null);
+        var request = new DebtRepayRequest(account.getId(), null, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(new BigDecimal("30.00"));
@@ -327,7 +328,7 @@ class DebtServiceTest {
     void should_reject_when_amountExceedsRemaining() {
         var user = buildUser();
         var debt = buildDebt(user);
-        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("200.00"));
+        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("200.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -342,7 +343,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         debt.setRembourse(true);
-        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
 
@@ -357,7 +358,7 @@ class DebtServiceTest {
         var debt = buildDebt(user);
         var account = buildAccount(user);
         account.setActif(false);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -387,6 +388,65 @@ class DebtServiceTest {
 
         assertThat(payments).hasSize(1);
         assertThat(payments.getFirst().amount()).isEqualByComparingTo(new BigDecimal("50.00"));
+    }
+
+    // -------------------------------------------------------------------------
+    // KKS-396 — libelle fourni par le client pour le remboursement, sinon
+    // defaut anglais "Repayment - <personne>"
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_useProvidedLibelle_when_repayLibelleGiven() {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var account = buildAccount(user);
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), "Remboursement partiel");
+
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        debtService.repay(debtId, request, userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Remboursement partiel".equals(tx.getLibelle())));
+    }
+
+    @Test
+    void should_useDefaultEnglishLibelle_when_repayLibelleAbsent() {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var account = buildAccount(user);
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
+
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        debtService.repay(debtId, request, userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Repayment - Alice".equals(tx.getLibelle())));
+    }
+
+    @Test
+    void should_useDefaultEnglishLibelle_when_repayLibelleBlank() {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var account = buildAccount(user);
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), "   ");
+
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        debtService.repay(debtId, request, userId);
+
+        verify(transactionRepository).save(argThat(tx -> "Repayment - Alice".equals(tx.getLibelle())));
     }
 
     // -------------------------------------------------------------------------
@@ -643,7 +703,7 @@ class DebtServiceTest {
     void should_reject_when_zeroAmount() {
         var user = buildUser();
         var debt = buildDebt(user);
-        var request = new DebtRepayRequest(UUID.randomUUID(), BigDecimal.ZERO);
+        var request = new DebtRepayRequest(UUID.randomUUID(), BigDecimal.ZERO, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);

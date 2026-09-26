@@ -170,6 +170,23 @@ describe('AccountService', () => {
     expect(service.refreshTrigger()).toBe(before + 1);
   });
 
+  it('should_adjust_balance_and_refresh_when_adjustBalance_called', () => {
+    apiService.post.mockReturnValue(of(mockAccount));
+    const before = service.refreshTrigger();
+
+    service
+      .adjustBalance('acc-1', { newBalance: 200, libelle: 'Ajustement de solde' })
+      .subscribe((result) => {
+        expect(result).toEqual(mockAccount);
+      });
+
+    expect(apiService.post).toHaveBeenCalledWith('/accounts/acc-1/adjust-balance', {
+      newBalance: 200,
+      libelle: 'Ajustement de solde',
+    });
+    expect(service.refreshTrigger()).toBe(before + 1);
+  });
+
   it('should_increment_refreshTrigger_on_successive_mutations', () => {
     apiService.post.mockReturnValue(of(mockAccount));
     apiService.put.mockReturnValue(of(mockAccount));

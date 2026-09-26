@@ -266,6 +266,22 @@ class CategoryServiceTest {
     }
 
     @Test
+    void should_seedEnglishNames_when_newUser() {
+        // KKS-396 : l'API n'ecrit plus de texte francais, meme pour les
+        // categories systeme d'un nouvel utilisateur.
+        var user = buildUser();
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        categoryService.seedSystemCategories(user);
+
+        ArgumentCaptor<Category> captor = ArgumentCaptor.forClass(Category.class);
+        verify(categoryRepository, org.mockito.Mockito.times(3)).save(captor.capture());
+        assertThat(captor.getAllValues())
+                .extracting(Category::getNom)
+                .containsExactly("Subscription", "Debt", "Transfer");
+    }
+
+    @Test
     void should_findSystemCategory_when_keyAndUserExist() {
         var user = buildUser();
         var systemCat = buildSystemCategory(user, "Abonnement", "🔄", SystemCategoryKey.SUBSCRIPTION);
@@ -332,7 +348,7 @@ class CategoryServiceTest {
 
         Category result = categoryService.findOrCreateAdjustmentCategory(userId);
 
-        assertThat(result.getNom()).isEqualTo("Ajustement");
+        assertThat(result.getNom()).isEqualTo("Balance adjustment");
         assertThat(result.getIsSystem()).isTrue();
         assertThat(result.getSystemKey()).isEqualTo(SystemCategoryKey.ADJUSTMENT);
         verify(categoryRepository).save(any(Category.class));

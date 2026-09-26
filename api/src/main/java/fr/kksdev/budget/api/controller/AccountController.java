@@ -99,7 +99,7 @@ public class AccountController {
             @Valid @RequestBody AdjustBalanceRequest request,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        return ResponseEntity.ok(accountService.adjustBalance(id, request.newBalance(), userId));
+        return ResponseEntity.ok(accountService.adjustBalance(id, request.newBalance(), request.libelle(), userId));
     }
 
     @Operation(summary = "Désigner un compte comme compte par défaut")

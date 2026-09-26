@@ -56,7 +56,11 @@ class AcceptInviteServiceTest {
     }
 
     private AcceptInviteRequest buildRequest(UUID token) {
-        return new AcceptInviteRequest(token, "password123", "Alice", Currency.EUR, "Europe/Paris");
+        return buildRequest(token, null);
+    }
+
+    private AcceptInviteRequest buildRequest(UUID token, String defaultAccountName) {
+        return new AcceptInviteRequest(token, "password123", "Alice", Currency.EUR, "Europe/Paris", defaultAccountName);
     }
 
     @Test
@@ -153,7 +157,7 @@ class AcceptInviteServiceTest {
     void should_preserve_currency_and_timezone_from_request() {
         Invitation invitation = buildActiveInvitation("alice@example.com");
         AcceptInviteRequest request = new AcceptInviteRequest(
-                invitation.getToken(), "password123", "Alice", Currency.XOF, "Africa/Lome");
+                invitation.getToken(), "password123", "Alice", Currency.XOF, "Africa/Lome", null);
         User provisioned = User.builder().email("alice@example.com").name("Alice").build();
 
         when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
@@ -169,5 +173,50 @@ class AcceptInviteServiceTest {
         verify(userOnboardingService).provisionUser(captor.capture());
         assertThat(captor.getValue().currency()).isEqualTo(Currency.XOF);
         assertThat(captor.getValue().timezone()).isEqualTo("Africa/Lome");
+    }
+
+    // -------------------------------------------------------------------------
+    // KKS-396 — defaultAccountName transmis a l'onboarding, sinon absent
+    // (defaut anglais applique par AccountService)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_forwardDefaultAccountName_when_provided() {
+        Invitation invitation = buildActiveInvitation("alice@example.com");
+        AcceptInviteRequest request = buildRequest(invitation.getToken(), "Compte perso");
+        User provisioned = User.builder().email("alice@example.com").name("Alice").build();
+
+        when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
+        when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
+        when(jwtUtil.generateToken("alice@example.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        acceptInviteService.acceptInvite(request);
+
+        ArgumentCaptor<UserOnboardingService.UserProvisioningRequest> captor =
+                ArgumentCaptor.forClass(UserOnboardingService.UserProvisioningRequest.class);
+        verify(userOnboardingService).provisionUser(captor.capture());
+        assertThat(captor.getValue().defaultAccountName()).isEqualTo("Compte perso");
+    }
+
+    @Test
+    void should_forwardNullDefaultAccountName_when_absent() {
+        Invitation invitation = buildActiveInvitation("alice@example.com");
+        AcceptInviteRequest request = buildRequest(invitation.getToken());
+        User provisioned = User.builder().email("alice@example.com").name("Alice").build();
+
+        when(invitationService.validatePublic(request.token())).thenReturn(Optional.of(invitation));
+        when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
+        when(userOnboardingService.provisionUser(any())).thenReturn(provisioned);
+        when(jwtUtil.generateToken("alice@example.com")).thenReturn("jwt-token");
+        when(refreshTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        acceptInviteService.acceptInvite(request);
+
+        ArgumentCaptor<UserOnboardingService.UserProvisioningRequest> captor =
+                ArgumentCaptor.forClass(UserOnboardingService.UserProvisioningRequest.class);
+        verify(userOnboardingService).provisionUser(captor.capture());
+        assertThat(captor.getValue().defaultAccountName()).isNull();
     }
 }

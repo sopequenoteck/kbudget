@@ -97,6 +97,18 @@ class BootstrapSeedRunnerTest {
     }
 
     @Test
+    void should_seed_account_with_default_english_name_when_no_default_account_name_provided() throws Exception {
+        // KKS-396 : le premier admin n'a aucun client pour fournir un nom de
+        // compte, l'API retombe sur le defaut anglais.
+        bootstrapSeedRunner.run(noArgs);
+
+        User seeded = userRepository.findAll().get(0);
+        var accounts = accountRepository.findByUserId(seeded.getId());
+
+        assertThat(accounts).extracting("nom").containsExactly("Main account");
+    }
+
+    @Test
     void should_log_banner_at_WARN_level_when_seeding() throws Exception {
         bootstrapSeedRunner.run(noArgs);
 

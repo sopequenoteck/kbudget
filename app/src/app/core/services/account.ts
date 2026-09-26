@@ -5,6 +5,7 @@ import { ApiService } from './api';
 import {
   Account,
   AccountRequest,
+  AdjustBalanceRequest,
   TransferRequest,
   TransferResponse,
 } from '../models/account.model';
@@ -52,9 +53,9 @@ export class AccountService {
       .pipe(tap(() => this.refresh()));
   }
 
-  adjustBalance(id: string, newBalance: number): Observable<Account> {
+  adjustBalance(id: string, request: AdjustBalanceRequest): Observable<Account> {
     return this.api
-      .post<Account>(`/accounts/${id}/adjust-balance`, { newBalance })
+      .post<Account>(`/accounts/${id}/adjust-balance`, request)
       .pipe(tap(() => this.refresh()));
   }
 }

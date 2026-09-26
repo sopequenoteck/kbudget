@@ -87,9 +87,14 @@ Request :
   "password": "motDePasse12",
   "displayName": "Kelly",
   "currency": "XOF",
-  "timezone": "Africa/Lome"
+  "timezone": "Africa/Lome",
+  "defaultAccountName": "Main account"
 }
 ```
+
+> `defaultAccountName` (optionnel, 50 caracteres au plus, KKS-396) : nom du
+> compte cree pour le nouvel utilisateur, fourni par le client dans sa langue.
+> Absent, vide ou blanc : `Main account`.
 
 > `email` n'est **pas** dans le body — l'email vient de l'invitation (verrouille cote serveur).
 
@@ -668,9 +673,14 @@ Request :
 ```json
 {
   "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "amount": 20.00
+  "amount": 20.00,
+  "libelle": "Repayment - Awa"
 }
 ```
+
+> `libelle` (optionnel, 255 caracteres au plus, KKS-396) : libelle de la
+> transaction creee, fourni par le client dans sa langue. Defaut :
+> `Repayment - <personne>`.
 
 > `amount` optionnel — si omis, rembourse le montant restant (solde complet).
 
@@ -825,9 +835,16 @@ Request :
   "fromAccountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
   "toAccountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
   "montant": 200.00,
-  "note": "Epargne mensuelle"
+  "note": "Epargne mensuelle",
+  "libelleDebit": "Transfer to Livret A",
+  "libelleCredit": "Transfer from Compte Principal"
 }
 ```
+
+> `libelleDebit` / `libelleCredit` (optionnels, 255 caracteres au plus,
+> KKS-396) : libelles des transactions de debit (compte source) et de credit
+> (compte destination), fournis par le client dans sa langue. Defauts :
+> `Transfer to <compte destination>` / `Transfer from <compte source>`.
 
 Response `201` :
 
@@ -837,7 +854,7 @@ Response `201` :
   "debitTransaction": {
     "id": "11111111-1111-1111-1111-111111111111",
     "montant": 200.00,
-    "libelle": "Virement vers Livret A",
+    "libelle": "Transfer to Livret A",
     "type": "DEPENSE",
     "date": "2026-02-15",
     "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
@@ -846,7 +863,7 @@ Response `201` :
   "creditTransaction": {
     "id": "22222222-2222-2222-2222-222222222222",
     "montant": 200.00,
-    "libelle": "Virement depuis Compte Principal",
+    "libelle": "Transfer from Compte Principal",
     "type": "RECETTE",
     "date": "2026-02-15",
     "accountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -875,9 +892,14 @@ Request :
 
 ```json
 {
-  "newBalance": 1500.00
+  "newBalance": 1500.00,
+  "libelle": "Balance adjustment"
 }
 ```
+
+> `libelle` (optionnel, 255 caracteres au plus, KKS-396) : libelle de la
+> transaction d'ajustement, fourni par le client dans sa langue. Defaut :
+> `Balance adjustment`.
 
 Response `200` : le compte mis a jour avec le nouveau solde.
 
@@ -1555,14 +1577,16 @@ Response `200` :
 - `Content-Disposition: attachment; filename="k-budget-transactions-2026-04-27.csv"`
 - Body : transactions du user uniquement (pas les abonnements/dettes/budgets), prefixees du **BOM UTF-8** (`EF BB BF`) pour ouverture correcte dans Excel.
 
-Colonnes : `date,libelle,montant,type,devise,compte,categorie,note`.
+Colonnes (format stable depuis KKS-396, en-tetes non traduits) :
+`date,label,amount,currency,account,category,type`. `type` : `RECETTE`,
+`DEPENSE`, `AJUSTEMENT` (codes du JSON). `category` : nom tel que stocke.
 
 Exemple :
 
 ```
-date,libelle,montant,type,devise,compte,categorie,note
-2026-04-15,Courses Carrefour,42.50,DEPENSE,EUR,Compte Principal,Alimentation,
-2026-04-10,Salaire,2500.00,RECETTE,EUR,Compte Principal,,
+date,label,amount,currency,account,category,type
+2026-04-15,Courses Carrefour,42.50,EUR,Compte Principal,Alimentation,DEPENSE
+2026-04-10,Salaire,2500.00,EUR,Compte Principal,,RECETTE
 ```
 
 Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parametre `format` absent ou autre que `json`/`csv`.

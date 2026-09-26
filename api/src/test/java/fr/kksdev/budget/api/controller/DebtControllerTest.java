@@ -30,8 +30,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -217,6 +219,44 @@ class DebtControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.montantRestant").value(50.00))
                 .andExpect(jsonPath("$.rembourse").value(false));
+    }
+
+    // --- KKS-396 : libelle de remboursement fourni par le client ---
+
+    @Test
+    void should_forwardLibelle_when_repayLibelleProvided() throws Exception {
+        var response = new DebtResponse(
+                debtId, "Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.of(2026, 2, 1),
+                null, "EUR", false, new BigDecimal("50.00"),
+                null, null, false, null, null);
+
+        when(debtService.repay(eq(debtId), any(DebtRepayRequest.class), eq(userId)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"accountId": "%s", "amount": 50.00, "libelle": "Remboursement partiel"}
+                                """.formatted(UUID.randomUUID())))
+                .andExpect(status().isOk());
+
+        verify(debtService).repay(eq(debtId),
+                argThat(r -> "Remboursement partiel".equals(r.libelle())), eq(userId));
+    }
+
+    @Test
+    void should_return_400_when_repayLibelleTooLong() throws Exception {
+        String tooLong = "a".repeat(256);
+
+        mockMvc.perform(post("/v1/debts/{id}/repay", debtId)
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"accountId": "%s", "amount": 50.00, "libelle": "%s"}
+                                """.formatted(UUID.randomUUID(), tooLong)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

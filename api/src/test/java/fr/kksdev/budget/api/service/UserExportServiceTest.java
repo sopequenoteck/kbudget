@@ -222,8 +222,25 @@ class UserExportServiceTest {
         assertThat(csv).contains("Compte courant");
     }
 
+    // -------------------------------------------------------------------------
+    // KKS-396 — l'API n'ecrit plus de texte francais dans l'export CSV : le
+    // type reste le nom brut de l'enum, jamais traduit.
+    // -------------------------------------------------------------------------
+
     @Test
-    void should_translate_transaction_type_in_csv() throws Exception {
+    void should_writeExactHeaders_when_exportingCsv() throws Exception {
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        String firstLine = csv.replace("﻿", "").split("\r\n|\n", 2)[0];
+
+        assertThat(firstLine).isEqualTo("date,label,amount,currency,account,category,type");
+    }
+
+    @Test
+    void should_writeRawEnumName_when_exportingEachTransactionType() throws Exception {
         Account account = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Livret A")
@@ -260,7 +277,7 @@ class UserExportServiceTest {
         Transaction ajustement = Transaction.builder()
                 .id(UUID.randomUUID())
                 .montant(new BigDecimal("5.00"))
-                .libelle("Ajustement")
+                .libelle("Ajustement de solde")
                 .type(TransactionType.AJUSTEMENT)
                 .date(LocalDate.of(2026, 4, 3))
                 .account(account)
@@ -274,10 +291,84 @@ class UserExportServiceTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         userExportService.exportCsv(user, baos);
         String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
 
-        assertThat(csv).contains("Dépense");
-        assertThat(csv).contains("Revenu");
-        assertThat(csv).contains("Ajustement");
+        assertThat(lines).hasSize(4); // en-tete + une ligne par transaction
+        assertThat(lines.get(1)).endsWith("DEPENSE");
+        assertThat(lines.get(2)).endsWith("RECETTE");
+        assertThat(lines.get(3)).endsWith("AJUSTEMENT");
+        assertThat(csv).doesNotContain("Dépense").doesNotContain("Revenu");
+    }
+
+    @Test
+    void should_writeEmptyCategory_when_transactionHasNoCategory() throws Exception {
+        Account account = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte courant")
+                .currency(Currency.EUR)
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💳")
+                .couleur("#000000")
+                .user(user)
+                .build();
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("15.00"))
+                .libelle("Sans categorie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, 4, 27))
+                .account(account)
+                .category(null)
+                .isRecurring(false)
+                .recurringActive(true)
+                .build();
+
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of(transaction));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
+
+        assertThat(lines).hasSize(2);
+        assertThat(lines.get(1)).isEqualTo("2026-04-27,Sans categorie,15.00,EUR,Compte courant,,DEPENSE");
+    }
+
+    @Test
+    void should_writeEmptyType_when_transactionHasNoType() throws Exception {
+        Account account = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte courant")
+                .currency(Currency.EUR)
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💳")
+                .couleur("#000000")
+                .user(user)
+                .build();
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("15.00"))
+                .libelle("Sans type")
+                .type(null)
+                .date(LocalDate.of(2026, 4, 27))
+                .account(account)
+                .isRecurring(false)
+                .recurringActive(true)
+                .build();
+
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of(transaction));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
+
+        assertThat(lines).hasSize(2);
+        assertThat(lines.get(1)).isEqualTo("2026-04-27,Sans type,15.00,EUR,Compte courant,,");
     }
 
     @Test

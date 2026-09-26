@@ -97,9 +97,26 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   par leur nom francais.
   - API : nouveaux champs `systemKey` (categorie) et `categorySystemKey`
     (budgets, regles et lignes d'import) dans les reponses ; `nom` reste servi.
+- **Textes generes dans la langue de l'interface (KKS-396)** : libelles de
+  virement, de remboursement et d'ajustement de solde, et nom du compte cree a
+  l'invitation. Angular les envoie dans la langue affichee ; en francais, rien
+  ne change a l'ecran.
+  - API : champs optionnels `libelleDebit` / `libelleCredit` (virement),
+    `libelle` (ajustement, remboursement), `defaultAccountName` (acceptation
+    d'invitation).
 
 ### Changed
 
+- **Textes par defaut de l'API en anglais (KKS-396)** : un client qui n'envoie
+  pas ces champs recoit des libelles anglais (`Transfer to X`, `Repayment - X`,
+  `Balance adjustment`, `Main account`) — c'est le cas du client Flutter
+  jusqu'a KKS-326 et du premier administrateur. Les categories systeme d'un
+  nouvel utilisateur s'appellent `Subscription`, `Debt`, `Transfer`, `Balance
+  adjustment`. Les donnees existantes ne changent pas.
+- **Export CSV : nouveau format (KKS-396)**. En-tetes
+  `date,label,amount,currency,account,category,type`, types en codes
+  (`RECETTE`, `DEPENSE`, `AJUSTEMENT`) au lieu de « Revenu / Depense /
+  Ajustement ». Un script qui lisait l'ancien format doit etre adapte.
 - **Analyse Sonar d'Angular : le blame git est recalcule a chaque analyse
   (KKS-373)** : `sonar.scm.forceReloadAll=true`. Le nouveau code est determine
   par `git blame`, que Sonar ne recalculait que pour les fichiers de contenu

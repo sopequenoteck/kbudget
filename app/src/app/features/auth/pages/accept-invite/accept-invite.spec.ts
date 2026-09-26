@@ -7,7 +7,14 @@ import { of, throwError } from 'rxjs';
 import { AcceptInvite } from './accept-invite';
 import { AuthService } from '../../../../core/services/auth';
 import { InvitationService } from '../../../../core/services/invitation.service';
+import { PreferenceService } from '../../../../core/services/preference';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
+
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 describe('AcceptInvite', () => {
   let component: AcceptInvite;
@@ -71,6 +78,50 @@ describe('AcceptInvite', () => {
     expect(
       transloco.translate('auth.form.passwordPlaceholder', { min: component.passwordMinLength }),
     ).toBe('Au moins 12 caractères');
+  });
+
+  it('should_send_translated_default_account_name_when_submitted', async () => {
+    fillValidForm();
+    invitationServiceMock.accept.mockReturnValue(
+      of({
+        token: 'jwt',
+        refreshToken: 'refresh',
+        email: 'alice@example.com',
+        name: 'Alice',
+        mustResetCredentials: false,
+      }),
+    );
+
+    await component.onSubmit();
+
+    expect(invitationServiceMock.accept).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultAccountName: 'Compte Principal' }),
+    );
+  });
+
+  it('should_send_english_default_account_name_when_language_switches_to_en', async () => {
+    fillValidForm();
+    invitationServiceMock.accept.mockReturnValue(
+      of({
+        token: 'jwt',
+        refreshToken: 'refresh',
+        email: 'alice@example.com',
+        name: 'Alice',
+        mustResetCredentials: false,
+      }),
+    );
+
+    const preferenceService = TestBed.inject(PreferenceService);
+    preferenceService.language.set('en');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    fixture.detectChanges();
+
+    await component.onSubmit();
+
+    expect(invitationServiceMock.accept).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultAccountName: 'Main account' }),
+    );
   });
 
   it('should_translate_the_invalid_link_error_when_the_invitation_lookup_fails', async () => {
