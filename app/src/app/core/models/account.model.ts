@@ -6,6 +6,14 @@ export enum AccountType {
   ESPECES = 'ESPECES',
 }
 
+/** Cle de traduction du type d'un compte (accounts.value.*), partagee par le
+ * formulaire et la liste pour eviter deux copies (KKS-375). */
+export const ACCOUNT_TYPE_LABEL_KEYS: Record<AccountType, string> = {
+  [AccountType.COURANT]: 'accounts.value.current',
+  [AccountType.EPARGNE]: 'accounts.value.savings',
+  [AccountType.ESPECES]: 'accounts.value.cash',
+};
+
 export interface Account {
   id: string;
   nom: string;

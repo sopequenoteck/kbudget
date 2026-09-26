@@ -16,26 +16,24 @@
     >
       <div class="dacd-header">
         <ng-icon name="phosphorWarning" size="18" class="dacd-header__icon" />
-        <h2 id="dacd-title" class="dacd-title">Supprimer mon compte</h2>
+        <h2 id="dacd-title" class="dacd-title">{{ 'users.action.deleteAccount' | transloco }}</h2>
         <button
           type="button"
           class="dacd-close"
           (click)="onCancel()"
-          aria-label="Fermer"
+          [attr.aria-label]="'common.action.close' | transloco"
           [disabled]="isSubmitting()"
         >
           <ng-icon name="phosphorX" size="16" />
         </button>
       </div>
 
-      <p class="dacd-warning">
-        Cette action est <strong>irréversible</strong>. Votre compte et toutes vos données seront supprimés définitivement.
-      </p>
+      <p class="dacd-warning" [innerHTML]="'users.dialog.deleteAccountMessage' | transloco"></p>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="dacd-form">
         <!-- Current password -->
         <div class="dacd-field">
-          <label for="dacd-password" class="dacd-label">Mot de passe actuel</label>
+          <label for="dacd-password" class="dacd-label">{{ 'users.form.currentPassword' | transloco }}</label>
           <div class="dacd-input-wrap">
             <input
               id="dacd-password"
@@ -50,13 +48,13 @@
               type="button"
               class="dacd-eye-btn"
               (click)="togglePassword()"
-              [attr.aria-label]="showPassword() ? 'Masquer' : 'Afficher'"
+              [attr.aria-label]="(showPassword() ? 'common.action.hidePasswordAria' : 'common.action.showPasswordAria') | transloco"
             >
               <ng-icon [name]="showPassword() ? 'phosphorEyeSlash' : 'phosphorEye'" size="16" />
             </button>
           </div>
           @if (form.controls.currentPassword.touched && form.controls.currentPassword.hasError('required')) {
-            <span class="dacd-error">Ce champ est requis.</span>
+            <span class="dacd-error">{{ 'common.validation.required' | transloco }}</span>
           }
         </div>
 
@@ -68,7 +66,7 @@
               formControlName="confirmed"
               class="dacd-checkbox"
             />
-            <span>Je comprends que cette action est définitive</span>
+            <span>{{ 'users.form.deleteAccountConfirm' | transloco }}</span>
           </label>
         </div>
 
@@ -83,14 +81,14 @@
             (click)="onCancel()"
             [disabled]="isSubmitting()"
           >
-            Annuler
+            {{ 'common.action.cancel' | transloco }}
           </button>
           <button
             type="submit"
             class="dacd-btn dacd-btn--danger"
             [disabled]="isSubmitDisabled"
           >
-            @if (isSubmitting()) { Suppression... } @else { Supprimer mon compte }
+            {{ (isSubmitting() ? 'users.feedback.deletingAccount' : 'users.action.deleteAccount') | transloco }}
           </button>
         </div>
       </form>

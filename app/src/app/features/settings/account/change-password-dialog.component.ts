@@ -15,7 +15,7 @@ import {
   phosphorEyeSlash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import {
   PASSWORD_MAX_LENGTH,
@@ -50,6 +50,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 export class ChangePasswordDialogComponent {
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   readonly isOpen = signal(false);
   readonly isSubmitting = signal(false);
@@ -127,19 +128,19 @@ export class ChangePasswordDialogComponent {
       if (error.status === 401) {
         const code = error.error?.error;
         if (code === 'PASSWORD_INCORRECT') {
-          this.errorMessage.set('Mot de passe actuel incorrect.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.currentPasswordIncorrect'));
         } else {
-          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+          this.errorMessage.set(this.transloco.translate('auth.feedback.genericError'));
         }
       } else if (error.status === 400) {
         const code = error.error?.error;
         if (code === 'PASSWORD_UNCHANGED') {
-          this.errorMessage.set('Le nouveau mot de passe doit être différent de l\'actuel.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.passwordUnchanged'));
         } else {
-          this.errorMessage.set('Données invalides. Veuillez vérifier les champs.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.invalidData'));
         }
       } else {
-        this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+        this.errorMessage.set(this.transloco.translate('auth.feedback.genericError'));
       }
     } finally {
       this.isSubmitting.set(false);

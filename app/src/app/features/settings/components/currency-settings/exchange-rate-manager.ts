@@ -19,9 +19,11 @@ import {
   phosphorFloppyDisk,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { ExchangeRate } from '../../../../core/models/exchange-rate.model';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
+import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
 
 const FIXED_PARITY_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
@@ -33,7 +35,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
   selector: 'app-exchange-rate-manager',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, FormsModule, NgIcon],
+  imports: [DecimalPipe, FormsModule, NgIcon, TranslocoPipe],
   viewProviders: [
     provideIcons({
       phosphorPencilSimple,
@@ -48,7 +50,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
     <!-- Section : Taux de conversion -->
     <div class="settings-section">
       <div class="settings-section__header">
-        <span class="settings-section__title">Taux de conversion</span>
+        <span class="settings-section__title">{{ 'exchangeRates.page.ratesTitle' | transloco }}</span>
         @if (!showForm()) {
           <button class="add-btn" (click)="openForm()">
             <ng-icon name="phosphorPlus" size="16" />
@@ -57,19 +59,19 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       </div>
       <div class="section-content">
         <div class="rate-row rate-row--info">
-          <span class="rate-row__label">Référence</span>
+          <span class="rate-row__label">{{ 'exchangeRates.list.reference' | transloco }}</span>
           <span class="rate-row__value">{{ primaryCurrency() }}</span>
         </div>
 
         @if (loading()) {
           <div class="rate-row rate-row--info">
-            <span class="rate-row__label">Chargement...</span>
+            <span class="rate-row__label">{{ 'common.feedback.loading' | transloco }}</span>
           </div>
         }
 
         @if (!loading() && rates().length === 0 && !showForm()) {
           <div class="rate-row rate-row--info">
-            <span class="rate-row__label">Aucun taux configuré</span>
+            <span class="rate-row__label">{{ 'exchangeRates.empty.title' | transloco }}</span>
           </div>
         }
 
@@ -81,10 +83,10 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
               {{ rate.targetCurrency }}
             </span>
             <span class="rate-row__value">{{ rate.rate | number: '1.0-6' }}</span>
-            <button class="btn-action" (click)="startEdit(rate)" aria-label="Modifier">
+            <button class="btn-action" (click)="startEdit(rate)" [attr.aria-label]="'common.action.edit' | transloco">
               <ng-icon name="phosphorPencilSimple" size="16" />
             </button>
-            <button class="btn-action btn-action--danger" (click)="confirmDelete(rate)" aria-label="Supprimer">
+            <button class="btn-action btn-action--danger" (click)="confirmDelete(rate)" [attr.aria-label]="'common.action.delete' | transloco">
               <ng-icon name="phosphorTrash" size="16" />
             </button>
           </div>
@@ -96,17 +98,17 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
     @if (showForm()) {
       <div class="settings-section">
         <h3 class="settings-section__title">
-          {{ editingRate() ? 'Modifier le taux' : 'Ajouter un taux' }}
+          {{ (editingRate() ? 'exchangeRates.dialog.editRateTitle' : 'exchangeRates.dialog.addRateTitle') | transloco }}
         </h3>
         <div class="section-content section-content--padded">
           <div class="form-grid">
             <div class="form-field">
-              <span class="form-label">Devise de base</span>
+              <span class="form-label">{{ 'exchangeRates.form.baseCurrency' | transloco }}</span>
               <div class="form-readonly">{{ primaryCurrency() }}</div>
             </div>
 
             <div class="form-field">
-              <label class="form-label" for="targetCurrency">Devise cible</label>
+              <label class="form-label" for="targetCurrency">{{ 'exchangeRates.form.targetCurrency' | transloco }}</label>
               @if (editingRate()) {
                 <div class="form-readonly">{{ formTargetCurrency() }}</div>
               } @else {
@@ -116,7 +118,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
                   [ngModel]="formTargetCurrency()"
                   (ngModelChange)="onTargetCurrencyChange($event)"
                 >
-                  <option value="" disabled>Choisir une devise</option>
+                  <option value="" disabled>{{ 'exchangeRates.form.targetCurrencyPlaceholder' | transloco }}</option>
                   @for (currency of availableTargetCurrencies(); track currency) {
                     <option [value]="currency">{{ currency }}</option>
                   }
@@ -125,7 +127,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
             </div>
 
             <div class="form-field form-field--full">
-              <label class="form-label" for="rateInput">Taux</label>
+              <label class="form-label" for="rateInput">{{ 'exchangeRates.form.rate' | transloco }}</label>
               <input
                 id="rateInput"
                 type="number"
@@ -134,7 +136,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
                 (ngModelChange)="formRate.set($event)"
                 min="0.000001"
                 step="0.000001"
-                placeholder="Ex: 655.957"
+                [placeholder]="'exchangeRates.form.ratePlaceholder' | transloco"
               />
             </div>
           </div>
@@ -146,7 +148,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
           <div class="form-actions">
             <button class="btn btn--ghost" (click)="cancelForm()">
               <ng-icon name="phosphorX" size="16" />
-              Annuler
+              {{ 'common.action.cancel' | transloco }}
             </button>
             <button
               class="btn btn--primary"
@@ -154,7 +156,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
               (click)="saveRate()"
             >
               <ng-icon name="phosphorFloppyDisk" size="16" />
-              {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+              {{ (isSaving() ? 'common.feedback.saving' : 'common.action.save') | transloco }}
             </button>
           </div>
         </div>
@@ -166,15 +168,18 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
       <div class="dialog-overlay" (click)="cancelDelete()">
         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
-        <div class="dialog" (click)="$event.stopPropagation()">
-          <p class="dialog__message">
-            Supprimer le taux
-            <strong>{{ rateToDelete()!.baseCurrency }} → {{ rateToDelete()!.targetCurrency }}</strong> ?
-          </p>
+        <div
+          class="dialog"
+          (click)="$event.stopPropagation()"
+        >
+          <p
+            class="dialog__message"
+            [innerHTML]="'exchangeRates.dialog.deleteRateMessage' | transloco: deleteRateMessageParams()!"
+          ></p>
           <div class="dialog__actions">
-            <button class="btn btn--ghost" (click)="cancelDelete()">Annuler</button>
+            <button class="btn btn--ghost" (click)="cancelDelete()">{{ 'common.action.cancel' | transloco }}</button>
             <button class="btn btn--danger" [disabled]="isDeleting()" (click)="deleteRate()">
-              {{ isDeleting() ? 'Suppression...' : 'Supprimer' }}
+              {{ (isDeleting() ? 'common.feedback.deleting' : 'common.action.delete') | transloco }}
             </button>
           </div>
         </div>
@@ -420,6 +425,7 @@ const ALL_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
 })
 export class ExchangeRateManager {
   private readonly rateService = inject(ExchangeRateService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly primaryCurrency = input.required<string>();
   readonly rates = input.required<ExchangeRate[]>();
@@ -446,6 +452,20 @@ export class ExchangeRateManager {
     return ALL_CURRENCIES.filter(
       (c) => c !== primary && !existingTargets.includes(c),
     );
+  });
+
+  /**
+   * Parametres du dialogue de suppression, echappes avant interpolation dans
+   * le `[innerHTML]` du template : les devises viennent d'un taux enregistre,
+   * pas d'une liste fermee cote client — MessageFormat ne les echappe pas.
+   */
+  readonly deleteRateMessageParams = computed(() => {
+    const rate = this.rateToDelete();
+    if (!rate) return null;
+    return {
+      baseCurrency: escapeHtml(rate.baseCurrency),
+      targetCurrency: escapeHtml(rate.targetCurrency),
+    };
   });
 
   openForm(): void {
@@ -486,11 +506,11 @@ export class ExchangeRateManager {
     const rate = this.formRate();
 
     if (!target) {
-      this.formError.set('Veuillez sélectionner une devise cible.');
+      this.formError.set(this.transloco.translate('exchangeRates.form.targetRequired'));
       return;
     }
     if (!rate || rate <= 0) {
-      this.formError.set('Veuillez saisir un taux valide (> 0).');
+      this.formError.set(this.transloco.translate('exchangeRates.form.rateInvalid'));
       return;
     }
 
@@ -503,7 +523,7 @@ export class ExchangeRateManager {
       this.cancelForm();
       this.rateSaved.emit();
     } catch {
-      this.formError.set("Erreur lors de l'enregistrement du taux.");
+      this.formError.set(this.transloco.translate('exchangeRates.feedback.saveError'));
     } finally {
       this.isSaving.set(false);
     }

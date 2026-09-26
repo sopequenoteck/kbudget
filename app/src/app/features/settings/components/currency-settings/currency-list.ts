@@ -14,8 +14,10 @@ import {
   phosphorPlus,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { Account } from '../../../../core/models/account.model';
+import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: '€', XOF: 'CFA', USD: '$', GBP: '£', CHF: 'CHF', CAD: 'CA$', MAD: 'MAD',
@@ -32,7 +34,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
   selector: 'app-currency-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, NgIcon, CdkDropList, CdkDrag],
+  imports: [FormsModule, NgIcon, CdkDropList, CdkDrag, TranslocoPipe],
   viewProviders: [
     provideIcons({ phosphorDotsSixVertical, phosphorTrash, phosphorPlus }),
   ],
@@ -40,7 +42,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
     <!-- Section : Mes devises -->
     <div class="settings-section">
       <div class="settings-section__header">
-        <span class="settings-section__title">Mes devises</span>
+        <span class="settings-section__title">{{ 'exchangeRates.page.currenciesTitle' | transloco }}</span>
         @if (availableCurrenciesToAdd().length > 0) {
           <button class="add-btn" (click)="showAddSheet.set(true)">
             <ng-icon name="phosphorPlus" size="16" />
@@ -57,10 +59,10 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
               <span class="currency-item__symbol">{{ CURRENCY_SYMBOLS[currency] || currency }}</span>
               <span class="currency-item__name">{{ CURRENCY_NAMES[currency] || currency }}</span>
               @if (i === 0) {
-                <span class="currency-item__badge">Principale</span>
+                <span class="currency-item__badge">{{ 'exchangeRates.value.primary' | transloco }}</span>
               }
               @if (i > 0) {
-                <button class="btn-action btn-action--danger" (click)="removeCurrency(currency)" aria-label="Supprimer cette devise">
+                <button class="btn-action btn-action--danger" (click)="removeCurrency(currency)" [attr.aria-label]="'exchangeRates.action.removeCurrencyAria' | transloco">
                   <ng-icon name="phosphorTrash" size="16" />
                 </button>
               }
@@ -76,7 +78,7 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       <div class="dialog-overlay" (click)="showAddSheet.set(false)">
         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
-          <p class="dialog__title">Ajouter une devise</p>
+          <p class="dialog__title">{{ 'exchangeRates.dialog.addCurrencyTitle' | transloco }}</p>
           @for (c of availableCurrenciesToAdd(); track c) {
             <button class="dialog__option" (click)="addCurrency(c); showAddSheet.set(false)">
               <span class="dialog__option-symbol">{{ CURRENCY_SYMBOLS[c] }}</span>
@@ -93,13 +95,13 @@ const AVAILABLE_CURRENCIES = ['EUR', 'USD', 'XOF', 'GBP', 'CHF', 'CAD', 'MAD'];
       <div class="dialog-overlay" (click)="showRemoveWarning.set(false)">
         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
         <div class="dialog" (click)="$event.stopPropagation()">
-          <p class="dialog__message">
-            La devise <strong>{{ CURRENCY_NAMES[currencyToRemove()!] || currencyToRemove() }}</strong>
-            est utilisée par des comptes existants. Retirer quand même ?
-          </p>
+          <p
+            class="dialog__message"
+            [innerHTML]="'exchangeRates.dialog.removeMessage' | transloco: removeMessageParams()!"
+          ></p>
           <div class="dialog__actions">
-            <button class="btn btn--ghost" (click)="showRemoveWarning.set(false)">Annuler</button>
-            <button class="btn btn--danger" (click)="doRemoveCurrency(currencyToRemove()!)">Retirer</button>
+            <button class="btn btn--ghost" (click)="showRemoveWarning.set(false)">{{ 'common.action.cancel' | transloco }}</button>
+            <button class="btn btn--danger" (click)="doRemoveCurrency(currencyToRemove()!)">{{ 'exchangeRates.action.remove' | transloco }}</button>
           </div>
         </div>
       </div>
@@ -233,6 +235,17 @@ export class CurrencyList {
   readonly availableCurrenciesToAdd = computed(() => {
     const configured = this.currencies();
     return AVAILABLE_CURRENCIES.filter((c) => !configured.includes(c));
+  });
+
+  /**
+   * Parametres du dialogue de retrait, echappes avant interpolation dans le
+   * `[innerHTML]` du template : a defaut d'un nom connu, `currency` retombe
+   * sur le code brut fourni en entree — pas une liste fermee cote client.
+   */
+  readonly removeMessageParams = computed(() => {
+    const currency = this.currencyToRemove();
+    if (!currency) return null;
+    return { currency: escapeHtml(CURRENCY_NAMES[currency] || currency) };
   });
 
   onDrop(event: CdkDragDrop<string[]>): void {

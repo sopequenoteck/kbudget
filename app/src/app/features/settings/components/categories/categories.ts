@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretLeft, phosphorPencilSimple, phosphorPlus, phosphorTag, phosphorTrash, phosphorWarning } from '@ng-icons/phosphor-icons/regular';
 
@@ -20,7 +21,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [RouterLink, NgIcon, EmptyState],
+  imports: [RouterLink, NgIcon, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCaretLeft,
