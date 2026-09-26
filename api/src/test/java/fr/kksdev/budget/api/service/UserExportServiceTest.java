@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.response.UserExportResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.*;
 import fr.kksdev.budget.api.repository.*;
@@ -322,6 +323,46 @@ class UserExportServiceTest {
         assertThat(response.accounts().get(0).nom()).isEqualTo("Compte A");
         // Aucun compte de B ne doit figurer
         assertThat(response.accounts()).noneMatch(a -> a.nom().equals("Compte B"));
+    }
+
+    @Test
+    void should_exportSystemKey_when_categoryIsSystemAndNullForUserCategory() {
+        stubAllRepositoriesEmpty();
+
+        Category systemCategory = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Abonnement")
+                .icone("🔄")
+                .couleur("#6366f1")
+                .isSystem(true)
+                .systemKey(SystemCategoryKey.SUBSCRIPTION)
+                .user(user)
+                .build();
+        Category userCategory = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Alimentation")
+                .icone("🍔")
+                .couleur("#22c55e")
+                .isSystem(false)
+                .user(user)
+                .build();
+        when(categoryRepository.findByUserIdOrderByNomAsc(userId))
+                .thenReturn(List.of(systemCategory, userCategory));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.categories()).hasSize(2);
+        var exportedSystem = response.categories().stream()
+                .filter(c -> c.nom().equals("Abonnement"))
+                .findFirst().orElseThrow();
+        assertThat(exportedSystem.isSystem()).isTrue();
+        assertThat(exportedSystem.systemKey()).isEqualTo("SUBSCRIPTION");
+
+        var exportedUser = response.categories().stream()
+                .filter(c -> c.nom().equals("Alimentation"))
+                .findFirst().orElseThrow();
+        assertThat(exportedUser.isSystem()).isFalse();
+        assertThat(exportedUser.systemKey()).isNull();
     }
 
     @Test

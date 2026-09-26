@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.response.UserExportResponse;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.*;
 import fr.kksdev.budget.api.repository.*;
@@ -175,7 +176,7 @@ public class UserExportService {
                 c.getIcone(),
                 c.getCouleur(),
                 c.getIsSystem() != null && c.getIsSystem(),
-                c.getSystemKey() != null ? c.getSystemKey().name() : null,
+                SystemCategoryKey.nameOf(c.getSystemKey()),
                 c.getUpdatedAt()
         );
     }

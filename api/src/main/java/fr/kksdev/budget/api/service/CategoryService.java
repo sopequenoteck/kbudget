@@ -189,7 +189,7 @@ public class CategoryService {
                 category.getIcone(),
                 category.getCouleur(),
                 Boolean.TRUE.equals(category.getIsSystem()),
-                category.getSystemKey() != null ? category.getSystemKey().name() : null
+                SystemCategoryKey.nameOf(category.getSystemKey())
         );
     }
 }

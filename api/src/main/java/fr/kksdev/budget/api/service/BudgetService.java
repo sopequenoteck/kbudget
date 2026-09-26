@@ -7,6 +7,7 @@ import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
@@ -174,7 +175,7 @@ public class BudgetService {
                     budget.getId(),
                     budget.getCategory().getId(),
                     budget.getCategory().getNom(),
-                    budget.getCategory().getSystemKey() != null ? budget.getCategory().getSystemKey().name() : null,
+                    SystemCategoryKey.nameOf(budget.getCategory().getSystemKey()),
                     budget.getCategory().getIcone(),
                     budget.getCategory().getCouleur(),
                     budget.getMontant(),
@@ -246,7 +247,7 @@ public class BudgetService {
             items.add(new BudgetHistoryItemResponse(
                     snapshot.getCategory().getId(),
                     snapshot.getCategory().getNom(),
-                    snapshot.getCategory().getSystemKey() != null ? snapshot.getCategory().getSystemKey().name() : null,
+                    SystemCategoryKey.nameOf(snapshot.getCategory().getSystemKey()),
                     snapshot.getCategory().getIcone(),
                     snapshot.getCategory().getCouleur(),
                     snapshot.getMontantBudget(),

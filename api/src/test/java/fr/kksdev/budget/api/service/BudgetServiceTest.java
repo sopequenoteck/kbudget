@@ -707,6 +707,70 @@ class BudgetServiceTest {
     }
 
     // -------------------------------------------------------------------------
+    // Unbudgeted spending — mapping des lignes natives (KKS-395, system_key)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_mapSystemKeyAndUserCategory_when_getUnbudgetedSpending() {
+        UUID subscriptionCategoryId = UUID.randomUUID();
+        UUID userCategoryId = UUID.randomUUID();
+
+        // Colonnes natives : category_id, nom, icone, couleur, montant, currency, system_key
+        Object[] systemRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("50.00"), "EUR", "SUBSCRIPTION"};
+        Object[] userRow = {userCategoryId, "Loisirs", "🎮", "#a855f7",
+                new BigDecimal("30.00"), "EUR", null};
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of());
+        when(transactionRepository.findUnbudgetedSpendingByMonth(
+                eq(userId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(systemRow, userRow));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        assertThat(response.unbudgetedItems()).hasSize(2);
+
+        var systemItem = response.unbudgetedItems().stream()
+                .filter(item -> item.categoryId().equals(subscriptionCategoryId))
+                .findFirst().orElseThrow();
+        assertThat(systemItem.categoryNom()).isEqualTo("Abonnement");
+        assertThat(systemItem.categorySystemKey()).isEqualTo("SUBSCRIPTION");
+        assertThat(systemItem.montantDepense()).isEqualByComparingTo("50.00");
+
+        var userItem = response.unbudgetedItems().stream()
+                .filter(item -> item.categoryId().equals(userCategoryId))
+                .findFirst().orElseThrow();
+        assertThat(userItem.categoryNom()).isEqualTo("Loisirs");
+        assertThat(userItem.categorySystemKey()).isNull();
+        assertThat(userItem.montantDepense()).isEqualByComparingTo("30.00");
+    }
+
+    @Test
+    void should_mergeRows_when_getUnbudgetedSpendingHasSameCategoryTwice() {
+        UUID subscriptionCategoryId = UUID.randomUUID();
+
+        // Deux lignes de la meme categorie (ex. deux comptes) : la branche
+        // merged.containsKey doit cumuler les montants sans dupliquer l'item.
+        Object[] firstRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("10.00"), "EUR", "SUBSCRIPTION"};
+        Object[] secondRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("5.00"), "EUR", "SUBSCRIPTION"};
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of());
+        when(transactionRepository.findUnbudgetedSpendingByMonth(
+                eq(userId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(firstRow, secondRow));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        assertThat(response.unbudgetedItems()).hasSize(1);
+        var merged = response.unbudgetedItems().getFirst();
+        assertThat(merged.categoryId()).isEqualTo(subscriptionCategoryId);
+        assertThat(merged.categorySystemKey()).isEqualTo("SUBSCRIPTION");
+        assertThat(merged.montantDepense()).isEqualByComparingTo("15.00");
+    }
+
+    // -------------------------------------------------------------------------
     // US3 — History tests (T029)
     // -------------------------------------------------------------------------
 

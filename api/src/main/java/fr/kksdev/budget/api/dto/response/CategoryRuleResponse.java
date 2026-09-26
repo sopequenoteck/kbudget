@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.CategoryRule;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public record CategoryRuleResponse(
                 rule.getPattern(),
                 rule.getCategory().getId(),
                 rule.getCategory().getNom(),
-                rule.getCategory().getSystemKey() != null ? rule.getCategory().getSystemKey().name() : null,
+                SystemCategoryKey.nameOf(rule.getCategory().getSystemKey()),
                 rule.getCategory().getIcone(),
                 rule.getCreatedAt(),
                 rule.getOrigin() != null ? rule.getOrigin().name() : null

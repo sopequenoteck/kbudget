@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Category;
 
 import java.util.UUID;
@@ -23,7 +24,7 @@ public record CategoryResponse(
                 category.getIcone(),
                 category.getCouleur(),
                 Boolean.TRUE.equals(category.getIsSystem()),
-                category.getSystemKey() != null ? category.getSystemKey().name() : null
+                SystemCategoryKey.nameOf(category.getSystemKey())
         );
     }
 }

@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.ImportDraftLine;
 
 import java.math.BigDecimal;
@@ -44,8 +45,7 @@ public record ImportDraftLineResponse(
                 line.getStatusMessage(),
                 line.getCategory() != null ? line.getCategory().getId() : null,
                 line.getCategory() != null ? line.getCategory().getNom() : null,
-                line.getCategory() != null && line.getCategory().getSystemKey() != null
-                        ? line.getCategory().getSystemKey().name() : null,
+                line.getCategory() != null ? SystemCategoryKey.nameOf(line.getCategory().getSystemKey()) : null,
                 line.getDuplicateTransactionId(),
                 suggestRule,
                 line.getSkipReason() != null ? line.getSkipReason().name() : null,

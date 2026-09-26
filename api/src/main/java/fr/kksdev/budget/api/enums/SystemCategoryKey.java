@@ -13,5 +13,13 @@ public enum SystemCategoryKey {
     /** Categorie des virements entre comptes. */
     TRANSFER,
     /** Categorie des ajustements de solde. */
-    ADJUSTMENT
+    ADJUSTMENT;
+
+    /**
+     * Nom de la cle a exposer dans un DTO, null pour une categorie utilisateur
+     * (KKS-395). Centralise la conversion pour eviter un ternaire par appelant.
+     */
+    public static String nameOf(SystemCategoryKey key) {
+        return key == null ? null : key.name();
+    }
 }
