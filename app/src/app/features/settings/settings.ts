@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorSun,
@@ -43,6 +44,18 @@ import { DebtService } from '../../core/services/debt';
 import { HealthService, type HealthCheckResult } from '../../core/services/health';
 import { FEATURES, type Feature } from '../../core/models/preference.model';
 import { type NotificationType } from '../../core/models/notification.model';
+import {
+  LANGUAGE_NATIVE_NAMES,
+  LanguageService,
+  SUPPORTED_LANGUAGES,
+} from '../../core/services/language';
+import { SelectPicker } from '../../shared/components/select-picker/select-picker';
+import { SelectPickerItem } from '../../shared/components/select-picker/select-picker.model';
+
+/** Identifiant du selecteur de langue quand la preference vaut `null`
+ * (KKS-380) : distinct de {@link Language} pour representer « Automatique »
+ * dans `app-select-picker`, qui ne travaille qu'avec des identifiants. */
+const AUTO_LANGUAGE_ID = 'auto';
 
 interface NotificationTypeConfig {
   type: NotificationType;
@@ -69,7 +82,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [RouterLink, NgIcon, CdkDropList, CdkDrag, CdkDragHandle, TranslocoPipe],
+  imports: [RouterLink, FormsModule, NgIcon, CdkDropList, CdkDrag, CdkDragHandle, TranslocoPipe, SelectPicker],
   providers: [
     provideIcons({
       phosphorSun,
@@ -102,6 +115,7 @@ export class Settings implements OnInit {
   private readonly themeService = inject(ThemeService);
   readonly textScaleService = inject(TextScaleService);
   readonly preferenceService = inject(PreferenceService);
+  readonly languageService = inject(LanguageService);
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
   private readonly healthService = inject(HealthService);
@@ -146,6 +160,36 @@ export class Settings implements OnInit {
   readonly disabledNavItems = computed(() => {
     const enabled = this.preferenceService.enabledFeatures();
     return FEATURES.filter((f) => !enabled.includes(f.value));
+  });
+
+  /** Identifiant courant du selecteur de langue (KKS-380) : `auto` tant que
+   * la preference vaut `null`. */
+  readonly languageSelectionId = computed(() => this.preferenceService.language() ?? AUTO_LANGUAGE_ID);
+
+  /**
+   * Options du selecteur de langue (KKS-380) : « Automatique » avec la
+   * langue detectee du navigateur entre parentheses, puis chaque langue
+   * supportee dans son propre nom, jamais traduit. Lit `activeLanguage()`
+   * avant de traduire pour se reevaluer au changement de langue (precedent
+   * `CurrencyService.currencyItems`, KKS-379) : `translate()` seul n'est pas
+   * un signal, `computed()` ne s'y abonnerait pas.
+   */
+  readonly languageItems = computed<SelectPickerItem[]>(() => {
+    this.languageService.activeLanguage();
+    const detected = this.languageService.detectedBrowserLanguage;
+    const autoLabel = this.transloco.translate('settings.value.languageAuto', {
+      language: LANGUAGE_NATIVE_NAMES[detected],
+    });
+    return [
+      { id: AUTO_LANGUAGE_ID, label: autoLabel, icon: null, secondaryText: null, color: null },
+      ...SUPPORTED_LANGUAGES.map((lang) => ({
+        id: lang,
+        label: LANGUAGE_NATIVE_NAMES[lang],
+        icon: null,
+        secondaryText: null,
+        color: null,
+      })),
+    ];
   });
 
   constructor() {
@@ -198,6 +242,16 @@ export class Settings implements OnInit {
   onTimezoneChange(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;
     this.preferenceService.updateTimezone(value);
+  }
+
+  /** `auto` remet la preference a `null` (`DELETE`) ; toute autre valeur est
+   * une langue supportee choisie explicitement (`PUT`) — KKS-380. */
+  onLanguageSelect(id: string): void {
+    if (id === AUTO_LANGUAGE_ID) {
+      this.preferenceService.clearLanguage();
+    } else {
+      this.preferenceService.setLanguage(id);
+    }
   }
 
   async toggleFeature(feature: Feature): Promise<void> {

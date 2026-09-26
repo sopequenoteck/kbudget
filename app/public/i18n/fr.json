@@ -688,6 +688,7 @@
       "saveError": "Impossible de sauvegarder les préférences"
     },
     "form": {
+      "language": "Langue",
       "timezone": "Zone"
     },
     "list": {
@@ -712,6 +713,7 @@
     "value": {
       "envDev": "Dev",
       "envProd": "Prod",
+      "languageAuto": "Automatique ({language})",
       "offline": "Hors ligne",
       "online": "En ligne",
       "textScaleLarge": "Grand",

@@ -71,6 +71,7 @@ function createMocks() {
       setCurrencies: vi.fn(),
       update: vi.fn(),
       language: vi.fn().mockReturnValue(null),
+      loaded: vi.fn().mockReturnValue(false),
     },
     modalService: {
       editingEntity: signal(null),

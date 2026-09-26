@@ -114,6 +114,7 @@ function createMockPreferenceService() {
     currencies: signal(['EUR']),
     enabledFeatures: signal([]),
     language: signal<string | null>(null),
+    loaded: signal(false),
   };
 }
 

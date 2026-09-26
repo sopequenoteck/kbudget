@@ -35,6 +35,15 @@ export class PreferenceService {
    */
   readonly language = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  /**
+   * Passe a `true` apres un chargement reussi (KKS-380). Distinct
+   * d'{@link isLoaded}, qui reste fonde sur `enabledFeatures().length` pour
+   * ses consommateurs actuels (`feature.guard`) — faux pour un compte sans
+   * fonctionnalite activee, alors que {@link loaded} l'est. Consomme par
+   * `LanguageService` : tant qu'il vaut `false`, une preference de langue
+   * nulle ne signifie pas encore « le serveur confirme l'absence de choix ».
+   */
+  readonly loaded = signal(false);
 
   async loadPreferences(): Promise<void> {
     try {
@@ -51,6 +60,7 @@ export class PreferenceService {
       this.textScale.set(prefs.textScale ?? 'MEDIUM');
       this.language.set(prefs.language ?? null);
       this.error.set(null);
+      this.loaded.set(true);
     } catch (e) {
       this.logger.error('Failed to load preferences:', e);
       this.error.set(this.transloco.translate('settings.feedback.loadError'));
@@ -90,17 +100,31 @@ export class PreferenceService {
     return this.enabledFeatures().length > 0;
   }
 
-  update(request: Partial<UserPreferenceRequest>): void {
-    const oldPrimary = this.currencies()[0];
-    const merged: UserPreferenceRequest = {
+  /**
+   * Corps complet d'un `PUT /users/me/preferences` (remplacement integral) :
+   * l'etat courant de chaque champ, `language` omis s'il vaut `null` (KKS-380 —
+   * jamais envoye a `null`, la remise a `null` passe par
+   * `DELETE .../preferences/language`), puis les `overrides` demandes.
+   */
+  private buildPreferenceRequest(
+    overrides: Partial<UserPreferenceRequest> = {},
+  ): UserPreferenceRequest {
+    const language = this.language();
+    return {
       enabledFeatures: this.enabledFeatures(),
       navOrder: this.navOrder(),
       currencies: this.currencies(),
       enabledNotificationTypes: this.enabledNotificationTypes(),
       timezone: this.timezone(),
       textScale: this.textScale(),
-      ...request,
+      ...(language ? { language } : {}),
+      ...overrides,
     };
+  }
+
+  update(request: Partial<UserPreferenceRequest>): void {
+    const oldPrimary = this.currencies()[0];
+    const merged = this.buildPreferenceRequest(request);
     firstValueFrom(this.apiService.put<UserPreference>('/users/me/preferences', merged))
       .then(() => {
         const newPrimary = merged.currencies?.[0];
@@ -133,6 +157,45 @@ export class PreferenceService {
   updateTextScale(scale: string): void {
     this.textScale.set(scale);
     this.update({ textScale: scale });
+  }
+
+  /**
+   * Choisit une langue explicite (KKS-380). Optimiste, sans revert
+   * automatique dans {@link update} (aucun des autres champs n'en a besoin) :
+   * ici le revert est manuel, la langue affichee devant rester correcte meme
+   * hors ligne.
+   */
+  setLanguage(language: string): void {
+    const previous = this.language();
+    if (previous === language) {
+      return;
+    }
+    this.language.set(language);
+    firstValueFrom(
+      this.apiService.put<UserPreference>(
+        '/users/me/preferences',
+        this.buildPreferenceRequest({ language }),
+      ),
+    ).catch((e) => {
+      this.logger.error('Failed to update language preference:', e);
+      this.language.set(previous);
+      this.error.set(this.transloco.translate('settings.feedback.saveError'));
+    });
+  }
+
+  /** Revient au choix « Automatique » (KKS-380) : `DELETE`, pas un `PUT`
+   * avec `language: null` — la preference n'accepte que `'en' | 'fr'`. */
+  clearLanguage(): void {
+    const previous = this.language();
+    if (previous === null) {
+      return;
+    }
+    this.language.set(null);
+    firstValueFrom(this.apiService.delete<void>('/users/me/preferences/language')).catch((e) => {
+      this.logger.error('Failed to reset language preference:', e);
+      this.language.set(previous);
+      this.error.set(this.transloco.translate('settings.feedback.saveError'));
+    });
   }
 
   reorderNavigation(newNavOrder: Feature[]): void {

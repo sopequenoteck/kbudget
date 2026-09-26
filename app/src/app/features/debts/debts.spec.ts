@@ -58,6 +58,7 @@ function createPreferenceServiceMock() {
     currencies,
     primaryCurrency: computed(() => currencies()[0] ?? 'EUR'),
     language: signal<string | null>(null),
+    loaded: signal(false),
     setCurrencies: vi.fn(),
     update: vi.fn(),
   };

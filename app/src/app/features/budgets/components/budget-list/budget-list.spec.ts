@@ -88,6 +88,7 @@ describe('BudgetList', () => {
     setCurrencies: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     language: ReturnType<typeof signal>;
+    loaded: ReturnType<typeof signal>;
   };
   let conversionServiceMock: { convert: ReturnType<typeof vi.fn> };
   let exchangeRateServiceMock: { loadRates: ReturnType<typeof vi.fn> };
@@ -109,6 +110,7 @@ describe('BudgetList', () => {
       setCurrencies: vi.fn(),
       update: vi.fn(),
       language: signal<string | null>(null),
+      loaded: signal(false),
     };
     conversionServiceMock = { convert: vi.fn((amount: number) => amount) };
     exchangeRateServiceMock = { loadRates: vi.fn().mockResolvedValue(undefined) };

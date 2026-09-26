@@ -487,4 +487,50 @@ class PreferenceServiceTest {
         assertThat(preferenceA.getLanguage()).isEqualTo("en");
         assertThat(otherResponse.language()).isNull();
     }
+
+    // === resetLanguage (KKS-380) ===
+
+    @Test
+    void should_resetLanguageToNull_when_languageWasSet() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        preference.setLanguage("fr");
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        preferenceService.resetLanguage(userId);
+
+        assertThat(preference.getLanguage()).isNull();
+        verify(userPreferenceRepository).save(preference);
+    }
+
+    @Test
+    void should_haveNoEffect_when_languageWasAlreadyNull() {
+        var preference = buildPreference(
+                List.of(Feature.SUBSCRIPTIONS),
+                List.of(Feature.SUBSCRIPTIONS)
+        );
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        preferenceService.resetLanguage(userId);
+
+        assertThat(preference.getLanguage()).isNull();
+        verify(userPreferenceRepository).save(preference);
+    }
+
+    @Test
+    void should_createPreferenceWithNullLanguage_when_noPreferenceExists() {
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.getReferenceById(userId)).thenReturn(User.builder().id(userId).build());
+        when(userPreferenceRepository.save(any(UserPreference.class))).thenAnswer(i -> i.getArgument(0));
+
+        preferenceService.resetLanguage(userId);
+
+        ArgumentCaptor<UserPreference> captor = ArgumentCaptor.forClass(UserPreference.class);
+        verify(userPreferenceRepository, org.mockito.Mockito.times(2)).save(captor.capture());
+        assertThat(captor.getValue().getLanguage()).isNull();
+    }
 }

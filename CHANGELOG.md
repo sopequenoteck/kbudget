@@ -5,6 +5,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+> **Changement de comportement (KKS-380) : l'interface passe en anglais par
+> defaut.** Un utilisateur qui n'a pas choisi de langue voit desormais
+> l'interface dans la langue de son navigateur, et en anglais si celle-ci n'est
+> ni l'anglais ni le francais. Un navigateur en francais continue d'afficher le
+> francais. Le choix se fait dans Reglages > Apparence > Langue.
+
 > **Une migration de base (V38) : sauvegarder avant de mettre a jour.** Elle
 > ajoute une colonne nullable, sans valeur par defaut, et ne modifie aucune
 > donnee existante.
@@ -75,6 +81,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   CFA (BCEAO) » (au lieu de « Franc CFA ») dans les reglages des devises. Le
   champ `name` de `/currencies` reste servi, mais les clients ne l'affichent
   plus.
+- **Choix de la langue de l'interface (KKS-380)** : derniere etape de
+  KKS-325. Anglais par defaut, francais complet ; sans choix, l'interface suit
+  le navigateur. Nouvelle ligne « Langue » dans Reglages > Apparence :
+  « Automatique », « English », « Francais ». Le changement s'applique sans
+  recharger la page. La derniere langue utilisee est memorisee sur l'appareil,
+  pour que la page de connexion s'affiche deja dans la bonne langue.
+  - API : `DELETE /users/me/preferences/language` remet la preference a `null`
+    (retour au choix automatique) ; `PUT` ne le permettait pas, un `language`
+    absent y signifiant « inchange ».
 
 ### Changed
 

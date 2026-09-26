@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -305,6 +306,25 @@ class PreferenceControllerTest {
                                 """.formatted(invalidLanguage)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+
+        org.mockito.Mockito.verifyNoInteractions(preferenceService);
+    }
+
+    // === DELETE /users/me/preferences/language (KKS-380) ===
+
+    @Test
+    void should_return204_when_resettingLanguage() throws Exception {
+        mockMvc.perform(delete("/v1/users/me/preferences/language")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isNoContent());
+
+        org.mockito.Mockito.verify(preferenceService).resetLanguage(userId);
+    }
+
+    @Test
+    void should_return401_when_noTokenOnDeleteLanguage() throws Exception {
+        mockMvc.perform(delete("/v1/users/me/preferences/language"))
+                .andExpect(status().isUnauthorized());
 
         org.mockito.Mockito.verifyNoInteractions(preferenceService);
     }

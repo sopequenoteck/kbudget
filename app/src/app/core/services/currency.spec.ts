@@ -112,9 +112,15 @@ describe('CurrencyService', () => {
       expect(service.currencyItems()[0].secondaryText).toBe('Dollar US');
 
       // Act — la reevaluation suit `activeLanguage()`, lu avant de traduire.
+      // `activeLanguage` ne bascule qu'apres chargement du catalogue
+      // (KKS-380) : il faut laisser la promesse de `LanguageService` se
+      // resoudre avant de lire `currencyItems()`.
       TestBed.inject(TranslocoService).load('en').subscribe();
       preferenceService.language.set('en');
       TestBed.tick();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
 
       // Assert
       expect(service.currencyItems()[0].secondaryText).toBe('US Dollar');

@@ -14,7 +14,12 @@ import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat'
 
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
-import { provideLanguageBootstrap } from './core/services/language';
+import {
+  BROWSER_LANGUAGES,
+  LANGUAGE_STORAGE,
+  provideLanguageBootstrap,
+  resolveBootstrapLanguage,
+} from './core/services/language';
 
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -29,9 +34,10 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    // Transloco (KKS-373, D5) : francais par defaut et de repli, transpileur
-    // MessageFormat pour l'ICU. Catalogues charges a l'execution depuis
-    // `/i18n/`, jamais incorpores au bundle.
+    // Transloco (KKS-373, D5 ; anglais par defaut depuis KKS-380) : anglais
+    // par defaut et de repli — langue source de `docs/i18n.md`, jamais
+    // traduite en retard. Transpileur MessageFormat pour l'ICU. Catalogues
+    // charges a l'execution depuis `/i18n/`, jamais incorpores au bundle.
     // Ne pas regler `interpolation` sur `{ }` : l'interpolation de Transloco
     // passerait alors avant MessageFormat et viderait tout bloc de pluriel ICU.
     // MessageFormat traite deja les parametres simples `{name}`, ce qui garde
@@ -39,8 +45,8 @@ export const appConfig: ApplicationConfig = {
     provideTransloco({
       config: {
         availableLangs: ['en', 'fr'],
-        defaultLang: 'fr',
-        fallbackLang: 'fr',
+        defaultLang: 'en',
+        fallbackLang: 'en',
         missingHandler: { useFallbackTranslation: true },
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
@@ -48,15 +54,23 @@ export const appConfig: ApplicationConfig = {
       loader: TranslocoHttpLoader,
     }),
     provideTranslocoMessageformat(),
-    // D6 : la langue par defaut est chargee avant le premier rendu — sans
-    // cela, une resolution synchrone de cle (ApiErrorService) pourrait
-    // rendre la cle brute plutot qu'un texte. Les ecrans non authentifies
-    // (connexion, invitation, reinitialisation) s'affichent avant toute
-    // lecture de preference : on ne precharge que le francais, jamais on
-    // n'attend le serveur pour peindre le premier ecran.
-    provideAppInitializer(() => {
+    // D4, D6 (KKS-380) : precharge la langue initiale *resolue* — derniere
+    // langue appliquee sur cet appareil (`localStorage`), sinon le
+    // navigateur — jamais `getDefaultLang()` seul, sans quoi un ecran non
+    // authentifie (connexion, invitation, reinitialisation) s'afficherait
+    // d'abord dans la langue par defaut avant que `LanguageService` ne
+    // corrige. Meme resolution que la valeur initiale de
+    // `LanguageService.activeLanguage` (KKS-380). `setActiveLang` une fois
+    // le catalogue charge : sans cela, Transloco reste sur `defaultLang`
+    // ('en') jusqu'au premier passage de l'`effect` de `LanguageService`, et
+    // un appareil memorisant `fr` verrait le tout premier ecran en anglais.
+    provideAppInitializer(async () => {
       const transloco = inject(TranslocoService);
-      return firstValueFrom(transloco.load(transloco.getDefaultLang()));
+      const storage = inject(LANGUAGE_STORAGE);
+      const browserLanguages = inject(BROWSER_LANGUAGES);
+      const lang = resolveBootstrapLanguage(storage, browserLanguages);
+      await firstValueFrom(transloco.load(lang));
+      transloco.setActiveLang(lang);
     }),
     // KKS-373 (D8) : demarre `LanguageService` des la creation de
     // l'injecteur, avant tout composant — voir le commentaire de la fonction

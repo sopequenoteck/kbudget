@@ -24,11 +24,15 @@ describe('Settings', () => {
     timezone: ReturnType<typeof signal<string>>;
     navOrder: ReturnType<typeof signal<string[]>>;
     enabledFeatures: ReturnType<typeof signal<string[]>>;
+    language: ReturnType<typeof signal<string | null>>;
+    loaded: ReturnType<typeof signal<boolean>>;
     isEnabled: ReturnType<typeof vi.fn>;
     toggleFeature: ReturnType<typeof vi.fn>;
     updateNotificationTypes: ReturnType<typeof vi.fn>;
     updateTimezone: ReturnType<typeof vi.fn>;
     reorderNavigation: ReturnType<typeof vi.fn>;
+    setLanguage: ReturnType<typeof vi.fn>;
+    clearLanguage: ReturnType<typeof vi.fn>;
   };
   let subscriptionServiceMock: { getAll: ReturnType<typeof vi.fn> };
   let debtServiceMock: { getAll: ReturnType<typeof vi.fn> };
@@ -52,11 +56,17 @@ describe('Settings', () => {
       timezone: signal('Europe/Paris'),
       navOrder: signal(['SUBSCRIPTIONS', 'DEBTS']),
       enabledFeatures: signal(['SUBSCRIPTIONS', 'DEBTS']),
+      // `language`/`loaded` : lus par le vrai `LanguageService` injecte par
+      // Settings (KKS-380), pas seulement par le composant lui-meme.
+      language: signal<string | null>(null),
+      loaded: signal(false),
       isEnabled: vi.fn().mockReturnValue(true),
       toggleFeature: vi.fn(),
       updateNotificationTypes: vi.fn(),
       updateTimezone: vi.fn(),
       reorderNavigation: vi.fn(),
+      setLanguage: vi.fn(),
+      clearLanguage: vi.fn(),
     };
     subscriptionServiceMock = { getAll: vi.fn().mockReturnValue(of([])) };
     debtServiceMock = { getAll: vi.fn().mockReturnValue(of([])) };
@@ -211,6 +221,71 @@ describe('Settings', () => {
       fixture.componentInstance.onTimezoneChange(event);
 
       expect(preferenceServiceMock.updateTimezone).toHaveBeenCalledWith('Europe/London');
+    });
+  });
+
+  describe('selecteur de langue (KKS-380)', () => {
+    it('should_expose_the_automatic_option_with_the_browser_detected_language', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      const items = fixture.componentInstance.languageItems();
+
+      // provideTranslocoTesting force le navigateur en francais (D10).
+      expect(items[0]).toEqual({
+        id: 'auto',
+        label: 'Automatique (Français)',
+        icon: null,
+        secondaryText: null,
+        color: null,
+      });
+    });
+
+    it('should_expose_each_supported_language_in_its_own_name', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      const items = fixture.componentInstance.languageItems();
+
+      expect(items.slice(1)).toEqual([
+        { id: 'en', label: 'English', icon: null, secondaryText: null, color: null },
+        { id: 'fr', label: 'Français', icon: null, secondaryText: null, color: null },
+      ]);
+    });
+
+    it('should_select_automatic_when_the_preference_is_null', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.languageSelectionId()).toBe('auto');
+    });
+
+    it('should_select_the_chosen_language_when_a_preference_is_set', () => {
+      const fixture = setup();
+      preferenceServiceMock.language.set('en');
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.languageSelectionId()).toBe('en');
+    });
+
+    it('should_delegate_to_setLanguage_when_a_language_is_chosen', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      fixture.componentInstance.onLanguageSelect('en');
+
+      expect(preferenceServiceMock.setLanguage).toHaveBeenCalledWith('en');
+      expect(preferenceServiceMock.clearLanguage).not.toHaveBeenCalled();
+    });
+
+    it('should_delegate_to_clearLanguage_when_automatic_is_chosen', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      fixture.componentInstance.onLanguageSelect('auto');
+
+      expect(preferenceServiceMock.clearLanguage).toHaveBeenCalled();
+      expect(preferenceServiceMock.setLanguage).not.toHaveBeenCalled();
     });
   });
 

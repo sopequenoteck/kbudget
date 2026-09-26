@@ -252,7 +252,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
 | timezone | String | Fuseau horaire (default "Europe/Paris") |
 | textScale | TextScale | Taille de texte (SMALL/MEDIUM/LARGE, default MEDIUM) |
-| language | String | Langue d'interface, code BCP 47 restreint (`en`, `fr`, `pt-BR`). Nullable sans defaut : null = pas choisi (KKS-373) |
+| language | String | Langue d'interface, code BCP 47 restreint (`en`, `fr`, `pt-BR`). Nullable sans defaut : null = pas choisi, le client suit alors le navigateur (KKS-373). Retour a null via `DELETE /users/me/preferences/language` (KKS-380) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
