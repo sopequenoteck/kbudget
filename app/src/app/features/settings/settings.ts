@@ -28,7 +28,7 @@ import {
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import packageJson from '../../../../package.json';
 
@@ -46,22 +46,22 @@ import { type NotificationType } from '../../core/models/notification.model';
 
 interface NotificationTypeConfig {
   type: NotificationType;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   icon: string;
 }
 
 const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
   {
     type: 'SUBSCRIPTION_DUE',
-    label: 'Rappels abonnements',
-    description: "Notification la veille d'une échéance d'abonnement",
+    labelKey: 'settings.list.subscriptionReminders',
+    descriptionKey: 'settings.list.subscriptionRemindersHint',
     icon: 'phosphorCalendarCheck',
   },
   {
     type: 'DEBT_DUE',
-    label: 'Rappels dettes',
-    description: "Notification la veille d'une échéance de dette",
+    labelKey: 'settings.list.debtReminders',
+    descriptionKey: 'settings.list.debtRemindersHint',
     icon: 'phosphorHandCoins',
   },
 ];
@@ -105,6 +105,7 @@ export class Settings implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly debtService = inject(DebtService);
   private readonly healthService = inject(HealthService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly currentUser = this.authService.currentUser;
   readonly avatarUrl = this.avatarService.avatarUrl;
@@ -159,7 +160,7 @@ export class Settings implements OnInit {
       this.healthResult.set({
         status: 'offline',
         responseTimeMs: null,
-        error: 'Erreur inconnue',
+        error: this.transloco.translate('errors.client.unknown'),
         checkedAt: null,
       });
     }

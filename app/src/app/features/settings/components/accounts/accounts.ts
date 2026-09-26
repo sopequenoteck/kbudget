@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -25,7 +26,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ModalService } from '../../../../core/services/modal.service';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { ApiErrorService } from '../../../../core/services/api-error';
-import { Account } from '../../../../core/models/account.model';
+import { ACCOUNT_TYPE_LABEL_KEYS, Account } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { AccountBankIcon } from '../../../../shared/components/account-bank-icon/account-bank-icon';
 import { CurrencyList } from '../currency-settings/currency-list';
@@ -35,7 +36,16 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [AmountPipe, RouterLink, NgIcon, AccountBankIcon, CurrencyList, ExchangeRateManager, EmptyState],
+  imports: [
+    AmountPipe,
+    RouterLink,
+    NgIcon,
+    AccountBankIcon,
+    CurrencyList,
+    ExchangeRateManager,
+    EmptyState,
+    TranslocoPipe,
+  ],
   providers: [
     provideIcons({
       phosphorBank,
@@ -58,10 +68,12 @@ export class Accounts {
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
   private readonly apiError = inject(ApiErrorService);
+  private readonly transloco = inject(TranslocoService);
   readonly rateService = inject(ExchangeRateService);
   private readonly prefService = inject(PreferenceService);
 
   readonly skeletonItems = Array(3);
+  readonly ACCOUNT_TYPE_LABEL_KEYS = ACCOUNT_TYPE_LABEL_KEYS;
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(true);
@@ -136,7 +148,10 @@ export class Accounts {
       this.deleteError.set(null);
     } catch (err: unknown) {
       const httpErr = err as { error?: { message?: string } };
-      const message = this.apiError.label(httpErr, 'Erreur lors de la suppression');
+      const message = this.apiError.label(
+        httpErr,
+        this.transloco.translate('common.feedback.deleteError'),
+      );
       this.deleteError.set(message);
       this.logger.error('Failed to delete account', err);
     }

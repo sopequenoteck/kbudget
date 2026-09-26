@@ -1,15 +1,19 @@
 {
   "accounts": {
     "action": {
+      "create": "Créer un compte",
       "createFirst": "Créer mon premier compte",
-      "later": "Plus tard"
+      "later": "Plus tard",
+      "setDefault": "Définir par défaut"
     },
     "dialog": {
       "createTitle": "Nouveau compte",
+      "deleteMessage": "Supprimer ce compte ?",
       "editTitle": "Modifier le compte"
     },
     "empty": {
       "bankNotFound": "Aucune banque trouvée",
+      "hint": "Créez votre premier compte pour commencer",
       "title": "Aucun compte"
     },
     "feedback": {
@@ -29,8 +33,8 @@
       "currency": "Devise",
       "currencyPlaceholder": "Devise par défaut",
       "currentBalance": "Solde actuel",
-      "customLogoAria": "Logo personnalisé",
       "customLogo": "Logo personnalisé (optionnel)",
+      "customLogoAria": "Logo personnalisé",
       "customisationTitle": "Personnalisation",
       "detailsTitle": "Détails",
       "icon": "Icône",
@@ -38,8 +42,8 @@
       "namePlaceholder": "Ex: Compte courant",
       "newBalance": "Nouveau solde",
       "openingBalance": "Solde initial",
-      "ratePlaceholder": "Ex: 655.957",
       "rate": "1 {currency} =",
+      "ratePlaceholder": "Ex: 655.957",
       "rateProposalMessage": "Aucun taux {from} → {to} n'est défini.",
       "rateProposalTitle": "Taux de conversion manquant",
       "typeTitle": "Type de compte"
@@ -47,7 +51,11 @@
     "list": {
       "bankGroupFrance": "France",
       "bankGroupInternational": "International",
-      "bankGroupWestAfrica": "Afrique de l'Ouest"
+      "bankGroupWestAfrica": "Afrique de l'Ouest",
+      "count": "{count, plural, one {# compte} other {# comptes}}"
+    },
+    "page": {
+      "title": "Comptes & Devises"
     },
     "summary": {
       "netWorth": "Patrimoine total"
@@ -55,6 +63,7 @@
     "value": {
       "cash": "Espèces",
       "current": "Courant",
+      "default": "Défaut",
       "other": "Autre",
       "otherCustom": "Autre / Personnalisé",
       "savings": "Épargne"
@@ -173,13 +182,16 @@
   "categories": {
     "action": {
       "create": "Créer",
+      "createCategory": "Créer une catégorie",
       "createNamed": "Créer « {name} »"
     },
     "dialog": {
       "createTitle": "Nouvelle catégorie",
+      "deleteMessage": "Cette catégorie sera dissociée de tous les items liés.",
       "editTitle": "Modifier la catégorie"
     },
     "empty": {
+      "noCategories": "Aucune catégorie",
       "title": "Aucune catégorie — créez-en une"
     },
     "form": {
@@ -190,8 +202,12 @@
       "searchPlaceholder": "Rechercher une catégorie..."
     },
     "list": {
+      "count": "{count, plural, one {# catégorie} other {# catégories}}",
       "noResults": "Aucune catégorie trouvée",
       "regionAria": "Catégories"
+    },
+    "page": {
+      "title": "Catégories"
     }
   },
   "common": {
@@ -205,7 +221,10 @@
       "create": "Créer",
       "currentMonthHint": "Revenir au mois actuel",
       "delete": "Supprimer",
+      "disable": "Désactiver",
       "edit": "Modifier",
+      "enable": "Réactiver",
+      "hidePasswordAria": "Masquer",
       "logout": "Déconnexion",
       "nextMonthAria": "Mois suivant",
       "previousMonthAria": "Mois précédent",
@@ -214,6 +233,7 @@
       "resetFilters": "Réinitialiser les filtres",
       "retry": "Réessayer",
       "save": "Enregistrer",
+      "showPasswordAria": "Afficher",
       "viewAll": "Voir tout"
     },
     "empty": {
@@ -222,7 +242,9 @@
     },
     "feedback": {
       "deleteError": "Erreur lors de la suppression",
+      "deleting": "Suppression...",
       "loadError": "Erreur de chargement",
+      "loading": "Chargement...",
       "saveError": "Erreur lors de la sauvegarde",
       "saving": "Enregistrement..."
     },
@@ -232,8 +254,8 @@
       "searchAria": "Rechercher"
     },
     "form": {
-      "colourAria": "Couleur {color}",
       "colour": "Couleur",
+      "colourAria": "Couleur {color}",
       "searchPlaceholder": "Rechercher...",
       "selectPlaceholder": "Selectionner..."
     },
@@ -252,7 +274,8 @@
     },
     "validation": {
       "maxLength": "{max} caractères maximum",
-      "nameRequired": "Nom requis"
+      "nameRequired": "Nom requis",
+      "required": "Ce champ est requis."
     },
     "value": {
       "active": "Actif",
@@ -331,8 +354,8 @@
       "repaid": "Dette remboursée !",
       "repayError": "Erreur lors du remboursement",
       "repaymentRecorded": "Remboursement enregistré. Reste : {amount}",
-      "snoozed": "Rappel reporté",
-      "snoozeError": "Erreur lors du report du rappel"
+      "snoozeError": "Erreur lors du report du rappel",
+      "snoozed": "Rappel reporté"
     },
     "form": {
       "account": "Compte",
@@ -375,33 +398,33 @@
   },
   "errors": {
     "api": {
-      "badRequest": "La demande n'a pas pu être traitée.",
-      "validationError": "Veuillez vérifier les informations saisies.",
-      "malformedRequest": "Requête invalide.",
-      "invalidImageFormat": "Seuls les formats JPG et PNG sont acceptés.",
-      "invalidExportFormat": "Format d'export invalide. Formats acceptés : json, csv.",
-      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
-      "confirmationRequired": "Confirmation explicite requise.",
-      "passwordIncorrect": "Mot de passe incorrect.",
-      "unauthenticated": "Authentification requise.",
-      "tokenExpired": "Votre session a expiré. Veuillez vous reconnecter.",
-      "tokenRevoked": "Votre session a été révoquée. Veuillez vous reconnecter.",
-      "tokenReuseDetected": "Session interrompue par sécurité. Veuillez vous reconnecter.",
-      "tokenInvalid": "Session invalide. Veuillez vous reconnecter.",
       "accessDenied": "Accès refusé",
-      "passwordResetRequired": "Reset requis",
-      "featureDisabled": "Fonctionnalité désactivée",
-      "passwordResetNotRequired": "La réinitialisation des identifiants n'est pas requise pour ce compte.",
-      "lastAdminDeletionForbidden": "Au moins un administrateur actif doit exister.",
-      "notFound": "Ressource introuvable",
       "avatarNotFound": "Avatar introuvable",
+      "badRequest": "La demande n'a pas pu être traitée.",
+      "confirmationRequired": "Confirmation explicite requise.",
       "conflict": "Conflit de données",
-      "lastAdminCannotBeDisabled": "Impossible de désactiver le dernier administrateur actif.",
-      "emailAlreadyExists": "Email déjà utilisé",
-      "fileTooLarge": "Fichier trop volumineux. La taille maximale est 2 MB.",
       "csvProfileNotFound": "Profil CSV introuvable",
+      "emailAlreadyExists": "Email déjà utilisé",
+      "featureDisabled": "Fonctionnalité désactivée",
+      "fileTooLarge": "Fichier trop volumineux. La taille maximale est 2 MB.",
+      "internalError": "Une erreur interne est survenue",
+      "invalidExportFormat": "Format d'export invalide. Formats acceptés : json, csv.",
+      "invalidImageFormat": "Seuls les formats JPG et PNG sont acceptés.",
+      "lastAdminCannotBeDisabled": "Impossible de désactiver le dernier administrateur actif.",
+      "lastAdminDeletionForbidden": "Au moins un administrateur actif doit exister.",
+      "malformedRequest": "Requête invalide.",
+      "notFound": "Ressource introuvable",
+      "passwordIncorrect": "Mot de passe incorrect.",
+      "passwordResetNotRequired": "La réinitialisation des identifiants n'est pas requise pour ce compte.",
+      "passwordResetRequired": "Reset requis",
+      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "tokenExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+      "tokenInvalid": "Session invalide. Veuillez vous reconnecter.",
+      "tokenReuseDetected": "Session interrompue par sécurité. Veuillez vous reconnecter.",
+      "tokenRevoked": "Votre session a été révoquée. Veuillez vous reconnecter.",
       "tooManyRequests": "Trop de tentatives. Réessayez dans quelques instants.",
-      "internalError": "Une erreur interne est survenue"
+      "unauthenticated": "Authentification requise.",
+      "validationError": "Veuillez vérifier les informations saisies."
     },
     "client": {
       "generic": "Une erreur est survenue",
@@ -413,9 +436,43 @@
     }
   },
   "exchangeRates": {
+    "action": {
+      "remove": "Retirer",
+      "removeCurrencyAria": "Supprimer cette devise"
+    },
+    "dialog": {
+      "addCurrencyTitle": "Ajouter une devise",
+      "addRateTitle": "Ajouter un taux",
+      "deleteRateMessage": "Supprimer le taux <strong>{baseCurrency} → {targetCurrency}</strong> ?",
+      "editRateTitle": "Modifier le taux",
+      "removeMessage": "La devise <strong>{currency}</strong> est utilisée par des comptes existants. Retirer quand même ?"
+    },
+    "empty": {
+      "title": "Aucun taux configuré"
+    },
     "feedback": {
       "conversionIncompleteHint": "Certains montants n'ont pas pu être convertis",
-      "loadError": "Impossible de charger les taux de change"
+      "loadError": "Impossible de charger les taux de change",
+      "saveError": "Erreur lors de l'enregistrement du taux."
+    },
+    "form": {
+      "baseCurrency": "Devise de base",
+      "rate": "Taux",
+      "rateInvalid": "Veuillez saisir un taux valide (> 0).",
+      "ratePlaceholder": "Ex: 655.957",
+      "targetCurrency": "Devise cible",
+      "targetCurrencyPlaceholder": "Choisir une devise",
+      "targetRequired": "Veuillez sélectionner une devise cible."
+    },
+    "list": {
+      "reference": "Référence"
+    },
+    "page": {
+      "currenciesTitle": "Mes devises",
+      "ratesTitle": "Taux de conversion"
+    },
+    "value": {
+      "primary": "Principale"
     }
   },
   "imports": {
@@ -431,6 +488,7 @@
       "editRule": "Modifier la règle",
       "forceImport": "Importer quand même",
       "import": "Importer",
+      "importCsv": "Importer un CSV",
       "markSkippedAria": "Marquer comme ignorée",
       "resolveLinesFirst": "{count, plural, one {Résoudre # ligne d'abord} other {Résoudre # lignes d'abord}}",
       "resume": "Reprendre",
@@ -613,11 +671,48 @@
     }
   },
   "settings": {
+    "dialog": {
+      "disableFeatureMessage": "Vos données seront masquées mais pas supprimées."
+    },
     "feedback": {
       "exchangeRatesStale": "Taux de change périmés — rechargez la page",
       "loadError": "Impossible de charger les préférences",
       "navOrderSaveError": "Impossible de sauvegarder l'ordre de navigation",
       "saveError": "Impossible de sauvegarder les préférences"
+    },
+    "form": {
+      "timezone": "Zone"
+    },
+    "list": {
+      "accounts": "Comptes & Devises",
+      "accountsHint": "Comptes, devises et taux de conversion",
+      "categories": "Catégories",
+      "categoriesHint": "Gérer les catégories",
+      "debtReminders": "Rappels dettes",
+      "debtRemindersHint": "Notification la veille d'une échéance de dette",
+      "subscriptionReminders": "Rappels abonnements",
+      "subscriptionRemindersHint": "Notification la veille d'une échéance d'abonnement",
+      "textScalePreview": "Voici un aperçu de la taille du texte choisie.",
+      "version": "K-Budget v{version}"
+    },
+    "page": {
+      "administrationTitle": "Administration",
+      "appearanceTitle": "Apparence",
+      "managementTitle": "Gestion",
+      "navigationTitle": "Navigation",
+      "notificationsTitle": "Notifications"
+    },
+    "value": {
+      "envDev": "Dev",
+      "envProd": "Prod",
+      "offline": "Hors ligne",
+      "online": "En ligne",
+      "textScaleLarge": "Grand",
+      "textScaleMedium": "Normal",
+      "textScaleSmall": "Petit",
+      "themeAuto": "Auto",
+      "themeDark": "Sombre",
+      "themeLight": "Clair"
     }
   },
   "subscriptions": {
@@ -644,8 +739,8 @@
       "activated": "Abonnement activé",
       "amountInvalid": "Montant invalide",
       "deactivated": "Abonnement désactivé",
-      "deleted": "Abonnement supprimé",
       "deleteFailed": "Échec de la suppression",
+      "deleted": "Abonnement supprimé",
       "paid": "Paiement enregistré",
       "payError": "Impossible d'enregistrer le paiement",
       "payFailed": "Échec du paiement",
@@ -725,9 +820,9 @@
       "amountInvalid": "Le montant doit être supérieur à 0",
       "category": "Catégorie",
       "dateAria": "Date",
+      "descriptionPlaceholder": "Libellé",
       "frequencyPlaceholder": "Fréquence",
       "isRecurring": "Transaction récurrente",
-      "descriptionPlaceholder": "Libellé",
       "note": "Note (optionnel)",
       "noteAria": "Note",
       "notePlaceholder": "Ajouter une note...",
@@ -757,6 +852,95 @@
     "value": {
       "expense": "Dépense",
       "income": "Recette"
+    }
+  },
+  "users": {
+    "action": {
+      "copyLink": "Copier le lien",
+      "createInvite": "Créer et copier le lien",
+      "deleteAccount": "Supprimer mon compte",
+      "invite": "Inviter un utilisateur",
+      "revoke": "Révoquer"
+    },
+    "dialog": {
+      "deleteAccountMessage": "Cette action est <strong>irréversible</strong>. Votre compte et toutes vos données seront supprimés définitivement."
+    },
+    "empty": {
+      "invitations": "Aucune invitation pour le moment",
+      "users": "Aucun utilisateur trouvé"
+    },
+    "feedback": {
+      "actionNotAllowed": "Action non autorisée.",
+      "avatarDeleteError": "Impossible de supprimer la photo.",
+      "avatarUploadError": "Impossible d'uploader la photo. Veuillez réessayer.",
+      "currentPasswordIncorrect": "Mot de passe actuel incorrect.",
+      "deleteAccountError": "Erreur lors de la suppression. Veuillez réessayer.",
+      "deletingAccount": "Suppression...",
+      "downloading": "Téléchargement en cours…",
+      "exportCsvError": "Erreur lors de l'export CSV. Veuillez réessayer.",
+      "exportJsonError": "Erreur lors de l'export JSON. Veuillez réessayer.",
+      "invalidData": "Données invalides. Veuillez vérifier les champs.",
+      "inviteCreateError": "Impossible de créer l'invitation.",
+      "inviteCreated": "Invitation créée et lien copié dans le presse-papiers.",
+      "inviteRevokeError": "Impossible de révoquer l'invitation.",
+      "inviteRevoked": "Invitation révoquée.",
+      "lastAdminDeletionForbidden": "Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.",
+      "lastAdminDisableForbidden": "Impossible de désactiver le dernier administrateur actif.",
+      "linkCopied": "Lien copié dans le presse-papiers.",
+      "linkCopyError": "Impossible de copier le lien.",
+      "loadInvitationsError": "Impossible de charger les invitations.",
+      "loadUsersError": "Impossible de charger les utilisateurs.",
+      "nameSaveError": "Impossible de sauvegarder le nom. Veuillez réessayer.",
+      "passwordIncorrect": "Mot de passe incorrect.",
+      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "sendingInvite": "Envoi...",
+      "userDisableError": "Impossible de désactiver l'utilisateur.",
+      "userDisabled": "Utilisateur désactivé.",
+      "userEnableError": "Impossible de réactiver l'utilisateur.",
+      "userEnabled": "Utilisateur réactivé."
+    },
+    "form": {
+      "confirmNewPassword": "Confirmer le nouveau mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "deleteAccountConfirm": "Je comprends que cette action est définitive",
+      "editNameAria": "Modifier le nom",
+      "emailManagedHint": "Géré par l'admin",
+      "emailPlaceholder": "nouveau@exemple.com",
+      "inviteLinkHint": "Le lien sera automatiquement copié dans votre presse-papiers.",
+      "name": "Nom",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "validEmailRequired": "Email valide requis"
+    },
+    "list": {
+      "changePassword": "Changer le mot de passe",
+      "changePasswordHint": "Modifiez votre mot de passe",
+      "deleteAccountHint": "Suppression définitive du compte et des données",
+      "exportCsv": "Exporter mes transactions (CSV)",
+      "exportCsvHint": "Mes transactions au format tableur",
+      "exportJson": "Exporter mes données (JSON)",
+      "exportJsonHint": "Toutes mes données en format JSON",
+      "invitedBy": "Par {email}",
+      "logoutHint": "Quitter cette session",
+      "manageHint": "Invitations et gestion des accès",
+      "profile": "Mon compte",
+      "profileHint": "Profil, sécurité, déconnexion"
+    },
+    "page": {
+      "adminTitle": "Utilisateurs",
+      "dangerZoneTitle": "Zone de danger",
+      "dataTitle": "Données",
+      "identityTitle": "Identité",
+      "invitationsTab": "Invitations",
+      "profileTitle": "Mon compte",
+      "securityTitle": "Sécurité"
+    },
+    "value": {
+      "admin": "Admin",
+      "disabled": "Désactivé",
+      "invitationActive": "Active",
+      "invitationExpired": "Expirée",
+      "invitationRevoked": "Révoquée",
+      "invitationUsed": "Utilisée"
     }
   }
 }

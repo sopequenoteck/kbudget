@@ -22,6 +22,7 @@ import {
   phosphorDatabase,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { AuthService } from '../../../core/services/auth';
 import { UserService } from '../../../core/services/user';
@@ -37,6 +38,7 @@ import { DeleteAccountConfirmDialogComponent } from './delete-account-confirm-di
   imports: [
     RouterLink,
     NgIcon,
+    TranslocoPipe,
     AvatarUploadComponent,
     ChangePasswordDialogComponent,
     DeleteAccountConfirmDialogComponent,
@@ -65,6 +67,7 @@ export class MonCompteComponent implements OnInit {
   private readonly avatarService = inject(AvatarService);
   private readonly userExportService = inject(UserExportService);
   private readonly router = inject(Router);
+  private readonly transloco = inject(TranslocoService);
 
   readonly changePasswordDialog = viewChild.required(ChangePasswordDialogComponent);
   readonly deleteAccountDialog = viewChild.required(DeleteAccountConfirmDialogComponent);
@@ -107,7 +110,7 @@ export class MonCompteComponent implements OnInit {
     try {
       await firstValueFrom(this.avatarService.upload(file));
     } catch {
-      this.errorMessage.set('Impossible d\'uploader la photo. Veuillez réessayer.');
+      this.errorMessage.set(this.transloco.translate('users.feedback.avatarUploadError'));
     } finally {
       this.isUploadingAvatar.set(false);
     }
@@ -119,7 +122,7 @@ export class MonCompteComponent implements OnInit {
     try {
       await firstValueFrom(this.avatarService.delete());
     } catch {
-      this.errorMessage.set('Impossible de supprimer la photo.');
+      this.errorMessage.set(this.transloco.translate('users.feedback.avatarDeleteError'));
     } finally {
       this.isUploadingAvatar.set(false);
     }
@@ -153,7 +156,7 @@ export class MonCompteComponent implements OnInit {
       await firstValueFrom(this.userService.updateProfile({ name }));
       this.isEditingName.set(false);
     } catch {
-      this.errorMessage.set('Impossible de sauvegarder le nom. Veuillez réessayer.');
+      this.errorMessage.set(this.transloco.translate('users.feedback.nameSaveError'));
     }
   }
 
@@ -182,7 +185,7 @@ export class MonCompteComponent implements OnInit {
     try {
       await firstValueFrom(this.userExportService.exportJson());
     } catch {
-      this.errorMessage.set('Erreur lors de l\'export JSON. Veuillez réessayer.');
+      this.errorMessage.set(this.transloco.translate('users.feedback.exportJsonError'));
     } finally {
       this.isExportingJson.set(false);
     }
@@ -195,7 +198,7 @@ export class MonCompteComponent implements OnInit {
     try {
       await firstValueFrom(this.userExportService.exportCsv());
     } catch {
-      this.errorMessage.set('Erreur lors de l\'export CSV. Veuillez réessayer.');
+      this.errorMessage.set(this.transloco.translate('users.feedback.exportCsvError'));
     } finally {
       this.isExportingCsv.set(false);
     }

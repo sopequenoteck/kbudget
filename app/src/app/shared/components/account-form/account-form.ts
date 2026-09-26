@@ -16,7 +16,12 @@ import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
 import { SelectPicker } from '../select-picker/select-picker';
 import { BankSelect } from '../bank-select/bank-select';
-import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
+import {
+  ACCOUNT_TYPE_LABEL_KEYS,
+  Account,
+  AccountRequest,
+  AccountType,
+} from '../../../core/models/account.model';
 import { AccountService } from '../../../core/services/account';
 import { BankService } from '../../../core/services/bank';
 import { CurrencyService } from '../../../core/services/currency';
@@ -30,12 +35,6 @@ import { compressImage } from '../../utils/image.utils';
 const FIXED_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
   XOF_EUR: 1 / 655.957,
-};
-
-const ACCOUNT_TYPE_LABEL_KEYS: Record<AccountType, string> = {
-  [AccountType.COURANT]: 'accounts.value.current',
-  [AccountType.EPARGNE]: 'accounts.value.savings',
-  [AccountType.ESPECES]: 'accounts.value.cash',
 };
 
 const DEFAULT_ICONS: Record<AccountType, string> = {

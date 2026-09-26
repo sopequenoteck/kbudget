@@ -1,10 +1,10 @@
 <div class="mon-compte">
   <!-- ===== HEADER ===== -->
   <div class="page-header">
-    <a class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <a class="page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
       <ng-icon name="phosphorCaretLeft" size="20" />
     </a>
-    <h1 class="page-header__title">Mon compte</h1>
+    <h1 class="page-header__title">{{ 'users.page.profileTitle' | transloco }}</h1>
   </div>
 
   <!-- ===== ERREUR GLOBALE ===== -->
@@ -14,7 +14,7 @@
 
   <!-- ===== SECTION IDENTITÉ ===== -->
   <div class="settings-section">
-    <div class="settings-section__label">IDENTITÉ</div>
+    <div class="settings-section__label">{{ 'users.page.identityTitle' | transloco }}</div>
     <div class="settings-section__container">
       <!-- Avatar -->
       <div class="mon-compte__avatar-row">
@@ -35,7 +35,7 @@
             <ng-icon name="phosphorUser" size="20" />
           </span>
           <div class="settings-row__content">
-            <span class="settings-row__title">Nom</span>
+            <span class="settings-row__title">{{ 'users.form.name' | transloco }}</span>
             @if (isEditingName()) {
               <div class="mon-compte__name-edit">
                 <input
@@ -47,14 +47,14 @@
                   (keydown.escape)="cancelEditName()"
                   maxlength="100"
                   autocomplete="name"
-                  aria-label="Modifier le nom"
+                  [attr.aria-label]="'users.form.editNameAria' | transloco"
                   #nameInput
                 />
                 <button
                   type="button"
                   class="mon-compte__edit-btn mon-compte__edit-btn--save"
                   (click)="onSaveName()"
-                  aria-label="Enregistrer"
+                  [attr.aria-label]="'common.action.save' | transloco"
                 >
                   <ng-icon name="phosphorCheck" size="14" />
                 </button>
@@ -62,7 +62,7 @@
                   type="button"
                   class="mon-compte__edit-btn mon-compte__edit-btn--cancel"
                   (click)="cancelEditName()"
-                  aria-label="Annuler"
+                  [attr.aria-label]="'common.action.cancel' | transloco"
                 >
                   <ng-icon name="phosphorX" size="14" />
                 </button>
@@ -76,7 +76,7 @@
               type="button"
               class="mon-compte__edit-trigger"
               (click)="startEditName()"
-              aria-label="Modifier le nom"
+              [attr.aria-label]="'users.form.editNameAria' | transloco"
             >
               <ng-icon name="phosphorPencil" size="16" />
             </button>
@@ -89,10 +89,10 @@
             <ng-icon name="phosphorUser" size="20" />
           </span>
           <div class="settings-row__content">
-            <span class="settings-row__title">Email</span>
+            <span class="settings-row__title">{{ 'auth.form.email' | transloco }}</span>
             <span class="settings-row__description">{{ user.email }}</span>
           </div>
-          <span class="mon-compte__badge">Géré par l'admin</span>
+          <span class="mon-compte__badge">{{ 'users.form.emailManagedHint' | transloco }}</span>
         </div>
       }
     </div>
@@ -100,7 +100,7 @@
 
   <!-- ===== SECTION SÉCURITÉ ===== -->
   <div class="settings-section">
-    <div class="settings-section__label">SÉCURITÉ</div>
+    <div class="settings-section__label">{{ 'users.page.securityTitle' | transloco }}</div>
     <div class="settings-section__container">
       <button
         type="button"
@@ -111,8 +111,8 @@
           <ng-icon name="phosphorLock" size="20" />
         </span>
         <div class="settings-row__content">
-          <span class="settings-row__title">Changer le mot de passe</span>
-          <span class="settings-row__description">Modifiez votre mot de passe</span>
+          <span class="settings-row__title">{{ 'users.list.changePassword' | transloco }}</span>
+          <span class="settings-row__description">{{ 'users.list.changePasswordHint' | transloco }}</span>
         </div>
         <span class="settings-row__chevron">›</span>
       </button>
@@ -121,7 +121,7 @@
 
   <!-- ===== SECTION DONNÉES ===== -->
   <div class="settings-section">
-    <div class="settings-section__label">DONNÉES</div>
+    <div class="settings-section__label">{{ 'users.page.dataTitle' | transloco }}</div>
     <div class="settings-section__container">
       <button
         type="button"
@@ -134,9 +134,9 @@
           <ng-icon name="phosphorDatabase" size="20" />
         </span>
         <div class="settings-row__content">
-          <span class="settings-row__title">Exporter mes données (JSON)</span>
+          <span class="settings-row__title">{{ 'users.list.exportJson' | transloco }}</span>
           <span class="settings-row__description">
-            @if (isExportingJson()) { Téléchargement en cours… } @else { Toutes mes données en format JSON }
+            {{ (isExportingJson() ? 'users.feedback.downloading' : 'users.list.exportJsonHint') | transloco }}
           </span>
         </div>
         <span class="settings-row__chevron">
@@ -159,9 +159,9 @@
           <ng-icon name="phosphorFileCsv" size="20" />
         </span>
         <div class="settings-row__content">
-          <span class="settings-row__title">Exporter mes transactions (CSV)</span>
+          <span class="settings-row__title">{{ 'users.list.exportCsv' | transloco }}</span>
           <span class="settings-row__description">
-            @if (isExportingCsv()) { Téléchargement en cours… } @else { Mes transactions au format tableur }
+            {{ (isExportingCsv() ? 'users.feedback.downloading' : 'users.list.exportCsvHint') | transloco }}
           </span>
         </div>
         <span class="settings-row__chevron">
@@ -177,7 +177,7 @@
 
   <!-- ===== SECTION ZONE DE DANGER ===== -->
   <div class="settings-section">
-    <div class="settings-section__label">ZONE DE DANGER</div>
+    <div class="settings-section__label">{{ 'users.page.dangerZoneTitle' | transloco }}</div>
     <div class="settings-section__container">
       <!-- Déconnexion -->
       <button
@@ -189,8 +189,8 @@
           <ng-icon name="phosphorSignOut" size="20" />
         </span>
         <div class="settings-row__content">
-          <span class="settings-row__title">Déconnexion</span>
-          <span class="settings-row__description">Quitter cette session</span>
+          <span class="settings-row__title">{{ 'common.action.logout' | transloco }}</span>
+          <span class="settings-row__description">{{ 'users.list.logoutHint' | transloco }}</span>
         </div>
       </button>
 
@@ -201,8 +201,8 @@
         (click)="onDeleteAccount()"
       >
         <div class="settings-row__content">
-          <span class="settings-row__title">Supprimer mon compte</span>
-          <span class="settings-row__description">Suppression définitive du compte et des données</span>
+          <span class="settings-row__title">{{ 'users.action.deleteAccount' | transloco }}</span>
+          <span class="settings-row__description">{{ 'users.list.deleteAccountHint' | transloco }}</span>
         </div>
       </button>
     </div>

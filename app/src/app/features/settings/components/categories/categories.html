@@ -1,8 +1,8 @@
 <div class="page-header">
-  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+  <button class="page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
     <ng-icon name="phosphorCaretLeft" size="20" />
   </button>
-  <h1 class="page-header__title"><ng-icon name="phosphorTag" size="20" /> Catégories</h1>
+  <h1 class="page-header__title"><ng-icon name="phosphorTag" size="20" /> {{ 'categories.page.title' | transloco }}</h1>
 </div>
 
 @if (loading()) {
@@ -23,21 +23,21 @@
 } @else if (error()) {
   <app-empty-state
     icon="phosphorWarning"
-    message="Erreur de chargement"
-    ctaLabel="Réessayer"
+    [message]="'common.feedback.loadError' | transloco"
+    [ctaLabel]="'common.action.retry' | transloco"
     (ctaClick)="loadCategories()"
   />
 } @else if (userCategories().length === 0) {
   <app-empty-state
     icon="phosphorTag"
-    message="Aucune catégorie"
-    ctaLabel="Créer une catégorie"
+    [message]="'categories.empty.noCategories' | transloco"
+    [ctaLabel]="'categories.action.createCategory' | transloco"
     (ctaClick)="createCategory()"
   />
 } @else {
   <div class="cat-section">
     <div class="cat-section__header">
-      <span class="cat-section__label">{{ userCategories().length }} catégories</span>
+      <span class="cat-section__label">{{ 'categories.list.count' | transloco: { count: userCategories().length } }}</span>
       <button class="cat-section__add" (click)="createCategory()">
         <ng-icon name="phosphorPlus" size="16" />
       </button>
@@ -50,19 +50,19 @@
           </span>
           <span class="cat-row__name">{{ cat.nom }}</span>
           <span class="cat-row__color" [style.background-color]="cat.couleur"></span>
-          <button class="btn-action" (click)="editCategory(cat)" aria-label="Modifier">
+          <button class="btn-action" (click)="editCategory(cat)" [attr.aria-label]="'common.action.edit' | transloco">
             <ng-icon name="phosphorPencilSimple" size="16" />
           </button>
-          <button class="btn-action btn-action--danger" (click)="requestDelete(cat.id)" aria-label="Supprimer">
+          <button class="btn-action btn-action--danger" (click)="requestDelete(cat.id)" [attr.aria-label]="'common.action.delete' | transloco">
             <ng-icon name="phosphorTrash" size="16" />
           </button>
 
           @if (confirmDeleteId() === cat.id) {
             <div class="cat-row__confirm">
-              <p>Cette catégorie sera dissociée de tous les items liés.</p>
+              <p>{{ 'categories.dialog.deleteMessage' | transloco }}</p>
               <div class="cat-row__confirm-actions">
-                <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
-                <button class="btn-delete" (click)="confirmDelete()">Supprimer</button>
+                <button class="btn-cancel" (click)="cancelDelete()">{{ 'common.action.cancel' | transloco }}</button>
+                <button class="btn-delete" (click)="confirmDelete()">{{ 'common.action.delete' | transloco }}</button>
               </div>
             </div>
           }

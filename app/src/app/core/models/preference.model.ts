@@ -7,7 +7,6 @@ export interface FeatureMetadata {
   readonly labelKey: string;
   readonly icon: string;
   readonly filledIcon: string;
-  readonly description: string;
   readonly route: string;
 }
 
@@ -17,7 +16,6 @@ export const FEATURES: readonly FeatureMetadata[] = [
     labelKey: 'common.nav.subscriptions',
     icon: 'phosphorArrowsClockwise',
     filledIcon: 'phosphorArrowsClockwiseFill',
-    description: 'Gérer vos abonnements récurrents',
     route: '/subscriptions',
   },
   {
@@ -25,7 +23,6 @@ export const FEATURES: readonly FeatureMetadata[] = [
     labelKey: 'common.nav.debts',
     icon: 'phosphorHandshake',
     filledIcon: 'phosphorHandshakeFill',
-    description: 'Suivre vos prêts et emprunts',
     route: '/debts',
   },
   {
@@ -33,7 +30,6 @@ export const FEATURES: readonly FeatureMetadata[] = [
     labelKey: 'common.nav.budgets',
     icon: 'phosphorChartPie',
     filledIcon: 'phosphorChartPieFill',
-    description: 'Suivre vos budgets par catégorie',
     route: '/budgets',
   },
 ] as const;
