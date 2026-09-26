@@ -63,6 +63,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   colonnes et revue passent dans les catalogues ; les noms de banques restent
   des donnees. Seuls les accords changent a l'ecran (« 1 transaction », « 2
   lignes selectionnees » au lieu de « ligne(s) selectionnee(s) »).
+- **Reglages dans les catalogues (KKS-375)** : etape 3 sur 8 de KKS-325, la
+  derniere extraction avant la bascule. Ecran des reglages, « Mon compte »
+  (*Profile*), administration des utilisateurs, comptes, categories et devises.
+  La liste des comptes affiche desormais « Courant », « Epargne » ou « Especes »
+  au lieu du code interne (`COURANT`) ; « 1 compte » et « 1 categorie » au
+  singulier.
 
 ### Changed
 
