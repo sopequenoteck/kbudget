@@ -137,6 +137,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   modifie. Or toutes les analyses ecrasent le meme projet : une PR d'arbre
   identique a une autre etait notee sur l'historique de celle-ci.
 
+### Fixed
+
+- **Montants et pourcentages selon la langue affichee** : la variation du mois
+  du tableau de bord (« +64.4% » en francais) et l'equivalent converti sous un
+  montant en devise etrangere (« ~ 18.29 € » en anglais) suivent desormais la
+  langue de l'interface.
+- **Recurrences : resume mensuel dans la devise principale** : le solde
+  s'affichait toujours en euros, quelle que soit la devise principale.
+- **Recurrences : lignes de la liste a nouveau pleine largeur** : elles ne
+  remplissaient plus la carte et leur texte etait centre, depuis la v5.0.0.
+
 ### Security
 
 - **Revue d'import : le bandeau de suggestion de regle echappe le libelle du

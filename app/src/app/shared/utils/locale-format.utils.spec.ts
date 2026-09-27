@@ -4,7 +4,15 @@ import {
   insertSortedByNom,
   formatMonthYearLabel,
   formatFullDateLabel,
+  formatSignedPercent,
 } from './locale-format.utils';
+
+// Intl insère une espace insécable (U+00A0 ou U+202F selon l'ICU) avant le
+// signe "%" en fr-FR : on la normalise en espace classique pour comparer à
+// une chaîne littérale sans dépendre de la version d'ICU.
+function normalizeSpaces(value: string): string {
+  return value.replace(/[\u00A0\u202F]/g, ' ');
+}
 
 describe('getCurrencySymbol', () => {
   it('should_return_euro_symbol_when_currency_is_eur_and_locale_is_fr', () => {
@@ -79,5 +87,28 @@ describe('formatFullDateLabel', () => {
     // La date ISO est ancrée à minuit local (KKS-397) : un fuseau UTC-N ne
     // doit jamais faire reculer le jour affiché.
     expect(formatFullDateLabel('2026-01-01', 'fr-FR')).toBe('1 janvier 2026');
+  });
+});
+
+describe('formatSignedPercent', () => {
+  it.each([
+    [64.4, 'fr-FR', '+64,4 %'],
+    [64.4, 'en-GB', '+64.4%'],
+    [-64.4, 'en-GB', '-64.4%'],
+    [0, 'fr-FR', '+0,0 %'],
+    [64.49, 'en-GB', '+64.5%'],
+  ])(
+    'should_format_signed_percent_when_value_is_%s_and_locale_is_%s',
+    (percent, locale, expected) => {
+      expect(normalizeSpaces(formatSignedPercent(percent, locale))).toBe(expected);
+    },
+  );
+
+  it('should_use_comma_as_decimal_separator_when_locale_is_fr', () => {
+    expect(formatSignedPercent(64.4, 'fr-FR')).toContain(',');
+  });
+
+  it('should_not_contain_any_space_when_locale_is_en', () => {
+    expect(formatSignedPercent(64.4, 'en-GB')).not.toMatch(/\s/);
   });
 });

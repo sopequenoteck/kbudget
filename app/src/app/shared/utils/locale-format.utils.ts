@@ -47,3 +47,18 @@ export function formatFullDateLabel(isoDate: string, locale: string): string {
     year: 'numeric',
   });
 }
+
+/**
+ * Pourcentage signé localisé (ex: "+64,4 %" en fr-FR, "+64.4%" en en-GB).
+ * `percent` est une valeur en points (64.4, pas 0.644) ; le signe s'affiche
+ * toujours, y compris pour zéro (comportement conservé de l'ancien pipe
+ * `number` en dur).
+ */
+export function formatSignedPercent(percent: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    style: 'percent',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+    signDisplay: 'always',
+  }).format(percent / 100);
+}

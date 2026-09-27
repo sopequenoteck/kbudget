@@ -64,8 +64,8 @@
             'dashboard.summary.monthVariation'
               | transloco: { amount: (convertedNet() >= 0 ? '+' : '') + (convertedNet() | amount: null : activeCurrency()) }
           }}
-          @if (convertedVariationPct() !== null) {
-            ({{ convertedVariationPct()! >= 0 ? '+' : '' }}{{ convertedVariationPct()! | number:'1.1-1' }}%)
+          @if (convertedVariationPctLabel() !== null) {
+            ({{ convertedVariationPctLabel() }})
           }
         </span>
       }
