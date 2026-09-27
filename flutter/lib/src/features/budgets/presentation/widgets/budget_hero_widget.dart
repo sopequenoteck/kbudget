@@ -109,7 +109,7 @@ class BudgetHeroWidget extends StatelessWidget {
         heroConverted != null && heroConvertedCurrency != null;
     final formattedHeroConverted = hasHeroConverted
         ? AmountFormatter.format(
-            heroConverted!,
+            heroConverted,
             currency: heroConvertedCurrency!,
             locale: locale,
           )

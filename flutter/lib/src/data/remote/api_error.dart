@@ -54,10 +54,11 @@ String? apiErrorCode(DioException e) {
 /// pas de surface Flutter. Le principe VIII de la constitution n'impose aucune
 /// parite avec Angular, dont le catalogue les couvre tous.
 ///
-/// Ces cinq codes retombent donc sur [AppLocalizations.errorGeneric]. Ce n'est
-/// pas un oubli : ajouter des branches sans site consommateur creerait le code
-/// mort que ce ticket a precisement supprime (`error_dto.dart`). A ajouter le
-/// jour ou un ecran Flutter en aura besoin, pas avant.
+/// Ces cinq codes retombent donc sur
+/// [AppLocalizations.errorsClientGeneric]. Ce n'est pas un oubli : ajouter
+/// des branches sans site consommateur creerait le code mort que ce ticket a
+/// precisement supprime (`error_dto.dart`). A ajouter le jour ou un ecran
+/// Flutter en aura besoin, pas avant.
 String errorLabel(
   AppLocalizations l10n,
   String? code, {

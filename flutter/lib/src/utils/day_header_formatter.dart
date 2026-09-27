@@ -13,7 +13,9 @@ class DayHeaderFormatter {
         () => DateFormat('EEEE d MMMM', locale),
       );
 
-  static String format(DateTime date, {DateTime? now, required String locale}) {
+  /// Libelle d'en-tete de jour : « Aujourd'hui », « Hier », sinon la date
+  /// complete dans [locale] (identifiant `intl`, ex. `fr_FR`).
+  static String format(DateTime date, {required String locale, DateTime? now}) {
     final ref = now ?? DateTime.now();
     final today = DateTime(ref.year, ref.month, ref.day);
     final target = DateTime(date.year, date.month, date.day);

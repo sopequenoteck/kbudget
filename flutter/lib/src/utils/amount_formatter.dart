@@ -35,9 +35,9 @@ class AmountFormatter {
   /// devise affichee.
   static String format(
     double? value, {
+    required String locale,
     String? type,
     Currency currency = Currency.eur,
-    required String locale,
   }) {
     if (value == null) return '';
 

@@ -15,6 +15,6 @@ final displayLocaleProvider = Provider<Locale>((ref) => const Locale('fr'));
 /// The `intl` locale identifier derived from [displayLocaleProvider], for
 /// `NumberFormat` and `DateFormat` (`fr` -> `fr_FR`, `en` -> `en_GB`). See
 /// [intlLocaleFor].
-final intlLocaleProvider = Provider<String>((ref) {
-  return intlLocaleFor(ref.watch(displayLocaleProvider));
-});
+final intlLocaleProvider = Provider<String>(
+  (ref) => intlLocaleFor(ref.watch(displayLocaleProvider)),
+);

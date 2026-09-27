@@ -6,9 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// The `intl` locale identifier for [locale] (`fr` -> `fr_FR`, `en` ->
 /// `en_GB`), for use with `NumberFormat` and `DateFormat`.
-String intlLocaleFor(Locale locale) {
-  return switch (locale.languageCode) {
-    'en' => 'en_GB',
-    _ => 'fr_FR',
-  };
-}
+String intlLocaleFor(Locale locale) => switch (locale.languageCode) {
+      'en' => 'en_GB',
+      _ => 'fr_FR',
+    };

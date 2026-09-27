@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 import '../theme/app_theme_extension.dart';
-import '../utils/locale_format.dart';
 
 /// Texte coloré compact affichant la variation d'un montant par rapport
 /// à une période précédente (ex : mois précédent).

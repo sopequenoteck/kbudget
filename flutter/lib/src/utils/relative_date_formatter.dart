@@ -25,8 +25,8 @@ class RelativeDateFormatter {
   /// - Format long (ex: "15 janvier 2026") au-dela
   static String format(
     DateTime? value, {
-    DateTime? now,
     required String locale,
+    DateTime? now,
   }) {
     if (value == null) return '';
 
@@ -60,8 +60,8 @@ class RelativeDateFormatter {
   /// - dd MMM (au-delà)
   static String formatCompact(
     DateTime value, {
-    DateTime? now,
     required String locale,
+    DateTime? now,
   }) {
     final today = now ?? DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
