@@ -221,7 +221,7 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
               const SizedBox(width: AppSpacing.space4),
               Expanded(
                 child: ColorPalettePicker(
-                  label: l10n.categoryFormColorField,
+                  label: l10n.commonFormColour,
                   selectedColor: _selectedColor,
                   onChanged: (color) => setState(() => _selectedColor = color),
                 ),

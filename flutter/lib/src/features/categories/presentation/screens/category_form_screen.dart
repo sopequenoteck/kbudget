@@ -49,11 +49,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
+            child: Text(l10n.commonActionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.delete),
+            child: Text(l10n.commonActionDelete),
           ),
         ],
       ),
@@ -84,8 +84,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       appBar: AppBar(
         title: Text(
           _isEditMode
-              ? l10n.categoryFormTitleEdit
-              : l10n.categoryFormTitleCreate,
+              ? l10n.categoriesDialogEditTitle
+              : l10n.categoriesDialogCreateTitle,
         ),
         actions: [
           if (_isSubmitting)
@@ -132,7 +132,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       size: 20,
                     ),
                     label: Text(
-                      l10n.delete,
+                      l10n.commonActionDelete,
                       style: TextStyle(color: colorScheme.error),
                     ),
                   ),

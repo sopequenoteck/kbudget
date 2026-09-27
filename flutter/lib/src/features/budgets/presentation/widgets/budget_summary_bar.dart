@@ -10,6 +10,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Barre de résumé global des budgets du mois.
@@ -54,8 +55,17 @@ class BudgetSummaryBar extends StatelessWidget {
       Currency.eur,
     );
 
-    final formattedSpent = AmountFormatter.format(totalSpent, currency: currencyEnum);
-    final formattedBudget = AmountFormatter.format(totalBudget, currency: currencyEnum);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedSpent = AmountFormatter.format(
+      totalSpent,
+      currency: currencyEnum,
+      locale: locale,
+    );
+    final formattedBudget = AmountFormatter.format(
+      totalBudget,
+      currency: currencyEnum,
+      locale: locale,
+    );
     final percentageText = '${percentage.toStringAsFixed(0)} %';
 
     return Padding(

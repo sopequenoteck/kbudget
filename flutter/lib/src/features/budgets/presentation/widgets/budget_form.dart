@@ -134,7 +134,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -155,7 +157,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -310,7 +314,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             const Spacer(),
             OutlinedButton(
               onPressed: _isSubmitting ? null : widget.onCancelled,
-              child: Text(AppLocalizations.of(context)!.cancel),
+              child: Text(AppLocalizations.of(context)!.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -326,8 +330,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                     )
                   : Text(
                       _isEditMode
-                          ? AppLocalizations.of(context)!.edit
-                          : AppLocalizations.of(context)!.save,
+                          ? AppLocalizations.of(context)!.commonActionEdit
+                          : AppLocalizations.of(context)!.commonActionSave,
                     ),
             ),
           ],
@@ -344,7 +348,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     if (_isEditMode) {
       // In edit mode, category is locked — show a read-only field
       final budget = widget.budget!;
-      final label = budget.categoryNom ?? AppLocalizations.of(context)!.category;
+      final label = budget.categoryNom ??
+          AppLocalizations.of(context)!.budgetsFormCategory;
       final icon = budget.categoryIcone;
       final color = parseHexColor(budget.categoryCouleur);
 
@@ -353,7 +358,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            AppLocalizations.of(context)!.category,
+            AppLocalizations.of(context)!.budgetsFormCategory,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.medium,
@@ -422,7 +427,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         setState(() => _selectedCategoryId = id);
         if (_showErrors) setState(() {});
       },
-      label: AppLocalizations.of(context)!.category,
+      label: AppLocalizations.of(context)!.budgetsFormCategory,
       placeholder: AppLocalizations.of(context)!.selectCategory,
       validator: _showErrors
           ? (_) => _validateCategory()
@@ -439,7 +444,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              AppLocalizations.of(context)!.alertThreshold,
+              AppLocalizations.of(context)!.budgetsFormThresholdAria,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,

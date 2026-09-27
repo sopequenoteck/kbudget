@@ -11,6 +11,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -32,7 +33,7 @@ class SnoozeDialog extends ConsumerStatefulWidget {
     final l10n = AppLocalizations.of(context)!;
     AppModal.show(
       context,
-      title: l10n.snoozeTitle,
+      title: l10n.debtsDialogSnoozeTitle,
       child: SnoozeDialog(debt: debt, onSnoozed: onSnoozed),
       onClose: () {},
     );
@@ -86,7 +87,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
       initialDate: _selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      locale: const Locale('fr'),
+      locale: ref.read(displayLocaleProvider),
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
@@ -125,7 +126,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     if (success) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.snoozeSuccess)),
+        SnackBar(content: Text(l10n.debtsFeedbackSnoozed)),
       );
       widget.onSnoozed?.call();
     } else {
@@ -211,7 +212,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
             OutlinedButton(
               onPressed:
                   _isSubmitting ? null : () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
+              child: Text(l10n.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -225,7 +226,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
                         color: colorScheme.onPrimary,
                       ),
                     )
-                  : Text(l10n.snoozeSubmitButton),
+                  : Text(l10n.debtsActionSnooze),
             ),
           ],
         ),

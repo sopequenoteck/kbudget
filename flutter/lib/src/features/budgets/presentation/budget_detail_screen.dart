@@ -25,11 +25,13 @@ import 'package:k_budget/src/features/budgets/application/budget_list_state.dart
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_transactions_provider.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -276,7 +278,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
             ),
           ];
         }
-        final groups = _groupByDate(filteredTx);
+        final groups = _groupByDate(filteredTx, ref.watch(intlLocaleProvider));
         return groups
             .expand((group) => [
                   SliverToBoxAdapter(child: _DateLabel(label: group.label)),
@@ -351,13 +353,23 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
     final isExceeded = percentage > 100;
     final isWarning = percentage > 80 && percentage <= 100;
 
-    final formattedSpent =
-        AmountFormatter.format(montantDepense, currency: currency);
-    final formattedBudget =
-        AmountFormatter.format(montantBudget, currency: currency);
+    final locale = ref.watch(intlLocaleProvider);
+    final formattedSpent = AmountFormatter.format(
+      montantDepense,
+      currency: currency,
+      locale: locale,
+    );
+    final formattedBudget = AmountFormatter.format(
+      montantBudget,
+      currency: currency,
+      locale: locale,
+    );
     final reste = montantBudget - montantDepense;
-    final formattedReste =
-        AmountFormatter.format(reste.abs(), currency: currency);
+    final formattedReste = AmountFormatter.format(
+      reste.abs(),
+      currency: currency,
+      locale: locale,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -573,7 +585,7 @@ class _TxGroup {
   final List<Transaction> transactions;
 }
 
-List<_TxGroup> _groupByDate(List<Transaction> transactions) {
+List<_TxGroup> _groupByDate(List<Transaction> transactions, String locale) {
   final today = DateTime.now();
   final todayDate = DateTime(today.year, today.month, today.day);
   final yesterdayDate = todayDate.subtract(const Duration(days: 1));
@@ -588,7 +600,7 @@ List<_TxGroup> _groupByDate(List<Transaction> transactions) {
     } else if (txDate == yesterdayDate) {
       label = 'Hier';
     } else {
-      label = DateFormat('d MMMM', 'fr_FR').format(tx.date);
+      label = DateFormat('d MMMM', locale).format(tx.date);
     }
     grouped.putIfAbsent(label, () => []).add(tx);
   }
@@ -703,7 +715,12 @@ class _TransactionRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final account = accounts.firstWhereOrNull((a) => a.id == tx.accountId);
     final currency = account?.currency ?? budgetCurrency;
-    final formatted = AmountFormatter.format(tx.montant, currency: currency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formatted = AmountFormatter.format(
+      tx.montant,
+      currency: currency,
+      locale: locale,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -742,7 +759,7 @@ class _TransactionRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  DateFormat('d MMM', 'fr_FR').format(tx.date),
+                  DateFormat('d MMM', locale).format(tx.date),
                   style: TextStyle(
                     fontSize: AppTypography.sizeXs,
                     color: colorScheme.onSurfaceVariant,

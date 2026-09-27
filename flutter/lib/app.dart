@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/application/text_scale_notifier.dart';
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
@@ -18,6 +19,7 @@ class KBudgetApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeNotifierProvider);
     final textScale = ref.watch(textScaleNotifierProvider);
+    final displayLocale = ref.watch(displayLocaleProvider);
 
     return MaterialApp.router(
       title: 'K-Budget',
@@ -28,7 +30,7 @@ class KBudgetApp extends ConsumerWidget {
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('fr'),
+      locale: displayLocale,
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(

@@ -10,6 +10,7 @@ import 'package:k_budget/src/common_widgets/restart_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('en');
   await initializeDateFormatting('fr');
 
   runApp(

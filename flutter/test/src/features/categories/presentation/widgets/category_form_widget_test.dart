@@ -43,6 +43,7 @@ void main() {
         theme: theme ?? app_theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: Scaffold(
           body: CategoryFormWidget(
             key: formKey,

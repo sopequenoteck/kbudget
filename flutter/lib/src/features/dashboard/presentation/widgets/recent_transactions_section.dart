@@ -18,11 +18,13 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecentTransactionsSection extends ConsumerWidget {
@@ -111,7 +113,8 @@ class RecentTransactionsSection extends ConsumerWidget {
                 convertedAmount = '≈ ${AmountFormatter.format(
                   converted,
                   currency: state.activeCurrency,
-                )}';
+                  locale: intlLocaleFor(Localizations.localeOf(context)),
+    )}';
               }
             }
 
@@ -128,7 +131,10 @@ class RecentTransactionsSection extends ConsumerWidget {
                 icon: category?.icone ?? '💰',
                 iconBackgroundColor: parseHexColor(category?.couleur),
                 subtitle: subtitle,
-                rightSubtitle: RelativeDateFormatter.format(transaction.date),
+                rightSubtitle: RelativeDateFormatter.format(
+                  transaction.date,
+                  locale: ref.watch(intlLocaleProvider),
+                ),
                 valueColor: AmountFormatter.amountColor(
                     transaction.type.name, colors),
                 accountCurrency: accountCurrency,
@@ -145,9 +151,12 @@ class RecentTransactionsSection extends ConsumerWidget {
                 transaction.montant,
                 type: transaction.type.name,
                 currency: accountCurrency ?? state.activeCurrency,
-              ),
+                locale: ref.watch(intlLocaleProvider)),
               subtitle: subtitle,
-              rightSubtitle: RelativeDateFormatter.format(transaction.date),
+              rightSubtitle: RelativeDateFormatter.format(
+                  transaction.date,
+                  locale: ref.watch(intlLocaleProvider),
+                ),
               valueColor:
                   AmountFormatter.amountColor(transaction.type.name, colors),
               onPressed: onPressed,
@@ -287,6 +296,7 @@ class _TransactionListItemWithBadge extends StatelessWidget {
                       transaction.montant,
                       type: transaction.type.name,
                       currency: accountCurrency,
+                      locale: intlLocaleFor(Localizations.localeOf(context)),
                     ),
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
@@ -331,6 +341,7 @@ class _TransactionListItemWithBadge extends StatelessWidget {
       transaction.montant,
       type: transaction.type.name,
       currency: accountCurrency,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
     )}';
 
     if (onPressed != null) {

@@ -12,6 +12,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_item.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -50,6 +51,18 @@ class BudgetSummarySection extends ConsumerWidget {
       (c) => c.name == overview.currency || c.name == overview.currency.toLowerCase(),
       orElse: () => Currency.eur,
     );
+    final locale = ref.watch(intlLocaleProvider);
+    final monthLabel = DateFormat('MMMM yyyy', locale).format(DateTime.now());
+    final spentFormatted = AmountFormatter.format(
+      overview.totalSpent,
+      currency: currencyEnum,
+      locale: locale,
+    );
+    final budgetFormatted = AmountFormatter.format(
+      overview.totalBudget,
+      currency: currencyEnum,
+      locale: locale,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +72,7 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Budgets · ${DateFormat('MMMM yyyy', 'fr_FR').format(DateTime.now())}',
+              'Budgets · $monthLabel',
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -87,7 +100,7 @@ class BudgetSummarySection extends ConsumerWidget {
               ),
             ),
             Text(
-              '${AmountFormatter.format(overview.totalSpent, currency: currencyEnum)} / ${AmountFormatter.format(overview.totalBudget, currency: currencyEnum)}',
+              '$spentFormatted / $budgetFormatted',
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,

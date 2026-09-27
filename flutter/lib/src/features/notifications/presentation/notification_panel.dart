@@ -17,6 +17,7 @@ import 'package:k_budget/src/features/debts/presentation/widgets/repay_bottom_sh
 import 'package:k_budget/src/features/debts/presentation/widgets/snooze_dialog.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
@@ -70,7 +71,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
       child: Row(
         children: [
           Text(
-            l10n.notificationTitle,
+            l10n.notificationsPageTitle,
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
@@ -78,7 +79,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             IconButton(
               onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
               icon: const PhosphorIcon(PhosphorIconsRegular.checks, size: 20),
-              tooltip: l10n.notificationMarkAllRead,
+              tooltip: l10n.notificationsActionMarkAllReadHint,
             ),
           if (state.items.isNotEmpty)
             IconButton(
@@ -88,7 +89,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                 size: 20,
                 color: theme.colorScheme.error,
               ),
-              tooltip: l10n.notificationClearHistory,
+              tooltip: l10n.notificationsActionDeleteAllHint,
             ),
         ],
       ),
@@ -107,7 +108,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
           ),
           const SizedBox(height: AppSpacing.space4),
           Text(
-            l10n.notificationEmpty,
+            l10n.notificationsEmptyTitle,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
@@ -207,7 +208,8 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             ),
             const SizedBox(height: 2),
             Text(
-              DateFormat.Hm('fr_FR').format(notification.createdAt.toLocal()),
+              DateFormat.Hm(ref.watch(intlLocaleProvider))
+                  .format(notification.createdAt.toLocal()),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
@@ -225,7 +227,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                       PhosphorIconsRegular.currencyCircleDollar,
                       size: 18,
                     ),
-                    tooltip: l10n.notificationRepayTooltip,
+                    tooltip: l10n.debtsActionRepay,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
@@ -235,7 +237,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                       PhosphorIconsRegular.bellSlash,
                       size: 18,
                     ),
-                    tooltip: l10n.notificationSnoozeTooltip,
+                    tooltip: l10n.debtsActionSnooze,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
@@ -324,7 +326,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.notificationLoadError)),
+        SnackBar(content: Text(l10n.debtsFeedbackLoadError)),
       );
     }
   }
@@ -347,7 +349,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.notificationLoadError)),
+        SnackBar(content: Text(l10n.debtsFeedbackLoadError)),
       );
     }
   }
@@ -380,12 +382,12 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.notificationClearConfirmTitle),
+        title: Text(l10n.notificationsActionDeleteAllHint),
         content: Text(l10n.notificationClearConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+            child: Text(l10n.commonActionCancel),
           ),
           TextButton(
             onPressed: () {
@@ -395,7 +397,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(l10n.delete),
+            child: Text(l10n.commonActionDelete),
           ),
         ],
       ),
@@ -415,11 +417,11 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
 
       String label;
       if (date == today) {
-        label = l10n.notificationGroupToday;
+        label = l10n.commonValueToday;
       } else if (date == yesterday) {
-        label = l10n.notificationGroupYesterday;
+        label = l10n.commonValueYesterday;
       } else {
-        label = DateFormat.yMMMMd('fr_FR').format(local);
+        label = DateFormat.yMMMMd(ref.watch(intlLocaleProvider)).format(local);
       }
 
       (map[label] ??= []).add(notification);

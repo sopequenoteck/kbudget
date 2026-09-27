@@ -21,6 +21,7 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
@@ -174,7 +175,9 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -195,7 +198,9 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -252,7 +257,10 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
             label: a.nom,
             icon: a.icone,
             color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(a.solde),
+            secondaryText: AmountFormatter.format(
+              a.solde,
+              locale: ref.watch(intlLocaleProvider),
+            ),
             imageUrl: resolveBankAssetPath(a),
           ),
         )
@@ -272,7 +280,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
           if (id != null) _forcedCurrency = null;
           _expandedSection = null;
         }),
-        label: AppLocalizations.of(context)!.subscriptionFormAccountPicker,
+        label: AppLocalizations.of(context)!.subscriptionsFormAccount,
       ),
     );
   }
@@ -424,7 +432,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
               key: const Key('tf_nom'),
               controller: _nomController,
               decoration: InputDecoration(
-                hintText: l10n.subscriptionFormNameField,
+                hintText: l10n.subscriptionsFormNamePlaceholder,
                 hintStyle: TextStyle(color: cs.onSurfaceVariant),
                 border: InputBorder.none,
                 isDense: true,
@@ -459,7 +467,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
                     color: _isActif ? cs.primary : cs.onSurfaceVariant,
                   ),
                   onPressed: () => setState(() => _isActif = !_isActif),
-                  tooltip: l10n.subscriptionFormActiveSwitch,
+                  tooltip: l10n.commonValueActive,
                 ),
               ]
             : null,
@@ -470,7 +478,7 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
                 BSheetDeletePill(
                   isLoading: _isSubmitting,
                   onTap: _onDelete,
-                  label: l10n.subscriptionFormDeleteButton,
+                  label: l10n.commonActionDelete,
                 ),
               ]
             : null,
@@ -479,8 +487,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
         loading: _isSubmitting,
         onSubmit: _onSubmit,
         submitLabel: _isEditMode
-            ? l10n.subscriptionFormUpdateButton
-            : l10n.subscriptionFormSaveButton,
+            ? l10n.commonActionEdit
+            : l10n.commonActionSave,
       ),
     );
   }

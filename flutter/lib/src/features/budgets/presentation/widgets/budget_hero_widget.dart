@@ -13,6 +13,7 @@ import 'package:k_budget/src/features/dashboard/presentation/widgets/currency_pi
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -98,7 +99,26 @@ class BudgetHeroWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final themeExt = Theme.of(context).extension<AppThemeExtension>()!;
 
-    final formattedSpent = AmountFormatter.format(budgetedSpent, currency: activeCurrency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedSpent = AmountFormatter.format(
+      budgetedSpent,
+      currency: activeCurrency,
+      locale: locale,
+    );
+    final hasHeroConverted =
+        heroConverted != null && heroConvertedCurrency != null;
+    final formattedHeroConverted = hasHeroConverted
+        ? AmountFormatter.format(
+            heroConverted!,
+            currency: heroConvertedCurrency!,
+            locale: locale,
+          )
+        : null;
+    final formattedUnbudgetedTotal = AmountFormatter.format(
+      unbudgetedTotal,
+      currency: activeCurrency,
+      locale: locale,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -149,7 +169,7 @@ class BudgetHeroWidget extends StatelessWidget {
                     if (heroConverted != null && heroConvertedCurrency != null) ...[
                       const SizedBox(height: AppSpacing.space1),
                       Text(
-                        '≈ ${AmountFormatter.format(heroConverted!, currency: heroConvertedCurrency!)}',
+                        '≈ $formattedHeroConverted',
                         style: TextStyle(
                           fontSize: AppTypography.sizeSm,
                           color: colorScheme.onSurfaceVariant,
@@ -205,7 +225,7 @@ class BudgetHeroWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${AmountFormatter.format(unbudgetedTotal, currency: activeCurrency)} non budgété',
+                    '$formattedUnbudgetedTotal non budgété',
                     style: TextStyle(
                       fontSize: AppTypography.sizeXs,
                       color: colorScheme.onSurfaceVariant,

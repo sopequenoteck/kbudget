@@ -65,7 +65,7 @@ String errorLabel(
   Map<String, String>? overrides,
 }) {
   if (code == null) {
-    return fallback ?? l10n.errorGeneric;
+    return fallback ?? l10n.errorsClientGeneric;
   }
   final override = overrides?[code];
   if (override != null) {
@@ -73,55 +73,55 @@ String errorLabel(
   }
   switch (code) {
     case 'BAD_REQUEST':
-      return l10n.errorCodeBadRequest;
+      return l10n.errorsApiBadRequest;
     case 'VALIDATION_ERROR':
-      return l10n.errorCodeValidation;
+      return l10n.errorsApiValidationError;
     case 'MALFORMED_REQUEST':
-      return l10n.errorCodeMalformedRequest;
+      return l10n.errorsApiMalformedRequest;
     case 'PASSWORD_INCORRECT':
       return l10n.errorCodePasswordIncorrect;
     case 'PASSWORD_UNCHANGED':
       return l10n.errorCodePasswordUnchanged;
     case 'CONFIRMATION_REQUIRED':
-      return l10n.errorCodeConfirmationRequired;
+      return l10n.errorsApiConfirmationRequired;
     case 'UNAUTHENTICATED':
       return l10n.errorCodeUnauthenticated;
     case 'TOKEN_EXPIRED':
-      return l10n.errorCodeTokenExpired;
+      return l10n.errorsApiTokenExpired;
     case 'TOKEN_REVOKED':
-      return l10n.errorCodeTokenRevoked;
+      return l10n.errorsApiTokenRevoked;
     case 'TOKEN_REUSE_DETECTED':
-      return l10n.errorCodeTokenReuseDetected;
+      return l10n.errorsApiTokenReuseDetected;
     case 'TOKEN_INVALID':
-      return l10n.errorCodeTokenInvalid;
+      return l10n.errorsApiTokenInvalid;
     case 'ACCESS_DENIED':
-      return l10n.errorCodeAccessDenied;
+      return l10n.errorsApiAccessDenied;
     case 'PASSWORD_RESET_REQUIRED':
       return l10n.errorCodePasswordResetRequired;
     case 'PASSWORD_RESET_NOT_REQUIRED':
-      return l10n.errorCodePasswordResetNotRequired;
+      return l10n.errorsApiPasswordResetNotRequired;
     case 'FEATURE_DISABLED':
-      return l10n.errorCodeFeatureDisabled;
+      return l10n.errorsApiFeatureDisabled;
     case 'LAST_ADMIN_DELETION_FORBIDDEN':
       return l10n.errorCodeLastAdminDeletionForbidden;
     case 'NOT_FOUND':
-      return l10n.errorCodeNotFound;
+      return l10n.errorsApiNotFound;
     case 'CONFLICT':
-      return l10n.errorCodeConflict;
+      return l10n.errorsApiConflict;
     case 'LAST_ADMIN_CANNOT_BE_DISABLED':
-      return l10n.errorCodeLastAdminCannotBeDisabled;
+      return l10n.errorsApiLastAdminCannotBeDisabled;
     case 'EMAIL_ALREADY_EXISTS':
-      return l10n.errorCodeEmailAlreadyExists;
+      return l10n.errorsApiEmailAlreadyExists;
     case 'TOO_MANY_REQUESTS':
-      return l10n.errorCodeTooManyRequests;
+      return l10n.errorsApiTooManyRequests;
     case 'INTERNAL_ERROR':
-      return l10n.errorCodeInternal;
+      return l10n.errorsApiInternalError;
     default:
       developer.log(
         'Unknown API error code: $code',
         name: 'api_error',
         level: _logLevelInfo,
       );
-      return fallback ?? l10n.errorGeneric;
+      return fallback ?? l10n.errorsClientGeneric;
   }
 }

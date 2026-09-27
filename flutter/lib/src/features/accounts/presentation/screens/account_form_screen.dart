@@ -27,6 +27,7 @@ import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
@@ -350,7 +351,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       icon: PhosphorIconsRegular.trash,
       title: l10n.accountDeleteConfirmTitle,
       message: l10n.accountDeleteConfirmMessage,
-      confirmLabel: l10n.delete,
+      confirmLabel: l10n.commonActionDelete,
       variant: ConfirmVariant.danger,
     );
 
@@ -389,7 +390,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? l10n.accountsEditTitle : l10n.accountsNewTitle),
+        title: Text(
+          _isEditMode
+              ? l10n.accountsDialogEditTitle
+              : l10n.accountsDialogCreateTitle,
+        ),
         actions: [
           if (_isSubmitting)
             const Padding(
@@ -448,14 +453,14 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 EmojiInput(
-                  label: l10n.accountFormIconField,
+                  label: l10n.accountsFormIcon,
                   initialValue: _selectedEmoji,
                   onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
                 ),
                 const SizedBox(width: AppSpacing.space4),
                 Expanded(
                   child: ColorPalettePicker(
-                    label: l10n.accountFormColorField,
+                    label: l10n.commonFormColour,
                     selectedColor: _selectedColor,
                     onChanged: (color) =>
                         setState(() => _selectedColor = color),
@@ -505,7 +510,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const _SectionHeader('DÉTAILS'),
           const SizedBox(height: AppSpacing.space2),
           AppFormField(
-            label: l10n.accountFormNameField,
+            label: l10n.accountsFormName,
             showError: nomError != null,
             errorMessage: nomError ?? '',
             child: TextField(
@@ -526,7 +531,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           // Currency picker (create mode only)
           if (!_isEditMode)
             SelectPicker(
-              label: l10n.accountFormCurrencyPicker,
+              label: l10n.accountsFormCurrency,
               items: Currency.values
                   .map((c) => SelectPickerItem(
                         id: c.name,
@@ -547,7 +552,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           // Initial balance (create mode) or current balance + adjust (edit mode)
           if (!_isEditMode) ...[
             AppFormField(
-              label: l10n.accountFormInitialBalanceField,
+              label: l10n.accountsFormOpeningBalance,
               showError: montantError != null,
               errorMessage: montantError ?? '',
               child: TextField(
@@ -583,7 +588,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.accountFormCurrentBalance,
+                    l10n.accountsFormCurrentBalance,
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       color: colorScheme.onSurfaceVariant,
@@ -593,7 +598,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     AmountFormatter.format(
                       widget.account!.solde,
                       currency: widget.account!.currency,
-                    ),
+                      locale: ref.watch(intlLocaleProvider)),
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       fontWeight: AppTypography.semiBold,
@@ -606,7 +611,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             const SizedBox(height: AppSpacing.space6),
             // New balance field
             AppFormField(
-              label: l10n.accountFormNewBalance,
+              label: l10n.accountsFormNewBalance,
               child: TextField(
                 controller: _newBalanceController,
                 decoration: InputDecoration.collapsed(
@@ -637,7 +642,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.accountFormActiveSwitch,
+                        l10n.commonValueActive,
                         style: TextStyle(
                           fontSize: AppTypography.sizeMd,
                           fontWeight: AppTypography.medium,
@@ -672,7 +677,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 onPressed: _onDelete,
                 icon: PhosphorIcon(PhosphorIconsRegular.trash, color: colorScheme.error, size: 20),
                 label: Text(
-                  l10n.delete,
+                  l10n.commonActionDelete,
                   style: TextStyle(color: colorScheme.error),
                 ),
               ),

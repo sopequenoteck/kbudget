@@ -24,6 +24,7 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/libelle_autocomplete_field.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -202,7 +203,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -223,7 +226,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -274,7 +279,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             label: a.nom,
             icon: a.icone,
             color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(a.solde),
+            secondaryText: AmountFormatter.format(
+              a.solde,
+              locale: ref.watch(intlLocaleProvider),
+            ),
             imageUrl: resolveBankAssetPath(a),
           ),
         )
@@ -292,7 +300,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           _selectedAccountId = id;
           _expandedSection = null;
         }),
-        label: AppLocalizations.of(context)!.transactionFormAccountPicker,
+        label: AppLocalizations.of(context)!.transactionsFormAccount,
       ),
     );
   }
@@ -510,7 +518,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             LibelleAutocompleteField(
               controller: _libelleController,
               decoration: InputDecoration(
-                hintText: l10n.transactionFormLabelField,
+                hintText: l10n.transactionsFormDescriptionPlaceholder,
                 hintStyle: TextStyle(color: cs.onSurfaceVariant),
                 border: InputBorder.none,
                 isDense: true,
@@ -573,7 +581,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 BSheetDeletePill(
                   isLoading: _isSubmitting,
                   onTap: _onDelete,
-                  label: l10n.transactionFormDeleteButton,
+                  label: l10n.commonActionDelete,
                 ),
               ]
             : null,
@@ -582,7 +590,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         loading: _isSubmitting,
         onSubmit: _onSubmit,
         submitLabel:
-            _isEditMode ? l10n.transactionFormUpdateButton : l10n.transactionFormSaveButton,
+            _isEditMode ? l10n.commonActionEdit : l10n.commonActionSave,
       ),
     );
   }

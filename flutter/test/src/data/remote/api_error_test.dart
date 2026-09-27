@@ -52,10 +52,10 @@ void main() {
 
   group('errorLabel', () {
     test('should_returnArbLabel_when_codeIsKnown', () {
-      expect(errorLabel(l10n, 'NOT_FOUND'), l10n.errorCodeNotFound);
+      expect(errorLabel(l10n, 'NOT_FOUND'), l10n.errorsApiNotFound);
       expect(
         errorLabel(l10n, 'TOO_MANY_REQUESTS'),
-        l10n.errorCodeTooManyRequests,
+        l10n.errorsApiTooManyRequests,
       );
     });
 
@@ -69,11 +69,11 @@ void main() {
 
     test('should_returnGenericLabel_when_codeIsUnknown', () {
       // Un client ancien face a un serveur recent : nominal, pas une anomalie.
-      expect(errorLabel(l10n, 'BREWING_COFFEE'), l10n.errorGeneric);
+      expect(errorLabel(l10n, 'BREWING_COFFEE'), l10n.errorsClientGeneric);
     });
 
     test('should_returnGenericLabel_when_codeIsNull', () {
-      expect(errorLabel(l10n, null), l10n.errorGeneric);
+      expect(errorLabel(l10n, null), l10n.errorsClientGeneric);
     });
 
     test('should_returnFallback_when_codeIsNullOrUnknown', () {
@@ -86,21 +86,21 @@ void main() {
       final label = errorLabel(
         l10n,
         'BAD_REQUEST',
-        overrides: {'BAD_REQUEST': l10n.loginInvalidCredentials},
+        overrides: {'BAD_REQUEST': l10n.authFeedbackInvalidCredentials},
       );
 
-      expect(label, l10n.loginInvalidCredentials);
-      expect(label, isNot(l10n.errorCodeBadRequest));
+      expect(label, l10n.authFeedbackInvalidCredentials);
+      expect(label, isNot(l10n.errorsApiBadRequest));
     });
 
     test('should_useCatalogue_when_codeIsNotOverridden', () {
       final label = errorLabel(
         l10n,
         'CONFLICT',
-        overrides: {'BAD_REQUEST': l10n.loginInvalidCredentials},
+        overrides: {'BAD_REQUEST': l10n.authFeedbackInvalidCredentials},
       );
 
-      expect(label, l10n.errorCodeConflict);
+      expect(label, l10n.errorsApiConflict);
     });
 
     test('should_returnLabelWithoutThrowing_when_bodyIsMalformed', () {
@@ -118,30 +118,30 @@ void main() {
     // reelle a empecher : un code du catalogue qui retombe sur le libelle
     // generique, signe qu'un getter AppLocalizations a ete oublie.
     final catalogueLabels = <String, String Function(AppLocalizations)>{
-      'BAD_REQUEST': (l) => l.errorCodeBadRequest,
-      'VALIDATION_ERROR': (l) => l.errorCodeValidation,
-      'MALFORMED_REQUEST': (l) => l.errorCodeMalformedRequest,
+      'BAD_REQUEST': (l) => l.errorsApiBadRequest,
+      'VALIDATION_ERROR': (l) => l.errorsApiValidationError,
+      'MALFORMED_REQUEST': (l) => l.errorsApiMalformedRequest,
       'PASSWORD_INCORRECT': (l) => l.errorCodePasswordIncorrect,
       'PASSWORD_UNCHANGED': (l) => l.errorCodePasswordUnchanged,
-      'CONFIRMATION_REQUIRED': (l) => l.errorCodeConfirmationRequired,
+      'CONFIRMATION_REQUIRED': (l) => l.errorsApiConfirmationRequired,
       'UNAUTHENTICATED': (l) => l.errorCodeUnauthenticated,
-      'TOKEN_EXPIRED': (l) => l.errorCodeTokenExpired,
-      'TOKEN_REVOKED': (l) => l.errorCodeTokenRevoked,
-      'TOKEN_REUSE_DETECTED': (l) => l.errorCodeTokenReuseDetected,
-      'TOKEN_INVALID': (l) => l.errorCodeTokenInvalid,
-      'ACCESS_DENIED': (l) => l.errorCodeAccessDenied,
+      'TOKEN_EXPIRED': (l) => l.errorsApiTokenExpired,
+      'TOKEN_REVOKED': (l) => l.errorsApiTokenRevoked,
+      'TOKEN_REUSE_DETECTED': (l) => l.errorsApiTokenReuseDetected,
+      'TOKEN_INVALID': (l) => l.errorsApiTokenInvalid,
+      'ACCESS_DENIED': (l) => l.errorsApiAccessDenied,
       'PASSWORD_RESET_REQUIRED': (l) => l.errorCodePasswordResetRequired,
-      'PASSWORD_RESET_NOT_REQUIRED': (l) => l.errorCodePasswordResetNotRequired,
-      'FEATURE_DISABLED': (l) => l.errorCodeFeatureDisabled,
+      'PASSWORD_RESET_NOT_REQUIRED': (l) => l.errorsApiPasswordResetNotRequired,
+      'FEATURE_DISABLED': (l) => l.errorsApiFeatureDisabled,
       'LAST_ADMIN_DELETION_FORBIDDEN': (l) =>
           l.errorCodeLastAdminDeletionForbidden,
-      'NOT_FOUND': (l) => l.errorCodeNotFound,
-      'CONFLICT': (l) => l.errorCodeConflict,
+      'NOT_FOUND': (l) => l.errorsApiNotFound,
+      'CONFLICT': (l) => l.errorsApiConflict,
       'LAST_ADMIN_CANNOT_BE_DISABLED': (l) =>
-          l.errorCodeLastAdminCannotBeDisabled,
-      'EMAIL_ALREADY_EXISTS': (l) => l.errorCodeEmailAlreadyExists,
-      'TOO_MANY_REQUESTS': (l) => l.errorCodeTooManyRequests,
-      'INTERNAL_ERROR': (l) => l.errorCodeInternal,
+          l.errorsApiLastAdminCannotBeDisabled,
+      'EMAIL_ALREADY_EXISTS': (l) => l.errorsApiEmailAlreadyExists,
+      'TOO_MANY_REQUESTS': (l) => l.errorsApiTooManyRequests,
+      'INTERNAL_ERROR': (l) => l.errorsApiInternalError,
     };
 
     for (final entry in catalogueLabels.entries) {
@@ -151,7 +151,7 @@ void main() {
 
         expect(label, entry.value(l10n));
         expect(label, isNotEmpty);
-        expect(label, isNot(l10n.errorGeneric));
+        expect(label, isNot(l10n.errorsClientGeneric));
       });
     }
   });

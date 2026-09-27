@@ -14,6 +14,7 @@ import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -43,6 +44,7 @@ class DashboardHeroWidget extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final colors = Theme.of(context).extension<AppThemeExtension>()!;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
 
     // Calcul du patrimoine total + détection taux manquants
     bool hasMissingRate = false;
@@ -105,7 +107,7 @@ class DashboardHeroWidget extends StatelessWidget {
                   AmountFormatter.format(
                     patrimoineTotal,
                     currency: activeCurrency,
-                  ),
+                    locale: locale),
                   style: TextStyle(
                     fontSize: AppTypography.size3xl,
                     fontWeight: AppTypography.bold,
@@ -128,14 +130,18 @@ class DashboardHeroWidget extends StatelessWidget {
           // 4. Badge variation mensuelle
           if (currentSummary != null) ...[
             const SizedBox(height: AppSpacing.space2),
-            _buildVariationBadge(colors, patrimoineTotal),
+            _buildVariationBadge(context, colors, patrimoineTotal),
           ],
 
           // 5. Devise secondaire — avant les meta-lines (ordre Angular)
           if (patrimoineSecondaire != null && secondaryCurrency != null) ...[
             const SizedBox(height: AppSpacing.space1),
             Text(
-              '≈ ${AmountFormatter.format(patrimoineSecondaire, currency: secondaryCurrency)}',
+              '≈ ${AmountFormatter.format(
+                patrimoineSecondaire,
+                currency: secondaryCurrency,
+                locale: locale,
+              )}',
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -162,7 +168,7 @@ class DashboardHeroWidget extends StatelessWidget {
                         currentSummary!.totalRecettes,
                         type: 'recette',
                         currency: activeCurrency,
-                      ),
+                        locale: locale),
                       style: TextStyle(
                         fontSize: AppTypography.sizeXs,
                         color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -183,7 +189,7 @@ class DashboardHeroWidget extends StatelessWidget {
                         currentSummary!.totalDepenses,
                         type: 'depense',
                         currency: activeCurrency,
-                      ),
+                        locale: locale),
                       style: TextStyle(
                         fontSize: AppTypography.sizeXs,
                         color: colors.expenseColor,
@@ -199,6 +205,7 @@ class DashboardHeroWidget extends StatelessWidget {
   }
 
   Widget _buildVariationBadge(
+    BuildContext context,
     AppThemeExtension colors,
     double patrimoineTotal,
   ) {
@@ -206,8 +213,11 @@ class DashboardHeroWidget extends StatelessWidget {
         currentSummary!.totalRecettes - currentSummary!.totalDepenses;
     final patrimoineDebutMois = patrimoineTotal - netDuMois;
     final sign = netDuMois >= 0 ? '+' : '';
-    final montantFormate =
-        AmountFormatter.format(netDuMois, currency: activeCurrency);
+    final montantFormate = AmountFormatter.format(
+      netDuMois,
+      currency: activeCurrency,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
+    );
 
     final String variationLabel;
     if (patrimoineDebutMois != 0) {

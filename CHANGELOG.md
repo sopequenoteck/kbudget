@@ -116,6 +116,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   equivalentes. Nouvel utilisateur de demo anglais `demo@local.test`, miroir
   traduit de `dev@local.test` (profil `dev` uniquement). Captures obsoletes
   supprimees.
+- **Infrastructure d'internationalisation de Flutter (KKS-398)** : etape 1 sur
+  8 de KKS-326. **Aucun changement visible** : le francais reste force jusqu'a
+  KKS-405. `app_en.arb` devient le catalogue de reference. Les cles dont le
+  texte correspond a une cle Angular du meme domaine prennent son nom, et 98
+  cles mortes sont supprimees (179 cles au lieu de 302). La locale d'affichage
+  vient d'un seul provider, qui remplace toutes les locales francaises codees
+  en dur.
 
 ### Changed
 

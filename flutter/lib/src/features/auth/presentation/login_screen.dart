@@ -192,9 +192,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             authState.errorCode,
                             fallback: authState.errorCode == null
                                 ? l10n.errorNetwork
-                                : l10n.loginInvalidCredentials,
+                                : l10n.authFeedbackInvalidCredentials,
                             overrides: {
-                              'BAD_REQUEST': l10n.loginInvalidCredentials,
+                              'BAD_REQUEST':
+                                  l10n.authFeedbackInvalidCredentials,
                             },
                           ),
                           style: TextStyle(

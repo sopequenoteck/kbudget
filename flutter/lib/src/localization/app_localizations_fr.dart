@@ -13,74 +13,35 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'K-Budget';
+  String get commonActionCancel => 'Annuler';
 
   @override
-  String get navDashboard => 'Accueil';
+  String get commonActionSave => 'Enregistrer';
 
   @override
-  String get navTransactions => 'Transactions';
+  String get commonActionDelete => 'Supprimer';
 
   @override
-  String get navSubscriptions => 'Abonnements';
+  String get commonActionEdit => 'Modifier';
 
   @override
-  String get navDebts => 'Dettes';
+  String get commonActionRetry => 'Réessayer';
 
   @override
-  String get settings => 'Paramètres';
-
-  @override
-  String get themeLight => 'Thème clair';
-
-  @override
-  String get themeDark => 'Thème sombre';
-
-  @override
-  String get cancel => 'Annuler';
-
-  @override
-  String get confirm => 'Confirmer';
-
-  @override
-  String get save => 'Enregistrer';
-
-  @override
-  String get delete => 'Supprimer';
-
-  @override
-  String get edit => 'Modifier';
-
-  @override
-  String get add => 'Ajouter';
-
-  @override
-  String get retry => 'Réessayer';
-
-  @override
-  String get loading => 'Chargement...';
-
-  @override
-  String get errorGeneric => 'Une erreur est survenue';
+  String get errorsClientGeneric => 'Une erreur est survenue';
 
   @override
   String get errorNetwork => 'Erreur de connexion réseau';
 
   @override
-  String get errorServer => 'Erreur serveur';
+  String get errorsApiBadRequest => 'La demande n\'a pas pu être traitée.';
 
   @override
-  String get errorLoadingData => 'Impossible de charger les données';
-
-  @override
-  String get errorCodeBadRequest => 'La demande n\'a pas pu être traitée.';
-
-  @override
-  String get errorCodeValidation =>
+  String get errorsApiValidationError =>
       'Veuillez vérifier les informations saisies.';
 
   @override
-  String get errorCodeMalformedRequest => 'Requête invalide.';
+  String get errorsApiMalformedRequest => 'Requête invalide.';
 
   @override
   String get errorCodePasswordIncorrect => 'Mot de passe incorrect';
@@ -94,64 +55,64 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le nouveau mot de passe doit être différent de l\'actuel';
 
   @override
-  String get errorCodeConfirmationRequired => 'Confirmation explicite requise.';
+  String get errorsApiConfirmationRequired => 'Confirmation explicite requise.';
 
   @override
   String get errorCodeUnauthenticated => 'Authentification requise';
 
   @override
-  String get errorCodeTokenExpired =>
+  String get errorsApiTokenExpired =>
       'Votre session a expiré. Veuillez vous reconnecter.';
 
   @override
-  String get errorCodeTokenRevoked =>
+  String get errorsApiTokenRevoked =>
       'Votre session a été révoquée. Veuillez vous reconnecter.';
 
   @override
-  String get errorCodeTokenReuseDetected =>
+  String get errorsApiTokenReuseDetected =>
       'Session interrompue par sécurité. Veuillez vous reconnecter.';
 
   @override
-  String get errorCodeTokenInvalid =>
+  String get errorsApiTokenInvalid =>
       'Session invalide. Veuillez vous reconnecter.';
 
   @override
-  String get errorCodeAccessDenied => 'Accès refusé';
+  String get errorsApiAccessDenied => 'Accès refusé';
 
   @override
   String get errorCodePasswordResetRequired =>
       'Réinitialisation des identifiants requise';
 
   @override
-  String get errorCodePasswordResetNotRequired =>
+  String get errorsApiPasswordResetNotRequired =>
       'La réinitialisation des identifiants n\'est pas requise pour ce compte.';
 
   @override
-  String get errorCodeFeatureDisabled => 'Fonctionnalité désactivée';
+  String get errorsApiFeatureDisabled => 'Fonctionnalité désactivée';
 
   @override
   String get errorCodeLastAdminDeletionForbidden =>
       'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.';
 
   @override
-  String get errorCodeNotFound => 'Ressource introuvable';
+  String get errorsApiNotFound => 'Ressource introuvable';
 
   @override
-  String get errorCodeConflict => 'Conflit de données';
+  String get errorsApiConflict => 'Conflit de données';
 
   @override
-  String get errorCodeLastAdminCannotBeDisabled =>
+  String get errorsApiLastAdminCannotBeDisabled =>
       'Impossible de désactiver le dernier administrateur actif.';
 
   @override
-  String get errorCodeEmailAlreadyExists => 'Email déjà utilisé';
+  String get errorsApiEmailAlreadyExists => 'Email déjà utilisé';
 
   @override
-  String get errorCodeTooManyRequests =>
+  String get errorsApiTooManyRequests =>
       'Trop de tentatives. Réessayez dans quelques instants.';
 
   @override
-  String get errorCodeInternal => 'Une erreur interne est survenue';
+  String get errorsApiInternalError => 'Une erreur interne est survenue';
 
   @override
   String get amount => 'Montant';
@@ -163,145 +124,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get frequency => 'Fréquence';
 
   @override
-  String get category => 'Catégorie';
+  String get budgetsFormCategory => 'Catégorie';
 
   @override
   String get selectCategory => 'Sélectionner une catégorie';
 
   @override
-  String get alertThreshold => 'Seuil d\'alerte';
+  String get budgetsFormThresholdAria => 'Seuil d\'alerte';
 
   @override
-  String get onboardingTitle => 'Bienvenue sur K-Budget';
-
-  @override
-  String get onboardingLocalTitle => 'Mode local';
-
-  @override
-  String get onboardingLocalDesc => 'Vos données restent sur cet appareil';
-
-  @override
-  String get onboardingServerTitle => 'Mode serveur';
-
-  @override
-  String get onboardingServerDesc => 'Synchronisez avec votre serveur K-Budget';
-
-  @override
-  String get onboardingChooseMode => 'Choisissez votre mode de données';
-
-  @override
-  String get serverUrlLabel => 'URL du serveur';
-
-  @override
-  String get serverUrlHint => 'https://budget.example.com/api';
-
-  @override
-  String get serverCheckConnection => 'Vérifier la connexion';
-
-  @override
-  String get serverConnecting => 'Connexion en cours...';
-
-  @override
-  String get serverConnected => 'Connexion réussie';
-
-  @override
-  String get serverUnreachable => 'Serveur injoignable';
-
-  @override
-  String get loginTitle => 'Connexion';
-
-  @override
-  String get loginEmail => 'Email';
-
-  @override
-  String get loginPassword => 'Mot de passe';
-
-  @override
-  String get loginButton => 'Se connecter';
-
-  @override
-  String get loginInvalidCredentials => 'Email ou mot de passe incorrect';
-
-  @override
-  String get logoutButton => 'Se déconnecter';
-
-  @override
-  String get lockTitle => 'Déverrouillage';
-
-  @override
-  String get lockBiometric => 'Déverrouiller avec la biométrie';
-
-  @override
-  String get lockPin => 'Saisir le code PIN';
-
-  @override
-  String get fabNewTransaction => 'Nouvelle transaction';
-
-  @override
-  String get fabNewSubscription => 'Nouvel abonnement';
-
-  @override
-  String get fabNewDebt => 'Nouvelle dette';
+  String get authFeedbackInvalidCredentials =>
+      'Email ou mot de passe incorrect';
 
   @override
   String get transactionsEmptyMonth => 'Aucune transaction ce mois-ci';
 
   @override
-  String get transactionsEmptyDepenses => 'Aucune dépense ce mois-ci';
-
-  @override
-  String get transactionsEmptyRecettes => 'Aucune recette ce mois-ci';
-
-  @override
-  String get transactionsSummaryRecettes => 'Recettes';
-
-  @override
-  String get transactionsSummaryDepenses => 'Dépenses';
-
-  @override
-  String get transactionsSummaryBilan => 'Bilan';
-
-  @override
-  String get transactionsFilterAll => 'Tous';
-
-  @override
-  String get transactionsFilterDepenses => 'Dépenses';
-
-  @override
-  String get transactionsFilterRecettes => 'Recettes';
-
-  @override
-  String get transactionsRetry => 'Réessayer';
-
-  @override
   String get transactionsNoCategory => 'Sans catégorie';
 
   @override
-  String get transactionFormLabelField => 'Libellé';
+  String get transactionsFormDescriptionPlaceholder => 'Libellé';
 
   @override
-  String get transactionFormAmountField => 'Montant';
-
-  @override
-  String get transactionFormDateField => 'Date';
-
-  @override
-  String get transactionFormNoteField => 'Note';
-
-  @override
-  String get transactionFormAccountPicker => 'Compte';
-
-  @override
-  String get transactionFormCategoryPicker => 'Catégorie';
-
-  @override
-  String get transactionFormSaveButton => 'Enregistrer';
-
-  @override
-  String get transactionFormUpdateButton => 'Modifier';
-
-  @override
-  String get transactionFormDeleteButton => 'Supprimer';
+  String get transactionsFormAccount => 'Compte';
 
   @override
   String get transactionFormDeleteConfirmTitle => 'Supprimer la transaction';
@@ -311,37 +156,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.';
 
   @override
-  String get transactionFormNoAccounts => 'Créez un compte dans les paramètres';
+  String get subscriptionsFormNamePlaceholder => 'Nom';
 
   @override
-  String get transactionFormNoCategories => 'Créez une catégorie d\'abord';
+  String get subscriptionsFormAccount => 'Compte';
 
   @override
-  String get subscriptionFormNameField => 'Nom';
-
-  @override
-  String get subscriptionFormAmountField => 'Montant';
-
-  @override
-  String get subscriptionFormDateField => 'Date de début';
-
-  @override
-  String get subscriptionFormAccountPicker => 'Compte';
-
-  @override
-  String get subscriptionFormCategoryPicker => 'Catégorie';
-
-  @override
-  String get subscriptionFormActiveSwitch => 'Actif';
-
-  @override
-  String get subscriptionFormSaveButton => 'Enregistrer';
-
-  @override
-  String get subscriptionFormUpdateButton => 'Modifier';
-
-  @override
-  String get subscriptionFormDeleteButton => 'Supprimer';
+  String get commonValueActive => 'Actif';
 
   @override
   String get subscriptionFormDeleteConfirmTitle => 'Supprimer l\'abonnement';
@@ -351,41 +172,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Êtes-vous sûr de vouloir supprimer cet abonnement ? Cette action est irréversible.';
 
   @override
-  String get subscriptionFormNoAccounts =>
-      'Créez un compte dans les paramètres';
+  String get subscriptionsEmptyTitle => 'Aucun abonnement';
 
   @override
-  String get subscriptionFormNoCategories => 'Créez une catégorie d\'abord';
+  String get subscriptionsValuePerMonth => '/mois';
 
   @override
-  String get subscriptionsEmpty => 'Aucun abonnement';
-
-  @override
-  String get subscriptionsRetry => 'Réessayer';
-
-  @override
-  String get subscriptionsFilterAll => 'Tous';
-
-  @override
-  String get subscriptionsFilterActifs => 'Actifs';
-
-  @override
-  String get subscriptionsFilterInactifs => 'Inactifs';
-
-  @override
-  String get subscriptionsTotalMensuel => 'Total mensuel';
-
-  @override
-  String get subscriptionsEmptyActifs => 'Aucun abonnement actif';
-
-  @override
-  String get subscriptionsEmptyInactifs => 'Aucun abonnement inactif';
-
-  @override
-  String get subscriptionFrequencyMensuel => '/mois';
-
-  @override
-  String get subscriptionFrequencyAnnuel => '/an';
+  String get subscriptionsValuePerYear => '/an';
 
   @override
   String subscriptionNextRenewal(String date) {
@@ -393,13 +186,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subscriptionBadgeInactif => 'Inactif';
+  String get commonValueInactive => 'Inactif';
 
   @override
-  String get subscriptionPay => 'Payer';
+  String get subscriptionsActionPay => 'Payer';
 
   @override
-  String get subscriptionPaySuccess => 'Paiement enregistré';
+  String get subscriptionsFeedbackPaid => 'Paiement enregistré';
 
   @override
   String get subscriptionPaymentHistory => 'Historique des paiements';
@@ -413,28 +206,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get debtFormPersonField => 'Personne';
-
-  @override
-  String get debtFormAmountField => 'Montant';
-
-  @override
-  String get debtFormDateField => 'Date';
-
-  @override
-  String get debtFormCategoryPicker => 'Catégorie';
-
-  @override
-  String get debtFormRepaidSwitch => 'Remboursé';
-
-  @override
-  String get debtFormSaveButton => 'Enregistrer';
-
-  @override
-  String get debtFormUpdateButton => 'Modifier';
-
-  @override
-  String get debtFormDeleteButton => 'Supprimer';
+  String get debtsFormPersonPlaceholder => 'Personne';
 
   @override
   String get debtFormDeleteConfirmTitle => 'Supprimer la dette';
@@ -444,70 +216,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.';
 
   @override
-  String get debtFormNoCategories => 'Créez une catégorie d\'abord';
-
-  @override
   String get debtFormAccountPicker => 'Compte bancaire';
 
   @override
-  String get debtFormAccountPlaceholder => 'Aucun compte';
+  String get debtsEmptyTitle => 'Aucune dette';
 
   @override
-  String get debtFormDueDateField => 'Date d\'échéance';
-
-  @override
-  String get debtFormDueDatePlaceholder => 'Aucune échéance';
-
-  @override
-  String get debtFormReminderField => 'Rappel';
-
-  @override
-  String get debtFormReminderPlaceholder => 'Aucun rappel';
-
-  @override
-  String get debtFormReminderTimeField => 'Heure de rappel';
-
-  @override
-  String get debtFormIncludeInBalance => 'Inclure dans le patrimoine';
-
-  @override
-  String get debtsTitle => 'Dettes';
-
-  @override
-  String get debtsSummaryEmprunts => 'Emprunts';
-
-  @override
-  String get debtsSummaryPrets => 'Prêts';
-
-  @override
-  String get debtsSummaryNet => 'Solde net';
-
-  @override
-  String get debtsFilterAll => 'Tous';
-
-  @override
-  String get debtsFilterEnCours => 'En cours';
-
-  @override
-  String get debtsFilterRembourse => 'Remboursé';
-
-  @override
-  String get debtsEmpty => 'Aucune dette';
-
-  @override
-  String get debtsEmptyEnCours => 'Aucune dette en cours';
-
-  @override
-  String get debtsEmptyRembourse => 'Aucune dette remboursée';
-
-  @override
-  String get debtsSectionPrets => 'Prêts';
-
-  @override
-  String get debtsSectionEmprunts => 'Emprunts';
-
-  @override
-  String get debtBadgeRembourse => 'Remboursé';
+  String get debtsValueRepaid => 'Remboursé';
 
   @override
   String get debtDetailInitialAmount => 'Montant initial';
@@ -516,10 +231,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtDetailRemainingAmount => 'Montant restant';
 
   @override
-  String get debtDetailRepayButton => 'Rembourser';
+  String get debtsActionRepay => 'Rembourser';
 
   @override
-  String get debtDetailSnoozeButton => 'Reporter le rappel';
+  String get debtsDialogSnoozeTitle => 'Reporter le rappel';
 
   @override
   String get debtDetailProgress => 'Progression';
@@ -531,7 +246,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtDetailCurrency => 'Devise';
 
   @override
-  String get debtDetailAccount => 'Compte';
+  String get debtsFormAccount => 'Compte';
 
   @override
   String get debtDetailAccountDeleted => 'Compte supprimé';
@@ -540,44 +255,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtDetailDueDate => 'Échéance';
 
   @override
-  String get debtDetailCategory => 'Catégorie';
+  String get debtsFormCategory => 'Catégorie';
 
   @override
   String get debtDetailIncludedInBalance => 'Inclus dans le solde';
 
   @override
-  String get debtDetailReminder => 'Rappel';
+  String get debtsFormReminderAria => 'Rappel';
 
   @override
-  String get debtDetailPayments => 'Paiements';
+  String get debtsDetailPayments => 'Paiements';
 
   @override
   String get debtDetailTotalRepaid => 'Total remboursé';
 
   @override
-  String get debtDetailNoPayments => 'Aucun paiement enregistré';
+  String get commonEmptyNoPayments => 'Aucun paiement enregistré';
 
   @override
   String get debtDetailPaymentsError =>
       'Erreur lors du chargement des paiements';
 
   @override
-  String get debtDetailBadgeEmprunt => 'Emprunt';
+  String get debtsValueBorrowed => 'Emprunt';
 
   @override
-  String get debtDetailBadgePret => 'Prêt';
-
-  @override
-  String get debtDetailBadgeRepaid => 'Remboursé';
-
-  @override
-  String get repayTitle => 'Rembourser';
+  String get debtsValueLent => 'Prêt';
 
   @override
   String get repayAccountLabel => 'Compte source';
 
   @override
-  String get repayAccountPlaceholder => 'Sélectionner un compte';
+  String get debtsFormAccountPlaceholder => 'Sélectionner un compte';
 
   @override
   String get repayAccountRequired => 'Compte requis';
@@ -589,7 +298,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get repayAmountRequired => 'Montant requis';
 
   @override
-  String get repayAmountInvalid => 'Montant invalide';
+  String get debtsFeedbackAmountInvalid => 'Montant invalide';
 
   @override
   String repayAmountMax(String amount) {
@@ -604,10 +313,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get repaySuccess => 'Remboursement enregistré';
 
   @override
-  String get repayError => 'Erreur lors du remboursement';
-
-  @override
-  String get snoozeTitle => 'Reporter le rappel';
+  String get debtsFeedbackRepayError => 'Erreur lors du remboursement';
 
   @override
   String get snoozeDateLabel => 'Nouvelle date';
@@ -619,13 +325,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get snoozeDateFutureRequired => 'La date doit être dans le futur';
 
   @override
-  String get snoozeSuccess => 'Rappel reporté';
+  String get debtsFeedbackSnoozed => 'Rappel reporté';
 
   @override
   String get snoozeError => 'Erreur lors du report';
 
   @override
-  String get snoozeSubmitButton => 'Reporter';
+  String get debtsActionSnooze => 'Reporter';
 
   @override
   String get yes => 'Oui';
@@ -634,22 +340,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get no => 'Non';
 
   @override
-  String get transferFormSourcePicker => 'Compte source';
+  String get transactionsFormTransferFromPlaceholder => 'Compte source';
 
   @override
-  String get transferFormDestinationPicker => 'Compte destination';
+  String get transactionsFormTransferToPlaceholder => 'Compte destination';
 
   @override
-  String get transferFormAmountField => 'Montant';
+  String get transactionsFormAmount => 'Montant';
 
   @override
-  String get transferFormNoteField => 'Note';
+  String get transactionsFormNoteAria => 'Note';
 
   @override
   String get transferFormSaveButton => 'Valider';
 
   @override
-  String get validationSameAccount =>
+  String get transactionsFormTransferAccountsMismatch =>
       'Les comptes source et destination doivent être différents';
 
   @override
@@ -667,68 +373,53 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsTitle => 'Comptes';
 
   @override
-  String get accountsEmpty => 'Aucun compte';
+  String get accountsEmptyTitle => 'Aucun compte';
 
   @override
-  String get accountsRetry => 'Réessayer';
+  String get accountsDialogCreateTitle => 'Nouveau compte';
 
   @override
-  String get accountsNewTitle => 'Nouveau compte';
+  String get accountsDialogEditTitle => 'Modifier le compte';
 
   @override
-  String get accountsEditTitle => 'Modifier le compte';
+  String get accountsValueCurrent => 'Courant';
 
   @override
-  String get accountTypeCourant => 'Courant';
+  String get accountsValueSavings => 'Épargne';
 
   @override
-  String get accountTypeEpargne => 'Épargne';
+  String get accountsValueCash => 'Espèces';
 
   @override
-  String get accountTypeEspeces => 'Espèces';
+  String get accountsFormName => 'Nom du compte';
 
   @override
-  String get accountFormNameField => 'Nom du compte';
+  String get accountsFormOpeningBalance => 'Solde initial';
 
   @override
-  String get accountFormInitialBalanceField => 'Solde initial';
+  String get accountsFormCurrency => 'Devise';
 
   @override
-  String get accountFormCurrencyPicker => 'Devise';
+  String get accountsFormIcon => 'Icône';
 
   @override
-  String get accountFormIconField => 'Icône';
-
-  @override
-  String get accountFormColorField => 'Couleur';
-
-  @override
-  String get accountFormActiveSwitch => 'Actif';
+  String get commonFormColour => 'Couleur';
 
   @override
   String get accountFormActiveDefaultHint =>
       'Le compte par défaut ne peut pas être désactivé';
 
   @override
-  String get accountFormCurrentBalance => 'Solde actuel';
+  String get accountsFormCurrentBalance => 'Solde actuel';
 
   @override
-  String get accountFormNewBalance => 'Nouveau solde';
+  String get accountsFormNewBalance => 'Nouveau solde';
 
   @override
   String get accountFormPreviewPlaceholder => 'Aperçu du compte';
 
   @override
-  String get accountBadgeDefault => 'Défaut';
-
-  @override
-  String get accountBadgeInactive => 'Inactif';
-
-  @override
-  String get accountActionSetDefault => 'Définir par défaut';
-
-  @override
-  String get accountActionDelete => 'Supprimer';
+  String get accountsValueDefault => 'Défaut';
 
   @override
   String get accountDeleteConfirmTitle => 'Supprimer le compte';
@@ -750,39 +441,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountErrorDelete => 'Erreur lors de la suppression du compte';
 
   @override
-  String get accountErrorSetDefault =>
-      'Erreur lors du changement de compte par défaut';
+  String get categoriesPageTitle => 'Catégories';
 
   @override
-  String get accountErrorAdjustBalance =>
-      'Erreur lors de l\'ajustement du solde';
+  String get categoriesEmptyNoCategories => 'Aucune catégorie';
 
   @override
-  String get categoriesTitle => 'Catégories';
+  String get categoriesDialogCreateTitle => 'Nouvelle catégorie';
 
   @override
-  String get categoriesEmpty => 'Aucune catégorie';
-
-  @override
-  String get categoriesRetry => 'Réessayer';
-
-  @override
-  String get categoryFormTitleCreate => 'Nouvelle catégorie';
-
-  @override
-  String get categoryFormTitleEdit => 'Modifier la catégorie';
+  String get categoriesDialogEditTitle => 'Modifier la catégorie';
 
   @override
   String get categoryFormNameField => 'Nom de la catégorie';
 
   @override
   String get categoryFormIconField => 'Icône';
-
-  @override
-  String get categoryFormColorField => 'Couleur';
-
-  @override
-  String get categoryFormPreviewPlaceholder => 'Aperçu de la catégorie';
 
   @override
   String get categoryNameRequired => 'Le nom est requis';
@@ -819,19 +493,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Erreur lors de la suppression de la catégorie';
 
   @override
-  String get budgetViewCharts => 'Voir les graphiques';
-
-  @override
   String get emptyBudgetList => 'Aucun budget';
-
-  @override
-  String get emptyBudgetCreateHint => 'Appuyez sur + pour créer un budget';
-
-  @override
-  String get budgetDetails => 'Détails budget';
-
-  @override
-  String get emptyBudgetData => 'Aucune donnée pour ce mois';
 
   @override
   String get deleteBudgetTitle => 'Supprimer le budget';
@@ -845,83 +507,59 @@ class AppLocalizationsFr extends AppLocalizations {
       'Toutes les catégories ont déjà un budget';
 
   @override
-  String get spent => 'Dépensé';
-
-  @override
-  String get budget => 'Budget';
-
-  @override
   String get total => 'Total';
 
   @override
   String get budgetOtherCategory => 'Autre';
 
   @override
-  String get budgetOtherCategoryDetail => 'Dépenses non budgétées';
-
-  @override
   String get budgetActive => 'Budget actif';
 
   @override
-  String get budgetShowInactive => 'Afficher les inactifs';
+  String get notificationsPageTitle => 'Notifications';
 
   @override
-  String get notificationTitle => 'Notifications';
+  String get notificationsActionMarkAllReadHint => 'Tout marquer lu';
 
   @override
-  String get notificationMarkAllRead => 'Tout marquer lu';
+  String get notificationsActionDeleteAllHint => 'Vider l\'historique';
 
   @override
-  String get notificationClearHistory => 'Vider l\'historique';
-
-  @override
-  String get notificationEmpty => 'Aucune notification';
-
-  @override
-  String get notificationClearConfirmTitle => 'Vider l\'historique';
+  String get notificationsEmptyTitle => 'Aucune notification';
 
   @override
   String get notificationClearConfirmMessage =>
       'Supprimer toutes les notifications ? Cette action est irréversible.';
 
   @override
-  String get notificationRepayTooltip => 'Rembourser';
+  String get debtsFeedbackLoadError => 'Impossible de charger la dette';
 
   @override
-  String get notificationSnoozeTooltip => 'Reporter';
+  String get commonValueToday => 'Aujourd\'hui';
 
   @override
-  String get notificationLoadError => 'Impossible de charger la dette';
+  String get commonValueYesterday => 'Hier';
 
   @override
-  String get notificationGroupToday => 'Aujourd\'hui';
+  String get recurringPageTitle => 'Récurrences';
 
   @override
-  String get notificationGroupYesterday => 'Hier';
+  String get recurringValueOverdue => 'En retard';
 
   @override
-  String get recurringTitle => 'Récurrences';
+  String get recurringValueUpcoming => 'À venir';
 
   @override
-  String get recurringOverdue => 'En retard';
+  String get recurringActionMarkAsPaid => 'Marquer comme payée';
 
   @override
-  String get recurringToday => 'Aujourd\'hui';
+  String get recurringActionSkipOccurrence => 'Passer cette occurrence';
 
   @override
-  String get recurringUpcoming => 'À venir';
+  String get recurringActionDeactivate => 'Désactiver la récurrence';
 
   @override
-  String get recurringValidate => 'Marquer comme payée';
-
-  @override
-  String get recurringSkip => 'Passer cette occurrence';
-
-  @override
-  String get recurringDeactivate => 'Désactiver la récurrence';
-
-  @override
-  String get recurringValidateAll => 'Tout payé';
+  String get recurringActionPayAll => 'Tout payé';
 
   @override
   String recurringNextOccurrence(String date) {
@@ -940,23 +578,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recurringEmpty => 'Aucune récurrence active';
 
   @override
-  String get recurringDeactivateConfirm => 'Désactiver cette récurrence ?';
-
-  @override
-  String get recurringValidateSuccess => 'Transaction créée';
+  String get recurringFeedbackValidated => 'Transaction créée';
 
   @override
   String get recurringSkipSuccess => 'Échéance avancée';
 
   @override
-  String get recurringDeactivateSuccess => 'Récurrence désactivée';
+  String get recurringFeedbackDeactivated => 'Récurrence désactivée';
 
   @override
   String get frequencyHebdomadaire => '/semaine';
-
-  @override
-  String get frequencyMensuel => '/mois';
-
-  @override
-  String get frequencyAnnuel => '/an';
 }

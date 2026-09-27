@@ -13,6 +13,7 @@ import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Bottom sheet affichant la liste des catégories non budgétées avec leurs dépenses.
@@ -63,6 +64,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
       currency.toLowerCase(),
       Currency.eur,
     );
+    final formattedTotal = AmountFormatter.format(
+      total,
+      currency: currencyEnum,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(
         vertical: AppSpacing.space3,
@@ -94,7 +100,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
             ),
           ),
           Text(
-            AmountFormatter.format(total, currency: currencyEnum),
+            formattedTotal,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.semiBold,
@@ -118,6 +124,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
     final currencyEnum = Currency.values.byNameOrDefault(
       currency.toLowerCase(),
       Currency.eur,
+    );
+    final formattedTotal = AmountFormatter.format(
+      total,
+      currency: currencyEnum,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
     );
 
     return SafeArea(
@@ -177,7 +188,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.space3),
             // Total
             Text(
-              '${l10n.total} : ${AmountFormatter.format(total, currency: currencyEnum)}',
+              '${l10n.total} : $formattedTotal',
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -224,7 +235,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                       AmountFormatter.format(
                         item.montantDepense,
                         currency: currencyEnum,
-                      ),
+                        locale: intlLocaleFor(Localizations.localeOf(context))),
                       style: TextStyle(
                         fontSize: AppTypography.sizeSm,
                         fontWeight: AppTypography.semiBold,

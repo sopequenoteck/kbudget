@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -41,6 +42,17 @@ class SubscriptionHeroWidget extends StatelessWidget {
     final totalMensuel = firstEntry.value;
     final currency = firstEntry.key;
     final totalAnnuel = totalMensuel * 12;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedMensuel = AmountFormatter.format(
+      totalMensuel,
+      currency: currency,
+      locale: locale,
+    );
+    final formattedAnnuel = AmountFormatter.format(
+      totalAnnuel,
+      currency: currency,
+      locale: locale,
+    );
 
     return Padding(
       key: const Key('subscription_hero'),
@@ -62,7 +74,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.space2),
           Text(
-            AmountFormatter.format(totalMensuel, currency: currency),
+            formattedMensuel,
             style: TextStyle(
               fontSize: AppTypography.size3xl,
               fontWeight: AppTypography.bold,
@@ -97,7 +109,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '≈ ${AmountFormatter.format(totalAnnuel, currency: currency)}/an',
+                '≈ $formattedAnnuel/an',
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,

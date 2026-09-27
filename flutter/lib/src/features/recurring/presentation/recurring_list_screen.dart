@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/empty_state_widget.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
@@ -21,6 +22,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecurringListScreen extends ConsumerStatefulWidget {
@@ -63,8 +65,8 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     } else if (state.error != null && state.items.isEmpty) {
       body = EmptyStateWidget(
         icon: PhosphorIconsRegular.warning,
-        message: l10n.errorGeneric,
-        ctaLabel: l10n.retry,
+        message: l10n.errorsClientGeneric,
+        ctaLabel: l10n.commonActionRetry,
         onCtaTap: () =>
             ref.read(recurringListNotifierProvider.notifier).loadItems(),
       );
@@ -115,7 +117,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringOverdue.toUpperCase(),
+                    label: l10n.recurringValueOverdue.toUpperCase(),
                     labelColor: themeExt.expenseColor,
                     items: overdue,
                     showValidateAll: true,
@@ -140,7 +142,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringToday.toUpperCase(),
+                    label: l10n.commonValueToday.toUpperCase(),
                     labelColor: colorScheme.primary,
                     items: today,
                     showValidateAll: false,
@@ -161,7 +163,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringUpcoming.toUpperCase(),
+                    label: l10n.recurringValueUpcoming.toUpperCase(),
                     labelColor: colorScheme.onSurfaceVariant,
                     items: upcoming,
                     showValidateAll: false,
@@ -181,7 +183,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.recurringTitle)),
+      appBar: AppBar(title: Text(l10n.recurringPageTitle)),
       body: body,
     );
   }
@@ -220,7 +222,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                 AmountFormatter.format(
                   item.montant,
                   currency: item.accountCurrency ?? Currency.eur,
-                ),
+                  locale: ref.watch(intlLocaleProvider)),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXl,
                   fontWeight: AppTypography.semiBold,
@@ -229,7 +231,10 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               Text(
                 l10n.recurringNextOccurrence(
-                  RelativeDateFormatter.formatCompact(item.nextOccurrence),
+                  RelativeDateFormatter.formatCompact(
+                    item.nextOccurrence,
+                    locale: ref.watch(intlLocaleProvider),
+                  ),
                 ),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXs,
@@ -238,7 +243,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space4),
               _ActionButton(
-                label: l10n.recurringValidate,
+                label: l10n.recurringActionMarkAsPaid,
                 icon: PhosphorIconsRegular.check,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
@@ -250,7 +255,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space2),
               _ActionButton(
-                label: l10n.recurringSkip,
+                label: l10n.recurringActionSkipOccurrence,
                 icon: PhosphorIconsRegular.skipForward,
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 foregroundColor: colorScheme.onSurface,
@@ -262,7 +267,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space2),
               _ActionButton(
-                label: l10n.recurringDeactivate,
+                label: l10n.recurringActionDeactivate,
                 icon: PhosphorIconsRegular.pause,
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 foregroundColor: themeExt.expenseColor,
@@ -290,13 +295,13 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.errorGeneric),
+          content: Text(l10n.errorsClientGeneric),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringValidateSuccess)),
+        SnackBar(content: Text(l10n.recurringFeedbackValidated)),
       );
     }
   }
@@ -312,13 +317,13 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.errorGeneric),
+          content: Text(l10n.errorsClientGeneric),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringValidateSuccess)),
+        SnackBar(content: Text(l10n.recurringFeedbackValidated)),
       );
     }
   }
@@ -334,7 +339,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.errorGeneric),
+          content: Text(l10n.errorsClientGeneric),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -356,13 +361,13 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.errorGeneric),
+          content: Text(l10n.errorsClientGeneric),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringDeactivateSuccess)),
+        SnackBar(content: Text(l10n.recurringFeedbackDeactivated)),
       );
     }
   }
@@ -471,7 +476,7 @@ class _StatusGroupSection extends StatelessWidget {
                     ),
                     onPressed: onValidateAll,
                     child: Text(
-                      l10n.recurringValidateAll,
+                      l10n.recurringActionPayAll,
                       style: const TextStyle(
                         fontSize: AppTypography.sizeXs,
                         fontWeight: AppTypography.semiBold,
@@ -566,10 +571,17 @@ class _MonthlySummaryCard extends StatelessWidget {
     }
 
     final displayCurrency = primaryCurrency ?? Currency.eur;
-    final netFormatted =
-        AmountFormatter.format(net.abs(), currency: displayCurrency);
-    final totalFormatted =
-        AmountFormatter.format(totalExpenses, currency: displayCurrency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final netFormatted = AmountFormatter.format(
+      net.abs(),
+      currency: displayCurrency,
+      locale: locale,
+    );
+    final totalFormatted = AmountFormatter.format(
+      totalExpenses,
+      currency: displayCurrency,
+      locale: locale,
+    );
     final netColor = net >= 0 ? themeExt.incomeColor : themeExt.expenseColor;
     final netPrefix = net >= 0 ? '+' : '−';
 

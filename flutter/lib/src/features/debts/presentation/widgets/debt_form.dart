@@ -22,6 +22,7 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -178,7 +179,9 @@ class _DebtFormState extends ConsumerState<DebtForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -199,7 +202,9 @@ class _DebtFormState extends ConsumerState<DebtForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -257,7 +262,10 @@ class _DebtFormState extends ConsumerState<DebtForm> {
             label: a.nom,
             icon: a.icone,
             color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(a.solde),
+            secondaryText: AmountFormatter.format(
+              a.solde,
+              locale: ref.watch(intlLocaleProvider),
+            ),
             imageUrl: resolveBankAssetPath(a),
           ),
         )
@@ -524,7 +532,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
               key: const Key('tf_personne'),
               controller: _personneController,
               decoration: InputDecoration(
-                hintText: l10n.debtFormPersonField,
+                hintText: l10n.debtsFormPersonPlaceholder,
                 hintStyle: TextStyle(color: cs.onSurfaceVariant),
                 border: InputBorder.none,
                 isDense: true,
@@ -571,7 +579,7 @@ class _DebtFormState extends ConsumerState<DebtForm> {
                   BSheetDeletePill(
                     isLoading: _isSubmitting,
                     onTap: _onDelete,
-                    label: l10n.debtFormDeleteButton,
+                    label: l10n.commonActionDelete,
                   ),
                 _StatusPill(
                   isRembourse: _rembourse,
@@ -585,8 +593,8 @@ class _DebtFormState extends ConsumerState<DebtForm> {
         loading: _isSubmitting,
         onSubmit: _onSubmit,
         submitLabel: _isEditMode
-            ? l10n.debtFormUpdateButton
-            : l10n.debtFormSaveButton,
+            ? l10n.commonActionEdit
+            : l10n.commonActionSave,
       ),
     );
   }
