@@ -6,6 +6,8 @@ import { LanguageService } from '../../core/services/language';
 // reconstruire un `Intl.DateTimeFormat` a chaque rendu.
 const longDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
 function getLongDateFormatter(locale: string): Intl.DateTimeFormat {
   let formatter = longDateFormatterCache.get(locale);
   if (!formatter) {
@@ -31,7 +33,9 @@ export class RelativeDatePipe implements PipeTransform {
       return '';
     }
 
-    const date = new Date(value);
+    // Date seule (`AAAA-MM-JJ`) lue a minuit local : `new Date` la lirait a
+    // minuit UTC, soit la veille dans un fuseau en retard sur UTC.
+    const date = new Date(DATE_ONLY.test(value) ? `${value}T00:00:00` : value);
     if (isNaN(date.getTime())) {
       return '';
     }

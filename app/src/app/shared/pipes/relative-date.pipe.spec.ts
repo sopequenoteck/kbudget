@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { RelativeDatePipe } from './relative-date.pipe';
@@ -16,11 +16,11 @@ describe('RelativeDatePipe', () => {
     pipe = TestBed.runInInjectionContext(() => new RelativeDatePipe());
   });
 
-  /** Retourne la date ISO (YYYY-MM-DD) de `n` jours avant aujourd'hui */
+  /** Retourne la date locale (YYYY-MM-DD) de `n` jours avant aujourd'hui */
   function daysAgo(n: number): string {
     const d = new Date();
     d.setDate(d.getDate() - n);
-    return d.toISOString().split('T')[0];
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   it('should_return_aujourdhui_when_today', () => {
@@ -79,5 +79,26 @@ describe('RelativeDatePipe', () => {
 
   it('should_return_empty_string_when_empty_string', () => {
     expect(pipe.transform('')).toBe('');
+  });
+
+  describe('horloge figee', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should_return_aujourdhui_when_date_only_is_today_just_after_local_midnight', () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 8, 27, 0, 30));
+
+      expect(pipe.transform('2026-09-27')).toBe("Aujourd'hui");
+      expect(pipe.transform('2026-09-26')).toBe('Hier');
+    });
+
+    it('should_return_aujourdhui_when_value_is_local_date_time_of_today', () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 8, 27, 10, 0));
+
+      expect(pipe.transform('2026-09-27T23:30:00')).toBe("Aujourd'hui");
+    });
   });
 });

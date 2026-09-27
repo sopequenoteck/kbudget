@@ -147,6 +147,9 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   s'affichait toujours en euros, quelle que soit la devise principale.
 - **Recurrences : lignes de la liste a nouveau pleine largeur** : elles ne
   remplissaient plus la carte et leur texte etait centre, depuis la v5.0.0.
+- **Tableau de bord : date relative des dernieres transactions** : dans un
+  fuseau en retard sur UTC (Ameriques), une transaction du jour s'affichait
+  « Hier » et une date longue avait un jour de moins.
 
 ### Security
 
