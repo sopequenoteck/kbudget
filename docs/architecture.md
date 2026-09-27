@@ -277,11 +277,12 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED |
-| entityType | EntityType | SUBSCRIPTION / DEBT |
+| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED / RECURRING_TRANSACTION_DUE |
+| entityType | EntityType | SUBSCRIPTION / DEBT / BUDGET / TRANSACTION |
 | entityId | UUID | ID de l'entite liee |
 | title | String | Titre de la notification |
-| body | String | Corps du message |
+| message | String | Corps du message |
+| params | Map<String,String> (JSONB) | Parametres du texte construit par le client, null avant KKS-397 |
 | read | Boolean | Lue ou non (default false) |
 | readAt | LocalDateTime | Date de lecture (nullable) |
 | createdAt | LocalDateTime | Date de creation |

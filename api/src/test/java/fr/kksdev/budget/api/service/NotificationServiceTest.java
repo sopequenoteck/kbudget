@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,24 +54,30 @@ class NotificationServiceTest {
     }
 
     private Notification buildNotification(User user, boolean read) {
+        return buildNotification(user, read, null);
+    }
+
+    private Notification buildNotification(User user, boolean read, Map<String, String> params) {
         return Notification.builder()
                 .id(notificationId)
                 .user(user)
                 .type(NotificationType.SUBSCRIPTION_DUE)
-                .title("Abonnement Netflix")
-                .message("Abonnement Netflix — échéance demain")
+                .title("Subscription Netflix")
+                .message("Netflix is due tomorrow")
                 .entityType(EntityType.SUBSCRIPTION)
                 .entityId(entityId)
                 .read(read)
                 .readAt(read ? LocalDateTime.now() : null)
                 .createdAt(LocalDateTime.now())
+                .params(params)
                 .build();
     }
 
     @Test
     void should_create_notification_when_valid_params() {
         var user = buildUser(userId);
-        var saved = buildNotification(user, false);
+        var params = Map.of("name", "Netflix");
+        var saved = buildNotification(user, false, params);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(notificationRepository.save(any(Notification.class))).thenReturn(saved);
@@ -78,22 +85,59 @@ class NotificationServiceTest {
         NotificationResponse response = notificationService.createNotification(
                 userId,
                 NotificationType.SUBSCRIPTION_DUE,
-                "Abonnement Netflix",
-                "Abonnement Netflix — échéance demain",
+                "Subscription Netflix",
+                "Netflix is due tomorrow",
                 EntityType.SUBSCRIPTION,
-                entityId
+                entityId,
+                params
         );
 
         assertThat(response.id()).isEqualTo(notificationId);
         assertThat(response.type()).isEqualTo(NotificationType.SUBSCRIPTION_DUE);
-        assertThat(response.title()).isEqualTo("Abonnement Netflix");
+        assertThat(response.title()).isEqualTo("Subscription Netflix");
         assertThat(response.read()).isFalse();
+        assertThat(response.params()).isEqualTo(params);
         verify(notificationRepository).save(any(Notification.class));
         verify(messagingTemplate).convertAndSendToUser(
                 eq(userId.toString()),
                 eq("/queue/notifications"),
                 any(NotificationResponse.class)
         );
+    }
+
+    @Test
+    void should_have_null_params_when_creating_notification_without_params() {
+        var user = buildUser(userId);
+        var saved = buildNotification(user, false, null);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(notificationRepository.save(any(Notification.class))).thenReturn(saved);
+
+        NotificationResponse response = notificationService.createNotification(
+                userId,
+                NotificationType.SUBSCRIPTION_DUE,
+                "Subscription Netflix",
+                "Netflix is due tomorrow",
+                EntityType.SUBSCRIPTION,
+                entityId,
+                null
+        );
+
+        assertThat(response.params()).isNull();
+    }
+
+    @Test
+    void should_return_null_params_when_existing_notification_has_no_params() {
+        var user = buildUser(userId);
+        var notification = buildNotification(user, false, null);
+        var pageable = PageRequest.of(0, 20);
+        var page = new PageImpl<>(List.of(notification), pageable, 1);
+
+        when(notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)).thenReturn(page);
+
+        var result = notificationService.getNotifications(userId, pageable, null);
+
+        assertThat(result.getContent().getFirst().params()).isNull();
     }
 
     @Test
@@ -109,7 +153,7 @@ class NotificationServiceTest {
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().getFirst().id()).isEqualTo(notificationId);
-        assertThat(result.getContent().getFirst().title()).isEqualTo("Abonnement Netflix");
+        assertThat(result.getContent().getFirst().title()).isEqualTo("Subscription Netflix");
     }
 
     @Test

@@ -345,9 +345,9 @@ public class BudgetService {
                     userId, NotificationType.BUDGET_THRESHOLD, budget.getId(), monthStart);
             if (!alreadyNotified) {
                 String categoryName = budget.getCategory().getNom();
-                String title = "Budget " + categoryName + " : " + percentage.intValue() + "%";
-                String body = "Vous avez atteint " + percentage.intValue() + "% du budget " + categoryName;
-                notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, title, body, EntityType.BUDGET, budget.getId());
+                String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
+                NotificationContent content = NotificationContentFactory.budgetThreshold(categoryName, categorySystemKey, percentage.intValue());
+                notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
                 log.info("Notification BUDGET_THRESHOLD envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
             }
         }
@@ -357,9 +357,9 @@ public class BudgetService {
                     userId, NotificationType.BUDGET_EXCEEDED, budget.getId(), monthStart);
             if (!alreadyNotified) {
                 String categoryName = budget.getCategory().getNom();
-                String title = "Budget " + categoryName + " dépassé !";
-                String body = "Vous avez dépassé le budget " + categoryName + " (" + percentage.intValue() + "%)";
-                notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, title, body, EntityType.BUDGET, budget.getId());
+                String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
+                NotificationContent content = NotificationContentFactory.budgetExceeded(categoryName, categorySystemKey, percentage.intValue());
+                notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
                 log.info("Notification BUDGET_EXCEEDED envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
             }
         }

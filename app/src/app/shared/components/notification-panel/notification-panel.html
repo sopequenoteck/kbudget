@@ -49,8 +49,10 @@
                 <ng-icon [name]="getIconForType(notification.type)" size="20" />
               </div>
               <div class="notification-content">
-                <div class="notification-title">{{ notification.title }}</div>
-                <div class="notification-message">{{ notification.message }}</div>
+                @if (notification | notificationText; as displayText) {
+                  <div class="notification-title">{{ displayText.title }}</div>
+                  <div class="notification-message">{{ displayText.message }}</div>
+                }
                 <div class="notification-time">
                   {{ notification.createdAt | date: 'HH:mm' }}
                 </div>

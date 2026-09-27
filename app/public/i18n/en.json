@@ -628,6 +628,20 @@
     "empty": {
       "title": "No notifications"
     },
+    "list": {
+      "budgetExceededMessage": "You have exceeded the {category} budget ({percentage}%)",
+      "budgetExceededTitle": "Budget {category} exceeded",
+      "budgetThresholdMessage": "You have reached {percentage}% of the {category} budget",
+      "budgetThresholdTitle": "Budget {category}: {percentage}%",
+      "debtDueMessage": "Debt with {person} is due tomorrow",
+      "debtDueTitle": "Debt with {person}",
+      "debtReminderMessage": "Reminder: {amount} left on the debt with {person}",
+      "debtReminderTitle": "Debt reminder - {person}",
+      "recurringTransactionDueMessage": "{label} {amount} due on {dueDate}",
+      "recurringTransactionDueTitle": "Recurring transaction {label}",
+      "subscriptionDueMessage": "{name} is due tomorrow",
+      "subscriptionDueTitle": "Subscription {name}"
+    },
     "page": {
       "title": "Notifications"
     }

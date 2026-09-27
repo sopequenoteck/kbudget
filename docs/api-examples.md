@@ -1379,13 +1379,14 @@ Response `200` :
     {
       "id": "uuid",
       "type": "SUBSCRIPTION_DUE",
-      "title": "Echeance abonnement",
-      "message": "Netflix arrive a echeance dans 3 jours",
+      "title": "Subscription Netflix",
+      "message": "Netflix is due tomorrow",
       "entityType": "SUBSCRIPTION",
       "entityId": "uuid-subscription",
       "read": false,
       "readAt": null,
-      "createdAt": "2026-03-27T08:00:00"
+      "createdAt": "2026-03-27T08:00:00",
+      "params": { "name": "Netflix" }
     }
   ],
   "number": 0,
@@ -1394,6 +1395,22 @@ Response `200` :
   "totalPages": 1
 }
 ```
+
+> `params` (KKS-397) : parametres de la notification, a partir desquels le
+> client construit titre et message dans sa langue. Valeurs en chaines :
+> montants decimaux exacts, dates ISO, pourcentage entier, devise en code ISO.
+>
+> | Type | Cles |
+> |------|------|
+> | `SUBSCRIPTION_DUE` | `name` |
+> | `DEBT_DUE` | `person` |
+> | `DEBT_REMINDER` | `person`, `amount`, `currency` |
+> | `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED` | `category`, `categorySystemKey` (categorie systeme seulement), `percentage` |
+> | `RECURRING_TRANSACTION_DUE` | `label`, `amount`, `currency` (absente sans compte), `dueDate` |
+>
+> `null` pour une notification anterieure : le client affiche alors `title` /
+> `message`, desormais ecrits en anglais. Le meme objet est pousse par
+> WebSocket.
 
 ### Compteur non lues `GET /api/v1/notifications/unread-count`
 

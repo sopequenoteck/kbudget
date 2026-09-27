@@ -1056,6 +1056,7 @@ RESPONSE PUT /v1/notifications/{id}/read 200 entityId: string
 RESPONSE PUT /v1/notifications/{id}/read 200 entityType: string
 RESPONSE PUT /v1/notifications/{id}/read 200 id: string
 RESPONSE PUT /v1/notifications/{id}/read 200 message: string
+RESPONSE PUT /v1/notifications/{id}/read 200 params: object
 RESPONSE PUT /v1/notifications/{id}/read 200 read: boolean
 RESPONSE PUT /v1/notifications/{id}/read 200 readAt: string
 RESPONSE PUT /v1/notifications/{id}/read 200 title: string

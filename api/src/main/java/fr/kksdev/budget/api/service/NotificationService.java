@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
-    public NotificationResponse createNotification(UUID userId, NotificationType type, String title, String message, EntityType entityType, UUID entityId) {
+    public NotificationResponse createNotification(UUID userId, NotificationType type, String title, String message, EntityType entityType, UUID entityId, Map<String, String> params) {
         Notification notification = Notification.builder()
                 .user(userRepository.getReferenceById(userId))
                 .type(type)
@@ -37,6 +38,7 @@ public class NotificationService {
                 .message(message)
                 .entityType(entityType)
                 .entityId(entityId)
+                .params(params)
                 .build();
         notification = notificationRepository.save(notification);
         log.info("Notification créée: type={}, userId={}", type, userId);
@@ -111,7 +113,8 @@ public class NotificationService {
                 notification.getEntityId(),
                 notification.isRead(),
                 notification.getReadAt(),
-                notification.getCreatedAt()
+                notification.getCreatedAt(),
+                notification.getParams()
         );
     }
 }

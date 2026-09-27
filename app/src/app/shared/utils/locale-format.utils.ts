@@ -34,3 +34,16 @@ export function insertSortedByNom<T extends { nom: string }>(
 export function formatMonthYearLabel(date: Date, locale: string): string {
   return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
+
+/**
+ * Libellé "jour mois année" localisé (ex: "1 octobre 2026") d'une date ISO
+ * `AAAA-MM-JJ` (KKS-397). Le suffixe `T00:00:00` évite qu'un fuseau négatif
+ * fasse reculer la date affichée d'un jour.
+ */
+export function formatFullDateLabel(isoDate: string, locale: string): string {
+  return new Date(`${isoDate}T00:00:00`).toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}

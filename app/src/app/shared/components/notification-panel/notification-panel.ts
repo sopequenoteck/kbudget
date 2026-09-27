@@ -25,11 +25,12 @@ import { ToastService } from '../toast/toast.service';
 import { ModalService } from '../../../core/services/modal.service';
 import { type Debt } from '../../../core/models/debt.model';
 import { SnoozeDialog } from '../../../features/debts/components/snooze-dialog/snooze-dialog';
+import { NotificationTextPipe } from '../../pipes/notification-text.pipe';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, NgIcon, SnoozeDialog, TranslocoPipe],
+  imports: [DatePipe, NgIcon, SnoozeDialog, TranslocoPipe, NotificationTextPipe],
   providers: [
     provideIcons({
       phosphorBellRinging,

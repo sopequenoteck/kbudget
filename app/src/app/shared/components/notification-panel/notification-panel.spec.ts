@@ -248,6 +248,47 @@ describe('NotificationPanel', () => {
     expect(actionButtons.length).toBe(0);
   });
 
+  it('should_render_text_built_from_type_and_params_when_params_are_present', () => {
+    const subscriptionNotification = makeNotification({
+      id: 'notif-with-params',
+      type: 'SUBSCRIPTION_DUE',
+      title: 'Titre serveur obsolete',
+      message: 'Message serveur obsolete',
+      params: { name: 'Netflix' },
+    });
+    notificationServiceMock = createNotificationServiceMock([subscriptionNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const title: HTMLElement = fixture.nativeElement.querySelector('.notification-title');
+    const message: HTMLElement = fixture.nativeElement.querySelector('.notification-message');
+    expect(title.textContent?.trim()).toBe('Abonnement Netflix');
+    expect(message.textContent?.trim()).toBe('Netflix — échéance demain');
+  });
+
+  it('should_render_raw_title_and_message_when_notification_has_no_params', () => {
+    const legacyNotification = makeNotification({
+      id: 'notif-legacy',
+      type: 'SUBSCRIPTION_DUE',
+      title: 'Abonnement',
+      message: 'Votre abonnement arrive à échéance',
+    });
+    notificationServiceMock = createNotificationServiceMock([legacyNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const title: HTMLElement = fixture.nativeElement.querySelector('.notification-title');
+    const message: HTMLElement = fixture.nativeElement.querySelector('.notification-message');
+    expect(title.textContent?.trim()).toBe('Abonnement');
+    expect(message.textContent?.trim()).toBe('Votre abonnement arrive à échéance');
+  });
+
   it('should_show_empty_state_when_no_notifications', () => {
     setupTestBed();
     const fixture = TestBed.createComponent(NotificationPanel);
