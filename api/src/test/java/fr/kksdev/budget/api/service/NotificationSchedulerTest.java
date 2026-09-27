@@ -27,8 +27,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,12 +116,13 @@ class NotificationSchedulerTest {
         notificationScheduler.runDailyJob();
 
         verify(notificationService).createNotification(
-                eq(userId),
-                eq(NotificationType.SUBSCRIPTION_DUE),
-                eq("Abonnement Netflix"),
-                eq("Abonnement Netflix — échéance demain"),
-                eq(EntityType.SUBSCRIPTION),
-                eq(subscriptionId)
+                userId,
+                NotificationType.SUBSCRIPTION_DUE,
+                "Subscription Netflix",
+                "Netflix is due tomorrow",
+                EntityType.SUBSCRIPTION,
+                subscriptionId,
+                Map.of("name", "Netflix")
         );
         verify(notificationService).purgeOldNotifications(userId);
     }
@@ -140,12 +143,13 @@ class NotificationSchedulerTest {
         notificationScheduler.runDailyJob();
 
         verify(notificationService).createNotification(
-                eq(userId),
-                eq(NotificationType.DEBT_DUE),
-                eq("Dette Alice"),
-                eq("Dette envers Alice — échéance demain"),
-                eq(EntityType.DEBT),
-                eq(debtId)
+                userId,
+                NotificationType.DEBT_DUE,
+                "Debt with Alice",
+                "Debt with Alice is due tomorrow",
+                EntityType.DEBT,
+                debtId,
+                Map.of("person", "Alice")
         );
         verify(notificationService).purgeOldNotifications(userId);
     }
@@ -161,7 +165,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.runDailyJob();
 
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
         verify(subscriptionRepository, never()).findByUserIdAndActifTrueOrderByNomAsc(any());
         verify(debtRepository, never()).findByUserIdAndRembourseFalseOrderByDateDesc(any());
     }
@@ -179,7 +183,7 @@ class NotificationSchedulerTest {
         notificationScheduler.runDailyJob();
 
         verify(subscriptionRepository).findByUserIdAndActifTrueOrderByNomAsc(userId);
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -244,7 +248,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.runDailyJob();
 
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -262,7 +266,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.runDailyJob();
 
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
     }
 
     // -------------------------------------------------------------------------
@@ -300,12 +304,13 @@ class NotificationSchedulerTest {
         notificationScheduler.checkDebtReminders();
 
         verify(notificationService).createNotification(
-                eq(userId),
-                eq(NotificationType.DEBT_REMINDER),
-                eq("Rappel dette - Alice"),
-                any(String.class),
-                eq(EntityType.DEBT),
-                eq(debtId)
+                userId,
+                NotificationType.DEBT_REMINDER,
+                "Debt reminder - Alice",
+                "Reminder: 100 EUR left on the debt with Alice",
+                EntityType.DEBT,
+                debtId,
+                Map.of("person", "Alice", "amount", "100", "currency", "EUR")
         );
     }
 
@@ -320,7 +325,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkDebtReminders();
 
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -337,7 +342,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkDebtReminders();
 
-        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -388,7 +393,8 @@ class NotificationSchedulerTest {
     void should_createNotification_when_recurringTransactionDue() {
         var user = buildUser();
         var recurringId = UUID.randomUUID();
-        var recurring = buildRecurringTransaction(recurringId, LocalDate.now(PARIS), true);
+        var dueDate = LocalDate.of(2026, Month.JANUARY, 15);
+        var recurring = buildRecurringTransaction(recurringId, dueDate, true);
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
@@ -399,12 +405,51 @@ class NotificationSchedulerTest {
         notificationScheduler.checkRecurringTransactions();
 
         verify(notificationService).createNotification(
-                eq(userId),
-                eq(NotificationType.RECURRING_TRANSACTION_DUE),
-                eq("Transaction récurrente Loyer"),
-                any(String.class),
-                eq(EntityType.TRANSACTION),
-                eq(recurringId)
+                userId,
+                NotificationType.RECURRING_TRANSACTION_DUE,
+                "Recurring transaction Loyer",
+                "Loyer 800 EUR due on 2026-01-15",
+                EntityType.TRANSACTION,
+                recurringId,
+                Map.of("label", "Loyer", "amount", "800", "currency", "EUR", "dueDate", "2026-01-15")
+        );
+    }
+
+    @Test
+    void should_omit_currency_when_recurringTransaction_has_no_account() {
+        var user = buildUser();
+        var recurringId = UUID.randomUUID();
+        var dueDate = LocalDate.of(2026, Month.JANUARY, 15);
+        var recurring = Transaction.builder()
+                .id(recurringId)
+                .montant(BigDecimal.valueOf(800))
+                .libelle("Loyer")
+                .type(TransactionType.DEPENSE)
+                .date(dueDate)
+                .isRecurring(true)
+                .frequency(Frequency.MENSUEL)
+                .nextOccurrence(dueDate)
+                .recurringActive(true)
+                .account(null)
+                .user(user)
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(preferenceService.isNotificationTypeEnabled(userId, NotificationType.RECURRING_TRANSACTION_DUE)).thenReturn(true);
+        when(preferenceService.getUserTimezone(userId)).thenReturn("Europe/Paris");
+        when(transactionRepository.findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(eq(userId), any(LocalDate.class))).thenReturn(List.of(recurring));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(eq(userId), eq(NotificationType.RECURRING_TRANSACTION_DUE), eq(recurringId), any(LocalDateTime.class))).thenReturn(false);
+
+        notificationScheduler.checkRecurringTransactions();
+
+        verify(notificationService).createNotification(
+                userId,
+                NotificationType.RECURRING_TRANSACTION_DUE,
+                "Recurring transaction Loyer",
+                "Loyer 800 due on 2026-01-15",
+                EntityType.TRANSACTION,
+                recurringId,
+                Map.of("label", "Loyer", "amount", "800", "dueDate", "2026-01-15")
         );
     }
 
@@ -419,7 +464,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkRecurringTransactions();
 
-        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -442,7 +487,8 @@ class NotificationSchedulerTest {
                 any(String.class),
                 any(String.class),
                 eq(EntityType.TRANSACTION),
-                eq(recurringId)
+                eq(recurringId),
+                any()
         );
     }
 
@@ -460,7 +506,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkRecurringTransactions();
 
-        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -473,7 +519,7 @@ class NotificationSchedulerTest {
         notificationScheduler.checkRecurringTransactions();
 
         verify(transactionRepository, never()).findByUserIdAndIsRecurringTrueAndRecurringActiveTrueAndNextOccurrenceLessThanEqual(any(), any());
-        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -488,7 +534,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkRecurringTransactions();
 
-        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any());
+        verify(notificationService, never()).createNotification(any(), eq(NotificationType.RECURRING_TRANSACTION_DUE), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -536,7 +582,7 @@ class NotificationSchedulerTest {
 
         notificationScheduler.checkDebtReminders();
 
-        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Rappel dette - Alice"), any(String.class), eq(EntityType.DEBT), eq(debtId));
-        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Rappel dette - Bob"), any(String.class), eq(EntityType.DEBT), eq(debt2Id));
+        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Debt reminder - Alice"), any(String.class), eq(EntityType.DEBT), eq(debtId), any());
+        verify(notificationService).createNotification(eq(userId), eq(NotificationType.DEBT_REMINDER), eq("Debt reminder - Bob"), any(String.class), eq(EntityType.DEBT), eq(debt2Id), any());
     }
 }

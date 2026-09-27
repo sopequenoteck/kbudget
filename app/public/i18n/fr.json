@@ -628,6 +628,20 @@
     "empty": {
       "title": "Aucune notification"
     },
+    "list": {
+      "budgetExceededMessage": "Vous avez dépassé le budget {category} ({percentage} %)",
+      "budgetExceededTitle": "Budget {category} dépassé !",
+      "budgetThresholdMessage": "Vous avez atteint {percentage} % du budget {category}",
+      "budgetThresholdTitle": "Budget {category} : {percentage} %",
+      "debtDueMessage": "Dette envers {person} — échéance demain",
+      "debtDueTitle": "Dette {person}",
+      "debtReminderMessage": "Rappel : dette envers {person} — {amount} restant",
+      "debtReminderTitle": "Rappel dette - {person}",
+      "recurringTransactionDueMessage": "{label} {amount} — échéance le {dueDate}",
+      "recurringTransactionDueTitle": "Transaction récurrente {label}",
+      "subscriptionDueMessage": "{name} — échéance demain",
+      "subscriptionDueTitle": "Abonnement {name}"
+    },
     "page": {
       "title": "Notifications"
     }

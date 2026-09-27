@@ -11,10 +11,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 > ni l'anglais ni le francais. Un navigateur en francais continue d'afficher le
 > francais. Le choix se fait dans Reglages > Apparence > Langue.
 
-> **Deux migrations de base (V38, V39) : sauvegarder avant de mettre a jour.**
-> V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie aucune
-> donnee existante. V39 ajoute une colonne et la renseigne pour les categories
-> systeme existantes, sans modifier d'autre donnee.
+> **Trois migrations de base (V38, V39, V40) : sauvegarder avant de mettre a
+> jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
+> aucune donnee existante. V39 ajoute une colonne et la renseigne pour les
+> categories systeme existantes, sans modifier d'autre donnee. V40 ajoute une
+> colonne nullable aux notifications, sans modifier de donnee.
 
 ### Added
 
@@ -104,9 +105,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   - API : champs optionnels `libelleDebit` / `libelleCredit` (virement),
     `libelle` (ajustement, remboursement), `defaultAccountName` (acceptation
     d'invitation).
+- **Notifications dans la langue de l'interface (KKS-397)** : echeances
+  d'abonnement, de dette et de transaction recurrente, rappels de dette, seuils
+  et depassements de budget. Le texte suit la langue affichee ; montants et
+  dates sont formates selon la langue. Les notifications anterieures gardent
+  leur texte d'origine, jusqu'a leur purge au bout de 90 jours.
+  - API : champ `params` sur les notifications (REST et WebSocket).
 
 ### Changed
 
+- **Titre et message des notifications en anglais (KKS-397)** : le client
+  Flutter les affiche en anglais jusqu'a KKS-326.
 - **Textes par defaut de l'API en anglais (KKS-396)** : un client qui n'envoie
   pas ces champs recoit des libelles anglais (`Transfer to X`, `Repayment - X`,
   `Balance adjustment`, `Main account`) — c'est le cas du client Flutter

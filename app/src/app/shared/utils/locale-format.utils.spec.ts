@@ -3,6 +3,7 @@ import {
   formatCurrencyAmount,
   insertSortedByNom,
   formatMonthYearLabel,
+  formatFullDateLabel,
 } from './locale-format.utils';
 
 describe('getCurrencySymbol', () => {
@@ -60,5 +61,23 @@ describe('formatMonthYearLabel', () => {
     const result = formatMonthYearLabel(new Date(2026, 2, 15), 'en-US');
     expect(result).toContain('2026');
     expect(result.toLowerCase()).toContain('march');
+  });
+});
+
+describe('formatFullDateLabel', () => {
+  it('should_format_day_month_and_year_when_locale_is_fr', () => {
+    expect(formatFullDateLabel('2026-10-01', 'fr-FR')).toBe('1 octobre 2026');
+  });
+
+  it('should_format_day_month_and_year_when_locale_is_en', () => {
+    const result = formatFullDateLabel('2026-10-01', 'en-GB');
+    expect(result).toContain('2026');
+    expect(result.toLowerCase()).toContain('october');
+  });
+
+  it('should_not_shift_the_date_by_a_day_when_timezone_is_negative', () => {
+    // La date ISO est ancrée à minuit local (KKS-397) : un fuseau UTC-N ne
+    // doit jamais faire reculer le jour affiché.
+    expect(formatFullDateLabel('2026-01-01', 'fr-FR')).toBe('1 janvier 2026');
   });
 });

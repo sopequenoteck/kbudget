@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.NotificationType;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public record NotificationResponse(
@@ -15,5 +16,6 @@ public record NotificationResponse(
         UUID entityId,
         boolean read,
         LocalDateTime readAt,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Map<String, String> params
 ) {}

@@ -50,7 +50,10 @@ Meme statut pour le `nom` d'une categorie systeme (`isSystem: true`) : il est
 en francais, et depuis KKS-395 les clients affichent la traduction de
 `systemKey` (`SUBSCRIPTION`, `DEBT`, `TRANSFER`, `ADJUSTMENT`), en ne gardant
 `nom` qu'en repli pour une cle inconnue. Les DTO qui exposent le nom a plat
-(budgets, regles et lignes d'import) portent `categorySystemKey`.
+(budgets, regles et lignes d'import) portent `categorySystemKey`. Meme statut
+pour `title` et `message` d'une notification qui porte `params` (KKS-397) :
+ecrits en anglais, ils servent de repli aux clients qui ne construisent pas
+encore le texte.
 
 ### 2. Ne jamais rendre obligatoire un champ de requete qui ne l'etait pas
 
