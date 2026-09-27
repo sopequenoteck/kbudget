@@ -5,6 +5,7 @@ import 'package:k_budget/src/common_widgets/month_selector.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_shadows.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -19,6 +20,9 @@ Future<void> pumpMonthSelector(
     MaterialApp(
       key: appKey,
       theme: theme ?? AppTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: Center(child: widget),
       ),

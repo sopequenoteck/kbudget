@@ -14,6 +14,7 @@ import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/payment_history_section.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
@@ -87,13 +88,13 @@ class _SubscriptionDetailScreenState
       ref.invalidate(subscriptionTotalPaidProvider(widget.subscriptionId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.subscriptionPaySuccess)),
+          SnackBar(content: Text(l10n.subscriptionsFeedbackPaid)),
         );
       }
     } on Exception {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorGeneric)),
+          SnackBar(content: Text(l10n.errorsClientGeneric)),
         );
       }
     }
@@ -133,14 +134,14 @@ class _SubscriptionDetailScreenState
               },
               icon: const PhosphorIcon(PhosphorIconsRegular.pencilSimple,
                   size: 20),
-              tooltip: l10n.edit,
+              tooltip: l10n.commonActionEdit,
             ),
         ],
       ),
       body: _isLoading && _subscription == null
           ? _buildSkeleton(colorScheme)
           : _subscription == null
-              ? Center(child: Text(l10n.errorGeneric))
+              ? Center(child: Text(l10n.errorsClientGeneric))
               : _buildContent(
                   context, _subscription!, colorScheme, l10n, isServerMode),
       floatingActionButton: _subscription != null && isServerMode
@@ -149,7 +150,7 @@ class _SubscriptionDetailScreenState
               icon: const PhosphorIcon(
                   PhosphorIconsRegular.currencyCircleDollar,
                   size: 20),
-              label: Text(l10n.subscriptionPay),
+              label: Text(l10n.subscriptionsActionPay),
             )
           : null,
     );
@@ -251,7 +252,8 @@ class _StatusBadge extends StatelessWidget {
         ? (themeExt?.incomeColor ?? Colors.green)
         : colorScheme.onSurfaceVariant;
     final l10n = AppLocalizations.of(context)!;
-    final label = subscription.actif ? l10n.subscriptionFormActiveSwitch : l10n.subscriptionBadgeInactif;
+    final label =
+        subscription.actif ? l10n.commonValueActive : l10n.commonValueInactive;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -285,7 +287,7 @@ class _InfoSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dateFormat = DateFormat('d MMMM yyyy', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM yyyy', ref.watch(intlLocaleProvider));
     final categories = ref.watch(categoryNotifierProvider).items;
     final accounts = ref.watch(accountNotifierProvider).items;
 
@@ -305,7 +307,7 @@ class _InfoSection extends ConsumerWidget {
     final formattedAmount = AmountFormatter.format(
       subscription.montant,
       currency: subscription.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     return Container(
       width: double.infinity,

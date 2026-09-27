@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 import '../theme/app_theme_extension.dart';
 
@@ -77,8 +78,9 @@ class VariationBadge extends StatelessWidget {
       color = colorScheme.onSurfaceVariant;
     }
 
+    final locale = intlLocaleFor(Localizations.localeOf(context));
     final amountFormat = NumberFormat.currency(
-      locale: 'fr_FR',
+      locale: locale,
       symbol: currency ?? '€',
       decimalDigits: 2,
     );
@@ -91,7 +93,7 @@ class VariationBadge extends StatelessWidget {
 
     if (percentage != null) {
       final pctSigne = percentage! >= 0 ? '+' : '';
-      final pctFormat = NumberFormat('#,##0.0', 'fr_FR');
+      final pctFormat = NumberFormat('#,##0.0', locale);
       final pctFormatted = pctFormat.format(percentage!.abs());
       final pctSignedFormatted = percentage! < 0 ? '-$pctFormatted' : pctFormatted;
       buffer.write(' ($pctSigne$pctSignedFormatted%)');

@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_shadows.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 /// Sélecteur de mois avec boutons précédent/suivant et label formaté en français.
 ///
@@ -40,7 +41,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   late int _month;
   late int _year;
 
-  static final DateFormat _dateFormat = DateFormat('MMMM yyyy', 'fr_FR');
+  static final _dateFormatCache = <String, DateFormat>{};
 
   @override
   void initState() {
@@ -72,7 +73,12 @@ class _MonthSelectorState extends State<MonthSelector> {
   }
 
   String get _formattedLabel {
-    final raw = _dateFormat.format(DateTime(_year, _month));
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final dateFormat = _dateFormatCache.putIfAbsent(
+      locale,
+      () => DateFormat('MMMM yyyy', locale),
+    );
+    final raw = dateFormat.format(DateTime(_year, _month));
     return raw[0].toUpperCase() + raw.substring(1);
   }
 

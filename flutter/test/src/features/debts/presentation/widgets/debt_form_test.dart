@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
+import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/list_state.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
@@ -15,6 +18,15 @@ import 'package:mockito/mockito.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../../../helpers/mocks.mocks.dart';
+
+class _TestAccountNotifier extends AccountNotifier {
+  _TestAccountNotifier(this.preloadedItems);
+
+  final List<Account> preloadedItems;
+
+  @override
+  ListState<Account> build() => ListState<Account>(items: preloadedItems);
+}
 
 void main() {
   setUpAll(() async {
@@ -71,12 +83,17 @@ void main() {
     Future<void> Function(Debt)? onSaved,
     Future<void> Function(String)? onDeleted,
     VoidCallback? onCancelled,
+    List<Account>? preloadedAccounts,
   }) {
     return ProviderScope(
       overrides: [
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
+        if (preloadedAccounts != null)
+          accountNotifierProvider.overrideWith(
+            () => _TestAccountNotifier(preloadedAccounts),
+          ),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,
@@ -166,6 +183,64 @@ void main() {
 
       // La dette de test n'est pas remboursée
       expect(find.text('Non remboursé'), findsOneWidget);
+    });
+
+    testWidgets('should_showAccountSecondaryBalance_when_accountSectionOpened',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+
+      // Aucun compte pré-sélectionné en création : la pastille affiche le placeholder
+      await tester.tap(find.text('Compte'));
+      await tester.pumpAndSettle();
+
+      // Ouvre la modale du SelectPicker de compte imbriqué dans la section
+      final trigger = find.descendant(
+        of: find.byType(SelectPicker),
+        matching: find.byType(GestureDetector),
+      );
+      await tester.tap(trigger.first);
+      await tester.pumpAndSettle();
+
+      // Le solde formaté du compte est affiché dans la liste déroulante
+      expect(find.textContaining('500,00'), findsWidgets);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_saveFails', (tester) async {
+      await tester.pumpWidget(
+        buildApp(onSaved: (_) async => throw Exception('boom')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('tf_montant')), '100');
+      await tester.enterText(find.byKey(const Key('tf_personne')), 'Bob');
+
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_deleteFails', (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt,
+        debtType: testDebt.sens,
+        onDeleted: (_) async => throw Exception('boom'),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Supprimer'),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
     });
   });
 }

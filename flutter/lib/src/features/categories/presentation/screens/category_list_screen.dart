@@ -55,7 +55,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space4),
               child: PageHeader(
-                title: l10n.categoriesTitle,
+                title: l10n.categoriesPageTitle,
                 onBack: () => context.pop(),
                 icon: const PhosphorIcon(PhosphorIconsRegular.tag, size: 16),
               ),
@@ -68,7 +68,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
                   } on Exception {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.errorGeneric)),
+                        SnackBar(content: Text(l10n.errorsClientGeneric)),
                       );
                     }
                   }
@@ -108,7 +108,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.warning,
             message: l10n.categoryErrorLoad,
-            ctaLabel: l10n.categoriesRetry,
+            ctaLabel: l10n.commonActionRetry,
             onCtaTap: () => ref.read(categoryNotifierProvider.notifier).refresh(),
           ),
         ),
@@ -122,7 +122,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
           hasScrollBody: false,
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.tag,
-            message: l10n.categoriesEmpty,
+            message: l10n.categoriesEmptyNoCategories,
           ),
         ),
       ];

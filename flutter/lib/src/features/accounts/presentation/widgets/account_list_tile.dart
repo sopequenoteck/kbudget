@@ -10,6 +10,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -41,9 +42,9 @@ class AccountListTile extends ConsumerWidget {
 
   String _typeLabel(AppLocalizations l10n) {
     return switch (account.type) {
-      AccountType.courant => l10n.accountTypeCourant,
-      AccountType.epargne => l10n.accountTypeEpargne,
-      AccountType.especes => l10n.accountTypeEspeces,
+      AccountType.courant => l10n.accountsValueCurrent,
+      AccountType.epargne => l10n.accountsValueSavings,
+      AccountType.especes => l10n.accountsValueCash,
     };
   }
 
@@ -65,7 +66,7 @@ class AccountListTile extends ConsumerWidget {
     final formattedBalance = AmountFormatter.format(
       account.solde,
       currency: account.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     final balanceColor = account.solde < 0
         ? colors.expenseColor
@@ -110,12 +111,12 @@ class AccountListTile extends ConsumerWidget {
                           ),
                           if (account.isDefault)
                             _Badge(
-                              label: l10n.accountBadgeDefault,
+                              label: l10n.accountsValueDefault,
                               colorScheme: colorScheme,
                             ),
                           if (!account.actif)
                             _Badge(
-                              label: l10n.accountBadgeInactive,
+                              label: l10n.commonValueInactive,
                               colorScheme: colorScheme,
                             ),
                         ],

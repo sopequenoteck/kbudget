@@ -37,9 +37,9 @@ class AccountTypeSelector extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final labels = {
-      AccountType.courant: l10n.accountTypeCourant,
-      AccountType.epargne: l10n.accountTypeEpargne,
-      AccountType.especes: l10n.accountTypeEspeces,
+      AccountType.courant: l10n.accountsValueCurrent,
+      AccountType.epargne: l10n.accountsValueSavings,
+      AccountType.especes: l10n.accountsValueCash,
     };
 
     return Opacity(

@@ -15,11 +15,11 @@ class AmountFormatter {
 
   static final _cache = <String, NumberFormat>{};
 
-  static NumberFormat _getFormatter(Currency currency) {
+  static NumberFormat _getFormatter(Currency currency, String locale) {
     return _cache.putIfAbsent(
-      currency.displayName,
+      '$locale-${currency.displayName}',
       () => NumberFormat.currency(
-        locale: 'fr_FR',
+        locale: locale,
         symbol: currency.symbol,
         decimalDigits: currency.decimalPlaces,
       ),
@@ -31,14 +31,17 @@ class AmountFormatter {
   /// [type] : nom de lenum (`TransactionType.depense.name`,
   /// `DebtType.pret.name`) pour determiner le signe +/-.
   /// Sans [type], le signe est deduit de la valeur.
+  /// [locale] : identifiant `intl` (`fr_FR`, `en_GB`), independant de la
+  /// devise affichee.
   static String format(
     double? value, {
+    required String locale,
     String? type,
     Currency currency = Currency.eur,
   }) {
     if (value == null) return '';
 
-    final formatter = _getFormatter(currency);
+    final formatter = _getFormatter(currency, locale);
     final formatted = formatter.format(value.abs());
 
     if (value == 0) return formatted;

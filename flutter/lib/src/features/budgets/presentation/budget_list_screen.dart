@@ -191,7 +191,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -246,7 +246,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -259,7 +259,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                         ? ref.read(budgetNotifierProvider.notifier).loadOverview()
                         : ref.read(budgetNotifierProvider.notifier).loadHistory(historyMonth),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.retry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),

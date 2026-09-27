@@ -82,6 +82,7 @@ void main() {
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: const Scaffold(
           body: TransactionListScreen(),
         ),

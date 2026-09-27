@@ -90,7 +90,7 @@ class _TransactionListScreenState
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -179,7 +179,7 @@ class _TransactionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -190,7 +190,7 @@ class _TransactionListScreenState
                   FilledButton.icon(
                     onPressed: () => ref.read(transactionListNotifierProvider.notifier).refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.transactionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),

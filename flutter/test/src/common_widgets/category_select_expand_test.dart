@@ -78,6 +78,7 @@ Future<void> pumpCategorySelect(
         theme: theme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: Scaffold(
           body: SingleChildScrollView(
             child: CategorySelectExpand(
@@ -318,6 +319,7 @@ void main() {
             theme: AppTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: const Scaffold(body: SizedBox.shrink()),
           ),
         ),

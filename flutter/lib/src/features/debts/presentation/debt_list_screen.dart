@@ -21,6 +21,7 @@ import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_hero_widget.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -80,7 +81,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -152,7 +153,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -164,7 +165,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                     onPressed: () =>
                         ref.read(debtNotifierProvider.notifier).refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.transactionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -200,7 +201,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.debtsEmpty,
+                    l10n.debtsEmptyTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -219,7 +220,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     final todayDate = DateTime(today.year, today.month, today.day);
     final groups = _groupByDueDate(state.items, todayDate);
     final themeExt = theme.extension<AppThemeExtension>();
-    final dateFormat = DateFormat('d MMMM', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM', ref.watch(intlLocaleProvider));
 
     final widgets = <Widget>[
       SliverToBoxAdapter(
@@ -371,7 +372,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     final formattedAmount = AmountFormatter.format(
       debt.montant,
       currency: debt.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     // Sous-texte montant converti si devise étrangère
     String? convertedSubtitle;
@@ -385,8 +386,12 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
         rates: exchangeRates,
       );
       if (converted != null) {
-        convertedSubtitle =
-            '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+        final formattedConverted = AmountFormatter.format(
+          converted,
+          currency: primaryCurrency,
+          locale: ref.watch(intlLocaleProvider),
+        );
+        convertedSubtitle = '~ $formattedConverted';
       }
     }
 
@@ -399,7 +404,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       subtitle: dateFormat.format(debt.date),
       value: formattedAmount,
       rightSubtitle:
-          convertedSubtitle ?? (debt.rembourse ? l10n.debtBadgeRembourse : null),
+          convertedSubtitle ?? (debt.rembourse ? l10n.debtsValueRepaid : null),
       onPressed: () {
         context.push('/debts/${debt.id}', extra: debt);
       },

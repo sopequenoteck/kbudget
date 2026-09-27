@@ -18,6 +18,7 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_hero_widget.dart';
 import 'package:k_budget/src/routing/route_names.dart';
@@ -88,7 +89,7 @@ class _SubscriptionListScreenState
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -158,7 +159,7 @@ class _SubscriptionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -171,7 +172,7 @@ class _SubscriptionListScreenState
                         .read(subscriptionNotifierProvider.notifier)
                         .refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.subscriptionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -207,7 +208,7 @@ class _SubscriptionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.subscriptionsEmpty,
+                    l10n.subscriptionsEmptyTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -222,7 +223,7 @@ class _SubscriptionListScreenState
     }
 
     // Data
-    final dateFormat = DateFormat('d MMMM', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM', ref.watch(intlLocaleProvider));
 
     final actifs = state.items.where((s) => s.actif).toList();
     final inactifs = state.items.where((s) => !s.actif).toList();
@@ -318,13 +319,13 @@ class _SubscriptionListScreenState
     final cat = sub.categoryId != null ? categoryMap[sub.categoryId] : null;
 
     final frequencySuffix = sub.frequence == Frequency.mensuel
-        ? l10n.subscriptionFrequencyMensuel
-        : l10n.subscriptionFrequencyAnnuel;
+        ? l10n.subscriptionsValuePerMonth
+        : l10n.subscriptionsValuePerYear;
 
     final formattedAmount = AmountFormatter.format(
       sub.montant,
       currency: sub.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     final renewal = nextRenewalDate(sub.dateDebut, sub.frequence);
     final renewalLabel = l10n.subscriptionNextRenewal(dateFormat.format(renewal));
@@ -341,8 +342,12 @@ class _SubscriptionListScreenState
         rates: exchangeRates,
       );
       if (converted != null) {
-        convertedSubtitle =
-            '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+        final formattedConverted = AmountFormatter.format(
+          converted,
+          currency: primaryCurrency,
+          locale: ref.watch(intlLocaleProvider),
+        );
+        convertedSubtitle = '~ $formattedConverted';
       }
     }
 
@@ -355,7 +360,7 @@ class _SubscriptionListScreenState
       subtitle: renewalLabel,
       value: '$formattedAmount$frequencySuffix',
       rightSubtitle: convertedSubtitle ??
-          (sub.actif ? null : l10n.subscriptionBadgeInactif),
+          (sub.actif ? null : l10n.commonValueInactive),
       onPressed: () {
         context.push(
           '${RouteNames.subscriptions}/${sub.id}',

@@ -90,7 +90,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           } on Exception {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.errorGeneric)),
+                SnackBar(content: Text(l10n.errorsClientGeneric)),
               );
             }
           }
@@ -123,7 +123,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.warning,
             message: l10n.accountErrorLoad,
-            ctaLabel: l10n.accountsRetry,
+            ctaLabel: l10n.commonActionRetry,
             onCtaTap: () =>
                 ref.read(accountNotifierProvider.notifier).refresh(),
           ),
@@ -138,7 +138,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           hasScrollBody: false,
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.bank,
-            message: l10n.accountsEmpty,
+            message: l10n.accountsEmptyTitle,
             ctaLabel: 'Créer un compte',
             onCtaTap: () => context.push(
               '${RouteNames.settings}/${RouteNames.settingsAccounts}/${RouteNames.settingsAccountsNew}',

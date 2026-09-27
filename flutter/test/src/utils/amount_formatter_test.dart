@@ -6,80 +6,94 @@ import 'package:k_budget/src/utils/amount_formatter.dart';
 void main() {
   group('AmountFormatter.format', () {
     test('should_return_empty_string_when_value_is_null', () {
-      expect(AmountFormatter.format(null), '');
+      expect(AmountFormatter.format(null, locale: 'fr_FR'), '');
     });
 
     test('should_format_zero_without_sign', () {
-      final result = AmountFormatter.format(0, type: 'depense');
+      final result = AmountFormatter.format(0, type: 'depense', locale: 'fr_FR');
       expect(result, contains('0'));
       expect(result, isNot(startsWith('+')));
       expect(result, isNot(startsWith('-')));
     });
 
     test('should_prefix_plus_when_type_is_recette', () {
-      final result = AmountFormatter.format(100, type: 'recette');
+      final result = AmountFormatter.format(100, type: 'recette', locale: 'fr_FR');
       expect(result, startsWith('+'));
     });
 
     test('should_prefix_plus_when_type_is_pret', () {
-      final result = AmountFormatter.format(500, type: 'pret');
+      final result = AmountFormatter.format(500, type: 'pret', locale: 'fr_FR');
       expect(result, startsWith('+'));
     });
 
     test('should_prefix_minus_when_type_is_depense', () {
-      final result = AmountFormatter.format(9.99, type: 'depense');
+      final result = AmountFormatter.format(9.99, type: 'depense', locale: 'fr_FR');
       expect(result, startsWith('-'));
     });
 
     test('should_prefix_minus_when_type_is_emprunt', () {
-      final result = AmountFormatter.format(150, type: 'emprunt');
+      final result = AmountFormatter.format(150, type: 'emprunt', locale: 'fr_FR');
       expect(result, startsWith('-'));
     });
 
     test('should_prefix_minus_when_value_is_negative_without_type', () {
-      final result = AmountFormatter.format(-50);
+      final result = AmountFormatter.format(-50, locale: 'fr_FR');
       expect(result, startsWith('-'));
     });
 
     test('should_format_without_sign_when_positive_without_type', () {
-      final result = AmountFormatter.format(1500.5);
+      final result = AmountFormatter.format(1500.5, locale: 'fr_FR');
       expect(result, isNot(startsWith('+')));
       expect(result, isNot(startsWith('-')));
     });
 
     test('should_use_abs_value_for_formatting', () {
-      final result = AmountFormatter.format(-42.5, type: 'depense');
+      final result = AmountFormatter.format(-42.5, type: 'depense', locale: 'fr_FR');
       // Should show -42,50 not --42,50
       expect('-'.allMatches(result).length, 1);
     });
 
     test('should_use_eur_currency_by_default', () {
-      final result = AmountFormatter.format(100);
+      final result = AmountFormatter.format(100, locale: 'fr_FR');
       expect(result, contains('€'));
     });
 
     test('should_use_specified_currency', () {
-      final result = AmountFormatter.format(100, currency: Currency.xof);
+      final result = AmountFormatter.format(100, currency: Currency.xof, locale: 'fr_FR');
       expect(result, contains('CFA'));
     });
 
     test('should_respect_decimal_places_for_xof', () {
       // XOF has 0 decimal places
-      final result = AmountFormatter.format(1000, currency: Currency.xof);
+      final result = AmountFormatter.format(1000, currency: Currency.xof, locale: 'fr_FR');
       expect(result, isNot(contains(',')));
     });
 
     test('should_format_with_two_decimals_for_eur', () {
-      final result = AmountFormatter.format(100, currency: Currency.eur);
+      final result = AmountFormatter.format(100, currency: Currency.eur, locale: 'fr_FR');
       // Format français : 100,00 €
       expect(result, contains('00'));
     });
 
     test('should_use_french_locale_formatting', () {
       // French locale uses space as thousands separator
-      final result = AmountFormatter.format(2100, type: 'recette');
+      final result = AmountFormatter.format(2100, type: 'recette', locale: 'fr_FR');
       // Should contain non-breaking space or regular space as thousands separator
       expect(result, contains('€'));
+    });
+  });
+
+  group('AmountFormatter.format locale', () {
+    test('should_useFrenchSeparators_when_localeIsFrFr', () {
+      final result =
+          AmountFormatter.format(2100, currency: Currency.eur, locale: 'fr_FR');
+      expect(result, '2 100,00 €');
+    });
+
+    test('should_useEnglishSeparators_when_localeIsEnGb', () {
+      final result =
+          AmountFormatter.format(2100, currency: Currency.eur, locale: 'en_GB');
+      expect(result, '€2,100.00');
     });
   });
 
