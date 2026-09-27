@@ -23,7 +23,9 @@ import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 // Vendredi 13 mars 2026 — fige pour que la salutation (matin/apres-midi/soir)
 // et le filtre "en retard" (`overdueCount`, base sur la date du jour) soient
-// deterministes. Les tests tournent sous TZ=UTC (cf. consigne d'execution).
+// deterministes. `MORNING`/`AFTERNOON`/`EVENING` fixent l'heure locale
+// (`new Date(y, m, d, h)`) : le resultat ne depend donc pas du fuseau de la
+// suite (America/Los_Angeles par defaut, cf. vitest.config.ts).
 const MORNING = new Date(2026, 2, 13, 8, 0, 0);
 const AFTERNOON = new Date(2026, 2, 13, 14, 0, 0);
 const EVENING = new Date(2026, 2, 13, 21, 0, 0);
@@ -297,6 +299,19 @@ describe('Dashboard', () => {
 
     const plural = await render({ recurringTransactions: [makeRecurring(), makeRecurring({ id: 'r2' })] });
     expect(text(plural)).toContain('2 charges en retard');
+  });
+
+  it('should_not_count_todays_occurrence_as_overdue_when_local_evening_is_next_day_in_utc', async () => {
+    // 23h locale un jour ou UTC est deja le lendemain (America/Los_Angeles,
+    // TZ figee par vitest.config.ts) : `toISOString().split('T')[0]` donnerait
+    // le 14, et compterait a tort le 13 comme en retard.
+    const evening = new Date(2026, 2, 13, 23, 0, 0);
+    const fixture = await render({
+      now: evening,
+      recurringTransactions: [makeRecurring({ nextOccurrence: '2026-03-13' })],
+    });
+
+    expect(text(fixture)).not.toContain('en retard');
   });
 
   it('should_render_exceeded_budget_status_with_correct_plural', async () => {

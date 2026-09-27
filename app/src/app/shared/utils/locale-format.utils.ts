@@ -6,6 +6,8 @@
  * d'import par composant consommateur.
  */
 
+import { parseLocalDate } from './date.utils';
+
 /** Symbole monétaire seul (ex: "€", "$", "CFA"), sans montant. */
 export function getCurrencySymbol(currency: string, locale: string): string {
   return (0)
@@ -28,6 +30,14 @@ export function insertSortedByNom<T extends { nom: string }>(
   locale: string,
 ): T[] {
   return [...items, item].sort((a, b) => a.nom.localeCompare(b.nom, locale));
+}
+
+/**
+ * Libellé "jour mois" localisé (ex: "27 septembre") d'une date ISO
+ * `AAAA-MM-JJ`, lue à minuit local via `parseLocalDate`.
+ */
+export function formatDayMonthLabel(isoDate: string, locale: string): string {
+  return parseLocalDate(isoDate).toLocaleDateString(locale, { day: 'numeric', month: 'long' });
 }
 
 /** Libellé "mois année" localisé (ex: "mars 2026"). */

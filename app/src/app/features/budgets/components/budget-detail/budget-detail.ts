@@ -47,8 +47,9 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
-import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { formatCurrencyAmount, formatDayMonthLabel } from '../../../../shared/utils/locale-format.utils';
 import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 /**
  * `labelKey` traduit un groupe "aujourd'hui"/"hier" ; `label` porte une date
@@ -98,6 +99,8 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
   private readonly transloco = inject(TranslocoService);
+  readonly formatDate = (dateStr: string): string =>
+    formatDayMonthLabel(dateStr, this.languageService.displayLocale());
 
   readonly Math = Math;
   readonly budgetAmount = budgetAmount;
@@ -176,7 +179,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     };
 
     for (const tx of txs) {
-      const txDate = new Date(tx.date);
+      const txDate = parseLocalDate(tx.date);
       txDate.setHours(0, 0, 0, 0);
 
       if (txDate.getTime() === today.getTime()) {
@@ -284,14 +287,6 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     } finally {
       this.transactionsLoading.set(false);
     }
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
   }
 
   goBack(): void {

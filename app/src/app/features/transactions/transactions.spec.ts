@@ -19,7 +19,9 @@ import { stubIntersectionObserver } from '../../../testing/intersection-observer
 
 // Vendredi 13 mars 2026, 10h — figé pour que le regroupement par date
 // (aujourd'hui / hier / cette semaine / semaine dernière / plus ancien) soit
-// déterministe. Les tests tournent sous TZ=UTC (cf. consigne d'exécution).
+// déterministe. `NOW` fixe l'heure locale (`new Date(y, m, d, h)`) : le
+// résultat ne dépend donc pas du fuseau de la suite (America/Los_Angeles par
+// défaut, cf. vitest.config.ts).
 const NOW = new Date(2026, 2, 13, 10, 0, 0);
 
 // jsdom ne fournit pas IntersectionObserver (utilisé par ngAfterViewInit pour
@@ -411,6 +413,26 @@ describe('Transactions', () => {
       ['lastWeek'],
       ['older'],
     ]);
+  });
+
+  it('should_only_list_categories_of_transactions_within_the_selected_month', async () => {
+    // `date` est une LocalDate ('AAAA-MM-JJ') : lue via `new Date` seul, elle
+    // reculerait d'un jour dans un fuseau en retard sur UTC et pourrait
+    // pousser une transaction du 1er mars hors du mois selectionne.
+    const inMonthTx = makeTransaction({
+      id: 'in-month',
+      date: '2026-03-01',
+      category: { id: 'cat-in', nom: 'Loisirs', icone: '🎮', couleur: '#000000', isSystem: false },
+    });
+    const outOfMonthTx = makeTransaction({
+      id: 'out-of-month',
+      date: '2026-02-28',
+      category: { id: 'cat-out', nom: 'Courses', icone: '🛒', couleur: '#000000', isSystem: false },
+    });
+
+    const fixture = await createFixture([inMonthTx, outOfMonthTx]);
+
+    expect(fixture.componentInstance.monthCategories().map((c) => c.id)).toEqual(['cat-in']);
   });
 
   it('should_omit_empty_date_groups', async () => {

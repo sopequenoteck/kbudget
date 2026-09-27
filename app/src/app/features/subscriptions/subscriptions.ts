@@ -34,6 +34,7 @@ import { DevLogger } from '../../core/services/dev-logger';
 import { LanguageService } from '../../core/services/language';
 import { formatCurrencyAmount } from '../../shared/utils/locale-format.utils';
 import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../shared/utils/relative-due-date.utils';
+import { parseLocalDate } from '../../shared/utils/date.utils';
 
 interface SubscriptionGroup {
   labelKey: string;
@@ -252,7 +253,7 @@ export class Subscriptions implements AfterViewInit, OnDestroy {
   getNextRenewalRaw(subscription: Subscription): Date {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const nextDate = new Date(subscription.dateDebut);
+    const nextDate = parseLocalDate(subscription.dateDebut);
 
     while (nextDate <= today) {
       if (subscription.frequence === Frequency.MENSUEL) {

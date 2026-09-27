@@ -36,6 +36,7 @@ import {
 import { Category } from '../../../../core/models/category.model';
 import { escapeHtml } from '../../../../shared/utils/html-escape.utils';
 import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 interface SuggestRuleBanner {
   lineId: string;
@@ -423,7 +424,7 @@ export class ImportReview {
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    const d = new Date(dateStr);
+    const d = parseLocalDate(dateStr);
     return d.toLocaleDateString(this.languageService.displayLocale(), { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

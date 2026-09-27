@@ -70,7 +70,7 @@ describe('Reactivite locale des pipes de formatage (KKS-373, SC-005)', () => {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    }).format(new Date(FAR_PAST_ISO));
+    }).format(new Date(`${FAR_PAST_ISO}T00:00:00`));
     const expectedShortFr = new Date(`${NEAR_FUTURE_ISO}T00:00:00`).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
@@ -101,7 +101,7 @@ describe('Reactivite locale des pipes de formatage (KKS-373, SC-005)', () => {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    }).format(new Date(FAR_PAST_ISO));
+    }).format(new Date(`${FAR_PAST_ISO}T00:00:00`));
     const expectedShortEn = new Date(`${NEAR_FUTURE_ISO}T00:00:00`).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',

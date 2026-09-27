@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { LanguageService } from '../../core/services/language';
+import { parseLocalDate } from '../utils/date.utils';
 
 // Cache par locale (KKS-373, D8) : le format long change de langue sans
 // reconstruire un `Intl.DateTimeFormat` a chaque rendu.
@@ -31,7 +32,7 @@ export class RelativeDatePipe implements PipeTransform {
       return '';
     }
 
-    const date = new Date(value);
+    const date = parseLocalDate(value);
     if (isNaN(date.getTime())) {
       return '';
     }

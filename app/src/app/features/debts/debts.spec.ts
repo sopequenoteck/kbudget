@@ -18,7 +18,9 @@ import { stubIntersectionObserver } from '../../../testing/intersection-observer
 
 // Vendredi 13 mars 2026, 10h — fige pour que le regroupement par echeance
 // (en retard / aujourd'hui / cette semaine / ce mois-ci / plus tard) soit
-// deterministe. Les tests tournent sous TZ=UTC (cf. consigne d'execution).
+// deterministe. `NOW` fixe l'heure locale (`new Date(y, m, d, h)`) : le
+// resultat ne depend donc pas du fuseau de la suite (America/Los_Angeles par
+// defaut, cf. vitest.config.ts).
 const NOW = new Date(2026, 2, 13, 10, 0, 0);
 
 // jsdom ne fournit pas IntersectionObserver (utilise par ngAfterViewInit pour
