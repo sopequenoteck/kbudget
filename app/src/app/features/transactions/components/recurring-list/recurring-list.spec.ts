@@ -240,6 +240,73 @@ describe('RecurringList', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Résumé mensuel — devise principale et locale (KKS-373 suite)
+  // -------------------------------------------------------------------------
+
+  // Intl insère une espace insécable (U+00A0 ou U+202F selon l'ICU) entre le
+  // montant et la devise : on la normalise pour comparer à une chaîne
+  // littérale sans dépendre de la version d'ICU de l'environnement de test.
+  const normalizeSpaces = (value: string) => value.replace(/[\u00A0\u202F]/g, ' ');
+
+  const incomeItem: RecurringTransactionResponse = {
+    id: 'rt-income',
+    montant: 100,
+    libelle: 'Salaire',
+    type: TransactionType.RECETTE,
+    frequency: Frequency.MENSUEL,
+    nextOccurrence: toDateStr(tomorrow),
+    recurringActive: true,
+    category: mockCategory,
+    account: mockAccount,
+  };
+
+  it('should_render_negative_monthly_net_without_plus_sign_when_primary_currency_is_eur', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-expense');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-50,00 €');
+  });
+
+  it('should_render_positive_monthly_net_without_decimals_when_primary_currency_is_xof', async () => {
+    preferenceServiceMock.primaryCurrency.set('XOF');
+    const mockService = createMockService([incomeItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-income');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('+100 F CFA');
+  });
+
+  it('should_reformat_monthly_net_in_english_when_language_switches_without_recreating_fixture', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-expense');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-50,00 €');
+
+    preferenceServiceMock.language.set('en');
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-€50.00');
+  });
+
+  // -------------------------------------------------------------------------
   // T012-5 : boutons désactivés pendant une action
   // -------------------------------------------------------------------------
 

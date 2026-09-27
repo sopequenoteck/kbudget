@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, computed } from '@angular/core';
+import { signal, computed, type WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
@@ -195,9 +195,13 @@ describe('Dashboard', () => {
         },
         { provide: DevLogger, useValue: { error: vi.fn(), log: vi.fn(), warn: vi.fn() } },
         {
+          // `displayLocale` est un vrai signal (et non un simple `vi.fn()`) :
+          // c'est ce qui permet à un test de le faire basculer (`.set(...)`)
+          // et de vérifier que les `computed()` du composant qui le lisent
+          // se réévaluent, sans recréer la fixture (cf. locale-reactivity.spec.ts).
           provide: LanguageService,
           useValue: {
-            displayLocale: vi.fn().mockReturnValue('fr-FR'),
+            displayLocale: signal('fr-FR'),
             activeLanguage: vi.fn().mockReturnValue('fr'),
           },
         },
@@ -341,6 +345,40 @@ describe('Dashboard', () => {
 
     expect(badge?.textContent).toContain('ce mois');
     expect(badge?.textContent).toContain('150');
+  });
+
+  it('should_render_month_variation_percentage_in_french_then_switch_to_english_locale', async () => {
+    const fixture = await render({
+      currentSummary: makeSummary({ totalRecettes: 200, totalDepenses: 50 }),
+    });
+    const badge = fixture.nativeElement.querySelector('.variation-badge');
+    // Intl insere une espace insecable (U+00A0 ou U+202F selon l'ICU) avant
+    // "%" en fr-FR : on la normalise pour comparer a une chaine litterale.
+    const normalizeSpaces = (value: string) => value.replace(/[\u00A0\u202F]/g, ' ');
+
+    // Assert — rendu initial en francais (17.647...% arrondi a une decimale).
+    expect(normalizeSpaces(badge?.textContent ?? '')).toContain('(+17,6 %)');
+
+    // Act — bascule de langue sans recreer la fixture (le signal mocke joue
+    // le role du vrai `LanguageService.displayLocale`, cf. provider ci-dessus).
+    const languageService = TestBed.inject(LanguageService) as unknown as {
+      displayLocale: WritableSignal<string>;
+    };
+    languageService.displayLocale.set('en-GB');
+    fixture.detectChanges();
+
+    expect(badge?.textContent).toContain('(+17.6%)');
+  });
+
+  it('should_not_render_variation_percentage_when_start_of_month_net_worth_is_zero', async () => {
+    const fixture = await render({
+      accounts: [makeAccount({ solde: 150 })],
+      currentSummary: makeSummary({ totalRecettes: 200, totalDepenses: 50 }),
+    });
+    const badge = fixture.nativeElement.querySelector('.variation-badge');
+
+    expect(badge?.textContent).not.toContain('%');
+    expect(badge?.textContent).not.toContain('(');
   });
 
   it('should_render_missing_rate_conversion_hint_when_a_currency_cannot_be_converted', async () => {

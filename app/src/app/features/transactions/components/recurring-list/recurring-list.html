@@ -75,11 +75,11 @@
     <div class="monthly-summary">
       <div class="monthly-summary__row">
         <span>{{ 'recurring.summary.title' | transloco }}</span>
-        <span [class]="summary.net >= 0 ? 'amount-income' : 'amount-expense'">{{ summary.net >= 0 ? '+' : '' }}{{ summary.net | number:'1.2-2' }} €</span>
+        <span [class]="summary.net >= 0 ? 'amount-income' : 'amount-expense'">{{ summary.net >= 0 ? '+' : '' }}{{ summary.net | amount: null : summary.currency }}</span>
       </div>
       <div class="monthly-summary__row">
         <span>{{ 'recurring.summary.expenseCount' | transloco: { count: summary.expenseCount } }}</span>
-        <span>{{ 'recurring.summary.monthlyExpenses' | transloco: { amount: (summary.totalExpenses | amount) } }}</span>
+        <span>{{ 'recurring.summary.monthlyExpenses' | transloco: { amount: (summary.totalExpenses | amount: null : summary.currency) } }}</span>
       </div>
     </div>
   }

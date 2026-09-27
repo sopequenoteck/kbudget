@@ -5,7 +5,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -46,6 +45,7 @@ interface MonthlySummary {
   totalIncome: number;
   net: number;
   expenseCount: number;
+  currency: string;
 }
 
 const RECURRING_DUE_DATE_KEYS: RelativeDueDateKeys = {
@@ -77,7 +77,7 @@ const FREQUENCY_LABEL_KEYS: Record<Frequency, string> = {
 @Component({
   selector: 'app-recurring-list',
   standalone: true,
-  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, DecimalPipe, EmptyState, TranslocoPipe],
+  imports: [NgIcon, AmountPipe, ConvertAmountPipe, Modal, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -158,7 +158,7 @@ export class RecurringList {
       }
     }
 
-    return { totalExpenses, totalIncome, net: totalIncome - totalExpenses, expenseCount };
+    return { totalExpenses, totalIncome, net: totalIncome - totalExpenses, expenseCount, currency: primary };
   });
 
   constructor() {

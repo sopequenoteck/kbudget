@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DecimalPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
@@ -35,6 +35,7 @@ import { type BudgetOverview } from '../../core/models/budget.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
+import { formatSignedPercent } from '../../shared/utils/locale-format.utils';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
@@ -56,7 +57,7 @@ function getGreetingPeriod(hour: number): GreetingPeriod {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState, TranslocoPipe],
+  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState, TranslocoPipe],
   providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -239,6 +240,12 @@ export class Dashboard {
     const debut = this.convertedPatrimoineDebutMois();
     if (debut === 0) return null;
     return (this.convertedNet() / debut) * 100;
+  });
+
+  readonly convertedVariationPctLabel = computed(() => {
+    const pct = this.convertedVariationPct();
+    if (pct === null) return null;
+    return formatSignedPercent(pct, this.languageService.displayLocale());
   });
 
   // -- Budget overview converti dans activeCurrency --
