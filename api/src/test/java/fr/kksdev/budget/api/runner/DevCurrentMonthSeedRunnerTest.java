@@ -10,6 +10,9 @@ import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,17 +30,22 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DevCurrentMonthSeedRunnerTest {
+
+    private static final String DEV_EMAIL = "dev@local.test";
+    private static final String DEMO_EMAIL = "demo@local.test";
 
     @Mock
     private UserRepository userRepository;
@@ -68,12 +76,19 @@ class DevCurrentMonthSeedRunnerTest {
 
     private final DefaultApplicationArguments noArgs = new DefaultApplicationArguments();
 
-    private User buildDevUser() {
+    /** Les deux emails seedes par le runner (dev@local.test et son miroir demo@local.test — KKS-394). */
+    private static Stream<Arguments> seededEmails() {
+        return Stream.of(
+                Arguments.of(DEV_EMAIL, "Dev User", buildFrenchCategories()),
+                Arguments.of(DEMO_EMAIL, "Alex Morgan", buildEnglishCategories()));
+    }
+
+    private User buildUser(String email, String name) {
         return User.builder()
                 .id(UUID.randomUUID())
-                .email("dev@local.test")
+                .email(email)
                 .password("encoded")
-                .name("Dev User")
+                .name(name)
                 .isAdmin(false)
                 .passwordResetRequired(false)
                 .build();
@@ -87,7 +102,7 @@ class DevCurrentMonthSeedRunnerTest {
                 .build();
     }
 
-    private List<Category> buildCategories() {
+    private static List<Category> buildFrenchCategories() {
         return List.of(
                 Category.builder().id(UUID.randomUUID()).nom("Salaire").icone("💼").couleur("#10b981").build(),
                 Category.builder().id(UUID.randomUUID()).nom("Logement").icone("🏠").couleur("#f97316").build(),
@@ -99,20 +114,40 @@ class DevCurrentMonthSeedRunnerTest {
         );
     }
 
+    private static List<Category> buildEnglishCategories() {
+        return List.of(
+                Category.builder().id(UUID.randomUUID()).nom("Salary").icone("💼").couleur("#10b981").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Housing").icone("🏠").couleur("#f97316").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Food").icone("🛒").couleur("#22c55e").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Transport").icone("🚗").couleur("#3b82f6").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Restaurant").icone("🍽️").couleur("#f59e0b").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Groceries").icone("🧺").couleur("#14b8a6").build(),
+                Category.builder().id(UUID.randomUUID()).nom("Leisure").icone("🎮").couleur("#a855f7").build()
+        );
+    }
+
+    /** Les autres emails seedes doivent rester introuvables, sans quoi le scenario teste n'est plus isole. */
+    private void stubOtherEmailsAbsent() {
+        when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
+    }
+
     @Test
-    void should_do_nothing_when_dev_user_does_not_exist() {
-        when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.empty());
+    void should_do_nothing_when_no_seeded_user_exists() {
+        stubOtherEmailsAbsent();
 
         devCurrentMonthSeedRunner.run(noArgs);
 
         verifyNoInteractions(transactionRepository, categoryRepository, accountRepository);
     }
 
-    @Test
-    void should_skip_seeding_when_current_month_already_has_transactions() {
-        User devUser = buildDevUser();
-        when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
-        when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any())).thenReturn(true);
+    @ParameterizedTest(name = "should skip seeding when current month already has transactions for {0}")
+    @MethodSource("seededEmails")
+    void should_skip_seeding_when_current_month_already_has_transactions(String email, String name, List<Category> categories) {
+        stubOtherEmailsAbsent();
+        User user = buildUser(email, name);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(transactionRepository.existsByUserIdAndDateBetween(user.getId(), REFERENCE_DAY.withDayOfMonth(1), REFERENCE_DAY))
+                .thenReturn(true);
 
         devCurrentMonthSeedRunner.run(noArgs);
 
@@ -120,12 +155,15 @@ class DevCurrentMonthSeedRunnerTest {
         verify(transactionRepository, never()).saveAll(any());
     }
 
-    @Test
-    void should_skip_seeding_when_no_default_account_found() {
-        User devUser = buildDevUser();
-        when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
-        when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any())).thenReturn(false);
-        when(accountRepository.findByUserIdAndIsDefaultTrue(devUser.getId())).thenReturn(Optional.empty());
+    @ParameterizedTest(name = "should skip seeding when no default account is found for {0}")
+    @MethodSource("seededEmails")
+    void should_skip_seeding_when_no_default_account_found(String email, String name, List<Category> categories) {
+        stubOtherEmailsAbsent();
+        User user = buildUser(email, name);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(transactionRepository.existsByUserIdAndDateBetween(user.getId(), REFERENCE_DAY.withDayOfMonth(1), REFERENCE_DAY))
+                .thenReturn(false);
+        when(accountRepository.findByUserIdAndIsDefaultTrue(user.getId())).thenReturn(Optional.empty());
 
         devCurrentMonthSeedRunner.run(noArgs);
 
@@ -133,20 +171,23 @@ class DevCurrentMonthSeedRunnerTest {
         verify(transactionRepository, never()).saveAll(any());
     }
 
-    @Test
-    void should_generate_about_ten_transactions_with_no_future_date_when_month_is_empty() {
-        User devUser = buildDevUser();
+    @ParameterizedTest(name = "should generate current-month transactions with no future date for {0}")
+    @MethodSource("seededEmails")
+    void should_generate_current_month_transactions_when_month_is_empty(String email, String name, List<Category> categories) {
+        stubOtherEmailsAbsent();
+        User user = buildUser(email, name);
         Account account = buildDefaultAccount();
-        when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
-        when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any())).thenReturn(false);
-        when(accountRepository.findByUserIdAndIsDefaultTrue(devUser.getId())).thenReturn(Optional.of(account));
-        when(categoryRepository.findByUserIdOrderByNomAsc(devUser.getId())).thenReturn(buildCategories());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(transactionRepository.existsByUserIdAndDateBetween(user.getId(), REFERENCE_DAY.withDayOfMonth(1), REFERENCE_DAY))
+                .thenReturn(false);
+        when(accountRepository.findByUserIdAndIsDefaultTrue(user.getId())).thenReturn(Optional.of(account));
+        when(categoryRepository.findByUserIdOrderByNomAsc(user.getId())).thenReturn(categories);
 
         devCurrentMonthSeedRunner.run(noArgs);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Transaction>> captor = ArgumentCaptor.forClass(List.class);
-        verify(transactionRepository).saveAll(captor.capture());
+        verify(transactionRepository, times(1)).saveAll(captor.capture());
 
         List<Transaction> generated = captor.getValue();
         LocalDate today = LocalDate.now(clock);
@@ -156,27 +197,47 @@ class DevCurrentMonthSeedRunnerTest {
                 .hasSizeGreaterThanOrEqualTo(8)
                 .allSatisfy(transaction -> assertThat(transaction)
                         .extracting(Transaction::getUser, Transaction::getAccount)
-                        .containsExactly(devUser, account))
+                        .containsExactly(user, account))
                 .extracting(Transaction::getDate)
                 .allSatisfy(date -> assertThat(date).isBetween(firstDayOfMonth, today));
     }
 
-    @Test
-    void should_not_create_duplicate_transactions_when_run_twice() {
-        User devUser = buildDevUser();
+    @ParameterizedTest(name = "should not create duplicate transactions when run twice for {0}")
+    @MethodSource("seededEmails")
+    void should_not_create_duplicate_transactions_when_run_twice(String email, String name, List<Category> categories) {
+        stubOtherEmailsAbsent();
+        User user = buildUser(email, name);
         Account account = buildDefaultAccount();
-        when(userRepository.findByEmail("dev@local.test")).thenReturn(Optional.of(devUser));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         // Premier run : mois vide. Second run : la garde d'idempotence doit court-circuiter.
-        when(transactionRepository.existsByUserIdAndDateBetween(any(), any(), any()))
+        when(transactionRepository.existsByUserIdAndDateBetween(user.getId(), REFERENCE_DAY.withDayOfMonth(1), REFERENCE_DAY))
                 .thenReturn(false)
                 .thenReturn(true);
-        when(accountRepository.findByUserIdAndIsDefaultTrue(devUser.getId())).thenReturn(Optional.of(account));
-        when(categoryRepository.findByUserIdOrderByNomAsc(devUser.getId())).thenReturn(buildCategories());
+        when(accountRepository.findByUserIdAndIsDefaultTrue(user.getId())).thenReturn(Optional.of(account));
+        when(categoryRepository.findByUserIdOrderByNomAsc(user.getId())).thenReturn(categories);
 
         devCurrentMonthSeedRunner.run(noArgs);
         devCurrentMonthSeedRunner.run(noArgs);
 
-        verify(transactionRepository, org.mockito.Mockito.times(1)).saveAll(any());
+        verify(transactionRepository, times(1)).saveAll(any());
+    }
+
+    @ParameterizedTest(name = "should skip seeding when no seed category matches for {0}")
+    @MethodSource("seededEmails")
+    void should_skip_seeding_when_no_matching_category_found(String email, String name, List<Category> categories) {
+        stubOtherEmailsAbsent();
+        User user = buildUser(email, name);
+        Account account = buildDefaultAccount();
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(transactionRepository.existsByUserIdAndDateBetween(user.getId(), REFERENCE_DAY.withDayOfMonth(1), REFERENCE_DAY))
+                .thenReturn(false);
+        when(accountRepository.findByUserIdAndIsDefaultTrue(user.getId())).thenReturn(Optional.of(account));
+        // Aucune categorie du seed ne correspond : buildTransactions ne doit rien produire.
+        when(categoryRepository.findByUserIdOrderByNomAsc(user.getId())).thenReturn(List.of());
+
+        devCurrentMonthSeedRunner.run(noArgs);
+
+        verify(transactionRepository, never()).saveAll(any());
     }
 
     // Point le plus important : un runner mal garde injecterait de fausses donnees en prod.

@@ -111,6 +111,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   dates sont formates selon la langue. Les notifications anterieures gardent
   leur texte d'origine, jusqu'a leur purge au bout de 90 jours.
   - API : champ `params` sur les notifications (REST et WebSocket).
+- **Captures du README dans les deux langues (KKS-394)** : `README.md` montre
+  l'interface anglaise, `README.fr.md` l'interface francaise, sur des donnees
+  equivalentes. Nouvel utilisateur de demo anglais `demo@local.test`, miroir
+  traduit de `dev@local.test` (profil `dev` uniquement). Captures obsoletes
+  supprimees.
 
 ### Changed
 
