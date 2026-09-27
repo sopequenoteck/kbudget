@@ -28,7 +28,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Genere quelques transactions sur le mois courant pour le user dev@local.test (KKS-355).
+ * Genere quelques transactions sur le mois courant pour dev@local.test (KKS-355) et son
+ * miroir anglais demo@local.test (KKS-394).
  * <p>
  * R__dev_seed.sql fixe ses dates relativement a CURRENT_DATE au moment ou son checksum
  * change, mais ne rejoue pas ensuite (migration repeatable). Une base de dev conservee
@@ -44,9 +45,10 @@ import java.util.stream.Collectors;
 public class DevCurrentMonthSeedRunner implements ApplicationRunner {
 
     private static final String DEV_USER_EMAIL = "dev@local.test";
+    private static final String DEMO_USER_EMAIL = "demo@local.test";
 
-    // Categories du seed de dev, designees par leur nom : le runner les retrouve a
-    // l'execution plutot que de les recreer.
+    // Categories du seed FR (dev@local.test), designees par leur nom : le runner les
+    // retrouve a l'execution plutot que de les recreer.
     private static final String CAT_SALAIRE = "Salaire";
     private static final String CAT_LOGEMENT = "Logement";
     private static final String CAT_ALIMENTATION = "Alimentation";
@@ -55,8 +57,15 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
     private static final String CAT_COURSES = "Courses";
     private static final String CAT_LOISIRS = "Loisirs";
 
+    // Categories du seed EN (demo@local.test, miroir traduit — KKS-394).
+    private static final String CAT_SALARY = "Salary";
+    private static final String CAT_HOUSING = "Housing";
+    private static final String CAT_FOOD = "Food";
+    private static final String CAT_GROCERIES = "Groceries";
+    private static final String CAT_LEISURE = "Leisure";
+
     /** Les ecritures du mois, en table plutot qu'en suite d'appels : plus lisible a relire. */
-    private static final List<SeedEntry> SEED_ENTRIES = List.of(
+    private static final List<SeedEntry> SEED_ENTRIES_FR = List.of(
             new SeedEntry(CAT_SALAIRE, new BigDecimal("2800.00"), "Salaire mensuel", TransactionType.RECETTE, 1),
             new SeedEntry(CAT_LOGEMENT, new BigDecimal("750.00"), "Loyer", TransactionType.DEPENSE, 1),
             new SeedEntry(CAT_ALIMENTATION, new BigDecimal("67.40"), "Carrefour Market", TransactionType.DEPENSE, 3),
@@ -68,6 +77,24 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
             new SeedEntry(CAT_LOISIRS, new BigDecimal("32.00"), "Cinema", TransactionType.DEPENSE, 12),
             new SeedEntry(CAT_ALIMENTATION, new BigDecimal("58.90"), "Courses semaine", TransactionType.DEPENSE, 14));
 
+    /** Miroir anglais de {@link #SEED_ENTRIES_FR} : memes montants et jours, libelles/categories traduits. */
+    private static final List<SeedEntry> SEED_ENTRIES_EN = List.of(
+            new SeedEntry(CAT_SALARY, new BigDecimal("2800.00"), "Monthly salary", TransactionType.RECETTE, 1),
+            new SeedEntry(CAT_HOUSING, new BigDecimal("750.00"), "Rent", TransactionType.DEPENSE, 1),
+            new SeedEntry(CAT_FOOD, new BigDecimal("67.40"), "Carrefour Market", TransactionType.DEPENSE, 3),
+            new SeedEntry(CAT_TRANSPORT, new BigDecimal("1.90"), "Metro ticket", TransactionType.DEPENSE, 4),
+            new SeedEntry(CAT_FOOD, new BigDecimal("12.50"), "Bakery", TransactionType.DEPENSE, 5),
+            new SeedEntry(CAT_RESTAURANT, new BigDecimal("14.90"), "Kebab lunch", TransactionType.DEPENSE, 6),
+            new SeedEntry(CAT_GROCERIES, new BigDecimal("43.20"), "Lidl", TransactionType.DEPENSE, 8),
+            new SeedEntry(CAT_TRANSPORT, new BigDecimal("48.00"), "Full tank", TransactionType.DEPENSE, 10),
+            new SeedEntry(CAT_LEISURE, new BigDecimal("32.00"), "Cinema", TransactionType.DEPENSE, 12),
+            new SeedEntry(CAT_FOOD, new BigDecimal("58.90"), "Weekly groceries", TransactionType.DEPENSE, 14));
+
+    /** Un utilisateur de dev a seeder, avec ses ecritures deja localisees. */
+    private static final List<UserSeed> USER_SEEDS = List.of(
+            new UserSeed(DEV_USER_EMAIL, SEED_ENTRIES_FR),
+            new UserSeed(DEMO_USER_EMAIL, SEED_ENTRIES_EN));
+
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
@@ -76,45 +103,53 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        Optional<User> devUser = userRepository.findByEmail(DEV_USER_EMAIL);
-        if (devUser.isEmpty()) {
-            log.info("Dev user {} not found, skipping current-month seed", DEV_USER_EMAIL);
+        for (UserSeed userSeed : USER_SEEDS) {
+            seedCurrentMonth(userSeed);
+        }
+    }
+
+    private void seedCurrentMonth(UserSeed userSeed) {
+        String email = userSeed.email();
+        Optional<User> seedUser = userRepository.findByEmail(email);
+        if (seedUser.isEmpty()) {
+            log.info("Dev user {} not found, skipping current-month seed", email);
             return;
         }
 
-        User user = devUser.get();
+        User user = seedUser.get();
         LocalDate today = LocalDate.now(clock);
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
         // Garde d'idempotence : deux demarrages successifs ne doivent rien creer de plus.
         if (transactionRepository.existsByUserIdAndDateBetween(user.getId(), firstDayOfMonth, today)) {
-            log.info("Current month already has transactions for {}, skipping current-month seed", DEV_USER_EMAIL);
+            log.info("Current month already has transactions for {}, skipping current-month seed", email);
             return;
         }
 
         Optional<Account> defaultAccount = accountRepository.findByUserIdAndIsDefaultTrue(user.getId());
         if (defaultAccount.isEmpty()) {
-            log.info("No default account found for {}, skipping current-month seed", DEV_USER_EMAIL);
+            log.info("No default account found for {}, skipping current-month seed", email);
             return;
         }
 
         Map<String, Category> categoriesByName = categoryRepository.findByUserIdOrderByNomAsc(user.getId()).stream()
                 .collect(Collectors.toMap(Category::getNom, Function.identity(), (first, second) -> first));
 
-        List<Transaction> transactions = buildTransactions(user, defaultAccount.get(), categoriesByName, firstDayOfMonth, today);
+        List<Transaction> transactions = buildTransactions(
+                user, defaultAccount.get(), categoriesByName, userSeed.entries(), firstDayOfMonth, today);
         if (transactions.isEmpty()) {
-            log.info("No matching category found for {}, skipping current-month seed", DEV_USER_EMAIL);
+            log.info("No matching category found for {}, skipping current-month seed", email);
             return;
         }
 
         transactionRepository.saveAll(transactions);
-        log.info("Seeded {} current-month transactions for {}", transactions.size(), DEV_USER_EMAIL);
+        log.info("Seeded {} current-month transactions for {}", transactions.size(), email);
     }
 
     private List<Transaction> buildTransactions(User user, Account account, Map<String, Category> categoriesByName,
-                                                 LocalDate firstDayOfMonth, LocalDate today) {
+                                                 List<SeedEntry> entries, LocalDate firstDayOfMonth, LocalDate today) {
         List<Transaction> transactions = new ArrayList<>();
-        for (SeedEntry entry : SEED_ENTRIES) {
+        for (SeedEntry entry : entries) {
             Category category = categoriesByName.get(entry.categoryName());
             if (category == null) {
                 continue;
@@ -149,5 +184,9 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
      */
     private record SeedEntry(String categoryName, BigDecimal montant, String libelle,
                              TransactionType type, int dayOffset) {
+    }
+
+    /** Un utilisateur de dev a seeder, avec ses ecritures deja localisees (FR ou EN). */
+    private record UserSeed(String email, List<SeedEntry> entries) {
     }
 }

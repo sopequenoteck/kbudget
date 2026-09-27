@@ -10,10 +10,10 @@ donnee qui sort de votre machine, aucune telemetrie.
 > 🇬🇧 [English version](README.md)
 
 <p>
-  <img src="docs/screenshots/dashboard.png"    alt="Tableau de bord"        width="240">
-  <img src="docs/screenshots/transactions.png" alt="Transactions"           width="240">
-  <img src="docs/screenshots/budget.png"       alt="Budgets"                width="240">
-  <img src="docs/screenshots/admin-users.png"  alt="Gestion des utilisateurs" width="240">
+  <img src="docs/screenshots/fr/dashboard.png" alt="Tableau de bord" width="240">
+  <img src="docs/screenshots/fr/transactions.png" alt="Transactions" width="240">
+  <img src="docs/screenshots/fr/budgets.png" alt="Budgets" width="240">
+  <img src="docs/screenshots/fr/admin-users.png" alt="Gestion des utilisateurs" width="240">
 </p>
 
 ## Pourquoi ce projet

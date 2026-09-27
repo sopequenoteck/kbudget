@@ -10,15 +10,11 @@ machine, no telemetry.
 > 🇫🇷 [Version française](README.fr.md)
 
 <p>
-  <img src="docs/screenshots/dashboard.png"    alt="Dashboard"      width="240">
-  <img src="docs/screenshots/transactions.png" alt="Transactions"   width="240">
-  <img src="docs/screenshots/budget.png"       alt="Budgets"        width="240">
-  <img src="docs/screenshots/admin-users.png"  alt="User management" width="240">
+  <img src="docs/screenshots/en/dashboard.png" alt="Dashboard" width="240">
+  <img src="docs/screenshots/en/transactions.png" alt="Transactions" width="240">
+  <img src="docs/screenshots/en/budgets.png" alt="Budgets" width="240">
+  <img src="docs/screenshots/en/admin-users.png" alt="User management" width="240">
 </p>
-
-> Screenshots are still in French. The interface is available in English (the
-> default) and French, and follows your browser until you pick a language in
-> Settings.
 
 ## Why this exists
 
