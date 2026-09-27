@@ -1,12 +1,11 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { LanguageService } from '../../core/services/language';
+import { parseLocalDate } from '../utils/date.utils';
 
 // Cache par locale (KKS-373, D8) : le format long change de langue sans
 // reconstruire un `Intl.DateTimeFormat` a chaque rendu.
 const longDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
-
-const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 function getLongDateFormatter(locale: string): Intl.DateTimeFormat {
   let formatter = longDateFormatterCache.get(locale);
@@ -33,9 +32,7 @@ export class RelativeDatePipe implements PipeTransform {
       return '';
     }
 
-    // Date seule (`AAAA-MM-JJ`) lue a minuit local : `new Date` la lirait a
-    // minuit UTC, soit la veille dans un fuseau en retard sur UTC.
-    const date = new Date(DATE_ONLY.test(value) ? `${value}T00:00:00` : value);
+    const date = parseLocalDate(value);
     if (isNaN(date.getTime())) {
       return '';
     }

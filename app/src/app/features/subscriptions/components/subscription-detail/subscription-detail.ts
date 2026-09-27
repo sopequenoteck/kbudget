@@ -33,6 +33,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
 import { LanguageService } from '../../../../core/services/language';
@@ -222,6 +223,6 @@ export class SubscriptionDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(parseLocalDate(date));
   }
 }

@@ -34,6 +34,7 @@ import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe'
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { formatDayMonthLabel } from '../../../../shared/utils/locale-format.utils';
 
 interface CategoryGroup {
   categoryId: string;
@@ -72,6 +73,8 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
+  readonly formatDate = (dateStr: string): string =>
+    formatDayMonthLabel(dateStr, this.languageService.displayLocale());
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -196,14 +199,6 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
     } finally {
       this.transactionsLoading.set(false);
     }
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(this.languageService.displayLocale(), {
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
   }
 
   goBack(): void {

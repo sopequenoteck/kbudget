@@ -5,6 +5,7 @@ import {
   formatMonthYearLabel,
   formatFullDateLabel,
   formatSignedPercent,
+  formatDayMonthLabel,
 } from './locale-format.utils';
 
 // Intl insère une espace insécable (U+00A0 ou U+202F selon l'ICU) avant le
@@ -111,4 +112,17 @@ describe('formatSignedPercent', () => {
   it('should_not_contain_any_space_when_locale_is_en', () => {
     expect(formatSignedPercent(64.4, 'en-GB')).not.toMatch(/\s/);
   });
+});
+
+describe('formatDayMonthLabel', () => {
+  it.each([
+    ['2026-09-27', 'fr-FR', '27 septembre'],
+    ['2026-09-27', 'en-GB', '27 September'],
+    ['2026-01-01', 'fr-FR', '1 janvier'],
+  ])(
+    'should_format_day_and_month_of_local_date_when_value_is_%s_and_locale_is_%s',
+    (isoDate, locale, expected) => {
+      expect(formatDayMonthLabel(isoDate, locale)).toBe(expected);
+    },
+  );
 });

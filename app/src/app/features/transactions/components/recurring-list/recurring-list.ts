@@ -31,6 +31,7 @@ import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 import { LanguageService } from '../../../../core/services/language';
 import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../../../shared/utils/relative-due-date.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 type RecurringStatus = 'overdue' | 'today' | 'upcoming';
 
@@ -169,7 +170,7 @@ export class RecurringList {
   getStatus(nextOccurrence: string): RecurringStatus {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const next = new Date(nextOccurrence);
+    const next = parseLocalDate(nextOccurrence);
     next.setHours(0, 0, 0, 0);
     const diff = next.getTime() - today.getTime();
     if (diff < 0) return 'overdue';
@@ -183,7 +184,7 @@ export class RecurringList {
 
   getRelativeDateInfo(nextOccurrence: string): RelativeDateInfo {
     return getRelativeDueDateInfo(
-      new Date(nextOccurrence),
+      parseLocalDate(nextOccurrence),
       new Date(),
       this.languageService.displayLocale(),
       RECURRING_DUE_DATE_KEYS,

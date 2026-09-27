@@ -42,6 +42,7 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
 import { formatMonthYearLabel } from '../../shared/utils/locale-format.utils';
+import { parseLocalDate } from '../../shared/utils/date.utils';
 
 type DateGroupKey = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'older';
 
@@ -192,7 +193,7 @@ export class Transactions implements AfterViewInit {
 
     return all
       .filter((t) => {
-        const d = new Date(t.date);
+        const d = parseLocalDate(t.date);
         return d.getMonth() + 1 === month && d.getFullYear() === year;
       })
       .filter(t => {
@@ -263,7 +264,7 @@ export class Transactions implements AfterViewInit {
     const year = this.selectedYear();
 
     const monthTransactions = all.filter(t => {
-      const d = new Date(t.date);
+      const d = parseLocalDate(t.date);
       return d.getMonth() + 1 === month && d.getFullYear() === year;
     });
 

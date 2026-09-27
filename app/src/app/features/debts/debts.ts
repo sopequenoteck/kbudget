@@ -29,6 +29,7 @@ import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../dashboard/components/currency-pill-selector';
 import { LanguageService } from '../../core/services/language';
 import { getRelativeDueDateInfo, RelativeDateInfo, RelativeDueDateKeys } from '../../shared/utils/relative-due-date.utils';
+import { parseLocalDate } from '../../shared/utils/date.utils';
 
 interface DebtGroup {
   labelKey: string;
@@ -180,7 +181,7 @@ export class Debts implements AfterViewInit, OnDestroy {
         continue;
       }
 
-      const dueDate = new Date(debt.dueDate);
+      const dueDate = parseLocalDate(debt.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       const diffDays = Math.round(
         (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
@@ -270,7 +271,7 @@ export class Debts implements AfterViewInit, OnDestroy {
 
   isOverdue(debt: Debt): boolean {
     if (!debt.dueDate || debt.rembourse) return false;
-    const dueDate = new Date(debt.dueDate);
+    const dueDate = parseLocalDate(debt.dueDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0);
@@ -279,7 +280,7 @@ export class Debts implements AfterViewInit, OnDestroy {
 
   getRelativeDateInfo(debt: Debt): RelativeDateInfo | null {
     if (!debt.dueDate || debt.rembourse) return null;
-    return getRelativeDueDateInfo(new Date(debt.dueDate), new Date(), this.languageService.displayLocale(), DEBT_DUE_DATE_KEYS);
+    return getRelativeDueDateInfo(parseLocalDate(debt.dueDate), new Date(), this.languageService.displayLocale(), DEBT_DUE_DATE_KEYS);
   }
 
   getAmountClass(debt: Debt): string {

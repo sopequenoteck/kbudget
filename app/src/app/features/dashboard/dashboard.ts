@@ -36,6 +36,7 @@ import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import { formatSignedPercent } from '../../shared/utils/locale-format.utils';
+import { toLocalIsoDate } from '../../shared/utils/date.utils';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
@@ -310,7 +311,7 @@ export class Dashboard {
   });
 
   readonly overdueCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalIsoDate(new Date());
     return this.recurringService.recurringTransactions()
       .filter(r => r.recurringActive && r.nextOccurrence < today)
       .length;

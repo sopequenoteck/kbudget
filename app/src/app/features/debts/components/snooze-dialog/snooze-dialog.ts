@@ -20,13 +20,14 @@ import { DebtService } from '../../../../core/services/debt';
 import { Debt, DebtSnoozeRequest } from '../../../../core/models/debt.model';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 function futureDateValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
   if (!value) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const selected = new Date(value);
+  const selected = parseLocalDate(value);
   selected.setHours(0, 0, 0, 0);
   return selected < today ? { pastDate: true } : null;
 }

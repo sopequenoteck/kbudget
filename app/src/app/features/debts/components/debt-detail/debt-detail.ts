@@ -34,6 +34,7 @@ import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe'
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { SnoozeDialog } from '../snooze-dialog/snooze-dialog';
 import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-debt-detail',
@@ -200,7 +201,7 @@ export class DebtDetail {
   isOverdue(): boolean {
     const d = this.debt();
     if (!d?.dueDate || d.rembourse) return false;
-    const dueDate = new Date(d.dueDate);
+    const dueDate = parseLocalDate(d.dueDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     dueDate.setHours(0, 0, 0, 0);
@@ -212,6 +213,6 @@ export class DebtDetail {
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(parseLocalDate(date));
   }
 }

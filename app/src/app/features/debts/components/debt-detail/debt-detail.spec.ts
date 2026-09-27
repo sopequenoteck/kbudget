@@ -282,6 +282,17 @@ describe('DebtDetail', () => {
     expect(result).toContain('2026');
   });
 
+  it('should_report_overdue_when_due_date_is_a_date_only_string_in_the_past', async () => {
+    // `dueDate` est une LocalDate ('AAAA-MM-JJ') : lue via `new Date` seul,
+    // elle reculerait d'un jour dans un fuseau en retard sur UTC.
+    debtServiceMock.getById.mockReturnValue(of({ ...mockDebt, dueDate: '2020-01-01' }));
+    const fixture = TestBed.createComponent(DebtDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.isOverdue()).toBe(true);
+  });
+
   it('should_expose_the_shared_debt_type_label_keys', async () => {
     const fixture = TestBed.createComponent(DebtDetail);
     fixture.detectChanges();
