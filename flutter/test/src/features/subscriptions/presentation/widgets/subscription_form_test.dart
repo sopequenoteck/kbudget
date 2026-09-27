@@ -9,13 +9,24 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
 import '../../../../../helpers/mocks.mocks.dart';
+
+class _TestAccountNotifier extends AccountNotifier {
+  _TestAccountNotifier(this.preloadedItems);
+
+  final List<Account> preloadedItems;
+
+  @override
+  ListState<Account> build() => ListState<Account>(items: preloadedItems);
+}
 
 void main() {
   setUpAll(() async {
@@ -72,12 +83,17 @@ void main() {
     Future<void> Function(Subscription)? onSaved,
     Future<void> Function(String)? onDeleted,
     VoidCallback? onCancelled,
+    List<Account>? preloadedAccounts,
   }) {
     return ProviderScope(
       overrides: [
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         subscriptionRepositoryProvider.overrideWithValue(mockSubRepo),
+        if (preloadedAccounts != null)
+          accountNotifierProvider.overrideWith(
+            () => _TestAccountNotifier(preloadedAccounts),
+          ),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,
@@ -302,6 +318,56 @@ void main() {
       // via l'IgnorePointer + Opacity sur bsheet_bottom_row
       final bottomRow = find.byKey(const Key('bsheet_bottom_row'));
       expect(bottomRow, findsOneWidget);
+    });
+
+    testWidgets('should_showAccountSecondaryBalance_when_accountSectionOpened',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+
+      // Le compte par défaut est pré-sélectionné : la pastille affiche son nom
+      await tester.tap(find.text('Compte courant'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Compte'), findsOneWidget);
+      expect(find.textContaining('500,00'), findsWidgets);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_saveFails', (tester) async {
+      await tester.pumpWidget(
+        buildApp(onSaved: (_) async => throw Exception('boom')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('tf_montant')), '10');
+      await tester.enterText(find.byKey(const Key('tf_nom')), 'Test');
+
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_deleteFails', (tester) async {
+      await tester.pumpWidget(buildApp(
+        subscription: testSubscription,
+        frequence: testSubscription.frequence,
+        onDeleted: (_) async => throw Exception('boom'),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Supprimer'),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
     });
   });
 }

@@ -365,5 +365,32 @@ void main() {
         expect(find.text('Aucune transaction ce mois'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'should_showGroupedTransactionRows_when_matchingTransactionsExist',
+      (tester) async {
+        final now = DateTime.now();
+        final olderDate = DateTime(now.year, now.month, now.day)
+            .subtract(const Duration(days: 10));
+        when(mockTransactionRepo.getByMonth(any, any)).thenAnswer(
+          (_) async => [
+            Transaction(
+              id: 'tx-old',
+              montant: 30,
+              libelle: 'Courses anciennes',
+              type: TransactionType.depense,
+              date: olderDate,
+              categoryId: 'cat-1',
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Courses anciennes'), findsOneWidget);
+        expect(find.textContaining('30,00'), findsWidgets);
+      },
+    );
   });
 }
