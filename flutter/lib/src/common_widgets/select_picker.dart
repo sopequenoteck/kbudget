@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, StringProperty;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
@@ -80,6 +82,13 @@ class SelectPicker extends FormField<String?> {
 
   @override
   FormFieldState<String?> createState() => _SelectPickerState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('placeholder', placeholder));
+    properties.add(StringProperty('emptyMessage', emptyMessage));
+  }
 }
 
 class _SelectPickerState extends FormFieldState<String?> {

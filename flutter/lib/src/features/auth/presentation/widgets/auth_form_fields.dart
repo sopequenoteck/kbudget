@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, DiagnosticsProperty;
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
@@ -15,6 +17,14 @@ class AuthEmailField extends StatelessWidget {
 
   /// Texte saisi.
   final TextEditingController controller;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<TextEditingController>('controller', controller),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +51,14 @@ class AuthDisplayNameField extends StatelessWidget {
 
   /// Texte saisi.
   final TextEditingController controller;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<TextEditingController>('controller', controller),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

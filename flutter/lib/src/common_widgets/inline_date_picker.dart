@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, IterableProperty;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -201,6 +203,12 @@ class _CalendarGrid extends StatelessWidget {
   final List<_CalendarDay> days;
   final List<String> dayHeaders;
   final ValueChanged<_CalendarDay> onSelectDay;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<String>('dayHeaders', dayHeaders));
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, StringProperty;
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -54,6 +56,12 @@ class CategoryPicker extends StatelessWidget {
             color: parseHexColor(c.couleur),
           ))
       .toList();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('placeholder', placeholder));
+  }
 
   @override
   Widget build(BuildContext context) {
