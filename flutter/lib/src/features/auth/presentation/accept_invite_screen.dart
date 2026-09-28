@@ -16,6 +16,7 @@ import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
 import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // Provider public (sans intercepteur auth) pour le lookup invitation
@@ -266,7 +267,9 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
             items: Currency.values.map((currency) {
               return DropdownMenuItem<String>(
                 value: currency.name.toUpperCase(),
-                child: Text('${currency.symbol} - ${currency.displayName}'),
+                child: Text(
+                  '${currency.symbol} - ${currencyName(currency, l10n)}',
+                ),
               );
             }).toList(),
             onChanged: (value) {

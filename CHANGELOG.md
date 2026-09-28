@@ -141,6 +141,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   et de comptes accordent le singulier. Les messages d'erreur n'affichent
   plus le detail technique de l'exception. Cote Angular, trois accents
   manquants sont corriges dans le formulaire de categorie.
+- **Dettes et abonnements de Flutter dans les catalogues (KKS-401)** : etape
+  4 sur 8 de KKS-326. Plusieurs textes francais reprennent la formulation
+  d'Angular, par exemple « Solde net » et « Total mensuel » en tete des
+  ecrans, « Remboursement », « Date du rappel » ou « Voulez-vous vraiment
+  supprimer cette dette ? ». Les compteurs accordent le singulier (« 1
+  paiement », « 1 actif »), la progression d'une dette suit le format de la
+  langue (« 50 % ») et les messages d'erreur n'affichent plus le detail
+  technique de l'exception. Les noms de devises sont traduits dans toute
+  l'application (« Dollar US »).
 
 ### Changed
 
@@ -164,6 +173,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Abonnements hebdomadaires affiches « /an » dans la liste (Flutter)** :
+  le suffixe suit desormais la frequence (« /sem »).
 - **Montants et pourcentages selon la langue affichee** : la variation du mois
   du tableau de bord (« +64.4% » en francais) et l'equivalent converti sous un
   montant en devise etrangere (« ~ 18.29 € » en anglais) suivent desormais la

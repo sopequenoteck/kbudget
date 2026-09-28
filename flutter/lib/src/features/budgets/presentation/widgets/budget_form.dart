@@ -16,6 +16,7 @@ import 'package:k_budget/src/features/exchange_rates/application/currency_config
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/utils/decimal_input_formatter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -201,10 +202,11 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             ))
         .toList();
 
+    final l10n = AppLocalizations.of(context)!;
     final currencyItems = currencies
         .map((c) => SelectPickerItem(
               id: c.name,
-              label: '${c.displayName} (${c.symbol})',
+              label: '${currencyName(c, l10n)} (${c.symbol})',
             ))
         .toList();
 

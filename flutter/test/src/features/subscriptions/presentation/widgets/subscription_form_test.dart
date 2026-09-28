@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
 import 'package:k_budget/src/common_widgets/category_select_expand.dart';
+import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -194,7 +195,7 @@ void main() {
       expect(find.text('Netflix'), findsOneWidget);
       expect(find.text('15.99'), findsOneWidget);
       // Titre mode édition
-      expect(find.text('Modifier abonnement'), findsOneWidget);
+      expect(find.text("Modifier l'abonnement"), findsOneWidget);
       // Bouton Modifier dans le footer
       expect(find.text('Modifier'), findsOneWidget);
     });
@@ -216,7 +217,7 @@ void main() {
       expect(find.text("Supprimer l'abonnement"), findsOneWidget);
       expect(
         find.text(
-            'Êtes-vous sûr de vouloir supprimer cet abonnement ? Cette action est irréversible.'),
+            'Voulez-vous vraiment supprimer cet abonnement ?'),
         findsOneWidget,
       );
     });
@@ -368,6 +369,50 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    Future<void> openPicker(WidgetTester tester) async {
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(SelectPicker),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('should_keepCurrencyPillHidden_when_accountChosen',
+        (tester) async {
+      // Le premier compte actif est pré-sélectionné : la devise suit le compte
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text(testAccount.nom));
+      await tester.tap(find.text(testAccount.nom));
+      await tester.pumpAndSettle();
+      await openPicker(tester);
+      await tester.tap(find.text(testAccount.nom).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Devise par défaut'), findsNothing);
+    });
+
+    testWidgets('should_showCurrencyName_when_currencyChosen', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Devise par défaut'));
+      await tester.tap(find.text('Devise par défaut'));
+      await tester.pumpAndSettle();
+      await openPicker(tester);
+      await tester.tap(find.text(r'Dollar US ($)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dollar US'), findsOneWidget);
     });
   });
 }

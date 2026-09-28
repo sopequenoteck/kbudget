@@ -91,7 +91,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
     });
 
     test('should_addItem_when_createSucceeds', () async {
@@ -113,6 +113,26 @@ void main() {
       await notifier().update(updated);
 
       expect(state().items.first.montant, 75.0);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_showSaveError_when_createFails', () async {
+      when(mockRepo.create(any)).thenThrow(Exception('Server error'));
+
+      await notifier().create(debt2);
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
+      expect(state().isLoading, isFalse);
+    });
+
+    test('should_showSaveError_when_updateFails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.update(any)).thenThrow(Exception('Server error'));
+      await notifier().update(debt1.copyWith(montant: 75.0));
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -339,7 +359,7 @@ void main() {
       final result = await notifier().repay('1', 'account-1', 50.0);
 
       expect(result, isFalse);
-      expect(state().error, contains('Erreur lors du remboursement'));
+      expect(state().error, 'Erreur lors du remboursement');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -392,7 +412,7 @@ void main() {
       final result = await notifier().snooze('1', '2026-04-01', '14:00');
 
       expect(result, isFalse);
-      expect(state().error, contains('Erreur lors du report'));
+      expect(state().error, 'Erreur lors du report du rappel');
       expect(state().mutatingIds, isEmpty);
     });
 

@@ -16,6 +16,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/frequency_suffix.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/payment_history_section.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
@@ -298,11 +299,8 @@ class _InfoSection extends ConsumerWidget {
         ? accounts.where((a) => a.id == subscription.accountId).firstOrNull
         : null;
 
-    final frequencySuffix = switch (subscription.frequence) {
-      Frequency.hebdomadaire => '/sem.',
-      Frequency.mensuel => '/mois',
-      Frequency.annuel => '/an',
-    };
+    final l10n = AppLocalizations.of(context)!;
+    final suffix = frequencySuffix(subscription.frequence, l10n);
 
     final formattedAmount = AmountFormatter.format(
       subscription.montant,
@@ -320,20 +318,20 @@ class _InfoSection extends ConsumerWidget {
         children: [
           _InfoRow(
             icon: PhosphorIconsRegular.currencyEur,
-            label: 'Montant',
-            value: '$formattedAmount$frequencySuffix',
+            label: l10n.subscriptionsDetailAmount,
+            value: '$formattedAmount$suffix',
             colorScheme: colorScheme,
           ),
           _InfoRow(
             icon: PhosphorIconsRegular.calendarBlank,
-            label: 'Date de début',
+            label: l10n.subscriptionsDetailStartDate,
             value: dateFormat.format(subscription.dateDebut),
             colorScheme: colorScheme,
           ),
           if (category != null)
             _InfoRow(
               icon: PhosphorIconsRegular.tag,
-              label: 'Catégorie',
+              label: l10n.subscriptionsFormCategory,
               value: '${category.icone} ${category.nom}',
               valueColor: parseHexColor(category.couleur),
               colorScheme: colorScheme,
@@ -341,7 +339,7 @@ class _InfoSection extends ConsumerWidget {
           if (account != null)
             _InfoRow(
               icon: PhosphorIconsRegular.bank,
-              label: 'Compte',
+              label: l10n.subscriptionsFormAccount,
               value: account.nom,
               colorScheme: colorScheme,
             ),

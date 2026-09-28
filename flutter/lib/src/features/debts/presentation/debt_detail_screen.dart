@@ -349,7 +349,7 @@ class _AmountSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailInitialAmount,
+                l10n.debtsDetailInitialAmount,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -370,7 +370,7 @@ class _AmountSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailRemainingAmount,
+                l10n.debtsDetailRemainingAmount,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -414,7 +414,7 @@ class _InfoSection extends StatelessWidget {
     if (debt.reminderDate != null) {
       final dateStr = dateFormat.format(debt.reminderDate!);
       reminderValue = debt.reminderTime != null
-          ? '$dateStr à ${debt.reminderTime}'
+          ? l10n.debtsDetailReminderAt(dateStr, debt.reminderTime!)
           : dateStr;
     }
 
@@ -429,13 +429,13 @@ class _InfoSection extends StatelessWidget {
         children: [
           _InfoRow(
             icon: PhosphorIconsRegular.calendarBlank,
-            label: l10n.debtDetailDate,
+            label: l10n.debtsDetailDate,
             value: dateFormat.format(debt.date),
             colorScheme: colorScheme,
           ),
           _InfoRow(
             icon: PhosphorIconsRegular.currencyEur,
-            label: l10n.debtDetailCurrency,
+            label: l10n.debtsFormCurrency,
             value: debt.currency.name.toUpperCase(),
             colorScheme: colorScheme,
           ),
@@ -443,13 +443,13 @@ class _InfoSection extends StatelessWidget {
             _InfoRow(
               icon: PhosphorIconsRegular.bank,
               label: l10n.debtsFormAccount,
-              value: debt.accountName ?? l10n.debtDetailAccountDeleted,
+              value: debt.accountName ?? l10n.debtsDetailAccountDeleted,
               colorScheme: colorScheme,
             ),
           if (debt.dueDate != null)
             _InfoRow(
               icon: PhosphorIconsRegular.calendarCheck,
-              label: l10n.debtDetailDueDate,
+              label: l10n.debtsFormDueDate,
               value: dateFormat.format(debt.dueDate!),
               colorScheme: colorScheme,
             ),
@@ -462,8 +462,10 @@ class _InfoSection extends StatelessWidget {
             ),
           _InfoRow(
             icon: PhosphorIconsRegular.scales,
-            label: l10n.debtDetailIncludedInBalance,
-            value: debt.includeInBalance ? l10n.yes : l10n.no,
+            label: l10n.debtsDetailIncludedInBalance,
+            value: debt.includeInBalance
+                ? l10n.commonValueYes
+                : l10n.commonValueNo,
             colorScheme: colorScheme,
           ),
           if (reminderValue != null)
@@ -540,7 +542,9 @@ class _ProgressSection extends StatelessWidget {
     final paid = debt.montant - remaining;
     final progress =
         debt.montant > 0 ? (paid / debt.montant).clamp(0.0, 1.0) : 0.0;
-    final percentage = (progress * 100).round();
+    final percentage = NumberFormat.percentPattern(
+      intlLocaleFor(Localizations.localeOf(context)),
+    ).format(progress);
 
     final progressColor = debt.sens == DebtType.emprunt
         ? (themeExt?.debtOweColor ?? colorScheme.error)
@@ -560,7 +564,7 @@ class _ProgressSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailProgress,
+                l10n.debtsDetailProgress,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.medium,
@@ -568,7 +572,7 @@ class _ProgressSection extends StatelessWidget {
                 ),
               ),
               Text(
-                '$percentage%',
+                percentage,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.semiBold,
@@ -630,7 +634,7 @@ class _PaymentsSection extends ConsumerWidget {
           error: (_, e) => Padding(
             padding: const EdgeInsets.all(AppSpacing.space4),
             child: Text(
-              l10n.debtDetailPaymentsError,
+              l10n.debtsFeedbackPaymentsLoadError,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 color: colorScheme.error,
@@ -670,7 +674,7 @@ class _PaymentsSection extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.debtDetailTotalRepaid,
+                          l10n.debtsDetailTotalRepaid,
                           style: TextStyle(
                             fontSize: AppTypography.sizeSm,
                             color: colorScheme.onSurfaceVariant,

@@ -37,7 +37,7 @@ class RepayBottomSheet extends ConsumerStatefulWidget {
     final l10n = AppLocalizations.of(context)!;
     AppModal.show(
       context,
-      title: l10n.debtsActionRepay,
+      title: l10n.debtsDialogRepayTitle,
       child: RepayBottomSheet(debt: debt, onRepaid: onRepaid),
       onClose: () {},
     );
@@ -71,19 +71,23 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
   }
 
   String? _validateAccount(AppLocalizations l10n) {
-    if (_selectedAccountId == null) return l10n.repayAccountRequired;
+    if (_selectedAccountId == null) {
+      return l10n.debtsFormAccountRequired;
+    }
     return null;
   }
 
   String? _validateAmount(AppLocalizations l10n) {
     final value = _amountController.text.trim();
-    if (value.isEmpty) return l10n.repayAmountRequired;
+    if (value.isEmpty) {
+      return l10n.debtsFormAmountRequired;
+    }
     final parsed = double.tryParse(value);
     if (parsed == null || parsed <= 0) {
       return l10n.debtsFeedbackAmountInvalid;
     }
     if (parsed > _remaining) {
-      return l10n.repayAmountMax(
+      return l10n.debtsFormAmountMax(
         AmountFormatter.format(
           _remaining,
           currency: widget.debt.currency,
@@ -118,7 +122,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
       ref.invalidate(debtPaymentsProvider(widget.debt.id));
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.repaySuccess)),
+        SnackBar(content: Text(l10n.debtsFeedbackRepaymentSaved)),
       );
       widget.onRepaid?.call();
     } else {
@@ -153,7 +157,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
             const SizedBox(width: AppSpacing.space2),
             Expanded(
               child: Text(
-                l10n.repayNoAccounts,
+                l10n.debtsEmptyNoAccounts,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -183,7 +187,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
               .toList(),
           selectedId: effectiveAccountId,
           onChanged: (id) => setState(() => _selectedAccountId = id),
-          label: l10n.repayAccountLabel,
+          label: l10n.debtsFormAccount,
           placeholder: l10n.debtsFormAccountPlaceholder,
           validator: (_) => _showErrors ? _validateAccount(l10n) : null,
           autovalidateMode: _showErrors
@@ -194,7 +198,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
 
         // Montant
         AppFormField(
-          label: l10n.repayAmountLabel,
+          label: l10n.debtsFormAmount,
           showError: _showErrors && amountError != null,
           errorMessage: amountError ?? '',
           child: TextField(

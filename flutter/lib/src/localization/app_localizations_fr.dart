@@ -174,11 +174,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonValueActive => 'Actif';
 
   @override
-  String get subscriptionFormDeleteConfirmTitle => 'Supprimer l\'abonnement';
+  String get subscriptionsDialogDeleteTitle => 'Supprimer l\'abonnement';
 
   @override
-  String get subscriptionFormDeleteConfirmMessage =>
-      'Êtes-vous sûr de vouloir supprimer cet abonnement ? Cette action est irréversible.';
+  String get subscriptionsDialogDeleteMessage =>
+      'Voulez-vous vraiment supprimer cet abonnement ?';
 
   @override
   String get subscriptionsEmptyTitle => 'Aucun abonnement';
@@ -190,7 +190,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsValuePerYear => '/an';
 
   @override
-  String subscriptionNextRenewal(String date) {
+  String subscriptionsListNextRenewal(String date) {
     return 'Prochain : $date';
   }
 
@@ -204,28 +204,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsFeedbackPaid => 'Paiement enregistré';
 
   @override
-  String get subscriptionPaymentHistory => 'Historique des paiements';
+  String get subscriptionsDetailHistory => 'Historique';
 
   @override
-  String get subscriptionNoPayments => 'Aucun paiement';
-
-  @override
-  String subscriptionPayments(int count) {
-    return '$count paiements';
+  String subscriptionsDetailPaymentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paiements',
+      one: '$count paiement',
+    );
+    return '$_temp0';
   }
 
   @override
   String get debtsFormPersonPlaceholder => 'Personne';
 
   @override
-  String get debtFormDeleteConfirmTitle => 'Supprimer la dette';
+  String get debtsDialogDeleteFormTitle => 'Supprimer la dette';
 
   @override
-  String get debtFormDeleteConfirmMessage =>
-      'Êtes-vous sûr de vouloir supprimer cette dette ? Cette action est irréversible.';
-
-  @override
-  String get debtFormAccountPicker => 'Compte bancaire';
+  String get debtsDialogDeleteFormMessage =>
+      'Voulez-vous vraiment supprimer cette dette ?';
 
   @override
   String get debtsEmptyTitle => 'Aucune dette';
@@ -234,10 +234,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsValueRepaid => 'Remboursé';
 
   @override
-  String get debtDetailInitialAmount => 'Montant initial';
+  String get debtsDetailInitialAmount => 'Montant initial';
 
   @override
-  String get debtDetailRemainingAmount => 'Montant restant';
+  String get debtsDetailRemainingAmount => 'Montant restant';
 
   @override
   String get debtsActionRepay => 'Rembourser';
@@ -246,28 +246,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsDialogSnoozeTitle => 'Reporter le rappel';
 
   @override
-  String get debtDetailProgress => 'Progression';
+  String get debtsDetailProgress => 'Progression';
 
   @override
-  String get debtDetailDate => 'Date';
+  String get debtsDetailDate => 'Date';
 
   @override
-  String get debtDetailCurrency => 'Devise';
+  String get debtsFormCurrency => 'Devise';
 
   @override
   String get debtsFormAccount => 'Compte';
 
   @override
-  String get debtDetailAccountDeleted => 'Compte supprimé';
+  String get debtsDetailAccountDeleted => 'Compte supprimé';
 
   @override
-  String get debtDetailDueDate => 'Échéance';
+  String get debtsFormDueDate => 'Échéance';
 
   @override
   String get debtsFormCategory => 'Catégorie';
 
   @override
-  String get debtDetailIncludedInBalance => 'Inclus dans le solde';
+  String get debtsDetailIncludedInBalance => 'Inclus dans le solde';
 
   @override
   String get debtsFormReminderAria => 'Rappel';
@@ -276,13 +276,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsDetailPayments => 'Paiements';
 
   @override
-  String get debtDetailTotalRepaid => 'Total remboursé';
+  String get debtsDetailTotalRepaid => 'Total remboursé';
 
   @override
   String get commonEmptyNoPayments => 'Aucun paiement enregistré';
 
   @override
-  String get debtDetailPaymentsError =>
+  String get debtsFeedbackPaymentsLoadError =>
       'Erreur lors du chargement des paiements';
 
   @override
@@ -292,61 +292,59 @@ class AppLocalizationsFr extends AppLocalizations {
   String get debtsValueLent => 'Prêt';
 
   @override
-  String get repayAccountLabel => 'Compte source';
-
-  @override
   String get debtsFormAccountPlaceholder => 'Sélectionner un compte';
 
   @override
-  String get repayAccountRequired => 'Compte requis';
+  String get debtsFormAccountRequired => 'Compte requis';
 
   @override
-  String get repayAmountLabel => 'Montant';
+  String get debtsFormAmount => 'Montant';
 
   @override
-  String get repayAmountRequired => 'Montant requis';
+  String get debtsFormAmountRequired => 'Montant requis';
 
   @override
   String get debtsFeedbackAmountInvalid => 'Montant invalide';
 
   @override
-  String repayAmountMax(String amount) {
-    return 'Maximum: $amount';
+  String debtsFormAmountMax(String amount) {
+    return 'Maximum : $amount';
   }
 
   @override
-  String get repayNoAccounts =>
+  String get debtsEmptyNoAccounts =>
       'Aucun compte actif. Créez un compte dans les paramètres.';
 
   @override
-  String get repaySuccess => 'Remboursement enregistré';
+  String get debtsFeedbackRepaymentSaved => 'Remboursement enregistré';
 
   @override
   String get debtsFeedbackRepayError => 'Erreur lors du remboursement';
 
   @override
-  String get snoozeDateLabel => 'Nouvelle date';
+  String get debtsFormReminderDate => 'Date du rappel';
 
   @override
-  String get snoozeTimeLabel => 'Heure';
+  String get debtsFormReminderTime => 'Heure du rappel';
 
   @override
-  String get snoozeDateFutureRequired => 'La date doit être dans le futur';
+  String get debtsDialogReminderDatePast =>
+      'La date ne peut pas être dans le passé';
 
   @override
   String get debtsFeedbackSnoozed => 'Rappel reporté';
 
   @override
-  String get snoozeError => 'Erreur lors du report';
+  String get debtsFeedbackSnoozeError => 'Erreur lors du report du rappel';
 
   @override
   String get debtsActionSnooze => 'Reporter';
 
   @override
-  String get yes => 'Oui';
+  String get commonValueYes => 'Oui';
 
   @override
-  String get no => 'Non';
+  String get commonValueNo => 'Non';
 
   @override
   String get transactionsFormTransferFromPlaceholder => 'Compte source';
@@ -1088,4 +1086,165 @@ class AppLocalizationsFr extends AppLocalizations {
   String recurringSummaryMonthlyExpenses(String amount) {
     return '~$amount /mois';
   }
+
+  @override
+  String get commonNavDebts => 'Dettes';
+
+  @override
+  String get commonNavSubscriptions => 'Abonnements';
+
+  @override
+  String get debtsSummaryNet => 'Solde net';
+
+  @override
+  String debtsSummaryOutstandingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en cours',
+      one: '$count en cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debtsSummaryLentTotal(String amount) {
+    return '$amount prêts';
+  }
+
+  @override
+  String debtsSummaryBorrowedTotal(String amount) {
+    return '$amount emprunts';
+  }
+
+  @override
+  String get debtsListOverdue => 'En retard';
+
+  @override
+  String get debtsListThisWeek => 'Cette semaine';
+
+  @override
+  String get debtsListThisMonth => 'Ce mois-ci';
+
+  @override
+  String get debtsListLater => 'Plus tard';
+
+  @override
+  String get debtsListNoDueDate => 'Sans échéance';
+
+  @override
+  String get debtsListRepaid => 'Remboursées';
+
+  @override
+  String get debtsDialogCreateTitle => 'Nouvelle dette';
+
+  @override
+  String get debtsDialogEditTitle => 'Modifier la dette';
+
+  @override
+  String get debtsDialogRepayTitle => 'Remboursement';
+
+  @override
+  String get debtsValueNotRepaid => 'Non remboursé';
+
+  @override
+  String get debtsFormCurrencyPlaceholder => 'Devise par défaut';
+
+  @override
+  String debtsFormReminderSummary(String date, String time) {
+    return 'Rappel : $date à $time';
+  }
+
+  @override
+  String debtsDetailReminderAt(String date, String time) {
+    return '$date à $time';
+  }
+
+  @override
+  String get debtsActionClearReminder => 'Effacer le rappel';
+
+  @override
+  String get subscriptionsSummaryMonthlyTotal => 'Total mensuel';
+
+  @override
+  String subscriptionsSummaryActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count abonnements',
+      one: '$count abonnement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subscriptionsListActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actifs',
+      one: '$count actif',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get subscriptionsListActive => 'Actifs';
+
+  @override
+  String get subscriptionsListInactive => 'Inactifs';
+
+  @override
+  String get subscriptionsValuePerWeek => '/sem';
+
+  @override
+  String get subscriptionsValueWeekly => 'Hebdomadaire';
+
+  @override
+  String get subscriptionsValueMonthly => 'Mensuel';
+
+  @override
+  String get subscriptionsValueYearly => 'Annuel';
+
+  @override
+  String get subscriptionsDialogCreateTitle => 'Nouvel abonnement';
+
+  @override
+  String get subscriptionsDialogEditTitle => 'Modifier l\'abonnement';
+
+  @override
+  String get subscriptionsFormCategory => 'Catégorie';
+
+  @override
+  String get subscriptionsFormCurrency => 'Devise';
+
+  @override
+  String get subscriptionsFormCurrencyPlaceholder => 'Devise par défaut';
+
+  @override
+  String get subscriptionsDetailAmount => 'Montant';
+
+  @override
+  String get subscriptionsDetailStartDate => 'Date de début';
+
+  @override
+  String get exchangeRatesValueEur => 'Euro';
+
+  @override
+  String get exchangeRatesValueXof => 'Franc CFA (BCEAO)';
+
+  @override
+  String get exchangeRatesValueUsd => 'Dollar US';
+
+  @override
+  String get exchangeRatesValueGbp => 'Livre sterling';
+
+  @override
+  String get exchangeRatesValueChf => 'Franc suisse';
+
+  @override
+  String get exchangeRatesValueCad => 'Dollar canadien';
+
+  @override
+  String get exchangeRatesValueMad => 'Dirham marocain';
 }
