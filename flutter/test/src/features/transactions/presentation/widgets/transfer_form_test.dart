@@ -83,7 +83,7 @@ void main() {
       expect(find.text('Montant'), findsOneWidget);
       expect(find.text('Note'), findsOneWidget);
       expect(find.text('Annuler'), findsOneWidget);
-      expect(find.text('Valider'), findsOneWidget);
+      expect(find.text('Effectuer le virement'), findsOneWidget);
 
       // Ouvre le picker source : les soldes formatés sont affichés
       await selectAccount(tester, pickerIndex: 0, accountName: 'Compte courant');
@@ -104,7 +104,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, '100');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Valider'));
+      await tester.tap(find.text('Effectuer le virement'));
       await tester.pumpAndSettle();
 
       expect(find.text('Une erreur est survenue'), findsOneWidget);
@@ -124,7 +124,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, '75');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Valider'));
+      await tester.tap(find.text('Effectuer le virement'));
       // La soumission réussie laisse le bouton en état "isSubmitting" (le
       // spinner tourne indéfiniment tant que l'écran n'est pas fermé par
       // l'appelant) : on avance de quelques frames plutôt que pumpAndSettle.

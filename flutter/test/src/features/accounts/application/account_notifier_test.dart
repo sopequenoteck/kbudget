@@ -166,7 +166,7 @@ void main() {
       when(mockRepo.setDefault('2')).thenThrow(Exception('Server error'));
       await notifier().setDefault('2');
 
-      expect(state().error, contains('Erreur lors du changement'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -229,7 +229,7 @@ void main() {
           .thenThrow(Exception('Server error'));
       await notifier().adjustBalance('1', 2000.0);
 
-      expect(state().error, contains('ajustement du solde'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 

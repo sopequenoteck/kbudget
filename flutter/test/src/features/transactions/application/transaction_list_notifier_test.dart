@@ -100,7 +100,7 @@ void main() {
 
       final s = state();
       expect(s.isLoading, false);
-      expect(s.error, contains('Impossible de charger'));
+      expect(s.error, 'Erreur de chargement');
     });
 
     test('should_filter_depenses_when_setFilter_depense', () async {

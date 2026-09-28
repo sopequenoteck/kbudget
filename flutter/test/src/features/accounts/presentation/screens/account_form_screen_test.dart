@@ -13,6 +13,7 @@ import 'package:k_budget/src/domain/models/bank.dart';
 import 'package:k_budget/src/features/accounts/application/bank_provider.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/widgets/account_type_selector.dart';
+import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
@@ -38,7 +39,7 @@ void main() {
     mockRepo = MockAccountRepository();
   });
 
-  Widget buildApp({Account? account}) {
+  Widget buildApp({Account? account, Currency primaryCurrency = Currency.eur}) {
     final router = GoRouter(
       initialLocation: '/list/form',
       routes: [
@@ -61,6 +62,10 @@ void main() {
       overrides: [
         accountRepositoryProvider.overrideWithValue(mockRepo),
         banksProvider.overrideWith((_) async => const <Bank>[]),
+        currencyConfigNotifierProvider
+            .overrideWith(() => _FixedCurrencies([primaryCurrency])),
+        exchangeRateRepositoryProvider
+            .overrideWith((_) async => MockExchangeRateRepository()),
       ],
       child: MaterialApp.router(
         theme: theme.AppTheme.light,
@@ -291,5 +296,141 @@ void main() {
       // les variations d'espace insécable selon la plateforme
       expect(find.textContaining('250'), findsWidgets);
     });
+
+    testWidgets('should_offerCameraAndGallery_when_logoTapped', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byIcon(PhosphorIconsRegular.upload),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byIcon(PhosphorIconsRegular.upload));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Caméra'), findsOneWidget);
+      expect(find.text('Galerie'), findsOneWidget);
+      expect(find.text('Supprimer'), findsNothing);
+    });
+
+    testWidgets('should_removeCustomLogo_when_deleteChosenInLogoSheet',
+        (tester) async {
+      await tester.pumpWidget(buildApp(
+        account: testAccount.copyWith(bankCustomLogo: _pngDataUri),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Logo personnalisé (optionnel)'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final logoTap = find.descendant(
+        of: find
+            .ancestor(
+              of: find.text('Logo personnalisé (optionnel)'),
+              matching: find.byType(Column),
+            )
+            .first,
+        matching: find.byType(GestureDetector),
+      );
+      await tester.scrollUntilVisible(
+        logoTap,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(logoTap);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('Supprimer'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(PhosphorIconsRegular.upload), findsOneWidget);
+    });
+
+    testWidgets('should_showActiveHint_when_accountIsDefault', (tester) async {
+      await tester.pumpWidget(
+        buildApp(account: testAccount.copyWith(isDefault: true)),
+      );
+      await tester.pumpAndSettle();
+
+      const hint =
+          'Définissez un autre compte par défaut avant de désactiver celui-ci';
+      await tester.scrollUntilVisible(
+        find.text(hint),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text(hint), findsOneWidget);
+    });
+
+    for (final (label, button, opensRateForm) in [
+      ('later', 'Plus tard', false),
+      ('enterRate', 'Saisir le taux', true),
+    ]) {
+      testWidgets(
+          'should_proposeMissingRate_when_created_and_${label}Chosen',
+          (tester) async {
+        when(mockRepo.create(any)).thenAnswer((_) async => testAccount);
+
+        await tester.pumpWidget(buildApp(primaryCurrency: Currency.usd));
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(
+          find.text('Nom du compte'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.enterText(
+          find.descendant(
+            of: find.ancestor(
+              of: find.text('Nom du compte'),
+              matching: find.byType(AppFormField),
+            ),
+            matching: find.byType(TextField),
+          ),
+          'Compte euro',
+        );
+        await tester.tap(findAppBarAction(PhosphorIconsBold.check));
+        // L'indicateur de sauvegarde tourne tant que le dialogue est ouvert :
+        // pumpAndSettle ne rendrait jamais la main.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(find.text('Taux de conversion manquant'), findsOneWidget);
+        expect(
+          find.text(
+            "Aucun taux \$ → € n'est défini.\nVoulez-vous le saisir maintenant ?",
+          ),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text(button));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(
+          find.text('Ajouter un taux'),
+          opensRateForm ? findsOneWidget : findsNothing,
+        );
+      });
+    }
   });
+}
+
+const _pngDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAf'
+    'FcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+class _FixedCurrencies extends CurrencyConfigNotifier {
+  _FixedCurrencies(this._currencies);
+
+  final List<Currency> _currencies;
+
+  @override
+  List<Currency> build() => _currencies;
 }

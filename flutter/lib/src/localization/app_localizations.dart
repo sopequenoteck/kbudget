@@ -336,17 +336,17 @@ abstract class AppLocalizations {
   /// **'Incorrect email or password'**
   String get authFeedbackInvalidCredentials;
 
-  /// No description provided for @transactionsEmptyMonth.
+  /// No description provided for @transactionsEmptyNoneInMonth.
   ///
   /// In en, this message translates to:
-  /// **'No transactions this month'**
-  String get transactionsEmptyMonth;
+  /// **'No transactions in {month}'**
+  String transactionsEmptyNoneInMonth(String month);
 
-  /// No description provided for @transactionsNoCategory.
+  /// No description provided for @transactionsListNoCategory.
   ///
   /// In en, this message translates to:
   /// **'No category'**
-  String get transactionsNoCategory;
+  String get transactionsListNoCategory;
 
   /// No description provided for @transactionsFormDescriptionPlaceholder.
   ///
@@ -360,17 +360,17 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get transactionsFormAccount;
 
-  /// No description provided for @transactionFormDeleteConfirmTitle.
+  /// No description provided for @transactionsDialogDeleteTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete transaction'**
-  String get transactionFormDeleteConfirmTitle;
+  String get transactionsDialogDeleteTitle;
 
-  /// No description provided for @transactionFormDeleteConfirmMessage.
+  /// No description provided for @transactionsDialogDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this transaction? This action is irreversible.'**
-  String get transactionFormDeleteConfirmMessage;
+  /// **'Are you sure you want to delete this transaction?'**
+  String get transactionsDialogDeleteMessage;
 
   /// No description provided for @subscriptionsFormNamePlaceholder.
   ///
@@ -744,11 +744,11 @@ abstract class AppLocalizations {
   /// **'Note'**
   String get transactionsFormNoteAria;
 
-  /// No description provided for @transferFormSaveButton.
+  /// No description provided for @transactionsActionTransferSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Confirm'**
-  String get transferFormSaveButton;
+  /// **'Make the transfer'**
+  String get transactionsActionTransferSubmit;
 
   /// No description provided for @transactionsFormTransferAccountsMismatch.
   ///
@@ -774,11 +774,11 @@ abstract class AppLocalizations {
   /// **'{max} characters maximum'**
   String commonValidationMaxLength(int max);
 
-  /// No description provided for @accountsTitle.
+  /// No description provided for @accountsPageTitle.
   ///
   /// In en, this message translates to:
   /// **'Accounts'**
-  String get accountsTitle;
+  String get accountsPageTitle;
 
   /// No description provided for @accountsEmptyTitle.
   ///
@@ -846,11 +846,11 @@ abstract class AppLocalizations {
   /// **'Colour'**
   String get commonFormColour;
 
-  /// No description provided for @accountFormActiveDefaultHint.
+  /// No description provided for @accountsFormActiveHint.
   ///
   /// In en, this message translates to:
-  /// **'The default account cannot be deactivated'**
-  String get accountFormActiveDefaultHint;
+  /// **'Set another default account before deactivating this one'**
+  String get accountsFormActiveHint;
 
   /// No description provided for @accountsFormCurrentBalance.
   ///
@@ -864,11 +864,11 @@ abstract class AppLocalizations {
   /// **'New balance'**
   String get accountsFormNewBalance;
 
-  /// No description provided for @accountFormPreviewPlaceholder.
+  /// No description provided for @accountsFormPreviewPlaceholder.
   ///
   /// In en, this message translates to:
   /// **'Account preview'**
-  String get accountFormPreviewPlaceholder;
+  String get accountsFormPreviewPlaceholder;
 
   /// No description provided for @accountsValueDefault.
   ///
@@ -876,41 +876,23 @@ abstract class AppLocalizations {
   /// **'Default'**
   String get accountsValueDefault;
 
-  /// No description provided for @accountDeleteConfirmTitle.
+  /// No description provided for @accountsDialogDeleteTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete account'**
-  String get accountDeleteConfirmTitle;
+  String get accountsDialogDeleteTitle;
 
-  /// No description provided for @accountDeleteConfirmMessage.
+  /// No description provided for @accountsDialogDeleteWarningMessage.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this account? This action is irreversible.'**
-  String get accountDeleteConfirmMessage;
+  String get accountsDialogDeleteWarningMessage;
 
-  /// No description provided for @accountErrorLoad.
+  /// No description provided for @accountsFeedbackLoadError.
   ///
   /// In en, this message translates to:
-  /// **'Unable to load accounts'**
-  String get accountErrorLoad;
-
-  /// No description provided for @accountErrorCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Error creating account'**
-  String get accountErrorCreate;
-
-  /// No description provided for @accountErrorUpdate.
-  ///
-  /// In en, this message translates to:
-  /// **'Error updating account'**
-  String get accountErrorUpdate;
-
-  /// No description provided for @accountErrorDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Error deleting account'**
-  String get accountErrorDelete;
+  /// **'Error loading accounts'**
+  String get accountsFeedbackLoadError;
 
   /// No description provided for @categoriesPageTitle.
   ///
@@ -936,77 +918,53 @@ abstract class AppLocalizations {
   /// **'Edit category'**
   String get categoriesDialogEditTitle;
 
-  /// No description provided for @categoryFormNameField.
+  /// No description provided for @categoriesFormName.
   ///
   /// In en, this message translates to:
-  /// **'Category name'**
-  String get categoryFormNameField;
+  /// **'Name'**
+  String get categoriesFormName;
 
-  /// No description provided for @categoryFormIconField.
+  /// No description provided for @categoriesFormIcon.
   ///
   /// In en, this message translates to:
   /// **'Icon'**
-  String get categoryFormIconField;
+  String get categoriesFormIcon;
 
-  /// No description provided for @categoryNameRequired.
+  /// No description provided for @commonValidationNameRequired.
   ///
   /// In en, this message translates to:
-  /// **'Name is required'**
-  String get categoryNameRequired;
+  /// **'Name required'**
+  String get commonValidationNameRequired;
 
-  /// No description provided for @categoryNameMaxLength.
+  /// No description provided for @categoriesFormNameMaxLength.
   ///
   /// In en, this message translates to:
   /// **'30 characters maximum'**
-  String get categoryNameMaxLength;
+  String get categoriesFormNameMaxLength;
 
-  /// No description provided for @categoryNameDuplicate.
+  /// No description provided for @categoriesFormNameDuplicate.
   ///
   /// In en, this message translates to:
   /// **'This category name already exists'**
-  String get categoryNameDuplicate;
+  String get categoriesFormNameDuplicate;
 
-  /// No description provided for @categoryEmojiRequired.
+  /// No description provided for @categoriesFormIconRequired.
   ///
   /// In en, this message translates to:
   /// **'Icon is required'**
-  String get categoryEmojiRequired;
+  String get categoriesFormIconRequired;
 
-  /// No description provided for @categoryDeleteConfirmTitle.
+  /// No description provided for @categoriesDialogDeleteTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete category'**
-  String get categoryDeleteConfirmTitle;
+  String get categoriesDialogDeleteTitle;
 
-  /// No description provided for @categoryDeleteConfirmMessage.
+  /// No description provided for @categoriesDialogDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this category? Related items will be unlinked.'**
-  String get categoryDeleteConfirmMessage;
-
-  /// No description provided for @categoryErrorLoad.
-  ///
-  /// In en, this message translates to:
-  /// **'Unable to load categories'**
-  String get categoryErrorLoad;
-
-  /// No description provided for @categoryErrorCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Error creating category'**
-  String get categoryErrorCreate;
-
-  /// No description provided for @categoryErrorUpdate.
-  ///
-  /// In en, this message translates to:
-  /// **'Error updating category'**
-  String get categoryErrorUpdate;
-
-  /// No description provided for @categoryErrorDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Error deleting category'**
-  String get categoryErrorDelete;
+  /// **'This category will be unlinked from all related items.'**
+  String get categoriesDialogDeleteMessage;
 
   /// No description provided for @emptyBudgetList.
   ///
@@ -1140,53 +1098,47 @@ abstract class AppLocalizations {
   /// **'All paid'**
   String get recurringActionPayAll;
 
-  /// No description provided for @recurringNextOccurrence.
+  /// No description provided for @recurringDetailNext.
   ///
   /// In en, this message translates to:
   /// **'Next: {date}'**
-  String recurringNextOccurrence(String date);
+  String recurringDetailNext(String date);
 
-  /// No description provided for @recurringMonthlySummaryTitle.
+  /// No description provided for @recurringSummaryTitle.
   ///
   /// In en, this message translates to:
-  /// **'MONTHLY SUMMARY'**
-  String get recurringMonthlySummaryTitle;
+  /// **'Monthly summary'**
+  String get recurringSummaryTitle;
 
-  /// No description provided for @recurringChargesCount.
+  /// No description provided for @recurringSummaryExpenseCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} EXPENSES'**
-  String recurringChargesCount(int count);
+  /// **'{count, plural, one {{count} expense} other {{count} expenses}}'**
+  String recurringSummaryExpenseCount(int count);
 
-  /// No description provided for @recurringEmpty.
+  /// No description provided for @recurringEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No active recurring transactions'**
-  String get recurringEmpty;
+  /// **'No recurring transactions'**
+  String get recurringEmptyTitle;
 
-  /// No description provided for @recurringFeedbackValidated.
+  /// No description provided for @recurringFeedbackValidatedOne.
   ///
   /// In en, this message translates to:
-  /// **'Transaction created'**
-  String get recurringFeedbackValidated;
+  /// **'Transaction validated'**
+  String get recurringFeedbackValidatedOne;
 
-  /// No description provided for @recurringSkipSuccess.
+  /// No description provided for @recurringFeedbackSkipped.
   ///
   /// In en, this message translates to:
   /// **'Occurrence skipped'**
-  String get recurringSkipSuccess;
+  String get recurringFeedbackSkipped;
 
   /// No description provided for @recurringFeedbackDeactivated.
   ///
   /// In en, this message translates to:
   /// **'Recurring transaction deactivated'**
   String get recurringFeedbackDeactivated;
-
-  /// No description provided for @frequencyHebdomadaire.
-  ///
-  /// In en, this message translates to:
-  /// **'/week'**
-  String get frequencyHebdomadaire;
 
   /// No description provided for @authPageLoginTagline.
   ///
@@ -1805,6 +1757,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{amount} this month'**
   String dashboardSummaryMonthVariation(String amount);
+
+  /// No description provided for @transactionsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsPageTitle;
+
+  /// No description provided for @transactionsListThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get transactionsListThisWeek;
+
+  /// No description provided for @transactionsListLastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week'**
+  String get transactionsListLastWeek;
+
+  /// No description provided for @transactionsListOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Older'**
+  String get transactionsListOlder;
+
+  /// No description provided for @transactionsSummaryBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get transactionsSummaryBalance;
+
+  /// No description provided for @transactionsDialogCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New transaction'**
+  String get transactionsDialogCreateTitle;
+
+  /// No description provided for @transactionsDialogEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transaction'**
+  String get transactionsDialogEditTitle;
+
+  /// No description provided for @transactionsValueExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transactionsValueExpense;
+
+  /// No description provided for @transactionsValueIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transactionsValueIncome;
+
+  /// No description provided for @transactionsFormCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get transactionsFormCategory;
+
+  /// No description provided for @transactionsFormNotePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note…'**
+  String get transactionsFormNotePlaceholder;
+
+  /// No description provided for @transactionsFormIsRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction'**
+  String get transactionsFormIsRecurring;
+
+  /// No description provided for @transactionsFormRecurringAria.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get transactionsFormRecurringAria;
+
+  /// No description provided for @transactionsFeedbackRecurringFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction created. The recurring transaction could not be created.'**
+  String get transactionsFeedbackRecurringFailed;
+
+  /// No description provided for @recurringValueWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurringValueWeekly;
+
+  /// No description provided for @recurringValueMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get recurringValueMonthly;
+
+  /// No description provided for @recurringValueYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get recurringValueYearly;
+
+  /// No description provided for @recurringFeedbackValidatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} transaction validated} other {{count} transactions validated}}'**
+  String recurringFeedbackValidatedCount(int count);
+
+  /// No description provided for @recurringFeedbackValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation failed'**
+  String get recurringFeedbackValidationError;
+
+  /// No description provided for @recurringFeedbackSkipFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to skip'**
+  String get recurringFeedbackSkipFailed;
+
+  /// No description provided for @recurringFeedbackDeactivateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to deactivate'**
+  String get recurringFeedbackDeactivateError;
+
+  /// No description provided for @categoriesFeedbackSystemEditForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'System categories cannot be edited'**
+  String get categoriesFeedbackSystemEditForbidden;
+
+  /// No description provided for @categoriesFeedbackSystemDeleteForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'System categories cannot be deleted'**
+  String get categoriesFeedbackSystemDeleteForbidden;
+
+  /// No description provided for @accountsActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get accountsActionCreate;
+
+  /// No description provided for @accountsActionLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get accountsActionLater;
+
+  /// No description provided for @accountsActionEnterRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the rate'**
+  String get accountsActionEnterRate;
+
+  /// No description provided for @accountsListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} account} other {{count} accounts}}'**
+  String accountsListCount(int count);
+
+  /// No description provided for @accountsDialogDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this account?'**
+  String get accountsDialogDeleteMessage;
+
+  /// No description provided for @accountsFormTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type'**
+  String get accountsFormTypeTitle;
+
+  /// No description provided for @accountsFormCustomisationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customisation'**
+  String get accountsFormCustomisationTitle;
+
+  /// No description provided for @accountsFormDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get accountsFormDetailsTitle;
+
+  /// No description provided for @accountsFormBankName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank name (optional)'**
+  String get accountsFormBankName;
+
+  /// No description provided for @accountsFormBankNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. My bank'**
+  String get accountsFormBankNamePlaceholder;
+
+  /// No description provided for @accountsFormCustomLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom logo (optional)'**
+  String get accountsFormCustomLogo;
+
+  /// No description provided for @accountsFormLogoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get accountsFormLogoCamera;
+
+  /// No description provided for @accountsFormLogoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get accountsFormLogoGallery;
+
+  /// No description provided for @accountsFormRateProposalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing exchange rate'**
+  String get accountsFormRateProposalTitle;
+
+  /// No description provided for @accountsFormRateProposalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No {from} → {to} rate is defined.'**
+  String accountsFormRateProposalMessage(String from, String to);
+
+  /// No description provided for @accountsFormRateProposalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to enter it now?'**
+  String get accountsFormRateProposalHint;
+
+  /// No description provided for @exchangeRatesDialogAddRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a rate'**
+  String get exchangeRatesDialogAddRateTitle;
+
+  /// No description provided for @recurringSummaryMonthlyExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'~{amount} /month'**
+  String recurringSummaryMonthlyExpenses(String amount);
 }
 
 class _AppLocalizationsDelegate

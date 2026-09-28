@@ -79,7 +79,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Impossible de charger les catégories'), findsOneWidget);
+      expect(find.text('Erreur de chargement'), findsOneWidget);
       // Le bouton retry est rendu via EmptyStateWidget comme TextButton (CTA texte)
       expect(find.text('Réessayer'), findsOneWidget);
     });
@@ -127,7 +127,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Impossible de charger les catégories'), findsOneWidget);
+      expect(find.text('Erreur de chargement'), findsOneWidget);
 
       await tester.tap(find.text('Réessayer'));
       await tester.pumpAndSettle();

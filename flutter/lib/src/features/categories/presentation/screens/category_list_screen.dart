@@ -107,7 +107,7 @@ class _CategoryListScreenState extends ConsumerState<CategoryListScreen> {
           hasScrollBody: false,
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.warning,
-            message: l10n.categoryErrorLoad,
+            message: l10n.commonFeedbackLoadError,
             ctaLabel: l10n.commonActionRetry,
             onCtaTap: () => ref.read(categoryNotifierProvider.notifier).refresh(),
           ),

@@ -50,7 +50,7 @@ class TransactionDayGroup extends StatelessWidget {
           final icon = category?.icone ?? '\u{1F4DD}';
           final iconBg = parseHexColor(category?.couleur);
           final l10n = AppLocalizations.of(context)!;
-          final subtitle = category?.nom ?? l10n.transactionsNoCategory;
+          final subtitle = category?.nom ?? l10n.transactionsListNoCategory;
           final typeName = tx.type.name;
           final valueColor =
               AmountFormatter.amountColor(typeName, colors) ??

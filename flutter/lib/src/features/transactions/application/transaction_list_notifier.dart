@@ -7,6 +7,7 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 
 final transactionListNotifierProvider =
@@ -48,11 +49,11 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
         summary: summaries.isNotEmpty ? summaries.first : null,
         isLoading: false,
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       if (state.selectedMonth != month || state.selectedYear != year) return;
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les transactions: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }

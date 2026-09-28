@@ -196,10 +196,10 @@
       "title": "Aucune catégorie — créez-en une"
     },
     "form": {
-      "icon": "Icone",
+      "icon": "Icône",
       "name": "Nom",
-      "nameMaxLength": "30 caracteres maximum",
-      "namePlaceholder": "Nom de la categorie",
+      "nameMaxLength": "30 caractères maximum",
+      "namePlaceholder": "Nom de la catégorie",
       "searchPlaceholder": "Rechercher une catégorie..."
     },
     "list": {

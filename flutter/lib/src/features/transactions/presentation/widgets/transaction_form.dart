@@ -70,7 +70,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   bool _isCreatingCategory = false;
   late TransactionType _currentType;
 
-  static final _dateFormat = DateFormat('dd/MM/yyyy');
   static final _isoFormat = DateFormat('yyyy-MM-dd');
 
   bool get _isEditMode => widget.transaction != null;
@@ -186,8 +185,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         } catch (_) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Transaction créée. Échec de la récurrence.'),
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!
+                      .transactionsFeedbackRecurringFailed,
+                ),
               ),
             );
           }
@@ -208,8 +210,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDeleteConfirmDialog(
       context: context,
-      title: l10n.transactionFormDeleteConfirmTitle,
-      message: l10n.transactionFormDeleteConfirmMessage,
+      title: l10n.transactionsDialogDeleteTitle,
+      message: l10n.transactionsDialogDeleteMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {
@@ -301,6 +303,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   Widget _buildNoteExpand() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.space4,
@@ -311,7 +314,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       child: TextField(
         controller: _noteController,
         decoration: InputDecoration(
-          hintText: 'Ajouter une note...',
+          hintText: l10n.transactionsFormNotePlaceholder,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -348,6 +351,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   Widget _buildRecurringExpand() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final frequencies = [
       Frequency.hebdomadaire,
       Frequency.mensuel,
@@ -363,7 +367,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(
-              'Transaction récurrente',
+              l10n.transactionsFormIsRecurring,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 color: colorScheme.onSurface,
@@ -375,7 +379,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           if (_isRecurring) ...[
             const SizedBox(height: AppSpacing.space2),
             BSheetTypeToggle(
-              labels: const ['Hebdo', 'Mensuel', 'Annuel'],
+              labels: [
+                l10n.recurringValueWeekly,
+                l10n.recurringValueMonthly,
+                l10n.recurringValueYearly,
+              ],
               selectedIndex: selectedFreqIndex.clamp(0, 2),
               onChanged: (i) =>
                   setState(() => _recurringFrequency = frequencies[i]),
@@ -403,6 +411,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     List<Account> accounts,
   ) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final selectedCategory = _selectedCategoryId != null
         ? categories.where((c) => c.id == _selectedCategoryId).firstOrNull
@@ -413,19 +422,20 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
     return [
       BSheetMetaPill(
-        label: _dateFormat.format(_selectedDate),
+        label: DateFormat.yMd(ref.watch(intlLocaleProvider))
+            .format(_selectedDate),
         isActive: _expandedSection == 'date',
         onTap: () => _toggleSection('date'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? 'Catégorie',
+        label: selectedCategory?.nom ?? l10n.transactionsFormCategory,
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedAccount?.nom ?? 'Compte',
+        label: selectedAccount?.nom ?? l10n.transactionsFormAccount,
         isActive: _expandedSection == 'compte',
         onTap: () => _toggleSection('compte'),
         colorScheme: cs,
@@ -455,9 +465,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         if (!didPop) setState(() => _expandedSection = null);
       },
       child: BottomSheet4RowsWidget(
-        title: _isEditMode ? 'Modifier transaction' : 'Nouvelle transaction',
+        title: _isEditMode
+            ? l10n.transactionsDialogEditTitle
+            : l10n.transactionsDialogCreateTitle,
         topTrailing: BSheetTypeToggle(
-          labels: const ['Dépense', 'Recette'],
+          labels: [
+            l10n.transactionsValueExpense,
+            l10n.transactionsValueIncome,
+          ],
           selectedIndex: _currentType == TransactionType.depense ? 0 : 1,
           onChanged: (i) => setState(
             () => _currentType =
@@ -551,7 +566,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   : cs.onSurfaceVariant,
             ),
             onPressed: () => _toggleSection('note'),
-            tooltip: 'Note',
+            tooltip: l10n.transactionsFormNoteAria,
           ),
           if (!_isEditMode)
             IconButton(
@@ -565,7 +580,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     : (_isRecurring ? cs.primary : cs.onSurfaceVariant),
               ),
               onPressed: () => _toggleSection('recurring'),
-              tooltip: 'Récurrence',
+              tooltip: l10n.transactionsFormRecurringAria,
             ),
         ],
         metaPills: _buildMetaPills(categories, accounts),

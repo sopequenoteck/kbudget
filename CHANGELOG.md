@@ -132,6 +132,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   serveur ». Les accents manquants sont corriges. Les messages d'erreur
   n'affichent plus le detail technique de l'exception. Le nom d'affichage est
   limite a 100 caracteres, comme cote API.
+- **Transactions, recurrences, categories et comptes de Flutter dans les
+  catalogues (KKS-400)** : etape 3 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Aucune
+  transaction en septembre 2026 », « Effectuer le virement », « Occurrence
+  passee » ou « Nom requis ». Les recurrences affichent leur frequence
+  (« Mensuel ») au lieu d'un suffixe (« /mois »), et les compteurs de charges
+  et de comptes accordent le singulier. Les messages d'erreur n'affichent
+  plus le detail technique de l'exception. Cote Angular, trois accents
+  manquants sont corriges dans le formulaire de categorie.
 
 ### Changed
 

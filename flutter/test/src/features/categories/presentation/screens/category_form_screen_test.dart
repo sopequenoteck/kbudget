@@ -104,7 +104,7 @@ void main() {
       await tester.tap(findSubmitButton());
       await tester.pumpAndSettle();
 
-      expect(find.text('Le nom est requis'), findsOneWidget);
+      expect(find.text('Nom requis'), findsOneWidget);
     });
 
     testWidgets('should_show_validation_error_when_emoji_empty',
@@ -199,7 +199,7 @@ void main() {
       expect(find.text('Supprimer la catégorie'), findsOneWidget);
       expect(
         find.text(
-          'Êtes-vous sûr de vouloir supprimer cette catégorie ? Les éléments liés seront dissociés.',
+          'Cette catégorie sera dissociée de tous les items liés.',
         ),
         findsOneWidget,
       );
