@@ -374,21 +374,25 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         IconButton(
           icon: const PhosphorIcon(PhosphorIconsRegular.tray, size: 20),
           onPressed: () => _openUnbudgetedSheet(context, overview),
-          tooltip: 'Non budgété',
+          tooltip: l10n.budgetsPageUnbudgetedTitle,
         ),
       IconButton(
         icon: const PhosphorIcon(PhosphorIconsRegular.plus, size: 20),
         onPressed: allCategoriesHaveBudget
             ? null
             : () => ref.read(modalNotifierProvider.notifier).open(ModalType.budget),
-        tooltip: 'Ajouter un budget',
+        tooltip: l10n.budgetsDialogCreateTitle,
       ),
     ];
 
     if (convertedItems.isEmpty && convertedUnbudgeted == 0) {
       return [
         heroSliver,
-        SectionHeaderSticky(title: 'Budgets', count: 0, actions: sectionActions),
+        SectionHeaderSticky(
+          title: l10n.budgetsPageTitle,
+          count: 0,
+          actions: sectionActions,
+        ),
         SliverFillRemaining(
           hasScrollBody: false,
           child: _buildEmptyState(colorScheme),
@@ -399,7 +403,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     return [
       heroSliver,
       SectionHeaderSticky(
-        title: 'Budgets',
+        title: l10n.budgetsPageTitle,
         count: convertedItems.length,
         actions: sectionActions,
       ),
@@ -545,7 +549,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     if (convertedItems.isEmpty) {
       return [
         heroSliver,
-        const SectionHeaderSticky(title: 'Budgets', count: 0),
+        SectionHeaderSticky(title: l10n.budgetsPageTitle, count: 0),
         SliverFillRemaining(
           hasScrollBody: false,
           child: _buildEmptyState(colorScheme),
@@ -555,7 +559,10 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
 
     return [
       heroSliver,
-      SectionHeaderSticky(title: 'Budgets', count: convertedItems.length),
+      SectionHeaderSticky(
+        title: l10n.budgetsPageTitle,
+        count: convertedItems.length,
+      ),
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, i) {
@@ -603,7 +610,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              l10n.emptyBudgetList,
+              l10n.budgetsEmptyTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.medium,
@@ -633,7 +640,7 @@ class _InactiveLabel extends StatelessWidget {
         AppSpacing.space2,
       ),
       child: Text(
-        'Inactifs',
+        AppLocalizations.of(context)!.budgetsListInactive,
         style: TextStyle(
           fontSize: AppTypography.sizeXs,
           fontWeight: AppTypography.semiBold,

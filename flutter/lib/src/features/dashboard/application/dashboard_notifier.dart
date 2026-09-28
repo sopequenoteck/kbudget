@@ -4,6 +4,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -12,12 +13,12 @@ import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
-import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
-import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 
 /// Provider qui lit le nom utilisateur depuis FlutterSecureStorage.
 /// Fallback null si cle absente (mode local ou jamais connecte).
@@ -148,10 +149,10 @@ class DashboardNotifier extends Notifier<DashboardState> {
         isLoading: false,
         error: null,
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }

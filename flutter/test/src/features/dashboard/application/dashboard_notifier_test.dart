@@ -425,8 +425,10 @@ void main() {
 
       expect(errorContainer.read(dashboardNotifierProvider).isLoading, false);
       expect(errorContainer.read(dashboardNotifierProvider).error, isNotNull);
-      expect(errorContainer.read(dashboardNotifierProvider).error,
-          contains('Storage error'));
+      expect(
+        errorContainer.read(dashboardNotifierProvider).error,
+        'Erreur de chargement',
+      );
     });
 
     test('should_setIsLoadingTrue_during_loadDashboard', () async {

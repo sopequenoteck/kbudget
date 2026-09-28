@@ -122,19 +122,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorsApiInternalError => 'Une erreur interne est survenue';
 
   @override
-  String get amount => 'Montant';
+  String get budgetsFormAmount => 'Montant';
 
   @override
-  String get currency => 'Devise';
+  String get budgetsFormCurrencyAria => 'Devise';
 
   @override
-  String get frequency => 'Fréquence';
+  String get budgetsFormFrequencyAria => 'Fréquence';
 
   @override
   String get budgetsFormCategory => 'Catégorie';
 
   @override
-  String get selectCategory => 'Sélectionner une catégorie';
+  String get budgetsFormCategoryPlaceholder => 'Choisir une catégorie';
 
   @override
   String get budgetsFormThresholdAria => 'Seuil d\'alerte';
@@ -477,27 +477,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette catégorie sera dissociée de tous les items liés.';
 
   @override
-  String get emptyBudgetList => 'Aucun budget';
+  String get budgetsEmptyTitle => 'Aucun budget pour cette période';
 
   @override
-  String get deleteBudgetTitle => 'Supprimer le budget';
+  String get budgetsDialogDeleteTitle => 'Supprimer le budget';
 
   @override
-  String get deleteBudgetMessage =>
-      'Êtes-vous sûr de vouloir supprimer ce budget ? Cette action est irréversible.';
+  String get budgetsDialogDeleteMessage =>
+      'Voulez-vous vraiment supprimer ce budget ?';
 
   @override
-  String get allCategoriesHaveBudgets =>
-      'Toutes les catégories ont déjà un budget';
-
-  @override
-  String get total => 'Total';
-
-  @override
-  String get budgetOtherCategory => 'Autre';
-
-  @override
-  String get budgetActive => 'Budget actif';
+  String get budgetsEmptyAllCategoriesBudgeted =>
+      'Toutes les catégories ont déjà un budget.';
 
   @override
   String get notificationsPageTitle => 'Notifications';
@@ -512,7 +503,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notificationsEmptyTitle => 'Aucune notification';
 
   @override
-  String get notificationClearConfirmMessage =>
+  String get notificationsDialogDeleteAllMessage =>
       'Supprimer toutes les notifications ? Cette action est irréversible.';
 
   @override
@@ -1247,4 +1238,168 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exchangeRatesValueMad => 'Dirham marocain';
+
+  @override
+  String get budgetsPageTitle => 'Budgets';
+
+  @override
+  String get budgetsPageUnbudgetedTitle => 'Non budgété';
+
+  @override
+  String get budgetsDialogCreateTitle => 'Nouveau budget';
+
+  @override
+  String get budgetsActionDeactivate => 'Désactiver';
+
+  @override
+  String get budgetsEmptyNoTransactions => 'Aucune transaction ce mois';
+
+  @override
+  String get budgetsListInactive => 'Inactifs';
+
+  @override
+  String budgetsDetailOverBudget(String amount) {
+    return 'dépassement $amount';
+  }
+
+  @override
+  String budgetsDetailRemaining(String amount) {
+    return 'reste $amount';
+  }
+
+  @override
+  String get budgetsSummarySpent => 'Dépensé';
+
+  @override
+  String budgetsSummaryActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets',
+      one: '$count budget',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsSummaryOverBudgetCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en dépassement',
+      one: '$count en dépassement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsSummaryExceededCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets dépassés',
+      one: '$count budget dépassé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetsSummaryUnbudgeted(String amount) {
+    return '$amount non budgété';
+  }
+
+  @override
+  String budgetsSummaryMonthlyInCurrency(String currency) {
+    return 'Mensuel · en $currency';
+  }
+
+  @override
+  String budgetsSummaryTotal(String amount) {
+    return 'Total : $amount';
+  }
+
+  @override
+  String get budgetsValueWeekly => 'Hebdomadaire';
+
+  @override
+  String get budgetsValueMonthly => 'Mensuel';
+
+  @override
+  String get budgetsValueYearly => 'Annuel';
+
+  @override
+  String get dashboardPageRecentTransactionsTitle => 'Dernières opérations';
+
+  @override
+  String dashboardSummaryGreetingMorning(String hasName, String name) {
+    String _temp0 = intl.Intl.selectLogic(hasName, {
+      'yes': 'Bonjour $name',
+      'other': 'Bonjour',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardSummaryGreetingAfternoon(String hasName, String name) {
+    String _temp0 = intl.Intl.selectLogic(hasName, {
+      'yes': 'Bon après-midi $name',
+      'other': 'Bon après-midi',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardSummaryGreetingEvening(String hasName, String name) {
+    String _temp0 = intl.Intl.selectLogic(hasName, {
+      'yes': 'Bonsoir $name',
+      'other': 'Bonsoir',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardSummaryMonthPositive => 'Mois positif';
+
+  @override
+  String get dashboardSummaryMonthNegative => 'Mois négatif';
+
+  @override
+  String get dashboardSummaryMonthQuiet => 'Mois calme';
+
+  @override
+  String get dashboardEmptyTitle => 'Bienvenue !';
+
+  @override
+  String get dashboardEmptyMessage =>
+      'Commencez par créer un compte\npour suivre vos finances.';
+
+  @override
+  String recurringSummaryOverdueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count charges en retard',
+      one: '$count charge en retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringActionValidate => 'Valider';
+
+  @override
+  String get recurringActionSkip => 'Passer';
+
+  @override
+  String get accountsSummaryNetWorth => 'Patrimoine total';
+
+  @override
+  String get exchangeRatesFeedbackConversionIncompleteHint =>
+      'Certains montants n\'ont pas pu être convertis';
+
+  @override
+  String get transactionsEmptyTitle => 'Aucune transaction';
+
+  @override
+  String get commonActionViewAll => 'Voir tout';
 }

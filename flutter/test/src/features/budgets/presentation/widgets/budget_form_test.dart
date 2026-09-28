@@ -117,7 +117,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Sélectionner une catégorie'));
+      await tester.tap(find.text('Choisir une catégorie'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Alimentation'));
       await tester.pumpAndSettle();
@@ -156,6 +156,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_showAllBudgetedMessage_when_noCategoryLeft', (tester) async {
+      await tester.pumpWidget(
+        buildApp(categories: const [], onSaved: (_) async {}),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Toutes les catégories ont déjà un budget.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'should_formatThresholdAsLocalePercent_when_rendered', (tester) async {
+      await tester.pumpWidget(buildApp(onSaved: (_) async {}));
+      await tester.pumpAndSettle();
+
+      // fr_FR : espace insecable avant le signe %
+      expect(find.textContaining(RegExp(r'^80\s%$')), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^50\s%$')), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^100\s%$')), findsOneWidget);
+      expect(find.text('Mensuel'), findsOneWidget);
     });
   });
 }

@@ -50,7 +50,7 @@ class RecentTransactionsSection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Dernières opérations',
+              l10n.dashboardPageRecentTransactionsTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeLg,
                 fontWeight: AppTypography.semiBold,
@@ -59,7 +59,7 @@ class RecentTransactionsSection extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () => context.go(RouteNames.transactions),
-              child: const Text('Voir tout'),
+              child: Text(l10n.commonActionViewAll),
             ),
           ],
         ),
@@ -69,7 +69,7 @@ class RecentTransactionsSection extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.space4),
             child: Center(
               child: Text(
-                'Aucune opération récente',
+                l10n.transactionsEmptyTitle,
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurface.withValues(alpha: 0.5),

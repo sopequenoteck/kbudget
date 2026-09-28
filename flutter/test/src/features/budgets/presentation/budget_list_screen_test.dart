@@ -8,6 +8,7 @@ import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_sou
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/domain/enums/frequency.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
+import 'package:k_budget/src/domain/models/budget_history.dart';
 import 'package:k_budget/src/domain/models/budget_overview.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
@@ -272,6 +273,110 @@ void main() {
           isNull,
           reason: 'Le bouton + doit être désactivé quand toutes les catégories ont un budget',
         );
+      },
+    );
+
+    testWidgets(
+      'should_showOverBudgetCount_when_itemExceedsBudget',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => const BudgetOverview(
+            month: '2026-05',
+            totalBudget: 100,
+            totalSpent: 150,
+            percentage: 150,
+            currency: 'EUR',
+            items: [
+              BudgetOverviewItem(
+                budgetId: 'b1',
+                categoryId: 'c1',
+                categoryNom: 'Alimentation',
+                categoryIcone: '🛒',
+                categoryCouleur: '#4CAF50',
+                montantBudget: 100,
+                montantBudgetNormalise: 100,
+                currency: 'EUR',
+                montantDepense: 150,
+                percentage: 150,
+                frequence: 'MENSUEL',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('1 en dépassement · '), findsOneWidget);
+        expect(find.text('1 budget'), findsOneWidget);
+        expect(find.text('Budgets'), findsOneWidget);
+      },
+    );
+
+    Future<void> goToPreviousMonth(WidgetTester tester) async {
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) =>
+              w is PhosphorIcon && w.icon == PhosphorIconsRegular.caretLeft,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'should_showEmptyTitle_when_pastMonthHasNoBudget',
+      (tester) async {
+        when(mockBudgetRepo.getHistory(any)).thenAnswer(
+          (_) async => const BudgetHistory(
+            month: '2026-04',
+            totalBudget: 0,
+            totalSpent: 0,
+            percentage: 0,
+            currency: 'EUR',
+            items: [],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+        await goToPreviousMonth(tester);
+
+        expect(find.text('Aucun budget pour cette période'), findsOneWidget);
+        expect(find.text('Budgets'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_listPastBudgets_when_pastMonthHasItems',
+      (tester) async {
+        when(mockBudgetRepo.getHistory(any)).thenAnswer(
+          (_) async => const BudgetHistory(
+            month: '2026-04',
+            totalBudget: 200,
+            totalSpent: 50,
+            percentage: 25,
+            currency: 'EUR',
+            items: [
+              BudgetHistoryItem(
+                categoryId: 'c1',
+                categoryNom: 'Alimentation',
+                categoryIcone: '🛒',
+                categoryCouleur: '#4CAF50',
+                montantBudget: 200,
+                currency: 'EUR',
+                montantDepense: 50,
+                percentage: 25,
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+        await goToPreviousMonth(tester);
+
+        expect(find.text('Alimentation'), findsOneWidget);
+        expect(find.text('Budgets'), findsOneWidget);
       },
     );
   });

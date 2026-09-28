@@ -287,5 +287,25 @@ void main() {
 
       expect(fakeSubscription.paidIds, contains('sub-2'));
     });
+
+    testWidgets(
+        'should_askConfirmation_when_deleteAllTapped', (tester) async {
+      final state = ListState<NotificationModel>(
+        items: [notifToday],
+        isLoading: false,
+      );
+
+      await tester.pumpWidget(buildApp(state));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip("Vider l'historique"));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Supprimer toutes les notifications ? Cette action est irréversible.',
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

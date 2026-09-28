@@ -254,7 +254,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                           size: 18,
                           color: AppColors.success,
                         ),
-                        tooltip: 'Valider',
+                        tooltip: l10n.recurringActionValidate,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       ),
@@ -265,7 +265,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                           size: 18,
                           color: AppColors.warning,
                         ),
-                        tooltip: 'Passer',
+                        tooltip: l10n.recurringActionSkip,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       ),
@@ -279,7 +279,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
                           size: 18,
                           color: theme.colorScheme.primary,
                         ),
-                        tooltip: 'Payer',
+                        tooltip: l10n.subscriptionsActionPay,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       )
@@ -383,7 +383,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.notificationsActionDeleteAllHint),
-        content: Text(l10n.notificationClearConfirmMessage),
+        content: Text(l10n.notificationsDialogDeleteAllMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

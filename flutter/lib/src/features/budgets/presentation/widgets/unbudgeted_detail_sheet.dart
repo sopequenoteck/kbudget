@@ -53,7 +53,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
     );
   }
 
-  /// Widget réutilisable pour la ligne "Autre" (dépenses non budgétées).
+  /// Widget réutilisable pour la ligne des dépenses non budgétées.
   static Widget buildOtherRow(
     BuildContext context,
     double total,
@@ -91,7 +91,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              AppLocalizations.of(context)!.budgetOtherCategory,
+              AppLocalizations.of(context)!.budgetsPageUnbudgetedTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -175,7 +175,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    l10n.budgetOtherCategory,
+                    l10n.budgetsPageUnbudgetedTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeXl,
                       fontWeight: AppTypography.semiBold,
@@ -188,7 +188,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.space3),
             // Total
             Text(
-              '${l10n.total} : $formattedTotal',
+              l10n.budgetsSummaryTotal(formattedTotal),
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,

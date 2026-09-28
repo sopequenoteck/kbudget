@@ -7,6 +7,7 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final budgetNotifierProvider =
     NotifierProvider<BudgetNotifier, BudgetListState>(
@@ -28,10 +29,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
       _allItems = await _repo.getAll(includeInactive: includeInactive);
       _allItems.sort((a, b) => (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
       _refreshPage(resetPage: true);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les budgets: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -41,10 +42,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
     try {
       final overview = await _repo.getOverview();
       state = state.copyWith(overview: overview, isLoading: false);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger l\'aperçu: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -54,10 +55,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
     try {
       final history = await _repo.getHistory(month);
       state = state.copyWith(history: history, isLoading: false);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger l\'historique: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -86,10 +87,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
       _allItems.add(created);
       _refreshPage();
       await loadOverview();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur lors de la création: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -108,10 +109,10 @@ class BudgetNotifier extends Notifier<BudgetListState> {
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
       await loadOverview();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
-        error: 'Erreur lors de la modification: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -131,12 +132,12 @@ class BudgetNotifier extends Notifier<BudgetListState> {
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
       await loadOverview();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       _allItems.insert(index, saved);
       _refreshPage();
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la suppression: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
       );
     }
   }
