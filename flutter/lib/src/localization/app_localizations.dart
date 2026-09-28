@@ -2429,6 +2429,528 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View all'**
   String get commonActionViewAll;
+
+  /// No description provided for @commonNavHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get commonNavHome;
+
+  /// No description provided for @commonNavTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get commonNavTransactions;
+
+  /// No description provided for @commonNavBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get commonNavBudgets;
+
+  /// No description provided for @commonActionDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get commonActionDisable;
+
+  /// No description provided for @settingsPageManagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Management'**
+  String get settingsPageManagementTitle;
+
+  /// No description provided for @settingsPageAdministrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get settingsPageAdministrationTitle;
+
+  /// No description provided for @settingsPageAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsPageAppearanceTitle;
+
+  /// No description provided for @settingsPageNavigationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get settingsPageNavigationTitle;
+
+  /// No description provided for @settingsPageNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsPageNotificationsTitle;
+
+  /// No description provided for @settingsPageTimezoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get settingsPageTimezoneTitle;
+
+  /// No description provided for @settingsListAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts & Currencies'**
+  String get settingsListAccounts;
+
+  /// No description provided for @settingsListAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage accounts and currencies'**
+  String get settingsListAccountsHint;
+
+  /// No description provided for @settingsListCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get settingsListCategories;
+
+  /// No description provided for @settingsListCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage categories'**
+  String get settingsListCategoriesHint;
+
+  /// No description provided for @settingsListTextScalePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is a preview of the chosen text size.'**
+  String get settingsListTextScalePreview;
+
+  /// No description provided for @settingsListVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'K-Budget v{version}'**
+  String settingsListVersion(String version);
+
+  /// No description provided for @settingsFormTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsFormTheme;
+
+  /// No description provided for @settingsFormTextScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get settingsFormTextScale;
+
+  /// No description provided for @settingsFormTimezoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for the day-before reminders'**
+  String get settingsFormTimezoneHint;
+
+  /// No description provided for @settingsValueThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsValueThemeLight;
+
+  /// No description provided for @settingsValueThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsValueThemeDark;
+
+  /// No description provided for @settingsValueThemeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get settingsValueThemeAuto;
+
+  /// No description provided for @settingsValueTextScaleSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get settingsValueTextScaleSmall;
+
+  /// No description provided for @settingsValueTextScaleMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get settingsValueTextScaleMedium;
+
+  /// No description provided for @settingsValueTextScaleLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get settingsValueTextScaleLarge;
+
+  /// No description provided for @settingsValueChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get settingsValueChecking;
+
+  /// No description provided for @settingsValueOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get settingsValueOnline;
+
+  /// No description provided for @settingsValueOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get settingsValueOffline;
+
+  /// No description provided for @settingsDialogDisableFeatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable {feature}?'**
+  String settingsDialogDisableFeatureTitle(String feature);
+
+  /// No description provided for @settingsDialogDisableFeatureMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data will be hidden, not deleted.'**
+  String get settingsDialogDisableFeatureMessage;
+
+  /// No description provided for @settingsFeedbackLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load preferences'**
+  String get settingsFeedbackLoadError;
+
+  /// No description provided for @settingsFeedbackSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save preferences'**
+  String get settingsFeedbackSaveError;
+
+  /// No description provided for @settingsPageDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsPageDataTitle;
+
+  /// No description provided for @settingsFormDataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data source'**
+  String get settingsFormDataSource;
+
+  /// No description provided for @settingsValueDataSourceLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get settingsValueDataSourceLocal;
+
+  /// No description provided for @settingsValueDataSourceServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get settingsValueDataSourceServer;
+
+  /// No description provided for @settingsFormServerUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get settingsFormServerUrl;
+
+  /// No description provided for @settingsFormServerUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The server URL is required'**
+  String get settingsFormServerUrlRequired;
+
+  /// No description provided for @settingsFormServerUrlHttpsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The URL must start with https://'**
+  String get settingsFormServerUrlHttpsRequired;
+
+  /// No description provided for @settingsFeedbackServerUrlSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'URL saved'**
+  String get settingsFeedbackServerUrlSaved;
+
+  /// No description provided for @settingsFeedbackServerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Server unreachable'**
+  String get settingsFeedbackServerUnreachable;
+
+  /// No description provided for @settingsFeedbackServerTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection timed out'**
+  String get settingsFeedbackServerTimeout;
+
+  /// No description provided for @settingsFeedbackServerAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied by the server'**
+  String get settingsFeedbackServerAccessDenied;
+
+  /// No description provided for @settingsFeedbackServerNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint not found — check the URL'**
+  String get settingsFeedbackServerNotFound;
+
+  /// No description provided for @settingsDialogChangeDataSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change data source?'**
+  String get settingsDialogChangeDataSourceTitle;
+
+  /// No description provided for @settingsDialogChangeDataSourceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.'**
+  String get settingsDialogChangeDataSourceMessage;
+
+  /// No description provided for @notificationsValueSubscriptionDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription due'**
+  String get notificationsValueSubscriptionDue;
+
+  /// No description provided for @notificationsValueDebtDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt due'**
+  String get notificationsValueDebtDue;
+
+  /// No description provided for @notificationsValueDebtReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt reminder'**
+  String get notificationsValueDebtReminder;
+
+  /// No description provided for @notificationsValueRecurringTransactionDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction due'**
+  String get notificationsValueRecurringTransactionDue;
+
+  /// No description provided for @notificationsValueBudgetThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget threshold reached'**
+  String get notificationsValueBudgetThreshold;
+
+  /// No description provided for @notificationsValueBudgetExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget exceeded'**
+  String get notificationsValueBudgetExceeded;
+
+  /// No description provided for @usersListProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get usersListProfile;
+
+  /// No description provided for @usersListProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile, security, sign out'**
+  String get usersListProfileHint;
+
+  /// No description provided for @usersListManageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations and access management'**
+  String get usersListManageHint;
+
+  /// No description provided for @usersListChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get usersListChangePassword;
+
+  /// No description provided for @usersListExportJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Export my data (JSON)'**
+  String get usersListExportJson;
+
+  /// No description provided for @usersListExportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export my transactions (CSV)'**
+  String get usersListExportCsv;
+
+  /// No description provided for @usersPageAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get usersPageAdminTitle;
+
+  /// No description provided for @usersPageProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get usersPageProfileTitle;
+
+  /// No description provided for @usersPageIdentityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get usersPageIdentityTitle;
+
+  /// No description provided for @usersPageSecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get usersPageSecurityTitle;
+
+  /// No description provided for @usersPageDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get usersPageDataTitle;
+
+  /// No description provided for @usersPageDangerZoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get usersPageDangerZoneTitle;
+
+  /// No description provided for @usersFormEmailManagedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by the admin'**
+  String get usersFormEmailManagedHint;
+
+  /// No description provided for @usersFormCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get usersFormCurrentPassword;
+
+  /// No description provided for @usersFormNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get usersFormNewPassword;
+
+  /// No description provided for @usersFormConfirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the new password'**
+  String get usersFormConfirmNewPassword;
+
+  /// No description provided for @usersFormPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get usersFormPasswordMismatch;
+
+  /// No description provided for @usersFormDeleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that this action is permanent'**
+  String get usersFormDeleteAccountConfirm;
+
+  /// No description provided for @usersValueNameNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get usersValueNameNotSet;
+
+  /// No description provided for @usersActionDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get usersActionDeleteAccount;
+
+  /// No description provided for @usersActionChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get usersActionChangePhoto;
+
+  /// No description provided for @usersActionDeletePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get usersActionDeletePhoto;
+
+  /// No description provided for @usersActionEditPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit photo'**
+  String get usersActionEditPhoto;
+
+  /// No description provided for @usersDialogDeleteAccountMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account will be deactivated. You will no longer be able to sign in with these credentials. Your data is kept in the database for traceability.'**
+  String get usersDialogDeleteAccountMessage;
+
+  /// No description provided for @usersFeedbackProfileLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load the profile'**
+  String get usersFeedbackProfileLoadError;
+
+  /// No description provided for @usersFeedbackNameSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save the name. Please try again.'**
+  String get usersFeedbackNameSaveError;
+
+  /// No description provided for @usersFeedbackExportJsonError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during the JSON export. Please try again.'**
+  String get usersFeedbackExportJsonError;
+
+  /// No description provided for @usersFeedbackExportCsvError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during the CSV export. Please try again.'**
+  String get usersFeedbackExportCsvError;
+
+  /// No description provided for @usersFeedbackDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get usersFeedbackDownloading;
+
+  /// No description provided for @usersFeedbackAvatarUploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to upload the photo. Please try again.'**
+  String get usersFeedbackAvatarUploadError;
+
+  /// No description provided for @usersFeedbackPasswordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get usersFeedbackPasswordChanged;
+
+  /// No description provided for @usersFeedbackPasswordChangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to change the password'**
+  String get usersFeedbackPasswordChangeError;
+
+  /// No description provided for @usersFeedbackDeleteAccountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during deletion. Please try again.'**
+  String get usersFeedbackDeleteAccountError;
+
+  /// No description provided for @errorsApiFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'File too large. The maximum size is 2 MB.'**
+  String get errorsApiFileTooLarge;
+
+  /// No description provided for @errorsApiInvalidImageFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Only JPG and PNG formats are accepted.'**
+  String get errorsApiInvalidImageFormat;
 }
 
 class _AppLocalizationsDelegate

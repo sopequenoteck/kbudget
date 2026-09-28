@@ -158,6 +158,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   compteur de budgets accorde le singulier (« 1 budget »), les pourcentages
   suivent le format de la langue (« 80 % », « +12,3 % ») et les messages
   d'erreur n'affichent plus le detail technique de l'exception.
+- **Reglages, profil et barre de navigation de Flutter dans les catalogues
+  (KKS-403, 1re partie)** : etape 6 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Parametres »
+  en titre des reglages, « Profil, securite, deconnexion », « Gere par
+  l'admin » ou « Ce champ est requis. ». Les messages d'erreur des
+  preferences et du profil n'affichent plus le detail technique de
+  l'exception. Le message de suppression de compte garde le texte Flutter,
+  fidele au comportement de l'API : compte desactive, donnees conservees.
 
 ### Changed
 

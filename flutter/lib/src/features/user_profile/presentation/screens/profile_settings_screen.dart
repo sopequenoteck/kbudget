@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/user_profile/presentation/widgets/avatar_p
 import 'package:k_budget/src/features/user_profile/presentation/widgets/change_password_sheet.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/delete_account_sheet.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/profile_settings_skeleton.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -61,15 +62,15 @@ class _ProfileSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileNotifierProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon compte'),
+        title: Text(l10n.usersPageProfileTitle),
       ),
       body: profileAsync.when(
         loading: () => const ProfileSettingsSkeleton(),
         error: (error, _) => _ErrorView(
-          message: error.toString(),
           onRetry: () =>
               ref.read(userProfileNotifierProvider.notifier).loadProfile(),
         ),
@@ -91,35 +92,35 @@ class _ProfileSettingsScreenState
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   _SettingsSection(
-                    label: 'Identité',
+                    label: l10n.usersPageIdentityTitle,
                     children: [
                       _buildNameRow(user),
                       _SettingsRow(
                         title: user.email,
-                        description: 'Géré par l\'administrateur',
+                        description: l10n.usersFormEmailManagedHint,
                       ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   _SettingsSection(
-                    label: 'Sécurité',
+                    label: l10n.usersPageSecurityTitle,
                     children: [
                       _SettingsRow(
                         icon: PhosphorIconsRegular.lock,
                         iconBg: ext(context).primarySubtle,
-                        title: 'Changer le mot de passe',
+                        title: l10n.usersListChangePassword,
                         onTap: _openChangePassword,
                       ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   _SettingsSection(
-                    label: 'Données',
+                    label: l10n.usersPageDataTitle,
                     children: [
                       _ExportRow(
                         icon: PhosphorIconsRegular.database,
                         iconBg: ext(context).primarySubtle,
-                        title: 'Exporter mes données (JSON)',
+                        title: l10n.usersListExportJson,
                         isLoading: _isExportingJson,
                         enabled: !_isExportingJson && !_isExportingCsv,
                         onTap: _exportJson,
@@ -127,7 +128,7 @@ class _ProfileSettingsScreenState
                       _ExportRow(
                         icon: PhosphorIconsRegular.fileCsv,
                         iconBg: ext(context).primarySubtle,
-                        title: 'Exporter mes transactions (CSV)',
+                        title: l10n.usersListExportCsv,
                         isLoading: _isExportingCsv,
                         enabled: !_isExportingJson && !_isExportingCsv,
                         onTap: _exportCsv,
@@ -136,14 +137,14 @@ class _ProfileSettingsScreenState
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   _SettingsSection(
-                    label: 'Zone de danger',
+                    label: l10n.usersPageDangerZoneTitle,
                     children: [
                       _SettingsRow(
-                        title: 'Déconnexion',
+                        title: l10n.commonActionLogout,
                         onTap: _logout,
                       ),
                       _SettingsRow(
-                        title: 'Supprimer mon compte',
+                        title: l10n.usersActionDeleteAccount,
                         titleColor: Theme.of(context).colorScheme.error,
                         onTap: _openDeleteAccount,
                       ),
@@ -212,7 +213,7 @@ class _ProfileSettingsScreenState
     }
 
     return _SettingsRow(
-      title: user.name ?? 'Non renseigné',
+      title: user.name ?? AppLocalizations.of(context)!.usersValueNameNotSet,
       trailing: IconButton(
         icon: const PhosphorIcon(PhosphorIconsRegular.pencil, size: 18),
         onPressed: () => setState(() {
@@ -277,7 +278,8 @@ class _ProfileSettingsScreenState
       if (!mounted) return;
       setState(() {
         _isSavingName = false;
-        _errorMessage = 'Impossible de mettre à jour le nom';
+        _errorMessage =
+            AppLocalizations.of(context)!.usersFeedbackNameSaveError;
       });
     }
   }
@@ -292,7 +294,10 @@ class _ProfileSettingsScreenState
       await repo.exportJson();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = 'Erreur lors de l\'export JSON');
+      setState(
+        () => _errorMessage =
+            AppLocalizations.of(context)!.usersFeedbackExportJsonError,
+      );
     } finally {
       if (mounted) setState(() => _isExportingJson = false);
     }
@@ -308,7 +313,10 @@ class _ProfileSettingsScreenState
       await repo.exportCsv();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = 'Erreur lors de l\'export CSV');
+      setState(
+        () => _errorMessage =
+            AppLocalizations.of(context)!.usersFeedbackExportCsvError,
+      );
     } finally {
       if (mounted) setState(() => _isExportingCsv = false);
     }
@@ -498,7 +506,9 @@ class _ExportRow extends StatelessWidget {
       icon: icon,
       iconBg: iconBg,
       title: title,
-      description: isLoading ? 'Téléchargement en cours…' : null,
+      description: isLoading
+          ? AppLocalizations.of(context)!.usersFeedbackDownloading
+          : null,
       enabled: enabled,
       onTap: onTap,
       trailing: isLoading
@@ -517,13 +527,13 @@ class _ExportRow extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  final String message;
   final VoidCallback onRetry;
 
-  const _ErrorView({required this.message, required this.onRetry});
+  const _ErrorView({required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space4),
@@ -537,16 +547,8 @@ class _ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.space4),
             Text(
-              'Impossible de charger le profil',
+              l10n.usersFeedbackProfileLoadError,
               style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.space2),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
             ),
             const SizedBox(height: AppSpacing.space6),
             FilledButton.icon(
@@ -555,7 +557,7 @@ class _ErrorView extends StatelessWidget {
                 PhosphorIconsRegular.arrowClockwise,
                 size: 20,
               ),
-              label: const Text('Réessayer'),
+              label: Text(l10n.commonActionRetry),
             ),
           ],
         ),

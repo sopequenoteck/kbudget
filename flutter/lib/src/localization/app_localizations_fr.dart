@@ -1402,4 +1402,288 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commonActionViewAll => 'Voir tout';
+
+  @override
+  String get commonNavHome => 'Accueil';
+
+  @override
+  String get commonNavTransactions => 'Transactions';
+
+  @override
+  String get commonNavBudgets => 'Budgets';
+
+  @override
+  String get commonActionDisable => 'Désactiver';
+
+  @override
+  String get settingsPageManagementTitle => 'Gestion';
+
+  @override
+  String get settingsPageAdministrationTitle => 'Administration';
+
+  @override
+  String get settingsPageAppearanceTitle => 'Apparence';
+
+  @override
+  String get settingsPageNavigationTitle => 'Navigation';
+
+  @override
+  String get settingsPageNotificationsTitle => 'Notifications';
+
+  @override
+  String get settingsPageTimezoneTitle => 'Fuseau horaire';
+
+  @override
+  String get settingsListAccounts => 'Comptes & Devises';
+
+  @override
+  String get settingsListAccountsHint => 'Gérer les comptes et devises';
+
+  @override
+  String get settingsListCategories => 'Catégories';
+
+  @override
+  String get settingsListCategoriesHint => 'Gérer les catégories';
+
+  @override
+  String get settingsListTextScalePreview =>
+      'Voici un aperçu de la taille du texte choisie.';
+
+  @override
+  String settingsListVersion(String version) {
+    return 'K-Budget v$version';
+  }
+
+  @override
+  String get settingsFormTheme => 'Thème';
+
+  @override
+  String get settingsFormTextScale => 'Taille du texte';
+
+  @override
+  String get settingsFormTimezoneHint => 'Pour le calcul des rappels J-1';
+
+  @override
+  String get settingsValueThemeLight => 'Clair';
+
+  @override
+  String get settingsValueThemeDark => 'Sombre';
+
+  @override
+  String get settingsValueThemeAuto => 'Auto';
+
+  @override
+  String get settingsValueTextScaleSmall => 'Petit';
+
+  @override
+  String get settingsValueTextScaleMedium => 'Normal';
+
+  @override
+  String get settingsValueTextScaleLarge => 'Grand';
+
+  @override
+  String get settingsValueChecking => 'Vérification…';
+
+  @override
+  String get settingsValueOnline => 'En ligne';
+
+  @override
+  String get settingsValueOffline => 'Hors ligne';
+
+  @override
+  String settingsDialogDisableFeatureTitle(String feature) {
+    return 'Désactiver $feature ?';
+  }
+
+  @override
+  String get settingsDialogDisableFeatureMessage =>
+      'Vos données seront masquées mais pas supprimées.';
+
+  @override
+  String get settingsFeedbackLoadError =>
+      'Impossible de charger les préférences';
+
+  @override
+  String get settingsFeedbackSaveError =>
+      'Impossible de sauvegarder les préférences';
+
+  @override
+  String get settingsPageDataTitle => 'Données';
+
+  @override
+  String get settingsFormDataSource => 'Source de données';
+
+  @override
+  String get settingsValueDataSourceLocal => 'Local';
+
+  @override
+  String get settingsValueDataSourceServer => 'Serveur';
+
+  @override
+  String get settingsFormServerUrl => 'URL du serveur';
+
+  @override
+  String get settingsFormServerUrlRequired => 'L\'URL du serveur est requise';
+
+  @override
+  String get settingsFormServerUrlHttpsRequired =>
+      'L\'URL doit commencer par https://';
+
+  @override
+  String get settingsFeedbackServerUrlSaved => 'URL enregistrée';
+
+  @override
+  String get settingsFeedbackServerUnreachable => 'Serveur injoignable';
+
+  @override
+  String get settingsFeedbackServerTimeout => 'Délai de connexion dépassé';
+
+  @override
+  String get settingsFeedbackServerAccessDenied =>
+      'Accès refusé par le serveur';
+
+  @override
+  String get settingsFeedbackServerNotFound =>
+      'Endpoint introuvable — vérifiez l\'URL';
+
+  @override
+  String get settingsDialogChangeDataSourceTitle => 'Changer de source ?';
+
+  @override
+  String get settingsDialogChangeDataSourceMessage =>
+      'Les sources de données sont indépendantes. Les données de la source actuelle ne seront pas visibles après le changement.\n\nL\'application va redémarrer pour appliquer la nouvelle source.';
+
+  @override
+  String get notificationsValueSubscriptionDue => 'Échéance abonnement';
+
+  @override
+  String get notificationsValueDebtDue => 'Échéance dette';
+
+  @override
+  String get notificationsValueDebtReminder => 'Rappel dette';
+
+  @override
+  String get notificationsValueRecurringTransactionDue => 'Récurrence due';
+
+  @override
+  String get notificationsValueBudgetThreshold => 'Seuil budget atteint';
+
+  @override
+  String get notificationsValueBudgetExceeded => 'Budget dépassé';
+
+  @override
+  String get usersListProfile => 'Mon compte';
+
+  @override
+  String get usersListProfileHint => 'Profil, sécurité, déconnexion';
+
+  @override
+  String get usersListManageHint => 'Invitations et gestion des accès';
+
+  @override
+  String get usersListChangePassword => 'Changer le mot de passe';
+
+  @override
+  String get usersListExportJson => 'Exporter mes données (JSON)';
+
+  @override
+  String get usersListExportCsv => 'Exporter mes transactions (CSV)';
+
+  @override
+  String get usersPageAdminTitle => 'Utilisateurs';
+
+  @override
+  String get usersPageProfileTitle => 'Mon compte';
+
+  @override
+  String get usersPageIdentityTitle => 'Identité';
+
+  @override
+  String get usersPageSecurityTitle => 'Sécurité';
+
+  @override
+  String get usersPageDataTitle => 'Données';
+
+  @override
+  String get usersPageDangerZoneTitle => 'Zone de danger';
+
+  @override
+  String get usersFormEmailManagedHint => 'Géré par l\'admin';
+
+  @override
+  String get usersFormCurrentPassword => 'Mot de passe actuel';
+
+  @override
+  String get usersFormNewPassword => 'Nouveau mot de passe';
+
+  @override
+  String get usersFormConfirmNewPassword => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get usersFormPasswordMismatch =>
+      'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get usersFormDeleteAccountConfirm =>
+      'Je comprends que cette action est définitive';
+
+  @override
+  String get usersValueNameNotSet => 'Non renseigné';
+
+  @override
+  String get usersActionDeleteAccount => 'Supprimer mon compte';
+
+  @override
+  String get usersActionChangePhoto => 'Changer la photo';
+
+  @override
+  String get usersActionDeletePhoto => 'Supprimer la photo';
+
+  @override
+  String get usersActionEditPhoto => 'Modifier la photo';
+
+  @override
+  String get usersDialogDeleteAccountMessage =>
+      'Votre compte sera désactivé. Vous ne pourrez plus vous connecter avec ces identifiants. Vos données restent conservées en base pour traçabilité.';
+
+  @override
+  String get usersFeedbackProfileLoadError => 'Impossible de charger le profil';
+
+  @override
+  String get usersFeedbackNameSaveError =>
+      'Impossible de sauvegarder le nom. Veuillez réessayer.';
+
+  @override
+  String get usersFeedbackExportJsonError =>
+      'Erreur lors de l\'export JSON. Veuillez réessayer.';
+
+  @override
+  String get usersFeedbackExportCsvError =>
+      'Erreur lors de l\'export CSV. Veuillez réessayer.';
+
+  @override
+  String get usersFeedbackDownloading => 'Téléchargement en cours…';
+
+  @override
+  String get usersFeedbackAvatarUploadError =>
+      'Impossible d\'uploader la photo. Veuillez réessayer.';
+
+  @override
+  String get usersFeedbackPasswordChanged => 'Mot de passe modifié avec succès';
+
+  @override
+  String get usersFeedbackPasswordChangeError =>
+      'Erreur lors du changement de mot de passe';
+
+  @override
+  String get usersFeedbackDeleteAccountError =>
+      'Erreur lors de la suppression. Veuillez réessayer.';
+
+  @override
+  String get errorsApiFileTooLarge =>
+      'Fichier trop volumineux. La taille maximale est 2 MB.';
+
+  @override
+  String get errorsApiInvalidImageFormat =>
+      'Seuls les formats JPG et PNG sont acceptés.';
 }

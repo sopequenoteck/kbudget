@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/user_profile/domain/models/delete_account_
 import 'package:k_budget/src/features/user_profile/domain/repositories/user_profile_repository.dart';
 import 'package:k_budget/src/features/user_profile/presentation/screens/profile_settings_screen.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -101,6 +102,26 @@ class _SlowExportRepository extends _MockUserProfileRepository {
   }
 }
 
+/// Repository dont les exports echouent.
+class _FailingExportRepository extends _MockUserProfileRepository {
+  @override
+  Future<File> exportJson() async => throw Exception('Network error');
+
+  @override
+  Future<File> exportCsv() async => throw Exception('Network error');
+}
+
+/// Notifier dont le chargement du profil echoue.
+class _FailingProfileNotifier extends UserProfileNotifier {
+  int loads = 0;
+
+  @override
+  Future<User> build() async => throw Exception('Socket closed');
+
+  @override
+  Future<void> loadProfile() async => loads++;
+}
+
 /// Repository avec callback de tracking.
 class _TrackingRepository extends _MockUserProfileRepository {
   final void Function(String name)? onUpdateName;
@@ -132,6 +153,9 @@ Widget _buildScreen({
       ),
     ],
     child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       theme: AppTheme.light,
       home: const ProfileSettingsScreen(),
     ),
@@ -204,7 +228,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('Géré par l\'administrateur'), findsOneWidget);
+      expect(find.text("Géré par l'admin"), findsOneWidget);
     });
 
     testWidgets('should_showDataSection_when_userLoaded', (tester) async {
@@ -380,9 +404,70 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('Impossible de mettre à jour le nom'),
+        find.text('Impossible de sauvegarder le nom. Veuillez réessayer.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('should_showExportJsonError_when_exportFails', (tester) async {
+      _setPhoneViewport(tester);
+      await tester.pumpWidget(
+        _buildScreen(repository: _FailingExportRepository()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Exporter mes données (JSON)'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text("Erreur lors de l'export JSON. Veuillez réessayer."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('should_showExportCsvError_when_exportFails', (tester) async {
+      _setPhoneViewport(tester);
+      await tester.pumpWidget(
+        _buildScreen(repository: _FailingExportRepository()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Exporter mes transactions (CSV)'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text("Erreur lors de l'export CSV. Veuillez réessayer."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('should_showLoadErrorWithoutDetail_when_profileFails',
+        (tester) async {
+      _setPhoneViewport(tester);
+      final notifier = _FailingProfileNotifier();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            userProfileNotifierProvider.overrideWith(() => notifier),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            theme: AppTheme.light,
+            home: const ProfileSettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Impossible de charger le profil'), findsOneWidget);
+      expect(find.textContaining('Socket closed'), findsNothing);
+
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.loads, 1);
     });
   });
 }

@@ -8,9 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
-
 import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
@@ -18,6 +15,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
@@ -26,9 +24,11 @@ import 'package:k_budget/src/features/settings/application/text_scale_notifier.d
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_notifier.dart';
-import 'package:k_budget/src/domain/models/user.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // ---------------------------------------------------------------------------
 // HealthCheckResult — sealed union pour l'état du health check serveur
@@ -147,13 +147,15 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
 
   Future<void> _onToggleFeature(Feature feature, bool isCurrentlyEnabled) async {
     if (isCurrentlyEnabled && _hasExistingData(feature)) {
+      final l10n = AppLocalizations.of(context)!;
       final confirmed = await ConfirmDialogCustom.show(
         context: context,
         icon: PhosphorIconsRegular.warning,
-        title: 'Désactiver ${feature.label} ?',
-        message:
-            'Vos données seront masquées mais pas supprimées.',
-        confirmLabel: 'Désactiver',
+        title: l10n.settingsDialogDisableFeatureTitle(
+          _featureName(feature, l10n),
+        ),
+        message: l10n.settingsDialogDisableFeatureMessage,
+        confirmLabel: l10n.commonActionDisable,
         variant: ConfirmVariant.danger,
       );
       if (confirmed != true) return;
@@ -187,6 +189,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     final userAsync = ref.watch(userProfileNotifierProvider);
     final dataModeAsync = ref.watch(dataModeProvider);
     final isAdmin = userAsync.valueOrNull?.isAdmin ?? false;
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen(featureConfigNotifierProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
@@ -204,7 +207,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Réglages')),
+      appBar: AppBar(title: Text(l10n.commonNavSettings)),
       body: CustomScrollView(
         slivers: [
           // ----------------------------------------------------------------
@@ -229,30 +232,30 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _SettingsSectionLabel('Gestion'),
+                  _SettingsSectionLabel(l10n.settingsPageManagementTitle),
                   const SizedBox(height: AppSpacing.space2),
                   _SettingsRow(
                     icon: PhosphorIconsRegular.user,
                     iconBgColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                     iconColor: theme.colorScheme.primary,
-                    title: 'Mon compte',
-                    description: 'Nom, email, devise',
+                    title: l10n.usersListProfile,
+                    description: l10n.usersListProfileHint,
                     onTap: () => context.push('${RouteNames.settings}/${RouteNames.settingsProfile}'),
                   ),
                   _SettingsRow(
                     icon: PhosphorIconsRegular.bank,
                     iconBgColor: (ext?.incomeColor ?? AppColors.incomeDark).withValues(alpha: 0.15),
                     iconColor: ext?.incomeColor ?? AppColors.incomeDark,
-                    title: 'Comptes & Devises',
-                    description: 'Gérer les comptes et devises',
+                    title: l10n.settingsListAccounts,
+                    description: l10n.settingsListAccountsHint,
                     onTap: () => context.push('${RouteNames.settings}/${RouteNames.settingsAccounts}'),
                   ),
                   _SettingsRow(
                     icon: PhosphorIconsRegular.tag,
                     iconBgColor: theme.colorScheme.primary.withValues(alpha: 0.15),
                     iconColor: theme.colorScheme.primary,
-                    title: 'Catégories',
-                    description: 'Gérer les catégories',
+                    title: l10n.settingsListCategories,
+                    description: l10n.settingsListCategoriesHint,
                     onTap: () => context.push('${RouteNames.settings}/${RouteNames.settingsCategories}'),
                   ),
                 ],
@@ -271,14 +274,16 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: AppSpacing.space6),
-                    const _SettingsSectionLabel('Administration'),
+                    _SettingsSectionLabel(
+                      l10n.settingsPageAdministrationTitle,
+                    ),
                     const SizedBox(height: AppSpacing.space2),
                     _SettingsRow(
                       icon: PhosphorIconsRegular.users,
                       iconBgColor: (ext?.secondaryColor ?? AppColors.indigo500).withValues(alpha: 0.15),
                       iconColor: ext?.secondaryColor ?? AppColors.indigo500,
-                      title: 'Utilisateurs',
-                      description: 'Invitations et gestion des comptes',
+                      title: l10n.usersPageAdminTitle,
+                      description: l10n.usersListManageHint,
                       onTap: () => context.push(RouteNames.adminUsers),
                     ),
                   ],
@@ -296,10 +301,10 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.space6),
-                  const _SettingsSectionLabel('Apparence'),
+                  _SettingsSectionLabel(l10n.settingsPageAppearanceTitle),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    'Thème',
+                    l10n.settingsFormTheme,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -310,7 +315,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       Expanded(
                         child: _ThemeOption(
                           icon: PhosphorIconsRegular.sun,
-                          label: 'Clair',
+                          label: l10n.settingsValueThemeLight,
                           isSelected: themeMode == ThemeMode.light,
                           onTap: () => ref
                               .read(themeNotifierProvider.notifier)
@@ -321,7 +326,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       Expanded(
                         child: _ThemeOption(
                           icon: PhosphorIconsRegular.moon,
-                          label: 'Sombre',
+                          label: l10n.settingsValueThemeDark,
                           isSelected: themeMode == ThemeMode.dark,
                           onTap: () => ref
                               .read(themeNotifierProvider.notifier)
@@ -332,7 +337,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       Expanded(
                         child: _ThemeOption(
                           icon: PhosphorIconsRegular.circleHalf,
-                          label: 'Auto',
+                          label: l10n.settingsValueThemeAuto,
                           isSelected: themeMode == ThemeMode.system,
                           onTap: () => ref
                               .read(themeNotifierProvider.notifier)
@@ -343,7 +348,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   Text(
-                    'Taille du texte',
+                    l10n.settingsFormTextScale,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -375,7 +380,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Text(
-                      'Voici un aperçu du texte.',
+                      l10n.settingsListTextScalePreview,
                       style: TextStyle(
                         fontSize:
                             AppTypography.sizeMd * textScale.scaleFactor,
@@ -398,7 +403,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.space6),
-                  const _SettingsSectionLabel('Navigation'),
+                  _SettingsSectionLabel(l10n.settingsPageNavigationTitle),
                   const SizedBox(height: AppSpacing.space2),
 
                   // Items verrouillés
@@ -408,12 +413,12 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       children: [
                         _NavFeatureLockedItem(
                           icon: PhosphorIconsRegular.house,
-                          label: 'Accueil',
+                          label: l10n.commonNavHome,
                           theme: theme,
                         ),
                         _NavFeatureLockedItem(
                           icon: PhosphorIconsRegular.receipt,
-                          label: 'Transactions',
+                          label: l10n.commonNavTransactions,
                           theme: theme,
                         ),
                       ],
@@ -481,7 +486,9 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.space6),
-                  const _SettingsSectionLabel('Notifications'),
+                  _SettingsSectionLabel(
+                    l10n.settingsPageNotificationsTitle,
+                  ),
                   const SizedBox(height: AppSpacing.space2),
                   _buildNotificationToggles(context, featureState),
                 ],
@@ -573,6 +580,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     FeatureConfigState featureState,
   ) {
     final notifier = ref.read(featureConfigNotifierProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
     final enabledNotifTypes = featureState.enabledNotificationTypes;
 
     // Types filtrés selon les features actives
@@ -591,7 +599,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
       children: [
         ...visibleTypes.map((type) => SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(type.label),
+              title: Text(_notificationTypeName(type, l10n)),
               secondary: PhosphorIcon(type.icon, size: 22),
               value: enabledNotifTypes.contains(type),
               onChanged: (value) {
@@ -605,7 +613,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
               },
             )),
         const SizedBox(height: AppSpacing.space4),
-        const _SettingsSectionLabel('Fuseau horaire'),
+        _SettingsSectionLabel(l10n.settingsPageTimezoneTitle),
         const SizedBox(height: AppSpacing.space2),
         _TimezoneDropdown(
           current: featureState.timezone,
@@ -619,11 +627,13 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     final theme = Theme.of(context);
     final ext = Theme.of(context).extension<AppThemeExtension>();
     final version = _packageInfo?.version ?? '...';
+    final l10n = AppLocalizations.of(context)!;
+    final versionLabel = l10n.settingsListVersion(version);
 
     if (mode == DataMode.local) {
       return Center(
         child: Text(
-          'K-Budget v$version · Mode local',
+          '$versionLabel · ${l10n.onboardingValueLocalMode}',
           style: TextStyle(
             fontSize: AppTypography.sizeXs,
             color: theme.colorScheme.onSurfaceVariant,
@@ -635,9 +645,10 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
 
     // Mode server — afficher statut health check
     final statusText = switch (_healthResult) {
-      _Checking() => 'Vérification…',
-      _Online(responseTimeMs: final ms) => 'En ligne · ${ms}ms',
-      _Offline() => 'Hors ligne',
+      _Checking() => l10n.settingsValueChecking,
+      _Online(responseTimeMs: final ms) =>
+        '${l10n.settingsValueOnline} · ${ms}ms',
+      _Offline() => l10n.settingsValueOffline,
     };
     final statusColor = switch (_healthResult) {
       _Checking() => theme.colorScheme.onSurfaceVariant,
@@ -647,7 +658,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
 
     return Center(
       child: Text(
-        'K-Budget v$version · $statusText',
+        '$versionLabel · $statusText',
         style: TextStyle(
           fontSize: AppTypography.sizeXs,
           color: statusColor,
@@ -864,7 +875,7 @@ class _ScaleOption extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.space1),
             Text(
-              scale.label,
+              _textScaleName(scale, AppLocalizations.of(context)!),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight:
@@ -947,7 +958,7 @@ class _NavFeatureActiveItem extends StatelessWidget {
           size: 20,
         ),
       ),
-      title: Text(feature.label),
+      title: Text(_featureName(feature, AppLocalizations.of(context)!)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -992,7 +1003,7 @@ class _NavFeatureDisabledItem extends StatelessWidget {
         ),
       ),
       title: Text(
-        feature.label,
+        _featureName(feature, AppLocalizations.of(context)!),
         style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
       ),
       trailing: Switch(
@@ -1031,12 +1042,13 @@ class _TimezoneDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     // Ensure current value is in the list to avoid assertion errors
     final safeValue = _timezones.contains(current) ? current : _timezones.first;
+    final l10n = AppLocalizations.of(context)!;
 
     return DropdownButtonFormField<String>(
       initialValue: safeValue,
-      decoration: const InputDecoration(
-        labelText: 'Fuseau horaire',
-        helperText: 'Pour le calcul des rappels J-1',
+      decoration: InputDecoration(
+        labelText: l10n.settingsPageTimezoneTitle,
+        helperText: l10n.settingsFormTimezoneHint,
       ),
       items: _timezones
           .map((tz) => DropdownMenuItem(value: tz, child: Text(tz)))
@@ -1047,3 +1059,30 @@ class _TimezoneDropdown extends StatelessWidget {
     );
   }
 }
+
+String _textScaleName(TextScale scale, AppLocalizations l10n) =>
+    switch (scale) {
+      TextScale.small => l10n.settingsValueTextScaleSmall,
+      TextScale.medium => l10n.settingsValueTextScaleMedium,
+      TextScale.large => l10n.settingsValueTextScaleLarge,
+    };
+
+String _notificationTypeName(NotificationType type, AppLocalizations l10n) =>
+    switch (type) {
+      NotificationType.subscriptionDue =>
+        l10n.notificationsValueSubscriptionDue,
+      NotificationType.debtDue => l10n.notificationsValueDebtDue,
+      NotificationType.debtReminder => l10n.notificationsValueDebtReminder,
+      NotificationType.recurringTransactionDue =>
+        l10n.notificationsValueRecurringTransactionDue,
+      NotificationType.budgetThreshold =>
+        l10n.notificationsValueBudgetThreshold,
+      NotificationType.budgetExceeded => l10n.notificationsValueBudgetExceeded,
+    };
+
+String _featureName(Feature feature, AppLocalizations l10n) =>
+    switch (feature) {
+      Feature.subscriptions => l10n.commonNavSubscriptions,
+      Feature.debts => l10n.commonNavDebts,
+      Feature.budgets => l10n.commonNavBudgets,
+    };
