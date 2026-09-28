@@ -86,8 +86,9 @@ class SelectPicker extends FormField<String?> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('placeholder', placeholder));
-    properties.add(StringProperty('emptyMessage', emptyMessage));
+    properties
+      ..add(StringProperty('placeholder', placeholder))
+      ..add(StringProperty('emptyMessage', emptyMessage));
   }
 }
 

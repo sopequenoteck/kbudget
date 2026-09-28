@@ -5,7 +5,7 @@ import 'package:k_budget/src/utils/form_validators.dart';
 void main() {
   final l10n = AppLocalizationsFr();
 
-  group('FormValidators.requiredText', () {
+  group('validateRequiredText', () {
     for (final (label, value, expected) in [
       ('null', null, l10n.commonValidationRequired),
       ('empty', '', l10n.commonValidationRequired),
@@ -16,14 +16,14 @@ void main() {
     ]) {
       test('should_return_expected_message_when_value_is_$label', () {
         expect(
-          FormValidators.requiredText(value, l10n, maxLength: 10),
+          validateRequiredText(value, l10n, maxLength: 10),
           expected,
         );
       });
     }
   });
 
-  group('FormValidators.positiveAmount', () {
+  group('validatePositiveAmount', () {
     for (final (label, value, expected) in [
       ('null', null, l10n.commonValidationRequired),
       ('empty', '', l10n.commonValidationRequired),
@@ -35,12 +35,12 @@ void main() {
       ('decimal_point_with_spaces', ' 3.2 ', null),
     ]) {
       test('should_return_expected_message_when_value_is_$label', () {
-        expect(FormValidators.positiveAmount(value, l10n), expected);
+        expect(validatePositiveAmount(value, l10n), expected);
       });
     }
   });
 
-  group('FormValidators.email', () {
+  group('validateEmail', () {
     for (final (label, value, expected) in [
       ('null', null, l10n.authFormEmailRequired),
       ('empty', '', l10n.authFormEmailRequired),
@@ -49,12 +49,12 @@ void main() {
       ('valid', 'alex@example.com', null),
     ]) {
       test('should_return_expected_message_when_value_is_$label', () {
-        expect(FormValidators.email(value, l10n), expected);
+        expect(validateEmail(value, l10n), expected);
       });
     }
   });
 
-  group('FormValidators.displayName', () {
+  group('validateDisplayName', () {
     for (final (label, value, expected) in [
       ('null', null, l10n.authFormDisplayNameRequired),
       ('blank', '  ', l10n.authFormDisplayNameRequired),
@@ -63,7 +63,7 @@ void main() {
       ('filled', 'Alex Morgan', null),
     ]) {
       test('should_return_expected_message_when_value_is_$label', () {
-        expect(FormValidators.displayName(value, l10n), expected);
+        expect(validateDisplayName(value, l10n), expected);
       });
     }
   });

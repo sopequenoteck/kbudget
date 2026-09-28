@@ -126,13 +126,13 @@ class _DebtFormState extends ConsumerState<DebtForm> {
 
   // --- Validation ---
 
-  String? _validatePersonne() => FormValidators.requiredText(
+  String? _validatePersonne() => validateRequiredText(
         _personneController.text,
         AppLocalizations.of(context)!,
         maxLength: 255,
       );
 
-  String? _validateMontant() => FormValidators.positiveAmount(
+  String? _validateMontant() => validatePositiveAmount(
         _montantController.text,
         AppLocalizations.of(context)!,
       );

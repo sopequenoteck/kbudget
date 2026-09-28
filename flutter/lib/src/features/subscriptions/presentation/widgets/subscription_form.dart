@@ -120,13 +120,13 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
 
   // --- Validation ---
 
-  String? _validateNom() => FormValidators.requiredText(
+  String? _validateNom() => validateRequiredText(
         _nomController.text,
         AppLocalizations.of(context)!,
         maxLength: 255,
       );
 
-  String? _validateMontant() => FormValidators.positiveAmount(
+  String? _validateMontant() => validatePositiveAmount(
         _montantController.text,
         AppLocalizations.of(context)!,
       );

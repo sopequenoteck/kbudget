@@ -127,13 +127,13 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   // --- Validation ---
 
-  String? _validateLibelle() => FormValidators.requiredText(
+  String? _validateLibelle() => validateRequiredText(
         _libelleController.text,
         AppLocalizations.of(context)!,
         maxLength: 255,
       );
 
-  String? _validateMontant() => FormValidators.positiveAmount(
+  String? _validateMontant() => validatePositiveAmount(
         _montantController.text,
         AppLocalizations.of(context)!,
       );
