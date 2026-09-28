@@ -40,7 +40,7 @@ class PaymentHistorySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              l10n.subscriptionPaymentHistory,
+              l10n.subscriptionsDetailHistory,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -70,7 +70,7 @@ class PaymentHistorySection extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    l10n.subscriptionPayments(total.paymentCount),
+                    l10n.subscriptionsDetailPaymentCount(total.paymentCount),
                     style: TextStyle(
                       fontSize: AppTypography.sizeXs,
                       color: colorScheme.onSurfaceVariant,
@@ -113,7 +113,7 @@ class PaymentHistorySection extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.space2),
                       Text(
-                        l10n.subscriptionNoPayments,
+                        l10n.commonEmptyNoPayments,
                         style: TextStyle(
                           fontSize: AppTypography.sizeSm,
                           color: colorScheme.onSurfaceVariant,

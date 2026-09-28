@@ -5,14 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
+import 'package:k_budget/src/common_widgets/account_select_expand.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
 import 'package:k_budget/src/common_widgets/bsheet_delete_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_meta_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_type_toggle.dart';
 import 'package:k_budget/src/common_widgets/category_select_expand.dart';
+import 'package:k_budget/src/common_widgets/currency_select_expand.dart';
 import 'package:k_budget/src/common_widgets/inline_date_picker.dart';
-import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -23,9 +23,8 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
-import 'package:k_budget/src/utils/amount_formatter.dart';
-import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -64,7 +63,6 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
   bool _isCreatingCategory = false;
   late Frequency _selectedFrequency;
 
-  static final _dateFormat = DateFormat('dd/MM/yyyy');
   static final _isoFormat = DateFormat('yyyy-MM-dd');
 
   static const _frequencies = [
@@ -180,8 +178,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDeleteConfirmDialog(
       context: context,
-      title: l10n.subscriptionFormDeleteConfirmTitle,
-      message: l10n.subscriptionFormDeleteConfirmMessage,
+      title: l10n.subscriptionsDialogDeleteTitle,
+      message: l10n.subscriptionsDialogDeleteMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {
@@ -238,76 +236,29 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
     };
   }
 
-  Widget _buildAccountExpand(List<Account> accounts) {
-    final accountItems = accounts
-        .where((a) {
-          if (a.actif) return true;
-          if (_isEditMode && a.id == widget.subscription?.accountId) return true;
-          return false;
-        })
-        .map(
-          (a) => SelectPickerItem(
-            id: a.id,
-            label: a.nom,
-            icon: a.icone,
-            color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(
-              a.solde,
-              locale: ref.watch(intlLocaleProvider),
-            ),
-            imageUrl: resolveBankAssetPath(a),
-          ),
-        )
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: SelectPicker(
-        items: accountItems,
+  Widget _buildAccountExpand(List<Account> accounts) => AccountSelectExpand(
+        accounts: accounts,
         selectedId: _selectedAccountId,
+        keptAccountId: _isEditMode ? widget.subscription?.accountId : null,
+        label: AppLocalizations.of(context)!.subscriptionsFormAccount,
         onChanged: (id) => setState(() {
           _selectedAccountId = id;
           // Réinitialiser la devise forcée quand un compte est sélectionné
-          if (id != null) _forcedCurrency = null;
+          if (id != null) {
+            _forcedCurrency = null;
+          }
           _expandedSection = null;
         }),
-        label: AppLocalizations.of(context)!.subscriptionsFormAccount,
-      ),
-    );
-  }
+      );
 
-  Widget _buildDeviseExpand() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: SelectPicker(
-        items: Currency.values
-            .map(
-              (c) => SelectPickerItem(
-                id: c.name,
-                label: '${c.displayName} (${c.symbol})',
-              ),
-            )
-            .toList(),
-        selectedId: _forcedCurrency?.name,
-        onChanged: (id) {
-          if (id != null) {
-            setState(() {
-              _forcedCurrency =
-                  Currency.values.firstWhere((c) => c.name == id);
-              _expandedSection = null;
-            });
-          }
-        },
-        label: 'Devise',
-      ),
-    );
-  }
+  Widget _buildDeviseExpand() => CurrencySelectExpand(
+        label: AppLocalizations.of(context)!.subscriptionsFormCurrency,
+        selected: _forcedCurrency,
+        onSelected: (currency) => setState(() {
+          _forcedCurrency = currency;
+          _expandedSection = null;
+        }),
+      );
 
   // --- Pills meta ---
 
@@ -316,6 +267,8 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
     List<Account> accounts,
   ) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final dateFormat = DateFormat.yMd(ref.watch(intlLocaleProvider));
 
     final selectedCategory = _selectedCategoryId != null
         ? categories.where((c) => c.id == _selectedCategoryId).firstOrNull
@@ -326,26 +279,28 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
 
     return [
       BSheetMetaPill(
-        label: _dateFormat.format(_selectedDate),
+        label: dateFormat.format(_selectedDate),
         isActive: _expandedSection == 'date',
         onTap: () => _toggleSection('date'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? 'Catégorie',
+        label: selectedCategory?.nom ?? l10n.subscriptionsFormCategory,
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedAccount?.nom ?? 'Compte',
+        label: selectedAccount?.nom ?? l10n.subscriptionsFormAccount,
         isActive: _expandedSection == 'compte',
         onTap: () => _toggleSection('compte'),
         colorScheme: cs,
       ),
       if (_selectedAccountId == null)
         BSheetMetaPill(
-          label: _forcedCurrency?.displayName ?? 'Devise',
+          label: _forcedCurrency == null
+              ? l10n.subscriptionsFormCurrencyPlaceholder
+              : currencyName(_forcedCurrency!, l10n),
           isActive: _expandedSection == 'devise',
           onTap: () => _toggleSection('devise'),
           colorScheme: cs,
@@ -375,9 +330,15 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
         if (!didPop) setState(() => _expandedSection = null);
       },
       child: BottomSheet4RowsWidget(
-        title: _isEditMode ? 'Modifier abonnement' : 'Nouvel abonnement',
+        title: _isEditMode
+            ? l10n.subscriptionsDialogEditTitle
+            : l10n.subscriptionsDialogCreateTitle,
         topTrailing: BSheetTypeToggle(
-          labels: const ['Hebdo', 'Mensuel', 'Annuel'],
+          labels: [
+            l10n.subscriptionsValueWeekly,
+            l10n.subscriptionsValueMonthly,
+            l10n.subscriptionsValueYearly,
+          ],
           selectedIndex:
               _frequencies.indexOf(_selectedFrequency).clamp(0, 2),
           onChanged: (i) =>

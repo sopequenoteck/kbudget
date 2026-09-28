@@ -390,17 +390,17 @@ abstract class AppLocalizations {
   /// **'Active'**
   String get commonValueActive;
 
-  /// No description provided for @subscriptionFormDeleteConfirmTitle.
+  /// No description provided for @subscriptionsDialogDeleteTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete subscription'**
-  String get subscriptionFormDeleteConfirmTitle;
+  String get subscriptionsDialogDeleteTitle;
 
-  /// No description provided for @subscriptionFormDeleteConfirmMessage.
+  /// No description provided for @subscriptionsDialogDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this subscription? This action is irreversible.'**
-  String get subscriptionFormDeleteConfirmMessage;
+  /// **'Are you sure you want to delete this subscription?'**
+  String get subscriptionsDialogDeleteMessage;
 
   /// No description provided for @subscriptionsEmptyTitle.
   ///
@@ -420,11 +420,11 @@ abstract class AppLocalizations {
   /// **'/year'**
   String get subscriptionsValuePerYear;
 
-  /// No description provided for @subscriptionNextRenewal.
+  /// No description provided for @subscriptionsListNextRenewal.
   ///
   /// In en, this message translates to:
   /// **'Next: {date}'**
-  String subscriptionNextRenewal(String date);
+  String subscriptionsListNextRenewal(String date);
 
   /// No description provided for @commonValueInactive.
   ///
@@ -444,23 +444,17 @@ abstract class AppLocalizations {
   /// **'Payment recorded'**
   String get subscriptionsFeedbackPaid;
 
-  /// No description provided for @subscriptionPaymentHistory.
+  /// No description provided for @subscriptionsDetailHistory.
   ///
   /// In en, this message translates to:
-  /// **'Payment history'**
-  String get subscriptionPaymentHistory;
+  /// **'History'**
+  String get subscriptionsDetailHistory;
 
-  /// No description provided for @subscriptionNoPayments.
+  /// No description provided for @subscriptionsDetailPaymentCount.
   ///
   /// In en, this message translates to:
-  /// **'No payments'**
-  String get subscriptionNoPayments;
-
-  /// No description provided for @subscriptionPayments.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} payments'**
-  String subscriptionPayments(int count);
+  /// **'{count, plural, one {{count} payment} other {{count} payments}}'**
+  String subscriptionsDetailPaymentCount(int count);
 
   /// No description provided for @debtsFormPersonPlaceholder.
   ///
@@ -468,23 +462,17 @@ abstract class AppLocalizations {
   /// **'Person'**
   String get debtsFormPersonPlaceholder;
 
-  /// No description provided for @debtFormDeleteConfirmTitle.
+  /// No description provided for @debtsDialogDeleteFormTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete debt'**
-  String get debtFormDeleteConfirmTitle;
+  String get debtsDialogDeleteFormTitle;
 
-  /// No description provided for @debtFormDeleteConfirmMessage.
+  /// No description provided for @debtsDialogDeleteFormMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this debt? This action is irreversible.'**
-  String get debtFormDeleteConfirmMessage;
-
-  /// No description provided for @debtFormAccountPicker.
-  ///
-  /// In en, this message translates to:
-  /// **'Bank account'**
-  String get debtFormAccountPicker;
+  /// **'Are you sure you want to delete this debt?'**
+  String get debtsDialogDeleteFormMessage;
 
   /// No description provided for @debtsEmptyTitle.
   ///
@@ -498,17 +486,17 @@ abstract class AppLocalizations {
   /// **'Repaid'**
   String get debtsValueRepaid;
 
-  /// No description provided for @debtDetailInitialAmount.
+  /// No description provided for @debtsDetailInitialAmount.
   ///
   /// In en, this message translates to:
   /// **'Initial amount'**
-  String get debtDetailInitialAmount;
+  String get debtsDetailInitialAmount;
 
-  /// No description provided for @debtDetailRemainingAmount.
+  /// No description provided for @debtsDetailRemainingAmount.
   ///
   /// In en, this message translates to:
   /// **'Remaining amount'**
-  String get debtDetailRemainingAmount;
+  String get debtsDetailRemainingAmount;
 
   /// No description provided for @debtsActionRepay.
   ///
@@ -522,23 +510,23 @@ abstract class AppLocalizations {
   /// **'Snooze the reminder'**
   String get debtsDialogSnoozeTitle;
 
-  /// No description provided for @debtDetailProgress.
+  /// No description provided for @debtsDetailProgress.
   ///
   /// In en, this message translates to:
   /// **'Progress'**
-  String get debtDetailProgress;
+  String get debtsDetailProgress;
 
-  /// No description provided for @debtDetailDate.
+  /// No description provided for @debtsDetailDate.
   ///
   /// In en, this message translates to:
   /// **'Date'**
-  String get debtDetailDate;
+  String get debtsDetailDate;
 
-  /// No description provided for @debtDetailCurrency.
+  /// No description provided for @debtsFormCurrency.
   ///
   /// In en, this message translates to:
   /// **'Currency'**
-  String get debtDetailCurrency;
+  String get debtsFormCurrency;
 
   /// No description provided for @debtsFormAccount.
   ///
@@ -546,17 +534,17 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get debtsFormAccount;
 
-  /// No description provided for @debtDetailAccountDeleted.
+  /// No description provided for @debtsDetailAccountDeleted.
   ///
   /// In en, this message translates to:
   /// **'Account deleted'**
-  String get debtDetailAccountDeleted;
+  String get debtsDetailAccountDeleted;
 
-  /// No description provided for @debtDetailDueDate.
+  /// No description provided for @debtsFormDueDate.
   ///
   /// In en, this message translates to:
   /// **'Due date'**
-  String get debtDetailDueDate;
+  String get debtsFormDueDate;
 
   /// No description provided for @debtsFormCategory.
   ///
@@ -564,11 +552,11 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get debtsFormCategory;
 
-  /// No description provided for @debtDetailIncludedInBalance.
+  /// No description provided for @debtsDetailIncludedInBalance.
   ///
   /// In en, this message translates to:
   /// **'Included in balance'**
-  String get debtDetailIncludedInBalance;
+  String get debtsDetailIncludedInBalance;
 
   /// No description provided for @debtsFormReminderAria.
   ///
@@ -582,11 +570,11 @@ abstract class AppLocalizations {
   /// **'Payments'**
   String get debtsDetailPayments;
 
-  /// No description provided for @debtDetailTotalRepaid.
+  /// No description provided for @debtsDetailTotalRepaid.
   ///
   /// In en, this message translates to:
   /// **'Total repaid'**
-  String get debtDetailTotalRepaid;
+  String get debtsDetailTotalRepaid;
 
   /// No description provided for @commonEmptyNoPayments.
   ///
@@ -594,11 +582,11 @@ abstract class AppLocalizations {
   /// **'No payments recorded'**
   String get commonEmptyNoPayments;
 
-  /// No description provided for @debtDetailPaymentsError.
+  /// No description provided for @debtsFeedbackPaymentsLoadError.
   ///
   /// In en, this message translates to:
   /// **'Unable to load payments'**
-  String get debtDetailPaymentsError;
+  String get debtsFeedbackPaymentsLoadError;
 
   /// No description provided for @debtsValueBorrowed.
   ///
@@ -612,35 +600,29 @@ abstract class AppLocalizations {
   /// **'Lent'**
   String get debtsValueLent;
 
-  /// No description provided for @repayAccountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Source account'**
-  String get repayAccountLabel;
-
   /// No description provided for @debtsFormAccountPlaceholder.
   ///
   /// In en, this message translates to:
   /// **'Select an account'**
   String get debtsFormAccountPlaceholder;
 
-  /// No description provided for @repayAccountRequired.
+  /// No description provided for @debtsFormAccountRequired.
   ///
   /// In en, this message translates to:
   /// **'Account required'**
-  String get repayAccountRequired;
+  String get debtsFormAccountRequired;
 
-  /// No description provided for @repayAmountLabel.
+  /// No description provided for @debtsFormAmount.
   ///
   /// In en, this message translates to:
   /// **'Amount'**
-  String get repayAmountLabel;
+  String get debtsFormAmount;
 
-  /// No description provided for @repayAmountRequired.
+  /// No description provided for @debtsFormAmountRequired.
   ///
   /// In en, this message translates to:
   /// **'Amount required'**
-  String get repayAmountRequired;
+  String get debtsFormAmountRequired;
 
   /// No description provided for @debtsFeedbackAmountInvalid.
   ///
@@ -648,23 +630,23 @@ abstract class AppLocalizations {
   /// **'Invalid amount'**
   String get debtsFeedbackAmountInvalid;
 
-  /// No description provided for @repayAmountMax.
+  /// No description provided for @debtsFormAmountMax.
   ///
   /// In en, this message translates to:
   /// **'Maximum: {amount}'**
-  String repayAmountMax(String amount);
+  String debtsFormAmountMax(String amount);
 
-  /// No description provided for @repayNoAccounts.
+  /// No description provided for @debtsEmptyNoAccounts.
   ///
   /// In en, this message translates to:
   /// **'No active accounts. Create an account in settings.'**
-  String get repayNoAccounts;
+  String get debtsEmptyNoAccounts;
 
-  /// No description provided for @repaySuccess.
+  /// No description provided for @debtsFeedbackRepaymentSaved.
   ///
   /// In en, this message translates to:
   /// **'Repayment recorded'**
-  String get repaySuccess;
+  String get debtsFeedbackRepaymentSaved;
 
   /// No description provided for @debtsFeedbackRepayError.
   ///
@@ -672,23 +654,23 @@ abstract class AppLocalizations {
   /// **'Repayment failed'**
   String get debtsFeedbackRepayError;
 
-  /// No description provided for @snoozeDateLabel.
+  /// No description provided for @debtsFormReminderDate.
   ///
   /// In en, this message translates to:
-  /// **'New date'**
-  String get snoozeDateLabel;
+  /// **'Reminder date'**
+  String get debtsFormReminderDate;
 
-  /// No description provided for @snoozeTimeLabel.
+  /// No description provided for @debtsFormReminderTime.
   ///
   /// In en, this message translates to:
-  /// **'Time'**
-  String get snoozeTimeLabel;
+  /// **'Reminder time'**
+  String get debtsFormReminderTime;
 
-  /// No description provided for @snoozeDateFutureRequired.
+  /// No description provided for @debtsDialogReminderDatePast.
   ///
   /// In en, this message translates to:
-  /// **'The date must be in the future'**
-  String get snoozeDateFutureRequired;
+  /// **'The date cannot be in the past'**
+  String get debtsDialogReminderDatePast;
 
   /// No description provided for @debtsFeedbackSnoozed.
   ///
@@ -696,11 +678,11 @@ abstract class AppLocalizations {
   /// **'Reminder snoozed'**
   String get debtsFeedbackSnoozed;
 
-  /// No description provided for @snoozeError.
+  /// No description provided for @debtsFeedbackSnoozeError.
   ///
   /// In en, this message translates to:
   /// **'Failed to snooze the reminder'**
-  String get snoozeError;
+  String get debtsFeedbackSnoozeError;
 
   /// No description provided for @debtsActionSnooze.
   ///
@@ -708,17 +690,17 @@ abstract class AppLocalizations {
   /// **'Snooze'**
   String get debtsActionSnooze;
 
-  /// No description provided for @yes.
+  /// No description provided for @commonValueYes.
   ///
   /// In en, this message translates to:
   /// **'Yes'**
-  String get yes;
+  String get commonValueYes;
 
-  /// No description provided for @no.
+  /// No description provided for @commonValueNo.
   ///
   /// In en, this message translates to:
   /// **'No'**
-  String get no;
+  String get commonValueNo;
 
   /// No description provided for @transactionsFormTransferFromPlaceholder.
   ///
@@ -2003,6 +1985,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'~{amount} /month'**
   String recurringSummaryMonthlyExpenses(String amount);
+
+  /// No description provided for @commonNavDebts.
+  ///
+  /// In en, this message translates to:
+  /// **'Debts'**
+  String get commonNavDebts;
+
+  /// No description provided for @commonNavSubscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get commonNavSubscriptions;
+
+  /// No description provided for @debtsSummaryNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net balance'**
+  String get debtsSummaryNet;
+
+  /// No description provided for @debtsSummaryOutstandingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} outstanding} other {{count} outstanding}}'**
+  String debtsSummaryOutstandingCount(int count);
+
+  /// No description provided for @debtsSummaryLentTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} lent'**
+  String debtsSummaryLentTotal(String amount);
+
+  /// No description provided for @debtsSummaryBorrowedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} borrowed'**
+  String debtsSummaryBorrowedTotal(String amount);
+
+  /// No description provided for @debtsListOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get debtsListOverdue;
+
+  /// No description provided for @debtsListThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get debtsListThisWeek;
+
+  /// No description provided for @debtsListThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get debtsListThisMonth;
+
+  /// No description provided for @debtsListLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get debtsListLater;
+
+  /// No description provided for @debtsListNoDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get debtsListNoDueDate;
+
+  /// No description provided for @debtsListRepaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Repaid'**
+  String get debtsListRepaid;
+
+  /// No description provided for @debtsDialogCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New debt'**
+  String get debtsDialogCreateTitle;
+
+  /// No description provided for @debtsDialogEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit debt'**
+  String get debtsDialogEditTitle;
+
+  /// No description provided for @debtsDialogRepayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repayment'**
+  String get debtsDialogRepayTitle;
+
+  /// No description provided for @debtsValueNotRepaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not repaid'**
+  String get debtsValueNotRepaid;
+
+  /// No description provided for @debtsFormCurrencyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Default currency'**
+  String get debtsFormCurrencyPlaceholder;
+
+  /// No description provided for @debtsFormReminderSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {date} at {time}'**
+  String debtsFormReminderSummary(String date, String time);
+
+  /// No description provided for @debtsDetailReminderAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} at {time}'**
+  String debtsDetailReminderAt(String date, String time);
+
+  /// No description provided for @debtsActionClearReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the reminder'**
+  String get debtsActionClearReminder;
+
+  /// No description provided for @subscriptionsSummaryMonthlyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly total'**
+  String get subscriptionsSummaryMonthlyTotal;
+
+  /// No description provided for @subscriptionsSummaryActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} subscription} other {{count} subscriptions}}'**
+  String subscriptionsSummaryActiveCount(int count);
+
+  /// No description provided for @subscriptionsListActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} active} other {{count} active}}'**
+  String subscriptionsListActiveCount(int count);
+
+  /// No description provided for @subscriptionsListActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get subscriptionsListActive;
+
+  /// No description provided for @subscriptionsListInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get subscriptionsListInactive;
+
+  /// No description provided for @subscriptionsValuePerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'/week'**
+  String get subscriptionsValuePerWeek;
+
+  /// No description provided for @subscriptionsValueWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get subscriptionsValueWeekly;
+
+  /// No description provided for @subscriptionsValueMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get subscriptionsValueMonthly;
+
+  /// No description provided for @subscriptionsValueYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get subscriptionsValueYearly;
+
+  /// No description provided for @subscriptionsDialogCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New subscription'**
+  String get subscriptionsDialogCreateTitle;
+
+  /// No description provided for @subscriptionsDialogEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit subscription'**
+  String get subscriptionsDialogEditTitle;
+
+  /// No description provided for @subscriptionsFormCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get subscriptionsFormCategory;
+
+  /// No description provided for @subscriptionsFormCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get subscriptionsFormCurrency;
+
+  /// No description provided for @subscriptionsFormCurrencyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Default currency'**
+  String get subscriptionsFormCurrencyPlaceholder;
+
+  /// No description provided for @subscriptionsDetailAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get subscriptionsDetailAmount;
+
+  /// No description provided for @subscriptionsDetailStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get subscriptionsDetailStartDate;
+
+  /// No description provided for @exchangeRatesValueEur.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get exchangeRatesValueEur;
+
+  /// No description provided for @exchangeRatesValueXof.
+  ///
+  /// In en, this message translates to:
+  /// **'CFA Franc (BCEAO)'**
+  String get exchangeRatesValueXof;
+
+  /// No description provided for @exchangeRatesValueUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get exchangeRatesValueUsd;
+
+  /// No description provided for @exchangeRatesValueGbp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pound Sterling'**
+  String get exchangeRatesValueGbp;
+
+  /// No description provided for @exchangeRatesValueChf.
+  ///
+  /// In en, this message translates to:
+  /// **'Swiss Franc'**
+  String get exchangeRatesValueChf;
+
+  /// No description provided for @exchangeRatesValueCad.
+  ///
+  /// In en, this message translates to:
+  /// **'Canadian Dollar'**
+  String get exchangeRatesValueCad;
+
+  /// No description provided for @exchangeRatesValueMad.
+  ///
+  /// In en, this message translates to:
+  /// **'Moroccan Dirham'**
+  String get exchangeRatesValueMad;
 }
 
 class _AppLocalizationsDelegate

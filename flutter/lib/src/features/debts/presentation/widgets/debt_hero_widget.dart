@@ -8,6 +8,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -62,6 +63,7 @@ class DebtHeroWidget extends StatelessWidget {
       netColor = colorScheme.onSurface;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final locale = intlLocaleFor(Localizations.localeOf(context));
     final formattedNet = AmountFormatter.format(
       net.abs(),
@@ -90,7 +92,7 @@ class DebtHeroWidget extends StatelessWidget {
         children: [
           // Label
           Text(
-            'DETTES',
+            l10n.debtsSummaryNet.toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
@@ -119,7 +121,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '$formattedPrets prêts',
+                l10n.debtsSummaryLentTotal(formattedPrets),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -133,7 +135,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '$formattedEmprunts emprunts',
+                l10n.debtsSummaryBorrowedTotal(formattedEmprunts),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -152,7 +154,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '$enCours en cours',
+                l10n.debtsSummaryOutstandingCount(enCours),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,

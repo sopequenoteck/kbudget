@@ -12,7 +12,9 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 
 class RateForm extends ConsumerStatefulWidget {
   final Currency baseCurrency;
@@ -140,7 +142,11 @@ class _RateFormState extends ConsumerState<RateForm> {
                 horizontal: AppSpacing.space4,
               ),
               child: Text(
-                '${widget.baseCurrency.symbol} — ${widget.baseCurrency.displayName}',
+                '${widget.baseCurrency.symbol} — '
+                '${currencyName(
+                  widget.baseCurrency,
+                  AppLocalizations.of(context)!,
+                )}',
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurfaceVariant,

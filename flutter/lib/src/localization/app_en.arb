@@ -55,13 +55,13 @@
   "subscriptionsFormNamePlaceholder": "Name",
   "subscriptionsFormAccount": "Account",
   "commonValueActive": "Active",
-  "subscriptionFormDeleteConfirmTitle": "Delete subscription",
-  "subscriptionFormDeleteConfirmMessage": "Are you sure you want to delete this subscription? This action is irreversible.",
+  "subscriptionsDialogDeleteTitle": "Delete subscription",
+  "subscriptionsDialogDeleteMessage": "Are you sure you want to delete this subscription?",
   "subscriptionsEmptyTitle": "No subscriptions",
   "subscriptionsValuePerMonth": "/month",
   "subscriptionsValuePerYear": "/year",
-  "subscriptionNextRenewal": "Next: {date}",
-  "@subscriptionNextRenewal": {
+  "subscriptionsListNextRenewal": "Next: {date}",
+  "@subscriptionsListNextRenewal": {
     "placeholders": {
       "date": {
         "type": "String"
@@ -71,10 +71,9 @@
   "commonValueInactive": "Inactive",
   "subscriptionsActionPay": "Pay",
   "subscriptionsFeedbackPaid": "Payment recorded",
-  "subscriptionPaymentHistory": "Payment history",
-  "subscriptionNoPayments": "No payments",
-  "subscriptionPayments": "{count} payments",
-  "@subscriptionPayments": {
+  "subscriptionsDetailHistory": "History",
+  "subscriptionsDetailPaymentCount": "{count, plural, one {{count} payment} other {{count} payments}}",
+  "@subscriptionsDetailPaymentCount": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -82,55 +81,53 @@
     }
   },
   "debtsFormPersonPlaceholder": "Person",
-  "debtFormDeleteConfirmTitle": "Delete debt",
-  "debtFormDeleteConfirmMessage": "Are you sure you want to delete this debt? This action is irreversible.",
-  "debtFormAccountPicker": "Bank account",
+  "debtsDialogDeleteFormTitle": "Delete debt",
+  "debtsDialogDeleteFormMessage": "Are you sure you want to delete this debt?",
   "debtsEmptyTitle": "No debts",
   "debtsValueRepaid": "Repaid",
-  "debtDetailInitialAmount": "Initial amount",
-  "debtDetailRemainingAmount": "Remaining amount",
+  "debtsDetailInitialAmount": "Initial amount",
+  "debtsDetailRemainingAmount": "Remaining amount",
   "debtsActionRepay": "Repay",
   "debtsDialogSnoozeTitle": "Snooze the reminder",
-  "debtDetailProgress": "Progress",
-  "debtDetailDate": "Date",
-  "debtDetailCurrency": "Currency",
+  "debtsDetailProgress": "Progress",
+  "debtsDetailDate": "Date",
+  "debtsFormCurrency": "Currency",
   "debtsFormAccount": "Account",
-  "debtDetailAccountDeleted": "Account deleted",
-  "debtDetailDueDate": "Due date",
+  "debtsDetailAccountDeleted": "Account deleted",
+  "debtsFormDueDate": "Due date",
   "debtsFormCategory": "Category",
-  "debtDetailIncludedInBalance": "Included in balance",
+  "debtsDetailIncludedInBalance": "Included in balance",
   "debtsFormReminderAria": "Reminder",
   "debtsDetailPayments": "Payments",
-  "debtDetailTotalRepaid": "Total repaid",
+  "debtsDetailTotalRepaid": "Total repaid",
   "commonEmptyNoPayments": "No payments recorded",
-  "debtDetailPaymentsError": "Unable to load payments",
+  "debtsFeedbackPaymentsLoadError": "Unable to load payments",
   "debtsValueBorrowed": "Borrowed",
   "debtsValueLent": "Lent",
-  "repayAccountLabel": "Source account",
   "debtsFormAccountPlaceholder": "Select an account",
-  "repayAccountRequired": "Account required",
-  "repayAmountLabel": "Amount",
-  "repayAmountRequired": "Amount required",
+  "debtsFormAccountRequired": "Account required",
+  "debtsFormAmount": "Amount",
+  "debtsFormAmountRequired": "Amount required",
   "debtsFeedbackAmountInvalid": "Invalid amount",
-  "repayAmountMax": "Maximum: {amount}",
-  "@repayAmountMax": {
+  "debtsFormAmountMax": "Maximum: {amount}",
+  "@debtsFormAmountMax": {
     "placeholders": {
       "amount": {
         "type": "String"
       }
     }
   },
-  "repayNoAccounts": "No active accounts. Create an account in settings.",
-  "repaySuccess": "Repayment recorded",
+  "debtsEmptyNoAccounts": "No active accounts. Create an account in settings.",
+  "debtsFeedbackRepaymentSaved": "Repayment recorded",
   "debtsFeedbackRepayError": "Repayment failed",
-  "snoozeDateLabel": "New date",
-  "snoozeTimeLabel": "Time",
-  "snoozeDateFutureRequired": "The date must be in the future",
+  "debtsFormReminderDate": "Reminder date",
+  "debtsFormReminderTime": "Reminder time",
+  "debtsDialogReminderDatePast": "The date cannot be in the past",
   "debtsFeedbackSnoozed": "Reminder snoozed",
-  "snoozeError": "Failed to snooze the reminder",
+  "debtsFeedbackSnoozeError": "Failed to snooze the reminder",
   "debtsActionSnooze": "Snooze",
-  "yes": "Yes",
-  "no": "No",
+  "commonValueYes": "Yes",
+  "commonValueNo": "No",
   "transactionsFormTransferFromPlaceholder": "Source account",
   "transactionsFormTransferToPlaceholder": "Destination account",
   "transactionsFormAmount": "Amount",
@@ -478,5 +475,103 @@
         "type": "String"
       }
     }
-  }
+  },
+  "commonNavDebts": "Debts",
+  "commonNavSubscriptions": "Subscriptions",
+  "debtsSummaryNet": "Net balance",
+  "debtsSummaryOutstandingCount": "{count, plural, one {{count} outstanding} other {{count} outstanding}}",
+  "@debtsSummaryOutstandingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSummaryLentTotal": "{amount} lent",
+  "@debtsSummaryLentTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSummaryBorrowedTotal": "{amount} borrowed",
+  "@debtsSummaryBorrowedTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsListOverdue": "Overdue",
+  "debtsListThisWeek": "This week",
+  "debtsListThisMonth": "This month",
+  "debtsListLater": "Later",
+  "debtsListNoDueDate": "No due date",
+  "debtsListRepaid": "Repaid",
+  "debtsDialogCreateTitle": "New debt",
+  "debtsDialogEditTitle": "Edit debt",
+  "debtsDialogRepayTitle": "Repayment",
+  "debtsValueNotRepaid": "Not repaid",
+  "debtsFormCurrencyPlaceholder": "Default currency",
+  "debtsFormReminderSummary": "Reminder: {date} at {time}",
+  "@debtsFormReminderSummary": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsDetailReminderAt": "{date} at {time}",
+  "@debtsDetailReminderAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsActionClearReminder": "Clear the reminder",
+  "subscriptionsSummaryMonthlyTotal": "Monthly total",
+  "subscriptionsSummaryActiveCount": "{count, plural, one {{count} subscription} other {{count} subscriptions}}",
+  "@subscriptionsSummaryActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsListActiveCount": "{count, plural, one {{count} active} other {{count} active}}",
+  "@subscriptionsListActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsListActive": "Active",
+  "subscriptionsListInactive": "Inactive",
+  "subscriptionsValuePerWeek": "/week",
+  "subscriptionsValueWeekly": "Weekly",
+  "subscriptionsValueMonthly": "Monthly",
+  "subscriptionsValueYearly": "Yearly",
+  "subscriptionsDialogCreateTitle": "New subscription",
+  "subscriptionsDialogEditTitle": "Edit subscription",
+  "subscriptionsFormCategory": "Category",
+  "subscriptionsFormCurrency": "Currency",
+  "subscriptionsFormCurrencyPlaceholder": "Default currency",
+  "subscriptionsDetailAmount": "Amount",
+  "subscriptionsDetailStartDate": "Start date",
+  "exchangeRatesValueEur": "Euro",
+  "exchangeRatesValueXof": "CFA Franc (BCEAO)",
+  "exchangeRatesValueUsd": "US Dollar",
+  "exchangeRatesValueGbp": "Pound Sterling",
+  "exchangeRatesValueChf": "Swiss Franc",
+  "exchangeRatesValueCad": "Canadian Dollar",
+  "exchangeRatesValueMad": "Moroccan Dirham"
 }

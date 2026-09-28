@@ -101,7 +101,7 @@ void main() {
       await tester.pumpWidget(buildApp(initialSubscription: sub1));
       await tester.pumpAndSettle();
 
-      expect(find.text('Historique des paiements'), findsOneWidget);
+      expect(find.text('Historique'), findsOneWidget);
     });
 
     testWidgets('should_show_pay_button_when_subscription_loaded',

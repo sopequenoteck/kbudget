@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
 import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/common_widgets/page_header.dart';
@@ -12,14 +12,16 @@ import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
-import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_calculator.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
-import 'package:go_router/go_router.dart';
+import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class CurrencySettingsScreen extends ConsumerStatefulWidget {
   const CurrencySettingsScreen({super.key});
@@ -189,6 +191,10 @@ class _CurrencySettingsScreenState
               itemBuilder: (context, index) {
                 final currency = currencies[index];
                 final isPrimary = index == 0;
+                final name = currencyName(
+                  currency,
+                  AppLocalizations.of(context)!,
+                );
                 return ListTile(
                   key: ValueKey(currency.name),
                   leading: Text(
@@ -197,7 +203,7 @@ class _CurrencySettingsScreenState
                   ),
                   title: Text(currency.name.toUpperCase()),
                   subtitle: Text(
-                    isPrimary ? 'Principale • ${currency.displayName}' : currency.displayName,
+                    isPrimary ? 'Principale • $name' : name,
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       color: isPrimary

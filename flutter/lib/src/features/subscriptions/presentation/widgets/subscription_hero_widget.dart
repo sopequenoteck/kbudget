@@ -7,6 +7,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -42,6 +43,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
     final totalMensuel = firstEntry.value;
     final currency = firstEntry.key;
     final totalAnnuel = totalMensuel * 12;
+    final l10n = AppLocalizations.of(context)!;
     final locale = intlLocaleFor(Localizations.localeOf(context));
     final formattedMensuel = AmountFormatter.format(
       totalMensuel,
@@ -64,7 +66,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ABONNEMENTS',
+            l10n.subscriptionsSummaryMonthlyTotal.toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
@@ -91,7 +93,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '$activeCount actifs',
+                l10n.subscriptionsSummaryActiveCount(activeCount),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -109,7 +111,7 @@ class SubscriptionHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '≈ $formattedAnnuel/an',
+                '≈ $formattedAnnuel${l10n.subscriptionsValuePerYear}',
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,

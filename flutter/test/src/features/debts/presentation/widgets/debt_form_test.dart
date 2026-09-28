@@ -242,5 +242,85 @@ void main() {
 
       expect(find.text('Une erreur est survenue'), findsOneWidget);
     });
+
+    Future<void> openPicker(WidgetTester tester) async {
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(SelectPicker),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('should_hideCurrencyPill_when_accountChosen', (tester) async {
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Devise par défaut'), findsOneWidget);
+
+      await tester.tap(find.text('Compte'));
+      await tester.pumpAndSettle();
+      await openPicker(tester);
+      await tester.tap(find.text('Compte courant').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Devise par défaut'), findsNothing);
+      expect(find.text('Compte courant'), findsOneWidget);
+    });
+
+    testWidgets('should_showCurrencyName_when_currencyChosen', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Devise par défaut'));
+      await tester.tap(find.text('Devise par défaut'));
+      await tester.pumpAndSettle();
+
+      await openPicker(tester);
+      await tester.tap(find.text(r'Dollar US ($)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dollar US'), findsOneWidget);
+    });
+
+    testWidgets('should_showReminderSummary_when_debtHasReminder',
+        (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt.copyWith(
+          reminderDate: DateTime(2026, 2, 1),
+          reminderTime: '14:00',
+        ),
+        onDeleted: (_) async {},
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Rappel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rappel : 01/02/2026 à 14:00'), findsOneWidget);
+
+      await tester.tap(find.text('Effacer le rappel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Effacer le rappel'), findsNothing);
+    });
+
+    testWidgets('should_showDueDateAndRepaidStatus_when_debtRepaid',
+        (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt.copyWith(
+          dueDate: DateTime(2026, 3, 10),
+          rembourse: true,
+        ),
+        onDeleted: (_) async {},
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('10/03/2026'), findsOneWidget);
+      expect(find.text('Remboursé'), findsOneWidget);
+    });
   });
 }

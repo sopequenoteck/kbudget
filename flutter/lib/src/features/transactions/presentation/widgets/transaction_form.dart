@@ -5,14 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
+import 'package:k_budget/src/common_widgets/account_select_expand.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
 import 'package:k_budget/src/common_widgets/bsheet_delete_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_meta_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_type_toggle.dart';
 import 'package:k_budget/src/common_widgets/category_select_expand.dart';
 import 'package:k_budget/src/common_widgets/inline_date_picker.dart';
-import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -27,8 +26,6 @@ import 'package:k_budget/src/features/recurring/application/recurring_list_notif
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/libelle_autocomplete_field.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
-import 'package:k_budget/src/utils/amount_formatter.dart';
-import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -266,40 +263,15 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     };
   }
 
-  Widget _buildAccountExpand(List<Account> accounts) {
-    final accountItems = accounts
-        .where((a) => a.actif)
-        .map(
-          (a) => SelectPickerItem(
-            id: a.id,
-            label: a.nom,
-            icon: a.icone,
-            color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(
-              a.solde,
-              locale: ref.watch(intlLocaleProvider),
-            ),
-            imageUrl: resolveBankAssetPath(a),
-          ),
-        )
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: SelectPicker(
-        items: accountItems,
+  Widget _buildAccountExpand(List<Account> accounts) => AccountSelectExpand(
+        accounts: accounts,
         selectedId: _selectedAccountId,
+        label: AppLocalizations.of(context)!.transactionsFormAccount,
         onChanged: (id) => setState(() {
           _selectedAccountId = id;
           _expandedSection = null;
         }),
-        label: AppLocalizations.of(context)!.transactionsFormAccount,
-      ),
-    );
-  }
+      );
 
   Widget _buildNoteExpand() {
     final colorScheme = Theme.of(context).colorScheme;

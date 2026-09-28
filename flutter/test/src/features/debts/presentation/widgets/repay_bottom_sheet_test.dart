@@ -112,9 +112,9 @@ void main() {
         'should_showPrefilledFormFields_when_shown', (tester) async {
       await openSheet(tester);
 
-      // Le titre de la modale et le libellé du bouton partagent le texte
-      expect(find.text('Rembourser'), findsAtLeast(1));
-      expect(find.text('Compte source'), findsOneWidget);
+      expect(find.text('Remboursement'), findsOneWidget);
+      expect(find.text('Rembourser'), findsOneWidget);
+      expect(find.text('Compte'), findsOneWidget);
       expect(find.text('Montant'), findsOneWidget);
       expect(find.text('Annuler'), findsOneWidget);
     });
@@ -140,7 +140,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Rembourser'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Maximum:'), findsOneWidget);
+      expect(find.textContaining('Maximum :'), findsOneWidget);
     });
 
     testWidgets(

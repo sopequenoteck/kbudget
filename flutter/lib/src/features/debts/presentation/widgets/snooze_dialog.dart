@@ -49,8 +49,6 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
   bool _showErrors = false;
   bool _isSubmitting = false;
 
-  static final _dateFormat = DateFormat('dd/MM/yyyy');
-
   @override
   void initState() {
     super.initState();
@@ -76,7 +74,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     if (!_selectedDate.isAfter(today)) {
-      return l10n.snoozeDateFutureRequired;
+      return l10n.debtsDialogReminderDatePast;
     }
     return null;
   }
@@ -132,7 +130,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     } else {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.snoozeError)),
+        SnackBar(content: Text(l10n.debtsFeedbackSnoozeError)),
       );
     }
   }
@@ -149,7 +147,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
       children: [
         // Date
         AppFormField(
-          label: l10n.snoozeDateLabel,
+          label: l10n.debtsFormReminderDate,
           showError: _showErrors && dateError != null,
           errorMessage: dateError ?? '',
           child: GestureDetector(
@@ -159,7 +157,8 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    _dateFormat.format(_selectedDate),
+                    DateFormat.yMd(ref.watch(intlLocaleProvider))
+                        .format(_selectedDate),
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface,
@@ -179,7 +178,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
 
         // Heure
         AppFormField(
-          label: l10n.snoozeTimeLabel,
+          label: l10n.debtsFormReminderTime,
           child: GestureDetector(
             onTap: _pickTime,
             behavior: HitTestBehavior.opaque,
