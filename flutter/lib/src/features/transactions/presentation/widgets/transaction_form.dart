@@ -30,6 +30,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TransactionForm extends ConsumerStatefulWidget {
@@ -126,23 +127,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   // --- Validation ---
 
-  String? _validateLibelle() {
-    final value = _libelleController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
-    if (value.length > 255) return l10n.validationMaxLength(255);
-    return null;
-  }
+  String? _validateLibelle() => validateRequiredText(
+        _libelleController.text,
+        AppLocalizations.of(context)!,
+        maxLength: 255,
+      );
 
-  String? _validateMontant() {
-    final value = _montantController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
-    final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
-    return null;
-  }
+  String? _validateMontant() => validatePositiveAmount(
+        _montantController.text,
+        AppLocalizations.of(context)!,
+      );
 
   bool _isValid() {
     return _validateLibelle() == null && _validateMontant() == null;

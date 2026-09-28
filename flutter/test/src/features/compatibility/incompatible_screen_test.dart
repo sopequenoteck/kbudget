@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/compatibility_provider.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/compatibility/presentation/incompatible_screen.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 
 /// Notifier de test : expose un verdict fixe, sans appel reseau.
@@ -24,6 +25,9 @@ Future<void> _pump(WidgetTester tester, CompatibilityStatus status) async {
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: const IncompatibleScreen(),
       ),
     ),
@@ -50,7 +54,7 @@ void main() {
       );
 
       final text = _visibleText(tester);
-      expect(text, contains('Application a mettre a jour'));
+      expect(text, contains('Application à mettre à jour'));
       expect(text, contains('6.1.0'));
       expect(text, contains('5.0.0'));
     });
@@ -66,7 +70,7 @@ void main() {
       );
 
       final text = _visibleText(tester);
-      expect(text, contains('Serveur a mettre a jour'));
+      expect(text, contains('Serveur à mettre à jour'));
       expect(text, contains('5.4.0'));
     });
 
@@ -111,7 +115,7 @@ void main() {
         ),
       );
 
-      expect(find.widgetWithText(FilledButton, 'Reessayer'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Réessayer'), findsOneWidget);
     });
 
     testWidgets('should_clearVerdict_when_retryTapped', (tester) async {
@@ -123,7 +127,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Reessayer'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Réessayer'));
       await tester.pumpAndSettle();
 
       // Le verdict efface, le routeur reverifiera a la prochaine redirection.

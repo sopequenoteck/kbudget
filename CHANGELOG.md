@@ -123,6 +123,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   cles mortes sont supprimees (179 cles au lieu de 302). La locale d'affichage
   vient d'un seul provider, qui remplace toutes les locales francaises codees
   en dur.
+- **Ecrans partages et non connectes de Flutter dans les catalogues
+  (KKS-399)** : etape 2 sur 8 de KKS-326. Connexion, premier acces,
+  acceptation d'invitation, ecran de verrouillage, onboarding, ecran
+  d'incompatibilite, composants partages et messages d'erreur. Certains textes
+  francais reprennent la formulation d'Angular, par exemple « Connectez-vous a
+  votre compte », « Ce champ est requis. » ou « Impossible de contacter le
+  serveur ». Les accents manquants sont corriges. Les messages d'erreur
+  n'affichent plus le detail technique de l'exception. Le nom d'affichage est
+  limite a 100 caracteres, comme cote API.
 
 ### Changed
 

@@ -234,6 +234,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                   RelativeDateFormatter.formatCompact(
                     item.nextOccurrence,
                     locale: ref.watch(intlLocaleProvider),
+                    l10n: l10n,
                   ),
                 ),
                 style: TextStyle(

@@ -138,11 +138,17 @@ abstract class AppLocalizations {
   /// **'An error occurred'**
   String get errorsClientGeneric;
 
-  /// No description provided for @errorNetwork.
+  /// No description provided for @errorsClientNetwork.
   ///
   /// In en, this message translates to:
-  /// **'Network connection error'**
-  String get errorNetwork;
+  /// **'Unable to reach the server'**
+  String get errorsClientNetwork;
+
+  /// No description provided for @errorsClientUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get errorsClientUnknown;
 
   /// No description provided for @errorsApiBadRequest.
   ///
@@ -162,23 +168,29 @@ abstract class AppLocalizations {
   /// **'Invalid request.'**
   String get errorsApiMalformedRequest;
 
-  /// No description provided for @errorCodePasswordIncorrect.
+  /// No description provided for @errorsApiPasswordIncorrect.
   ///
   /// In en, this message translates to:
-  /// **'Incorrect password'**
-  String get errorCodePasswordIncorrect;
+  /// **'Incorrect password.'**
+  String get errorsApiPasswordIncorrect;
 
-  /// No description provided for @errorCodeCurrentPasswordIncorrect.
+  /// No description provided for @usersFeedbackCurrentPasswordIncorrect.
   ///
   /// In en, this message translates to:
-  /// **'Current password incorrect'**
-  String get errorCodeCurrentPasswordIncorrect;
+  /// **'Current password incorrect.'**
+  String get usersFeedbackCurrentPasswordIncorrect;
 
-  /// No description provided for @errorCodePasswordUnchanged.
+  /// No description provided for @usersFeedbackLastAdminDeletionForbidden.
   ///
   /// In en, this message translates to:
-  /// **'The new password must be different from the current one'**
-  String get errorCodePasswordUnchanged;
+  /// **'You are the last administrator. Please appoint another administrator before deleting your account.'**
+  String get usersFeedbackLastAdminDeletionForbidden;
+
+  /// No description provided for @errorsApiPasswordUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The new password must be different from the current one.'**
+  String get errorsApiPasswordUnchanged;
 
   /// No description provided for @errorsApiConfirmationRequired.
   ///
@@ -186,11 +198,11 @@ abstract class AppLocalizations {
   /// **'Explicit confirmation required.'**
   String get errorsApiConfirmationRequired;
 
-  /// No description provided for @errorCodeUnauthenticated.
+  /// No description provided for @errorsApiUnauthenticated.
   ///
   /// In en, this message translates to:
-  /// **'Authentication required'**
-  String get errorCodeUnauthenticated;
+  /// **'Authentication required.'**
+  String get errorsApiUnauthenticated;
 
   /// No description provided for @errorsApiTokenExpired.
   ///
@@ -222,11 +234,11 @@ abstract class AppLocalizations {
   /// **'Access denied'**
   String get errorsApiAccessDenied;
 
-  /// No description provided for @errorCodePasswordResetRequired.
+  /// No description provided for @errorsApiPasswordResetRequired.
   ///
   /// In en, this message translates to:
   /// **'Credentials reset required'**
-  String get errorCodePasswordResetRequired;
+  String get errorsApiPasswordResetRequired;
 
   /// No description provided for @errorsApiPasswordResetNotRequired.
   ///
@@ -240,11 +252,11 @@ abstract class AppLocalizations {
   /// **'Feature disabled'**
   String get errorsApiFeatureDisabled;
 
-  /// No description provided for @errorCodeLastAdminDeletionForbidden.
+  /// No description provided for @errorsApiLastAdminDeletionForbidden.
   ///
   /// In en, this message translates to:
-  /// **'You are the last administrator. Please appoint another administrator before deleting your account.'**
-  String get errorCodeLastAdminDeletionForbidden;
+  /// **'At least one active administrator must exist.'**
+  String get errorsApiLastAdminDeletionForbidden;
 
   /// No description provided for @errorsApiNotFound.
   ///
@@ -744,23 +756,23 @@ abstract class AppLocalizations {
   /// **'The source and destination accounts must be different'**
   String get transactionsFormTransferAccountsMismatch;
 
-  /// No description provided for @validationRequired.
+  /// No description provided for @commonValidationRequired.
   ///
   /// In en, this message translates to:
-  /// **'This field is required'**
-  String get validationRequired;
+  /// **'This field is required.'**
+  String get commonValidationRequired;
 
-  /// No description provided for @validationAmountPositive.
+  /// No description provided for @commonValidationAmountPositive.
   ///
   /// In en, this message translates to:
-  /// **'The amount must be positive'**
-  String get validationAmountPositive;
+  /// **'The amount must be greater than 0'**
+  String get commonValidationAmountPositive;
 
-  /// No description provided for @validationMaxLength.
+  /// No description provided for @commonValidationMaxLength.
   ///
   /// In en, this message translates to:
-  /// **'Maximum {max} characters'**
-  String validationMaxLength(int max);
+  /// **'{max} characters maximum'**
+  String commonValidationMaxLength(int max);
 
   /// No description provided for @accountsTitle.
   ///
@@ -1175,6 +1187,624 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'/week'**
   String get frequencyHebdomadaire;
+
+  /// No description provided for @authPageLoginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your account'**
+  String get authPageLoginTagline;
+
+  /// No description provided for @authFormEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email required'**
+  String get authFormEmailRequired;
+
+  /// No description provided for @authFormPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password required'**
+  String get authFormPasswordRequired;
+
+  /// No description provided for @authPageFirstLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First sign-in'**
+  String get authPageFirstLoginTitle;
+
+  /// No description provided for @authPageFirstLoginNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in with the initial credentials generated by the system. Set your final email, a personal password and your display name now to access the application.'**
+  String get authPageFirstLoginNotice;
+
+  /// No description provided for @authFormDisplayNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name required (100 characters max)'**
+  String get authFormDisplayNameRequired;
+
+  /// No description provided for @authFeedbackResetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating your credentials. Please try again.'**
+  String get authFeedbackResetError;
+
+  /// No description provided for @authFormPasswordConfirmRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get authFormPasswordConfirmRequired;
+
+  /// No description provided for @authFeedbackInvalidLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid, expired, already used or revoked link.'**
+  String get authFeedbackInvalidLink;
+
+  /// No description provided for @authFeedbackCreateAccountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error creating the account. Please try again.'**
+  String get authFeedbackCreateAccountError;
+
+  /// No description provided for @authFeedbackCheckingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the link...'**
+  String get authFeedbackCheckingLink;
+
+  /// No description provided for @authPageInvalidLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid link'**
+  String get authPageInvalidLinkTitle;
+
+  /// No description provided for @authActionBackToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign-in'**
+  String get authActionBackToLogin;
+
+  /// No description provided for @authPageAcceptInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get authPageAcceptInviteTitle;
+
+  /// No description provided for @authPageAcceptInviteTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'A few details to finish signing up'**
+  String get authPageAcceptInviteTagline;
+
+  /// No description provided for @authFormEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authFormEmail;
+
+  /// No description provided for @authFormEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get authFormEmailInvalid;
+
+  /// No description provided for @authFormPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authFormPassword;
+
+  /// No description provided for @authFormDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get authFormDisplayName;
+
+  /// No description provided for @authFormConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authFormConfirmPassword;
+
+  /// No description provided for @authFormPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get authFormPasswordMismatch;
+
+  /// No description provided for @authFormCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get authFormCurrency;
+
+  /// No description provided for @authActionCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create my account'**
+  String get authActionCreateAccount;
+
+  /// No description provided for @authActionSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authActionSignIn;
+
+  /// No description provided for @authFormPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} characters minimum'**
+  String authFormPasswordMinLength(int min);
+
+  /// No description provided for @authActionUnlockBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock K-Budget'**
+  String get authActionUnlockBiometricReason;
+
+  /// No description provided for @authFeedbackBiometricError.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric error. Use your PIN.'**
+  String get authFeedbackBiometricError;
+
+  /// No description provided for @authFormPinMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'The PIN must contain at least 4 digits'**
+  String get authFormPinMinLength;
+
+  /// No description provided for @authFeedbackPinIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN'**
+  String get authFeedbackPinIncorrect;
+
+  /// No description provided for @authDialogForgotPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your PIN?'**
+  String get authDialogForgotPinTitle;
+
+  /// No description provided for @authDialogForgotPinServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out and will need to sign in again with your credentials.'**
+  String get authDialogForgotPinServerMessage;
+
+  /// No description provided for @authDialogForgotPinLocalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'In local mode, resetting the PIN will erase all your data. This action is irreversible.'**
+  String get authDialogForgotPinLocalMessage;
+
+  /// No description provided for @authPagePinTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN to continue'**
+  String get authPagePinTagline;
+
+  /// No description provided for @authActionUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get authActionUnlock;
+
+  /// No description provided for @authActionBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics'**
+  String get authActionBiometric;
+
+  /// No description provided for @commonActionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get commonActionConfirm;
+
+  /// No description provided for @commonActionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonActionClose;
+
+  /// No description provided for @commonActionChooseEmoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an emoji'**
+  String get commonActionChooseEmoji;
+
+  /// No description provided for @commonFormEmojiSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for an emoji…'**
+  String get commonFormEmojiSearchPlaceholder;
+
+  /// No description provided for @commonEmptyNoRecentEmoji.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent emoji'**
+  String get commonEmptyNoRecentEmoji;
+
+  /// No description provided for @transactionsActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transactionsActionCreate;
+
+  /// No description provided for @subscriptionsActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscriptionsActionCreate;
+
+  /// No description provided for @debtsActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt'**
+  String get debtsActionCreate;
+
+  /// No description provided for @budgetsActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get budgetsActionCreate;
+
+  /// No description provided for @transactionsActionTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transactionsActionTransfer;
+
+  /// No description provided for @commonActionPreviousMonthAria.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get commonActionPreviousMonthAria;
+
+  /// No description provided for @commonActionNextMonthAria.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get commonActionNextMonthAria;
+
+  /// No description provided for @commonNavSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get commonNavSettings;
+
+  /// No description provided for @commonActionLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get commonActionLogout;
+
+  /// No description provided for @commonActionReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get commonActionReset;
+
+  /// No description provided for @commonFormSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get commonFormSearchPlaceholder;
+
+  /// No description provided for @commonFormSelectPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select...'**
+  String get commonFormSelectPlaceholder;
+
+  /// No description provided for @commonEmptyNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get commonEmptyNoResults;
+
+  /// No description provided for @categoriesActionCreateNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create \"{name}\"'**
+  String categoriesActionCreateNamed(String name);
+
+  /// No description provided for @categoriesFormSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a category…'**
+  String get categoriesFormSearchPlaceholder;
+
+  /// No description provided for @categoriesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet — create one'**
+  String get categoriesEmptyTitle;
+
+  /// No description provided for @categoriesActionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get categoriesActionCreate;
+
+  /// No description provided for @categoriesListNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories found'**
+  String get categoriesListNoResults;
+
+  /// No description provided for @commonActionBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonActionBack;
+
+  /// No description provided for @accountsFormSelectBankPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a bank'**
+  String get accountsFormSelectBankPlaceholder;
+
+  /// No description provided for @accountsFormBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get accountsFormBankTitle;
+
+  /// No description provided for @accountsValueOtherCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Other / Custom'**
+  String get accountsValueOtherCustom;
+
+  /// No description provided for @accountsFilterBankSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a bank…'**
+  String get accountsFilterBankSearchPlaceholder;
+
+  /// No description provided for @accountsFeedbackBanksLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load banks'**
+  String get accountsFeedbackBanksLoadError;
+
+  /// No description provided for @accountsEmptyBankNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No bank found'**
+  String get accountsEmptyBankNotFound;
+
+  /// No description provided for @accountsListBankGroupFrance.
+  ///
+  /// In en, this message translates to:
+  /// **'France'**
+  String get accountsListBankGroupFrance;
+
+  /// No description provided for @accountsListBankGroupWestAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'West Africa'**
+  String get accountsListBankGroupWestAfrica;
+
+  /// No description provided for @accountsListBankGroupInternational.
+  ///
+  /// In en, this message translates to:
+  /// **'International'**
+  String get accountsListBankGroupInternational;
+
+  /// No description provided for @commonFeedbackSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get commonFeedbackSaveError;
+
+  /// No description provided for @commonFeedbackDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed'**
+  String get commonFeedbackDeleteError;
+
+  /// No description provided for @commonFeedbackLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get commonFeedbackLoadError;
+
+  /// No description provided for @onboardingDialogSwitchToLocalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to local mode?'**
+  String get onboardingDialogSwitchToLocalTitle;
+
+  /// No description provided for @onboardingDialogSwitchToLocalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data will be stored only on this device. You can switch back to server mode from settings.'**
+  String get onboardingDialogSwitchToLocalMessage;
+
+  /// No description provided for @onboardingActionUseLocalMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use in local mode'**
+  String get onboardingActionUseLocalMode;
+
+  /// No description provided for @onboardingPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to K-Budget'**
+  String get onboardingPageTitle;
+
+  /// No description provided for @onboardingPageTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your data mode'**
+  String get onboardingPageTagline;
+
+  /// No description provided for @onboardingValueLocalMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Local mode'**
+  String get onboardingValueLocalMode;
+
+  /// No description provided for @onboardingValueLocalModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays on this device'**
+  String get onboardingValueLocalModeHint;
+
+  /// No description provided for @onboardingValueServerMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Server mode'**
+  String get onboardingValueServerMode;
+
+  /// No description provided for @onboardingValueServerModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with your K-Budget server'**
+  String get onboardingValueServerModeHint;
+
+  /// No description provided for @onboardingPageServerSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server setup'**
+  String get onboardingPageServerSetupTitle;
+
+  /// No description provided for @onboardingFormServerUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your K-Budget server URL'**
+  String get onboardingFormServerUrlHint;
+
+  /// No description provided for @onboardingFormServerUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get onboardingFormServerUrl;
+
+  /// No description provided for @onboardingFormServerUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The URL is required'**
+  String get onboardingFormServerUrlRequired;
+
+  /// No description provided for @onboardingFormServerUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get onboardingFormServerUrlInvalid;
+
+  /// No description provided for @onboardingFeedbackConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected successfully'**
+  String get onboardingFeedbackConnected;
+
+  /// No description provided for @onboardingFeedbackConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get onboardingFeedbackConnecting;
+
+  /// No description provided for @onboardingActionCheckConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Check connection'**
+  String get onboardingActionCheckConnection;
+
+  /// No description provided for @compatibilityPageClientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App update required'**
+  String get compatibilityPageClientTitle;
+
+  /// No description provided for @compatibilityPageServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server update required'**
+  String get compatibilityPageServerTitle;
+
+  /// No description provided for @compatibilityPageTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the application and your server cannot work together.'**
+  String get compatibilityPageTagline;
+
+  /// No description provided for @compatibilityFeedbackOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Server unreachable. Check the URL and your connection.'**
+  String get compatibilityFeedbackOffline;
+
+  /// No description provided for @compatibilityFeedbackServerTooOldUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is too old to report its version. This application requires at least version {requiredVersion}. Update your instance, then restart the application.'**
+  String compatibilityFeedbackServerTooOldUnknown(String requiredVersion);
+
+  /// No description provided for @compatibilityFeedbackServerTooOldVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is running version {serverVersion}. This application requires at least version {requiredVersion}. Update your instance, then restart the application.'**
+  String compatibilityFeedbackServerTooOldVersion(
+    String serverVersion,
+    String requiredVersion,
+  );
+
+  /// No description provided for @compatibilityFeedbackClientTooOld.
+  ///
+  /// In en, this message translates to:
+  /// **'This server requires at least version {requiredVersion} of the application. Update K-Budget from your app store.'**
+  String compatibilityFeedbackClientTooOld(String requiredVersion);
+
+  /// No description provided for @compatibilityFeedbackClientTooOldVerbose.
+  ///
+  /// In en, this message translates to:
+  /// **'This server requires at least version {requiredVersion} of the application. You are using version {clientVersion}. Update K-Budget from your app store.'**
+  String compatibilityFeedbackClientTooOldVerbose(
+    String requiredVersion,
+    String clientVersion,
+  );
+
+  /// No description provided for @commonValueTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get commonValueTomorrow;
+
+  /// No description provided for @commonValueDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} day ago} other {{count} days ago}}'**
+  String commonValueDaysAgo(int count);
+
+  /// No description provided for @commonValueWeeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} week ago} other {{count} weeks ago}}'**
+  String commonValueWeeksAgo(int count);
+
+  /// No description provided for @commonValueDaysAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String commonValueDaysAgoShort(int count);
+
+  /// No description provided for @commonValueInDaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'in {count}d'**
+  String commonValueInDaysShort(int count);
+
+  /// No description provided for @dashboardSummaryMonthVariation.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} this month'**
+  String dashboardSummaryMonthVariation(String amount);
 }
 
 class _AppLocalizationsDelegate

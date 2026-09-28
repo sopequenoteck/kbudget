@@ -2,12 +2,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, StringProperty;
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 
 class CategoryPicker extends StatelessWidget {
@@ -15,7 +18,10 @@ class CategoryPicker extends StatelessWidget {
   final String? selectedId;
   final ValueChanged<String?>? onChanged;
   final String label;
-  final String placeholder;
+
+  /// `null` retombe sur [AppLocalizations.commonFormSelectPlaceholder]
+  /// (résolu par [SelectPicker]).
+  final String? placeholder;
   final bool clearable;
   final int searchThreshold;
   final bool enabled;
@@ -31,7 +37,7 @@ class CategoryPicker extends StatelessWidget {
     this.selectedId,
     this.onChanged,
     required this.label,
-    this.placeholder = 'Sélectionner...',
+    this.placeholder,
     this.clearable = false,
     this.searchThreshold = 5,
     this.enabled = true,
@@ -52,7 +58,14 @@ class CategoryPicker extends StatelessWidget {
       .toList();
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('placeholder', placeholder));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SelectPicker(
       items: _items,
       selectedId: selectedId,
@@ -62,7 +75,7 @@ class CategoryPicker extends StatelessWidget {
       clearable: clearable,
       searchThreshold: searchThreshold,
       enabled: enabled,
-      emptyMessage: 'Aucune catégorie',
+      emptyMessage: l10n.categoriesEmptyNoCategories,
       onSearchChanged: onSearchChanged,
       emptyActionBuilder:
           onCreateRequested != null ? _buildCreateButton : null,
@@ -76,9 +89,11 @@ class CategoryPicker extends StatelessWidget {
     return Builder(
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
+        final l10n = AppLocalizations.of(context)!;
+        final label = l10n.categoriesActionCreateNamed(searchTerm);
         return Semantics(
           button: true,
-          label: 'Créer $searchTerm',
+          label: label,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
@@ -100,7 +115,7 @@ class CategoryPicker extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.space2),
                     Text(
-                      '+ Créer « $searchTerm »',
+                      '+ $label',
                       style: TextStyle(
                         fontSize: AppTypography.sizeMd,
                         fontWeight: AppTypography.medium,

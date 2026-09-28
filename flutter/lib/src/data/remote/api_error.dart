@@ -80,13 +80,13 @@ String errorLabel(
     case 'MALFORMED_REQUEST':
       return l10n.errorsApiMalformedRequest;
     case 'PASSWORD_INCORRECT':
-      return l10n.errorCodePasswordIncorrect;
+      return l10n.errorsApiPasswordIncorrect;
     case 'PASSWORD_UNCHANGED':
-      return l10n.errorCodePasswordUnchanged;
+      return l10n.errorsApiPasswordUnchanged;
     case 'CONFIRMATION_REQUIRED':
       return l10n.errorsApiConfirmationRequired;
     case 'UNAUTHENTICATED':
-      return l10n.errorCodeUnauthenticated;
+      return l10n.errorsApiUnauthenticated;
     case 'TOKEN_EXPIRED':
       return l10n.errorsApiTokenExpired;
     case 'TOKEN_REVOKED':
@@ -98,13 +98,13 @@ String errorLabel(
     case 'ACCESS_DENIED':
       return l10n.errorsApiAccessDenied;
     case 'PASSWORD_RESET_REQUIRED':
-      return l10n.errorCodePasswordResetRequired;
+      return l10n.errorsApiPasswordResetRequired;
     case 'PASSWORD_RESET_NOT_REQUIRED':
       return l10n.errorsApiPasswordResetNotRequired;
     case 'FEATURE_DISABLED':
       return l10n.errorsApiFeatureDisabled;
     case 'LAST_ADMIN_DELETION_FORBIDDEN':
-      return l10n.errorCodeLastAdminDeletionForbidden;
+      return l10n.errorsApiLastAdminDeletionForbidden;
     case 'NOT_FOUND':
       return l10n.errorsApiNotFound;
     case 'CONFLICT':

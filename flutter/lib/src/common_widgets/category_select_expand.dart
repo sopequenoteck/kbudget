@@ -8,6 +8,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/presentation/widgets/category_form_widget.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/string_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -77,7 +78,8 @@ class CategorySelectExpand extends StatefulWidget {
   final ValueChanged<bool>? onCreatingChanged;
 
   /// Placeholder du champ recherche.
-  /// Défaut : `'Rechercher une catégorie...'`.
+  ///
+  /// `null` retombe sur [AppLocalizations.categoriesFormSearchPlaceholder].
   final String? searchPlaceholder;
 
   const CategorySelectExpand({
@@ -194,9 +196,12 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
   Widget _buildListMode(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     final filtered = _filteredCategories;
     final isEmpty =
         widget.categories.isEmpty && _searchController.text.isEmpty;
+    final createLabel =
+        l10n.categoriesActionCreateNamed(_searchController.text);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -213,7 +218,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: widget.searchPlaceholder ??
-                  'Rechercher une catégorie...',
+                  l10n.categoriesFormSearchPlaceholder,
               hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -268,7 +273,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
               child: TextButton(
                 onPressed: _pushToCreate,
                 child: Text(
-                  '+ Créer « ${_searchController.text} »',
+                  '+ $createLabel',
                   style: TextStyle(color: colorScheme.primary),
                 ),
               ),
@@ -327,6 +332,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.space4),
@@ -334,7 +340,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Aucune catégorie — créez-en une',
+            l10n.categoriesEmptyTitle,
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -344,7 +350,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
           TextButton(
             onPressed: _pushToCreate,
             child: Text(
-              '+ Créer',
+              '+ ${l10n.categoriesActionCreate}',
               style: TextStyle(color: colorScheme.primary),
             ),
           ),
@@ -356,11 +362,12 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
   Widget _buildNoResults(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.space4),
       child: Text(
-        'Aucune catégorie trouvée',
+        l10n.categoriesListNoResults,
         style: textTheme.bodyMedium?.copyWith(
           color: colorScheme.onSurfaceVariant,
         ),
@@ -375,6 +382,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
 
   Widget _buildCreateMode(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -394,7 +402,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
                   PhosphorIconsRegular.arrowLeft,
                   size: 16,
                 ),
-                label: const Text('Retour'),
+                label: Text(l10n.commonActionBack),
               ),
               const Spacer(),
               FilledButton.icon(
@@ -412,7 +420,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
                         PhosphorIconsRegular.check,
                         size: 14,
                       ),
-                label: const Text('Créer'),
+                label: Text(l10n.categoriesActionCreate),
               ),
             ],
           ),

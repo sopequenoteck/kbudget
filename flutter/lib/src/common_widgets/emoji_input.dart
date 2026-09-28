@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_durations.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class EmojiInput extends FormField<String> {
   final String label;
@@ -165,6 +166,7 @@ class _EmojiPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.5,
       child: Column(
@@ -194,13 +196,13 @@ class _EmojiPickerSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Choisir un emoji',
+                    l10n.commonActionChooseEmoji,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 Semantics(
                   button: true,
-                  label: 'Fermer',
+                  label: l10n.commonActionClose,
                   child: IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const PhosphorIcon(PhosphorIconsBold.x, size: 24),
@@ -221,9 +223,9 @@ class _EmojiPickerSheet extends StatelessWidget {
                   columns: 8,
                   emojiSizeMax: 28,
                   backgroundColor: colorScheme.surface,
-                  noRecents: const Text(
-                    'Aucun emoji récent',
-                    style: TextStyle(fontSize: AppTypography.sizeXl),
+                  noRecents: Text(
+                    l10n.commonEmptyNoRecentEmoji,
+                    style: const TextStyle(fontSize: AppTypography.sizeXl),
                   ),
                 ),
                 categoryViewConfig: CategoryViewConfig(
@@ -239,7 +241,7 @@ class _EmojiPickerSheet extends StatelessWidget {
                 searchViewConfig: SearchViewConfig(
                   backgroundColor: colorScheme.surface,
                   buttonIconColor: colorScheme.onSurfaceVariant,
-                  hintText: 'Rechercher un emoji...',
+                  hintText: l10n.commonFormEmojiSearchPlaceholder,
                 ),
               ),
             ),

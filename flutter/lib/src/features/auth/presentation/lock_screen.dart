@@ -13,6 +13,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -48,6 +49,14 @@ class _LockScreenState extends ConsumerState<LockScreen> {
         .getConfig();
 
     if (config.lockMethod != LockMethod.biometric) return;
+    if (!mounted) {
+      return;
+    }
+
+    // Recupere apres le premier await : lu depuis initState(), l'appeler
+    // plus tot leverait "dependOnInheritedWidgetOfExactType() ... called
+    // before initState() completed" (le widget n'est pas encore monte).
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isAuthenticating = true;
@@ -56,7 +65,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
     try {
       final authenticated = await _localAuth.authenticate(
-        localizedReason: 'Deverrouillez K-Budget',
+        localizedReason: l10n.authActionUnlockBiometricReason,
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -68,7 +77,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     } on PlatformException {
       if (mounted) {
         setState(() {
-          _error = 'Erreur biometrique. Utilisez votre PIN.';
+          _error = l10n.authFeedbackBiometricError;
         });
       }
     } finally {
@@ -79,8 +88,9 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 
   Future<void> _validatePin() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_pinController.text.length < 4) {
-      setState(() => _error = 'Le PIN doit contenir au moins 4 chiffres');
+      setState(() => _error = l10n.authFormPinMinLength);
       return;
     }
 
@@ -103,7 +113,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     } else {
       if (mounted) {
         setState(() {
-          _error = 'PIN incorrect';
+          _error = l10n.authFeedbackPinIncorrect;
           _isAuthenticating = false;
         });
         _pinController.clear();
@@ -112,6 +122,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 
   Future<void> _handleForgotPin() async {
+    final l10n = AppLocalizations.of(context)!;
     final config = await ref
         .read(onboardingNotifierProvider.notifier)
         .getConfig();
@@ -123,19 +134,16 @@ class _LockScreenState extends ConsumerState<LockScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('PIN oublie ?'),
-          content: const Text(
-            'Vous serez deconnecte et devrez vous reconnecter '
-            'avec vos identifiants.',
-          ),
+          title: Text(l10n.authDialogForgotPinTitle),
+          content: Text(l10n.authDialogForgotPinServerMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Annuler'),
+              child: Text(l10n.commonActionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Se deconnecter'),
+              child: Text(l10n.commonActionLogout),
             ),
           ],
         ),
@@ -149,22 +157,19 @@ class _LockScreenState extends ConsumerState<LockScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('PIN oublie ?'),
-          content: const Text(
-            'En mode local, la reinitialisation du PIN effacera '
-            'toutes vos donnees. Cette action est irreversible.',
-          ),
+          title: Text(l10n.authDialogForgotPinTitle),
+          content: Text(l10n.authDialogForgotPinLocalMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Annuler'),
+              child: Text(l10n.commonActionCancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Reinitialiser'),
+              child: Text(l10n.commonActionReset),
             ),
           ],
         ),
@@ -184,6 +189,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -206,7 +212,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space2),
                   Text(
-                    'Saisissez votre PIN pour continuer',
+                    l10n.authPagePinTagline,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color:
                               Theme.of(context).colorScheme.onSurfaceVariant,
@@ -249,7 +255,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Deverrouiller'),
+                        : Text(l10n.authActionUnlock),
                   ),
                   const SizedBox(height: AppSpacing.space4),
                   Row(
@@ -258,13 +264,13 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                       TextButton(
                         onPressed:
                             _isAuthenticating ? null : _handleForgotPin,
-                        child: const Text('PIN oublie ?'),
+                        child: Text(l10n.authDialogForgotPinTitle),
                       ),
                       TextButton.icon(
                         onPressed:
                             _isAuthenticating ? null : _attemptBiometric,
                         icon: const PhosphorIcon(PhosphorIconsRegular.fingerprint, size: 20),
-                        label: const Text('Biometrie'),
+                        label: Text(l10n.authActionBiometric),
                       ),
                     ],
                   ),

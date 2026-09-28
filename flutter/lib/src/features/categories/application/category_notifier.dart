@@ -26,9 +26,6 @@ class CategoryNotifier extends CrudNotifier<Category> {
       items.sort((a, b) => a.nom.compareTo(b.nom));
 
   @override
-  String get entityLabel => 'catégories';
-
-  @override
   String? validateUpdate(Category item) {
     final existing = allItems.where((e) => e.id == item.id).firstOrNull;
     if (existing != null && existing.isSystem) {

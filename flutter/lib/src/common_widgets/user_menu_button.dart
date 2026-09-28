@@ -8,6 +8,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 
 class UserMenuButton extends ConsumerWidget {
@@ -17,6 +18,7 @@ class UserMenuButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
     final isAuthenticated = authState is AuthAuthenticated;
+    final l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<String>(
       offset: const Offset(0, 48),
@@ -30,25 +32,25 @@ class UserMenuButton extends ConsumerWidget {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: 'settings',
           child: Row(
             children: [
-              PhosphorIcon(PhosphorIconsRegular.gear, size: 20),
-              SizedBox(width: 12),
-              Text('Paramètres'),
+              const PhosphorIcon(PhosphorIconsRegular.gear, size: 20),
+              const SizedBox(width: 12),
+              Text(l10n.commonNavSettings),
             ],
           ),
         ),
         if (isAuthenticated) ...[
           const PopupMenuDivider(),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'logout',
             child: Row(
               children: [
-                PhosphorIcon(PhosphorIconsRegular.signOut, size: 20),
-                SizedBox(width: 12),
-                Text('Déconnexion'),
+                const PhosphorIcon(PhosphorIconsRegular.signOut, size: 20),
+                const SizedBox(width: 12),
+                Text(l10n.commonActionLogout),
               ],
             ),
           ),

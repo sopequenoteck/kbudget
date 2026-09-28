@@ -189,8 +189,8 @@ void main() {
       await tester.tap(find.text('Enregistrer'));
       await tester.pumpAndSettle();
 
-      // Une erreur "Champ requis" doit apparaître (libellé vide)
-      expect(find.text('Champ requis'), findsAtLeast(1));
+      // Une erreur "Ce champ est requis." doit apparaître (libellé vide)
+      expect(find.text('Ce champ est requis.'), findsAtLeast(1));
     });
 
     testWidgets('should_show_errors_when_amount_invalid_on_submit',
@@ -211,7 +211,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Une erreur de validation doit apparaître (montant invalide)
-      expect(find.text('Champ requis'), findsAtLeast(1));
+      expect(find.text('Ce champ est requis.'), findsAtLeast(1));
     });
 
     testWidgets('should_show_delete_pill_when_edit_mode', (tester) async {

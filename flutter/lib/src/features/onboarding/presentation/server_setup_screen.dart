@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ServerSetupScreen extends ConsumerStatefulWidget {
@@ -29,10 +30,11 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingNotifierProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configuration serveur'),
+        title: Text(l10n.onboardingPageServerSetupTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.space6),
@@ -42,26 +44,29 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Entrez l\'URL de votre serveur K-Budget',
+                l10n.onboardingFormServerUrlHint,
                 style: theme.textTheme.bodyLarge,
               ),
               const SizedBox(height: AppSpacing.space6),
               TextFormField(
                 controller: _urlController,
-                decoration: const InputDecoration(
-                  labelText: 'URL du serveur',
+                decoration: InputDecoration(
+                  labelText: l10n.onboardingFormServerUrl,
                   hintText: 'https://budget.example.com/api',
-                  prefixIcon: PhosphorIcon(PhosphorIconsRegular.link, size: 20),
+                  prefixIcon: const PhosphorIcon(
+                    PhosphorIconsRegular.link,
+                    size: 20,
+                  ),
                 ),
                 keyboardType: TextInputType.url,
                 autocorrect: false,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'L\'URL est requise';
+                    return l10n.onboardingFormServerUrlRequired;
                   }
                   final uri = Uri.tryParse(value.trim());
                   if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-                    return 'URL invalide';
+                    return l10n.onboardingFormServerUrlInvalid;
                   }
                   return null;
                 },
@@ -82,7 +87,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                       ),
                       const SizedBox(width: AppSpacing.space2),
                       Text(
-                        'Connexion réussie',
+                        l10n.onboardingFeedbackConnected,
                         style: TextStyle(color: theme.colorScheme.primary),
                       ),
                     ],
@@ -126,8 +131,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                     : const PhosphorIcon(PhosphorIconsRegular.wifiHigh, size: 20),
                 label: Text(
                   state.isCheckingServer
-                      ? 'Connexion en cours...'
-                      : 'Vérifier la connexion',
+                      ? l10n.onboardingFeedbackConnecting
+                      : l10n.onboardingActionCheckConnection,
                 ),
               ),
               const Spacer(),
@@ -135,7 +140,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                 onPressed: state.isServerReachable
                     ? () => Navigator.of(context).pop(true)
                     : null,
-                child: const Text('Confirmer'),
+                child: Text(l10n.commonActionConfirm),
               ),
               const SizedBox(height: AppSpacing.space4),
             ],

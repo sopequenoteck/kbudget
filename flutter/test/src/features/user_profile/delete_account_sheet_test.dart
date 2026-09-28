@@ -226,7 +226,7 @@ void main() {
 
         final l10n = AppLocalizationsFr();
         expect(
-          find.text(l10n.errorCodeLastAdminDeletionForbidden),
+          find.text(l10n.usersFeedbackLastAdminDeletionForbidden),
           findsOneWidget,
         );
       },

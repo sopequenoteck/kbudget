@@ -11,6 +11,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/bank.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -27,10 +28,11 @@ class BankSelectPicker extends ConsumerWidget {
   final AsyncValue<List<Bank>> banks;
 
   void _openModal(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final searchNotifier = ValueNotifier<String>('');
     AppModal.show(
       context,
-      title: 'Sélectionner une banque',
+      title: l10n.accountsFormSelectBankPlaceholder,
       headerActions: _SearchField(notifier: searchNotifier),
       child: _BankList(
         searchNotifier: searchNotifier,
@@ -50,6 +52,7 @@ class BankSelectPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final selectedBank = banks.whenOrNull(
       data: (list) => list.where((b) => b.code == selectedBankCode).firstOrNull,
@@ -63,7 +66,7 @@ class BankSelectPicker extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Banque',
+          l10n.accountsFormBankTitle,
           style: TextStyle(
             fontSize: AppTypography.sizeSm,
             fontWeight: AppTypography.medium,
@@ -124,7 +127,7 @@ class BankSelectPicker extends ConsumerWidget {
                 ] else if (hasSelection && isOther) ...[
                   Expanded(
                     child: Text(
-                      'Autre / Personnalisé',
+                      l10n.accountsValueOtherCustom,
                       style: TextStyle(
                         fontSize: AppTypography.sizeMd,
                         fontWeight: AppTypography.medium,
@@ -137,7 +140,7 @@ class BankSelectPicker extends ConsumerWidget {
                 ] else
                   Expanded(
                     child: Text(
-                      'Sélectionner une banque',
+                      l10n.accountsFormSelectBankPlaceholder,
                       style: TextStyle(
                         fontSize: AppTypography.sizeMd,
                         color: colorScheme.onSurfaceVariant,
@@ -168,6 +171,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
@@ -192,7 +196,7 @@ class _SearchField extends StatelessWidget {
                 color: colorScheme.onSurface,
               ),
               decoration: InputDecoration.collapsed(
-                hintText: 'Rechercher une banque...',
+                hintText: l10n.accountsFilterBankSearchPlaceholder,
                 hintStyle: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurfaceVariant,
@@ -237,13 +241,14 @@ class _BankList extends StatelessWidget {
 
   Widget _buildErrorFallback(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.space6),
           child: Text(
-            'Impossible de charger les banques',
+            l10n.accountsFeedbackBanksLoadError,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               color: colorScheme.onSurfaceVariant,
@@ -261,6 +266,7 @@ class _BankList extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, List<Bank> allBanks, String query) {
+    final l10n = AppLocalizations.of(context)!;
     final filtered = query.isEmpty
         ? allBanks.where((b) => b.code != 'OTHER').toList()
         : allBanks
@@ -283,7 +289,7 @@ class _BankList extends StatelessWidget {
           _buildEmptyMessage(context)
         else ...[
           if (frBanks.isNotEmpty) ...[
-            _buildSectionHeader(context, 'France'),
+            _buildSectionHeader(context, l10n.accountsListBankGroupFrance),
             ...frBanks.map(
               (b) => _BankTile(
                 bank: b,
@@ -294,7 +300,10 @@ class _BankList extends StatelessWidget {
           ],
           if (tgBanks.isNotEmpty) ...[
             if (frBanks.isNotEmpty) const SizedBox(height: AppSpacing.space2),
-            _buildSectionHeader(context, 'Afrique de l\'Ouest'),
+            _buildSectionHeader(
+              context,
+              l10n.accountsListBankGroupWestAfrica,
+            ),
             ...tgBanks.map(
               (b) => _BankTile(
                 bank: b,
@@ -306,7 +315,10 @@ class _BankList extends StatelessWidget {
           if (intlBanks.isNotEmpty) ...[
             if (frBanks.isNotEmpty || tgBanks.isNotEmpty)
               const SizedBox(height: AppSpacing.space2),
-            _buildSectionHeader(context, 'International'),
+            _buildSectionHeader(
+              context,
+              l10n.accountsListBankGroupInternational,
+            ),
             ...intlBanks.map(
               (b) => _BankTile(
                 bank: b,
@@ -348,11 +360,12 @@ class _BankList extends StatelessWidget {
 
   Widget _buildEmptyMessage(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.space6),
       child: Center(
         child: Text(
-          'Aucune banque trouvée',
+          l10n.accountsEmptyBankNotFound,
           style: TextStyle(
             fontSize: AppTypography.sizeSm,
             color: colorScheme.onSurfaceVariant,
@@ -451,9 +464,10 @@ class _OtherBankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Semantics(
-      label: 'Autre / Personnalisé',
+      label: l10n.accountsValueOtherCustom,
       toggled: isSelected,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -485,7 +499,7 @@ class _OtherBankTile extends StatelessWidget {
               const SizedBox(width: AppSpacing.space3),
               Expanded(
                 child: Text(
-                  'Autre / Personnalisé',
+                  l10n.accountsValueOtherCustom,
                   style: TextStyle(
                     fontSize: AppTypography.sizeMd,
                     fontWeight: AppTypography.medium,

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppModal {
@@ -127,6 +128,7 @@ class _ModalContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Semantics(
@@ -182,7 +184,7 @@ class _ModalContent extends StatelessWidget {
                         ],
                         Semantics(
                           button: true,
-                          label: 'Fermer',
+                          label: l10n.commonActionClose,
                           child: IconButton(
                             onPressed: () {
                               Navigator.of(context).pop();

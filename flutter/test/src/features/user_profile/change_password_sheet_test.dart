@@ -23,6 +23,9 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
@@ -50,6 +53,9 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
@@ -81,10 +87,10 @@ void main() {
       );
 
       await tester.tap(find.text('Modifier'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(
-        find.text('Le mot de passe doit contenir au moins 12 caractères'),
+        find.text('12 caractères minimum'),
         findsOneWidget,
       );
     });
@@ -96,6 +102,9 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
@@ -125,7 +134,7 @@ void main() {
       );
 
       await tester.tap(find.text('Modifier'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(
         find.text('Les mots de passe ne correspondent pas'),
@@ -138,6 +147,9 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
@@ -226,10 +238,10 @@ void main() {
 
         final l10n = AppLocalizationsFr();
         expect(
-          find.text(l10n.errorCodeCurrentPasswordIncorrect),
+          find.text(l10n.usersFeedbackCurrentPasswordIncorrect),
           findsOneWidget,
         );
-        expect(find.text(l10n.errorCodePasswordIncorrect), findsNothing);
+        expect(find.text(l10n.errorsApiPasswordIncorrect), findsNothing);
       },
     );
   });

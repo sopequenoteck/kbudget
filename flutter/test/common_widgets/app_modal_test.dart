@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
   Widget buildApp({required double width, required double height}) {
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: MediaQuery(
         data: MediaQueryData(size: Size(width, height)),
         child: Builder(
@@ -64,6 +68,9 @@ void main() {
     testWidgets('should_closeModal_when_closeButtonTapped', (tester) async {
       var closed = false;
       await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: MediaQuery(
           data: const MediaQueryData(size: Size(400, 800)),
           child: Builder(

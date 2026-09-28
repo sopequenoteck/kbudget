@@ -2,15 +2,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 /// Classe de base pour les notifiers CRUD avec pagination client-side.
 ///
-/// Les sous-classes doivent implémenter [repo], [itemId], [sortItems]
-/// et [entityLabel]. Elles peuvent optionnellement surcharger
+/// Les sous-classes doivent implémenter [repo], [itemId] et [sortItems].
+/// Elles peuvent optionnellement surcharger
 /// [validateUpdate] et [validateDelete] pour ajouter des gardes.
 abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
   static const _pageSize = 20;
@@ -25,9 +26,6 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
 
   /// Trie la liste d'items en place.
   void sortItems(List<T> items);
-
-  /// Label de l'entité pour les messages d'erreur (ex: "comptes").
-  String get entityLabel;
 
   /// Valide avant une mise à jour. Retourne un message d'erreur ou null.
   String? validateUpdate(T item) => null;
@@ -44,10 +42,10 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
       allItems = await repo.getAll();
       sortItems(allItems);
       refreshPage(resetPage: true);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les $entityLabel: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -73,10 +71,10 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
       allItems.add(created);
       sortItems(allItems);
       refreshPage();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur lors de la création: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -101,10 +99,10 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la modification: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -128,13 +126,13 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       allItems.insert(index, saved);
       sortItems(allItems);
       refreshPage();
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la suppression: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
       );
     }
   }

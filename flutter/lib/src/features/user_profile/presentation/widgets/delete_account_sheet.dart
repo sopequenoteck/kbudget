@@ -74,10 +74,17 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
       }
     } on DioException catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       final message = errorLabel(
-        AppLocalizations.of(context)!,
+        l10n,
         apiErrorCode(e),
         fallback: 'Erreur lors de la suppression',
+        // Sur cet ecran, le libelle generique ne dit pas quoi faire : le
+        // texte propre a la suppression de compte le dit, comme Angular.
+        overrides: {
+          'LAST_ADMIN_DELETION_FORBIDDEN':
+              l10n.usersFeedbackLastAdminDeletionForbidden,
+        },
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),

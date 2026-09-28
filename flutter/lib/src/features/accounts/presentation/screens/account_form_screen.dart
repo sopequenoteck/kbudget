@@ -104,16 +104,24 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   String? _validateNom(String value) {
     final l10n = AppLocalizations.of(context)!;
-    if (value.trim().isEmpty) return l10n.validationRequired;
-    if (value.length > 50) return l10n.validationMaxLength(50);
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationRequired;
+    }
+    if (value.length > 50) {
+      return l10n.commonValidationMaxLength(50);
+    }
     return null;
   }
 
   String? _validateMontant(String value) {
     final l10n = AppLocalizations.of(context)!;
-    if (value.trim().isEmpty) return l10n.validationRequired;
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 

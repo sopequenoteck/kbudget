@@ -19,6 +19,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -37,6 +38,7 @@ class RecentTransactionsSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final colors = theme.extension<AppThemeExtension>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     if (state.isLoading) return _buildSkeleton();
 
@@ -134,6 +136,7 @@ class RecentTransactionsSection extends ConsumerWidget {
                 rightSubtitle: RelativeDateFormatter.format(
                   transaction.date,
                   locale: ref.watch(intlLocaleProvider),
+                  l10n: l10n,
                 ),
                 valueColor: AmountFormatter.amountColor(
                     transaction.type.name, colors),
@@ -154,9 +157,10 @@ class RecentTransactionsSection extends ConsumerWidget {
                 locale: ref.watch(intlLocaleProvider)),
               subtitle: subtitle,
               rightSubtitle: RelativeDateFormatter.format(
-                  transaction.date,
-                  locale: ref.watch(intlLocaleProvider),
-                ),
+                transaction.date,
+                locale: ref.watch(intlLocaleProvider),
+                l10n: l10n,
+              ),
               valueColor:
                   AmountFormatter.amountColor(transaction.type.name, colors),
               onPressed: onPressed,

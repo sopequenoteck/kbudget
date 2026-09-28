@@ -6,24 +6,26 @@
   "commonActionEdit": "Modifier",
   "commonActionRetry": "Réessayer",
   "errorsClientGeneric": "Une erreur est survenue",
-  "errorNetwork": "Erreur de connexion réseau",
+  "errorsClientNetwork": "Impossible de contacter le serveur",
+  "errorsClientUnknown": "Erreur inattendue",
   "errorsApiBadRequest": "La demande n'a pas pu être traitée.",
   "errorsApiValidationError": "Veuillez vérifier les informations saisies.",
   "errorsApiMalformedRequest": "Requête invalide.",
-  "errorCodePasswordIncorrect": "Mot de passe incorrect",
-  "errorCodeCurrentPasswordIncorrect": "Mot de passe actuel incorrect",
-  "errorCodePasswordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel",
+  "errorsApiPasswordIncorrect": "Mot de passe incorrect.",
+  "usersFeedbackCurrentPasswordIncorrect": "Mot de passe actuel incorrect.",
+  "usersFeedbackLastAdminDeletionForbidden": "Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.",
+  "errorsApiPasswordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
   "errorsApiConfirmationRequired": "Confirmation explicite requise.",
-  "errorCodeUnauthenticated": "Authentification requise",
+  "errorsApiUnauthenticated": "Authentification requise.",
   "errorsApiTokenExpired": "Votre session a expiré. Veuillez vous reconnecter.",
   "errorsApiTokenRevoked": "Votre session a été révoquée. Veuillez vous reconnecter.",
   "errorsApiTokenReuseDetected": "Session interrompue par sécurité. Veuillez vous reconnecter.",
   "errorsApiTokenInvalid": "Session invalide. Veuillez vous reconnecter.",
   "errorsApiAccessDenied": "Accès refusé",
-  "errorCodePasswordResetRequired": "Réinitialisation des identifiants requise",
+  "errorsApiPasswordResetRequired": "Réinitialisation des identifiants requise",
   "errorsApiPasswordResetNotRequired": "La réinitialisation des identifiants n'est pas requise pour ce compte.",
   "errorsApiFeatureDisabled": "Fonctionnalité désactivée",
-  "errorCodeLastAdminDeletionForbidden": "Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.",
+  "errorsApiLastAdminDeletionForbidden": "Au moins un administrateur actif doit exister.",
   "errorsApiNotFound": "Ressource introuvable",
   "errorsApiConflict": "Conflit de données",
   "errorsApiLastAdminCannotBeDisabled": "Impossible de désactiver le dernier administrateur actif.",
@@ -128,10 +130,10 @@
   "transactionsFormNoteAria": "Note",
   "transferFormSaveButton": "Valider",
   "transactionsFormTransferAccountsMismatch": "Les comptes source et destination doivent être différents",
-  "validationRequired": "Champ requis",
-  "validationAmountPositive": "Le montant doit être positif",
-  "validationMaxLength": "Maximum {max} caractères",
-  "@validationMaxLength": {
+  "commonValidationRequired": "Ce champ est requis.",
+  "commonValidationAmountPositive": "Le montant doit être supérieur à 0",
+  "commonValidationMaxLength": "{max} caractères maximum",
+  "@commonValidationMaxLength": {
     "placeholders": {
       "max": {
         "type": "int"
@@ -220,5 +222,190 @@
   "recurringFeedbackValidated": "Transaction créée",
   "recurringSkipSuccess": "Échéance avancée",
   "recurringFeedbackDeactivated": "Récurrence désactivée",
-  "frequencyHebdomadaire": "/semaine"
+  "frequencyHebdomadaire": "/semaine",
+  "authPageLoginTagline": "Connectez-vous à votre compte",
+  "authFormEmailRequired": "Email requis",
+  "authFormPasswordRequired": "Mot de passe requis",
+  "authPageFirstLoginTitle": "Premier accès",
+  "authPageFirstLoginNotice": "Vous êtes connecté avec les identifiants initiaux générés par le système. Définissez dès maintenant votre email définitif, un mot de passe personnel et votre nom d'affichage pour accéder à l'application.",
+  "authFormDisplayNameRequired": "Nom requis (100 caractères max)",
+  "authFeedbackResetError": "Erreur lors de la mise à jour de vos identifiants. Veuillez réessayer.",
+  "authFormPasswordConfirmRequired": "Veuillez confirmer votre mot de passe",
+  "authFeedbackInvalidLink": "Lien invalide, expiré, déjà utilisé ou révoqué.",
+  "authFeedbackCreateAccountError": "Erreur lors de la création du compte. Veuillez réessayer.",
+  "authFeedbackCheckingLink": "Vérification du lien...",
+  "authPageInvalidLinkTitle": "Lien invalide",
+  "authActionBackToLogin": "Retour à la connexion",
+  "authPageAcceptInviteTitle": "Créer votre compte",
+  "authPageAcceptInviteTagline": "Quelques informations pour finaliser l'inscription",
+  "authFormEmail": "Email",
+  "authFormEmailInvalid": "Email invalide",
+  "authFormPassword": "Mot de passe",
+  "authFormDisplayName": "Nom d'affichage",
+  "authFormConfirmPassword": "Confirmer le mot de passe",
+  "authFormPasswordMismatch": "Les mots de passe ne correspondent pas",
+  "authFormCurrency": "Devise",
+  "authActionCreateAccount": "Créer mon compte",
+  "authActionSignIn": "Se connecter",
+  "authFormPasswordMinLength": "{min} caractères minimum",
+  "@authFormPasswordMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authActionUnlockBiometricReason": "Déverrouillez K-Budget",
+  "authFeedbackBiometricError": "Erreur biométrique. Utilisez votre PIN.",
+  "authFormPinMinLength": "Le PIN doit contenir au moins 4 chiffres",
+  "authFeedbackPinIncorrect": "PIN incorrect",
+  "authDialogForgotPinTitle": "PIN oublié ?",
+  "authDialogForgotPinServerMessage": "Vous serez déconnecté et devrez vous reconnecter avec vos identifiants.",
+  "authDialogForgotPinLocalMessage": "En mode local, la réinitialisation du PIN effacera toutes vos données. Cette action est irréversible.",
+  "authPagePinTagline": "Saisissez votre PIN pour continuer",
+  "authActionUnlock": "Déverrouiller",
+  "authActionBiometric": "Biométrie",
+  "commonActionConfirm": "Confirmer",
+  "commonActionClose": "Fermer",
+  "commonActionChooseEmoji": "Choisir un emoji",
+  "commonFormEmojiSearchPlaceholder": "Rechercher un emoji...",
+  "commonEmptyNoRecentEmoji": "Aucun emoji récent",
+  "transactionsActionCreate": "Transaction",
+  "subscriptionsActionCreate": "Abonnement",
+  "debtsActionCreate": "Dette",
+  "budgetsActionCreate": "Budget",
+  "transactionsActionTransfer": "Virement",
+  "commonActionPreviousMonthAria": "Mois précédent",
+  "commonActionNextMonthAria": "Mois suivant",
+  "commonNavSettings": "Paramètres",
+  "commonActionLogout": "Déconnexion",
+  "commonActionReset": "Réinitialiser",
+  "commonFormSearchPlaceholder": "Rechercher...",
+  "commonFormSelectPlaceholder": "Sélectionner...",
+  "commonEmptyNoResults": "Aucun résultat",
+  "categoriesActionCreateNamed": "Créer « {name} »",
+  "@categoriesActionCreateNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesFormSearchPlaceholder": "Rechercher une catégorie...",
+  "categoriesEmptyTitle": "Aucune catégorie — créez-en une",
+  "categoriesActionCreate": "Créer",
+  "categoriesListNoResults": "Aucune catégorie trouvée",
+  "commonActionBack": "Retour",
+  "accountsFormSelectBankPlaceholder": "Sélectionner une banque",
+  "accountsFormBankTitle": "Banque",
+  "accountsValueOtherCustom": "Autre / Personnalisé",
+  "accountsFilterBankSearchPlaceholder": "Rechercher une banque...",
+  "accountsFeedbackBanksLoadError": "Impossible de charger les banques",
+  "accountsEmptyBankNotFound": "Aucune banque trouvée",
+  "accountsListBankGroupFrance": "France",
+  "accountsListBankGroupWestAfrica": "Afrique de l'Ouest",
+  "accountsListBankGroupInternational": "International",
+  "commonFeedbackSaveError": "Erreur lors de la sauvegarde",
+  "commonFeedbackDeleteError": "Erreur lors de la suppression",
+  "commonFeedbackLoadError": "Erreur de chargement",
+  "onboardingDialogSwitchToLocalTitle": "Passer en mode local ?",
+  "onboardingDialogSwitchToLocalMessage": "Vos données seront stockées uniquement sur cet appareil. Vous pourrez revenir en mode serveur depuis les paramètres.",
+  "onboardingActionUseLocalMode": "Utiliser en mode local",
+  "onboardingPageTitle": "Bienvenue sur K-Budget",
+  "onboardingPageTagline": "Choisissez votre mode de données",
+  "onboardingValueLocalMode": "Mode local",
+  "onboardingValueLocalModeHint": "Vos données restent sur cet appareil",
+  "onboardingValueServerMode": "Mode serveur",
+  "onboardingValueServerModeHint": "Synchronisez avec votre serveur K-Budget",
+  "onboardingPageServerSetupTitle": "Configuration serveur",
+  "onboardingFormServerUrlHint": "Entrez l'URL de votre serveur K-Budget",
+  "onboardingFormServerUrl": "URL du serveur",
+  "onboardingFormServerUrlRequired": "L'URL est requise",
+  "onboardingFormServerUrlInvalid": "URL invalide",
+  "onboardingFeedbackConnected": "Connexion réussie",
+  "onboardingFeedbackConnecting": "Connexion en cours...",
+  "onboardingActionCheckConnection": "Vérifier la connexion",
+  "compatibilityPageClientTitle": "Application à mettre à jour",
+  "compatibilityPageServerTitle": "Serveur à mettre à jour",
+  "compatibilityPageTagline": "Cette version de l'application et votre serveur ne peuvent pas fonctionner ensemble.",
+  "compatibilityFeedbackOffline": "Serveur injoignable. Vérifiez l'URL et votre connexion.",
+  "compatibilityFeedbackServerTooOldUnknown": "Ce serveur est trop ancien pour indiquer sa version. Cette application requiert au minimum la version {requiredVersion}. Mettez votre instance à jour, puis relancez l'application.",
+  "@compatibilityFeedbackServerTooOldUnknown": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackServerTooOldVersion": "Ce serveur est en version {serverVersion}. Cette application requiert au minimum la version {requiredVersion}. Mettez votre instance à jour, puis relancez l'application.",
+  "@compatibilityFeedbackServerTooOldVersion": {
+    "placeholders": {
+      "serverVersion": {
+        "type": "String"
+      },
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackClientTooOld": "Ce serveur exige au minimum la version {requiredVersion} de l'application. Mettez à jour K-Budget depuis votre magasin.",
+  "@compatibilityFeedbackClientTooOld": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackClientTooOldVerbose": "Ce serveur exige au minimum la version {requiredVersion} de l'application. Vous utilisez la version {clientVersion}. Mettez à jour K-Budget depuis votre magasin.",
+  "@compatibilityFeedbackClientTooOldVerbose": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      },
+      "clientVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValueTomorrow": "Demain",
+  "commonValueDaysAgo": "il y a {count, plural, one {{count} jour} other {{count} jours}}",
+  "@commonValueDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueWeeksAgo": "il y a {count, plural, one {{count} semaine} other {{count} semaines}}",
+  "@commonValueWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueDaysAgoShort": "il y a {count} j.",
+  "@commonValueDaysAgoShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueInDaysShort": "dans {count} j.",
+  "@commonValueInDaysShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardSummaryMonthVariation": "{amount} ce mois",
+  "@dashboardSummaryMonthVariation": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

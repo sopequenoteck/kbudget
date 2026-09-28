@@ -250,7 +250,7 @@ void main() {
       ]));
       await tester.pumpAndSettle();
 
-      expect(find.text('Finalisez votre compte'), findsOneWidget);
+      expect(find.text('Premier accès'), findsOneWidget);
     });
 
     testWidgets(
@@ -270,7 +270,7 @@ void main() {
       ]));
       await tester.pumpAndSettle();
 
-      expect(find.text('Finalisez votre compte'), findsNothing);
+      expect(find.text('Premier accès'), findsNothing);
       expect(find.text('Accueil'), findsWidgets);
     });
   });

@@ -28,9 +28,6 @@ class AccountNotifier extends CrudNotifier<Account> {
   void sortItems(List<Account> items) =>
       items.sort((a, b) => a.nom.compareTo(b.nom));
 
-  @override
-  String get entityLabel => 'comptes';
-
   Future<void> setDefault(String id) async {
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},

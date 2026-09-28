@@ -13,7 +13,6 @@ Future<void> pumpVariationBadge(
   required num delta,
   String? currency,
   num? percentage,
-  String suffix = 'ce mois',
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -27,7 +26,6 @@ Future<void> pumpVariationBadge(
             delta: delta,
             currency: currency,
             percentage: percentage,
-            suffix: suffix,
           ),
         ),
       ),
@@ -136,6 +134,23 @@ void main() {
 
         // Vérifier que le pourcentage est formaté avec 1 décimale
         expect(textContent, contains('(+12,5%)'));
+      },
+    );
+
+    testWidgets(
+      'should_include_month_variation_sentence_in_french_$themeName',
+      (tester) async {
+        await pumpVariationBadge(
+          tester,
+          theme,
+          delta: 150.50,
+          currency: '€',
+        );
+
+        final textWidget = tester.widget<Text>(find.byType(Text));
+        final textContent = textWidget.data ?? '';
+
+        expect(textContent, contains('ce mois'));
       },
     );
   });
