@@ -235,7 +235,7 @@ void main() {
       await notifier().loadItems();
 
       expect(state().error, isNotNull);
-      expect(state().error, contains('Network error'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().isLoading, false);
     });
 

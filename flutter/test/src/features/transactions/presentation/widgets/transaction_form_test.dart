@@ -223,8 +223,8 @@ void main() {
 
       // Le bouton Supprimer doit être présent en mode édition
       expect(find.text('Supprimer'), findsOneWidget);
-      // Le titre "Modifier transaction" doit être visible
-      expect(find.text('Modifier transaction'), findsOneWidget);
+      // Le titre "Modifier la transaction" doit être visible
+      expect(find.text('Modifier la transaction'), findsOneWidget);
     });
 
     testWidgets('should_hide_recurring_icon_when_edit_mode', (tester) async {
@@ -288,6 +288,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    testWidgets('should_showNotePlaceholder_when_noteSectionOpened',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Note'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ajouter une note...'), findsOneWidget);
+    });
+
+    testWidgets('should_showFrequencies_when_recurringEnabled',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Récurrence'));
+      await tester.pumpAndSettle();
+      expect(find.text('Transaction récurrente'), findsOneWidget);
+      expect(find.text('Hebdomadaire'), findsNothing);
+
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hebdomadaire'), findsOneWidget);
+      expect(find.text('Mensuel'), findsOneWidget);
+      expect(find.text('Annuel'), findsOneWidget);
+    });
+
+    testWidgets('should_showTypeLabels_when_formOpens', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dépense'), findsOneWidget);
+      expect(find.text('Recette'), findsOneWidget);
+      expect(find.text('Catégorie'), findsOneWidget);
     });
   });
 }

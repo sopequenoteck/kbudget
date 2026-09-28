@@ -248,6 +248,7 @@ class _ConfirmDeleteBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(top: AppSpacing.space2),
       padding: const EdgeInsets.all(AppSpacing.space3),
@@ -260,7 +261,7 @@ class _ConfirmDeleteBlock extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Supprimer ce compte ?',
+            l10n.accountsDialogDeleteMessage,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.medium,
@@ -284,7 +285,7 @@ class _ConfirmDeleteBlock extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onCancel,
-                  child: const Text('Annuler'),
+                  child: Text(l10n.commonActionCancel),
                 ),
               ),
               Expanded(
@@ -294,7 +295,7 @@ class _ConfirmDeleteBlock extends StatelessWidget {
                     backgroundColor: expenseColor,
                     foregroundColor: colorScheme.onError,
                   ),
-                  child: const Text('Supprimer'),
+                  child: Text(l10n.commonActionDelete),
                 ),
               ),
             ],

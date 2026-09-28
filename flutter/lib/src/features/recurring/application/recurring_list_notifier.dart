@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final recurringListNotifierProvider =
     NotifierProvider<RecurringListNotifier, ListState<RecurringTransaction>>(
@@ -31,10 +32,10 @@ class RecurringListNotifier
       final items = await repo.listActive();
       final sorted = _sortItems(items);
       state = state.copyWith(items: sorted, isLoading: false);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les récurrences: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }

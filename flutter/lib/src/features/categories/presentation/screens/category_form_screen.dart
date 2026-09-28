@@ -44,8 +44,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.categoryDeleteConfirmTitle),
-        content: Text(l10n.categoryDeleteConfirmMessage),
+        title: Text(l10n.categoriesDialogDeleteTitle),
+        content: Text(l10n.categoriesDialogDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -68,7 +68,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         if (mounted) {
           final l10nInner = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10nInner.categoryErrorDelete)),
+            SnackBar(content: Text(l10nInner.commonFeedbackDeleteError)),
           );
         }
       }

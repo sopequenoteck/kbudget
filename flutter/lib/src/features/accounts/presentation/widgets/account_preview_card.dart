@@ -75,7 +75,7 @@ class AccountPreviewCard extends StatelessWidget {
                 Text(
                   hasContent && name != null && name!.isNotEmpty
                       ? name!
-                      : l10n.accountFormPreviewPlaceholder,
+                      : l10n.accountsFormPreviewPlaceholder,
                   style: TextStyle(
                     fontSize: AppTypography.sizeMd,
                     fontWeight: AppTypography.medium,

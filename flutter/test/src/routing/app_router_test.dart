@@ -189,7 +189,7 @@ void main() {
       await tester.tap(find.text('Transactions').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction ce mois-ci'), findsOneWidget);
+      expect(find.textContaining('Aucune transaction en '), findsOneWidget);
     });
 
     testWidgets('should_show_fab_when_onboarding_done',

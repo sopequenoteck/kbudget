@@ -65,7 +65,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     } else if (state.error != null && state.items.isEmpty) {
       body = EmptyStateWidget(
         icon: PhosphorIconsRegular.warning,
-        message: l10n.errorsClientGeneric,
+        message: l10n.commonFeedbackLoadError,
         ctaLabel: l10n.commonActionRetry,
         onCtaTap: () =>
             ref.read(recurringListNotifierProvider.notifier).loadItems(),
@@ -73,7 +73,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     } else if (state.items.isEmpty) {
       body = EmptyStateWidget(
         icon: PhosphorIconsRegular.repeat,
-        message: l10n.recurringEmpty,
+        message: l10n.recurringEmptyTitle,
       );
     } else {
       final isValidatingAll = state.mutatingIds.contains('__all__');
@@ -230,7 +230,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                 ),
               ),
               Text(
-                l10n.recurringNextOccurrence(
+                l10n.recurringDetailNext(
                   RelativeDateFormatter.formatCompact(
                     item.nextOccurrence,
                     locale: ref.watch(intlLocaleProvider),
@@ -289,88 +289,69 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     BuildContext context,
     List<String> ids,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).validateAll(ids);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorsClientGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.validateAll(ids),
+        success: l10n.recurringFeedbackValidatedCount(ids.length),
+        failure: l10n.recurringFeedbackValidationError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringFeedbackValidated)),
-      );
-    }
-  }
 
   Future<void> _handleValidate(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).validate(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorsClientGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.validate(id),
+        success: l10n.recurringFeedbackValidatedOne,
+        failure: l10n.recurringFeedbackValidationError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringFeedbackValidated)),
-      );
-    }
-  }
 
   Future<void> _handleSkip(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).skip(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorsClientGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.skip(id),
+        success: l10n.recurringFeedbackSkipped,
+        failure: l10n.recurringFeedbackSkipFailed,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringSkipSuccess)),
-      );
-    }
-  }
 
   Future<void> _handleDeactivate(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).deactivate(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorsClientGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.deactivate(id),
+        success: l10n.recurringFeedbackDeactivated,
+        failure: l10n.recurringFeedbackDeactivateError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringFeedbackDeactivated)),
-      );
+
+  /// Lance [action], puis affiche [failure] si elle a laisse une erreur dans
+  /// l'etat, [success] sinon.
+  Future<void> _runWithFeedback(
+    BuildContext context,
+    Future<void> Function(RecurringListNotifier notifier) action, {
+    required String success,
+    required String failure,
+  }) async {
+    await action(ref.read(recurringListNotifierProvider.notifier));
+    if (!context.mounted) {
+      return;
     }
+    final failed = ref.read(recurringListNotifierProvider).error != null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(failed ? failure : success),
+        backgroundColor: failed ? Theme.of(context).colorScheme.error : null,
+      ),
+    );
   }
 }
 
@@ -599,7 +580,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.recurringMonthlySummaryTitle,
+                  l10n.recurringSummaryTitle.toUpperCase(),
                   style: TextStyle(
                     fontSize: AppTypography.sizeXs,
                     fontWeight: AppTypography.semiBold,
@@ -623,7 +604,7 @@ class _MonthlySummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                l10n.recurringChargesCount(expenseCount),
+                l10n.recurringSummaryExpenseCount(expenseCount).toUpperCase(),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXs,
                   fontWeight: AppTypography.semiBold,
@@ -633,7 +614,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '~$totalFormatted/mois',
+                l10n.recurringSummaryMonthlyExpenses(totalFormatted),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.semiBold,

@@ -265,7 +265,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
                         color: colorScheme.onPrimary,
                       ),
                     )
-                  : Text(l10n.transferFormSaveButton),
+                  : Text(l10n.transactionsActionTransferSubmit),
             ),
           ],
         ),

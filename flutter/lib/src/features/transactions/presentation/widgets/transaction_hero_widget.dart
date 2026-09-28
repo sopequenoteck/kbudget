@@ -8,6 +8,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -79,7 +80,9 @@ class TransactionHeroWidget extends StatelessWidget {
         children: [
           // Label
           Text(
-            'SOLDE',
+            AppLocalizations.of(context)!
+                .transactionsSummaryBalance
+                .toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,

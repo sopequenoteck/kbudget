@@ -96,7 +96,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune récurrence active'), findsOneWidget);
+      expect(find.text('Aucune transaction récurrente'), findsOneWidget);
     });
 
     testWidgets('should_show_recurring_items_sorted', (tester) async {
@@ -127,7 +127,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Une erreur est survenue'), findsOneWidget);
+      expect(find.text('Erreur de chargement'), findsOneWidget);
       expect(find.text('Réessayer'), findsOneWidget);
 
       await tester.tap(find.text('Réessayer'));
@@ -177,12 +177,14 @@ void main() {
       (
         action: 'validate',
         buttonLabel: 'Marquer comme payée',
-        successMessage: 'Transaction créée',
+        successMessage: 'Transaction validée',
+        errorMessage: 'Erreur lors de la validation',
       ),
       (
         action: 'deactivate',
         buttonLabel: 'Désactiver la récurrence',
         successMessage: 'Récurrence désactivée',
+        errorMessage: 'Erreur lors de la désactivation',
       ),
     ]) {
       testWidgets(
@@ -220,7 +222,7 @@ void main() {
         await tester.tap(find.text(scenario.buttonLabel));
         await tester.pumpAndSettle();
 
-        expect(find.text('Une erreur est survenue'), findsOneWidget);
+        expect(find.text(scenario.errorMessage), findsOneWidget);
       });
     }
 
@@ -237,7 +239,7 @@ void main() {
       await tester.tap(find.text('Passer cette occurrence'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Une erreur est survenue'), findsOneWidget);
+      expect(find.text('Erreur lors du passage'), findsOneWidget);
     });
 
     testWidgets(
@@ -252,7 +254,7 @@ void main() {
       await tester.tap(find.text('Tout payé'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Transaction créée'), findsOneWidget);
+      expect(find.text('1 transaction validée'), findsOneWidget);
     });
 
     testWidgets(
@@ -267,7 +269,7 @@ void main() {
       await tester.tap(find.text('Tout payé'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Une erreur est survenue'), findsOneWidget);
+      expect(find.text('Erreur lors de la validation'), findsOneWidget);
     });
   });
 }

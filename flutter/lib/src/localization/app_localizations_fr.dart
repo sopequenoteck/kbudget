@@ -144,10 +144,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'Email ou mot de passe incorrect';
 
   @override
-  String get transactionsEmptyMonth => 'Aucune transaction ce mois-ci';
+  String transactionsEmptyNoneInMonth(String month) {
+    return 'Aucune transaction en $month';
+  }
 
   @override
-  String get transactionsNoCategory => 'Sans catégorie';
+  String get transactionsListNoCategory => 'Sans catégorie';
 
   @override
   String get transactionsFormDescriptionPlaceholder => 'Libellé';
@@ -156,11 +158,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsFormAccount => 'Compte';
 
   @override
-  String get transactionFormDeleteConfirmTitle => 'Supprimer la transaction';
+  String get transactionsDialogDeleteTitle => 'Supprimer la transaction';
 
   @override
-  String get transactionFormDeleteConfirmMessage =>
-      'Êtes-vous sûr de vouloir supprimer cette transaction ? Cette action est irréversible.';
+  String get transactionsDialogDeleteMessage =>
+      'Voulez-vous vraiment supprimer cette transaction ?';
 
   @override
   String get subscriptionsFormNamePlaceholder => 'Nom';
@@ -359,7 +361,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsFormNoteAria => 'Note';
 
   @override
-  String get transferFormSaveButton => 'Valider';
+  String get transactionsActionTransferSubmit => 'Effectuer le virement';
 
   @override
   String get transactionsFormTransferAccountsMismatch =>
@@ -378,7 +380,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get accountsTitle => 'Comptes';
+  String get accountsPageTitle => 'Comptes';
 
   @override
   String get accountsEmptyTitle => 'Aucun compte';
@@ -414,8 +416,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commonFormColour => 'Couleur';
 
   @override
-  String get accountFormActiveDefaultHint =>
-      'Le compte par défaut ne peut pas être désactivé';
+  String get accountsFormActiveHint =>
+      'Définissez un autre compte par défaut avant de désactiver celui-ci';
 
   @override
   String get accountsFormCurrentBalance => 'Solde actuel';
@@ -424,29 +426,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountsFormNewBalance => 'Nouveau solde';
 
   @override
-  String get accountFormPreviewPlaceholder => 'Aperçu du compte';
+  String get accountsFormPreviewPlaceholder => 'Aperçu du compte';
 
   @override
   String get accountsValueDefault => 'Défaut';
 
   @override
-  String get accountDeleteConfirmTitle => 'Supprimer le compte';
+  String get accountsDialogDeleteTitle => 'Supprimer le compte';
 
   @override
-  String get accountDeleteConfirmMessage =>
+  String get accountsDialogDeleteWarningMessage =>
       'Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.';
 
   @override
-  String get accountErrorLoad => 'Impossible de charger les comptes';
-
-  @override
-  String get accountErrorCreate => 'Erreur lors de la création du compte';
-
-  @override
-  String get accountErrorUpdate => 'Erreur lors de la modification du compte';
-
-  @override
-  String get accountErrorDelete => 'Erreur lors de la suppression du compte';
+  String get accountsFeedbackLoadError => 'Erreur de chargement des comptes';
 
   @override
   String get categoriesPageTitle => 'Catégories';
@@ -461,44 +454,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoriesDialogEditTitle => 'Modifier la catégorie';
 
   @override
-  String get categoryFormNameField => 'Nom de la catégorie';
+  String get categoriesFormName => 'Nom';
 
   @override
-  String get categoryFormIconField => 'Icône';
+  String get categoriesFormIcon => 'Icône';
 
   @override
-  String get categoryNameRequired => 'Le nom est requis';
+  String get commonValidationNameRequired => 'Nom requis';
 
   @override
-  String get categoryNameMaxLength => 'Maximum 30 caractères';
+  String get categoriesFormNameMaxLength => '30 caractères maximum';
 
   @override
-  String get categoryNameDuplicate => 'Ce nom de catégorie existe déjà';
+  String get categoriesFormNameDuplicate => 'Ce nom de catégorie existe déjà';
 
   @override
-  String get categoryEmojiRequired => 'L\'icône est requise';
+  String get categoriesFormIconRequired => 'L\'icône est requise';
 
   @override
-  String get categoryDeleteConfirmTitle => 'Supprimer la catégorie';
+  String get categoriesDialogDeleteTitle => 'Supprimer la catégorie';
 
   @override
-  String get categoryDeleteConfirmMessage =>
-      'Êtes-vous sûr de vouloir supprimer cette catégorie ? Les éléments liés seront dissociés.';
-
-  @override
-  String get categoryErrorLoad => 'Impossible de charger les catégories';
-
-  @override
-  String get categoryErrorCreate =>
-      'Erreur lors de la création de la catégorie';
-
-  @override
-  String get categoryErrorUpdate =>
-      'Erreur lors de la modification de la catégorie';
-
-  @override
-  String get categoryErrorDelete =>
-      'Erreur lors de la suppression de la catégorie';
+  String get categoriesDialogDeleteMessage =>
+      'Cette catégorie sera dissociée de tous les items liés.';
 
   @override
   String get emptyBudgetList => 'Aucun budget';
@@ -570,32 +548,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recurringActionPayAll => 'Tout payé';
 
   @override
-  String recurringNextOccurrence(String date) {
+  String recurringDetailNext(String date) {
     return 'Prochaine : $date';
   }
 
   @override
-  String get recurringMonthlySummaryTitle => 'BILAN MENSUEL';
+  String get recurringSummaryTitle => 'Bilan mensuel';
 
   @override
-  String recurringChargesCount(int count) {
-    return '$count CHARGES';
+  String recurringSummaryExpenseCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count charges',
+      one: '$count charge',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get recurringEmpty => 'Aucune récurrence active';
+  String get recurringEmptyTitle => 'Aucune transaction récurrente';
 
   @override
-  String get recurringFeedbackValidated => 'Transaction créée';
+  String get recurringFeedbackValidatedOne => 'Transaction validée';
 
   @override
-  String get recurringSkipSuccess => 'Échéance avancée';
+  String get recurringFeedbackSkipped => 'Occurrence passée';
 
   @override
   String get recurringFeedbackDeactivated => 'Récurrence désactivée';
-
-  @override
-  String get frequencyHebdomadaire => '/semaine';
 
   @override
   String get authPageLoginTagline => 'Connectez-vous à votre compte';
@@ -958,5 +939,153 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String dashboardSummaryMonthVariation(String amount) {
     return '$amount ce mois';
+  }
+
+  @override
+  String get transactionsPageTitle => 'Transactions';
+
+  @override
+  String get transactionsListThisWeek => 'Cette semaine';
+
+  @override
+  String get transactionsListLastWeek => 'Semaine dernière';
+
+  @override
+  String get transactionsListOlder => 'Plus ancien';
+
+  @override
+  String get transactionsSummaryBalance => 'Solde';
+
+  @override
+  String get transactionsDialogCreateTitle => 'Nouvelle transaction';
+
+  @override
+  String get transactionsDialogEditTitle => 'Modifier la transaction';
+
+  @override
+  String get transactionsValueExpense => 'Dépense';
+
+  @override
+  String get transactionsValueIncome => 'Recette';
+
+  @override
+  String get transactionsFormCategory => 'Catégorie';
+
+  @override
+  String get transactionsFormNotePlaceholder => 'Ajouter une note...';
+
+  @override
+  String get transactionsFormIsRecurring => 'Transaction récurrente';
+
+  @override
+  String get transactionsFormRecurringAria => 'Récurrence';
+
+  @override
+  String get transactionsFeedbackRecurringFailed =>
+      'Transaction créée. Échec de la récurrence.';
+
+  @override
+  String get recurringValueWeekly => 'Hebdomadaire';
+
+  @override
+  String get recurringValueMonthly => 'Mensuel';
+
+  @override
+  String get recurringValueYearly => 'Annuel';
+
+  @override
+  String recurringFeedbackValidatedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions validées',
+      one: '$count transaction validée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringFeedbackValidationError => 'Erreur lors de la validation';
+
+  @override
+  String get recurringFeedbackSkipFailed => 'Erreur lors du passage';
+
+  @override
+  String get recurringFeedbackDeactivateError =>
+      'Erreur lors de la désactivation';
+
+  @override
+  String get categoriesFeedbackSystemEditForbidden =>
+      'Les catégories système ne peuvent pas être modifiées';
+
+  @override
+  String get categoriesFeedbackSystemDeleteForbidden =>
+      'Les catégories système ne peuvent pas être supprimées';
+
+  @override
+  String get accountsActionCreate => 'Créer un compte';
+
+  @override
+  String get accountsActionLater => 'Plus tard';
+
+  @override
+  String get accountsActionEnterRate => 'Saisir le taux';
+
+  @override
+  String accountsListCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comptes',
+      one: '$count compte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountsDialogDeleteMessage => 'Supprimer ce compte ?';
+
+  @override
+  String get accountsFormTypeTitle => 'Type de compte';
+
+  @override
+  String get accountsFormCustomisationTitle => 'Personnalisation';
+
+  @override
+  String get accountsFormDetailsTitle => 'Détails';
+
+  @override
+  String get accountsFormBankName => 'Nom de la banque (optionnel)';
+
+  @override
+  String get accountsFormBankNamePlaceholder => 'Ex: Ma banque';
+
+  @override
+  String get accountsFormCustomLogo => 'Logo personnalisé (optionnel)';
+
+  @override
+  String get accountsFormLogoCamera => 'Caméra';
+
+  @override
+  String get accountsFormLogoGallery => 'Galerie';
+
+  @override
+  String get accountsFormRateProposalTitle => 'Taux de conversion manquant';
+
+  @override
+  String accountsFormRateProposalMessage(String from, String to) {
+    return 'Aucun taux $from → $to n\'est défini.';
+  }
+
+  @override
+  String get accountsFormRateProposalHint =>
+      'Voulez-vous le saisir maintenant ?';
+
+  @override
+  String get exchangeRatesDialogAddRateTitle => 'Ajouter un taux';
+
+  @override
+  String recurringSummaryMonthlyExpenses(String amount) {
+    return '~$amount /mois';
   }
 }

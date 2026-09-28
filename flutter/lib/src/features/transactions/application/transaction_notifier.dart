@@ -7,6 +7,7 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final transactionNotifierProvider =
     NotifierProvider<TransactionNotifier, ListState<Transaction>>(
@@ -29,10 +30,10 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
       _allItems = await _repo.getAll();
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage(resetPage: true);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les transactions: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -58,10 +59,10 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
       _allItems.add(created);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur lors de la création: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -80,10 +81,10 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
-        error: 'Erreur lors de la modification: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -104,13 +105,13 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       _allItems.insert(index, saved);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la suppression: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
       );
     }
   }

@@ -102,9 +102,9 @@ class RecurringListItem extends StatelessWidget {
 
   String _frequencyLabel(AppLocalizations l10n) {
     return switch (item.frequency) {
-      Frequency.hebdomadaire => l10n.frequencyHebdomadaire,
-      Frequency.mensuel => l10n.subscriptionsValuePerMonth,
-      Frequency.annuel => l10n.subscriptionsValuePerYear,
+      Frequency.hebdomadaire => l10n.recurringValueWeekly,
+      Frequency.mensuel => l10n.recurringValueMonthly,
+      Frequency.annuel => l10n.recurringValueYearly,
     };
   }
 }

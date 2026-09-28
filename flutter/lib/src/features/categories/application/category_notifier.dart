@@ -8,6 +8,7 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
 import 'package:k_budget/src/features/common/application/crud_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final categoryNotifierProvider =
     NotifierProvider<CategoryNotifier, ListState<Category>>(
@@ -29,7 +30,9 @@ class CategoryNotifier extends CrudNotifier<Category> {
   String? validateUpdate(Category item) {
     final existing = allItems.where((e) => e.id == item.id).firstOrNull;
     if (existing != null && existing.isSystem) {
-      return 'Les catégories système ne peuvent pas être modifiées';
+      return ref
+          .read(appLocalizationsProvider)
+          .categoriesFeedbackSystemEditForbidden;
     }
     return null;
   }
@@ -38,7 +41,9 @@ class CategoryNotifier extends CrudNotifier<Category> {
   String? validateDelete(String id) {
     final existing = allItems.where((e) => e.id == id).firstOrNull;
     if (existing != null && existing.isSystem) {
-      return 'Les catégories système ne peuvent pas être supprimées';
+      return ref
+          .read(appLocalizationsProvider)
+          .categoriesFeedbackSystemDeleteForbidden;
     }
     return null;
   }

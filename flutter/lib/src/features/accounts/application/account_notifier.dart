@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
 import 'package:k_budget/src/features/common/application/crud_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final accountNotifierProvider =
     NotifierProvider<AccountNotifier, ListState<Account>>(
@@ -46,10 +47,10 @@ class AccountNotifier extends CrudNotifier<Account> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors du changement de compte par défaut: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -67,10 +68,10 @@ class AccountNotifier extends CrudNotifier<Account> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de l\'ajustement du solde: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }

@@ -73,7 +73,7 @@ void main() {
           await tester.pumpAndSettle();
 
           // L'erreur de nom vide doit être affichée
-          expect(find.text('Le nom est requis'), findsOneWidget);
+          expect(find.text('Nom requis'), findsOneWidget);
           verifyNever(mockRepo.create(any));
         },
       );
@@ -172,6 +172,7 @@ void main() {
 
         // Un SnackBar d'erreur doit être affiché
         expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.text('Erreur lors de la sauvegarde'), findsOneWidget);
         // onSaved ne doit pas avoir été appelé
       },
     );

@@ -105,7 +105,7 @@ void main() {
       await notifier().loadItems();
 
       expect(state().isLoading, false);
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().items, isEmpty);
     });
 
@@ -151,7 +151,7 @@ void main() {
       when(mockRepo.create(any)).thenThrow(Exception('Server error'));
       await notifier().create(tx2);
 
-      expect(state().error, contains('Erreur lors de la création'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().items, hasLength(1)); // unchanged
     });
 
@@ -174,7 +174,7 @@ void main() {
       when(mockRepo.update(any)).thenThrow(Exception('Server error'));
       await notifier().update(tx1.copyWith(montant: 75.0));
 
-      expect(state().error, contains('Erreur lors de la modification'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
       expect(state().items.first.montant, 50.0); // unchanged
     });

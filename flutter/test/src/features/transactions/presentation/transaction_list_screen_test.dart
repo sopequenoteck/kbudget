@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -117,7 +118,8 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction ce mois-ci'), findsOneWidget);
+      final month = DateFormat.yMMMM('fr_FR').format(DateTime.now());
+      expect(find.text('Aucune transaction en $month'), findsOneWidget);
     });
 
     testWidgets('should_display_error_with_retry_when_error',

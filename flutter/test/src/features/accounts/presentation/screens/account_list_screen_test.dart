@@ -79,7 +79,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Impossible de charger les comptes'), findsOneWidget);
+      expect(find.text('Erreur de chargement des comptes'), findsOneWidget);
       expect(find.text('Réessayer'), findsOneWidget);
     });
 
@@ -125,7 +125,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Impossible de charger les comptes'), findsOneWidget);
+      expect(find.text('Erreur de chargement des comptes'), findsOneWidget);
 
       await tester.tap(find.text('Réessayer'));
       await tester.pumpAndSettle();
