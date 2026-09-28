@@ -26,6 +26,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SubscriptionForm extends ConsumerStatefulWidget {
@@ -119,33 +120,16 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
 
   // --- Validation ---
 
-  String? _validateNom() {
-    final value = _nomController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) {
-      return l10n.commonValidationRequired;
-    }
-    if (value.length > 255) {
-      return l10n.commonValidationMaxLength(255);
-    }
-    return null;
-  }
+  String? _validateNom() => FormValidators.requiredText(
+        _nomController.text,
+        AppLocalizations.of(context)!,
+        maxLength: 255,
+      );
 
-  String? _validateMontant() {
-    final value = _montantController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) {
-      return l10n.commonValidationRequired;
-    }
-    final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) {
-      return l10n.commonValidationRequired;
-    }
-    if (parsed <= 0) {
-      return l10n.commonValidationAmountPositive;
-    }
-    return null;
-  }
+  String? _validateMontant() => FormValidators.positiveAmount(
+        _montantController.text,
+        AppLocalizations.of(context)!,
+      );
 
   bool _isValid() {
     return _validateNom() == null && _validateMontant() == null;

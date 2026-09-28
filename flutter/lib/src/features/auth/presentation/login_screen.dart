@@ -11,6 +11,7 @@ import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
@@ -122,28 +123,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.space8),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: InputDecoration(
-                        labelText: l10n.authFormEmail,
-                        prefixIcon: const PhosphorIcon(
-                          PhosphorIconsRegular.envelope,
-                          size: 20,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return l10n.authFormEmailRequired;
-                        }
-                        if (!value.contains('@')) {
-                          return l10n.authFormEmailInvalid;
-                        }
-                        return null;
-                      },
-                    ),
+                    AuthEmailField(controller: _emailController),
                     const SizedBox(height: AppSpacing.space4),
                     TextFormField(
                       controller: _passwordController,

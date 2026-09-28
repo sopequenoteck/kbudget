@@ -13,6 +13,7 @@ import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -216,28 +217,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.space4),
-          TextFormField(
-            controller: _displayNameController,
-            textInputAction: TextInputAction.next,
-            autofillHints: const [AutofillHints.name],
-            decoration: InputDecoration(
-              labelText: l10n.authFormDisplayName,
-              prefixIcon: const PhosphorIcon(
-                PhosphorIconsRegular.user,
-                size: 20,
-              ),
-            ),
-            validator: (value) {
-              final trimmed = value?.trim() ?? '';
-              if (trimmed.isEmpty) {
-                return l10n.authFormDisplayNameRequired;
-              }
-              if (trimmed.length > 100) {
-                return l10n.authFormDisplayNameRequired;
-              }
-              return null;
-            },
-          ),
+          AuthDisplayNameField(controller: _displayNameController),
           const SizedBox(height: AppSpacing.space4),
           TextFormField(
             controller: _passwordController,

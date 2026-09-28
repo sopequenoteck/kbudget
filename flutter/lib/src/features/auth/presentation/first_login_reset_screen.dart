@@ -10,6 +10,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -130,51 +131,9 @@ class _FirstLoginResetScreenState
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.space8),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: InputDecoration(
-                        labelText: l10n.authFormEmail,
-                        prefixIcon: const PhosphorIcon(
-                          PhosphorIconsRegular.envelope,
-                          size: 20,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return l10n.authFormEmailRequired;
-                        }
-                        if (!value.contains('@')) {
-                          return l10n.authFormEmailInvalid;
-                        }
-                        return null;
-                      },
-                    ),
+                    AuthEmailField(controller: _emailController),
                     const SizedBox(height: AppSpacing.space4),
-                    TextFormField(
-                      controller: _displayNameController,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.name],
-                      decoration: InputDecoration(
-                        labelText: l10n.authFormDisplayName,
-                        prefixIcon: const PhosphorIcon(
-                          PhosphorIconsRegular.user,
-                          size: 20,
-                        ),
-                      ),
-                      validator: (value) {
-                        final trimmed = value?.trim() ?? '';
-                        if (trimmed.isEmpty) {
-                          return l10n.authFormDisplayNameRequired;
-                        }
-                        if (trimmed.length > 100) {
-                          return l10n.authFormDisplayNameRequired;
-                        }
-                        return null;
-                      },
-                    ),
+                    AuthDisplayNameField(controller: _displayNameController),
                     const SizedBox(height: AppSpacing.space4),
                     TextFormField(
                       controller: _passwordController,
