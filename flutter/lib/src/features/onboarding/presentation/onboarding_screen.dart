@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -19,6 +20,7 @@ class OnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(onboardingNotifierProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -35,7 +37,7 @@ class OnboardingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space6),
               Text(
-                'Bienvenue sur K-Budget',
+                l10n.onboardingPageTitle,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -43,7 +45,7 @@ class OnboardingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.space2),
               Text(
-                'Choisissez votre mode de données',
+                l10n.onboardingPageTagline,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -52,16 +54,16 @@ class OnboardingScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.space8),
               _ModeCard(
                 icon: PhosphorIconsRegular.deviceMobile,
-                title: 'Mode local',
-                description: 'Vos données restent sur cet appareil',
+                title: l10n.onboardingValueLocalMode,
+                description: l10n.onboardingValueLocalModeHint,
                 isSelected: state.selectedMode == DataMode.local,
                 onTap: () => ref.read(onboardingNotifierProvider.notifier).selectMode(DataMode.local),
               ),
               const SizedBox(height: AppSpacing.space4),
               _ModeCard(
                 icon: PhosphorIconsRegular.cloud,
-                title: 'Mode serveur',
-                description: 'Synchronisez avec votre serveur K-Budget',
+                title: l10n.onboardingValueServerMode,
+                description: l10n.onboardingValueServerModeHint,
                 isSelected: state.selectedMode == DataMode.server,
                 onTap: () => ref.read(onboardingNotifierProvider.notifier).selectMode(DataMode.server),
               ),
@@ -85,7 +87,7 @@ class OnboardingScreen extends ConsumerWidget {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Confirmer'),
+                    : Text(l10n.commonActionConfirm),
               ),
               const SizedBox(height: AppSpacing.space4),
             ],

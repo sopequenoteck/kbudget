@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class FabMenu extends ConsumerStatefulWidget {
   const FabMenu({super.key});
@@ -27,27 +28,22 @@ class _FabMenuState extends ConsumerState<FabMenu>
   static const _allItems = [
     _SpeedDialItem(
       icon: PhosphorIconsBold.receipt,
-      label: 'Transaction',
       modalType: ModalType.transaction,
     ),
     _SpeedDialItem(
       icon: PhosphorIconsBold.arrowsClockwise,
-      label: 'Abonnement',
       modalType: ModalType.subscription,
     ),
     _SpeedDialItem(
       icon: PhosphorIconsBold.handshake,
-      label: 'Dette',
       modalType: ModalType.debt,
     ),
     _SpeedDialItem(
       icon: PhosphorIconsBold.chartPie,
-      label: 'Budget',
       modalType: ModalType.budget,
     ),
     _SpeedDialItem(
       icon: PhosphorIconsBold.arrowsLeftRight,
-      label: 'Virement',
       modalType: ModalType.transfer,
     ),
   ];
@@ -95,6 +91,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
       final featureState = ref.read(featureConfigNotifierProvider);
       final enabledFeatures = featureState.enabledFeatures;
       final theme = Theme.of(context);
+      final l10n = AppLocalizations.of(context)!;
 
       final items = _allItems
           .where((item) {
@@ -144,7 +141,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: items
-                        .map((item) => _buildSpeedDialItem(item, theme))
+                        .map((item) => _buildSpeedDialItem(item, theme, l10n))
                         .toList(),
                   ),
                 ),
@@ -174,7 +171,11 @@ class _FabMenuState extends ConsumerState<FabMenu>
     );
   }
 
-  Widget _buildSpeedDialItem(_SpeedDialItem item, ThemeData theme) {
+  Widget _buildSpeedDialItem(
+    _SpeedDialItem item,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
@@ -201,7 +202,7 @@ class _FabMenuState extends ConsumerState<FabMenu>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    item.label,
+                    _labelFor(item.modalType, l10n),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -216,14 +217,35 @@ class _FabMenuState extends ConsumerState<FabMenu>
   }
 }
 
+/// Libelle du bouton FAB pour [type].
+///
+/// `category` et `account` n'apparaissent jamais dans [_FabMenuState._allItems]
+/// : le cas par defaut n'est jamais atteint, il rend seulement le `switch`
+/// exhaustif sur [ModalType].
+String _labelFor(ModalType type, AppLocalizations l10n) {
+  switch (type) {
+    case ModalType.transaction:
+      return l10n.transactionsActionCreate;
+    case ModalType.subscription:
+      return l10n.subscriptionsActionCreate;
+    case ModalType.debt:
+      return l10n.debtsActionCreate;
+    case ModalType.budget:
+      return l10n.budgetsActionCreate;
+    case ModalType.transfer:
+      return l10n.transactionsActionTransfer;
+    case ModalType.category:
+    case ModalType.account:
+      return l10n.transactionsActionCreate;
+  }
+}
+
 class _SpeedDialItem {
   final PhosphorIconData icon;
-  final String label;
   final ModalType modalType;
 
   const _SpeedDialItem({
     required this.icon,
-    required this.label,
     required this.modalType,
   });
 }

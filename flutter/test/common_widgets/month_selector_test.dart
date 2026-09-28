@@ -373,6 +373,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: Scaffold(
             body: Center(
               child: ConstrainedBox(

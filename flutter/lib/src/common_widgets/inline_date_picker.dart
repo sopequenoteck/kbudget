@@ -3,32 +3,28 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 // ---------------------------------------------------------------------------
-// Constants
+// Helpers de formatage locale-aware
 // ---------------------------------------------------------------------------
 
-const List<String> _kMonthNames = [
-  'janvier',
-  'février',
-  'mars',
-  'avril',
-  'mai',
-  'juin',
-  'juillet',
-  'août',
-  'septembre',
-  'octobre',
-  'novembre',
-  'décembre',
-];
-
-const List<String> _kDayHeaders = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+/// En-tetes de colonnes lundi-first (`L M M J V S D` en francais), derives des
+/// symboles `intl` de [format] plutot que codes en dur : un nom de jour est
+/// une donnee locale-aware, pas un texte a extraire dans l'ARB.
+///
+/// `NARROWWEEKDAYS` est indexe dimanche-first (0 = dimanche) ; `[1..6, 0]`
+/// reordonne vers lundi-first pour matcher [_normalizeStartOffset].
+List<String> _weekdayHeaders(DateFormat format) {
+  final narrow = format.dateSymbols.NARROWWEEKDAYS;
+  return [1, 2, 3, 4, 5, 6, 0].map((i) => narrow[i]).toList();
+}
 
 // ---------------------------------------------------------------------------
 // T-024 — Model + helpers privés
@@ -198,10 +194,12 @@ class _NavButton extends StatelessWidget {
 class _CalendarGrid extends StatelessWidget {
   const _CalendarGrid({
     required this.days,
+    required this.dayHeaders,
     required this.onSelectDay,
   });
 
   final List<_CalendarDay> days;
+  final List<String> dayHeaders;
   final ValueChanged<_CalendarDay> onSelectDay;
 
   @override
@@ -211,7 +209,7 @@ class _CalendarGrid extends StatelessWidget {
 
     // Ligne de headers de jours
     final headerRow = Row(
-      children: _kDayHeaders
+      children: dayHeaders
           .map(
             (h) => Expanded(
               child: SizedBox(
@@ -430,10 +428,9 @@ class _InlineDatePickerState extends State<InlineDatePicker> {
   }
 
   /// Label du mois courant : `'Mai 2026'` (première lettre capitalisée).
-  String get _monthLabel {
-    final name = _kMonthNames[_currentMonth - 1];
-    final capitalized = name[0].toUpperCase() + name.substring(1);
-    return '$capitalized $_currentYear';
+  String _monthLabel(DateFormat format) {
+    final raw = format.format(DateTime(_currentYear, _currentMonth));
+    return raw[0].toUpperCase() + raw.substring(1);
   }
 
   void _prevMonth() {
@@ -563,19 +560,22 @@ class _InlineDatePickerState extends State<InlineDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final monthFormat = DateFormat('MMMM yyyy', locale);
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.space2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _CalendarHeader(
-            monthLabel: _monthLabel,
+            monthLabel: _monthLabel(monthFormat),
             onPrev: _prevMonth,
             onNext: _nextMonth,
             onLabelTap: _goToToday,
           ),
           _CalendarGrid(
             days: _computeDays(),
+            dayHeaders: _weekdayHeaders(monthFormat),
             onSelectDay: _selectDay,
           ),
         ],

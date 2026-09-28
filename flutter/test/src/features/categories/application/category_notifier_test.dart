@@ -71,7 +71,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
     });
 
     test('should_addItem_when_createSucceeds', () async {

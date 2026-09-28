@@ -88,16 +88,22 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
   String? _validateMontant() {
     final value = _montantController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value);
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationRequired;
+    }
+    if (parsed <= 0) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 
   String? _validateCategory() {
     if (_selectedCategoryId == null) {
-      return AppLocalizations.of(context)!.validationRequired;
+      return AppLocalizations.of(context)!.commonValidationRequired;
     }
     return null;
   }

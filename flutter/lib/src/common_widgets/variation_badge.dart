@@ -4,12 +4,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
 
 import '../theme/app_theme_extension.dart';
 
 /// Texte coloré compact affichant la variation d'un montant par rapport
-/// à une période précédente (ex : mois précédent).
+/// à une période précédente (le mois courant).
 ///
 /// Pas un pill — aucun fond, aucune bordure. Simple texte coloré `bodySmall`
 /// medium, aligné sur le pattern Angular `.variation-badge`.
@@ -21,9 +22,13 @@ import '../theme/app_theme_extension.dart';
 /// - `delta < 0` → `AppThemeExtension.expenseColor` (rouge)
 /// - `delta == 0` (avec `percentage`) → `colorScheme.onSurfaceVariant` (text-secondary)
 ///
-/// Format : `{signe}{montant formaté} {suffix} ({signePct}{pct,1 décimale}%)`
+/// Le montant fait partie de la phrase traduite
+/// ([AppLocalizations.dashboardSummaryMonthVariation]) ; le pourcentage entre
+/// parenthèses est ajouté à part, comme côté Angular
+/// (`dashboard.html`) — une notation numérique entre parenthèses n'a pas de
+/// mot à traduire.
 ///
-/// Exemple : `+150,50 € ce mois (+12,5%)`
+/// Exemple (français) : `+150,50 € ce mois (+12,5%)`
 ///
 /// Exemple d'usage :
 /// ```dart
@@ -31,7 +36,6 @@ import '../theme/app_theme_extension.dart';
 ///   delta: 20.0,
 ///   currency: '€',
 ///   percentage: 20.0,
-///   suffix: 'ce mois',
 /// )
 /// ```
 class VariationBadge extends StatelessWidget {
@@ -41,7 +45,6 @@ class VariationBadge extends StatelessWidget {
     required this.delta,
     this.currency,
     this.percentage,
-    this.suffix = 'ce mois',
   });
 
   /// Variation absolue du montant (ex : `+150.5` ou `-8.0`).
@@ -57,14 +60,12 @@ class VariationBadge extends StatelessWidget {
   /// Si fourni, affiché entre parenthèses avec une décimale.
   final num? percentage;
 
-  /// Suffixe textuel après le montant (défaut : `'ce mois'`).
-  final String suffix;
-
   @override
   Widget build(BuildContext context) {
     // Masquer si delta == 0 et pas de pourcentage
     if (delta == 0 && percentage == null) return const SizedBox.shrink();
 
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final themeExt = Theme.of(context).extension<AppThemeExtension>()!;
     final textTheme = Theme.of(context).textTheme;
@@ -89,7 +90,7 @@ class VariationBadge extends StatelessWidget {
     final montantFormatted = amountFormat.format(delta);
 
     final buffer = StringBuffer()
-      ..write('$signe$montantFormatted $suffix');
+      ..write(l10n.dashboardSummaryMonthVariation('$signe$montantFormatted'));
 
     if (percentage != null) {
       final pctSigne = percentage! >= 0 ? '+' : '';

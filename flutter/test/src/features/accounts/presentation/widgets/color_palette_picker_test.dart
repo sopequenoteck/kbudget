@@ -17,6 +17,7 @@ void main() {
       locale: const Locale('fr'),
       home: Scaffold(
         body: ColorPalettePicker(
+          label: 'Couleur',
           selectedColor: selectedColor,
           onChanged: onChanged,
         ),

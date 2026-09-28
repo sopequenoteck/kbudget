@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_hero_widget.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 
 void main() {
@@ -14,6 +15,9 @@ void main() {
   Widget buildHero({List<DoughnutSegment> segments = const []}) {
     return MaterialApp(
       theme: AppTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: SingleChildScrollView(
           child: BudgetHeroWidget(

@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_shadows.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
 
 /// Sélecteur de mois avec boutons précédent/suivant et label formaté en français.
@@ -138,6 +139,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -145,7 +147,7 @@ class _MonthSelectorState extends State<MonthSelector> {
         _buildNavButton(
           icon: PhosphorIconsRegular.caretLeft,
           onPressed: _prevMonth,
-          semanticsLabel: 'Mois précédent',
+          semanticsLabel: l10n.commonActionPreviousMonthAria,
         ),
         const SizedBox(width: AppSpacing.space4),
         Flexible(
@@ -164,7 +166,7 @@ class _MonthSelectorState extends State<MonthSelector> {
         _buildNavButton(
           icon: PhosphorIconsRegular.caretRight,
           onPressed: _nextMonth,
-          semanticsLabel: 'Mois suivant',
+          semanticsLabel: l10n.commonActionNextMonthAria,
         ),
       ],
     );

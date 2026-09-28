@@ -37,22 +37,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleSwitchToLocal() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Passer en mode local ?'),
-        content: const Text(
-          'Vos données seront stockées uniquement sur cet appareil. '
-          'Vous pourrez revenir en mode serveur depuis les paramètres.',
-        ),
+        title: Text(l10n.onboardingDialogSwitchToLocalTitle),
+        content: Text(l10n.onboardingDialogSwitchToLocalMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.commonActionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirmer'),
+            child: Text(l10n.commonActionConfirm),
           ),
         ],
       ),
@@ -115,7 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.space2),
                     Text(
-                      'Connectez-vous pour continuer',
+                      l10n.authPageLoginTagline,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -129,16 +127,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: PhosphorIcon(PhosphorIconsRegular.envelope, size: 20),
+                      decoration: InputDecoration(
+                        labelText: l10n.authFormEmail,
+                        prefixIcon: const PhosphorIcon(
+                          PhosphorIconsRegular.envelope,
+                          size: 20,
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Veuillez saisir votre email';
+                          return l10n.authFormEmailRequired;
                         }
                         if (!value.contains('@')) {
-                          return 'Email invalide';
+                          return l10n.authFormEmailInvalid;
                         }
                         return null;
                       },
@@ -150,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
-                        labelText: 'Mot de passe',
+                        labelText: l10n.authFormPassword,
                         prefixIcon: const PhosphorIcon(PhosphorIconsRegular.lock, size: 20),
                         suffixIcon: IconButton(
                           icon: PhosphorIcon(
@@ -168,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez saisir votre mot de passe';
+                          return l10n.authFormPasswordRequired;
                         }
                         return null;
                       },
@@ -191,7 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             l10n,
                             authState.errorCode,
                             fallback: authState.errorCode == null
-                                ? l10n.errorNetwork
+                                ? l10n.errorsClientNetwork
                                 : l10n.authFeedbackInvalidCredentials,
                             overrides: {
                               'BAD_REQUEST':
@@ -214,14 +215,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text('Se connecter'),
+                          : Text(l10n.authActionSignIn),
                     ),
                     const SizedBox(height: AppSpacing.space4),
                     TextButton(
                       onPressed:
                           isLoading ? null : () => _handleSwitchToLocal(),
                       child: Text(
-                        'Utiliser en mode local',
+                        l10n.onboardingActionUseLocalMode,
                         style: TextStyle(
                           color:
                               Theme.of(context).colorScheme.onSurfaceVariant,

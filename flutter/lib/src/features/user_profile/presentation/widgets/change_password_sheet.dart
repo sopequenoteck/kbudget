@@ -95,7 +95,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
           // Sur cet ecran, PASSWORD_INCORRECT designe l'ancien mot de passe,
           // pas celui qu'on saisit : le libelle du catalogue serait ambigu.
           overrides: {
-            'PASSWORD_INCORRECT': l10n.errorCodeCurrentPasswordIncorrect,
+            'PASSWORD_INCORRECT': l10n.usersFeedbackCurrentPasswordIncorrect,
           },
         );
         setState(() {
@@ -118,6 +118,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -165,7 +166,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 obscureText: !_showNew,
                 decoration: InputDecoration(
                   labelText: 'Nouveau mot de passe',
-                  helperText: PasswordPolicy.helperText,
+                  helperText: PasswordPolicy.helperText(l10n),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: PhosphorIcon(
@@ -179,7 +180,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Champ requis';
                   if (v.length < PasswordPolicy.minLength) {
-                    return PasswordPolicy.tooShortMessage;
+                    return PasswordPolicy.tooShortMessage(l10n);
                   }
                   return null;
                 },

@@ -57,14 +57,16 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
   String? _validateSource() {
     if (_sourceAccountId == null) {
-      return AppLocalizations.of(context)!.validationRequired;
+      return AppLocalizations.of(context)!.commonValidationRequired;
     }
     return null;
   }
 
   String? _validateDestination() {
     final l10n = AppLocalizations.of(context)!;
-    if (_destinationAccountId == null) return l10n.validationRequired;
+    if (_destinationAccountId == null) {
+      return l10n.commonValidationRequired;
+    }
     if (_destinationAccountId == _sourceAccountId) {
       return l10n.transactionsFormTransferAccountsMismatch;
     }
@@ -74,17 +76,23 @@ class _TransferFormState extends ConsumerState<TransferForm> {
   String? _validateMontant() {
     final value = _montantController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value);
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationRequired;
+    }
+    if (parsed <= 0) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 
   String? _validateNote() {
     final value = _noteController.text.trim();
     if (value.isNotEmpty && value.length > 500) {
-      return AppLocalizations.of(context)!.validationMaxLength(500);
+      return AppLocalizations.of(context)!.commonValidationMaxLength(500);
     }
     return null;
   }

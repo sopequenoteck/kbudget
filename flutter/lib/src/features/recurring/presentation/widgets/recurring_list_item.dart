@@ -33,6 +33,7 @@ class RecurringListItem extends StatelessWidget {
     final nextOccurrence = RelativeDateFormatter.formatCompact(
       item.nextOccurrence,
       locale: locale,
+      l10n: l10n,
     );
 
     final amountColor = item.type == TransactionType.depense

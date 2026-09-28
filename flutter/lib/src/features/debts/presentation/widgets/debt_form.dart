@@ -128,18 +128,28 @@ class _DebtFormState extends ConsumerState<DebtForm> {
   String? _validatePersonne() {
     final value = _personneController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
-    if (value.length > 255) return l10n.validationMaxLength(255);
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
+    if (value.length > 255) {
+      return l10n.commonValidationMaxLength(255);
+    }
     return null;
   }
 
   String? _validateMontant() {
     final value = _montantController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationRequired;
+    }
+    if (parsed <= 0) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 

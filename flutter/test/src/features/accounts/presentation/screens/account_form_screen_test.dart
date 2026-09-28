@@ -133,7 +133,7 @@ void main() {
       await tester.tap(findAppBarAction(PhosphorIconsBold.check));
       await tester.pumpAndSettle();
 
-      expect(find.text('Champ requis'), findsWidgets);
+      expect(find.text('Ce champ est requis.'), findsWidgets);
     });
 
     testWidgets('should_callCreate_when_submitInCreateMode', (tester) async {

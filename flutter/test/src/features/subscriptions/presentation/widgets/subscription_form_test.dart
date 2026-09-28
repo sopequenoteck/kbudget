@@ -143,7 +143,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Les erreurs de validation doivent apparaître
-      expect(find.text('Champ requis'), findsAtLeast(1));
+      expect(find.text('Ce champ est requis.'), findsAtLeast(1));
     });
 
     testWidgets(

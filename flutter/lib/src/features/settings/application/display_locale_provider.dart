@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
 
 /// The locale used to display the interface.
@@ -17,4 +18,11 @@ final displayLocaleProvider = Provider<Locale>((ref) => const Locale('fr'));
 /// [intlLocaleFor].
 final intlLocaleProvider = Provider<String>(
   (ref) => intlLocaleFor(ref.watch(displayLocaleProvider)),
+);
+
+/// The translations for [displayLocaleProvider], for code that has no
+/// `BuildContext` — a `Notifier`, a repository — and therefore cannot call
+/// `AppLocalizations.of(context)`.
+final appLocalizationsProvider = Provider<AppLocalizations>(
+  (ref) => lookupAppLocalizations(ref.watch(displayLocaleProvider)),
 );

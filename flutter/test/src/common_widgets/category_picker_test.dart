@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/category_picker.dart';
 import 'package:k_budget/src/domain/models/category.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -13,6 +14,9 @@ Future<void> pumpCategoryPicker(
   await tester.pumpWidget(
     MaterialApp(
       theme: theme ?? AppTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: Center(
           child: Form(child: widget),
@@ -544,6 +548,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Center(
                 child: Form(
@@ -577,6 +584,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Center(
                 child: Form(
@@ -621,6 +631,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
             home: Scaffold(
               body: Center(
                 child: StatefulBuilder(

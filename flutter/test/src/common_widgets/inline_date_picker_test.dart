@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/common_widgets/inline_date_picker.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -22,6 +24,9 @@ Future<void> pumpDatePicker(
   await tester.pumpWidget(
     MaterialApp(
       theme: theme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: SingleChildScrollView(
           child: InlineDatePicker(
@@ -43,6 +48,10 @@ Future<void> pumpDatePicker(
 // ---------------------------------------------------------------------------
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('fr_FR');
+  });
+
   // Test 1 : Rendu mois courant avec valeur fournie
   forEachTheme((theme, themeName) {
     testWidgets(

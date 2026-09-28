@@ -79,7 +79,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().isLoading, false);
     });
 

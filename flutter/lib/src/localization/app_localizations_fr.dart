@@ -31,7 +31,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorsClientGeneric => 'Une erreur est survenue';
 
   @override
-  String get errorNetwork => 'Erreur de connexion réseau';
+  String get errorsClientNetwork => 'Impossible de contacter le serveur';
+
+  @override
+  String get errorsClientUnknown => 'Erreur inattendue';
 
   @override
   String get errorsApiBadRequest => 'La demande n\'a pas pu être traitée.';
@@ -44,21 +47,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorsApiMalformedRequest => 'Requête invalide.';
 
   @override
-  String get errorCodePasswordIncorrect => 'Mot de passe incorrect';
+  String get errorsApiPasswordIncorrect => 'Mot de passe incorrect.';
 
   @override
-  String get errorCodeCurrentPasswordIncorrect =>
-      'Mot de passe actuel incorrect';
+  String get usersFeedbackCurrentPasswordIncorrect =>
+      'Mot de passe actuel incorrect.';
 
   @override
-  String get errorCodePasswordUnchanged =>
-      'Le nouveau mot de passe doit être différent de l\'actuel';
+  String get usersFeedbackLastAdminDeletionForbidden =>
+      'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.';
+
+  @override
+  String get errorsApiPasswordUnchanged =>
+      'Le nouveau mot de passe doit être différent de l\'actuel.';
 
   @override
   String get errorsApiConfirmationRequired => 'Confirmation explicite requise.';
 
   @override
-  String get errorCodeUnauthenticated => 'Authentification requise';
+  String get errorsApiUnauthenticated => 'Authentification requise.';
 
   @override
   String get errorsApiTokenExpired =>
@@ -80,7 +87,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorsApiAccessDenied => 'Accès refusé';
 
   @override
-  String get errorCodePasswordResetRequired =>
+  String get errorsApiPasswordResetRequired =>
       'Réinitialisation des identifiants requise';
 
   @override
@@ -91,8 +98,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get errorsApiFeatureDisabled => 'Fonctionnalité désactivée';
 
   @override
-  String get errorCodeLastAdminDeletionForbidden =>
-      'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.';
+  String get errorsApiLastAdminDeletionForbidden =>
+      'Au moins un administrateur actif doit exister.';
 
   @override
   String get errorsApiNotFound => 'Ressource introuvable';
@@ -359,14 +366,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les comptes source et destination doivent être différents';
 
   @override
-  String get validationRequired => 'Champ requis';
+  String get commonValidationRequired => 'Ce champ est requis.';
 
   @override
-  String get validationAmountPositive => 'Le montant doit être positif';
+  String get commonValidationAmountPositive =>
+      'Le montant doit être supérieur à 0';
 
   @override
-  String validationMaxLength(int max) {
-    return 'Maximum $max caractères';
+  String commonValidationMaxLength(int max) {
+    return '$max caractères maximum';
   }
 
   @override
@@ -588,4 +596,367 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get frequencyHebdomadaire => '/semaine';
+
+  @override
+  String get authPageLoginTagline => 'Connectez-vous à votre compte';
+
+  @override
+  String get authFormEmailRequired => 'Email requis';
+
+  @override
+  String get authFormPasswordRequired => 'Mot de passe requis';
+
+  @override
+  String get authPageFirstLoginTitle => 'Premier accès';
+
+  @override
+  String get authPageFirstLoginNotice =>
+      'Vous êtes connecté avec les identifiants initiaux générés par le système. Définissez dès maintenant votre email définitif, un mot de passe personnel et votre nom d\'affichage pour accéder à l\'application.';
+
+  @override
+  String get authFormDisplayNameRequired => 'Nom requis (100 caractères max)';
+
+  @override
+  String get authFeedbackResetError =>
+      'Erreur lors de la mise à jour de vos identifiants. Veuillez réessayer.';
+
+  @override
+  String get authFormPasswordConfirmRequired =>
+      'Veuillez confirmer votre mot de passe';
+
+  @override
+  String get authFeedbackInvalidLink =>
+      'Lien invalide, expiré, déjà utilisé ou révoqué.';
+
+  @override
+  String get authFeedbackCreateAccountError =>
+      'Erreur lors de la création du compte. Veuillez réessayer.';
+
+  @override
+  String get authFeedbackCheckingLink => 'Vérification du lien...';
+
+  @override
+  String get authPageInvalidLinkTitle => 'Lien invalide';
+
+  @override
+  String get authActionBackToLogin => 'Retour à la connexion';
+
+  @override
+  String get authPageAcceptInviteTitle => 'Créer votre compte';
+
+  @override
+  String get authPageAcceptInviteTagline =>
+      'Quelques informations pour finaliser l\'inscription';
+
+  @override
+  String get authFormEmail => 'Email';
+
+  @override
+  String get authFormEmailInvalid => 'Email invalide';
+
+  @override
+  String get authFormPassword => 'Mot de passe';
+
+  @override
+  String get authFormDisplayName => 'Nom d\'affichage';
+
+  @override
+  String get authFormConfirmPassword => 'Confirmer le mot de passe';
+
+  @override
+  String get authFormPasswordMismatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get authFormCurrency => 'Devise';
+
+  @override
+  String get authActionCreateAccount => 'Créer mon compte';
+
+  @override
+  String get authActionSignIn => 'Se connecter';
+
+  @override
+  String authFormPasswordMinLength(int min) {
+    return '$min caractères minimum';
+  }
+
+  @override
+  String get authActionUnlockBiometricReason => 'Déverrouillez K-Budget';
+
+  @override
+  String get authFeedbackBiometricError =>
+      'Erreur biométrique. Utilisez votre PIN.';
+
+  @override
+  String get authFormPinMinLength => 'Le PIN doit contenir au moins 4 chiffres';
+
+  @override
+  String get authFeedbackPinIncorrect => 'PIN incorrect';
+
+  @override
+  String get authDialogForgotPinTitle => 'PIN oublié ?';
+
+  @override
+  String get authDialogForgotPinServerMessage =>
+      'Vous serez déconnecté et devrez vous reconnecter avec vos identifiants.';
+
+  @override
+  String get authDialogForgotPinLocalMessage =>
+      'En mode local, la réinitialisation du PIN effacera toutes vos données. Cette action est irréversible.';
+
+  @override
+  String get authPagePinTagline => 'Saisissez votre PIN pour continuer';
+
+  @override
+  String get authActionUnlock => 'Déverrouiller';
+
+  @override
+  String get authActionBiometric => 'Biométrie';
+
+  @override
+  String get commonActionConfirm => 'Confirmer';
+
+  @override
+  String get commonActionClose => 'Fermer';
+
+  @override
+  String get commonActionChooseEmoji => 'Choisir un emoji';
+
+  @override
+  String get commonFormEmojiSearchPlaceholder => 'Rechercher un emoji...';
+
+  @override
+  String get commonEmptyNoRecentEmoji => 'Aucun emoji récent';
+
+  @override
+  String get transactionsActionCreate => 'Transaction';
+
+  @override
+  String get subscriptionsActionCreate => 'Abonnement';
+
+  @override
+  String get debtsActionCreate => 'Dette';
+
+  @override
+  String get budgetsActionCreate => 'Budget';
+
+  @override
+  String get transactionsActionTransfer => 'Virement';
+
+  @override
+  String get commonActionPreviousMonthAria => 'Mois précédent';
+
+  @override
+  String get commonActionNextMonthAria => 'Mois suivant';
+
+  @override
+  String get commonNavSettings => 'Paramètres';
+
+  @override
+  String get commonActionLogout => 'Déconnexion';
+
+  @override
+  String get commonActionReset => 'Réinitialiser';
+
+  @override
+  String get commonFormSearchPlaceholder => 'Rechercher...';
+
+  @override
+  String get commonFormSelectPlaceholder => 'Sélectionner...';
+
+  @override
+  String get commonEmptyNoResults => 'Aucun résultat';
+
+  @override
+  String categoriesActionCreateNamed(String name) {
+    return 'Créer « $name »';
+  }
+
+  @override
+  String get categoriesFormSearchPlaceholder => 'Rechercher une catégorie...';
+
+  @override
+  String get categoriesEmptyTitle => 'Aucune catégorie — créez-en une';
+
+  @override
+  String get categoriesActionCreate => 'Créer';
+
+  @override
+  String get categoriesListNoResults => 'Aucune catégorie trouvée';
+
+  @override
+  String get commonActionBack => 'Retour';
+
+  @override
+  String get accountsFormSelectBankPlaceholder => 'Sélectionner une banque';
+
+  @override
+  String get accountsFormBankTitle => 'Banque';
+
+  @override
+  String get accountsValueOtherCustom => 'Autre / Personnalisé';
+
+  @override
+  String get accountsFilterBankSearchPlaceholder => 'Rechercher une banque...';
+
+  @override
+  String get accountsFeedbackBanksLoadError =>
+      'Impossible de charger les banques';
+
+  @override
+  String get accountsEmptyBankNotFound => 'Aucune banque trouvée';
+
+  @override
+  String get accountsListBankGroupFrance => 'France';
+
+  @override
+  String get accountsListBankGroupWestAfrica => 'Afrique de l\'Ouest';
+
+  @override
+  String get accountsListBankGroupInternational => 'International';
+
+  @override
+  String get commonFeedbackSaveError => 'Erreur lors de la sauvegarde';
+
+  @override
+  String get commonFeedbackDeleteError => 'Erreur lors de la suppression';
+
+  @override
+  String get commonFeedbackLoadError => 'Erreur de chargement';
+
+  @override
+  String get onboardingDialogSwitchToLocalTitle => 'Passer en mode local ?';
+
+  @override
+  String get onboardingDialogSwitchToLocalMessage =>
+      'Vos données seront stockées uniquement sur cet appareil. Vous pourrez revenir en mode serveur depuis les paramètres.';
+
+  @override
+  String get onboardingActionUseLocalMode => 'Utiliser en mode local';
+
+  @override
+  String get onboardingPageTitle => 'Bienvenue sur K-Budget';
+
+  @override
+  String get onboardingPageTagline => 'Choisissez votre mode de données';
+
+  @override
+  String get onboardingValueLocalMode => 'Mode local';
+
+  @override
+  String get onboardingValueLocalModeHint =>
+      'Vos données restent sur cet appareil';
+
+  @override
+  String get onboardingValueServerMode => 'Mode serveur';
+
+  @override
+  String get onboardingValueServerModeHint =>
+      'Synchronisez avec votre serveur K-Budget';
+
+  @override
+  String get onboardingPageServerSetupTitle => 'Configuration serveur';
+
+  @override
+  String get onboardingFormServerUrlHint =>
+      'Entrez l\'URL de votre serveur K-Budget';
+
+  @override
+  String get onboardingFormServerUrl => 'URL du serveur';
+
+  @override
+  String get onboardingFormServerUrlRequired => 'L\'URL est requise';
+
+  @override
+  String get onboardingFormServerUrlInvalid => 'URL invalide';
+
+  @override
+  String get onboardingFeedbackConnected => 'Connexion réussie';
+
+  @override
+  String get onboardingFeedbackConnecting => 'Connexion en cours...';
+
+  @override
+  String get onboardingActionCheckConnection => 'Vérifier la connexion';
+
+  @override
+  String get compatibilityPageClientTitle => 'Application à mettre à jour';
+
+  @override
+  String get compatibilityPageServerTitle => 'Serveur à mettre à jour';
+
+  @override
+  String get compatibilityPageTagline =>
+      'Cette version de l\'application et votre serveur ne peuvent pas fonctionner ensemble.';
+
+  @override
+  String get compatibilityFeedbackOffline =>
+      'Serveur injoignable. Vérifiez l\'URL et votre connexion.';
+
+  @override
+  String compatibilityFeedbackServerTooOldUnknown(String requiredVersion) {
+    return 'Ce serveur est trop ancien pour indiquer sa version. Cette application requiert au minimum la version $requiredVersion. Mettez votre instance à jour, puis relancez l\'application.';
+  }
+
+  @override
+  String compatibilityFeedbackServerTooOldVersion(
+    String serverVersion,
+    String requiredVersion,
+  ) {
+    return 'Ce serveur est en version $serverVersion. Cette application requiert au minimum la version $requiredVersion. Mettez votre instance à jour, puis relancez l\'application.';
+  }
+
+  @override
+  String compatibilityFeedbackClientTooOld(String requiredVersion) {
+    return 'Ce serveur exige au minimum la version $requiredVersion de l\'application. Mettez à jour K-Budget depuis votre magasin.';
+  }
+
+  @override
+  String compatibilityFeedbackClientTooOldVerbose(
+    String requiredVersion,
+    String clientVersion,
+  ) {
+    return 'Ce serveur exige au minimum la version $requiredVersion de l\'application. Vous utilisez la version $clientVersion. Mettez à jour K-Budget depuis votre magasin.';
+  }
+
+  @override
+  String get commonValueTomorrow => 'Demain';
+
+  @override
+  String commonValueDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '$count jour',
+    );
+    return 'il y a $_temp0';
+  }
+
+  @override
+  String commonValueWeeksAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines',
+      one: '$count semaine',
+    );
+    return 'il y a $_temp0';
+  }
+
+  @override
+  String commonValueDaysAgoShort(int count) {
+    return 'il y a $count j.';
+  }
+
+  @override
+  String commonValueInDaysShort(int count) {
+    return 'dans $count j.';
+  }
+
+  @override
+  String dashboardSummaryMonthVariation(String amount) {
+    return '$amount ce mois';
+  }
 }

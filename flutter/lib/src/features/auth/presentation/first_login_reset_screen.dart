@@ -10,6 +10,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -57,6 +58,8 @@ class _FirstLoginResetScreenState
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _isSubmitting = true;
       _submitError = null;
@@ -72,14 +75,13 @@ class _FirstLoginResetScreenState
       setState(() {
         _isSubmitting = false;
         _submitError = e.response?.statusCode == 400
-            ? 'Veuillez vérifier les informations saisies.'
-            : 'Erreur lors de la mise à jour de vos identifiants. '
-                  'Veuillez réessayer.';
+            ? l10n.errorsApiValidationError
+            : l10n.authFeedbackResetError;
       });
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       setState(() {
         _isSubmitting = false;
-        _submitError = 'Erreur inattendue: $e';
+        _submitError = l10n.errorsClientUnknown;
       });
     }
   }
@@ -87,6 +89,7 @@ class _FirstLoginResetScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next is AuthAuthenticated) {
@@ -114,14 +117,13 @@ class _FirstLoginResetScreenState
                     ),
                     const SizedBox(height: AppSpacing.space4),
                     Text(
-                      'Finalisez votre compte',
+                      l10n.authPageFirstLoginTitle,
                       style: theme.textTheme.headlineMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.space2),
                     Text(
-                      'Votre compte a été créé par un administrateur. '
-                      'Choisissez vos identifiants définitifs pour continuer.',
+                      l10n.authPageFirstLoginNotice,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -133,19 +135,19 @@ class _FirstLoginResetScreenState
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: PhosphorIcon(
+                      decoration: InputDecoration(
+                        labelText: l10n.authFormEmail,
+                        prefixIcon: const PhosphorIcon(
                           PhosphorIconsRegular.envelope,
                           size: 20,
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Veuillez saisir votre email';
+                          return l10n.authFormEmailRequired;
                         }
                         if (!value.contains('@')) {
-                          return 'Email invalide';
+                          return l10n.authFormEmailInvalid;
                         }
                         return null;
                       },
@@ -155,16 +157,20 @@ class _FirstLoginResetScreenState
                       controller: _displayNameController,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.name],
-                      decoration: const InputDecoration(
-                        labelText: "Nom d'affichage",
-                        prefixIcon: PhosphorIcon(
+                      decoration: InputDecoration(
+                        labelText: l10n.authFormDisplayName,
+                        prefixIcon: const PhosphorIcon(
                           PhosphorIconsRegular.user,
                           size: 20,
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Veuillez saisir un nom';
+                        final trimmed = value?.trim() ?? '';
+                        if (trimmed.isEmpty) {
+                          return l10n.authFormDisplayNameRequired;
+                        }
+                        if (trimmed.length > 100) {
+                          return l10n.authFormDisplayNameRequired;
                         }
                         return null;
                       },
@@ -176,8 +182,8 @@ class _FirstLoginResetScreenState
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
-                        labelText: 'Mot de passe',
-                        helperText: PasswordPolicy.helperText,
+                        labelText: l10n.authFormPassword,
+                        helperText: PasswordPolicy.helperText(l10n),
                         prefixIcon: const PhosphorIcon(
                           PhosphorIconsRegular.lock,
                           size: 20,
@@ -195,10 +201,10 @@ class _FirstLoginResetScreenState
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez saisir un mot de passe';
+                          return l10n.authFormPasswordRequired;
                         }
                         if (value.length < PasswordPolicy.minLength) {
-                          return PasswordPolicy.tooShortMessage;
+                          return PasswordPolicy.tooShortMessage(l10n);
                         }
                         return null;
                       },
@@ -210,7 +216,7 @@ class _FirstLoginResetScreenState
                       textInputAction: TextInputAction.done,
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
-                        labelText: 'Confirmer le mot de passe',
+                        labelText: l10n.authFormConfirmPassword,
                         prefixIcon: const PhosphorIcon(
                           PhosphorIconsRegular.lock,
                           size: 20,
@@ -229,10 +235,10 @@ class _FirstLoginResetScreenState
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez confirmer votre mot de passe';
+                          return l10n.authFormPasswordConfirmRequired;
                         }
                         if (value != _passwordController.text) {
-                          return 'Les mots de passe ne correspondent pas';
+                          return l10n.authFormPasswordMismatch;
                         }
                         return null;
                       },
@@ -259,7 +265,7 @@ class _FirstLoginResetScreenState
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text('Confirmer'),
+                          : Text(l10n.commonActionConfirm),
                     ),
                   ],
                 ),

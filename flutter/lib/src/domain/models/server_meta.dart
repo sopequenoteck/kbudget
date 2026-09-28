@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:k_budget/src/localization/app_localizations.dart';
+
 /// Description que le serveur donne de lui-meme, via `GET /api/meta` (KKS-314).
 class ServerMeta {
   /// Construit la description renvoyee par `GET /api/meta`.
@@ -93,22 +95,29 @@ extension CompatibilityMessage on CompatibilityStatus {
   ///
   /// [verbose] ajoute la version du client, pertinente sur un ecran de blocage
   /// mais bruyante sous un champ de saisie d'URL.
-  String? userMessage({bool verbose = false}) => switch (this) {
-    CompatibilityOk() => null,
-    CompatibilityOffline() =>
-      "Serveur injoignable. Verifiez l'URL et votre connexion.",
-    CompatibilityServerTooOld(:final serverVersion, :final requiredVersion) =>
-      serverVersion == null
-          ? 'Ce serveur est trop ancien pour indiquer sa version. Cette '
-                'application requiert au minimum la version $requiredVersion. '
-                "Mettez votre instance a jour, puis relancez l'application."
-          : 'Ce serveur est en version $serverVersion. Cette application '
-                'requiert au minimum la version $requiredVersion. '
-                "Mettez votre instance a jour, puis relancez l'application.",
-    CompatibilityClientTooOld(:final clientVersion, :final requiredVersion) =>
-      'Ce serveur exige au minimum la version $requiredVersion de '
-          "l'application. "
-          "${verbose ? 'Vous utilisez la version $clientVersion. ' : ''}"
-          'Mettez a jour K-Budget depuis votre magasin.',
-  };
+  String? userMessage(AppLocalizations l10n, {bool verbose = false}) =>
+      switch (this) {
+        CompatibilityOk() => null,
+        CompatibilityOffline() => l10n.compatibilityFeedbackOffline,
+        CompatibilityServerTooOld(
+          :final serverVersion,
+          :final requiredVersion,
+        ) =>
+          serverVersion == null
+              ? l10n.compatibilityFeedbackServerTooOldUnknown(requiredVersion)
+              : l10n.compatibilityFeedbackServerTooOldVersion(
+                  serverVersion,
+                  requiredVersion,
+                ),
+        CompatibilityClientTooOld(
+          :final clientVersion,
+          :final requiredVersion,
+        ) =>
+          verbose
+              ? l10n.compatibilityFeedbackClientTooOldVerbose(
+                  requiredVersion,
+                  clientVersion,
+                )
+              : l10n.compatibilityFeedbackClientTooOld(requiredVersion),
+      };
 }
