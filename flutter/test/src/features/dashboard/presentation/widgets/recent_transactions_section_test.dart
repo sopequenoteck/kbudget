@@ -127,5 +127,17 @@ void main() {
       expect(find.text('USD'), findsOneWidget);
       expect(find.textContaining('≈'), findsOneWidget);
     });
+
+    testWidgets('should_showSectionTexts_when_noRecentTransactions',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(const DashboardState(isLoading: false)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dernières opérations'), findsOneWidget);
+      expect(find.text('Voir tout'), findsOneWidget);
+      expect(find.text('Aucune transaction'), findsOneWidget);
+    });
   });
 }

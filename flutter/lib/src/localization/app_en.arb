@@ -32,11 +32,11 @@
   "errorsApiEmailAlreadyExists": "Email already in use",
   "errorsApiTooManyRequests": "Too many attempts. Please try again shortly.",
   "errorsApiInternalError": "An internal error occurred",
-  "amount": "Amount",
-  "currency": "Currency",
-  "frequency": "Frequency",
+  "budgetsFormAmount": "Amount",
+  "budgetsFormCurrencyAria": "Currency",
+  "budgetsFormFrequencyAria": "Frequency",
   "budgetsFormCategory": "Category",
-  "selectCategory": "Choose a category",
+  "budgetsFormCategoryPlaceholder": "Choose a category",
   "budgetsFormThresholdAria": "Alert threshold",
   "authFeedbackInvalidCredentials": "Incorrect email or password",
   "transactionsEmptyNoneInMonth": "No transactions in {month}",
@@ -176,18 +176,15 @@
   "categoriesFormIconRequired": "Icon is required",
   "categoriesDialogDeleteTitle": "Delete category",
   "categoriesDialogDeleteMessage": "This category will be unlinked from all related items.",
-  "emptyBudgetList": "No budget",
-  "deleteBudgetTitle": "Delete budget",
-  "deleteBudgetMessage": "Are you sure you want to delete this budget? This action is irreversible.",
-  "allCategoriesHaveBudgets": "All categories already have a budget",
-  "total": "Total",
-  "budgetOtherCategory": "Other",
-  "budgetActive": "Active budget",
+  "budgetsEmptyTitle": "No budget for this period",
+  "budgetsDialogDeleteTitle": "Delete budget",
+  "budgetsDialogDeleteMessage": "Are you sure you want to delete this budget?",
+  "budgetsEmptyAllCategoriesBudgeted": "All categories already have a budget.",
   "notificationsPageTitle": "Notifications",
   "notificationsActionMarkAllReadHint": "Mark all as read",
   "notificationsActionDeleteAllHint": "Clear history",
   "notificationsEmptyTitle": "No notifications",
-  "notificationClearConfirmMessage": "Delete all notifications? This action is irreversible.",
+  "notificationsDialogDeleteAllMessage": "Delete all notifications? This action is irreversible.",
   "debtsFeedbackLoadError": "Unable to load debt",
   "commonValueToday": "Today",
   "commonValueYesterday": "Yesterday",
@@ -573,5 +570,132 @@
   "exchangeRatesValueGbp": "Pound Sterling",
   "exchangeRatesValueChf": "Swiss Franc",
   "exchangeRatesValueCad": "Canadian Dollar",
-  "exchangeRatesValueMad": "Moroccan Dirham"
+  "exchangeRatesValueMad": "Moroccan Dirham",
+  "budgetsPageTitle": "Budgets",
+  "budgetsPageUnbudgetedTitle": "Unbudgeted",
+  "budgetsDialogCreateTitle": "New budget",
+  "budgetsActionDeactivate": "Deactivate",
+  "budgetsEmptyNoTransactions": "No transactions this month",
+  "budgetsListInactive": "Inactive",
+  "budgetsDetailOverBudget": "over {amount}",
+  "@budgetsDetailOverBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsDetailRemaining": "{amount} remaining",
+  "@budgetsDetailRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummarySpent": "Spent",
+  "budgetsSummaryActiveCount": "{count, plural, one {{count} budget} other {{count} budgets}}",
+  "@budgetsSummaryActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryOverBudgetCount": "{count, plural, one {{count} over budget} other {{count} over budget}}",
+  "@budgetsSummaryOverBudgetCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryExceededCount": "{count, plural, one {{count} budget exceeded} other {{count} budgets exceeded}}",
+  "@budgetsSummaryExceededCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryUnbudgeted": "{amount} unbudgeted",
+  "@budgetsSummaryUnbudgeted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummaryMonthlyInCurrency": "Monthly · in {currency}",
+  "@budgetsSummaryMonthlyInCurrency": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummaryTotal": "Total: {amount}",
+  "@budgetsSummaryTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsValueWeekly": "Weekly",
+  "budgetsValueMonthly": "Monthly",
+  "budgetsValueYearly": "Yearly",
+  "dashboardPageRecentTransactionsTitle": "Recent transactions",
+  "dashboardSummaryGreetingMorning": "{hasName, select, yes {Good morning {name}} other {Good morning}}",
+  "@dashboardSummaryGreetingMorning": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryGreetingAfternoon": "{hasName, select, yes {Good afternoon {name}} other {Good afternoon}}",
+  "@dashboardSummaryGreetingAfternoon": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryGreetingEvening": "{hasName, select, yes {Good evening {name}} other {Good evening}}",
+  "@dashboardSummaryGreetingEvening": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryMonthPositive": "Positive month",
+  "dashboardSummaryMonthNegative": "Negative month",
+  "dashboardSummaryMonthQuiet": "Quiet month",
+  "dashboardEmptyTitle": "Welcome!",
+  "dashboardEmptyMessage": "Start by creating an account\nto track your finances.",
+  "recurringSummaryOverdueCount": "{count, plural, one {{count} expense overdue} other {{count} expenses overdue}}",
+  "@recurringSummaryOverdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringActionValidate": "Validate",
+  "recurringActionSkip": "Skip",
+  "accountsSummaryNetWorth": "Total net worth",
+  "exchangeRatesFeedbackConversionIncompleteHint": "Some amounts could not be converted",
+  "transactionsEmptyTitle": "No transactions",
+  "commonActionViewAll": "View all"
 }

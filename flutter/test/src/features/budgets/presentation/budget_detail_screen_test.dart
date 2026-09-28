@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
@@ -262,7 +263,11 @@ void main() {
         await tester.tap(find.text('Supprimer'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Supprimer ce budget ?'), findsOneWidget);
+        expect(find.text('Supprimer le budget'), findsOneWidget);
+        expect(
+          find.text('Voulez-vous vraiment supprimer ce budget ?'),
+          findsOneWidget,
+        );
 
         final dialogSupprimer = find.descendant(
           of: find.byType(Dialog),
@@ -390,6 +395,101 @@ void main() {
 
         expect(find.text('Courses anciennes'), findsOneWidget);
         expect(find.textContaining('30,00'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'should_orderGroups_todayYesterdayThenMostRecent_when_severalDays',
+      (tester) async {
+        // Surface haute : les cinq groupes doivent etre construits
+        tester.view.physicalSize = const Size(2400, 9000);
+        addTearDown(tester.view.resetPhysicalSize);
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day, 12);
+        Transaction tx(String id, DateTime date) => Transaction(
+              id: id,
+              montant: 10,
+              libelle: 'Achat $id',
+              type: TransactionType.depense,
+              date: date,
+              categoryId: 'cat-1',
+            );
+        final tomorrow = today.add(const Duration(days: 1));
+        final threeDaysAgo = today.subtract(const Duration(days: 3));
+        final fiveDaysAgo = today.subtract(const Duration(days: 5));
+        when(mockTransactionRepo.getByMonth(any, any)).thenAnswer(
+          (_) async => [
+            tx('j-5', fiveDaysAgo),
+            tx('j', today),
+            tx('j+1', tomorrow),
+            tx('j-3', threeDaysAgo),
+            tx('j-1', today.subtract(const Duration(days: 1))),
+          ],
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        final format = DateFormat.MMMMd('fr_FR');
+        final labels = [
+          "Aujourd'hui",
+          'Hier',
+          format.format(tomorrow),
+          format.format(threeDaysAgo),
+          format.format(fiveDaysAgo),
+        ];
+        final tops = [
+          for (final label in labels) tester.getTopLeft(find.text(label)).dy,
+        ];
+        for (var i = 1; i < tops.length; i++) {
+          expect(tops[i], greaterThan(tops[i - 1]), reason: labels[i]);
+        }
+      },
+    );
+
+    testWidgets(
+      'should_showLoadError_when_transactionsFail',
+      (tester) async {
+        when(mockTransactionRepo.getByMonth(any, any))
+            .thenThrow(Exception('network'));
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Erreur de chargement'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showOverBudgetAmount_when_spentExceedsBudget',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => overviewWithCat1.copyWith(
+            items: [
+              overviewWithCat1.items.first.copyWith(
+                montantDepense: 250,
+                percentage: 125,
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('dépassement 50,00'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showRetry_when_overviewFails',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenThrow(Exception('network'));
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Réessayer'), findsOneWidget);
       },
     );
   });

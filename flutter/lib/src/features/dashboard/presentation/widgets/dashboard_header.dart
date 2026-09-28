@@ -9,32 +9,34 @@ import 'package:k_budget/src/domain/enums/recurring_status.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
 
-  String _greeting(String? userName) {
+  String _greeting(AppLocalizations l10n, String? userName) {
     final hour = DateTime.now().hour;
-    final String salut;
+    final hasName = userName != null ? 'yes' : 'no';
+    final name = userName ?? '';
     if (hour < 12) {
-      salut = 'Bonjour';
-    } else if (hour < 18) {
-      salut = 'Bon après-midi';
-    } else {
-      salut = 'Bonsoir';
+      return l10n.dashboardSummaryGreetingMorning(hasName, name);
     }
-    return userName != null ? '$salut $userName' : salut;
+    if (hour < 18) {
+      return l10n.dashboardSummaryGreetingAfternoon(hasName, name);
+    }
+    return l10n.dashboardSummaryGreetingEvening(hasName, name);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final dashState = ref.watch(dashboardNotifierProvider);
     final recurringState = ref.watch(recurringListNotifierProvider);
     final budgetState = ref.watch(budgetNotifierProvider);
 
-    final prefix = _greeting(dashState.userName);
+    final prefix = _greeting(l10n, dashState.userName);
 
     final overdueCount = recurringState.items
         .where((i) => i.status == RecurringStatus.overdue)
@@ -44,24 +46,27 @@ class DashboardHeader extends ConsumerWidget {
         budgetState.overview?.items.where((i) => i.percentage > 100).length ??
             0;
 
-    final String suffix;
+    final String status;
 
     if (overdueCount > 0) {
-      suffix = ' · $overdueCount charge${overdueCount > 1 ? 's' : ''} en retard';
+      status = l10n.recurringSummaryOverdueCount(overdueCount);
     } else if (exceededCount > 0) {
-      suffix = ' · $exceededCount budget${exceededCount > 1 ? 's' : ''} dépassé${exceededCount > 1 ? 's' : ''}';
+      status = l10n.budgetsSummaryExceededCount(exceededCount);
     } else {
       final summary = dashState.currentSummary;
-      if (summary != null && summary.totalRecettes + summary.totalDepenses > 0) {
+      if (summary != null &&
+          summary.totalRecettes + summary.totalDepenses > 0) {
         final isPositive = summary.totalRecettes >= summary.totalDepenses;
-        suffix = isPositive ? ' · Mois positif' : ' · Mois négatif';
+        status = isPositive
+            ? l10n.dashboardSummaryMonthPositive
+            : l10n.dashboardSummaryMonthNegative;
       } else {
-        suffix = ' · Mois calme';
+        status = l10n.dashboardSummaryMonthQuiet;
       }
     }
 
     return Text(
-      '$prefix$suffix',
+      '$prefix · $status',
       style: TextStyle(
         fontSize: AppTypography.sizeSm,
         fontWeight: AppTypography.regular,

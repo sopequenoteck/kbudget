@@ -294,23 +294,23 @@ abstract class AppLocalizations {
   /// **'An internal error occurred'**
   String get errorsApiInternalError;
 
-  /// No description provided for @amount.
+  /// No description provided for @budgetsFormAmount.
   ///
   /// In en, this message translates to:
   /// **'Amount'**
-  String get amount;
+  String get budgetsFormAmount;
 
-  /// No description provided for @currency.
+  /// No description provided for @budgetsFormCurrencyAria.
   ///
   /// In en, this message translates to:
   /// **'Currency'**
-  String get currency;
+  String get budgetsFormCurrencyAria;
 
-  /// No description provided for @frequency.
+  /// No description provided for @budgetsFormFrequencyAria.
   ///
   /// In en, this message translates to:
   /// **'Frequency'**
-  String get frequency;
+  String get budgetsFormFrequencyAria;
 
   /// No description provided for @budgetsFormCategory.
   ///
@@ -318,11 +318,11 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get budgetsFormCategory;
 
-  /// No description provided for @selectCategory.
+  /// No description provided for @budgetsFormCategoryPlaceholder.
   ///
   /// In en, this message translates to:
   /// **'Choose a category'**
-  String get selectCategory;
+  String get budgetsFormCategoryPlaceholder;
 
   /// No description provided for @budgetsFormThresholdAria.
   ///
@@ -948,47 +948,29 @@ abstract class AppLocalizations {
   /// **'This category will be unlinked from all related items.'**
   String get categoriesDialogDeleteMessage;
 
-  /// No description provided for @emptyBudgetList.
+  /// No description provided for @budgetsEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No budget'**
-  String get emptyBudgetList;
+  /// **'No budget for this period'**
+  String get budgetsEmptyTitle;
 
-  /// No description provided for @deleteBudgetTitle.
+  /// No description provided for @budgetsDialogDeleteTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete budget'**
-  String get deleteBudgetTitle;
+  String get budgetsDialogDeleteTitle;
 
-  /// No description provided for @deleteBudgetMessage.
+  /// No description provided for @budgetsDialogDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete this budget? This action is irreversible.'**
-  String get deleteBudgetMessage;
+  /// **'Are you sure you want to delete this budget?'**
+  String get budgetsDialogDeleteMessage;
 
-  /// No description provided for @allCategoriesHaveBudgets.
+  /// No description provided for @budgetsEmptyAllCategoriesBudgeted.
   ///
   /// In en, this message translates to:
-  /// **'All categories already have a budget'**
-  String get allCategoriesHaveBudgets;
-
-  /// No description provided for @total.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get total;
-
-  /// No description provided for @budgetOtherCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get budgetOtherCategory;
-
-  /// No description provided for @budgetActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active budget'**
-  String get budgetActive;
+  /// **'All categories already have a budget.'**
+  String get budgetsEmptyAllCategoriesBudgeted;
 
   /// No description provided for @notificationsPageTitle.
   ///
@@ -1014,11 +996,11 @@ abstract class AppLocalizations {
   /// **'No notifications'**
   String get notificationsEmptyTitle;
 
-  /// No description provided for @notificationClearConfirmMessage.
+  /// No description provided for @notificationsDialogDeleteAllMessage.
   ///
   /// In en, this message translates to:
   /// **'Delete all notifications? This action is irreversible.'**
-  String get notificationClearConfirmMessage;
+  String get notificationsDialogDeleteAllMessage;
 
   /// No description provided for @debtsFeedbackLoadError.
   ///
@@ -2243,6 +2225,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Moroccan Dirham'**
   String get exchangeRatesValueMad;
+
+  /// No description provided for @budgetsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgetsPageTitle;
+
+  /// No description provided for @budgetsPageUnbudgetedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbudgeted'**
+  String get budgetsPageUnbudgetedTitle;
+
+  /// No description provided for @budgetsDialogCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New budget'**
+  String get budgetsDialogCreateTitle;
+
+  /// No description provided for @budgetsActionDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get budgetsActionDeactivate;
+
+  /// No description provided for @budgetsEmptyNoTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions this month'**
+  String get budgetsEmptyNoTransactions;
+
+  /// No description provided for @budgetsListInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get budgetsListInactive;
+
+  /// No description provided for @budgetsDetailOverBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'over {amount}'**
+  String budgetsDetailOverBudget(String amount);
+
+  /// No description provided for @budgetsDetailRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} remaining'**
+  String budgetsDetailRemaining(String amount);
+
+  /// No description provided for @budgetsSummarySpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetsSummarySpent;
+
+  /// No description provided for @budgetsSummaryActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} budget} other {{count} budgets}}'**
+  String budgetsSummaryActiveCount(int count);
+
+  /// No description provided for @budgetsSummaryOverBudgetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} over budget} other {{count} over budget}}'**
+  String budgetsSummaryOverBudgetCount(int count);
+
+  /// No description provided for @budgetsSummaryExceededCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} budget exceeded} other {{count} budgets exceeded}}'**
+  String budgetsSummaryExceededCount(int count);
+
+  /// No description provided for @budgetsSummaryUnbudgeted.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} unbudgeted'**
+  String budgetsSummaryUnbudgeted(String amount);
+
+  /// No description provided for @budgetsSummaryMonthlyInCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly · in {currency}'**
+  String budgetsSummaryMonthlyInCurrency(String currency);
+
+  /// No description provided for @budgetsSummaryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {amount}'**
+  String budgetsSummaryTotal(String amount);
+
+  /// No description provided for @budgetsValueWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get budgetsValueWeekly;
+
+  /// No description provided for @budgetsValueMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get budgetsValueMonthly;
+
+  /// No description provided for @budgetsValueYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get budgetsValueYearly;
+
+  /// No description provided for @dashboardPageRecentTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent transactions'**
+  String get dashboardPageRecentTransactionsTitle;
+
+  /// No description provided for @dashboardSummaryGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'{hasName, select, yes {Good morning {name}} other {Good morning}}'**
+  String dashboardSummaryGreetingMorning(String hasName, String name);
+
+  /// No description provided for @dashboardSummaryGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'{hasName, select, yes {Good afternoon {name}} other {Good afternoon}}'**
+  String dashboardSummaryGreetingAfternoon(String hasName, String name);
+
+  /// No description provided for @dashboardSummaryGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'{hasName, select, yes {Good evening {name}} other {Good evening}}'**
+  String dashboardSummaryGreetingEvening(String hasName, String name);
+
+  /// No description provided for @dashboardSummaryMonthPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive month'**
+  String get dashboardSummaryMonthPositive;
+
+  /// No description provided for @dashboardSummaryMonthNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative month'**
+  String get dashboardSummaryMonthNegative;
+
+  /// No description provided for @dashboardSummaryMonthQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet month'**
+  String get dashboardSummaryMonthQuiet;
+
+  /// No description provided for @dashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get dashboardEmptyTitle;
+
+  /// No description provided for @dashboardEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by creating an account\nto track your finances.'**
+  String get dashboardEmptyMessage;
+
+  /// No description provided for @recurringSummaryOverdueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one {{count} expense overdue} other {{count} expenses overdue}}'**
+  String recurringSummaryOverdueCount(int count);
+
+  /// No description provided for @recurringActionValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate'**
+  String get recurringActionValidate;
+
+  /// No description provided for @recurringActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get recurringActionSkip;
+
+  /// No description provided for @accountsSummaryNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Total net worth'**
+  String get accountsSummaryNetWorth;
+
+  /// No description provided for @exchangeRatesFeedbackConversionIncompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Some amounts could not be converted'**
+  String get exchangeRatesFeedbackConversionIncompleteHint;
+
+  /// No description provided for @transactionsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions'**
+  String get transactionsEmptyTitle;
+
+  /// No description provided for @commonActionViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get commonActionViewAll;
 }
 
 class _AppLocalizationsDelegate

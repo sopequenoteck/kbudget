@@ -150,6 +150,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   langue (« 50 % ») et les messages d'erreur n'affichent plus le detail
   technique de l'exception. Les noms de devises sont traduits dans toute
   l'application (« Dollar US »).
+- **Budgets, tableau de bord et panneau de notifications de Flutter dans les
+  catalogues (KKS-402)** : etape 5 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Aucun budget
+  pour cette periode », « Nouveau budget », « Voulez-vous vraiment supprimer
+  ce budget ? » ou « Non budgete » en titre des depenses hors budget. Le
+  compteur de budgets accorde le singulier (« 1 budget »), les pourcentages
+  suivent le format de la langue (« 80 % », « +12,3 % ») et les messages
+  d'erreur n'affichent plus le detail technique de l'exception.
 
 ### Changed
 

@@ -14,6 +14,7 @@ import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_item.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -41,6 +42,7 @@ class BudgetSummarySection extends ConsumerWidget {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Top 4 items tries par pourcentage decroissant (depasses en premier)
     final topItems = [...overview.items]
@@ -52,7 +54,7 @@ class BudgetSummarySection extends ConsumerWidget {
       orElse: () => Currency.eur,
     );
     final locale = ref.watch(intlLocaleProvider);
-    final monthLabel = DateFormat('MMMM yyyy', locale).format(DateTime.now());
+    final monthLabel = DateFormat.yMMMM(locale).format(DateTime.now());
     final spentFormatted = AmountFormatter.format(
       overview.totalSpent,
       currency: currencyEnum,
@@ -72,7 +74,7 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Budgets · $monthLabel',
+              '${l10n.budgetsPageTitle} · $monthLabel',
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -81,7 +83,7 @@ class BudgetSummarySection extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () => context.push(RouteNames.budgets),
-              child: const Text('Voir tout'),
+              child: Text(l10n.commonActionViewAll),
             ),
           ],
         ),
@@ -91,7 +93,9 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'MENSUEL · EN ${overview.currency.toUpperCase()}',
+              l10n
+                  .budgetsSummaryMonthlyInCurrency(overview.currency)
+                  .toUpperCase(),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,

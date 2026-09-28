@@ -32,7 +32,7 @@ void main() {
       expect(find.textContaining('Total :'), findsOneWidget);
       expect(find.textContaining('45,00'), findsWidgets);
       expect(find.text('Divers'), findsOneWidget);
-      expect(find.text('Autre'), findsOneWidget);
+      expect(find.text('Non budgété'), findsOneWidget);
     });
 
     testWidgets(
@@ -49,7 +49,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Autre'), findsOneWidget);
+      expect(find.text('Non budgété'), findsOneWidget);
       expect(find.textContaining('45,00'), findsOneWidget);
     });
   });
