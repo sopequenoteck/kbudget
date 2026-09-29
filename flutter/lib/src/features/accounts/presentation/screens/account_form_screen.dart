@@ -31,6 +31,7 @@ import 'package:k_budget/src/features/settings/application/display_locale_provid
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -544,7 +545,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               items: Currency.values
                   .map((c) => SelectPickerItem(
                         id: c.name,
-                        label: '${c.symbol} — ${c.name}',
+                        label: '${c.symbol} — ${currencyName(c, l10n)}',
                       ))
                   .toList(),
               selectedId: _selectedCurrency.name,

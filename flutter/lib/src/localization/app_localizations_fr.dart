@@ -1861,4 +1861,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exchangeRatesFormRatePlaceholder => 'Ex: 655.957';
+
+  @override
+  String transactionsValueTransferTo(String account) {
+    return 'Virement vers $account';
+  }
+
+  @override
+  String transactionsValueTransferFrom(String account) {
+    return 'Virement depuis $account';
+  }
+
+  @override
+  String get transactionsValueBalanceAdjustment => 'Ajustement de solde';
+
+  @override
+  String debtsValueRepayment(String person) {
+    return 'Remboursement - $person';
+  }
+
+  @override
+  String get accountsValueDefaultAccountName => 'Compte Principal';
 }

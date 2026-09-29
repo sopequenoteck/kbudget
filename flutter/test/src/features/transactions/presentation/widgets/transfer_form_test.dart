@@ -135,6 +135,8 @@ void main() {
       expect(captured!.fromAccountId, 'acc-a');
       expect(captured!.toAccountId, 'acc-b');
       expect(captured!.montant, 75.0);
+      expect(captured!.libelleDebit, 'Virement vers Épargne');
+      expect(captured!.libelleCredit, 'Virement depuis Compte courant');
     });
 
     testWidgets('should_callOnCancelled_when_cancelButtonTapped',

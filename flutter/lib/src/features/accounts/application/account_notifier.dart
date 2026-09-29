@@ -61,7 +61,13 @@ class AccountNotifier extends CrudNotifier<Account> {
       error: null,
     );
     try {
-      final updated = await _typedRepo.adjustBalance(id, newBalance);
+      final updated = await _typedRepo.adjustBalance(
+        id,
+        newBalance,
+        libelle: ref
+            .read(appLocalizationsProvider)
+            .transactionsValueBalanceAdjustment,
+      );
       final index = allItems.indexWhere((e) => e.id == id);
       if (index != -1) allItems[index] = updated;
       refreshPage();

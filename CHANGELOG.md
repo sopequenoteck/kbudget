@@ -178,6 +178,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   (« 655,957 ») avec au plus six decimales. Les messages d'erreur n'affichent
   plus le detail technique de l'exception. Le calculateur de taux, sans
   equivalent Angular, est conserve et traduit.
+- **Textes generes envoyes par Flutter (KKS-423)** : premiere partie de
+  l'etape 7 sur 8 de KKS-326. Comme Angular, Flutter envoie dans la langue
+  affichee les libelles de virement (« Virement vers X », « Virement depuis
+  X »), d'ajustement de solde (« Ajustement de solde ») et de remboursement
+  de dette (« Remboursement - X »), ainsi que le nom du compte cree a
+  l'acceptation d'une invitation (« Compte Principal »). L'API n'y ecrit plus
+  son defaut anglais. La liste des devises du formulaire de compte affiche le
+  nom traduit (« Dollar US ») au lieu du code brut, et l'enum `Currency` ne
+  porte plus de noms francais en dur.
 
 ### Changed
 

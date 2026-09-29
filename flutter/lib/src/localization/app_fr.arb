@@ -633,5 +633,10 @@
   "exchangeRatesFormCalculatorFrom": "J'ai",
   "exchangeRatesFormRateWithPair": "Taux (1 {base} = X {target})",
   "exchangeRatesFormRateInvalid": "Veuillez saisir un taux valide (> 0).",
-  "exchangeRatesFormRatePlaceholder": "Ex: 655.957"
+  "exchangeRatesFormRatePlaceholder": "Ex: 655.957",
+  "transactionsValueTransferTo": "Virement vers {account}",
+  "transactionsValueTransferFrom": "Virement depuis {account}",
+  "transactionsValueBalanceAdjustment": "Ajustement de solde",
+  "debtsValueRepayment": "Remboursement - {person}",
+  "accountsValueDefaultAccountName": "Compte Principal"
 }

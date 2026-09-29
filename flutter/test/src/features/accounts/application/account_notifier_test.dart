@@ -213,7 +213,7 @@ void main() {
       await notifier().loadItems();
 
       final adjusted = acc1.copyWith(solde: 2000.0);
-      when(mockRepo.adjustBalance('1', 2000.0))
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
           .thenAnswer((_) async => adjusted);
       await notifier().adjustBalance('1', 2000.0);
 
@@ -221,11 +221,29 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
+    test('should_sendAdjustmentLabel_when_adjustBalanceCalled', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+      when(
+        mockRepo.adjustBalance(any, any, libelle: anyNamed('libelle')),
+      ).thenAnswer((_) async => acc1.copyWith(solde: 2000.0));
+
+      await notifier().adjustBalance('1', 2000.0);
+
+      verify(
+        mockRepo.adjustBalance(
+          '1',
+          2000.0,
+          libelle: 'Ajustement de solde',
+        ),
+      ).called(1);
+    });
+
     test('should_setError_when_adjustBalanceFails', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
       await notifier().loadItems();
 
-      when(mockRepo.adjustBalance('1', 2000.0))
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
           .thenThrow(Exception('Server error'));
       await notifier().adjustBalance('1', 2000.0);
 
@@ -238,7 +256,8 @@ void main() {
       await notifier().loadItems();
 
       final adjusted = acc1.copyWith(solde: 2000.0);
-      when(mockRepo.adjustBalance('1', 2000.0)).thenAnswer(
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
+          .thenAnswer(
         (_) =>
             Future.delayed(const Duration(milliseconds: 100), () => adjusted),
       );

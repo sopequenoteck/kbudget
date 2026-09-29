@@ -121,13 +121,23 @@ class DebtNotifier extends Notifier<DebtListState> {
     }
   }
 
-  Future<bool> repay(String debtId, String accountId, double? amount) async {
+  /// Rembourse [debt] depuis [accountId]. Le libelle de la transaction
+  /// est envoye dans la langue affichee (KKS-423).
+  Future<bool> repay(Debt debt, String accountId, double? amount) async {
+    final debtId = debt.id;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, debtId},
       error: null,
     );
     try {
-      final updated = await _repo.repay(debtId, accountId, amount);
+      final updated = await _repo.repay(
+        debtId,
+        accountId,
+        amount,
+        libelle: ref
+            .read(appLocalizationsProvider)
+            .debtsValueRepayment(debt.personne),
+      );
       final index = _allItems.indexWhere((e) => e.id == debtId);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => b.date.compareTo(a.date));

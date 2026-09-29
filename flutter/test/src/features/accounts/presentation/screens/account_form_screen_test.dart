@@ -251,6 +251,28 @@ void main() {
       expect(find.text('COURANT'), findsOneWidget);
     });
 
+    testWidgets('should_listTranslatedCurrencyNames_when_createMode',
+        (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byType(SelectPicker),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      final picker = tester.widget<SelectPicker>(find.byType(SelectPicker));
+      expect(picker.items.map((i) => i.label), [
+        '€ — Euro',
+        'CFA — Franc CFA (BCEAO)',
+        r'$ — Dollar US',
+        '£ — Livre sterling',
+        'CHF — Franc suisse',
+        r'CA$ — Dollar canadien',
+        'MAD — Dirham marocain',
+      ]);
+    });
+
     // SC-005 : SelectPicker devise absent en mode édition
     testWidgets('should_hideCurrencyPicker_when_editMode', (tester) async {
       await tester.pumpWidget(buildApp(account: testAccount));

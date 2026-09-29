@@ -8,12 +8,21 @@ part 'adjust_balance_request.g.dart';
 
 @JsonSerializable()
 class AdjustBalanceRequest {
-  final double newBalance;
+  /// Ajustement du solde a [newBalance], libelle de la transaction creee
+  /// par [libelle].
+  const AdjustBalanceRequest({required this.newBalance, this.libelle});
 
-  const AdjustBalanceRequest({required this.newBalance});
-
+  /// Lecture depuis le JSON de l'API.
   factory AdjustBalanceRequest.fromJson(Map<String, dynamic> json) =>
       _$AdjustBalanceRequestFromJson(json);
 
+  /// Nouveau solde du compte.
+  final double newBalance;
+
+  /// Libelle de la transaction d'ajustement ; sans lui, l'API ecrit un
+  /// defaut anglais (KKS-423).
+  final String? libelle;
+
+  /// Corps JSON envoye a l'API.
   Map<String, dynamic> toJson() => _$AdjustBalanceRequestToJson(this);
 }

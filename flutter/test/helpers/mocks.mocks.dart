@@ -835,19 +835,36 @@ class MockDebtRepository extends _i1.Mock implements _i26.DebtRepository {
           as _i21.Future<void>);
 
   @override
-  _i21.Future<_i8.Debt> repay(String? id, String? accountId, double? amount) =>
+  _i21.Future<_i8.Debt> repay(
+    String? id,
+    String? accountId,
+    double? amount, {
+    String? libelle,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#repay, [id, accountId, amount]),
+            Invocation.method(
+              #repay,
+              [id, accountId, amount],
+              {#libelle: libelle},
+            ),
             returnValue: _i21.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
-                Invocation.method(#repay, [id, accountId, amount]),
+                Invocation.method(
+                  #repay,
+                  [id, accountId, amount],
+                  {#libelle: libelle},
+                ),
               ),
             ),
             returnValueForMissingStub: _i21.Future<_i8.Debt>.value(
               _FakeDebt_6(
                 this,
-                Invocation.method(#repay, [id, accountId, amount]),
+                Invocation.method(
+                  #repay,
+                  [id, accountId, amount],
+                  {#libelle: libelle},
+                ),
               ),
             ),
           )
@@ -1005,19 +1022,35 @@ class MockAccountRepository extends _i1.Mock implements _i29.AccountRepository {
           as _i21.Future<_i10.Account>);
 
   @override
-  _i21.Future<_i10.Account> adjustBalance(String? id, double? newBalance) =>
+  _i21.Future<_i10.Account> adjustBalance(
+    String? id,
+    double? newBalance, {
+    String? libelle,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#adjustBalance, [id, newBalance]),
+            Invocation.method(
+              #adjustBalance,
+              [id, newBalance],
+              {#libelle: libelle},
+            ),
             returnValue: _i21.Future<_i10.Account>.value(
               _FakeAccount_8(
                 this,
-                Invocation.method(#adjustBalance, [id, newBalance]),
+                Invocation.method(
+                  #adjustBalance,
+                  [id, newBalance],
+                  {#libelle: libelle},
+                ),
               ),
             ),
             returnValueForMissingStub: _i21.Future<_i10.Account>.value(
               _FakeAccount_8(
                 this,
-                Invocation.method(#adjustBalance, [id, newBalance]),
+                Invocation.method(
+                  #adjustBalance,
+                  [id, newBalance],
+                  {#libelle: libelle},
+                ),
               ),
             ),
           )

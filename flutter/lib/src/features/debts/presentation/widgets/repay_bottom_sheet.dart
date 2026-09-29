@@ -111,7 +111,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
     if (accountId == null) return;
 
     final success = await ref.read(debtNotifierProvider.notifier).repay(
-          widget.debt.id,
+          widget.debt,
           accountId,
           amount,
         );

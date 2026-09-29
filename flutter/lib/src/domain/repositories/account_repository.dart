@@ -9,5 +9,11 @@ abstract class AccountRepository extends CrudRepository<Account> {
   Stream<List<Account>> watchAll();
   Future<Account> getById(String id);
   Future<Account> setDefault(String id);
-  Future<Account> adjustBalance(String id, double newBalance);
+  /// Ajuste le solde du compte [id]. [libelle] nomme la transaction
+  /// d'ajustement ; sans lui, l'API ecrit un defaut anglais.
+  Future<Account> adjustBalance(
+    String id,
+    double newBalance, {
+    String? libelle,
+  });
 }

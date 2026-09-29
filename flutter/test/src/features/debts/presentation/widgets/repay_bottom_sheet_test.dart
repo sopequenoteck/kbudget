@@ -24,11 +24,13 @@ class _TestDebtNotifier extends DebtNotifier {
   _TestDebtNotifier({this.repayResult = true});
 
   final bool repayResult;
+  Debt? lastDebt;
   String? lastAccountId;
   double? lastAmount;
 
   @override
-  Future<bool> repay(String debtId, String accountId, double? amount) async {
+  Future<bool> repay(Debt debt, String accountId, double? amount) async {
+    lastDebt = debt;
     lastAccountId = accountId;
     lastAmount = amount;
     return repayResult;
@@ -163,6 +165,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repaidCalled, isTrue);
+      expect(testDebtNotifier.lastDebt, testDebt);
       expect(testDebtNotifier.lastAccountId, 'acc1');
       expect(testDebtNotifier.lastAmount, 100.0);
       expect(find.text('Remboursement enregistré'), findsOneWidget);

@@ -50,8 +50,17 @@ class DebtRepositoryRemote implements DebtRepository {
   Future<void> delete(String id) => _dataSource.delete(id);
 
   @override
-  Future<Debt> repay(String id, String accountId, double? amount) async {
-    final request = RepayRequest(accountId: accountId, amount: amount);
+  Future<Debt> repay(
+    String id,
+    String accountId,
+    double? amount, {
+    String? libelle,
+  }) async {
+    final request = RepayRequest(
+      accountId: accountId,
+      amount: amount,
+      libelle: libelle,
+    );
     final response = await _dataSource.repay(id, request);
     return _toDomain(response);
   }
