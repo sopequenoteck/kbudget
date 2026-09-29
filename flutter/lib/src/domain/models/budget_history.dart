@@ -38,6 +38,7 @@ class BudgetHistoryItem with _$BudgetHistoryItem {
     required double montantDepense,
     required double percentage,
     DateTime? createdAt,
+    String? categorySystemKey,
   }) = _BudgetHistoryItem;
 
   factory BudgetHistoryItem.fromJson(Map<String, dynamic> json) =>

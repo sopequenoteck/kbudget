@@ -334,4 +334,59 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     },
   );
+
+  // KKS-424 : noms de catégories système traduits
+  const systemCategory = Category(
+    id: 'cat-sys',
+    nom: 'Subscription',
+    icone: '🔁',
+    couleur: '#8B5CF6',
+    isSystem: true,
+    systemKey: 'SUBSCRIPTION',
+  );
+  const withSystem = [..._testCategories, systemCategory];
+
+  testWidgets(
+    'should_show_translated_name_when_category_is_system',
+    (tester) async {
+      await pumpCategorySelect(tester, AppTheme.light, categories: withSystem);
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should_find_system_category_when_search_matches_translated_name',
+    (tester) async {
+      await pumpCategorySelect(tester, AppTheme.light, categories: withSystem);
+
+      await tester.enterText(find.byType(TextField), 'abonn');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Courses'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should_hide_create_button_when_typed_name_matches_translated_name',
+    (tester) async {
+      await pumpCategorySelect(tester, AppTheme.light, categories: withSystem);
+
+      await tester.enterText(find.byType(TextField), 'Abonnement');
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('+ Créer «'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should_keep_typed_name_when_category_is_not_system',
+    (tester) async {
+      await pumpCategorySelect(tester, AppTheme.light, categories: withSystem);
+
+      expect(find.text('Courses'), findsOneWidget);
+    },
+  );
 }

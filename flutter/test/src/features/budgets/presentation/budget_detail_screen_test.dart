@@ -492,5 +492,66 @@ void main() {
         expect(find.text('Réessayer'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'should_showTranslatedTitle_when_overviewItemIsSystem',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => overviewWithCat1.copyWith(
+            items: [
+              overviewWithCat1.items.first.copyWith(
+                categoryId: 'cat-sys',
+                categoryNom: 'Subscription',
+                categorySystemKey: 'SUBSCRIPTION',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp(categoryId: 'cat-sys'));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Abonnement'), findsWidgets);
+        expect(find.textContaining('Subscription'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should_showTranslatedTitle_when_fallbackBudgetIsSystem',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => overviewWithCat1.copyWith(items: []),
+        );
+        when(
+          mockBudgetRepo.getAll(includeInactive: anyNamed('includeInactive')),
+        ).thenAnswer((_) async => [
+                  const Budget(
+                    id: 'b-sys',
+                    categoryId: 'cat-sys',
+                    montant: 100,
+                    frequence: Frequency.mensuel,
+                    currency: Currency.eur,
+                    actif: false,
+                    categoryNom: 'Debt',
+                    categorySystemKey: 'DEBT',
+                  ),
+                ]);
+
+        await tester.pumpWidget(buildApp(categoryId: 'cat-sys'));
+        await tester.pumpAndSettle();
+        // L'ecran ne charge que l'overview : le budget de repli vient de la
+        // liste, chargee ici comme le fait l'ecran des budgets.
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(BudgetDetailScreen)),
+        );
+        await container
+            .read(budgetNotifierProvider.notifier)
+            .loadItems(includeInactive: true);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Dette'), findsWidgets);
+        expect(find.textContaining('Debt'), findsNothing);
+      },
+    );
   });
 }

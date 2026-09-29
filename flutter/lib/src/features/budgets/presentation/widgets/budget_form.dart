@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 import 'package:k_budget/src/utils/currency_name.dart';
@@ -133,6 +134,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       seuilNotification: _seuilNotification,
       actif: _actif,
       categoryNom: widget.budget?.categoryNom,
+      categorySystemKey: widget.budget?.categorySystemKey,
       categoryIcone: widget.budget?.categoryIcone,
       categoryCouleur: widget.budget?.categoryCouleur,
     );
@@ -195,16 +197,16 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             .where((c) => !existingBudgetCategoryIds.contains(c.id))
             .toList();
 
+    final l10n = AppLocalizations.of(context)!;
     final categoryItems = availableCategories
         .map((c) => SelectPickerItem(
               id: c.id,
-              label: c.nom,
+              label: categoryDisplayName(c.nom, c.systemKey, l10n),
               icon: c.icone,
               color: parseHexColor(c.couleur),
             ))
         .toList();
 
-    final l10n = AppLocalizations.of(context)!;
     final currencyItems = currencies
         .map((c) => SelectPickerItem(
               id: c.name,
@@ -368,8 +370,11 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     if (_isEditMode) {
       // In edit mode, category is locked — show a read-only field
       final budget = widget.budget!;
-      final label = budget.categoryNom ??
-          AppLocalizations.of(context)!.budgetsFormCategory;
+      final l10n = AppLocalizations.of(context)!;
+      final categoryNom = budget.categoryNom;
+      final label = categoryNom == null
+          ? l10n.budgetsFormCategory
+          : categoryDisplayName(categoryNom, budget.categorySystemKey, l10n);
       final icon = budget.categoryIcone;
       final color = parseHexColor(budget.categoryCouleur);
 

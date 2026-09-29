@@ -11,6 +11,7 @@ import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -221,7 +222,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        item.categoryNom,
+                        categoryDisplayName(
+                          item.categoryNom,
+                          item.categorySystemKey,
+                          l10n,
+                        ),
                         style: TextStyle(
                           fontSize: AppTypography.sizeSm,
                           fontWeight: AppTypography.medium,

@@ -13,11 +13,13 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../../helpers/mocks.mocks.dart';
 
 class _TestAccountNotifier extends AccountNotifier {
@@ -413,6 +415,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Dollar US'), findsOneWidget);
+    });
+
+    testWidgets('should_showTranslatedCategory_when_categoryIsSystem',
+        (tester) async {
+      when(mockCategoryRepo.getAll())
+          .thenAnswer((_) async => [TestFixtures.systemCategory]);
+
+      await tester.pumpWidget(buildApp(
+        subscription: testSubscription.copyWith(categoryId: 'cat-sys'),
+      ));
+      await tester.pumpAndSettle();
+      await ProviderScope.containerOf(tester.element(find.byType(Scaffold)))
+          .read(categoryNotifierProvider.notifier)
+          .loadItems();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
     });
   });
 }

@@ -15,6 +15,7 @@ class Category with _$Category {
     required String icone,
     required String couleur,
     @Default(false) bool isSystem,
+    String? systemKey,
     DateTime? updatedAt,
   }) = _Category;
 

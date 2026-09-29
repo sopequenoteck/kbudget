@@ -23,6 +23,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -92,7 +93,8 @@ class RecentTransactionsSection extends ConsumerWidget {
 
             // Subtitle : catégorie · nom du compte
             final parts = <String>[
-              if (category?.nom != null) category!.nom,
+              if (category != null)
+                categoryDisplayName(category.nom, category.systemKey, l10n),
               if (account?.nom != null) account!.nom,
             ];
             final subtitle = parts.isEmpty ? null : parts.join(' · ');

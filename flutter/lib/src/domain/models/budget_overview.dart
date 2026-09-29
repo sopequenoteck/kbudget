@@ -39,6 +39,7 @@ class BudgetOverviewItem with _$BudgetOverviewItem {
     required double montantDepense,
     required double percentage,
     required String frequence,
+    String? categorySystemKey,
   }) = _BudgetOverviewItem;
 
   factory BudgetOverviewItem.fromJson(Map<String, dynamic> json) =>

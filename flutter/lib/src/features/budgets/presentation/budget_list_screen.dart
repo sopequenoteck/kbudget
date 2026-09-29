@@ -32,6 +32,7 @@ import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_n
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -413,7 +414,11 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
           (ctx, i) {
             final e = convertedItems[i];
             return BudgetItem(
-              categoryNom: e.item.categoryNom,
+              categoryNom: categoryDisplayName(
+                e.item.categoryNom,
+                e.item.categorySystemKey,
+                l10n,
+              ),
               categoryIcone: e.item.categoryIcone,
               categoryCouleur: e.item.categoryCouleur,
               montantBudget: e.budget,
@@ -450,7 +455,13 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
               return Opacity(
                 opacity: 0.5,
                 child: BudgetItem(
-                  categoryNom: cat?.nom ?? b.categoryNom ?? b.categoryId,
+                  categoryNom: cat != null
+                      ? categoryDisplayName(cat.nom, cat.systemKey, l10n)
+                      : categoryDisplayName(
+                          b.categoryNom ?? b.categoryId,
+                          b.categorySystemKey,
+                          l10n,
+                        ),
                   categoryIcone: cat?.icone ?? b.categoryIcone ?? '',
                   categoryCouleur: cat?.couleur ?? b.categoryCouleur ?? '',
                   montantBudget: convertedMontant,
@@ -568,7 +579,11 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
           (ctx, i) {
             final e = convertedItems[i];
             return BudgetItem(
-              categoryNom: e.item.categoryNom,
+              categoryNom: categoryDisplayName(
+                e.item.categoryNom,
+                e.item.categorySystemKey,
+                l10n,
+              ),
               categoryIcone: e.item.categoryIcone,
               categoryCouleur: e.item.categoryCouleur,
               montantBudget: e.budget,

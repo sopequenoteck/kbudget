@@ -27,6 +27,7 @@ class CategoryResponse with _$CategoryResponse {
     required String icone,
     required String couleur,
     required bool isSystem,
+    String? systemKey,
     String? updatedAt,
   }) = _CategoryResponse;
 

@@ -1012,6 +1012,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les catégories système ne peuvent pas être supprimées';
 
   @override
+  String get categoriesValueSubscription => 'Abonnement';
+
+  @override
+  String get categoriesValueDebt => 'Dette';
+
+  @override
+  String get categoriesValueTransfer => 'Virement';
+
+  @override
+  String get categoriesValueAdjustment => 'Ajustement';
+
+  @override
   String get accountsActionCreate => 'Créer un compte';
 
   @override

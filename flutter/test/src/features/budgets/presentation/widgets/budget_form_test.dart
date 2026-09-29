@@ -11,6 +11,8 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../../../../helpers/fixtures/test_fixtures.dart';
+
 class _TestCategoryNotifier extends CategoryNotifier {
   _TestCategoryNotifier(this.preloadedItems);
 
@@ -181,6 +183,70 @@ void main() {
       expect(find.textContaining(RegExp(r'^50\s%$')), findsOneWidget);
       expect(find.textContaining(RegExp(r'^100\s%$')), findsOneWidget);
       expect(find.text('Mensuel'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_showTranslatedCategoryName_when_creatingWithSystemCategory',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(
+          categories: [TestFixtures.systemCategory],
+          onSaved: (_) async {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Choisir une catégorie'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
+    });
+
+    testWidgets(
+        'should_showTranslatedLockedCategory_when_editingSystemCategoryBudget',
+        (tester) async {
+      const budget = Budget(
+        id: 'b1',
+        categoryId: 'cat-sys',
+        montant: 200,
+        frequence: Frequency.mensuel,
+        categoryNom: 'Subscription',
+        categorySystemKey: 'SUBSCRIPTION',
+        categoryIcone: '🔁',
+        categoryCouleur: '#8B5CF6',
+      );
+
+      await tester.pumpWidget(buildApp(budget: budget, onSaved: (_) async {}));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
+    });
+
+    testWidgets(
+        'should_keepCategorySystemKey_when_savingSystemCategoryBudget',
+        (tester) async {
+      Budget? saved;
+      const budget = Budget(
+        id: 'b1',
+        categoryId: 'cat-sys',
+        montant: 200,
+        frequence: Frequency.mensuel,
+        categoryNom: 'Subscription',
+        categorySystemKey: 'SUBSCRIPTION',
+      );
+
+      await tester.pumpWidget(
+        buildApp(budget: budget, onSaved: (b) async => saved = b),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Modifier'));
+      await tester.pump();
+
+      expect(saved?.categorySystemKey, 'SUBSCRIPTION');
+      expect(saved?.categoryNom, 'Subscription');
     });
   });
 }
