@@ -527,9 +527,9 @@ class _ExportRow extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  final VoidCallback onRetry;
-
   const _ErrorView({required this.onRetry});
+
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
