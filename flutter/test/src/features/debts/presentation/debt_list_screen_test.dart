@@ -36,14 +36,6 @@ void main() {
     date: DateTime(2026, 2, 10),
     categoryId: 'cat1',
   );
-  final debtEmprunt = Debt(
-    id: '2',
-    personne: 'Bob',
-    montant: 50.0,
-    sens: DebtType.emprunt,
-    date: DateTime(2026, 2, 20),
-    categoryId: 'cat2',
-  );
   final debtRepaid = Debt(
     id: '3',
     personne: 'Charlie',
@@ -58,12 +50,6 @@ void main() {
     nom: 'Amis',
     icone: '\u{1F91D}',
     couleur: '#4CAF50',
-  );
-  const category2 = Category(
-    id: 'cat2',
-    nom: 'Famille',
-    icone: '\u{1F46A}',
-    couleur: '#2196F3',
   );
 
   setUp(() {

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/form_validators.dart';
 
 class InviteDialog extends StatefulWidget {
   final void Function(String email) onSubmit;
@@ -37,6 +39,7 @@ class _InviteDialogState extends State<InviteDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -53,7 +56,7 @@ class _InviteDialogState extends State<InviteDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Inviter un utilisateur',
+              l10n.usersActionInvite,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: AppSpacing.space4),
@@ -62,19 +65,11 @@ class _InviteDialogState extends State<InviteDialog> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(
-                labelText: 'Email de l\'invité',
-                hintText: 'exemple@domaine.com',
+              decoration: InputDecoration(
+                labelText: l10n.authFormEmailAddress,
+                hintText: l10n.usersFormEmailPlaceholder,
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Veuillez saisir un email';
-                }
-                if (!value.contains('@')) {
-                  return 'Email invalide';
-                }
-                return null;
-              },
+              validator: (value) => validateEmail(value, l10n),
               onFieldSubmitted: (_) => _handleSubmit(),
             ),
             const SizedBox(height: AppSpacing.space6),
@@ -86,14 +81,14 @@ class _InviteDialogState extends State<InviteDialog> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Créer l\'invitation'),
+                  : Text(l10n.usersActionCreateInvite),
             ),
             const SizedBox(height: AppSpacing.space2),
             TextButton(
               onPressed: widget.isLoading
                   ? null
                   : () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
+              child: Text(l10n.commonActionCancel),
             ),
           ],
         ),

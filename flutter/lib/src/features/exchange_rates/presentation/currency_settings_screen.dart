@@ -21,6 +21,7 @@ import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_c
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/currency_name.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class CurrencySettingsScreen extends ConsumerStatefulWidget {
@@ -43,12 +44,16 @@ class _CurrencySettingsScreenState
   }
 
   Future<void> _openRateForm({ExchangeRate? existingRate}) async {
+    final l10n = AppLocalizations.of(context)!;
     final currencies = ref.read(currencyConfigNotifierProvider);
-    final baseCurrency = currencies.isNotEmpty ? currencies.first : Currency.eur;
+    final baseCurrency =
+        currencies.isNotEmpty ? currencies.first : Currency.eur;
 
     await AppModal.show(
       context,
-      title: existingRate == null ? 'Ajouter un taux' : 'Modifier le taux',
+      title: existingRate == null
+          ? l10n.exchangeRatesDialogAddRateTitle
+          : l10n.exchangeRatesDialogEditRateTitle,
       onClose: () {},
       child: RateForm(
         baseCurrency: baseCurrency,
@@ -59,12 +64,16 @@ class _CurrencySettingsScreenState
   }
 
   Future<void> _confirmDelete(ExchangeRate rate) async {
+    final l10n = AppLocalizations.of(context)!;
+    final base = rate.baseCurrency.name.toUpperCase();
+    final target = rate.targetCurrency.name.toUpperCase();
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
       icon: PhosphorIconsRegular.trash,
-      title: '${rate.baseCurrency.name.toUpperCase()} → ${rate.targetCurrency.name.toUpperCase()}',
-      message: 'Ce taux de conversion sera définitivement supprimé.',
-      confirmLabel: 'Supprimer',
+      title: '$base → $target',
+      message: l10n.exchangeRatesDialogDeleteRateMessage(base, target),
+      confirmLabel: l10n.commonActionDelete,
+      cancelLabel: l10n.commonActionCancel,
       variant: ConfirmVariant.danger,
     ) ?? false;
 
@@ -75,20 +84,23 @@ class _CurrencySettingsScreenState
   }
 
   Future<void> _confirmRemoveCurrency(Currency currency) async {
+    final l10n = AppLocalizations.of(context)!;
     final accounts = ref.read(accountNotifierProvider).items;
     final hasAccounts =
         accounts.any((a) => a.currency == currency && a.actif);
+    final code = currency.name.toUpperCase();
 
     final message = hasAccounts
-        ? 'Cette devise est utilisée par des comptes existants. Voulez-vous la retirer ?'
-        : 'Retirer ${currency.name.toUpperCase()} de vos devises ?';
+        ? l10n.exchangeRatesDialogRemoveMessage(code)
+        : l10n.exchangeRatesDialogRemoveUnusedMessage(code);
 
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
       icon: PhosphorIconsRegular.warning,
-      title: 'Retirer ${currency.name.toUpperCase()} ?',
+      title: l10n.exchangeRatesDialogRemoveTitle(code),
       message: message,
-      confirmLabel: 'Retirer',
+      confirmLabel: l10n.exchangeRatesActionRemove,
+      cancelLabel: l10n.commonActionCancel,
       variant: ConfirmVariant.danger,
     ) ?? false;
 
@@ -105,6 +117,7 @@ class _CurrencySettingsScreenState
         Currency.values.where((c) => !currencies.contains(c)).toList();
     if (available.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final items = available
         .map((c) => SelectPickerItem(
               id: c.name,
@@ -115,7 +128,7 @@ class _CurrencySettingsScreenState
 
     AppModal.show(
       context,
-      title: 'Ajouter une devise',
+      title: l10n.exchangeRatesDialogAddCurrencyTitle,
       onClose: () {},
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -127,7 +140,9 @@ class _CurrencySettingsScreenState
                   style: const TextStyle(fontSize: 20),
                 ),
                 title: Text(item.label),
-                subtitle: Text(Currency.values.byName(item.id).name),
+                subtitle: Text(
+                  currencyName(Currency.values.byName(item.id), l10n),
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                   ref
@@ -143,6 +158,7 @@ class _CurrencySettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(exchangeRateListProvider);
     final currencies = ref.watch(currencyConfigNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
@@ -160,7 +176,7 @@ class _CurrencySettingsScreenState
           padding: const EdgeInsets.all(AppSpacing.space4),
           children: [
             PageHeader(
-              title: 'Devises & Taux',
+              title: l10n.exchangeRatesPageTitle,
               onBack: () => context.pop(),
               icon: const PhosphorIcon(PhosphorIconsRegular.bank, size: 16),
             ),
@@ -169,7 +185,10 @@ class _CurrencySettingsScreenState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('MES DEVISES', style: sectionLabelStyle),
+                Text(
+                  l10n.exchangeRatesPageCurrenciesTitle.toUpperCase(),
+                  style: sectionLabelStyle,
+                ),
                 _AddButton(onTap: _addCurrency),
               ],
             ),
@@ -191,10 +210,7 @@ class _CurrencySettingsScreenState
               itemBuilder: (context, index) {
                 final currency = currencies[index];
                 final isPrimary = index == 0;
-                final name = currencyName(
-                  currency,
-                  AppLocalizations.of(context)!,
-                );
+                final name = currencyName(currency, l10n);
                 return ListTile(
                   key: ValueKey(currency.name),
                   leading: Text(
@@ -203,7 +219,9 @@ class _CurrencySettingsScreenState
                   ),
                   title: Text(currency.name.toUpperCase()),
                   subtitle: Text(
-                    isPrimary ? 'Principale • $name' : name,
+                    isPrimary
+                        ? '${l10n.exchangeRatesValuePrimary} • $name'
+                        : name,
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       color: isPrimary
@@ -215,7 +233,7 @@ class _CurrencySettingsScreenState
                   ),
                   trailing: isPrimary
                       ? Chip(
-                          label: const Text('Principale'),
+                          label: Text(l10n.exchangeRatesValuePrimary),
                           labelStyle: TextStyle(
                             fontSize: AppTypography.sizeXs,
                             color: colorScheme.primary,
@@ -233,7 +251,7 @@ class _CurrencySettingsScreenState
                             color: colorScheme.error,
                           ),
                           onPressed: () => _confirmRemoveCurrency(currency),
-                          tooltip: 'Retirer cette devise',
+                          tooltip: l10n.exchangeRatesActionRemoveCurrencyAria,
                         ),
                 );
               },
@@ -247,7 +265,10 @@ class _CurrencySettingsScreenState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('TAUX DE CONVERSION', style: sectionLabelStyle),
+                Text(
+                  l10n.exchangeRatesPageRatesTitle.toUpperCase(),
+                  style: sectionLabelStyle,
+                ),
                 _AddButton(onTap: () => _openRateForm()),
               ],
             ),
@@ -265,7 +286,7 @@ class _CurrencySettingsScreenState
                 padding:
                     const EdgeInsets.symmetric(vertical: AppSpacing.space4),
                 child: Text(
-                  'Erreur : ${state.error}',
+                  state.error!,
                   style: TextStyle(color: colorScheme.error),
                 ),
               )
@@ -274,7 +295,7 @@ class _CurrencySettingsScreenState
                 padding:
                     const EdgeInsets.symmetric(vertical: AppSpacing.space6),
                 child: Text(
-                  'Aucun taux de conversion enregistré.',
+                  l10n.exchangeRatesEmptyTitle,
                   style: TextStyle(
                     fontSize: AppTypography.sizeSm,
                     color: colorScheme.onSurfaceVariant,
@@ -293,7 +314,8 @@ class _CurrencySettingsScreenState
                     for (int i = 0; i < state.items.length; i++) ...[
                       _RateTile(
                         rate: state.items[i],
-                        onEdit: () => _openRateForm(existingRate: state.items[i]),
+                        onEdit: () =>
+                            _openRateForm(existingRate: state.items[i]),
                         onDelete: () => _confirmDelete(state.items[i]),
                       ),
                       if (i < state.items.length - 1)
@@ -308,7 +330,10 @@ class _CurrencySettingsScreenState
             const SizedBox(height: AppSpacing.space4),
 
             // Section calculateur
-            Text('CALCULATEUR', style: sectionLabelStyle),
+            Text(
+              l10n.exchangeRatesPageCalculatorTitle.toUpperCase(),
+              style: sectionLabelStyle,
+            ),
             const SizedBox(height: AppSpacing.space3),
             const RateCalculator(),
             const SizedBox(height: AppSpacing.space8),
@@ -361,6 +386,7 @@ class _RateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.space4,
@@ -370,7 +396,8 @@ class _RateTile extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '${rate.baseCurrency.name.toUpperCase()} → ${rate.targetCurrency.name.toUpperCase()}',
+              '${rate.baseCurrency.name.toUpperCase()} → '
+              '${rate.targetCurrency.name.toUpperCase()}',
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -379,8 +406,9 @@ class _RateTile extends StatelessWidget {
             ),
           ),
           Text(
-            rate.rate.toStringAsFixed(
-              rate.rate < 1 ? 6 : (rate.rate < 10 ? 4 : 3),
+            formatRate(
+              rate.rate,
+              intlLocaleFor(Localizations.localeOf(context)),
             ),
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
@@ -395,7 +423,7 @@ class _RateTile extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
             ),
             onPressed: onEdit,
-            tooltip: 'Modifier',
+            tooltip: l10n.commonActionEdit,
           ),
           IconButton(
             icon: PhosphorIcon(
@@ -404,7 +432,7 @@ class _RateTile extends StatelessWidget {
               color: colorScheme.error,
             ),
             onPressed: onDelete,
-            tooltip: 'Supprimer',
+            tooltip: l10n.commonActionDelete,
           ),
         ],
       ),

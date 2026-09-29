@@ -7,6 +7,7 @@ import 'package:k_budget/src/features/admin/application/invitation_list_state.da
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final invitationsNotifierProvider =
     NotifierProvider<InvitationsNotifier, InvitationListState>(
@@ -25,10 +26,11 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
     try {
       final items = await _repo.listInvitations();
       state = state.copyWith(items: items, isLoading: false);
-    } on Exception catch (e) {
+    } on Exception {
+      final l10n = ref.read(appLocalizationsProvider);
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les invitations: $e',
+        error: l10n.usersFeedbackLoadInvitationsError,
       );
     }
   }
@@ -39,10 +41,11 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
       final created = await _repo.createInvitation(email);
       await loadItems();
       return created;
-    } on Exception catch (e) {
+    } on Exception {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur lors de la création de l\'invitation: $e',
+        error:
+            ref.read(appLocalizationsProvider).usersFeedbackInviteCreateError,
       );
       rethrow;
     }
@@ -56,10 +59,11 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la révocation: $e',
+        error:
+            ref.read(appLocalizationsProvider).usersFeedbackInviteRevokeError,
       );
     }
   }

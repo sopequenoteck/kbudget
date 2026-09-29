@@ -68,7 +68,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     await Clipboard.setData(ClipboardData(text: link));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lien copié dans le presse-papier')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.usersFeedbackLinkCopied),
+        ),
       );
     }
   }
@@ -84,8 +86,11 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
             await Clipboard.setData(ClipboardData(text: link));
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Invitation créée — lien copié automatiquement')),
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context)!.usersFeedbackInviteCreated,
+                  ),
+                ),
               );
             }
           },
@@ -101,10 +106,11 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
       if (!mounted) return;
       // Le code seul suffit : tester en plus `statusCode == 409` doublait le
       // contrat sans rien y ajouter (KKS-324).
+      final l10n = AppLocalizations.of(context)!;
       final message = errorLabel(
-        AppLocalizations.of(context)!,
+        l10n,
         apiErrorCode(e),
-        fallback: 'Erreur lors de la désactivation',
+        fallback: l10n.usersFeedbackUserDisableError,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
@@ -112,7 +118,11 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la désactivation')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.usersFeedbackUserDisableError,
+          ),
+        ),
       );
     }
   }
@@ -121,21 +131,22 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
   Widget build(BuildContext context) {
     final invState = ref.watch(invitationsNotifierProvider);
     final usersState = ref.watch(adminUsersNotifierProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Utilisateurs'),
+        title: Text(l10n.usersPageAdminTitle),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Invitations'),
-            Tab(text: 'Comptes'),
+          tabs: [
+            Tab(text: l10n.usersPageInvitationsTab),
+            Tab(text: l10n.usersPageAdminTitle),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add_outlined),
-            tooltip: 'Inviter un utilisateur',
+            tooltip: l10n.usersActionInvite,
             onPressed: _showInviteDialog,
           ),
         ],
@@ -170,13 +181,13 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     }
 
     if (invState.items.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.mail_outline, size: 48),
-            SizedBox(height: AppSpacing.space2),
-            Text('Aucune invitation'),
+            const Icon(Icons.mail_outline, size: 48),
+            const SizedBox(height: AppSpacing.space2),
+            Text(AppLocalizations.of(context)!.usersEmptyInvitations),
           ],
         ),
       );
@@ -198,8 +209,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
             onCopyLink: invitation.token != null
                 ? () => _copyLink(invitation.token!)
                 : null,
-            onRevoke: () =>
-                ref.read(invitationsNotifierProvider.notifier).revoke(invitation.id),
+            onRevoke: () => ref
+                .read(invitationsNotifierProvider.notifier)
+                .revoke(invitation.id),
           );
         },
       ),
@@ -224,13 +236,13 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     }
 
     if (usersState.items.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.group_outlined, size: 48),
-            SizedBox(height: AppSpacing.space2),
-            Text('Aucun utilisateur'),
+            const Icon(Icons.group_outlined, size: 48),
+            const SizedBox(height: AppSpacing.space2),
+            Text(AppLocalizations.of(context)!.usersEmptyUsers),
           ],
         ),
       );
@@ -284,8 +296,11 @@ class _InviteDialogSheet extends ConsumerWidget {
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Erreur lors de la création de l\'invitation')),
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!.usersFeedbackInviteCreateError,
+                ),
+              ),
             );
           }
         }

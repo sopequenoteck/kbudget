@@ -17,4 +17,20 @@ void main() {
       expect(intlLocaleFor(const Locale('es')), 'fr_FR');
     });
   });
+
+  group('formatRate', () {
+    for (final (rate, locale, expected) in [
+      (655.957, 'fr_FR', '655,957'),
+      (1.1, 'fr_FR', '1,1'),
+      (1.1, 'en_GB', '1.1'),
+      (2.0, 'fr_FR', '2'),
+      (0.0015244, 'fr_FR', '0,001524'),
+      (1234.5, 'fr_FR', '1\u202f234,5'),
+      (1234.5, 'en_GB', '1,234.5'),
+    ]) {
+      test('should_format${rate}_when_localeIs$locale', () {
+        expect(formatRate(rate, locale), expected);
+      });
+    }
+  });
 }

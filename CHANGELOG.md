@@ -166,6 +166,18 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   preferences et du profil n'affichent plus le detail technique de
   l'exception. Le message de suppression de compte garde le texte Flutter,
   fidele au comportement de l'API : compte desactive, donnees conservees.
+- **Administration et devises & taux de Flutter dans les catalogues (KKS-403,
+  2e partie)** : fin de l'etape 6 sur 8 de KKS-326. Les textes francais
+  reprennent la formulation d'Angular, par exemple « Inviter un utilisateur »,
+  « Aucune invitation pour le moment », « Mes devises » ou « Aucun taux
+  configure », et les statuts d'invitation passent au feminin (« Active »,
+  « Expiree »). Le second onglet de l'administration s'appelle « Utilisateurs »
+  et non plus « Comptes ». Les noms de devise sont traduits partout, y compris
+  dans les listes du formulaire de taux, du calculateur et de l'ajout de
+  devise, qui affichaient le code brut. Les taux suivent le format de la langue
+  (« 655,957 ») avec au plus six decimales. Les messages d'erreur n'affichent
+  plus le detail technique de l'exception. Le calculateur de taux, sans
+  equivalent Angular, est conserve et traduit.
 
 ### Changed
 
