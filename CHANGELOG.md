@@ -187,6 +187,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   son defaut anglais. La liste des devises du formulaire de compte affiche le
   nom traduit (« Dollar US ») au lieu du code brut, et l'enum `Currency` ne
   porte plus de noms francais en dur.
+- **Categories systeme traduites dans Flutter (KKS-424)** : seconde partie de
+  l'etape 7 sur 8 de KKS-326. Flutter lit `systemKey` (categories) et
+  `categorySystemKey` (vue d'ensemble, historique et hors-budget des budgets)
+  et affiche le nom d'une categorie systeme dans la langue de l'interface
+  (« Abonnement », « Dette », « Virement », « Ajustement ») au lieu du nom
+  anglais stocke pour un nouvel utilisateur. Le selecteur de categorie
+  cherche sur le nom affiche. Une categorie utilisateur, ou une cle inconnue,
+  garde son nom. Le widget `CategoryPicker`, sans appelant, est supprime.
 
 ### Changed
 

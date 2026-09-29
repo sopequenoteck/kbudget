@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/presentation/widgets/category_form_widget.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/string_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -125,19 +126,26 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
   // Computed
   // ---------------------------------------------------------------------------
 
+  String _displayName(Category c) => categoryDisplayName(
+        c.nom,
+        c.systemKey,
+        AppLocalizations.of(context)!,
+      );
+
+  String _searchName(Category c) => normalizeForSearch(_displayName(c));
+
   List<Category> get _filteredCategories {
     final query = normalizeForSearch(_searchController.text);
     if (query.isEmpty) return widget.categories;
     return widget.categories
-        .where((c) => normalizeForSearch(c.nom).contains(query))
+        .where((c) => _searchName(c).contains(query))
         .toList();
   }
 
   bool get _hasExactMatch {
     final query = normalizeForSearch(_searchController.text);
     if (query.isEmpty) return true;
-    return widget.categories
-        .any((c) => normalizeForSearch(c.nom) == query);
+    return widget.categories.any((c) => _searchName(c) == query);
   }
 
   bool get _showCreateButton =>
@@ -317,7 +325,7 @@ class _CategorySelectExpandState extends State<CategorySelectExpand> {
             const SizedBox(width: AppSpacing.space2),
             Expanded(
               child: Text(
-                cat.nom,
+                _displayName(cat),
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurface,
                 ),

@@ -23,6 +23,7 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
@@ -285,7 +286,13 @@ class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? l10n.subscriptionsFormCategory,
+        label: selectedCategory == null
+            ? l10n.subscriptionsFormCategory
+            : categoryDisplayName(
+                selectedCategory.nom,
+                selectedCategory.systemKey,
+                l10n,
+              ),
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,

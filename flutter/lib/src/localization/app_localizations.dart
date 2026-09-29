@@ -1860,6 +1860,30 @@ abstract class AppLocalizations {
   /// **'System categories cannot be deleted'**
   String get categoriesFeedbackSystemDeleteForbidden;
 
+  /// No description provided for @categoriesValueSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get categoriesValueSubscription;
+
+  /// No description provided for @categoriesValueDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt'**
+  String get categoriesValueDebt;
+
+  /// No description provided for @categoriesValueTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get categoriesValueTransfer;
+
+  /// No description provided for @categoriesValueAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance adjustment'**
+  String get categoriesValueAdjustment;
+
   /// No description provided for @accountsActionCreate.
   ///
   /// In en, this message translates to:

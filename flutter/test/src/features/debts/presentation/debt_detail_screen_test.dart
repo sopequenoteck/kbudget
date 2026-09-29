@@ -15,6 +15,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 class _TestDebtNotifier extends DebtNotifier {
@@ -187,6 +188,23 @@ void main() {
 
       // Aucun paiement enregistré
       expect(find.text('Aucun paiement enregistré'), findsOneWidget);
+    });
+
+    testWidgets('should_displayTranslatedCategory_when_categoryIsSystem',
+        (tester) async {
+      when(mockDebtRepo.getPayments(borrowedDebt.id))
+          .thenAnswer((_) async => []);
+
+      await tester.pumpWidget(
+        buildApp(
+          debt: borrowedDebt.copyWith(categoryId: 'cat-sys'),
+          categories: [TestFixtures.systemCategory],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
     });
   });
 }

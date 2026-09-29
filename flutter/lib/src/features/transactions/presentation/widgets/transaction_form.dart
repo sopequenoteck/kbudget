@@ -26,6 +26,7 @@ import 'package:k_budget/src/features/recurring/application/recurring_list_notif
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/libelle_autocomplete_field.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -401,7 +402,13 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? l10n.transactionsFormCategory,
+        label: selectedCategory == null
+            ? l10n.transactionsFormCategory
+            : categoryDisplayName(
+                selectedCategory.nom,
+                selectedCategory.systemKey,
+                l10n,
+              ),
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,

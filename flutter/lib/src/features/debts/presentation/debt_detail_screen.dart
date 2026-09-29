@@ -21,6 +21,7 @@ import 'package:k_budget/src/features/settings/application/display_locale_provid
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -132,12 +133,12 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
 
     // Résoudre le nom de catégorie depuis le provider
     final categories = ref.watch(categoryNotifierProvider).items;
-    final categoryName = debt.categoryId != null
-        ? categories
-            .where((c) => c.id == debt.categoryId)
-            .firstOrNull
-            ?.nom
+    final category = debt.categoryId != null
+        ? categories.where((c) => c.id == debt.categoryId).firstOrNull
         : null;
+    final categoryName = category == null
+        ? null
+        : categoryDisplayName(category.nom, category.systemKey, l10n);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.space4),

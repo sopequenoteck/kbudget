@@ -19,6 +19,7 @@ class Budget with _$Budget {
     @Default(80) int seuilNotification,
     @Default(true) bool actif,
     String? categoryNom,
+    String? categorySystemKey,
     String? categoryIcone,
     String? categoryCouleur,
     double? spent,

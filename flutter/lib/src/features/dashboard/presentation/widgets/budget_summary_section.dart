@@ -17,6 +17,7 @@ import 'package:k_budget/src/features/settings/application/feature_config_notifi
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BudgetSummarySection extends ConsumerWidget {
@@ -124,7 +125,11 @@ class BudgetSummarySection extends ConsumerWidget {
           child: Column(
             children: displayItems.map(
               (item) => BudgetItem(
-                categoryNom: item.categoryNom,
+                categoryNom: categoryDisplayName(
+                  item.categoryNom,
+                  item.categorySystemKey,
+                  l10n,
+                ),
                 categoryIcone: item.categoryIcone,
                 categoryCouleur: item.categoryCouleur,
                 montantBudget: item.montantBudgetNormalise,

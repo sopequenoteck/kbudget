@@ -71,6 +71,7 @@ class BudgetOverviewItemResponse with _$BudgetOverviewItemResponse {
     required double montantDepense,
     required double percentage,
     required String frequence,
+    String? categorySystemKey,
   }) = _BudgetOverviewItemResponse;
 
   factory BudgetOverviewItemResponse.fromJson(Map<String, dynamic> json) =>
@@ -107,6 +108,7 @@ class BudgetHistoryItemResponse with _$BudgetHistoryItemResponse {
     required double montantDepense,
     required double percentage,
     DateTime? createdAt,
+    String? categorySystemKey,
   }) = _BudgetHistoryItemResponse;
 
   factory BudgetHistoryItemResponse.fromJson(Map<String, dynamic> json) =>
@@ -122,6 +124,7 @@ class UnbudgetedItemDto with _$UnbudgetedItemDto {
     required String categoryCouleur,
     required double montantDepense,
     String? currency,
+    String? categorySystemKey,
   }) = _UnbudgetedItemDto;
 
   factory UnbudgetedItemDto.fromJson(Map<String, dynamic> json) =>

@@ -54,10 +54,12 @@ void main() {
     ],
   );
 
-  Widget buildApp() {
+  Widget buildApp({BudgetOverview budgetOverview = overview}) {
     return ProviderScope(
       overrides: [
-        budgetNotifierProvider.overrideWith(() => _TestBudgetNotifier(overview)),
+        budgetNotifierProvider.overrideWith(
+          () => _TestBudgetNotifier(budgetOverview),
+        ),
         featureConfigNotifierProvider.overrideWith(
           () => _TestFeatureConfigNotifier(),
         ),
@@ -85,6 +87,41 @@ void main() {
       expect(find.textContaining('120,00'), findsWidgets);
       expect(find.textContaining('300,00'), findsWidgets);
       expect(find.text('Alimentation'), findsOneWidget);
+    });
+
+    testWidgets('should_displayTranslatedCategory_when_itemIsSystem',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(
+          budgetOverview: const BudgetOverview(
+            month: '2026-03',
+            totalBudget: 300,
+            totalSpent: 120,
+            percentage: 40,
+            currency: 'EUR',
+            items: [
+              BudgetOverviewItem(
+                budgetId: 'b2',
+                categoryId: 'cat-sys',
+                categoryNom: 'Subscription',
+                categorySystemKey: 'SUBSCRIPTION',
+                categoryIcone: '🔁',
+                categoryCouleur: '#8B5CF6',
+                montantBudget: 300,
+                montantBudgetNormalise: 300,
+                currency: 'EUR',
+                montantDepense: 120,
+                percentage: 40,
+                frequence: 'MENSUEL',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
     });
   });
 }

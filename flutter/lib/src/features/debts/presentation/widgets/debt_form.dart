@@ -25,6 +25,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
 import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/utils/form_validators.dart';
@@ -365,7 +366,13 @@ class _DebtFormState extends ConsumerState<DebtForm> {
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? l10n.debtsFormCategory,
+        label: selectedCategory == null
+            ? l10n.debtsFormCategory
+            : categoryDisplayName(
+                selectedCategory.nom,
+                selectedCategory.systemKey,
+                l10n,
+              ),
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,

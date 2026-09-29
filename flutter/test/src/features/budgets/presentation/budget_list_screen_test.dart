@@ -379,5 +379,138 @@ void main() {
         expect(find.text('Budgets'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'should_showTranslatedCategoryName_when_overviewItemIsSystem',
+      (tester) async {
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => const BudgetOverview(
+            month: '2026-05',
+            totalBudget: 200,
+            totalSpent: 50,
+            percentage: 25,
+            currency: 'EUR',
+            items: [
+              BudgetOverviewItem(
+                budgetId: 'b1',
+                categoryId: 'c-sys',
+                categoryNom: 'Subscription',
+                categorySystemKey: 'SUBSCRIPTION',
+                categoryIcone: '🔁',
+                categoryCouleur: '#8B5CF6',
+                montantBudget: 200,
+                montantBudgetNormalise: 200,
+                currency: 'EUR',
+                montantDepense: 50,
+                percentage: 25,
+                frequence: 'MENSUEL',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Abonnement'), findsOneWidget);
+        expect(find.text('Subscription'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should_showTranslatedCategoryName_when_historyItemIsSystem',
+      (tester) async {
+        when(mockBudgetRepo.getHistory(any)).thenAnswer(
+          (_) async => const BudgetHistory(
+            month: '2026-04',
+            totalBudget: 200,
+            totalSpent: 50,
+            percentage: 25,
+            currency: 'EUR',
+            items: [
+              BudgetHistoryItem(
+                categoryId: 'c-sys',
+                categoryNom: 'Debt',
+                categorySystemKey: 'DEBT',
+                categoryIcone: '💸',
+                categoryCouleur: '#8B5CF6',
+                montantBudget: 200,
+                currency: 'EUR',
+                montantDepense: 50,
+                percentage: 25,
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+        await goToPreviousMonth(tester);
+
+        expect(find.text('Dette'), findsOneWidget);
+        expect(find.text('Debt'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should_showTranslatedCategoryName_when_inactiveBudgetIsSystem',
+      (tester) async {
+        when(
+          mockBudgetRepo.getAll(includeInactive: anyNamed('includeInactive')),
+        ).thenAnswer((_) async => [
+                  const Budget(
+                    id: 'b-actif',
+                    categoryId: 'c-actif',
+                    montant: 200,
+                    frequence: Frequency.mensuel,
+                    currency: Currency.eur,
+                    actif: true,
+                  ),
+                  const Budget(
+                    id: 'b-inactif',
+                    categoryId: 'c-sys',
+                    montant: 100,
+                    frequence: Frequency.mensuel,
+                    currency: Currency.eur,
+                    actif: false,
+                    categoryNom: 'Transfer',
+                    categorySystemKey: 'TRANSFER',
+                    categoryIcone: '🔄',
+                    categoryCouleur: '#8B5CF6',
+                  ),
+                ]);
+        when(mockBudgetRepo.getOverview()).thenAnswer(
+          (_) async => const BudgetOverview(
+            month: '2026-05',
+            totalBudget: 200,
+            totalSpent: 50,
+            percentage: 25,
+            currency: 'EUR',
+            items: [
+              BudgetOverviewItem(
+                budgetId: 'b-actif',
+                categoryId: 'c-actif',
+                categoryNom: 'Alimentation',
+                categoryIcone: '🛒',
+                categoryCouleur: '#4CAF50',
+                montantBudget: 200,
+                montantBudgetNormalise: 200,
+                currency: 'EUR',
+                montantDepense: 50,
+                percentage: 25,
+                frequence: 'MENSUEL',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Inactifs'), findsOneWidget);
+        expect(find.text('Virement'), findsOneWidget);
+        expect(find.text('Transfer'), findsNothing);
+      },
+    );
   });
 }

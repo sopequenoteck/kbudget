@@ -21,6 +21,7 @@ import 'package:k_budget/src/features/subscriptions/presentation/widgets/payment
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -332,7 +333,10 @@ class _InfoSection extends ConsumerWidget {
             _InfoRow(
               icon: PhosphorIconsRegular.tag,
               label: l10n.subscriptionsFormCategory,
-              value: '${category.icone} ${category.nom}',
+              value: [
+                category.icone,
+                categoryDisplayName(category.nom, category.systemKey, l10n),
+              ].join(' '),
               valueColor: parseHexColor(category.couleur),
               colorScheme: colorScheme,
             ),

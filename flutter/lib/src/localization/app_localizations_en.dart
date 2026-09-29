@@ -1002,6 +1002,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'System categories cannot be deleted';
 
   @override
+  String get categoriesValueSubscription => 'Subscription';
+
+  @override
+  String get categoriesValueDebt => 'Debt';
+
+  @override
+  String get categoriesValueTransfer => 'Transfer';
+
+  @override
+  String get categoriesValueAdjustment => 'Balance adjustment';
+
+  @override
   String get accountsActionCreate => 'Create an account';
 
   @override

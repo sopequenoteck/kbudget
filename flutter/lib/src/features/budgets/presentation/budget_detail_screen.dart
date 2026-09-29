@@ -30,6 +30,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
@@ -163,10 +164,20 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
     final fallbackBudget = _findFallbackBudget(state);
 
     // Données du hero (depuis overview ou fallback)
-    final String categoryNom = overviewItem?.categoryNom ??
-        fallbackBudget?.categoryNom ??
-        fallbackBudget?.categoryId ??
-        AppLocalizations.of(context)!.budgetsActionCreate;
+    final l10n = AppLocalizations.of(context)!;
+    final categoryNom = overviewItem != null
+        ? categoryDisplayName(
+            overviewItem.categoryNom,
+            overviewItem.categorySystemKey,
+            l10n,
+          )
+        : fallbackBudget != null
+            ? categoryDisplayName(
+                fallbackBudget.categoryNom ?? fallbackBudget.categoryId,
+                fallbackBudget.categorySystemKey,
+                l10n,
+              )
+            : l10n.budgetsActionCreate;
     final String categoryIcone =
         overviewItem?.categoryIcone ?? fallbackBudget?.categoryIcone ?? '';
     final String categoryCouleur =

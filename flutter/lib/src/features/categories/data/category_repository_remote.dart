@@ -52,6 +52,7 @@ class CategoryRepositoryRemote implements CategoryRepository {
         icone: r.icone,
         couleur: r.couleur,
         isSystem: r.isSystem,
+        systemKey: r.systemKey,
         updatedAt: r.updatedAt != null ? DateTime.parse(r.updatedAt!) : null,
       );
 

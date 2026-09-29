@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
+import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
@@ -18,6 +21,15 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   DashboardState build() => preloadedState;
+}
+
+class _TestCategoryNotifier extends CategoryNotifier {
+  _TestCategoryNotifier(this.preloadedItems);
+
+  final List<Category> preloadedItems;
+
+  @override
+  ListState<Category> build() => ListState<Category>(items: preloadedItems);
 }
 
 void main() {
@@ -62,9 +74,15 @@ void main() {
     accountId: 'acc-usd',
   );
 
-  Widget buildApp(DashboardState state) {
+  Widget buildApp(
+    DashboardState state, {
+    List<Category> categories = const [],
+  }) {
     return ProviderScope(
       overrides: [
+        categoryNotifierProvider.overrideWith(
+          () => _TestCategoryNotifier(categories),
+        ),
         dashboardNotifierProvider.overrideWith(
           () => _TestDashboardNotifier(state),
         ),
@@ -138,6 +156,44 @@ void main() {
       expect(find.text('Dernières opérations'), findsOneWidget);
       expect(find.text('Voir tout'), findsOneWidget);
       expect(find.text('Aucune transaction'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_showTranslatedCategoryAndAccount_when_categoryIsSystem',
+        (tester) async {
+      final systemTransaction = Transaction(
+        id: 't3',
+        montant: 9.99,
+        libelle: 'Netflix',
+        type: TransactionType.depense,
+        date: DateTime(2026, 3, 3),
+        accountId: 'acc-eur',
+        categoryId: 'cat-sys',
+      );
+
+      await tester.pumpWidget(
+        buildApp(
+          DashboardState(
+            isLoading: false,
+            recentTransactions: [systemTransaction],
+            accounts: const [accountEur],
+          ),
+          categories: const [
+            Category(
+              id: 'cat-sys',
+              nom: 'Subscription',
+              icone: '🔁',
+              couleur: '#8B5CF6',
+              isSystem: true,
+              systemKey: 'SUBSCRIPTION',
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement · Compte courant'), findsOneWidget);
+      expect(find.textContaining('Subscription'), findsNothing);
     });
   });
 }
