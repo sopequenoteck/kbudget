@@ -12,6 +12,7 @@ import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -132,6 +133,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
   }
 
   void _showAvatarMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -140,7 +142,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
           children: [
             ListTile(
               leading: const PhosphorIcon(PhosphorIconsRegular.camera),
-              title: const Text('Changer la photo'),
+              title: Text(l10n.usersActionChangePhoto),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickAndUpload();
@@ -153,7 +155,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
                   color: Theme.of(ctx).colorScheme.error,
                 ),
                 title: Text(
-                  'Supprimer la photo',
+                  l10n.usersActionDeletePhoto,
                   style: TextStyle(color: Theme.of(ctx).colorScheme.error),
                 ),
                 onTap: () {
@@ -163,7 +165,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
               ),
             ListTile(
               leading: const PhosphorIcon(PhosphorIconsRegular.x),
-              title: const Text('Annuler'),
+              title: Text(l10n.commonActionCancel),
               onTap: () => Navigator.pop(ctx),
             ),
           ],
@@ -173,14 +175,15 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
   }
 
   String _mapError(Exception e) {
+    final l10n = AppLocalizations.of(context)!;
     final msg = e.toString();
     if (msg.contains('413') || msg.contains('FILE_TOO_LARGE')) {
-      return 'Image trop lourde (max 2 MB)';
+      return l10n.errorsApiFileTooLarge;
     }
     if (msg.contains('400') || msg.contains('INVALID_IMAGE_FORMAT')) {
-      return 'Format invalide — JPG ou PNG uniquement';
+      return l10n.errorsApiInvalidImageFormat;
     }
-    return 'Erreur lors de l\'upload';
+    return l10n.usersFeedbackAvatarUploadError;
   }
 
   @override
@@ -252,7 +255,7 @@ class _AvatarPickerState extends ConsumerState<AvatarPicker> {
         const SizedBox(height: AppSpacing.space2),
         TextButton(
           onPressed: _isLoading ? null : () => _showAvatarMenu(context),
-          child: const Text('Modifier la photo'),
+          child: Text(AppLocalizations.of(context)!.usersActionEditPhoto),
         ),
       ],
     );

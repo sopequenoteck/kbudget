@@ -174,6 +174,23 @@ void main() {
       expect(find.text('Dettes'), findsOneWidget);
     });
 
+    testWidgets('should_show_budgets_tab_when_budgets_enabled',
+        (WidgetTester tester) async {
+      when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
+      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getEnabledFeatures())
+          .thenAnswer((_) async => Feature.values.toList());
+
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Budgets'), findsWidgets);
+    });
+
     testWidgets('should_navigate_to_transactions_when_tab_tapped',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);

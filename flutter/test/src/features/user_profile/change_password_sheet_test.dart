@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_repository_provider.dart';
 import 'package:k_budget/src/features/user_profile/presentation/widgets/change_password_sheet.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
@@ -137,7 +139,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Les mots de passe ne correspondent pas'),
+        find.text('Les mots de passe ne correspondent pas.'),
         findsOneWidget,
       );
     });
@@ -244,5 +246,101 @@ void main() {
         expect(find.text(l10n.errorsApiPasswordIncorrect), findsNothing);
       },
     );
+
+    Future<void> openFilledSheet(
+      WidgetTester tester, {
+      List<Override> overrides = const [],
+      bool fill = true,
+    }) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: overrides,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => ChangePasswordSheet.show(context),
+                  child: const Text('Ouvrir'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Ouvrir'));
+      await tester.pumpAndSettle();
+      if (fill) {
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Mot de passe actuel'),
+          'ancien_mdp',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nouveau mot de passe'),
+          'nouveau_mdp_valide_12chars',
+        );
+        await tester.enterText(
+          find.widgetWithText(
+            TextFormField,
+            'Confirmer le nouveau mot de passe',
+          ),
+          'nouveau_mdp_valide_12chars',
+        );
+      }
+      await tester.tap(find.text('Modifier'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('should_requireEveryField_when_submittedEmpty',
+        (tester) async {
+      await openFilledSheet(tester, fill: false);
+
+      expect(find.text('Ce champ est requis.'), findsNWidgets(3));
+    });
+
+    testWidgets('should_confirmAndClose_when_passwordChanged', (tester) async {
+      final mockAuthRepo = MockAuthRepository();
+      when(mockUserProfileRepo.changePassword(any)).thenAnswer(
+        (_) async => const AuthResponse(
+          accessToken: 'access',
+          refreshToken: 'refresh',
+          email: 'kelly@example.com',
+        ),
+      );
+      when(mockAuthRepo.saveTokens(any, any)).thenAnswer((_) async {});
+
+      await openFilledSheet(
+        tester,
+        overrides: [
+          userProfileRepositoryProvider
+              .overrideWith((_) async => mockUserProfileRepo),
+          authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
+        ],
+      );
+
+      verify(mockAuthRepo.saveTokens('access', 'refresh')).called(1);
+      expect(find.text('Mot de passe modifié avec succès'), findsOneWidget);
+      expect(find.text('Nouveau mot de passe'), findsNothing);
+    });
+
+    testWidgets('should_showNetworkError_when_changeFailsOffline',
+        (tester) async {
+      when(mockUserProfileRepo.changePassword(any))
+          .thenThrow(Exception('offline'));
+
+      await openFilledSheet(
+        tester,
+        overrides: [
+          userProfileRepositoryProvider
+              .overrideWith((_) async => mockUserProfileRepo),
+        ],
+      );
+
+      expect(find.text('Impossible de contacter le serveur'), findsOneWidget);
+    });
   });
 }

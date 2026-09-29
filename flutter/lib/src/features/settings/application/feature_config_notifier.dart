@@ -11,6 +11,7 @@ import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_sou
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 part 'feature_config_notifier.freezed.dart';
 
@@ -72,10 +73,10 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
       final repo = ref.read(appConfigRepositoryProvider);
       await repo.setEnabledFeatures(prefs.enabledFeatures);
       await repo.setNavOrder(prefs.navOrder);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur de synchronisation: $e',
+        error: ref.read(appLocalizationsProvider).settingsFeedbackLoadError,
       );
     }
   }
@@ -177,8 +178,10 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
           timezone: timezone,
         ),
       );
-    } on Exception catch (e) {
-      state = state.copyWith(error: 'Synchronisation échouée: $e');
+    } on Exception catch (_) {
+      state = state.copyWith(
+        error: ref.read(appLocalizationsProvider).settingsFeedbackSaveError,
+      );
     }
   }
 }

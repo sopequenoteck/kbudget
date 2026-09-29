@@ -13,12 +13,6 @@ enum Feature {
   @JsonValue('BUDGETS')
   budgets;
 
-  String get label => switch (this) {
-    Feature.subscriptions => 'Abonnements',
-    Feature.debts => 'Dettes',
-    Feature.budgets => 'Budgets',
-  };
-
   PhosphorIconData get icon => switch (this) {
     Feature.subscriptions => PhosphorIconsFill.arrowsClockwise,
     Feature.debts => PhosphorIconsFill.handshake,
@@ -29,12 +23,6 @@ enum Feature {
     Feature.subscriptions => PhosphorIconsRegular.arrowsClockwise,
     Feature.debts => PhosphorIconsRegular.handshake,
     Feature.budgets => PhosphorIconsRegular.chartPie,
-  };
-
-  String get description => switch (this) {
-    Feature.subscriptions => 'Gérer vos abonnements récurrents',
-    Feature.debts => 'Suivre vos prêts et emprunts',
-    Feature.budgets => 'Suivre vos budgets par catégorie',
   };
 
   bool get defaultEnabled => switch (this) {

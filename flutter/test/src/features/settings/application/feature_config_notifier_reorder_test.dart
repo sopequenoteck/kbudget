@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
@@ -132,6 +133,49 @@ void main() {
       final newOrder = [Feature.debts, Feature.subscriptions, Feature.budgets];
       await notifier().reorderNavigation(newOrder);
       expect(state().error, isNull);
+    });
+  });
+
+  group('server errors', () {
+    late ProviderContainer serverContainer;
+
+    Future<void> startInServerMode() async {
+      serverContainer = ProviderContainer(
+        overrides: [
+          appConfigRepositoryProvider.overrideWithValue(mockRepo),
+          dataModeProvider.overrideWith((ref) async => DataMode.server),
+          preferenceRemoteDataSourceProvider.overrideWith(
+            (ref) => Future.error(Exception('offline')),
+          ),
+        ],
+      );
+      addTearDown(serverContainer.dispose);
+      await serverContainer.read(dataModeProvider.future);
+      serverContainer.read(featureConfigNotifierProvider);
+      await pumpEventQueue();
+    }
+
+    test('should_setLoadError_when_serverPreferencesUnavailable', () async {
+      await startInServerMode();
+
+      final s = serverContainer.read(featureConfigNotifierProvider);
+      expect(s.isLoading, false);
+      expect(s.error, 'Impossible de charger les préférences');
+    });
+
+    test('should_setSaveError_when_syncToServerFails', () async {
+      await startInServerMode();
+
+      await serverContainer
+          .read(featureConfigNotifierProvider.notifier)
+          .reorderNavigation(
+              [Feature.debts, Feature.subscriptions, Feature.budgets]);
+      await pumpEventQueue();
+
+      expect(
+        serverContainer.read(featureConfigNotifierProvider).error,
+        'Impossible de sauvegarder les préférences',
+      );
     });
   });
 }

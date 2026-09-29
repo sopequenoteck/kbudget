@@ -134,6 +134,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 - **Design tokens** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations) — jamais de valeurs hardcodees
 - **Locale d'affichage** : `displayLocaleProvider` / `intlLocaleProvider` (`features/settings/application/display_locale_provider.dart`), jamais une locale en dur dans `NumberFormat` ou `DateFormat`. Cles ARB selon [`docs/i18n.md`](docs/i18n.md) (KKS-398)
 - **Nom de devise** : `currencyName(currency, l10n)` (`utils/currency_name.dart`), jamais `Currency.displayName`, en francais et reserve aux cles de cache (KKS-401)
+- **Libellé d'un enum** : fonction de traduction côté présentation (`_featureName`, `_textScaleName` dans `settings_hub_screen.dart`), jamais un getter en français dans `domain/enums` (KKS-403)
 - **Navigation** : `context.push()` / `context.go()` via go_router
 - **Skeleton loading** : Package `shimmer` avec widgets `_XxxSkeleton` prives
 - **Code generation** : `build_runner` pour Drift, Freezed, json_serializable — fichiers `.g.dart` et `.freezed.dart` gitignores (generes localement)

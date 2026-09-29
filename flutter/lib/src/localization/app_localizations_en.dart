@@ -1391,4 +1391,286 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonActionViewAll => 'View all';
+
+  @override
+  String get commonNavHome => 'Home';
+
+  @override
+  String get commonNavTransactions => 'Transactions';
+
+  @override
+  String get commonNavBudgets => 'Budgets';
+
+  @override
+  String get commonActionDisable => 'Disable';
+
+  @override
+  String get settingsPageManagementTitle => 'Management';
+
+  @override
+  String get settingsPageAdministrationTitle => 'Administration';
+
+  @override
+  String get settingsPageAppearanceTitle => 'Appearance';
+
+  @override
+  String get settingsPageNavigationTitle => 'Navigation';
+
+  @override
+  String get settingsPageNotificationsTitle => 'Notifications';
+
+  @override
+  String get settingsPageTimezoneTitle => 'Time zone';
+
+  @override
+  String get settingsListAccounts => 'Accounts & Currencies';
+
+  @override
+  String get settingsListAccountsHint => 'Manage accounts and currencies';
+
+  @override
+  String get settingsListCategories => 'Categories';
+
+  @override
+  String get settingsListCategoriesHint => 'Manage categories';
+
+  @override
+  String get settingsListTextScalePreview =>
+      'Here is a preview of the chosen text size.';
+
+  @override
+  String settingsListVersion(String version) {
+    return 'K-Budget v$version';
+  }
+
+  @override
+  String get settingsFormTheme => 'Theme';
+
+  @override
+  String get settingsFormTextScale => 'Text size';
+
+  @override
+  String get settingsFormTimezoneHint => 'Used for the day-before reminders';
+
+  @override
+  String get settingsValueThemeLight => 'Light';
+
+  @override
+  String get settingsValueThemeDark => 'Dark';
+
+  @override
+  String get settingsValueThemeAuto => 'Auto';
+
+  @override
+  String get settingsValueTextScaleSmall => 'Small';
+
+  @override
+  String get settingsValueTextScaleMedium => 'Normal';
+
+  @override
+  String get settingsValueTextScaleLarge => 'Large';
+
+  @override
+  String get settingsValueChecking => 'Checking…';
+
+  @override
+  String get settingsValueOnline => 'Online';
+
+  @override
+  String get settingsValueOffline => 'Offline';
+
+  @override
+  String settingsDialogDisableFeatureTitle(String feature) {
+    return 'Disable $feature?';
+  }
+
+  @override
+  String get settingsDialogDisableFeatureMessage =>
+      'Your data will be hidden, not deleted.';
+
+  @override
+  String get settingsFeedbackLoadError => 'Unable to load preferences';
+
+  @override
+  String get settingsFeedbackSaveError => 'Unable to save preferences';
+
+  @override
+  String get settingsPageDataTitle => 'Data';
+
+  @override
+  String get settingsFormDataSource => 'Data source';
+
+  @override
+  String get settingsValueDataSourceLocal => 'Local';
+
+  @override
+  String get settingsValueDataSourceServer => 'Server';
+
+  @override
+  String get settingsFormServerUrl => 'Server URL';
+
+  @override
+  String get settingsFormServerUrlRequired => 'The server URL is required';
+
+  @override
+  String get settingsFormServerUrlHttpsRequired =>
+      'The URL must start with https://';
+
+  @override
+  String get settingsFeedbackServerUrlSaved => 'URL saved';
+
+  @override
+  String get settingsFeedbackServerUnreachable => 'Server unreachable';
+
+  @override
+  String get settingsFeedbackServerTimeout => 'Connection timed out';
+
+  @override
+  String get settingsFeedbackServerAccessDenied =>
+      'Access denied by the server';
+
+  @override
+  String get settingsFeedbackServerNotFound =>
+      'Endpoint not found — check the URL';
+
+  @override
+  String get settingsDialogChangeDataSourceTitle => 'Change data source?';
+
+  @override
+  String get settingsDialogChangeDataSourceMessage =>
+      'Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.';
+
+  @override
+  String get notificationsValueSubscriptionDue => 'Subscription due';
+
+  @override
+  String get notificationsValueDebtDue => 'Debt due';
+
+  @override
+  String get notificationsValueDebtReminder => 'Debt reminder';
+
+  @override
+  String get notificationsValueRecurringTransactionDue =>
+      'Recurring transaction due';
+
+  @override
+  String get notificationsValueBudgetThreshold => 'Budget threshold reached';
+
+  @override
+  String get notificationsValueBudgetExceeded => 'Budget exceeded';
+
+  @override
+  String get usersListProfile => 'Profile';
+
+  @override
+  String get usersListProfileHint => 'Profile, security, sign out';
+
+  @override
+  String get usersListManageHint => 'Invitations and access management';
+
+  @override
+  String get usersListChangePassword => 'Change password';
+
+  @override
+  String get usersListExportJson => 'Export my data (JSON)';
+
+  @override
+  String get usersListExportCsv => 'Export my transactions (CSV)';
+
+  @override
+  String get usersPageAdminTitle => 'Users';
+
+  @override
+  String get usersPageProfileTitle => 'Profile';
+
+  @override
+  String get usersPageIdentityTitle => 'Identity';
+
+  @override
+  String get usersPageSecurityTitle => 'Security';
+
+  @override
+  String get usersPageDataTitle => 'Data';
+
+  @override
+  String get usersPageDangerZoneTitle => 'Danger zone';
+
+  @override
+  String get usersFormEmailManagedHint => 'Managed by the admin';
+
+  @override
+  String get usersFormCurrentPassword => 'Current password';
+
+  @override
+  String get usersFormNewPassword => 'New password';
+
+  @override
+  String get usersFormConfirmNewPassword => 'Confirm the new password';
+
+  @override
+  String get usersFormPasswordMismatch => 'Passwords do not match.';
+
+  @override
+  String get usersFormDeleteAccountConfirm =>
+      'I understand that this action is permanent';
+
+  @override
+  String get usersValueNameNotSet => 'Not set';
+
+  @override
+  String get usersActionDeleteAccount => 'Delete my account';
+
+  @override
+  String get usersActionChangePhoto => 'Change photo';
+
+  @override
+  String get usersActionDeletePhoto => 'Delete photo';
+
+  @override
+  String get usersActionEditPhoto => 'Edit photo';
+
+  @override
+  String get usersDialogDeleteAccountMessage =>
+      'Your account will be deactivated. You will no longer be able to sign in with these credentials. Your data is kept in the database for traceability.';
+
+  @override
+  String get usersFeedbackProfileLoadError => 'Unable to load the profile';
+
+  @override
+  String get usersFeedbackNameSaveError =>
+      'Unable to save the name. Please try again.';
+
+  @override
+  String get usersFeedbackExportJsonError =>
+      'Error during the JSON export. Please try again.';
+
+  @override
+  String get usersFeedbackExportCsvError =>
+      'Error during the CSV export. Please try again.';
+
+  @override
+  String get usersFeedbackDownloading => 'Downloading…';
+
+  @override
+  String get usersFeedbackAvatarUploadError =>
+      'Unable to upload the photo. Please try again.';
+
+  @override
+  String get usersFeedbackPasswordChanged => 'Password changed';
+
+  @override
+  String get usersFeedbackPasswordChangeError =>
+      'Unable to change the password';
+
+  @override
+  String get usersFeedbackDeleteAccountError =>
+      'Error during deletion. Please try again.';
+
+  @override
+  String get errorsApiFileTooLarge =>
+      'File too large. The maximum size is 2 MB.';
+
+  @override
+  String get errorsApiInvalidImageFormat =>
+      'Only JPG and PNG formats are accepted.';
 }
