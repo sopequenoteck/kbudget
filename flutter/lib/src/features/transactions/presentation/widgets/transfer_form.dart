@@ -104,6 +104,9 @@ class _TransferFormState extends ConsumerState<TransferForm> {
         _validateNote() == null;
   }
 
+  Account? _accountById(String id) =>
+      widget.accounts.where((a) => a.id == id).firstOrNull;
+
   // --- Actions ---
 
   Future<void> _onSubmit() async {
@@ -112,6 +115,9 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
     setState(() => _isSubmitting = true);
 
+    final l10n = AppLocalizations.of(context)!;
+    final source = _accountById(_sourceAccountId!);
+    final destination = _accountById(_destinationAccountId!);
     final request = TransferRequest(
       fromAccountId: _sourceAccountId!,
       toAccountId: _destinationAccountId!,
@@ -119,6 +125,12 @@ class _TransferFormState extends ConsumerState<TransferForm> {
       note: _noteController.text.trim().isEmpty
           ? null
           : _noteController.text.trim(),
+      libelleDebit: destination == null
+          ? null
+          : l10n.transactionsValueTransferTo(destination.nom),
+      libelleCredit: source == null
+          ? null
+          : l10n.transactionsValueTransferFrom(source.nom),
     );
 
     try {

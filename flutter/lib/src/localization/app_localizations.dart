@@ -3248,6 +3248,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. 655.957'**
   String get exchangeRatesFormRatePlaceholder;
+
+  /// No description provided for @transactionsValueTransferTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer to {account}'**
+  String transactionsValueTransferTo(String account);
+
+  /// No description provided for @transactionsValueTransferFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer from {account}'**
+  String transactionsValueTransferFrom(String account);
+
+  /// No description provided for @transactionsValueBalanceAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance adjustment'**
+  String get transactionsValueBalanceAdjustment;
+
+  /// No description provided for @debtsValueRepayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Repayment - {person}'**
+  String debtsValueRepayment(String person);
+
+  /// No description provided for @accountsValueDefaultAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Main account'**
+  String get accountsValueDefaultAccountName;
 }
 
 class _AppLocalizationsDelegate

@@ -63,6 +63,9 @@ void main() {
 
   DebtListState state() => container.read(debtNotifierProvider);
 
+  Future<Debt> anyRepay() =>
+      mockRepo.repay(any, any, any, libelle: anyNamed('libelle'));
+
   group('DebtNotifier', () {
     test('should_haveEmptyState_when_created', () {
       expect(state().items, isEmpty);
@@ -306,14 +309,49 @@ void main() {
       await notifier().loadItems();
 
       final repaidDebt = debt1.copyWith(remainingAmount: 0.0, rembourse: false);
-      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => repaidDebt);
+      when(anyRepay()).thenAnswer((_) async => repaidDebt);
 
-      final result = await notifier().repay('1', 'account-1', 50.0);
+      final result = await notifier().repay(debt1, 'account-1', 50.0);
 
       expect(result, isTrue);
       expect(state().items.first.remainingAmount, 0.0);
       expect(state().error, isNull);
       expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_sendRepaymentLabel_when_repaying', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+      when(anyRepay())
+          .thenAnswer((_) async => debt1);
+
+      await notifier().repay(debt1, 'account-1', 50.0);
+
+      verify(
+        mockRepo.repay(
+          '1',
+          'account-1',
+          50.0,
+          libelle: 'Remboursement - Alice',
+        ),
+      ).called(1);
+    });
+
+    test('should_sendRepaymentLabel_when_debtNotLoaded', () async {
+      when(anyRepay())
+          .thenAnswer((_) async => debt2);
+
+      final result = await notifier().repay(debt2, 'account-1', null);
+
+      expect(result, isTrue);
+      verify(
+        mockRepo.repay(
+          '2',
+          'account-1',
+          null,
+          libelle: 'Remboursement - Bob',
+        ),
+      ).called(1);
     });
 
     test('should_update_remaining_when_partial_repay', () async {
@@ -322,10 +360,11 @@ void main() {
       await notifier().loadItems();
 
       final partiallyRepaid = debtWithAmount.copyWith(remainingAmount: 300.0);
-      when(mockRepo.repay(any, any, any))
+      when(anyRepay())
           .thenAnswer((_) async => partiallyRepaid);
 
-      final result = await notifier().repay('1', 'account-1', 200.0);
+      final result =
+          await notifier().repay(debtWithAmount, 'account-1', 200.0);
 
       expect(result, isTrue);
       expect(state().items.first.remainingAmount, 300.0);
@@ -341,9 +380,9 @@ void main() {
         remainingAmount: 0.0,
         rembourse: true,
       );
-      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => fullyRepaid);
+      when(anyRepay()).thenAnswer((_) async => fullyRepaid);
 
-      await notifier().repay('1', 'account-1', 100.0);
+      await notifier().repay(debtWithAmount, 'account-1', 100.0);
 
       expect(state().items.first.rembourse, isTrue);
       expect(state().items.first.remainingAmount, 0.0);
@@ -353,10 +392,10 @@ void main() {
       when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
       await notifier().loadItems();
 
-      when(mockRepo.repay(any, any, any))
+      when(anyRepay())
           .thenThrow(Exception('Server error'));
 
-      final result = await notifier().repay('1', 'account-1', 50.0);
+      final result = await notifier().repay(debt1, 'account-1', 50.0);
 
       expect(result, isFalse);
       expect(state().error, 'Erreur lors du remboursement');
@@ -367,14 +406,14 @@ void main() {
       when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
       await notifier().loadItems();
 
-      when(mockRepo.repay(any, any, any)).thenAnswer(
+      when(anyRepay()).thenAnswer(
         (_) => Future.delayed(
           const Duration(milliseconds: 100),
           () => debt1.copyWith(remainingAmount: 0.0),
         ),
       );
 
-      final future = notifier().repay('1', 'account-1', 50.0);
+      final future = notifier().repay(debt1, 'account-1', 50.0);
       expect(state().mutatingIds, contains('1'));
 
       await future;

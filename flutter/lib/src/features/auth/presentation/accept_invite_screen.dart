@@ -79,6 +79,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           'displayName': _displayNameController.text.trim(),
           'currency': _selectedCurrency,
           'timezone': timezone,
+          'defaultAccountName': l10n.accountsValueDefaultAccountName,
         },
       );
 

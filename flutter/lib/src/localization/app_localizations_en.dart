@@ -1841,4 +1841,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exchangeRatesFormRatePlaceholder => 'e.g. 655.957';
+
+  @override
+  String transactionsValueTransferTo(String account) {
+    return 'Transfer to $account';
+  }
+
+  @override
+  String transactionsValueTransferFrom(String account) {
+    return 'Transfer from $account';
+  }
+
+  @override
+  String get transactionsValueBalanceAdjustment => 'Balance adjustment';
+
+  @override
+  String debtsValueRepayment(String person) {
+    return 'Repayment - $person';
+  }
+
+  @override
+  String get accountsValueDefaultAccountName => 'Main account';
 }

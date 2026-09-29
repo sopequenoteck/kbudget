@@ -6,8 +6,7 @@ import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
 /// Nom de [currency] dans la langue d'affichage : une cle
-/// `exchangeRatesValue*` par code (docs/i18n.md). `displayName`, en
-/// francais, ne sert plus qu'aux cles de cache (KKS-401).
+/// `exchangeRatesValue*` par code (docs/i18n.md).
 String currencyName(Currency currency, AppLocalizations l10n) =>
     switch (currency) {
       Currency.eur => l10n.exchangeRatesValueEur,

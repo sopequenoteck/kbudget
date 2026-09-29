@@ -78,6 +78,7 @@ class RepayRequest with _$RepayRequest {
   const factory RepayRequest({
     required String accountId,
     double? amount,
+    String? libelle,
   }) = _RepayRequest;
 
   factory RepayRequest.fromJson(Map<String, dynamic> json) =>

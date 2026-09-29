@@ -17,6 +17,9 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 
+/// Corps du dernier `POST /auth/accept-invite` recu par l'adaptateur.
+Map<String, dynamic>? lastAcceptInviteBody;
+
 /// Adaptateur Dio minimal, sans dependance supplementaire : route les
 /// requetes de cet ecran vers des reponses en dur selon [_scenario].
 class _FakeHttpClientAdapter implements HttpClientAdapter {
@@ -47,6 +50,7 @@ class _FakeHttpClientAdapter implements HttpClientAdapter {
     }
 
     if (options.method == 'POST' && options.path == '/auth/accept-invite') {
+      lastAcceptInviteBody = options.data as Map<String, dynamic>;
       switch (_scenario) {
         case 'submitInvalidLink':
           return ResponseBody.fromString('{}', 404);
@@ -105,6 +109,8 @@ Future<void> pumpAcceptInviteScreen(
 }
 
 void main() {
+  setUp(() => lastAcceptInviteBody = null);
+
   group('AcceptInviteScreen', () {
     testWidgets('should_showInvalidLinkScreen_when_lookupIs404', (
       tester,
@@ -226,6 +232,30 @@ void main() {
         expect(
           find.text('Lien invalide, expiré, déjà utilisé ou révoqué.'),
           findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'should_sendDefaultAccountName_when_submitted',
+      (tester) async {
+        await pumpAcceptInviteScreen(tester, scenario: 'submitServerError');
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nom d\'affichage'),
+          'Alex',
+        );
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Mot de passe'),
+          'a-very-long-password',
+        );
+        await tester.tap(find.text('Créer mon compte'));
+        await tester.pumpAndSettle();
+        tester.takeException();
+
+        expect(
+          lastAcceptInviteBody?['defaultAccountName'],
+          'Compte Principal',
         );
       },
     );

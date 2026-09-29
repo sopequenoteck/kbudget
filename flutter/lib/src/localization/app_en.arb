@@ -908,5 +908,31 @@
     }
   },
   "exchangeRatesFormRateInvalid": "Please enter a valid rate (> 0).",
-  "exchangeRatesFormRatePlaceholder": "e.g. 655.957"
+  "exchangeRatesFormRatePlaceholder": "e.g. 655.957",
+  "transactionsValueTransferTo": "Transfer to {account}",
+  "@transactionsValueTransferTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsValueTransferFrom": "Transfer from {account}",
+  "@transactionsValueTransferFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsValueBalanceAdjustment": "Balance adjustment",
+  "debtsValueRepayment": "Repayment - {person}",
+  "@debtsValueRepayment": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsValueDefaultAccountName": "Main account"
 }
