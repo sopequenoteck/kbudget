@@ -2951,6 +2951,303 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only JPG and PNG formats are accepted.'**
   String get errorsApiInvalidImageFormat;
+
+  /// No description provided for @commonActionEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get commonActionEnable;
+
+  /// No description provided for @authFormEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get authFormEmailAddress;
+
+  /// No description provided for @usersPageInvitationsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get usersPageInvitationsTab;
+
+  /// No description provided for @usersActionInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a user'**
+  String get usersActionInvite;
+
+  /// No description provided for @usersActionCreateInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and copy the link'**
+  String get usersActionCreateInvite;
+
+  /// No description provided for @usersActionCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the link'**
+  String get usersActionCopyLink;
+
+  /// No description provided for @usersActionRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get usersActionRevoke;
+
+  /// No description provided for @usersEmptyInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations yet'**
+  String get usersEmptyInvitations;
+
+  /// No description provided for @usersEmptyUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get usersEmptyUsers;
+
+  /// No description provided for @usersFormEmailPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'new@example.com'**
+  String get usersFormEmailPlaceholder;
+
+  /// No description provided for @usersListInvitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'By {email}'**
+  String usersListInvitedBy(String email);
+
+  /// No description provided for @usersValueAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get usersValueAdmin;
+
+  /// No description provided for @usersValueInvitationActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get usersValueInvitationActive;
+
+  /// No description provided for @usersValueInvitationExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get usersValueInvitationExpired;
+
+  /// No description provided for @usersValueInvitationUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get usersValueInvitationUsed;
+
+  /// No description provided for @usersValueInvitationRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get usersValueInvitationRevoked;
+
+  /// No description provided for @usersFeedbackLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to the clipboard.'**
+  String get usersFeedbackLinkCopied;
+
+  /// No description provided for @usersFeedbackInviteCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation created and link copied to the clipboard.'**
+  String get usersFeedbackInviteCreated;
+
+  /// No description provided for @usersFeedbackInviteCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create the invitation.'**
+  String get usersFeedbackInviteCreateError;
+
+  /// No description provided for @usersFeedbackInviteRevokeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to revoke the invitation.'**
+  String get usersFeedbackInviteRevokeError;
+
+  /// No description provided for @usersFeedbackLoadUsersError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load users.'**
+  String get usersFeedbackLoadUsersError;
+
+  /// No description provided for @usersFeedbackLoadInvitationsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load invitations.'**
+  String get usersFeedbackLoadInvitationsError;
+
+  /// No description provided for @usersFeedbackUserDisableError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to disable the user.'**
+  String get usersFeedbackUserDisableError;
+
+  /// No description provided for @usersFeedbackUserEnableError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to re-enable the user.'**
+  String get usersFeedbackUserEnableError;
+
+  /// No description provided for @exchangeRatesPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Currencies & Rates'**
+  String get exchangeRatesPageTitle;
+
+  /// No description provided for @exchangeRatesPageCurrenciesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My currencies'**
+  String get exchangeRatesPageCurrenciesTitle;
+
+  /// No description provided for @exchangeRatesPageRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion rates'**
+  String get exchangeRatesPageRatesTitle;
+
+  /// No description provided for @exchangeRatesPageCalculatorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculator'**
+  String get exchangeRatesPageCalculatorTitle;
+
+  /// No description provided for @exchangeRatesDialogEditRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the rate'**
+  String get exchangeRatesDialogEditRateTitle;
+
+  /// No description provided for @exchangeRatesDialogAddCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a currency'**
+  String get exchangeRatesDialogAddCurrencyTitle;
+
+  /// No description provided for @exchangeRatesDialogDeleteRateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the rate {baseCurrency} → {targetCurrency}?'**
+  String exchangeRatesDialogDeleteRateMessage(
+    String baseCurrency,
+    String targetCurrency,
+  );
+
+  /// No description provided for @exchangeRatesDialogRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {currency}?'**
+  String exchangeRatesDialogRemoveTitle(String currency);
+
+  /// No description provided for @exchangeRatesDialogRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The currency {currency} is used by existing accounts. Remove anyway?'**
+  String exchangeRatesDialogRemoveMessage(String currency);
+
+  /// No description provided for @exchangeRatesDialogRemoveUnusedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {currency} from your currencies?'**
+  String exchangeRatesDialogRemoveUnusedMessage(String currency);
+
+  /// No description provided for @exchangeRatesActionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get exchangeRatesActionRemove;
+
+  /// No description provided for @exchangeRatesActionRemoveCurrencyAria.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this currency'**
+  String get exchangeRatesActionRemoveCurrencyAria;
+
+  /// No description provided for @exchangeRatesValuePrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get exchangeRatesValuePrimary;
+
+  /// No description provided for @exchangeRatesValueCalculatedRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: 1 {from} = {rate} {to}'**
+  String exchangeRatesValueCalculatedRate(String from, String rate, String to);
+
+  /// No description provided for @exchangeRatesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No rates configured'**
+  String get exchangeRatesEmptyTitle;
+
+  /// No description provided for @exchangeRatesEmptyCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter two amounts to calculate the rate'**
+  String get exchangeRatesEmptyCalculator;
+
+  /// No description provided for @exchangeRatesFeedbackLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load exchange rates'**
+  String get exchangeRatesFeedbackLoadError;
+
+  /// No description provided for @exchangeRatesFeedbackSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving the rate.'**
+  String get exchangeRatesFeedbackSaveError;
+
+  /// No description provided for @exchangeRatesFormBaseCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency'**
+  String get exchangeRatesFormBaseCurrency;
+
+  /// No description provided for @exchangeRatesFormTargetCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Target currency'**
+  String get exchangeRatesFormTargetCurrency;
+
+  /// No description provided for @exchangeRatesFormCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get exchangeRatesFormCurrency;
+
+  /// No description provided for @exchangeRatesFormCalculatorFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'I have'**
+  String get exchangeRatesFormCalculatorFrom;
+
+  /// No description provided for @exchangeRatesFormRateWithPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate (1 {base} = X {target})'**
+  String exchangeRatesFormRateWithPair(String base, String target);
+
+  /// No description provided for @exchangeRatesFormRateInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid rate (> 0).'**
+  String get exchangeRatesFormRateInvalid;
+
+  /// No description provided for @exchangeRatesFormRatePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 655.957'**
+  String get exchangeRatesFormRatePlaceholder;
 }
 
 class _AppLocalizationsDelegate

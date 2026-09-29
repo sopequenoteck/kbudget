@@ -1673,4 +1673,172 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorsApiInvalidImageFormat =>
       'Only JPG and PNG formats are accepted.';
+
+  @override
+  String get commonActionEnable => 'Enable';
+
+  @override
+  String get authFormEmailAddress => 'Email address';
+
+  @override
+  String get usersPageInvitationsTab => 'Invitations';
+
+  @override
+  String get usersActionInvite => 'Invite a user';
+
+  @override
+  String get usersActionCreateInvite => 'Create and copy the link';
+
+  @override
+  String get usersActionCopyLink => 'Copy the link';
+
+  @override
+  String get usersActionRevoke => 'Revoke';
+
+  @override
+  String get usersEmptyInvitations => 'No invitations yet';
+
+  @override
+  String get usersEmptyUsers => 'No users found';
+
+  @override
+  String get usersFormEmailPlaceholder => 'new@example.com';
+
+  @override
+  String usersListInvitedBy(String email) {
+    return 'By $email';
+  }
+
+  @override
+  String get usersValueAdmin => 'Admin';
+
+  @override
+  String get usersValueInvitationActive => 'Active';
+
+  @override
+  String get usersValueInvitationExpired => 'Expired';
+
+  @override
+  String get usersValueInvitationUsed => 'Used';
+
+  @override
+  String get usersValueInvitationRevoked => 'Revoked';
+
+  @override
+  String get usersFeedbackLinkCopied => 'Link copied to the clipboard.';
+
+  @override
+  String get usersFeedbackInviteCreated =>
+      'Invitation created and link copied to the clipboard.';
+
+  @override
+  String get usersFeedbackInviteCreateError =>
+      'Unable to create the invitation.';
+
+  @override
+  String get usersFeedbackInviteRevokeError =>
+      'Unable to revoke the invitation.';
+
+  @override
+  String get usersFeedbackLoadUsersError => 'Unable to load users.';
+
+  @override
+  String get usersFeedbackLoadInvitationsError => 'Unable to load invitations.';
+
+  @override
+  String get usersFeedbackUserDisableError => 'Unable to disable the user.';
+
+  @override
+  String get usersFeedbackUserEnableError => 'Unable to re-enable the user.';
+
+  @override
+  String get exchangeRatesPageTitle => 'Currencies & Rates';
+
+  @override
+  String get exchangeRatesPageCurrenciesTitle => 'My currencies';
+
+  @override
+  String get exchangeRatesPageRatesTitle => 'Conversion rates';
+
+  @override
+  String get exchangeRatesPageCalculatorTitle => 'Calculator';
+
+  @override
+  String get exchangeRatesDialogEditRateTitle => 'Edit the rate';
+
+  @override
+  String get exchangeRatesDialogAddCurrencyTitle => 'Add a currency';
+
+  @override
+  String exchangeRatesDialogDeleteRateMessage(
+    String baseCurrency,
+    String targetCurrency,
+  ) {
+    return 'Delete the rate $baseCurrency → $targetCurrency?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveTitle(String currency) {
+    return 'Remove $currency?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveMessage(String currency) {
+    return 'The currency $currency is used by existing accounts. Remove anyway?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveUnusedMessage(String currency) {
+    return 'Remove $currency from your currencies?';
+  }
+
+  @override
+  String get exchangeRatesActionRemove => 'Remove';
+
+  @override
+  String get exchangeRatesActionRemoveCurrencyAria => 'Remove this currency';
+
+  @override
+  String get exchangeRatesValuePrimary => 'Primary';
+
+  @override
+  String exchangeRatesValueCalculatedRate(String from, String rate, String to) {
+    return 'Rate: 1 $from = $rate $to';
+  }
+
+  @override
+  String get exchangeRatesEmptyTitle => 'No rates configured';
+
+  @override
+  String get exchangeRatesEmptyCalculator =>
+      'Enter two amounts to calculate the rate';
+
+  @override
+  String get exchangeRatesFeedbackLoadError => 'Unable to load exchange rates';
+
+  @override
+  String get exchangeRatesFeedbackSaveError => 'Error saving the rate.';
+
+  @override
+  String get exchangeRatesFormBaseCurrency => 'Base currency';
+
+  @override
+  String get exchangeRatesFormTargetCurrency => 'Target currency';
+
+  @override
+  String get exchangeRatesFormCurrency => 'Currency';
+
+  @override
+  String get exchangeRatesFormCalculatorFrom => 'I have';
+
+  @override
+  String exchangeRatesFormRateWithPair(String base, String target) {
+    return 'Rate (1 $base = X $target)';
+  }
+
+  @override
+  String get exchangeRatesFormRateInvalid => 'Please enter a valid rate (> 0).';
+
+  @override
+  String get exchangeRatesFormRatePlaceholder => 'e.g. 655.957';
 }

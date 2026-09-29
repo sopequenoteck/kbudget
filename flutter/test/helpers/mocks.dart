@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart';
+import 'package:k_budget/src/features/admin/data/admin_repository.dart';
 import 'package:k_budget/src/features/user_profile/domain/repositories/user_profile_repository.dart';
 
 @GenerateNiceMocks([
@@ -23,5 +24,6 @@ import 'package:k_budget/src/features/user_profile/domain/repositories/user_prof
   MockSpec<BudgetRepository>(),
   MockSpec<RecurringTransactionRepository>(),
   MockSpec<UserProfileRepository>(),
+  MockSpec<AdminRepository>(),
 ])
 void main() {}

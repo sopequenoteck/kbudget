@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
 
 final exchangeRateListProvider =
@@ -28,17 +29,22 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
   }
 
   Future<void> loadItems() async {
+    final l10n = ref.read(appLocalizationsProvider);
     state = state.copyWith(isLoading: true, error: null);
     try {
       final rates = await (await _repository).getAll();
       state = state.copyWith(items: rates, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: l10n.exchangeRatesFeedbackLoadError,
+      );
     }
   }
 
   Future<void> upsert(
       Currency baseCurrency, Currency targetCurrency, double rate) async {
+    final l10n = ref.read(appLocalizationsProvider);
     try {
       final result =
           await (await _repository).upsert(baseCurrency, targetCurrency, rate);
@@ -53,12 +59,15 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
         items.add(result);
       }
       state = state.copyWith(items: items);
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+    } catch (_) {
+      state = state.copyWith(
+        error: l10n.exchangeRatesFeedbackSaveError,
+      );
     }
   }
 
   Future<void> delete(Currency baseCurrency, Currency targetCurrency) async {
+    final l10n = ref.read(appLocalizationsProvider);
     try {
       await (await _repository).delete(baseCurrency, targetCurrency);
       state = state.copyWith(
@@ -67,8 +76,10 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
                 r.targetCurrency == targetCurrency))
             .toList(),
       );
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+    } catch (_) {
+      state = state.copyWith(
+        error: l10n.commonFeedbackDeleteError,
+      );
     }
   }
 

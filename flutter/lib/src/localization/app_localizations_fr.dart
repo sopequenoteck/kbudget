@@ -1686,4 +1686,179 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get errorsApiInvalidImageFormat =>
       'Seuls les formats JPG et PNG sont acceptés.';
+
+  @override
+  String get commonActionEnable => 'Réactiver';
+
+  @override
+  String get authFormEmailAddress => 'Adresse email';
+
+  @override
+  String get usersPageInvitationsTab => 'Invitations';
+
+  @override
+  String get usersActionInvite => 'Inviter un utilisateur';
+
+  @override
+  String get usersActionCreateInvite => 'Créer et copier le lien';
+
+  @override
+  String get usersActionCopyLink => 'Copier le lien';
+
+  @override
+  String get usersActionRevoke => 'Révoquer';
+
+  @override
+  String get usersEmptyInvitations => 'Aucune invitation pour le moment';
+
+  @override
+  String get usersEmptyUsers => 'Aucun utilisateur trouvé';
+
+  @override
+  String get usersFormEmailPlaceholder => 'nouveau@exemple.com';
+
+  @override
+  String usersListInvitedBy(String email) {
+    return 'Par $email';
+  }
+
+  @override
+  String get usersValueAdmin => 'Admin';
+
+  @override
+  String get usersValueInvitationActive => 'Active';
+
+  @override
+  String get usersValueInvitationExpired => 'Expirée';
+
+  @override
+  String get usersValueInvitationUsed => 'Utilisée';
+
+  @override
+  String get usersValueInvitationRevoked => 'Révoquée';
+
+  @override
+  String get usersFeedbackLinkCopied => 'Lien copié dans le presse-papiers.';
+
+  @override
+  String get usersFeedbackInviteCreated =>
+      'Invitation créée et lien copié dans le presse-papiers.';
+
+  @override
+  String get usersFeedbackInviteCreateError =>
+      'Impossible de créer l\'invitation.';
+
+  @override
+  String get usersFeedbackInviteRevokeError =>
+      'Impossible de révoquer l\'invitation.';
+
+  @override
+  String get usersFeedbackLoadUsersError =>
+      'Impossible de charger les utilisateurs.';
+
+  @override
+  String get usersFeedbackLoadInvitationsError =>
+      'Impossible de charger les invitations.';
+
+  @override
+  String get usersFeedbackUserDisableError =>
+      'Impossible de désactiver l\'utilisateur.';
+
+  @override
+  String get usersFeedbackUserEnableError =>
+      'Impossible de réactiver l\'utilisateur.';
+
+  @override
+  String get exchangeRatesPageTitle => 'Devises & Taux';
+
+  @override
+  String get exchangeRatesPageCurrenciesTitle => 'Mes devises';
+
+  @override
+  String get exchangeRatesPageRatesTitle => 'Taux de conversion';
+
+  @override
+  String get exchangeRatesPageCalculatorTitle => 'Calculateur';
+
+  @override
+  String get exchangeRatesDialogEditRateTitle => 'Modifier le taux';
+
+  @override
+  String get exchangeRatesDialogAddCurrencyTitle => 'Ajouter une devise';
+
+  @override
+  String exchangeRatesDialogDeleteRateMessage(
+    String baseCurrency,
+    String targetCurrency,
+  ) {
+    return 'Supprimer le taux $baseCurrency → $targetCurrency ?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveTitle(String currency) {
+    return 'Retirer $currency ?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveMessage(String currency) {
+    return 'La devise $currency est utilisée par des comptes existants. Retirer quand même ?';
+  }
+
+  @override
+  String exchangeRatesDialogRemoveUnusedMessage(String currency) {
+    return 'Retirer $currency de vos devises ?';
+  }
+
+  @override
+  String get exchangeRatesActionRemove => 'Retirer';
+
+  @override
+  String get exchangeRatesActionRemoveCurrencyAria => 'Supprimer cette devise';
+
+  @override
+  String get exchangeRatesValuePrimary => 'Principale';
+
+  @override
+  String exchangeRatesValueCalculatedRate(String from, String rate, String to) {
+    return 'Taux : 1 $from = $rate $to';
+  }
+
+  @override
+  String get exchangeRatesEmptyTitle => 'Aucun taux configuré';
+
+  @override
+  String get exchangeRatesEmptyCalculator =>
+      'Saisissez deux montants pour calculer le taux';
+
+  @override
+  String get exchangeRatesFeedbackLoadError =>
+      'Impossible de charger les taux de change';
+
+  @override
+  String get exchangeRatesFeedbackSaveError =>
+      'Erreur lors de l\'enregistrement du taux.';
+
+  @override
+  String get exchangeRatesFormBaseCurrency => 'Devise de base';
+
+  @override
+  String get exchangeRatesFormTargetCurrency => 'Devise cible';
+
+  @override
+  String get exchangeRatesFormCurrency => 'Devise';
+
+  @override
+  String get exchangeRatesFormCalculatorFrom => 'J\'ai';
+
+  @override
+  String exchangeRatesFormRateWithPair(String base, String target) {
+    return 'Taux (1 $base = X $target)';
+  }
+
+  @override
+  String get exchangeRatesFormRateInvalid =>
+      'Veuillez saisir un taux valide (> 0).';
+
+  @override
+  String get exchangeRatesFormRatePlaceholder => 'Ex: 655.957';
 }
