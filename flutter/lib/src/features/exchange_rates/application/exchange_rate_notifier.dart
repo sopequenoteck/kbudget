@@ -34,7 +34,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
     try {
       final rates = await (await _repository).getAll();
       state = state.copyWith(items: rates, isLoading: false);
-    } catch (_) {
+    } on Exception {
       state = state.copyWith(
         isLoading: false,
         error: l10n.exchangeRatesFeedbackLoadError,
@@ -59,7 +59,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
         items.add(result);
       }
       state = state.copyWith(items: items);
-    } catch (_) {
+    } on Exception {
       state = state.copyWith(
         error: l10n.exchangeRatesFeedbackSaveError,
       );
@@ -76,7 +76,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
                 r.targetCurrency == targetCurrency))
             .toList(),
       );
-    } catch (_) {
+    } on Exception {
       state = state.copyWith(
         error: l10n.commonFeedbackDeleteError,
       );
