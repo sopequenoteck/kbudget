@@ -3,6 +3,7 @@ import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_user_model.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
 
+import '../../../helpers/display_locale.dart';
 import '../../../helpers/mocks.mocks.dart';
 
 /// Utilisateur actif de test.
@@ -43,7 +44,9 @@ Override adminRepoOverride(MockAdminRepository repo) =>
 
 /// Conteneur dont le repository admin est deja resolu (`requireValue`).
 Future<ProviderContainer> adminContainer(MockAdminRepository repo) async {
-  final container = ProviderContainer(overrides: [adminRepoOverride(repo)]);
+  final container = ProviderContainer(
+    overrides: [displayLocaleOverride(), adminRepoOverride(repo)],
+  );
   await container.read(adminRepositoryProvider.future);
   return container;
 }

@@ -8,6 +8,7 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -35,7 +36,10 @@ void main() {
       (_) async => const AppConfig(dataMode: DataMode.local),
     );
     container = ProviderContainer(
-      overrides: [appConfigRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        displayLocaleOverride(),
+        appConfigRepositoryProvider.overrideWithValue(repo),
+      ],
     );
     state();
   });

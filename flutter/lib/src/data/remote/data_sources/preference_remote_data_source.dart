@@ -27,6 +27,11 @@ class PreferenceRemoteDataSource {
     );
     return UserPreferenceResponse.fromJson(response.data!);
   }
+
+  /// Resets the language preference to `null` (automatic).
+  Future<void> clearLanguage() async {
+    await _dio.delete<void>('/users/me/preferences/language');
+  }
 }
 
 final preferenceRemoteDataSourceProvider =

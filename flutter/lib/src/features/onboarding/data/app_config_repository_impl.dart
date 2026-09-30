@@ -132,4 +132,16 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
     final config = await getConfig();
     await saveConfig(config.copyWith(navOrder: order));
   }
+
+  @override
+  Future<String?> getLanguage() async {
+    final config = await getConfig();
+    return config.language;
+  }
+
+  @override
+  Future<void> setLanguage(String? language) async {
+    final config = await getConfig();
+    await saveConfig(config.copyWith(language: language));
+  }
 }

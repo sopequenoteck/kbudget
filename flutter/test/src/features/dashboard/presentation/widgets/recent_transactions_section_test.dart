@@ -14,6 +14,8 @@ import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_tran
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 
+import '../../../../../helpers/display_locale.dart';
+
 class _TestDashboardNotifier extends DashboardNotifier {
   _TestDashboardNotifier(this.preloadedState);
 
@@ -80,6 +82,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(),
         categoryNotifierProvider.overrideWith(
           () => _TestCategoryNotifier(categories),
         ),

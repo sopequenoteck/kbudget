@@ -4,20 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 
+import 'display_locale.dart';
+
 extension PumpApp on WidgetTester {
   Future<void> pumpApp(
     Widget widget, {
     List<Override> overrides = const [],
+    Locale locale = const Locale('fr'),
   }) async {
     await pumpWidget(
       ProviderScope(
-        overrides: overrides,
+        overrides: [displayLocaleOverride(locale), ...overrides],
         child: MaterialApp(
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('fr'),
+          locale: locale,
           home: widget,
         ),
       ),

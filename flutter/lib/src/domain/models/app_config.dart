@@ -51,6 +51,7 @@ class AppConfig with _$AppConfig {
     @Default(Feature.values)
     @JsonKey(fromJson: _safeParseNavOrder)
     List<Feature> navOrder,
+    String? language,
   }) = _AppConfig;
 
   factory AppConfig.fromJson(Map<String, dynamic> json) =>

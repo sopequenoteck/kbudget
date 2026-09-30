@@ -9,7 +9,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 > defaut.** Un utilisateur qui n'a pas choisi de langue voit desormais
 > l'interface dans la langue de son navigateur, et en anglais si celle-ci n'est
 > ni l'anglais ni le francais. Un navigateur en francais continue d'afficher le
-> francais. Le choix se fait dans Reglages > Apparence > Langue.
+> francais. Le choix se fait dans Reglages > Apparence > Langue. L'application
+> Flutter suit la meme regle avec la langue du telephone (KKS-405).
 
 > **Trois migrations de base (V38, V39, V40) : sauvegarder avant de mettre a
 > jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
@@ -203,6 +204,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   notification sans `params` (anterieure a V40), d'un type inconnu ou a qui
   manque un parametre garde son texte stocke. Le canal Android est nomme et
   decrit dans la langue affichee.
+- **Langue de Flutter : anglais par defaut, langue du systeme et selecteur
+  (KKS-405)** : derniere etape (8 sur 8) de KKS-326, pendant Flutter de
+  KKS-380. **Changement visible** : le francais n'est plus impose. Sans choix
+  de langue, l'application suit la langue du telephone, et l'anglais si
+  celle-ci n'est ni l'anglais ni le francais. Le choix se fait dans Reglages >
+  Apparence > Langue (« Auto », « English », « Français ») ; il est enregistre
+  sur le serveur et suit l'utilisateur d'un client a l'autre, ou sur
+  l'appareil en mode local. La bascule s'applique sans redemarrage.
 
 ### Changed
 
@@ -226,6 +235,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Pied des formulaires de Flutter sur un ecran etroit** : en modification
+  d'une dette, les boutons « Supprimer », « Non rembourse » et « Modifier »
+  debordaient d'un ecran de 360 px de large. Les boutons de gauche defilent
+  desormais horizontalement quand la place manque.
 - **Panneau des notifications bloque sur son chargement (Flutter)** : une
   notification d'un type, ou liee a une entite, inconnu de l'application
   faisait echouer le chargement de toute la liste. Elle s'affiche desormais

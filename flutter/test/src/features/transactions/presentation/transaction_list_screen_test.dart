@@ -15,6 +15,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -75,6 +76,7 @@ void main() {
   Widget buildApp() {
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(),
         transactionRepositoryProvider.overrideWithValue(mockRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
         exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),

@@ -2562,6 +2562,12 @@ abstract class AppLocalizations {
   /// **'Text size'**
   String get settingsFormTextScale;
 
+  /// No description provided for @settingsFormLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsFormLanguage;
+
   /// No description provided for @settingsFormTimezoneHint.
   ///
   /// In en, this message translates to:
@@ -2585,6 +2591,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto'**
   String get settingsValueThemeAuto;
+
+  /// No description provided for @settingsValueLanguageAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get settingsValueLanguageAuto;
 
   /// No description provided for @settingsValueTextScaleSmall.
   ///

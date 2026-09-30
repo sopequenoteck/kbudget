@@ -20,6 +20,7 @@ import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/features/settings/application/language_notifier.dart';
 import 'package:k_budget/src/features/settings/application/text_scale_notifier.dart';
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
@@ -388,6 +389,8 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.space4),
+                  const _LanguageSelector(),
                 ],
               ),
             ),
@@ -753,6 +756,58 @@ class _SettingsRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Language choices, automatic (`null`) first.
+const _languageOptions = <String?>[null, 'en', 'fr'];
+
+class _LanguageSelector extends ConsumerWidget {
+  const _LanguageSelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final preference = ref.watch(
+      languageNotifierProvider.select((state) => state.preference),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.settingsFormLanguage,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: AppSpacing.space2),
+        Row(
+          children: [
+            for (final (index, code) in _languageOptions.indexed) ...[
+              if (index > 0) const SizedBox(width: AppSpacing.space2),
+              Expanded(
+                child: _ThemeOption(
+                  icon: code == null
+                      ? PhosphorIconsRegular.globe
+                      : PhosphorIconsRegular.translate,
+                  label: code == null
+                      ? l10n.settingsValueLanguageAuto
+                      : languageNativeNames[code]!,
+                  isSelected: preference == code,
+                  onTap: () => unawaited(
+                    ref
+                        .read(languageNotifierProvider.notifier)
+                        .selectLanguage(code),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }

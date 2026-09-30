@@ -17,6 +17,7 @@ class UserPreferenceResponse with _$UserPreferenceResponse {
     @Default([]) List<NotificationType> enabledNotificationTypes,
     @Default('Europe/Paris') String timezone,
     String? textScale,
+    String? language,
   }) = _UserPreferenceResponse;
 
   factory UserPreferenceResponse.fromJson(Map<String, dynamic> json) =>

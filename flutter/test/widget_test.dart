@@ -5,6 +5,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import 'helpers/display_locale.dart';
 import 'helpers/mocks.mocks.dart';
 
 void main() {
@@ -17,6 +18,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          displayLocaleOverride(),
           appConfigRepositoryProvider.overrideWithValue(mockRepo),
         ],
         child: const KBudgetApp(),

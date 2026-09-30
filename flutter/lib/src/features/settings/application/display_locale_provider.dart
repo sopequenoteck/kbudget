@@ -4,14 +4,19 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/language_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/locale_format.dart';
 
 /// The locale used to display the interface.
 ///
-/// Fixed to French until the language preference (KKS-405) is wired in.
-/// Tests that need another locale override it in `ProviderScope.overrides`.
-final displayLocaleProvider = Provider<Locale>((ref) => const Locale('fr'));
+/// Derived from [languageNotifierProvider]. Tests that need a fixed locale
+/// override it in `ProviderScope.overrides`.
+final displayLocaleProvider = Provider<Locale>(
+  (ref) => Locale(
+    ref.watch(languageNotifierProvider.select((state) => state.language)),
+  ),
+);
 
 /// The `intl` locale identifier derived from [displayLocaleProvider], for
 /// `NumberFormat` and `DateFormat` (`fr` -> `fr_FR`, `en` -> `en_GB`). See
