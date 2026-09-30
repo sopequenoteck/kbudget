@@ -195,6 +195,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   anglais stocke pour un nouvel utilisateur. Le selecteur de categorie
   cherche sur le nom affiche. Une categorie utilisateur, ou une cle inconnue,
   garde son nom. Le widget `CategoryPicker`, sans appelant, est supprime.
+- **Notifications traduites dans Flutter (KKS-425)** : suite de l'etape 7 sur
+  8 de KKS-326, pendant Flutter de KKS-397. Le panneau et la notification
+  systeme construisent titre et message depuis `type` et `params`, dans la
+  langue affichee, avec les textes d'Angular : montant formate avec sa devise,
+  date d'echeance en toutes lettres, categorie systeme traduite. Une
+  notification sans `params` (anterieure a V40), d'un type inconnu ou a qui
+  manque un parametre garde son texte stocke. Le canal Android est nomme et
+  decrit dans la langue affichee.
 
 ### Changed
 
@@ -218,6 +226,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Panneau des notifications bloque sur son chargement (Flutter)** : une
+  notification d'un type, ou liee a une entite, inconnu de l'application
+  faisait echouer le chargement de toute la liste. Elle s'affiche desormais
+  avec son texte stocke, une cloche et sans action rapide.
 - **Abonnements hebdomadaires affiches « /an » dans la liste (Flutter)** :
   le suffixe suit desormais la frequence (« /sem »).
 - **Montants et pourcentages selon la langue affichee** : la variation du mois

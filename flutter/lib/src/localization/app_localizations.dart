@@ -3302,6 +3302,97 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Main account'**
   String get accountsValueDefaultAccountName;
+
+  /// No description provided for @notificationsListSubscriptionDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription {name}'**
+  String notificationsListSubscriptionDueTitle(String name);
+
+  /// No description provided for @notificationsListSubscriptionDueMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is due tomorrow'**
+  String notificationsListSubscriptionDueMessage(String name);
+
+  /// No description provided for @notificationsListDebtDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt with {person}'**
+  String notificationsListDebtDueTitle(String person);
+
+  /// No description provided for @notificationsListDebtDueMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt with {person} is due tomorrow'**
+  String notificationsListDebtDueMessage(String person);
+
+  /// No description provided for @notificationsListDebtReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt reminder - {person}'**
+  String notificationsListDebtReminderTitle(String person);
+
+  /// No description provided for @notificationsListDebtReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {amount} left on the debt with {person}'**
+  String notificationsListDebtReminderMessage(String amount, String person);
+
+  /// No description provided for @notificationsListBudgetThresholdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget {category}: {percentage}%'**
+  String notificationsListBudgetThresholdTitle(
+    String category,
+    String percentage,
+  );
+
+  /// No description provided for @notificationsListBudgetThresholdMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached {percentage}% of the {category} budget'**
+  String notificationsListBudgetThresholdMessage(
+    String percentage,
+    String category,
+  );
+
+  /// No description provided for @notificationsListBudgetExceededTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget {category} exceeded'**
+  String notificationsListBudgetExceededTitle(String category);
+
+  /// No description provided for @notificationsListBudgetExceededMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have exceeded the {category} budget ({percentage}%)'**
+  String notificationsListBudgetExceededMessage(
+    String category,
+    String percentage,
+  );
+
+  /// No description provided for @notificationsListRecurringTransactionDueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction {label}'**
+  String notificationsListRecurringTransactionDueTitle(String label);
+
+  /// No description provided for @notificationsListRecurringTransactionDueMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {amount} due on {dueDate}'**
+  String notificationsListRecurringTransactionDueMessage(
+    String label,
+    String amount,
+    String dueDate,
+  );
+
+  /// No description provided for @notificationsPageChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'K-Budget notifications'**
+  String get notificationsPageChannelDescription;
 }
 
 class _AppLocalizationsDelegate

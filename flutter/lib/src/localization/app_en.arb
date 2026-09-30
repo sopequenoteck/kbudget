@@ -938,5 +938,120 @@
       }
     }
   },
-  "accountsValueDefaultAccountName": "Main account"
+  "accountsValueDefaultAccountName": "Main account",
+  "notificationsListSubscriptionDueTitle": "Subscription {name}",
+  "@notificationsListSubscriptionDueTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListSubscriptionDueMessage": "{name} is due tomorrow",
+  "@notificationsListSubscriptionDueMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtDueTitle": "Debt with {person}",
+  "@notificationsListDebtDueTitle": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtDueMessage": "Debt with {person} is due tomorrow",
+  "@notificationsListDebtDueMessage": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtReminderTitle": "Debt reminder - {person}",
+  "@notificationsListDebtReminderTitle": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtReminderMessage": "Reminder: {amount} left on the debt with {person}",
+  "@notificationsListDebtReminderMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetThresholdTitle": "Budget {category}: {percentage}%",
+  "@notificationsListBudgetThresholdTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetThresholdMessage": "You have reached {percentage}% of the {category} budget",
+  "@notificationsListBudgetThresholdMessage": {
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetExceededTitle": "Budget {category} exceeded",
+  "@notificationsListBudgetExceededTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetExceededMessage": "You have exceeded the {category} budget ({percentage}%)",
+  "@notificationsListBudgetExceededMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListRecurringTransactionDueTitle": "Recurring transaction {label}",
+  "@notificationsListRecurringTransactionDueTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListRecurringTransactionDueMessage": "{label} {amount} due on {dueDate}",
+  "@notificationsListRecurringTransactionDueMessage": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "dueDate": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsPageChannelDescription": "K-Budget notifications"
 }

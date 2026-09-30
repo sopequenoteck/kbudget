@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/domain/enums/entity_type.dart';
 import 'package:k_budget/src/domain/enums/notification_type.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
@@ -18,6 +19,7 @@ import 'package:k_budget/src/features/subscriptions/application/subscription_lis
 // Notifier de test permettant d'injecter un état initial
 class _FakeNotificationNotifier extends NotificationNotifier {
   final ListState<NotificationModel> initialState;
+  final List<String> readIds = [];
 
   _FakeNotificationNotifier(this.initialState);
 
@@ -31,7 +33,8 @@ class _FakeNotificationNotifier extends NotificationNotifier {
 
   @override
   Future<void> markAsRead(String id) async {
-    // No-op dans les tests — évite l'accès réseau
+    // Enregistre l'appel sans accès réseau
+    readIds.add(id);
   }
 }
 
@@ -124,10 +127,32 @@ void main() {
     createdAt: DateTime(now.year, now.month, now.day, 9, 0),
   );
 
+  final notifWithParams = NotificationModel(
+    id: '5',
+    type: NotificationType.budgetExceeded,
+    title: 'Budget Groceries exceeded',
+    message: 'You have exceeded the Groceries budget (120%)',
+    entityType: EntityType.budget,
+    entityId: 'budget-1',
+    createdAt: DateTime(now.year, now.month, now.day, 11, 0),
+    params: const {'category': 'Courses', 'percentage': '120'},
+  );
+
+  final notifUnknownType = NotificationModel(
+    id: '6',
+    type: null,
+    title: 'Stored title',
+    message: 'Stored message',
+    entityId: 'entity-1',
+    createdAt: DateTime(now.year, now.month, now.day, 12, 0),
+    params: const {'name': 'Netflix'},
+  );
+
   Widget buildApp(
     ListState<NotificationModel> state, {
     _FakeRecurringListNotifier? recurringNotifier,
     _FakeSubscriptionNotifier? subscriptionNotifier,
+    _FakeNotificationNotifier? notificationNotifier,
   }) {
     final fakeRecurring = recurringNotifier ?? _FakeRecurringListNotifier();
     final fakeSubscription = subscriptionNotifier ?? _FakeSubscriptionNotifier();
@@ -135,7 +160,7 @@ void main() {
     return ProviderScope(
       overrides: [
         notificationNotifierProvider.overrideWith(
-          () => _FakeNotificationNotifier(state),
+          () => notificationNotifier ?? _FakeNotificationNotifier(state),
         ),
         unreadCountProvider.overrideWith(
           (ref) => state.items.where((n) => !n.read).length,
@@ -306,6 +331,70 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('should_displayTranslatedText_when_paramsArePresent',
+        (tester) async {
+      final state = ListState<NotificationModel>(items: [notifWithParams]);
+
+      await tester.pumpWidget(buildApp(state));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Budget Courses dépassé !'), findsOneWidget);
+      expect(
+        find.text('Vous avez dépassé le budget Courses (120 %)'),
+        findsOneWidget,
+      );
+      expect(find.text('Budget Groceries exceeded'), findsNothing);
+    });
+
+    testWidgets('should_displayStoredText_when_paramsAreAbsent',
+        (tester) async {
+      final state = ListState<NotificationModel>(items: [notifToday]);
+
+      await tester.pumpWidget(buildApp(state));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement Netflix'), findsOneWidget);
+      expect(
+        find.text('Votre abonnement Netflix arrive à échéance'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('should_showBellWithoutAction_when_typeIsUnknown',
+        (tester) async {
+      final state = ListState<NotificationModel>(items: [notifUnknownType]);
+
+      await tester.pumpWidget(buildApp(state));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Stored title'), findsOneWidget);
+      expect(find.text('Stored message'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is PhosphorIcon && w.icon == PhosphorIconsRegular.bell,
+        ),
+        findsOneWidget,
+      );
+      // Seuls les deux boutons de l'en-tête : aucune action rapide
+      expect(find.byType(IconButton), findsNWidgets(2));
+    });
+
+    testWidgets('should_onlyMarkAsRead_when_unknownTypeTapped',
+        (tester) async {
+      final state = ListState<NotificationModel>(items: [notifUnknownType]);
+      final fakeNotifier = _FakeNotificationNotifier(state);
+
+      await tester.pumpWidget(
+        buildApp(state, notificationNotifier: fakeNotifier),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Stored title'));
+      await tester.pumpAndSettle();
+
+      expect(fakeNotifier.readIds, ['6']);
+      expect(find.byType(NotificationPanel), findsOneWidget);
     });
   });
 }
