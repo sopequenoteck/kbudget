@@ -20,6 +20,7 @@ import 'package:k_budget/src/features/recurring/application/recurring_list_notif
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/notification_text.dart';
 
 class NotificationPanel extends ConsumerStatefulWidget {
   const NotificationPanel({super.key});
@@ -164,6 +165,11 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
         notification.type == NotificationType.recurringTransactionDue;
     final isSubscriptionNotification =
         notification.type == NotificationType.subscriptionDue;
+    final text = buildNotificationText(
+      notification,
+      l10n,
+      ref.watch(intlLocaleProvider),
+    );
 
     return Dismissible(
       key: Key(notification.id),
@@ -184,7 +190,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
               ? theme.colorScheme.surfaceContainerHighest
               : theme.colorScheme.primary.withValues(alpha: 0.1),
           child: PhosphorIcon(
-            notification.type.icon,
+            notification.type?.icon ?? PhosphorIconsRegular.bell,
             size: 20,
             color: notification.read
                 ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
@@ -192,7 +198,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
           ),
         ),
         title: Text(
-          notification.title,
+          text.title,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: notification.read ? FontWeight.normal : FontWeight.w600,
           ),
@@ -201,7 +207,7 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              notification.message,
+              text.message,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall,

@@ -1894,4 +1894,80 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountsValueDefaultAccountName => 'Compte Principal';
+
+  @override
+  String notificationsListSubscriptionDueTitle(String name) {
+    return 'Abonnement $name';
+  }
+
+  @override
+  String notificationsListSubscriptionDueMessage(String name) {
+    return '$name — échéance demain';
+  }
+
+  @override
+  String notificationsListDebtDueTitle(String person) {
+    return 'Dette $person';
+  }
+
+  @override
+  String notificationsListDebtDueMessage(String person) {
+    return 'Dette envers $person — échéance demain';
+  }
+
+  @override
+  String notificationsListDebtReminderTitle(String person) {
+    return 'Rappel dette - $person';
+  }
+
+  @override
+  String notificationsListDebtReminderMessage(String amount, String person) {
+    return 'Rappel : dette envers $person — $amount restant';
+  }
+
+  @override
+  String notificationsListBudgetThresholdTitle(
+    String category,
+    String percentage,
+  ) {
+    return 'Budget $category : $percentage %';
+  }
+
+  @override
+  String notificationsListBudgetThresholdMessage(
+    String percentage,
+    String category,
+  ) {
+    return 'Vous avez atteint $percentage % du budget $category';
+  }
+
+  @override
+  String notificationsListBudgetExceededTitle(String category) {
+    return 'Budget $category dépassé !';
+  }
+
+  @override
+  String notificationsListBudgetExceededMessage(
+    String category,
+    String percentage,
+  ) {
+    return 'Vous avez dépassé le budget $category ($percentage %)';
+  }
+
+  @override
+  String notificationsListRecurringTransactionDueTitle(String label) {
+    return 'Transaction récurrente $label';
+  }
+
+  @override
+  String notificationsListRecurringTransactionDueMessage(
+    String label,
+    String amount,
+    String dueDate,
+  ) {
+    return '$label $amount — échéance le $dueDate';
+  }
+
+  @override
+  String get notificationsPageChannelDescription => 'Notifications K-Budget';
 }

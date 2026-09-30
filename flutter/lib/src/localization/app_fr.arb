@@ -642,5 +642,18 @@
   "transactionsValueTransferFrom": "Virement depuis {account}",
   "transactionsValueBalanceAdjustment": "Ajustement de solde",
   "debtsValueRepayment": "Remboursement - {person}",
-  "accountsValueDefaultAccountName": "Compte Principal"
+  "accountsValueDefaultAccountName": "Compte Principal",
+  "notificationsListSubscriptionDueTitle": "Abonnement {name}",
+  "notificationsListSubscriptionDueMessage": "{name} — échéance demain",
+  "notificationsListDebtDueTitle": "Dette {person}",
+  "notificationsListDebtDueMessage": "Dette envers {person} — échéance demain",
+  "notificationsListDebtReminderTitle": "Rappel dette - {person}",
+  "notificationsListDebtReminderMessage": "Rappel : dette envers {person} — {amount} restant",
+  "notificationsListBudgetThresholdTitle": "Budget {category} : {percentage} %",
+  "notificationsListBudgetThresholdMessage": "Vous avez atteint {percentage} % du budget {category}",
+  "notificationsListBudgetExceededTitle": "Budget {category} dépassé !",
+  "notificationsListBudgetExceededMessage": "Vous avez dépassé le budget {category} ({percentage} %)",
+  "notificationsListRecurringTransactionDueTitle": "Transaction récurrente {label}",
+  "notificationsListRecurringTransactionDueMessage": "{label} {amount} — échéance le {dueDate}",
+  "notificationsPageChannelDescription": "Notifications K-Budget"
 }

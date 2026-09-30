@@ -2,14 +2,25 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 final localNotificationServiceProvider = Provider<LocalNotificationService>((ref) {
-  return LocalNotificationService();
+  return LocalNotificationService(
+    readL10n: () => ref.read(appLocalizationsProvider),
+  );
 });
 
 class LocalNotificationService {
+  /// Cree le service ; [readL10n] est lu a chaque notification, pour
+  /// nommer le canal Android dans la langue affichee a ce moment.
+  LocalNotificationService({required this.readL10n});
+
+  /// Traductions de la langue affichee, lues a l'appel.
+  final AppLocalizations Function() readL10n;
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
@@ -45,25 +56,27 @@ class LocalNotificationService {
   }) async {
     if (!_initialized) await initialize();
 
-    const androidDetails = AndroidNotificationDetails(
-      'k_budget_notifications',
-      'Notifications',
-      channelDescription: 'Notifications K-Budget',
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
-    );
-    const iosDetails = DarwinNotificationDetails();
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
     await _plugin.show(
       id: id.hashCode & 0x7FFFFFFF,
       title: title,
       body: body,
-      notificationDetails: details,
+      notificationDetails: notificationDetails(),
       payload: payload,
+    );
+  }
+
+  /// Details d'affichage : canal Android nomme et decrit depuis les ARB,
+  /// identifiant `k_budget_notifications` inchange.
+  @visibleForTesting
+  NotificationDetails notificationDetails() {
+    final l10n = readL10n();
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        'k_budget_notifications',
+        l10n.notificationsPageTitle,
+        channelDescription: l10n.notificationsPageChannelDescription,
+      ),
+      iOS: const DarwinNotificationDetails(),
     );
   }
 }
