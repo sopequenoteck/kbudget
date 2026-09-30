@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -39,6 +40,7 @@ void main() {
     mockRepo = MockTransactionRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         transactionRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );

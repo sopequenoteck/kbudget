@@ -8,6 +8,8 @@ import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
+import '../../../../helpers/display_locale.dart';
+
 class MockAppConfigRepository implements AppConfigRepository {
   List<Feature> enabledFeatures = [Feature.subscriptions, Feature.debts];
   List<Feature> navOrder = Feature.values.toList();
@@ -78,6 +80,12 @@ class MockAppConfigRepository implements AppConfigRepository {
 
   @override
   Future<void> setHashedPin(String? pin) async {}
+
+  @override
+  Future<String?> getLanguage() async => null;
+
+  @override
+  Future<void> setLanguage(String? language) async {}
 }
 
 void main() {
@@ -93,6 +101,7 @@ void main() {
     mockRepo = MockAppConfigRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
         dataModeProvider.overrideWith((ref) async => DataMode.local),
       ],
@@ -142,6 +151,7 @@ void main() {
     Future<void> startInServerMode() async {
       serverContainer = ProviderContainer(
         overrides: [
+          displayLocaleOverride(),
           appConfigRepositoryProvider.overrideWithValue(mockRepo),
           dataModeProvider.overrideWith((ref) async => DataMode.server),
           preferenceRemoteDataSourceProvider.overrideWith(

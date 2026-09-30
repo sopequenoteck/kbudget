@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -35,6 +36,7 @@ void main() {
     mockRepo = MockAccountRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         accountRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );

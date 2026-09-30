@@ -7,6 +7,8 @@ import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/domain/repositories/notification_repository.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 
+import '../../../../helpers/display_locale.dart';
+
 // Mock manuel — NotificationRepository n'est pas encore dans mocks.mocks.dart
 class MockNotificationRepository implements NotificationRepository {
   List<NotificationModel> _items = [];
@@ -90,6 +92,7 @@ void main() {
     mockRepo = MockNotificationRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         notificationRepositoryProvider.overrideWith((ref) async => mockRepo),
       ],
     );

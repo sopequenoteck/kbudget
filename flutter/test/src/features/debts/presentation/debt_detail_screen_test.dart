@@ -15,6 +15,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
@@ -86,6 +87,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
         debtNotifierProvider.overrideWith(
           () => _TestDebtNotifier(preloadedDebt: debt),
@@ -114,6 +116,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            displayLocaleOverride(),
             debtRepositoryProvider.overrideWithValue(mockDebtRepo),
             debtNotifierProvider.overrideWith(
               () => _TestDebtNotifier(),

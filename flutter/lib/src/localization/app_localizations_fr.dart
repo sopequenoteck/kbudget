@@ -1473,6 +1473,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsFormTextScale => 'Taille du texte';
 
   @override
+  String get settingsFormLanguage => 'Langue';
+
+  @override
   String get settingsFormTimezoneHint => 'Pour le calcul des rappels J-1';
 
   @override
@@ -1483,6 +1486,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsValueThemeAuto => 'Auto';
+
+  @override
+  String get settingsValueLanguageAuto => 'Auto';
 
   @override
   String get settingsValueTextScaleSmall => 'Petit';

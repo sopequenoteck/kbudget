@@ -9,6 +9,7 @@ import 'package:k_budget/src/features/subscriptions/application/subscription_lis
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -44,6 +45,7 @@ void main() {
     mockRepo = MockSubscriptionRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         subscriptionRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );

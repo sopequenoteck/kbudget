@@ -18,6 +18,8 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../../helpers/app_fonts.dart';
+import '../../../../../helpers/display_locale.dart';
 import '../../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../../helpers/mocks.mocks.dart';
 
@@ -88,9 +90,11 @@ void main() {
     Future<void> Function(String)? onDeleted,
     VoidCallback? onCancelled,
     List<Account>? preloadedAccounts,
+    Locale locale = const Locale('fr'),
   }) {
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(locale),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
@@ -105,7 +109,7 @@ void main() {
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('fr'),
+        locale: locale,
         home: Scaffold(
           body: SizedBox(
             height: 600,
@@ -347,5 +351,38 @@ void main() {
       expect(find.text('Abonnement'), findsOneWidget);
       expect(find.text('Subscription'), findsNothing);
     });
+  });
+
+  group('TransactionForm at 360 px', () {
+    setUpAll(loadAppFonts);
+
+    Future<void> pumpNarrow(WidgetTester tester, Widget app) async {
+      tester.view.physicalSize = const Size(360, 780);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(app);
+      await tester.pumpAndSettle();
+    }
+
+    for (final locale in const [Locale('fr'), Locale('en')]) {
+      testWidgets(
+          'should_notOverflow_when_creating_${locale.languageCode}',
+          (tester) async {
+        await pumpNarrow(tester, buildApp(locale: locale));
+
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets(
+          'should_notOverflow_when_editing_${locale.languageCode}',
+          (tester) async {
+        await pumpNarrow(
+          tester,
+          buildApp(transaction: testTransaction, onDeleted: (_) async {}, locale: locale),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

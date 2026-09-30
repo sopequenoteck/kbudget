@@ -8,6 +8,8 @@ import 'package:k_budget/src/features/settings/presentation/data_settings_screen
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:k_budget/src/localization/app_localizations.dart';
 
+import '../../../../helpers/display_locale.dart';
+
 void main() {
   Widget buildApp({DataMode initialMode = DataMode.local, String? serverUrl}) {
     final router = GoRouter(
@@ -22,6 +24,7 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(),
         dataSettingsNotifierProvider.overrideWith(() {
           final notifier = DataSettingsNotifier();
           return notifier;

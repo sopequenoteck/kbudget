@@ -25,6 +25,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 class _TestBudgetNotifier extends BudgetNotifier {
@@ -132,6 +133,7 @@ void main() {
   });
 
   List<Override> buildOverrides() => [
+        displayLocaleOverride(),
         budgetRepositoryProvider.overrideWithValue(mockBudgetRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),

@@ -362,6 +362,24 @@ class MockAppConfigRepository extends _i1.Mock
             returnValueForMissingStub: _i21.Future<void>.value(),
           )
           as _i21.Future<void>);
+
+  @override
+  _i21.Future<String?> getLanguage() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLanguage, []),
+            returnValue: _i21.Future<String?>.value(),
+            returnValueForMissingStub: _i21.Future<String?>.value(),
+          )
+          as _i21.Future<String?>);
+
+  @override
+  _i21.Future<void> setLanguage(String? language) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLanguage, [language]),
+            returnValue: _i21.Future<void>.value(),
+            returnValueForMissingStub: _i21.Future<void>.value(),
+          )
+          as _i21.Future<void>);
 }
 
 /// A class which mocks [AuthRepository].

@@ -9,6 +9,8 @@ import 'package:k_budget/src/features/transactions/presentation/widgets/transfer
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 
+import '../../../../../helpers/display_locale.dart';
+
 void main() {
   const accountA = Account(
     id: 'acc-a',
@@ -38,6 +40,7 @@ void main() {
     VoidCallback? onCancelled,
   }) {
     return ProviderScope(
+      overrides: [displayLocaleOverride()],
       child: MaterialApp(
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

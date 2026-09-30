@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 import '../exchange_rates_test_helpers.dart';
 
@@ -23,6 +24,7 @@ void main() {
     repo = MockExchangeRateRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         exchangeRateRepositoryProvider.overrideWith((ref) async => repo),
       ],
     );

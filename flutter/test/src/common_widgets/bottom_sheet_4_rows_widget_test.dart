@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
+import 'package:k_budget/src/common_widgets/bsheet_delete_pill.dart';
+import 'package:k_budget/src/common_widgets/bsheet_meta_pill.dart';
+import 'package:k_budget/src/common_widgets/bsheet_type_toggle.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 
+import '../../helpers/app_fonts.dart';
 import '../../helpers/theme_test_helpers.dart';
 
 /// Pompe un [BottomSheet4RowsWidget] dans un arbre de widgets minimal avec le thème fourni.
@@ -474,5 +479,74 @@ void main() {
         expect(find.byKey(const ValueKey('leading-y')), findsOneWidget);
       },
     );
+  });
+
+  // ---------------------------------------------------------------------------
+  // KKS-405 — aucun débordement à 360 px, en français comme en anglais
+  // ---------------------------------------------------------------------------
+  group('at 360 px', () {
+    setUpAll(loadAppFonts);
+
+    for (final locale in const [Locale('fr'), Locale('en')]) {
+      testWidgets(
+          'should_notOverflow_when_widestLabels_${locale.languageCode}',
+          (tester) async {
+        tester.view.physicalSize = const Size(360, 780);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        final l10n = lookupAppLocalizations(locale);
+
+        await pumpSheet(
+          tester,
+          AppTheme.light,
+          BottomSheet4RowsWidget(
+            title: l10n.subscriptionsDialogEditTitle,
+            topTrailing: BSheetTypeToggle(
+              labels: [
+                l10n.subscriptionsValueWeekly,
+                l10n.subscriptionsValueMonthly,
+                l10n.subscriptionsValueYearly,
+              ],
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
+            amountField: const SizedBox(width: 110),
+            libelleField: const TextField(),
+            metaPills: [
+              for (final label in [
+                l10n.transactionsFormCategory,
+                l10n.debtsValueNotRepaid,
+                l10n.subscriptionsValueMonthly,
+              ])
+                BSheetMetaPill(
+                  label: label,
+                  isActive: false,
+                  onTap: () {},
+                  colorScheme: AppTheme.light.colorScheme,
+                ),
+            ],
+            footerLeading: [
+              BSheetDeletePill(
+                isLoading: false,
+                onTap: () {},
+                label: l10n.commonActionDelete,
+              ),
+              BSheetDeletePill(
+                isLoading: false,
+                onTap: () {},
+                label: l10n.debtsValueNotRepaid,
+              ),
+            ],
+            onSubmit: () {},
+            cancelLabel: l10n.commonActionCancel,
+            submitLabel: l10n.commonActionSave,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.byKey(const Key('bsheet_submit')), findsOneWidget);
+      });
+    }
   });
 }

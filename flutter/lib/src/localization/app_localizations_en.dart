@@ -1462,6 +1462,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFormTextScale => 'Text size';
 
   @override
+  String get settingsFormLanguage => 'Language';
+
+  @override
   String get settingsFormTimezoneHint => 'Used for the day-before reminders';
 
   @override
@@ -1472,6 +1475,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsValueThemeAuto => 'Auto';
+
+  @override
+  String get settingsValueLanguageAuto => 'Auto';
 
   @override
   String get settingsValueTextScaleSmall => 'Small';
