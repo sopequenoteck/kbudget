@@ -1,0 +1,10 @@
+formatVersion: 1
+bankCode: "NOSIGNATURE"
+name: "No Signature Bank"
+separator: ";"
+encoding: "UTF-8"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date"
+amountColumn: "Amount"
+labelColumn: "Label"
+decimalSeparator: ","

@@ -63,6 +63,7 @@ class ImportReimportIT {
 
     @Autowired ImportService importService;
     @Autowired LabelCleaningService labelCleaningService;
+    @Autowired ImportProfileRegistry importProfileRegistry;
     @Autowired UserRepository userRepository;
     @Autowired AccountRepository accountRepository;
     @Autowired TransactionRepository transactionRepository;
@@ -211,7 +212,7 @@ class ImportReimportIT {
 
     private String cleanLabelOf(String csvLine) {
         String detail = csvLine.split(";")[2];
-        List<String> sgPatterns = ImportProfileRegistry.findByBankCode("SG").orElseThrow().cleanupPatterns();
+        List<String> sgPatterns = importProfileRegistry.findByBankCode("SG").orElseThrow().cleanupPatterns();
         return labelCleaningService.clean(detail.trim(), sgPatterns);
     }
 

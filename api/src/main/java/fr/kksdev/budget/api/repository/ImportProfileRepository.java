@@ -11,5 +11,8 @@ public interface ImportProfileRepository extends JpaRepository<ImportProfile, UU
 
     List<ImportProfile> findByUserIdOrderByNameAsc(UUID userId);
 
+    /** Most recently modified first; the id breaks a tie so the order is deterministic. */
+    List<ImportProfile> findByUserIdOrderByUpdatedAtDescIdDesc(UUID userId);
+
     Optional<ImportProfile> findByIdAndUserId(UUID id, UUID userId);
 }

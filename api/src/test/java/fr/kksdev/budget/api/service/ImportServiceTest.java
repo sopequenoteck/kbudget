@@ -3,14 +3,17 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
+import fr.kksdev.budget.api.dto.response.ImportProfileResponse;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportProfileSource;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.ImportDraft;
 import fr.kksdev.budget.api.model.ImportDraftLine;
+import fr.kksdev.budget.api.model.ImportProfile;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -23,6 +26,9 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,9 +42,14 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +91,12 @@ class ImportServiceTest {
 
     @Mock
     private ImportProfileRepository importProfileRepository;
+
+    @Mock
+    private ImportProfileRegistry importProfileRegistry;
+
+    @Mock
+    private ImportProfileDetector importProfileDetector;
 
     @InjectMocks
     private ImportService importService;
@@ -143,7 +160,7 @@ class ImportServiceTest {
         when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
         when(importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING))
                 .thenReturn(Optional.empty());
-        when(csvParsingService.detectProfile("SG")).thenReturn(Optional.empty());
+        when(importProfileDetector.resolve(any(), eq("SG"), eq(userId))).thenReturn(Optional.empty());
 
         var file = validCsvFile();
 
@@ -156,14 +173,10 @@ class ImportServiceTest {
     void should_throw_when_fileUnreadableOnUpload() throws IOException {
         var user = buildUser();
         var account = buildActiveAccount(user);
-        var profile = new ImportProfileRegistry.ImportProfileConfig(
-                "SG", "Société Générale", ";", "dd/MM/yyyy", "Date", "Montant",
-                null, null, "Libellé", "UTF-8", ",", 1, List.of());
 
         when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
         when(importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING))
                 .thenReturn(Optional.empty());
-        when(csvParsingService.detectProfile("SG")).thenReturn(Optional.of(profile));
 
         MultipartFile file = mock(MultipartFile.class);
         when(file.isEmpty()).thenReturn(false);
@@ -402,6 +415,113 @@ class ImportServiceTest {
         assertThatThrownBy(() -> importService.batchUpdateLines(draftId, request, userId))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Category not found");
+    }
+
+    // -------------------------------------------------------------------------
+    // detect() (KKS-440)
+    // -------------------------------------------------------------------------
+
+    private ImportProfileRegistry.ImportProfileConfig sgConfig() {
+        return new ImportProfileRegistry.ImportProfileConfig(
+                "SG", "Société Générale", ";", "dd/MM/yyyy", "Date", "Montant",
+                null, null, "Libellé", "ISO-8859-1", ",", 1, List.of(), List.of(), null, null);
+    }
+
+    @Test
+    void should_describe_the_bundled_profile_when_detecting_a_recognized_file() {
+        when(importProfileDetector.detect(any(), eq(userId)))
+                .thenReturn(Optional.of(new ImportProfileDetector.Detection(sgConfig(), ImportProfileSource.REGISTRY, null)));
+
+        var response = importService.detect(validCsvFile(), userId);
+
+        assertThat(response.recognized()).isTrue();
+        assertThat(response.profileSource()).isEqualTo("REGISTRY");
+        assertThat(response.bankCode()).isEqualTo("SG");
+        assertThat(response.profileName()).isEqualTo("Société Générale");
+    }
+
+    @Test
+    void should_describe_the_custom_profile_without_bank_code_when_detecting_a_recognized_file() {
+        var custom = new ImportProfileRegistry.ImportProfileConfig(
+                null, "My bank", ",", "dd/MM/yyyy", "Date", "Montant", null, null, "Libellé", "UTF-8", ".", 0, List.of(), List.of(), null, null);
+        when(importProfileDetector.detect(any(), eq(userId)))
+                .thenReturn(Optional.of(new ImportProfileDetector.Detection(custom, ImportProfileSource.CUSTOM, UUID.randomUUID())));
+
+        var response = importService.detect(validCsvFile(), userId);
+
+        assertThat(response.recognized()).isTrue();
+        assertThat(response.profileSource()).isEqualTo("CUSTOM");
+        assertThat(response.bankCode()).isNull();
+        assertThat(response.profileName()).isEqualTo("My bank");
+    }
+
+    @Test
+    void should_report_not_recognized_without_profile_when_detecting_an_unknown_file() {
+        when(importProfileDetector.detect(any(), eq(userId))).thenReturn(Optional.empty());
+
+        var response = importService.detect(validCsvFile(), userId);
+
+        assertThat(response.recognized()).isFalse();
+        assertThat(response.profileSource()).isNull();
+        assertThat(response.bankCode()).isNull();
+        assertThat(response.profileName()).isNull();
+    }
+
+    @Test
+    void should_create_nothing_when_detecting_a_file() {
+        when(importProfileDetector.detect(any(), eq(userId))).thenReturn(Optional.empty());
+
+        importService.detect(validCsvFile(), userId);
+
+        verifyNoInteractions(importDraftRepository, importDraftLineRepository, importProfileRepository, transactionRepository);
+    }
+
+    static Stream<Arguments> rejectedFiles() {
+        return Stream.of(
+                Arguments.of("empty file", new MockMultipartFile("file", "test.csv", "text/csv", new byte[0]),
+                        "The file is empty"),
+                Arguments.of("no file", null, "The file is empty"),
+                Arguments.of("not a csv", new MockMultipartFile("file", "statement.pdf", "application/pdf", "x".getBytes()),
+                        "The file must be in CSV format"));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("rejectedFiles")
+    void should_throw_when_detecting_a_file_that_is_not_acceptable(String description, MultipartFile file, String message) {
+        assertThatThrownBy(() -> importService.detect(file, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+    }
+
+    @Test
+    void should_throw_when_detecting_a_file_that_cannot_be_read() throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getSize()).thenReturn(100L);
+        when(file.getOriginalFilename()).thenReturn("test.csv");
+        when(file.getInputStream()).thenThrow(new IOException("stream closed"));
+
+        assertThatThrownBy(() -> importService.detect(file, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unable to read the file: stream closed");
+    }
+
+    // -------------------------------------------------------------------------
+    // listProfiles()
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_list_bundled_profiles_then_custom_profiles_of_the_user() {
+        var customId = UUID.randomUUID();
+        var custom = ImportProfile.builder().id(customId).name("My bank").build();
+        when(importProfileRegistry.getAll()).thenReturn(List.of(sgConfig()));
+        when(importProfileRepository.findByUserIdOrderByNameAsc(userId)).thenReturn(List.of(custom));
+
+        var profiles = importService.listProfiles(userId);
+
+        assertThat(profiles).containsExactly(
+                new ImportProfileResponse(null, "SG", "Société Générale", "REGISTRY", false),
+                new ImportProfileResponse(customId, null, "My bank", "CUSTOM", true));
     }
 
     // -------------------------------------------------------------------------
