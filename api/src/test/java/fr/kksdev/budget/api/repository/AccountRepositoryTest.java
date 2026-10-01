@@ -134,6 +134,91 @@ class AccountRepositoryTest {
     }
 
     @Test
+    void should_calculateBalanceUntilDate_when_transactionsAreDatedAroundIt() {
+        Account account = accountRepository.findById(defaultAccount.getId()).orElseThrow();
+        saveTransaction(account, TransactionType.RECETTE, "2000.00", LocalDate.of(2026, 2, 1));
+        saveTransaction(account, TransactionType.DEPENSE, "150.00", LocalDate.of(2026, 2, 5));
+        saveTransaction(account, TransactionType.AJUSTEMENT, "-10.00", LocalDate.of(2026, 2, 5));
+        saveTransaction(account, TransactionType.DEPENSE, "40.00", LocalDate.of(2026, 2, 6));
+        entityManager.flush();
+
+        BigDecimal untilBoundary = transactionRepository.calculateBalanceByAccountIdUntil(
+                account.getId(), LocalDate.of(2026, 2, 5));
+        BigDecimal untilBefore = transactionRepository.calculateBalanceByAccountIdUntil(
+                account.getId(), LocalDate.of(2026, 1, 31));
+        BigDecimal untilAfter = transactionRepository.calculateBalanceByAccountIdUntil(
+                account.getId(), LocalDate.of(2026, 2, 6));
+
+        assertThat(untilBoundary).isEqualByComparingTo("1840.00");
+        assertThat(untilBefore).isEqualByComparingTo("0");
+        assertThat(untilAfter).isEqualByComparingTo("1800.00");
+        assertThat(untilAfter).isEqualByComparingTo(transactionRepository.calculateBalanceByAccountId(account.getId()));
+    }
+
+    @Test
+    void should_ignoreOtherAccounts_when_calculatingBalanceUntilDate() {
+        Account other = accountRepository.findById(savingsAccount.getId()).orElseThrow();
+        saveTransaction(other, TransactionType.RECETTE, "999.00", LocalDate.of(2026, 2, 1));
+        entityManager.flush();
+
+        BigDecimal balance = transactionRepository.calculateBalanceByAccountIdUntil(
+                defaultAccount.getId(), LocalDate.of(2026, 12, 31));
+
+        assertThat(balance).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void should_findOnlyActiveAccountsOfUser_when_profileKeyAndSuffixMatch() {
+        User otherUser = userRepository.save(User.builder()
+                .email("other@test.com").password("encoded").name("Other").build());
+        Account sameAssociationOfOtherUser = Account.builder()
+                .nom("Compte Principal").type(AccountType.COURANT).soldeInitial(BigDecimal.ZERO)
+                .icone("🏦").couleur("#3b82f6").user(otherUser).build();
+        sameAssociationOfOtherUser.setStatementProfileKey("REGISTRY:SG");
+        sameAssociationOfOtherUser.setStatementAccountSuffix("1596");
+        accountRepository.save(sameAssociationOfOtherUser);
+        associate(defaultAccount, "REGISTRY:SG", "1596");
+        associate(savingsAccount, "REGISTRY:SG", "9999");
+        associate(inactiveAccount, "REGISTRY:SG", "1596");
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Account> found = accountRepository.findByUserIdAndActifTrueAndStatementProfileKeyAndStatementAccountSuffix(
+                user.getId(), "REGISTRY:SG", "1596");
+
+        assertThat(found).extracting(Account::getId).containsExactly(defaultAccount.getId());
+    }
+
+    @Test
+    void should_findNothing_when_profileKeyDiffers() {
+        associate(defaultAccount, "REGISTRY:SG", "1596");
+        entityManager.flush();
+
+        List<Account> found = accountRepository.findByUserIdAndActifTrueAndStatementProfileKeyAndStatementAccountSuffix(
+                user.getId(), "CUSTOM:" + defaultAccount.getId(), "1596");
+
+        assertThat(found).isEmpty();
+    }
+
+    private void associate(Account account, String profileKey, String suffix) {
+        Account managed = accountRepository.findById(account.getId()).orElseThrow();
+        managed.setStatementProfileKey(profileKey);
+        managed.setStatementAccountSuffix(suffix);
+        accountRepository.save(managed);
+    }
+
+    private void saveTransaction(Account account, TransactionType type, String amount, LocalDate date) {
+        transactionRepository.save(Transaction.builder()
+                .montant(new BigDecimal(amount))
+                .libelle("Test")
+                .type(type)
+                .date(date)
+                .account(account)
+                .user(user)
+                .build());
+    }
+
+    @Test
     void should_returnZeroBalance_when_noTransactions() {
         BigDecimal balance = transactionRepository.calculateBalanceByAccountId(savingsAccount.getId());
 

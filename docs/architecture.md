@@ -153,8 +153,12 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | bankCode | String | Code de la banque associee (default "OTHER") |
 | bankCustomName | String | Nom personnalise si bankCode="OTHER" (nullable) |
 | bankCustomLogo | String | Logo personnalise en base64 data URI (nullable) |
+| statementProfileKey | String | Profil du dernier releve importe sur ce compte : `REGISTRY:<bankCode>` ou `CUSTOM:<id du profil>` (nullable, max 64) — KKS-384 |
+| statementAccountSuffix | String | 4 derniers chiffres du numero de compte lu dans l'en-tete du releve (nullable, max 4) — KKS-384. Le numero complet n'est **jamais** stocke, ni en clair ni en empreinte |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+
+> Reconnaissance du compte (KKS-384) : `statementProfileKey` + `statementAccountSuffix` sont ecrits a la confirmation d'un import, sur le compte choisi par l'utilisateur (ils remplacent les precedents de ce compte). `POST /imports/detect` suggere l'unique compte **actif de l'utilisateur authentifie** qui porte la meme paire ; aucune suggestion s'il y en a zero ou plusieurs. Une association n'est jamais lue ni ecrite au-dela de son utilisateur. Le solde d'un compte reste `soldeInitial` + somme de ses transactions, jamais stocke.
 
 ### Transaction
 
@@ -331,11 +335,17 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | alreadyImportedCount | Integer | Sous-ensemble de skippedCount : lignes ecartees d'office car deja importees (KKS-382) |
 | profileId | UUID | Identifiant du profil utilise (nullable) |
 | profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
+| statementProfileKey | String | Cle du profil du releve (voir Account) ; nullable sans en-tete exploitable — KKS-384 |
+| statementAccountSuffix | String | 4 derniers chiffres du numero de compte lus dans l'en-tete (nullable) — KKS-384 |
+| statementBalance | BigDecimal | Solde donne par la banque dans l'en-tete du releve (nullable) — KKS-384 |
+| statementBalanceDate | LocalDate | Date de ce solde (nullable) — KKS-384 |
 | createdAt | LocalDateTime | Date de creation |
 | expiresAt | LocalDateTime | Date d'expiration |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 | account | Account | FK → Account cible. UNIQUE(user_id, account_id) WHERE status = 'PENDING' |
+
+> Solde du releve (KKS-384) : lu a l'upload dans les lignes sautees par `statementHeader` du profil (valeur illisible → `null`, jamais une erreur). `ImportBalanceService` en tire `projectedBalance` (solde de l'application a la date du solde si le brouillon est confirme : `soldeInitial` + transactions du compte datees jusqu'a cette date + lignes `READY` datees jusqu'a cette date), `proposedOpeningBalance` (premier import du compte seulement, c'est-a-dire aucun `ImportHistory` pour ce compte : le `soldeInitial` qui rend `projectedBalance` egal au solde bancaire) et, apres confirmation, le controle de solde (`balanceCheck`). Un profil sans `statementHeader` laisse tous ces champs a `null`.
 
 ### ImportDraftLine
 

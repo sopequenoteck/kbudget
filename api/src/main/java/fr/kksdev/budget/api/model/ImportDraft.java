@@ -7,6 +7,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +77,22 @@ public class ImportDraft {
     @Enumerated(EnumType.STRING)
     @Column(name = "profile_source", length = 20)
     private ImportProfileSource profileSource;
+
+    /** Cle du profil du releve, voir {@link Account#getStatementProfileKey()} (KKS-384). Nulle sans en-tete exploitable. */
+    @Column(name = "statement_profile_key", length = 64)
+    private String statementProfileKey;
+
+    /** 4 derniers chiffres du numero de compte lu dans l'en-tete du releve (KKS-384). */
+    @Column(name = "statement_account_suffix", length = 4)
+    private String statementAccountSuffix;
+
+    /** Solde du compte donne par la banque dans l'en-tete du releve (KKS-384). */
+    @Column(name = "statement_balance", precision = 19, scale = 2)
+    private BigDecimal statementBalance;
+
+    /** Date a laquelle la banque donne ce solde (KKS-384). */
+    @Column(name = "statement_balance_date")
+    private LocalDate statementBalanceDate;
 
     @CreationTimestamp
     @Column(nullable = false)

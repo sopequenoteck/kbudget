@@ -418,7 +418,8 @@ public class AccountService {
                 bankInfo.bankBrandColor(),
                 bankInfo.bankLogoUrl(),
                 bankInfo.bankCustomName(),
-                bankInfo.bankCustomLogo()
+                bankInfo.bankCustomLogo(),
+                account.getStatementAccountSuffix()
         );
     }
 }

@@ -7,5 +7,7 @@ public record ImportConfirmResponse(
         int skippedCount,
         UUID historyId,
         /** Sous-ensemble de skippedCount : lignes ecartees car deja importees (KKS-382). */
-        int alreadyImportedCount
+        int alreadyImportedCount,
+        /** Controle du solde bancaire apres import (KKS-384) ; nul quand le releve n'en donne pas. */
+        ImportBalanceCheckResponse balanceCheck
 ) {}

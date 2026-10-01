@@ -2,6 +2,8 @@ package fr.kksdev.budget.api.dto.response;
 
 import fr.kksdev.budget.api.model.ImportDraft;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,9 +25,19 @@ public record ImportDraftResponse(
         String profileSource,
         LocalDateTime createdAt,
         LocalDateTime expiresAt,
-        List<ImportDraftLineResponse> lines
+        List<ImportDraftLineResponse> lines,
+        /** 4 derniers chiffres du numero de compte lus dans l'en-tete du releve (KKS-384) ; nul sans en-tete exploitable. */
+        String statementAccountSuffix,
+        /** Solde donne par la banque dans l'en-tete du releve (KKS-384). */
+        BigDecimal statementBalance,
+        LocalDate statementBalanceDate,
+        /** Solde que l'application aura a la date du solde si l'import est confirme tel quel (KKS-384). */
+        BigDecimal projectedBalance,
+        /** Premier import du compte seulement : solde initial qui ferait egaler solde de l'application et solde bancaire (KKS-384). */
+        BigDecimal proposedOpeningBalance
 ) {
-    public static ImportDraftResponse from(ImportDraft draft) {
+    public static ImportDraftResponse from(ImportDraft draft, BigDecimal projectedBalance,
+                                           BigDecimal proposedOpeningBalance) {
         return new ImportDraftResponse(
                 draft.getId(),
                 draft.getAccount().getId(),
@@ -44,7 +56,12 @@ public record ImportDraftResponse(
                 draft.getExpiresAt(),
                 draft.getLines().stream()
                         .map(ImportDraftLineResponse::from)
-                        .toList()
+                        .toList(),
+                draft.getStatementAccountSuffix(),
+                draft.getStatementBalance(),
+                draft.getStatementBalanceDate(),
+                projectedBalance,
+                proposedOpeningBalance
         );
     }
 }

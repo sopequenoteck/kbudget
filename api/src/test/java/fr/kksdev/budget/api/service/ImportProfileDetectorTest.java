@@ -301,4 +301,35 @@ class ImportProfileDetectorTest {
 
         assertThat(detector.detect(ImportTestFiles.otherBankStatement(), userId)).isEmpty();
     }
+
+    // -------------------------------------------------------------------------
+    // Detection.profileKey() (KKS-384)
+    // -------------------------------------------------------------------------
+
+    private static ImportProfileRegistry.ImportProfileConfig configOfBank(String bankCode) {
+        return new ImportProfileRegistry.ImportProfileConfig(
+                bankCode, "Any", ";", "dd/MM/yyyy", "Date", "Amount", null, null, "Label", "UTF-8", ",", 0,
+                List.of(), List.of(), null, null);
+    }
+
+    @Test
+    void should_key_a_bundled_profile_by_its_bank_code() {
+        Detection detection = new Detection(configOfBank("SG"), ImportProfileSource.REGISTRY, null);
+
+        assertThat(detection.profileKey()).isEqualTo("REGISTRY:SG");
+    }
+
+    @Test
+    void should_key_a_custom_profile_by_its_id() {
+        UUID profileId = UUID.randomUUID();
+        Detection detection = new Detection(configOfBank(null), ImportProfileSource.CUSTOM, profileId);
+
+        assertThat(detection.profileKey()).isEqualTo("CUSTOM:" + profileId);
+    }
+
+    @Test
+    void should_give_no_key_to_a_profile_without_identity() {
+        assertThat(new Detection(configOfBank(null), ImportProfileSource.REGISTRY, null).profileKey()).isNull();
+        assertThat(new Detection(configOfBank(null), ImportProfileSource.CUSTOM, null).profileKey()).isNull();
+    }
 }

@@ -124,7 +124,7 @@ class ImportProfileDetectionIT {
 
         ImportDetectionResponse detection = importService.detect(otherBankFile(), user.getId());
 
-        assertThat(detection).isEqualTo(new ImportDetectionResponse(true, "CUSTOM", null, CUSTOM_PROFILE_NAME));
+        assertThat(detection).isEqualTo(new ImportDetectionResponse(true, "CUSTOM", null, CUSTOM_PROFILE_NAME, null, null));
         assertThat(importDraftRepository.count()).isEqualTo(drafts);
     }
 
@@ -155,7 +155,7 @@ class ImportProfileDetectionIT {
 
         assertThatThrownBy(() -> importService.upload(file, accountId, userId))
                 .isInstanceOf(CsvProfileNotFoundException.class);
-        assertThat(importService.detect(otherBankFile(), userId)).isEqualTo(new ImportDetectionResponse(false, null, null, null));
+        assertThat(importService.detect(otherBankFile(), userId)).isEqualTo(new ImportDetectionResponse(false, null, null, null, null, null));
         assertThat(importService.detect(otherBankFile(), otherUser.getId()).profileName()).isEqualTo("Someone else's profile");
     }
 
