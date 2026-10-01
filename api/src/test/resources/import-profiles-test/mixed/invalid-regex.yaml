@@ -1,0 +1,14 @@
+formatVersion: 1
+bankCode: "BADREGEX"
+name: "Bad Regex Bank"
+separator: ";"
+encoding: "UTF-8"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date"
+amountColumn: "Amount"
+labelColumn: "Label"
+decimalSeparator: ","
+cleanupPatterns:
+  - '[unclosed'
+signature:
+  headerColumns: ["Date", "Label"]

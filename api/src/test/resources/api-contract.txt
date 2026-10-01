@@ -752,6 +752,10 @@ RESPONSE POST /v1/debts/{id}/snooze 200 rembourse: boolean
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderDate: string
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderTime: string
 RESPONSE POST /v1/debts/{id}/snooze 200 sens: string
+RESPONSE POST /v1/imports/detect 200 bankCode: string
+RESPONSE POST /v1/imports/detect 200 profileName: string
+RESPONSE POST /v1/imports/detect 200 profileSource: string
+RESPONSE POST /v1/imports/detect 200 recognized: boolean
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 alreadyImportedCount: integer
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 historyId: string
 RESPONSE POST /v1/imports/drafts/{draftId}/confirm 200 importedCount: integer

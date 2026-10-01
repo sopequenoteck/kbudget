@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.response.CsvPreviewResponse;
 import fr.kksdev.budget.api.dto.response.ImportConfirmResponse;
+import fr.kksdev.budget.api.dto.response.ImportDetectionResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftLineResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftSummaryResponse;
@@ -42,7 +43,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +73,8 @@ public class ImportService {
     private final CategoryRuleService categoryRuleService;
     private final DeduplicationService deduplicationService;
     private final ImportProfileRepository importProfileRepository;
+    private final ImportProfileRegistry importProfileRegistry;
+    private final ImportProfileDetector importProfileDetector;
 
     @Transactional
     public ImportDraftResponse upload(MultipartFile file, UUID accountId, UUID userId) {
@@ -77,23 +82,34 @@ public class ImportService {
 
         Account account = validateAccountForImport(accountId, userId);
 
-        ImportProfileRegistry.ImportProfileConfig profile = csvParsingService.detectProfile(account.getBankCode())
+        byte[] content = readContent(file);
+
+        // The file is recognized by its columns first; the bank of the account is only a fallback.
+        ImportProfileDetector.Detection detection = importProfileDetector.resolve(content, account.getBankCode(), userId)
                 .orElseThrow(() -> new CsvProfileNotFoundException(
                         "No import profile available for bank: " + account.getBankCode()));
+        ImportProfileRegistry.ImportProfileConfig profile = detection.config();
 
-        List<ImportDraftLine> parsedLines;
-        try {
-            parsedLines = csvParsingService.parse(file.getInputStream(), profile, userId);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
-        }
+        List<ImportDraftLine> parsedLines = csvParsingService.parse(new ByteArrayInputStream(content), profile, userId);
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
 
         log.info("CSV import uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
 
-        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(), null, ImportProfileSource.REGISTRY);
+        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
+                detection.customProfileId(), detection.source());
         return buildResponseWithProfileName(savedDraft, profile.name());
+    }
+
+    /** Recognizes the profile of a file without creating anything (KKS-440). */
+    public ImportDetectionResponse detect(MultipartFile file, UUID userId) {
+        validateFile(file);
+        ImportDetectionResponse response = importProfileDetector.detect(readContent(file), userId)
+                .map(detection -> new ImportDetectionResponse(true, detection.source().name(),
+                        detection.config().bankCode(), detection.config().name()))
+                .orElseGet(ImportDetectionResponse::notRecognized);
+        log.info("Import file profile detection: recognized={}, source={}", response.recognized(), response.profileSource());
+        return response;
     }
 
     @Transactional
@@ -315,7 +331,10 @@ public class ImportService {
                 mapping.encoding(),
                 mapping.decimalSeparator(),
                 mapping.skipHeaderLines(),
-                List.of()
+                List.of(),
+                List.of(),
+                null,
+                null
         );
 
         List<ImportDraftLine> parsedLines;
@@ -359,7 +378,7 @@ public class ImportService {
         List<ImportProfileResponse> result = new ArrayList<>();
 
         // Registry profiles
-        for (ImportProfileRegistry.ImportProfileConfig cfg : ImportProfileRegistry.getAll()) {
+        for (ImportProfileRegistry.ImportProfileConfig cfg : importProfileRegistry.getAll()) {
             result.add(new ImportProfileResponse(null, cfg.bankCode(), cfg.name(), "REGISTRY", false));
         }
 
@@ -421,6 +440,14 @@ public class ImportService {
                     log.error("Draft d'import non trouvé: id={}, userId={}", draftId, userId);
                     return new EntityNotFoundException("Import draft not found");
                 });
+    }
+
+    private byte[] readContent(MultipartFile file) {
+        try (InputStream in = file.getInputStream()) {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
+        }
     }
 
     private void validateFile(MultipartFile file) {

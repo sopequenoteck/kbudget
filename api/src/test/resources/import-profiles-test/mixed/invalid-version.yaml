@@ -1,0 +1,12 @@
+formatVersion: 99
+bankCode: "FUTURE"
+name: "Future Bank"
+separator: ";"
+encoding: "UTF-8"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date"
+amountColumn: "Amount"
+labelColumn: "Label"
+decimalSeparator: ","
+signature:
+  headerColumns: ["Date", "Label"]

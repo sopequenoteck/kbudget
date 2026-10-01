@@ -1668,6 +1668,54 @@ Response `200` :
 
 ## Import CSV
 
+### Reconnaitre un fichier `POST /api/v1/imports/detect` (KKS-440)
+
+Identifie le profil d'import d'un fichier, sans rien creer : ni brouillon, ni
+profil. A appeler avant le choix du compte pour reconnaitre le format.
+
+Request (multipart/form-data) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `file` | File | Fichier CSV (max 5 Mo, memes limites que `/upload`) |
+
+Response `200`, fichier reconnu :
+
+```json
+{
+  "recognized": true,
+  "profileSource": "REGISTRY",
+  "bankCode": "SG",
+  "profileName": "Société Générale"
+}
+```
+
+Response `200`, fichier non reconnu :
+
+```json
+{
+  "recognized": false,
+  "profileSource": null,
+  "bankCode": null,
+  "profileName": null
+}
+```
+
+- `profileSource` : `REGISTRY` (profil embarque) ou `CUSTOM` (profil personnalise
+  de l'utilisateur authentifie). `bankCode` vaut `null` pour `CUSTOM`.
+- Le fichier est reconnu quand toutes les colonnes de la signature du profil
+  figurent sur la ligne d'en-tete de colonnes (apres `skipHeaderLines`, lue avec
+  l'encodage et le separateur du profil ; espaces de bord ignores, casse
+  respectee, comme a la lecture des lignes). Un profil personnalise a pour
+  signature ses colonnes mappees. Profils
+  embarques d'abord, puis profils personnalises de l'utilisateur seulement
+  (le plus recemment modifie si plusieurs correspondent).
+- `/imports/upload` suit le meme ordre, puis se replie sur le profil embarque
+  du `bankCode` du compte ; `422` si rien ne correspond. Le brouillon porte alors
+  `profileSource` = `CUSTOM` quand un profil personnalise a ete reconnu.
+
+Erreur `400` : fichier absent, vide, trop gros ou qui n'est pas un CSV. Erreur `401` sans jeton.
+
 ### Upload CSV `POST /api/v1/imports/upload`
 
 Request (multipart/form-data) :
@@ -1760,6 +1808,11 @@ tous montants), `USER` (choisie pendant la revue). `null` sans categorie.
 
 Erreur `409` : brouillon actif existant pour ce compte.
 Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
+
+**Profil retenu (KKS-440)** : le fichier est d'abord reconnu par ses colonnes
+(voir `/imports/detect`), quel que soit le `bankCode` du compte ; ce dernier ne
+sert plus que de repli. Un profil personnalise sauvegarde au mapping manuel est
+donc reutilise au reimport.
 
 ### Confirmer import `POST /api/v1/imports/drafts/{draftId}/confirm`
 

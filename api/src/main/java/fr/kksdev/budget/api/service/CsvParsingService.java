@@ -4,7 +4,6 @@ import fr.kksdev.budget.api.dto.response.CsvPreviewResponse;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.ImportDraftLine;
-import fr.kksdev.budget.api.repository.ImportProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -13,6 +12,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -36,7 +35,6 @@ public class CsvParsingService {
 
     private final LabelCleaningService labelCleaningService;
     private final CategorySuggestionService categorySuggestionService;
-    private final ImportProfileRepository importProfileRepository;
 
     public List<ImportDraftLine> parse(InputStream inputStream, ImportProfileRegistry.ImportProfileConfig profile, UUID userId) {
         List<ImportDraftLine> lines = new ArrayList<>();
@@ -44,19 +42,10 @@ public class CsvParsingService {
         Charset charset = Charset.forName(profile.encoding());
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(profile.dateFormat());
 
-        CSVFormat format = CSVFormat.Builder.create()
-                .setDelimiter(profile.separator().charAt(0))
-                .setHeader()
-                .setSkipHeaderRecord(true)
-                .setIgnoreEmptyLines(true)
-                .setTrim(true)
-                .build();
+        CSVFormat format = columnHeaderFormat(profile.separator().charAt(0));
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-            // Skip bank info header lines (e.g. SG has 1 line before column headers)
-            for (int i = 0; i < profile.skipHeaderLines(); i++) {
-                bufferedReader.readLine();
-            }
+            skipBankHeader(bufferedReader, profile.skipHeaderLines());
 
             CSVParser parser = new CSVParser(bufferedReader, format);
             int lineNumber = 1;
@@ -176,46 +165,39 @@ public class CsvParsingService {
         }
     }
 
-    public Optional<ImportProfileRegistry.ImportProfileConfig> detectProfile(String bankCode) {
-        return resolveProfile(bankCode, null);
-    }
-
-    public Optional<ImportProfileRegistry.ImportProfileConfig> resolveProfile(String bankCode, UUID userId) {
-        // 1. Try registry first
-        Optional<ImportProfileRegistry.ImportProfileConfig> registryProfile = ImportProfileRegistry.findByBankCode(bankCode);
-        if (registryProfile.isPresent()) {
-            return registryProfile;
-        }
-
-        // 2. Try custom profiles for user
-        if (userId != null) {
-            List<fr.kksdev.budget.api.model.ImportProfile> customProfiles =
-                    importProfileRepository.findByUserIdOrderByNameAsc(userId);
-            if (!customProfiles.isEmpty()) {
-                fr.kksdev.budget.api.model.ImportProfile custom = customProfiles.get(0);
-                return Optional.of(toConfig(custom));
+    /**
+     * Column names found on the column header line of the file, read the way
+     * {@link #parse} reads it: bank header lines skipped, then the first
+     * non-empty record. Empty when the file cannot be read with this profile.
+     */
+    public List<String> readHeaderColumns(byte[] content, ImportProfileRegistry.ImportProfileConfig profile) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new ByteArrayInputStream(content), Charset.forName(profile.encoding())))) {
+            skipBankHeader(reader, profile.skipHeaderLines());
+            try (CSVParser parser = new CSVParser(reader, columnHeaderFormat(profile.separator().charAt(0)))) {
+                return List.copyOf(parser.getHeaderNames());
             }
+        } catch (IOException | RuntimeException e) {
+            log.debug("File not readable with import profile '{}': {}", profile.name(), e.getMessage());
+            return List.of();
         }
-
-        return Optional.empty();
     }
 
-    public ImportProfileRegistry.ImportProfileConfig toConfig(fr.kksdev.budget.api.model.ImportProfile profile) {
-        return new ImportProfileRegistry.ImportProfileConfig(
-                null,
-                profile.getName(),
-                profile.getSeparator(),
-                profile.getDateFormat(),
-                profile.getDateColumn(),
-                profile.getAmountColumn(),
-                profile.getDebitColumn(),
-                profile.getCreditColumn(),
-                profile.getLabelColumn(),
-                profile.getEncoding(),
-                profile.getDecimalSeparator(),
-                profile.getSkipHeaderLines() != null ? profile.getSkipHeaderLines() : 0,
-                List.of()
-        );
+    private static CSVFormat columnHeaderFormat(char delimiter) {
+        return CSVFormat.Builder.create()
+                .setDelimiter(delimiter)
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setIgnoreEmptyLines(true)
+                .setTrim(true)
+                .build();
+    }
+
+    /** Skips the bank info header lines (e.g. SG has 1 line before the column headers). */
+    private static void skipBankHeader(BufferedReader reader, int lines) throws IOException {
+        for (int i = 0; i < lines; i++) {
+            reader.readLine();
+        }
     }
 
     public CsvPreviewResponse preview(InputStream inputStream, String separator, String encoding, int skipHeaderLines) throws IOException {

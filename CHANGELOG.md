@@ -20,6 +20,21 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **Profils d'import en fichiers et reconnaissance du format (KKS-440)** :
+  Le profil Societe Generale n'est plus code en dur :
+  il est lu dans `api/src/main/resources/import-profiles/sg.yaml`, un format de
+  fichier versionne (`formatVersion: 1`) qui decrit aussi la signature du format,
+  l'en-tete bancaire (compte, solde, date du solde) et la date d'achat portee par
+  le libelle. Un fichier invalide est journalise et ignore, il n'empeche jamais
+  le demarrage.
+  - API : `POST /imports/detect` reconnait le format d'un fichier sans rien
+    creer (`recognized`, `profileSource`, `bankCode`, `profileName`). Le
+    `/imports/upload` reconnait desormais le fichier par ses colonnes, y compris
+    avec un profil personnalise de l'utilisateur, et ne se replie sur le
+    `bankCode` du compte qu'ensuite : un releve Societe Generale charge sur le
+    compte d'une autre banque n'exige plus de mapping manuel, et un mapping
+    sauvegarde est reutilise au reimport. Aucune migration de base.
+
 - **Infrastructure d'internationalisation d'Angular et preference de langue
   (KKS-373)** : etape 1 sur 8 de KKS-325. **Aucun changement visible** : le
   francais reste la langue par defaut, et aucun selecteur n'apparait avant

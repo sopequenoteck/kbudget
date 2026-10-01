@@ -1,0 +1,12 @@
+formatVersion: 1
+bankCode: "DUP"
+name: "Duplicate second"
+separator: ";"
+encoding: "UTF-8"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date"
+amountColumn: "Amount"
+labelColumn: "Label"
+decimalSeparator: ","
+signature:
+  headerColumns: ["Date", "Label"]
