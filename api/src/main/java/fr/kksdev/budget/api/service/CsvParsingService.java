@@ -195,8 +195,9 @@ public class CsvParsingService {
 
     /** Skips the bank info header lines (e.g. SG has 1 line before the column headers). */
     private static void skipBankHeader(BufferedReader reader, int lines) throws IOException {
-        for (int i = 0; i < lines; i++) {
-            reader.readLine();
+        int skipped = 0;
+        while (skipped < lines && reader.readLine() != null) {
+            skipped++;
         }
     }
 
