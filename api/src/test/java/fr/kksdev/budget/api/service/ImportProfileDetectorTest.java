@@ -110,6 +110,13 @@ class ImportProfileDetectorTest {
     }
 
     @Test
+    void should_not_recognize_the_file_when_it_ends_before_the_bank_header_is_skipped() {
+        byte[] emptyFile = ImportTestFiles.bytes("", StandardCharsets.ISO_8859_1);
+
+        assertThat(detector.detect(emptyFile, userId)).isEmpty();
+    }
+
+    @Test
     void should_not_recognize_the_file_when_it_is_decoded_with_the_wrong_encoding() {
         Optional<Detection> detection = detector.detect(
                 ImportTestFiles.bytes(ImportTestFiles.SG_STATEMENT, StandardCharsets.UTF_8), userId);
