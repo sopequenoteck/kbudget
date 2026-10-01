@@ -212,9 +212,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   Apparence > Langue (« Auto », « English », « Français ») ; il est enregistre
   sur le serveur et suit l'utilisateur d'un client a l'autre, ou sur
   l'appareil en mode local. La bascule s'applique sans redemarrage.
+- **Traduction communautaire par pull request (KKS-439)** : le depot est pret
+  a recevoir une nouvelle langue. Guide « Translating k-budget » dans
+  `CONTRIBUTING.md`, politique et liste de controle d'activation dans
+  `docs/i18n.md` (« Adding a language ») : une langue est activee a 100 % des
+  cles, client par client, et n'est jamais retiree ; une traduction partielle
+  peut etre fusionnee sans etre activee. Controles bloquants de tous les
+  catalogues presents, Angular et Flutter : aucune cle inconnue de l'anglais,
+  toutes les cles pour une langue activee, memes parametres ICU que l'anglais,
+  ICU valide (Angular), listes de langues accordees. Weblate viendra avec le
+  premier traducteur (KKS-327).
 
 ### Changed
 
+- **Flutter : une langue sans locale de formatage retombe sur l'anglais
+  (KKS-439)** : `intlLocaleFor` renvoie `en_GB`, plus `fr_FR`, pour une langue
+  autre que `fr` et `en`. Aucun effet sur les langues actuelles.
 - **Titre et message des notifications en anglais (KKS-397)** : le client
   Flutter les affiche en anglais jusqu'a KKS-326.
 - **Textes par defaut de l'API en anglais (KKS-396)** : un client qui n'envoie

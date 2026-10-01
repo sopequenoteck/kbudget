@@ -175,6 +175,9 @@ comment, nothing to print or email. [`CONTRIBUTING.md`](CONTRIBUTING.md)
 explains how to run the project, what is expected of a change, why the CLA
 exists and what it does not mean.
 
+Translations are welcome too, by pull request: see
+[Translating k-budget](CONTRIBUTING.md#translating-k-budget).
+
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 Found a security issue? Read [`SECURITY.md`](SECURITY.md) and report it
