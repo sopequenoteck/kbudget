@@ -6,10 +6,11 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 /// The `intl` locale identifier for [locale] (`fr` -> `fr_FR`, `en` ->
-/// `en_GB`), for use with `NumberFormat` and `DateFormat`.
+/// `en_GB`), for use with `NumberFormat` and `DateFormat`. Any other
+/// language falls back to `en_GB`, the default language.
 String intlLocaleFor(Locale locale) => switch (locale.languageCode) {
-      'en' => 'en_GB',
-      _ => 'fr_FR',
+      'fr' => 'fr_FR',
+      _ => 'en_GB',
     };
 
 /// Formate un taux de change pour [intlLocale] : 0 a 6 decimales, comme le

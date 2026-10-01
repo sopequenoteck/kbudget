@@ -181,6 +181,9 @@ commentaire, rien a imprimer ni a envoyer. [`CONTRIBUTING.md`](CONTRIBUTING.md)
 explique comment lancer le projet, ce qui est attendu d'un changement, pourquoi
 le CLA existe et ce qu'il n'implique pas.
 
+Les traductions sont bienvenues aussi, par pull request : voir
+[Translating k-budget](CONTRIBUTING.md#translating-k-budget).
+
 En participant, vous acceptez le [Code de conduite](CODE_OF_CONDUCT.md).
 
 Une faille de securite ? Lisez [`SECURITY.md`](SECURITY.md) et signalez-la en

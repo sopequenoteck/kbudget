@@ -13,8 +13,8 @@ void main() {
       });
     }
 
-    test('should_defaultToFrFr_when_languageCodeIsUnknown', () {
-      expect(intlLocaleFor(const Locale('es')), 'fr_FR');
+    test('should_defaultToEnGb_when_languageCodeIsUnknown', () {
+      expect(intlLocaleFor(const Locale('es')), 'en_GB');
     });
   });
 

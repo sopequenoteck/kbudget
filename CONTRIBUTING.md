@@ -144,6 +144,47 @@ Translation keys, string-writing rules and the English–French glossary are in
 the key structure is a closed list, and some terms are easy to get wrong — a
 *recurring transaction* is not a *subscription*, and *lent* is never *loan*.
 
+## Translating k-budget
+
+**Translating needs no code**, only two catalogues. Once a catalogue is
+complete, enabling the language takes a few lines of configuration, listed in
+the activation checklist; the maintainer can add them. Translation goes through
+pull requests: a translation platform (Weblate) is not set up yet, and will be
+once a first translator asks for it.
+
+1. **Start from English**, the reference. Copy `app/public/i18n/en.json` to
+   `app/public/i18n/xx.json` (Angular, the web client) and
+   `flutter/lib/src/localization/app_en.arb` to
+   `flutter/lib/src/localization/app_xx.arb` (Flutter, the mobile client), `xx`
+   being the language code. In the ARB file, set `"@@locale": "xx"`; the other
+   `@…` entries are metadata, left as they are and never translated.
+2. **Translate the values, never the keys or the `{placeholders}`.** Follow
+   the rules and the glossary of [`docs/i18n.md`](docs/i18n.md): the glossary
+   fixes the meaning of each term (*recurring transaction*, *subscription*,
+   *lent*…) and is the same for every language.
+3. **Regenerate the Flutter files.** Run `cd flutter && flutter gen-l10n`, then
+   commit the new `app_localizations_xx.dart` and the updated
+   `app_localizations.dart` next to the ARB file. Generation drops the licence
+   header of these files: put it back at the top of each (see
+   [The two licences](#the-two-licences)), or the header check fails.
+4. **A partial translation is welcome.** It can be merged as it is; the
+   language is offered to users once a client's catalogue holds 100 % of the
+   keys. Each client is enabled on its own, so Angular may come before
+   Flutter. The policy and the activation checklist are in
+   [Adding a language](docs/i18n.md#adding-a-language).
+5. **Ask a second speaker to review** if you can. It is welcome, not required.
+
+French is maintained by the maintainer; a correction to it is still welcome.
+
+The pull request runs the catalogue checks automatically: no key unknown to
+English, every key for an enabled language, the same placeholders as the
+English message (including inside `plural` and `select`), valid ICU syntax.
+Locally, they are part of `cd app && npm test` and `cd flutter && flutter test`.
+
+**A translation is a contribution like code**: it is covered by the
+[CLA](#contributor-licence-agreement), signed once with a comment on your first
+pull request.
+
 ## Contributor Licence Agreement
 
 **Every pull request must be covered by the [CLA](CLA.md).** An automated check
