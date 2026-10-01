@@ -16,6 +16,8 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 
+const _searchThreshold = 5;
+
 class SelectPickerItem {
   final String id;
   final String label;
@@ -44,16 +46,6 @@ class SelectPicker extends FormField<String?> {
   ///
   /// `null` retombe sur [AppLocalizations.commonFormSelectPlaceholder].
   final String? placeholder;
-  final bool clearable;
-  final bool? searchable;
-  final int searchThreshold;
-
-  /// Message affiché quand la recherche ne retourne aucun résultat.
-  ///
-  /// `null` retombe sur [AppLocalizations.commonEmptyNoResults].
-  final String? emptyMessage;
-  final ValueChanged<String>? onSearchChanged;
-  final Widget Function(String searchTerm)? emptyActionBuilder;
 
   SelectPicker({
     super.key,
@@ -62,12 +54,6 @@ class SelectPicker extends FormField<String?> {
     this.onChanged,
     required this.label,
     this.placeholder,
-    this.clearable = false,
-    this.searchable,
-    this.searchThreshold = 5,
-    this.emptyMessage,
-    this.onSearchChanged,
-    this.emptyActionBuilder,
     super.validator,
     super.onSaved,
     super.autovalidateMode,
@@ -86,9 +72,7 @@ class SelectPicker extends FormField<String?> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-      ..add(StringProperty('placeholder', placeholder))
-      ..add(StringProperty('emptyMessage', emptyMessage));
+    properties.add(StringProperty('placeholder', placeholder));
   }
 }
 
@@ -105,9 +89,6 @@ class _SelectPickerState extends FormFieldState<String?> {
   String _placeholder(BuildContext ctx) =>
       widget.placeholder ??
       AppLocalizations.of(ctx)!.commonFormSelectPlaceholder;
-
-  String _emptyMessage(BuildContext ctx) =>
-      widget.emptyMessage ?? AppLocalizations.of(ctx)!.commonEmptyNoResults;
 
   @override
   void didUpdateWidget(covariant SelectPicker oldWidget) {
@@ -139,15 +120,8 @@ class _SelectPickerState extends FormFieldState<String?> {
     Navigator.of(context).pop();
   }
 
-  void _onClear() {
-    didChange(null);
-    widget.onChanged?.call(null);
-  }
-
   void _openModal() {
-    final showSearch = widget.searchable == true ||
-        (widget.searchable == null &&
-            widget.items.length >= widget.searchThreshold);
+    final showSearch = widget.items.length >= _searchThreshold;
 
     if (showSearch) {
       final searchNotifier = ValueNotifier<String>('');
@@ -195,10 +169,7 @@ class _SelectPickerState extends FormFieldState<String?> {
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-        onChanged: (query) {
-          notifier.value = query;
-          widget.onSearchChanged?.call(query);
-        },
+        onChanged: (query) => notifier.value = query,
       ),
     );
   }
@@ -213,14 +184,11 @@ class _SelectPickerState extends FormFieldState<String?> {
             .toList();
 
     if (filteredItems.isEmpty) {
-      if (widget.emptyActionBuilder != null) {
-        return widget.emptyActionBuilder!(searchQuery);
-      }
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.space6),
           child: Text(
-            _emptyMessage(ctx),
+            AppLocalizations.of(ctx)!.commonEmptyNoResults,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               color: colorScheme.onSurfaceVariant,
@@ -427,20 +395,10 @@ class _SelectPickerState extends FormFieldState<String?> {
                           ),
                         ),
                       const SizedBox(width: AppSpacing.space2),
-                      if (widget.clearable && hasSelection && widget.enabled)
-                        GestureDetector(
-                          onTap: _onClear,
-                          child: PhosphorIcon(
-                            PhosphorIconsBold.x,
-                            size: 18,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      else
-                        PhosphorIcon(
-                          PhosphorIconsRegular.caretDown,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      PhosphorIcon(
+                        PhosphorIconsRegular.caretDown,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ],
                   ),
                 ),
