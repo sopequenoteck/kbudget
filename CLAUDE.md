@@ -54,7 +54,7 @@ cd flutter && flutter analyze          # Analyse statique
 
 ## Constitution du projet
 
-Le fichier `.specify/memory/constitution.md` (v4.1.0) est le document de reference. 8 principes :
+Le fichier `.specify/memory/constitution.md` (v4.2.0) est le document de reference. 8 principes :
 
 1. **API-First** : l'API est la source de verite unique pour tous les clients. DTOs obligatoires, jamais d'entite JPA exposee. Endpoints metier servis sous `/api/v1` (KKS-313) — une seule version servie a la fois, jamais deux en parallele. `/api/meta` pour la detection d'incompatibilite. Jamais retirer/renommer un champ de reponse — voir [`docs/api-compatibility.md`](docs/api-compatibility.md) pour les six regles et la procedure de rupture assumee.
 2. **Securite par defaut** : JWT sur toutes les routes, filtrage par user authentifie, Bean Validation.
@@ -72,7 +72,7 @@ Le fichier `.specify/memory/constitution.md` (v4.1.0) est le document de referen
 - Lombok obligatoire (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
 - Chaque requete filtre par le user authentifie (isolation des donnees)
 - Inputs valides via Bean Validation (`@Valid`, `@NotNull`, `@Size`)
-- Branches feature : `feature/<nom>`
+- Branches : `feature/<nom>`, `fix/<nom>`, `chore/<nom>`, `hotfix/<nom>`
 
 ## Conventions Angular
 
@@ -153,7 +153,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 | Document | Contenu |
 |----------|---------|
-| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** (v4.1.0) — principes fondateurs. Fait autorite sur toute autre documentation |
+| [`.specify/memory/constitution.md`](.specify/memory/constitution.md) | **Constitution du projet** (v4.2.0) — principes fondateurs. Fait autorite sur toute autre documentation |
 | [`docs/architecture.md`](docs/architecture.md) | Structure du code, securite, profils Spring, decisions techniques, modele de donnees (18 entites) |
 | [`docs/vision.md`](docs/vision.md) | Vision produit, modules fonctionnels |
 | [`docs/api-examples.md`](docs/api-examples.md) | Exemples requetes/reponses par endpoint |

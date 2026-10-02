@@ -1,6 +1,50 @@
 <!--
   Sync Impact Report
   ==================================================
+  Version change: 4.1.0 → 4.2.0 (MINOR — remise à niveau sur
+    l'état réel du projet et règles des profils d'import,
+    2026-10-02)
+  Bump rationale: Les jalons P1 à P4 et « Import de relevés
+    utilisable » sont livrés ; le texte décrivait encore
+    l'état d'avant (versioning Flutter séparé, DDL dev en
+    create-drop, aucun préfixe de version d'API, nom « Budget
+    App »). La direction du 2026-08-26 reste la référence :
+    les règles qu'elle pose pour les profils d'import (P6) et
+    que la constitution ne portait pas y sont ajoutées.
+    MINOR et non MAJOR : aucun principe n'est supprimé ni
+    redéfini. MINOR et non PATCH : les principes II et VII
+    reçoivent des règles nouvelles.
+
+  Modified principles:
+    - Principe I : préfixe `/api/v1`, `/api/meta`, renvoi vers
+      docs/api-compatibility.md.
+    - Principe II : donnée bancaire identifiante jamais
+      stockée entière ; aucun relevé réel dans le dépôt.
+    - Principe VII : nouveau bloc « Profils d'import ».
+
+  Modified sections:
+    - Titre et Governance : « k-budget ».
+    - Contraintes techniques : Flyway et `validate` en dev et
+      en prod (backend),
+      Vitest et Transloco (Angular), état transitoire du mode
+      autonome (Flutter, KKS-335).
+    - Workflow : préfixes de branches, `main` protégée,
+      Quality Gate Sonar, SemVer commune aux quatre fichiers.
+
+  Templates requiring updates: aucun.
+
+  Follow-up TODOs:
+    - Retirer la ligne « État transitoire » des contraintes
+      Flutter à la livraison de KKS-335.
+    - Répertoire externe de profils d'import : KKS-329. À sa
+      livraison, retirer la ligne « État transitoire » du
+      bloc « Profils d'import ».
+    - Les TODO hérités de la v4.0.0 sont soldés : plus aucune
+      mention des trajectoires dans les templates ni dans
+      docs/vision.md et docs/architecture.md.
+  ==================================================
+  Historique — 4.0.0 → 4.1.0
+  ==================================================
   Version change: 4.0.0 → 4.1.0 (MINOR — périmètre du bouton
     flottant précisé, 2026-10-02, KKS-386)
   Bump rationale: Le principe IV exigeait le FAB « sur tous les
@@ -77,7 +121,7 @@
   ==================================================
 -->
 
-# Budget App Constitution
+# k-budget Constitution
 
 ## Core Principles
 
@@ -92,7 +136,7 @@ avant d'être consommée par un frontend, quel qu'il soit.
 - Les DTOs DOIVENT séparer la couche API de la couche
   persistance — jamais d'entité JPA exposée directement
 - Le context path `/api` DOIT être respecté pour tous les
-  endpoints
+  endpoints ; les endpoints métier sont servis sous `/api/v1`
 - Les réponses DOIVENT être en JSON
 - Chaque ressource DOIT exposer un contrat clair
   (request DTO → response DTO) documenté par ses types
@@ -107,10 +151,10 @@ reste sur la version qu'il a choisi de déployer.
 
 - Une seule version d'API est servie à la fois. Aucune
   version antérieure N'EST maintenue en parallèle
-- Un endpoint public et non versionné DOIT permettre à tout
-  client de découvrir la version du serveur, la version
-  d'API, la version minimale de client supportée et les
-  capacités disponibles
+- Un endpoint public et non versionné, `/api/meta`, DOIT
+  permettre à tout client de découvrir la version du serveur,
+  la version d'API, la version minimale de client supportée
+  et les capacités disponibles
 - Un client incompatible DOIT l'apprendre explicitement et
   le dire à l'utilisateur — jamais échouer sur une erreur
   technique
@@ -122,6 +166,9 @@ reste sur la version qu'il a choisi de déployer.
   pas par la modification d'un existant
 - Une rupture inévitable DOIT être assumée : version
   minimale de client relevée, note de migration publiée
+
+Les règles d'écriture détaillées et la procédure de rupture
+assumée sont dans `docs/api-compatibility.md`.
 
 ### II. Sécurité par défaut
 
@@ -145,6 +192,13 @@ celles explicitement déclarées publiques dans `SecurityConfig`.
 - Les instances étant exposées publiquement par leurs
   propriétaires, les endpoints d'authentification DOIVENT
   être protégés contre les tentatives répétées
+- Une donnée bancaire identifiante NE DOIT JAMAIS être
+  stockée entière : un compte se reconnaît à son suffixe,
+  pas à son numéro
+- Aucun relevé réel NE DOIT entrer dans le dépôt : les
+  fichiers d'exemple sont des fixtures synthétiques, la PR
+  le confirme explicitement et la vérification précède le
+  merge
 
 ### III. Simplicité & YAGNI
 
@@ -277,6 +331,25 @@ la commodité, pas le logiciel.
 - Aucune fonctionnalité NE DOIT être conditionnée à
   l'origine du build, à un achat ou à une licence
 
+**Profils d'import**
+
+L'import de relevés est la seule voie d'alimentation
+automatique, et la seule surface où un non-développeur peut
+contribuer.
+
+- Un profil bancaire est une donnée, pas du code : un
+  fichier par banque, chargé au démarrage
+- Ajouter une banque NE DOIT exiger ni Java, ni compilation,
+  ni release
+- Un profil invalide DOIT être ignoré avec un avertissement ;
+  il ne bloque jamais le démarrage
+- Un self-hoster DOIT pouvoir déposer son profil sans forker
+  ni attendre une release
+- **État transitoire** : les profils sont aujourd'hui
+  embarqués dans le build. Le répertoire externe (KKS-329)
+  rend effectives les règles sur l'ajout d'une banque et le
+  dépôt sans fork
+
 **Langues**
 
 - L'anglais est la langue par défaut de l'interface et de
@@ -353,7 +426,8 @@ pas de l'existence du second client.
 - **Package base** : `fr.kksdev.budget.api`
 - **Structure** : `config/`, `controller/`, `service/`,
   `repository/`, `model/`, `dto/`, `enums/`
-- **DDL dev** : `create-drop` — **DDL prod** : `validate`
+- **Schéma** : migrations Flyway, `ddl-auto: validate` en
+  dev et en prod ; les tests tournent sur un schéma généré
 - **Licence** : AGPL-3.0
 
 ### Frontend PWA (app/)
@@ -367,8 +441,9 @@ pas de l'existence du second client.
 - **DI** : `inject()` uniquement (pas de constructor injection)
 - **RxJS** : Limité aux flux HTTP et opérateurs complexes
 - **Linting** : ESLint + Prettier
-- **i18n** : chargement à l'exécution — une seule image
-  Docker DOIT servir toutes les langues
+- **Tests** : Vitest
+- **i18n** : Transloco, chargement à l'exécution — une seule
+  image Docker DOIT servir toutes les langues
 - **Licence** : AGPL-3.0
 
 ### Mobile natif (flutter/)
@@ -380,6 +455,9 @@ pas de l'existence du second client.
 - **HTTP** : Dio — l'API est la source de vérité
 - **Stockage local** : cache et préférences uniquement,
   jamais une source de vérité
+- **État transitoire** : le mode autonome (Drift,
+  `dataModeProvider`) subsiste jusqu'à sa suppression
+  (KKS-335) et n'accueille aucune évolution
 - **Secure storage** : flutter_secure_storage
 - **Models** : Freezed + json_serializable
 - **Tests** : flutter_test + Mockito
@@ -397,8 +475,12 @@ pas de l'existence du second client.
 
 ## Workflow de développement
 
-- Toute modification DOIT passer par une branche feature
-  (`feature/<nom>`)
+- Toute modification DOIT passer par une branche dédiée
+  (`feature/<nom>`, `fix/<nom>`, `chore/<nom>`,
+  `hotfix/<nom>`) ; le push direct sur `main` est interdit
+- Le Quality Gate Sonar est bloquant sur toute PR qui touche
+  le code d'une stack ; pour la PR d'un fork, un mainteneur
+  le lance avant la fusion
 - Un pre-commit review DOIT être exécuté avant chaque commit
   (code mort, duplication, secrets, console.log)
 - Les commits DOIVENT avoir des messages clairs et descriptifs
@@ -409,17 +491,17 @@ pas de l'existence du second client.
   8 principes de cette constitution
 - Avant tout portage vers Flutter, l'état de la surface
   (Suivi / Gelé / Jamais) DOIT être vérifié
-- **Versioning** : `VERSION`, `api/pom.xml` et
-  `app/package.json` partagent une SemVer commune. Flutter
-  applique sa propre SemVer (`flutter/pubspec.yaml`), alignée
-  sur les cycles stores, mais DOIT rester compatible avec la
-  version minimale de client déclarée par l'API
+- **Versioning** : `VERSION`, `api/pom.xml`,
+  `app/package.json` et `flutter/pubspec.yaml` partagent une
+  SemVer commune, contrôlée par le workflow `version-check`
+  sur toute PR vers `main`. Seul le suffixe `+N` de
+  `pubspec.yaml` suit le rythme des dépôts sur les stores
 
 ## Governance
 
 Cette constitution est le document de référence pour toutes
 les décisions architecturales et de développement du projet
-Budget App. Elle prévaut sur toute autre convention implicite,
+k-budget. Elle prévaut sur toute autre convention implicite,
 tout en restant pragmatique dans son application.
 
 - **Amendements** : toute modification DOIT être documentée
@@ -437,4 +519,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 4.1.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-10-02
+**Version**: 4.2.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-10-02
