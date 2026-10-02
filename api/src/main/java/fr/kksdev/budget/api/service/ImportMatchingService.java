@@ -247,13 +247,33 @@ public class ImportMatchingService {
     private static boolean inWindow(ImportDraftLine line, Transaction transaction) {
         // Positive when the transaction is dated after the reference date of the line.
         long offset = ChronoUnit.DAYS.between(line.transactionDate(), transaction.getDate());
-        if (transaction.getSubscription() != null) {
+        return inWindow(offset, transaction.getSubscription() != null, line.getPurchaseDate() != null);
+    }
+
+    /**
+     * The date window of the matching criteria, on the signed number of days from the reference
+     * date of the statement line to the date of the manual transaction.
+     */
+    private static boolean inWindow(long offset, boolean subscriptionLinked, boolean purchaseDateKnown) {
+        if (subscriptionLinked) {
             return Math.abs(offset) <= SUBSCRIPTION_WINDOW_DAYS;
         }
-        if (line.getPurchaseDate() != null) {
+        if (purchaseDateKnown) {
             return Math.abs(offset) <= PURCHASE_DATE_WINDOW_DAYS;
         }
         return offset >= -BOOKING_DAYS_BEFORE && offset <= BOOKING_DAYS_AFTER;
+    }
+
+    /**
+     * Whether a manual transaction falls in the window of a transaction already imported
+     * (KKS-387), the same one the matching applies to a line of a statement. An imported
+     * transaction does not remember whether its date is the purchase date or the booking
+     * date, so a manual transaction qualifies if it fits either window.
+     */
+    static boolean inWindowOfImported(LocalDate importedDate, Transaction manual) {
+        long offset = ChronoUnit.DAYS.between(importedDate, manual.getDate());
+        boolean subscriptionLinked = manual.getSubscription() != null;
+        return inWindow(offset, subscriptionLinked, true) || inWindow(offset, subscriptionLinked, false);
     }
 
     /** Whether the line already stands for the transaction: matched with it, or skipped because it was imported before. */

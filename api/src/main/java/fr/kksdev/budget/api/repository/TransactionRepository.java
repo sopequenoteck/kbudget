@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.repository;
 
+import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -85,6 +86,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<Transaction> findByUserIdAndAccountIdAndImportFingerprintIn(UUID userId, UUID accountId, Collection<String> fingerprints);
 
     List<Transaction> findByUserIdAndAccountIdAndIdIn(UUID userId, UUID accountId, Collection<UUID> ids);
+
+    List<Transaction> findByUserIdAndIdIn(UUID userId, Collection<UUID> ids);
+
+    List<Transaction> findByUserIdAndTypeOrderByDateAscIdAsc(UUID userId, TransactionType type);
+
+    /**
+     * Transactions of the user that the history cleanup may merge, oldest first (KKS-387): neither an
+     * adjustment, nor a recurring template, nor one leg of a transfer.
+     */
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.category LEFT JOIN FETCH t.account " +
+            "LEFT JOIN FETCH t.subscription " +
+            "WHERE t.user.id = :userId AND t.type <> :excludedType AND t.isRecurring = false " +
+            "AND t.transferId IS NULL ORDER BY t.date ASC, t.id ASC")
+    List<Transaction> findMergeableByUserId(@Param("userId") UUID userId,
+                                            @Param("excludedType") TransactionType excludedType);
+
+    /** Transactions of the user with no category, oldest first, recurring templates and {@code excludedType} left out (KKS-387). */
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.account " +
+            "WHERE t.user.id = :userId AND t.category IS NULL AND t.type <> :excludedType " +
+            "AND t.isRecurring = false ORDER BY t.date ASC, t.id ASC")
+    List<Transaction> findUncategorizedByUserId(@Param("userId") UUID userId,
+                                                @Param("excludedType") TransactionType excludedType);
 
     List<Transaction> findByUserIdAndCategoryIsNotNullAndIsRecurringFalse(UUID userId);
 

@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.config;
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.dto.response.ValidationErrorDetail;
 import fr.kksdev.budget.api.exception.AvatarNotFoundException;
+import fr.kksdev.budget.api.exception.CleanupConflictCode;
 import fr.kksdev.budget.api.exception.ConfirmationRequiredException;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
@@ -79,14 +80,18 @@ public class GlobalExceptionHandler {
     }
 
     private boolean isSpecializedConflict(String value) {
-        return "LAST_ADMIN_CANNOT_BE_DISABLED".equals(value) || "EMAIL_ALREADY_EXISTS".equals(value);
+        return "LAST_ADMIN_CANNOT_BE_DISABLED".equals(value) || "EMAIL_ALREADY_EXISTS".equals(value)
+                || CleanupConflictCode.of(value) != null;
     }
 
     private String resolveConflictMessage(String errorCode) {
         return switch (errorCode == null ? "" : errorCode) {
             case "LAST_ADMIN_CANNOT_BE_DISABLED" -> "The last active administrator cannot be disabled.";
             case "EMAIL_ALREADY_EXISTS" -> "This email is already used by another user.";
-            default -> errorCode;
+            default -> {
+                CleanupConflictCode cleanup = CleanupConflictCode.of(errorCode);
+                yield cleanup != null ? cleanup.description() : errorCode;
+            }
         };
     }
 

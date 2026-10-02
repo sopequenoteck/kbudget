@@ -23,6 +23,35 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **Rattrapage de l'historique deja en base (KKS-387)** : les imports futurs sont
+  corriges par KKS-382 a KKS-386, pas les donnees existantes. Sur un compte reel :
+  681,09 EUR de transactions en double (11 saisies retrouvees dans le releve,
+  8 paiements d'abonnement crees a cote du prelevement reel dont 3 sur un double
+  clic), 104 transactions sans categorie dont 63 categorisables par l'historique,
+  et un ajustement de solde qui compensait ces erreurs. Un passage unique,
+  declenche par l'utilisateur, qui **propose** et ne modifie rien sans validation :
+  les `GET` ne changent rien, chaque `POST` applique une proposition validee, et
+  seules les donnees de l'utilisateur authentifie sont lues ou ecrites.
+  - `GET /history-cleanup/duplicates` : operations importees deja saisies (memes
+    compte, sens et montant, date dans la fenetre du rapprochement de KKS-385) et
+    paiements d'un meme abonnement pour une meme echeance. `POST
+    /history-cleanup/duplicates/merge` garde la saisie, lui donne l'empreinte de
+    l'importee (un reimport la reconnait) et supprime l'importee ; `POST
+    /history-cleanup/subscription-duplicates/merge` ne garde qu'un paiement.
+    Une transaction qui rembourse une dette n'est supprimee que si celle conservee
+    rembourse la meme dette.
+  - `GET /history-cleanup/uncategorized` : transactions sans categorie groupees par
+    commercant, avec la categorie proposee (regle, historique au meme montant, puis
+    historique du commercant). `POST /history-cleanup/uncategorized/apply` applique
+    la categorie choisie et retient une regle `AUTO` ; une regle `MANUAL` n'est jamais
+    modifiee.
+  - `GET /history-cleanup/adjustments` : ajustements de solde par compte, avec
+    `probablyUnnecessary` quand le dernier solde bancaire connu (KKS-384) egalerait le
+    solde calcule sans eux. Lecture seule.
+  - API (ajouts seuls, aucune migration) : nouveaux endpoints sous `/history-cleanup`
+    et deux codes d'erreur `409`, `CLEANUP_PROPOSAL_STALE` et
+    `CLEANUP_DEBT_LINK_MISSING`.
+
 - **Rapprochement des saisies manuelles et des lignes de releve (KKS-385)** : une
   operation saisie a la main puis retrouvee dans le releve n'est plus comptee deux
   fois. Sur des donnees reelles, 11 saisies en double (355,90 EUR comptes deux fois)

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -131,6 +132,17 @@ public class CategoryRuleService {
                 }
             }
         }
+    }
+
+    /** Category of the first rule, in the order given, that matches the label; empty when none does (KKS-387). */
+    public static Optional<Category> firstMatch(List<CategoryRule> rules, String label) {
+        if (label == null) {
+            return Optional.empty();
+        }
+        return rules.stream()
+                .filter(rule -> matches(rule, label))
+                .map(CategoryRule::getCategory)
+                .findFirst();
     }
 
     public boolean hasMatchingRule(String cleanLabel, UUID userId) {

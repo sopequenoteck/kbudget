@@ -543,4 +543,24 @@ class ImportMatchingServiceTest {
         assertThat(notReady.getStatus()).isEqualTo(status);
         assertThat(ready.getMatchedTransactionId()).isEqualTo(candidate.getId());
     }
+
+    // -------------------------------------------------------------------------
+    // inWindowOfImported(): the window applied to a transaction already imported (KKS-387)
+    // -------------------------------------------------------------------------
+
+    @ParameterizedTest(name = "subscription={0}, offset={1} days -> in window={2}")
+    @CsvSource({
+            // either window of a manual transaction: from 5 days before to 2 days after
+            "false, -6, false", "false, -5, true", "false, 0, true", "false, 1, true", "false, 2, true", "false, 3, false",
+            // subscription payment: 8 days either side
+            "true, -9, false", "true, -8, true", "true, 8, true", "true, 9, false"})
+    void should_apply_the_matching_windows_to_the_date_of_an_imported_transaction(
+            boolean subscriptionLinked, int offset, boolean expected) {
+        Transaction manual = expense("12.50", BOOKING.plusDays(offset));
+        if (subscriptionLinked) {
+            manual.setSubscription(subscription("12.50", null));
+        }
+
+        assertThat(ImportMatchingService.inWindowOfImported(BOOKING, manual)).isEqualTo(expected);
+    }
 }

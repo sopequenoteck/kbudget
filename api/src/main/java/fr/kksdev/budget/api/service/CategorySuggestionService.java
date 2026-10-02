@@ -89,12 +89,22 @@ public class CategorySuggestionService {
         }
 
         Optional<Category> categoryFor(String merchant, TransactionType type, BigDecimal amount) {
+            Optional<Category> sameAmount = categoryForAmount(merchant, type, amount);
+            return sameAmount.isPresent() ? sameAmount : categoryForMerchant(merchant, type);
+        }
+
+        /** Majority category of the past transactions of the merchant at exactly this amount (KKS-387 reuses it). */
+        Optional<Category> categoryForAmount(String merchant, TransactionType type, BigDecimal amount) {
             if (merchant.isEmpty()) {
                 return Optional.empty();
             }
-            Tally sameAmount = byMerchantAndAmount.get(amountKey(merchant, type, amount));
-            if (sameAmount != null) {
-                return Optional.of(sameAmount.best());
+            return Optional.ofNullable(byMerchantAndAmount.get(amountKey(merchant, type, amount))).map(Tally::best);
+        }
+
+        /** Majority category of the past transactions of the merchant, whatever the amount. */
+        Optional<Category> categoryForMerchant(String merchant, TransactionType type) {
+            if (merchant.isEmpty()) {
+                return Optional.empty();
             }
             return Optional.ofNullable(byMerchant.get(merchantKey(merchant, type))).map(Tally::best);
         }
