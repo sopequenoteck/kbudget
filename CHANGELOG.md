@@ -5,6 +5,27 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Retour arriere dans l'application web** (KKS-447) : le geste de retour
+  d'Android ou le bouton precedent du navigateur quittait la page au lieu de
+  fermer la feuille ouverte. Il ferme desormais la surface du dessus (feuille,
+  dialogue, confirmation, panneau de notifications, selecteur) sans changer de
+  page ; dans une feuille, il replie d'abord la section depliee (categorie,
+  date, compte, creation de categorie), saisie conservee.
+
+### Changed
+
+- **Zones sures et barre d'etat de la PWA** (KKS-447) : `viewport-fit=cover` ;
+  en-tete, barre du bas, bouton flottant, feuilles, toasts, panneaux et ecrans
+  d'authentification tiennent compte de l'encoche et de la barre de gestes.
+  Barre d'etat iOS en `black-translucent` : l'en-tete passe dessous (texte de
+  la barre blanc, peu lisible en theme clair). `theme-color` suit la couleur de
+  l'en-tete du theme applique au lieu de l'ambre fixe.
+- **Manifeste** (KKS-447) : `id` explicite (`/`), identique a l'identite
+  implicite, sans seconde installation ; couleurs sombres au lieu de l'ambre et
+  du blanc.
+
 ## [6.8.0] - 2026-10-02
 
 > Mises a jour de l'application web installee (PWA). Aucune migration, aucun
