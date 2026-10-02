@@ -411,7 +411,9 @@
 | # | Scenario | Etapes | Resultat attendu | Statut |
 |---|----------|--------|-------------------|--------|
 | ADV-2 | Token expire pendant submit | Attendre ~15 min sur formulaire → soumettre | Refresh token transparent, formulaire se complete | -- |
-| ADV-4 | App background > 15 min | Mettre en arriere-plan 20min → revenir → action | Refresh token ou logout propre | -- |
+| ADV-4 | App background > 15 min | Mettre en arriere-plan 20min → revenir → action | Refresh token transparent, aucun ecran de connexion | -- |
+| ADV-16 | Relance a froid > 15 min (KKS-448) | Fermer la PWA installee, attendre 20 min → la rouvrir | Page d'accueil affichee, aucun ecran de connexion, session conservee | -- |
+| ADV-17 | Relance hors ligne > 15 min (KKS-448) | Fermer la PWA, attendre 20 min, mode avion → la rouvrir → retablir le reseau → action | Application ouverte (erreurs de chargement explicites), pas de deconnexion ; l'action aboutit une fois le reseau retabli | -- |
 | ADV-14 | Back Android pendant submit | Soumettre + appuyer back immediatement | Transaction creee malgre retour (pas de crash) | -- |
 | ADV-13 | Virgule comme separateur | Taper "12,50" dans un champ montant | Message clair si rejete, ou accepte correctement | -- |
 | ADV-15 | Emojis dans les champs | Libelle avec 200 emojis | API accepte ou erreur claire (pas de 500) | -- |
