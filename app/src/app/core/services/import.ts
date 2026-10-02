@@ -6,6 +6,7 @@ import {
   ImportDraft,
   ImportDraftLine,
   ImportConfirmResult,
+  ImportDetection,
   ImportLineUpdate,
   ImportLineBatchUpdate,
   ImportDraftSummary,
@@ -26,6 +27,13 @@ export class ImportService {
 
   private refresh(): void {
     this.refreshTrigger.update((v) => v + 1);
+  }
+
+  /** Reconnait le profil d'un fichier, sans rien creer (KKS-440). */
+  detect(file: File): Observable<ImportDetection> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.api.postFormData<ImportDetection>('/imports/detect', formData);
   }
 
   upload(file: File, accountId: string): Observable<ImportDraft> {
@@ -57,9 +65,9 @@ export class ImportService {
       .pipe(tap(() => this.refresh()));
   }
 
-  confirm(draftId: string): Observable<ImportConfirmResult> {
+  confirm(draftId: string, applyOpeningBalance = false): Observable<ImportConfirmResult> {
     return this.api
-      .post<ImportConfirmResult>(`/imports/drafts/${draftId}/confirm`, {})
+      .post<ImportConfirmResult>(`/imports/drafts/${draftId}/confirm`, { applyOpeningBalance })
       .pipe(tap(() => this.refresh()));
   }
 

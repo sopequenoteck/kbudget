@@ -32,11 +32,18 @@ function draft(overrides: Partial<ImportDraft> = {}): ImportDraft {
     reviewCount: 0,
     duplicateCount: 0,
     skippedCount: 0,
+    alreadyImportedCount: 0,
+    matchedCount: 0,
     profileName: null,
     profileSource: null,
     createdAt: '2026-03-12T10:00:00',
     expiresAt: '2026-03-19T10:00:00',
     lines: [],
+    statementAccountSuffix: null,
+    statementBalance: null,
+    statementBalanceDate: null,
+    projectedBalance: null,
+    proposedOpeningBalance: null,
     ...overrides,
   };
 }
@@ -92,6 +99,24 @@ describe('CsvMapping', () => {
     const fixture = setup();
     expect(importServiceMock.preview).not.toHaveBeenCalled();
     expect(fixture.componentInstance.fileName()).toBe('');
+  });
+
+  it('should_redirect_to_the_import_start_when_the_file_was_lost_by_a_reload', () => {
+    setup();
+    expect(navigateSpy).toHaveBeenCalledWith(['/transactions/import'], { replaceUrl: true });
+  });
+
+  it('should_not_redirect_when_the_file_is_provided', async () => {
+    const fixture = setup({ file: new File(['a'], 'releve.csv'), accountId: 'acc-1' });
+    await fixture.whenStable();
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('should_link_back_to_the_import_start', async () => {
+    const fixture = setup({ file: new File(['a'], 'releve.csv'), accountId: 'acc-1' });
+    await fixture.whenStable();
+    const back = fixture.nativeElement.querySelector('a.section-back') as HTMLAnchorElement;
+    expect(back.getAttribute('href')).toBe('/transactions/import');
   });
 
   it('should_load_preview_and_prefill_state_when_file_provided', async () => {
@@ -265,7 +290,7 @@ describe('CsvMapping', () => {
       'acc-1',
       expect.objectContaining({ dateColumn: 'Date', labelColumn: 'Libelle', amountColumn: 'Montant' }),
     );
-    expect(navigateSpy).toHaveBeenCalledWith(['/settings/import/review', 'draft-1']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/transactions/import/review', 'draft-1']);
   });
 
   it('should_send_debit_and_credit_columns_when_split_mode', async () => {

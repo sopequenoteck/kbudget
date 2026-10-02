@@ -8,4 +8,8 @@ export const TRANSACTIONS_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/recurring-list/recurring-list').then((m) => m.RecurringList),
   },
+  {
+    path: 'import',
+    loadChildren: () => import('../imports/imports.routes').then((m) => m.IMPORTS_ROUTES),
+  },
 ];

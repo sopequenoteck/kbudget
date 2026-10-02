@@ -322,6 +322,7 @@ RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].matchedTransaction.libelle
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].matchedTransaction.montant: number
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].matchedTransaction.type: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].matchedTransactionId: string
+RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].merchantKey: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].purchaseDate: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].rawLabel: string
 RESPONSE GET /v1/imports/drafts/{draftId} 200 lines[].skipReason: string
@@ -945,6 +946,7 @@ RESPONSE POST /v1/imports/upload 200 lines[].matchedTransaction.libelle: string
 RESPONSE POST /v1/imports/upload 200 lines[].matchedTransaction.montant: number
 RESPONSE POST /v1/imports/upload 200 lines[].matchedTransaction.type: string
 RESPONSE POST /v1/imports/upload 200 lines[].matchedTransactionId: string
+RESPONSE POST /v1/imports/upload 200 lines[].merchantKey: string
 RESPONSE POST /v1/imports/upload 200 lines[].purchaseDate: string
 RESPONSE POST /v1/imports/upload 200 lines[].rawLabel: string
 RESPONSE POST /v1/imports/upload 200 lines[].skipReason: string
@@ -996,6 +998,7 @@ RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].matchedTransaction.lib
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].matchedTransaction.montant: number
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].matchedTransaction.type: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].matchedTransactionId: string
+RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].merchantKey: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].purchaseDate: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].rawLabel: string
 RESPONSE POST /v1/imports/upload-with-mapping 200 lines[].skipReason: string
@@ -1220,6 +1223,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].matchedTransaction.
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].matchedTransaction.montant: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].matchedTransaction.type: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].matchedTransactionId: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].merchantKey: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].purchaseDate: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].rawLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/batch 200 [].skipReason: string
@@ -1250,6 +1254,7 @@ RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 matchedTransaction.
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 matchedTransaction.montant: number
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 matchedTransaction.type: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 matchedTransactionId: string
+RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 merchantKey: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 purchaseDate: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 rawLabel: string
 RESPONSE PUT /v1/imports/drafts/{draftId}/lines/{lineId} 200 skipReason: string

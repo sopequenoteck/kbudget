@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.dto.response;
 
 import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.ImportDraftLine;
+import fr.kksdev.budget.api.util.MerchantKey;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -41,7 +42,9 @@ public record ImportDraftLineResponse(
         /** Detail de la transaction rapprochee, null sans rapprochement ou si elle a disparu depuis (KKS-386). */
         ImportMatchedTransactionResponse matchedTransaction,
         /** Detail des candidats de {@code matchCandidateIds}, dans le meme ordre ; un candidat disparu en est absent (KKS-386). */
-        List<ImportMatchedTransactionResponse> matchCandidates
+        List<ImportMatchedTransactionResponse> matchCandidates,
+        /** Cle commercant du libelle nettoye : les lignes de meme cle (et de meme sens) recoivent ensemble la categorie corrigee (KKS-386). */
+        String merchantKey
 ) {
     public static ImportDraftLineResponse from(ImportDraftLine line) {
         return from(line, false, Map.of());
@@ -75,7 +78,8 @@ public record ImportDraftLineResponse(
                 line.getMatchCandidateIds(),
                 line.getSubscriptionId(),
                 line.getMatchedTransactionId() == null ? null : transactions.get(line.getMatchedTransactionId()),
-                line.getMatchCandidateIds().stream().map(transactions::get).filter(Objects::nonNull).toList()
+                line.getMatchCandidateIds().stream().map(transactions::get).filter(Objects::nonNull).toList(),
+                MerchantKey.of(line.getCleanLabel())
         );
     }
 }

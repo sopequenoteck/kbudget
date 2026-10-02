@@ -243,59 +243,10 @@
   }
 </section>
 
-<!-- Nouvel import -->
+<!-- Nouvel import : le parcours vit sur l'ecran Transactions -->
 <section class="import-section">
-  <h3 class="import-section__title">
+  <a class="new-import-link" routerLink="/transactions/import">
     <ng-icon name="phosphorUploadSimple" size="18" />
     {{ 'imports.page.newImportTitle' | transloco }}
-  </h3>
-
-  <div class="import-form">
-    <div class="form-group">
-      <label class="form-label" for="account-select">{{ 'imports.form.account' | transloco }}</label>
-      @if (accounts().length === 0) {
-        <p class="form-hint">{{ 'imports.empty.accounts' | transloco }}</p>
-      } @else {
-        <select
-          id="account-select"
-          class="form-select"
-          [value]="selectedAccountId()"
-          (change)="onAccountChange($any($event.target).value)"
-        >
-          @for (account of accounts(); track account.id) {
-            <option [value]="account.id">{{ account.icone }} {{ account.nom }}</option>
-          }
-        </select>
-      }
-    </div>
-
-    <div class="upload-zone" (click)="triggerFileInput()" (keydown.enter)="triggerFileInput()" tabindex="0" role="button" [class.upload-zone--disabled]="uploading()">
-      <input
-        id="csv-file-input"
-        type="file"
-        accept=".csv,.txt"
-        class="upload-zone__input"
-        (change)="onFileSelected($event)"
-        [disabled]="uploading()"
-      />
-      @if (uploading()) {
-        <div class="upload-zone__content">
-          <div class="spinner"></div>
-          <p class="upload-zone__text">{{ 'imports.feedback.uploading' | transloco }}</p>
-        </div>
-      } @else {
-        <div class="upload-zone__content">
-          <span class="upload-zone__icon">&#8679;</span>
-          <p class="upload-zone__text">{{ 'imports.form.uploadPrompt' | transloco }}</p>
-          <p class="upload-zone__hint">{{ 'imports.form.uploadHint' | transloco }}</p>
-        </div>
-      }
-    </div>
-
-    @if (uploadError()) {
-      <div class="upload-error">
-        {{ uploadError() }}
-      </div>
-    }
-  </div>
+  </a>
 </section>

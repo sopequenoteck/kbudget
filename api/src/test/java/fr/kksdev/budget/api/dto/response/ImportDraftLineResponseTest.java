@@ -64,6 +64,13 @@ class ImportDraftLineResponseTest {
     }
 
     @Test
+    void should_expose_the_merchant_key_of_the_clean_label_and_an_empty_one_for_a_label_without_letters() {
+        assertThat(ImportDraftLineResponse.from(lineBuilder().cleanLabel("Super U 12/03").build()).merchantKey())
+                .isEqualTo("SUPER U");
+        assertThat(ImportDraftLineResponse.from(lineBuilder().cleanLabel("1234").build()).merchantKey()).isEmpty();
+    }
+
+    @Test
     void should_give_no_category_source_when_the_category_has_none_or_the_line_has_no_category() {
         Category category = Category.builder().id(UUID.randomUUID()).nom("Courses").build();
 

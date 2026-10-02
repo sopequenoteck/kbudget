@@ -59,6 +59,14 @@ import { Modal } from '../modal/modal';
 import { Toast } from '../toast/toast';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
+/**
+ * Parcours dedies a une tache (parametres, import de releve) : le FAB n'y a pas d'usage
+ * et n'y est pas affiche (constitution 4.1.0, principe IV).
+ */
+export function isTaskFlowRoute(url: string): boolean {
+  return url.startsWith('/settings') || url.startsWith('/transactions/import');
+}
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -187,7 +195,7 @@ export class Shell {
     const e = this.navigationEnd();
     return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
-  readonly isOnSettingsRoute = computed(() => this.currentRoute().startsWith('/settings'));
+  readonly isOnTaskFlowRoute = computed(() => isTaskFlowRoute(this.currentRoute()));
 
   constructor() {
     effect(() => {

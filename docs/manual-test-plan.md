@@ -30,6 +30,7 @@
 20. [Divergences connues Angular / Flutter](#20-divergences-connues)
 21. [Angular — Catégories (KKS-231)](#21-angular--catégories-kks-231)
 22. [KKS-235 — Page Mon compte](#22-kks-235--page-mon-compte-angular--flutter)
+23. [KKS-386 — Import de relevé (Angular)](#23-kks-386--import-de-relevé-angular)
 
 ---
 
@@ -552,6 +553,63 @@
 | MC-29 | MDP incorrect | Page Mon compte | Saisir mauvais password + `SUPPRIMER` | Erreur `PASSWORD_INCORRECT` 401 | -- |
 | MC-30 | Dernier admin bloque | User est seul admin actif (desactiver les autres en DB ou ADMIN_EMAILS reduit) | Tenter la suppression avec password + `SUPPRIMER` valides | Erreur `LAST_ADMIN_DELETION_FORBIDDEN` 403, compte non supprime | -- |
 | MC-31 | Reconnexion impossible | Apres MC-26 | Tenter `POST /api/v1/auth/login` avec les credentials du compte supprime | Echec auth (compte `disabled_at` non null) | -- |
+
+## 23. KKS-386 — Import de relevé (Angular)
+
+> **Concerne** : parcours `Transactions → Importer un relevé` (`/transactions/import`), revue des exceptions (`/transactions/import/review/:draftId`), gestion dans `Paramètres → Import`.
+> **Angular uniquement, mode serveur.** À vérifier sur un vrai navigateur, en 375 px (mobile) puis en desktop, en thème sombre et clair, en français puis en anglais.
+> **Prérequis** : 2 comptes actifs dont un déjà importé avec un relevé Société Générale (suffixe connu), un relevé SG synthétique (le même, élargi de quelques opérations), un relevé d'un format inconnu, au moins 3 transactions saisies à la main de même sens et de même montant qu'une ligne du relevé.
+
+### 23.1 — Entrée et départ
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| IM-1 | Icône d'import | Écran Transactions | Repérer la barre d'actions de l'en-tête de section | Icône d'envoi à côté des récurrences, `aria-label` « Importer un relevé » ; le clic ouvre `/transactions/import` | -- |
+| IM-2 | Entrée depuis un compte | Paramètres → Comptes | Cliquer l'icône d'envoi d'un compte | Même parcours, URL `?accountId=…` ; aucun compte n'est coché avant le choix du fichier | -- |
+| IM-3 | FAB et confirmation | `/transactions/import` et la revue, 375 px | Observer le bas de l'écran | Pas de bouton flottant (+) sur le parcours d'import (constitution 4.1.0) ; « Confirmer l'import » est un bouton pleine largeur en fin de page, libellé sur une ligne, phrase de blocage juste au-dessus | --
+| IM-4 | Format reconnu, compte suggéré | Relevé SG déjà importé sur un compte | Choisir le fichier | « Reconnu : Société Générale · compte …1596 » ; le compte suggéré est coché ; les comptes affichent leur suffixe quand ils en ont un | -- |
+| IM-5 | Format reconnu, aucune suggestion | Premier import d'un relevé SG | Choisir le fichier | Aucun compte coché (jamais le compte par défaut), « Analyser le relevé » désactivé tant qu'aucun choix | -- |
+| IM-6 | Compte de l'URL | Entrée par IM-2, relevé sans suggestion | Choisir le fichier | Le compte de l'URL est coché ; une suggestion de l'API prime sur lui | -- |
+| IM-7 | Format inconnu | Relevé d'une banque non reconnue | Choisir le fichier | Message « format non reconnu », choix du compte, « Configurer les colonnes » → mappage existant ; son lien retour revient à `/transactions/import` ; une fois importé, on arrive sur la nouvelle revue | -- |
+| IM-8 | Rechargement du mappage | Sur `/settings/import/mapping` | Recharger la page (F5) | Redirection vers `/transactions/import`, jamais un écran vide | -- |
+| IM-9 | Brouillon déjà ouvert | Un brouillon existe pour le compte | Analyser un second relevé sur ce compte | Message d'erreur et lien « Reprendre le brouillon en cours » vers sa revue | -- |
+| IM-10 | Fichier illisible | Fichier vide ou non CSV | Choisir le fichier | Message d'erreur, le fichier est oublié | -- |
+
+### 23.2 — Revue
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| IM-11 | En-tête | Revue d'un relevé SG | Observer le haut de page | Compte (+ « …1596 »), solde de la banque à la date du relevé, lignes de méta : nouvelles transactions, déjà importées, rapprochées, catégorisées automatiquement (celles à zéro sont masquées) | -- |
+| IM-12 | Solde initial | Premier import du compte | Observer l'interrupteur | « Aligner le solde initial sur la banque (X) » **actif par défaut** ; à la confirmation, le solde du compte égale celui de la banque ; désactivé : le solde initial ne bouge pas. Absent aux imports suivants | -- |
+| IM-13 | Squelette | Réseau lent | Ouvrir la revue | Squelette (pas de spinner), puis le contenu | -- |
+| IM-14 | Sans catégorie, par commerçant | Lignes de même commerçant sans catégorie | Observer la section « Sans catégorie » | Une ligne par commerçant : libellé, nombre d'opérations, total ; les lignes de sens opposé ne sont pas fondues | -- |
+| IM-15 | Un choix par groupe | Idem | Toucher un groupe, choisir une catégorie (ou en créer une) | Une seule feuille (pas de second niveau) ; le groupe disparaît, ses lignes passent dans « Catégorisées par vous » ; une règle est créée et s'appliquera au prochain relevé | -- |
+| IM-16 | Confirmer sans catégorie | Des lignes sans catégorie, rien d'autre à résoudre | Confirmer | L'import part, ces lignes sont créées sans catégorie | -- |
+| IM-17 | À trancher | Plusieurs saisies manuelles candidates pour une ligne | Observer la section « À trancher » | Chaque candidat avec libellé, date et montant ; « Créer une nouvelle transaction » et « Ignorer la ligne » ; le bouton de confirmation est désactivé et la phrase dit combien de lignes restent à trancher | -- |
+| IM-18 | Choisir un candidat | Idem | Toucher un candidat | La ligne passe dans « Rapprochées » ; aucune transaction n'est créée pour elle à la confirmation | -- |
+| IM-19 | Doublon probable | Ligne au libellé proche d'une transaction importée | Observer | « Importer quand même » / « Ignorer la ligne » | -- |
+| IM-20 | Erreur de lecture | Relevé avec une ligne à date ou montant illisible | Observer | Section « Erreurs de lecture » avec le message ; « Ignorer la ligne » ; bloque la confirmation tant qu'elle n'est pas ignorée | -- |
+| IM-21 | Groupes repliés | Relevé chevauchant le précédent | Déplier chaque groupe | « Rapprochées » (« Rapprochée de « Tabac » du 18 septembre », « Défaire »), « Catégorisées automatiquement » (origine règle / historique, catégorie modifiable), « Déjà importées » (lecture seule), « Ignorées » (« Restaurer ») | -- |
+| IM-22 | Défaire / restaurer | Idem | « Défaire » un rapprochement ; ignorer une ligne puis « Restaurer » | La ligne redevient une nouvelle transaction ; une ligne ignorée revient en `READY` ; une ligne déjà importée ou illisible ne propose pas « Restaurer » | -- |
+| IM-23 | Tout résolu | Plus aucune exception | Observer le corps | État vide « Tout est résolu » | -- |
+| IM-24 | Erreur d'action | Couper le réseau | Changer une catégorie | Toast d'erreur, la revue reste inchangée | -- |
+| IM-25 | Mobile 375 px | Revue complète | Parcourir | Pas de débordement horizontal ; la barre « Confirmer l'import (N) » reste collée au-dessus de la navigation basse ; desktop : contenu borné | -- |
+
+### 23.3 — Résultat
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| IM-26 | Solde identique | Relevé complet, sans écart | Confirmer | « Solde identique à celui de la banque » avec le solde et sa date ; transactions créées / rapprochées / déjà importées | -- |
+| IM-27 | Écart | Une transaction saisie en double dans la période | Confirmer | « Écart de X avec la banque » et la liste « Opérations de la période absentes du relevé » (doublons probables) | -- |
+| IM-28 | Retour | État résultat | « Voir mes transactions » | Écran Transactions ; le brouillon a disparu de Paramètres → Import | -- |
+
+### 23.4 — Paramètres → Import
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| IM-29 | Gestion seule | Paramètres → Import | Observer | Brouillons en cours, historique, règles, profils, et un lien « Nouvel import » vers `/transactions/import` (plus de formulaire d'envoi) | -- |
+| IM-30 | Reprendre | Un brouillon en cours | « Reprendre » | Ouvre la nouvelle revue | -- |
+| IM-31 | Ancien lien | Favori `/settings/import/review/<id>` | Ouvrir | Redirigé vers `/transactions/import/review/<id>` | -- |
 
 ---
 

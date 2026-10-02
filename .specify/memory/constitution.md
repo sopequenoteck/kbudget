@@ -1,6 +1,26 @@
 <!--
   Sync Impact Report
   ==================================================
+  Version change: 4.0.0 → 4.1.0 (MINOR — périmètre du bouton
+    flottant précisé, 2026-10-02, KKS-386)
+  Bump rationale: Le principe IV exigeait le FAB « sur tous les
+    écrans (sauf login) ». Le code le masquait déjà sous
+    /settings sans que ce soit écrit, et la nouvelle revue
+    d'import n'en a pas l'usage. La règle porte désormais sur
+    les écrans de consultation ; la connexion et les parcours
+    dédiés à une tâche (paramètres, import de relevé) en sont
+    exclus. Décision de Kelly à la validation de KKS-386.
+    MINOR et non MAJOR : le principe IV n'est ni supprimé ni
+    redéfini, seul le périmètre d'une de ses exigences est
+    précisé (restriction écrite d'une exception déjà en place).
+
+  Modified principles:
+    - Principe IV : périmètre du bouton flottant (+).
+
+  Templates requiring updates: aucun.
+  ==================================================
+  Historique — 3.0.0 → 4.0.0
+  ==================================================
   Version change: 3.0.0 → 4.0.0 (MAJOR — suppression de
     la bifurcation des trajectoires de distribution)
   Bump rationale: La direction actée le 2026-08-26 supprime
@@ -152,7 +172,10 @@ saisie rapide est la priorité absolue.
 
 - Saisie d'une dépense en 2-3 interactions maximum
 - Le bouton flottant (+) DOIT être accessible sur tous les
-  écrans (sauf login)
+  écrans de consultation (Accueil, Transactions, Abonnements,
+  Dettes, Budgets et leurs pages de détail). Il est absent de
+  la connexion et des parcours dédiés à une tâche (paramètres,
+  import de relevé), où il n'a pas d'usage
 - Le dashboard DOIT afficher : solde mensuel, résumé
   abonnements, état des dettes
 - Le design DOIT être responsive mais optimisé mobile
@@ -414,4 +437,4 @@ tout en restant pragmatique dans son application.
 - **Revue périodique** : la constitution DOIT être revue
   à chaque changement majeur d'architecture ou de scope
 
-**Version**: 4.0.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-08-26
+**Version**: 4.1.0 | **Ratified**: 2026-02-07 | **Last Amended**: 2026-10-02

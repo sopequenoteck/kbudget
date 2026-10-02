@@ -35,6 +35,7 @@ import {
   phosphorTrendUp,
   phosphorTrendDown,
   phosphorReceipt,
+  phosphorUploadSimple,
   phosphorX,
 } from '@ng-icons/phosphor-icons/regular';
 import { RouterLink } from '@angular/router';
@@ -81,6 +82,7 @@ interface EmptyStateConfig {
       phosphorTrendUp,
       phosphorTrendDown,
       phosphorReceipt,
+      phosphorUploadSimple,
       phosphorX,
     }),
   ],

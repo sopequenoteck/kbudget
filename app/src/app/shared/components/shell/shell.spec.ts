@@ -5,7 +5,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { Shell } from './shell';
+import { Shell, isTaskFlowRoute } from './shell';
 import { AuthService } from '../../../core/services/auth';
 import { AvatarService } from '../../../core/services/avatar.service';
 import { PreferenceService } from '../../../core/services/preference';
@@ -158,5 +158,19 @@ describe('Shell', () => {
 
     expect(text).toContain('Paramètres');
     expect(text).toContain('Déconnexion');
+  });
+});
+
+describe('isTaskFlowRoute', () => {
+  it.each([
+    ['/settings', true],
+    ['/settings/accounts', true],
+    ['/transactions/import', true],
+    ['/transactions/import/review/draft-1', true],
+    ['/transactions', false],
+    ['/transactions/recurring', false],
+    ['/dashboard', false],
+  ])('should_return_%s_as_%s_when_deciding_whether_the_fab_is_hidden', (url, expected) => {
+    expect(isTaskFlowRoute(url)).toBe(expected);
   });
 });

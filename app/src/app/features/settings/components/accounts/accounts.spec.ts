@@ -362,7 +362,7 @@ describe('Accounts', () => {
 
     fixture.componentInstance.triggerImport(account.id);
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/settings/import'], {
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions/import'], {
       queryParams: { accountId: account.id },
     });
   });
