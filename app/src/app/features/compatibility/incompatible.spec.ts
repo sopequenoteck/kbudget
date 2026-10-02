@@ -2,11 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import { Incompatible } from './incompatible';
+import { AppUpdateService } from '../../core/services/app-update';
 import { CompatibilityService } from '../../core/services/compatibility';
 import { type CompatibilityStatus } from '../../core/models/meta.model';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
-function render(status: CompatibilityStatus) {
+function render(
+  status: CompatibilityStatus,
+  refreshAndReload: () => Promise<void> = () => Promise.resolve(),
+) {
   TestBed.configureTestingModule({
     imports: [Incompatible],
     providers: [
@@ -15,6 +19,7 @@ function render(status: CompatibilityStatus) {
         provide: CompatibilityService,
         useValue: { status: signal<CompatibilityStatus | null>(status) },
       },
+      { provide: AppUpdateService, useValue: { refreshAndReload } },
     ],
   });
 
@@ -93,5 +98,19 @@ describe('Incompatible', () => {
 
     expect(button).not.toBeNull();
     expect(button?.textContent).toContain('Réessayer');
+  });
+
+  it('should_search_activate_and_reload_through_app_update_when_retry_is_clicked', () => {
+    // La recherche et l'activation (avec ou sans service worker) sont couvertes par
+    // `AppUpdateService.refreshAndReload` ; l'ecran ne doit plus recharger lui-meme.
+    const refreshAndReload = vi.fn<() => Promise<void>>().mockResolvedValue();
+    const fixture = render(
+      { kind: 'clientTooOld', clientVersion: '5.0.0', requiredVersion: '6.1.0' },
+      refreshAndReload,
+    );
+
+    (fixture.nativeElement as HTMLElement).querySelector('button')?.click();
+
+    expect(refreshAndReload).toHaveBeenCalledTimes(1);
   });
 });

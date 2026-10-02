@@ -1,6 +1,6 @@
 {
   "name": "k-budget-app",
-  "version": "6.7.3",
+  "version": "6.8.0",
   "license": "AGPL-3.0-only",
   "scripts": {
     "ng": "ng",

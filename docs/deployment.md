@@ -152,6 +152,38 @@ The API stops and logs the failing migration. Nothing is silently half-applied
 3. Go back to the previous image version
 4. Open an issue with the migration name and the error
 
+### Removing a faulty web app from installed browsers
+
+The web app installs a **service worker** in each browser, and it outlives the
+container: going back to a previous `app` image does not, on its own, reach a
+worker that is already installed. If a release breaks the web app on devices
+that already ran it, use the emergency worker shipped with every build
+(`safety-worker.js`, Angular's own). It unregisters the installed worker and
+clears its caches.
+
+1. **Stop any auto-updater** (Watchtower and the like): recreating the `app`
+   container would silently undo step 2.
+2. **Serve the emergency worker in place of the real one**, from the running
+   container:
+
+   ```bash
+   docker compose exec app sh -c \
+     'cp /usr/share/nginx/html/safety-worker.js /usr/share/nginx/html/ngsw-worker.js'
+   ```
+
+3. **Wait for the devices to pick it up.** The browser re-reads
+   `/ngsw-worker.js` on each launch of the app (it is served `no-cache`), then
+   the emergency worker unregisters itself. A device that has not opened the app
+   yet is only fixed when it does. If a CDN or proxy sits in front, make sure it
+   forwards `Cache-Control: no-cache` for that file.
+4. **Deploy a healthy image** (pin the fixed or previous version, then
+   `docker compose pull && docker compose up -d`). Recreating the container
+   brings back the real `ngsw-worker.js`, and the next launch installs it again.
+
+Step 2 does not survive a container restart or recreation: it is a stopgap, not
+a release. For a single device, unregister the worker in the browser's developer
+tools (Application, Service Workers) or clear the site data.
+
 ## Backup and restore
 
 Two things need saving: the **database** and the **avatars**. Restoring only

@@ -309,6 +309,17 @@ describe('NotificationPanel', () => {
     expect(panel).toBeNull();
   });
 
+  it('should_mark_the_panel_as_a_modal_surface_when_open', () => {
+    // Marqueur lu par AppUpdateService pour ne pas recharger la page sous le panneau.
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const panel = fixture.nativeElement.querySelector('.notification-panel') as HTMLElement;
+    expect(panel.hasAttribute('data-modal-surface')).toBe(true);
+  });
+
   it('should_emit_closed_when_close_called', () => {
     setupTestBed();
     const fixture = TestBed.createComponent(NotificationPanel);

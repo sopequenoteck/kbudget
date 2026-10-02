@@ -1,7 +1,7 @@
 @if (isOpen()) {
   <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events,@angular-eslint/template/interactive-supports-focus -->
   <div class="notification-overlay" (click)="onClose()"></div>
-  <aside class="notification-panel">
+  <aside class="notification-panel" data-modal-surface>
     <div class="panel-header">
       <h2>{{ 'notifications.page.title' | transloco }}</h2>
       <div class="panel-actions">

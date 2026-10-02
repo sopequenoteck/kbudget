@@ -5,6 +5,37 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.8.0] - 2026-10-02
+
+> Mises a jour de l'application web installee (PWA). Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule
+> l'image `app` change (code et en-tetes de cache nginx). Les versions
+> suivantes arriveront d'elles-memes sur les PWA installees.
+
+### Added
+
+- **Mises a jour fiables de l'application web** (KKS-446) : une nouvelle
+  version etait prise seulement au lancement a froid, rare pour une PWA
+  installee. Elle est desormais cherchee au lancement et a chaque retour au
+  premier plan, puis appliquee par rechargement si elle arrive dans les trois
+  premieres secondes ; sinon au retour suivant. Jamais sur un parcours de tache
+  (parametres, import de releve) ni sous une feuille ou une fenetre ouverte ; un
+  etat irrecuperable du service worker recharge aussitot. « Reessayer » de
+  l'ecran d'incompatibilite active la nouvelle version au lieu de recharger
+  celle en cache. Aucune interface ajoutee.
+- **Worker de secours** (KKS-446) : `safety-worker.js` d'Angular est publie
+  avec l'application ; procedure de retrait d'un service worker fautif dans
+  `docs/deployment.md`.
+
+### Changed
+
+- **En-tetes de cache de l'image `app`** (KKS-446) : `index.html` en
+  `no-cache, no-transform` (un proxy qui reecrit le HTML, comme Cloudflare,
+  cassait l'empreinte verifiee par le service worker) ; `ngsw-worker.js`,
+  `ngsw.json`, le manifeste, les icones, le favicon et les catalogues i18n,
+  sans empreinte, en `no-cache` au lieu d'`immutable` pendant un an ; seuls les
+  fichiers a empreinte du build restent `immutable`.
+
 ## [6.7.3] - 2026-10-02
 
 > Correctif de session de l'application web. Aucune migration, aucun
@@ -1462,7 +1493,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...HEAD
+[6.8.0]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...v6.8.0
 [6.7.3]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...v6.7.3
 [6.7.2]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...v6.7.2
 [6.7.1]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...v6.7.1
