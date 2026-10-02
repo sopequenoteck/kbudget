@@ -566,7 +566,7 @@
 |---|----------|----------------|--------|-------------------|--------|
 | IM-1 | Icône d'import | Écran Transactions | Repérer la barre d'actions de l'en-tête de section | Icône d'envoi à côté des récurrences, `aria-label` « Importer un relevé » ; le clic ouvre `/transactions/import` | -- |
 | IM-2 | Entrée depuis un compte | Paramètres → Comptes | Cliquer l'icône d'envoi d'un compte | Même parcours, URL `?accountId=…` ; aucun compte n'est coché avant le choix du fichier | -- |
-| IM-3 | FAB et barre de confirmation | `/transactions/import` et la revue, 375 px | Observer le bas de l'écran, ouvrir le FAB | Le bouton flottant (+) reste visible ; la barre « Confirmer l'import » lui réserve sa place à droite : ni le bouton ni la phrase de blocage ne sont recouverts ; le texte du bouton peut passer sur deux lignes | --
+| IM-3 | FAB et confirmation | `/transactions/import` et la revue, 375 px | Observer le bas de l'écran | Pas de bouton flottant (+) sur le parcours d'import (constitution 4.1.0) ; « Confirmer l'import » est un bouton pleine largeur en fin de page, libellé sur une ligne, phrase de blocage juste au-dessus | --
 | IM-4 | Format reconnu, compte suggéré | Relevé SG déjà importé sur un compte | Choisir le fichier | « Reconnu : Société Générale · compte …1596 » ; le compte suggéré est coché ; les comptes affichent leur suffixe quand ils en ont un | -- |
 | IM-5 | Format reconnu, aucune suggestion | Premier import d'un relevé SG | Choisir le fichier | Aucun compte coché (jamais le compte par défaut), « Analyser le relevé » désactivé tant qu'aucun choix | -- |
 | IM-6 | Compte de l'URL | Entrée par IM-2, relevé sans suggestion | Choisir le fichier | Le compte de l'URL est coché ; une suggestion de l'API prime sur lui | -- |

@@ -74,6 +74,15 @@
   }
 }
 
+// Format reconnu : texte secondaire, icone verte (choix de Kelly a la validation de KKS-386).
+.start__message--recognized {
+  color: var(--text-secondary);
+
+  ng-icon {
+    color: var(--color-income);
+  }
+}
+
 .start__skeleton {
   margin-top: var(--space-4);
 }

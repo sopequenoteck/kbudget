@@ -56,7 +56,7 @@
   </div>
 } @else if (showAccounts()) {
   @if (recognized()) {
-    <p class="start__message">
+    <p class="start__message start__message--recognized">
       <ng-icon name="phosphorCheckCircle" size="18" />
       <span>
         @if (detection()?.accountSuffix; as suffix) {

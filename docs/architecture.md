@@ -472,7 +472,7 @@ app/src/app/
 
 ### Bouton flottant (FAB speed-dial)
 
-- Masque sur `/settings/**` et ecran login
+- Masque sur l'ecran login et les parcours dedies a une tache : `/settings/**` et `/transactions/import/**` (`isTaskFlowRoute` du shell, constitution 4.1.0, principe IV)
 - Actions contextuelles par page :
   - `/dashboard` : Transaction, Abonnement*, Dette*, Virement**
   - `/transactions`, `/subscriptions`, `/debts` (+ pages detail) : Transaction, Abonnement*, Dette*
