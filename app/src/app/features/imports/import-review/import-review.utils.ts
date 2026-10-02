@@ -77,8 +77,8 @@ function groupUncategorised(lines: ImportDraftLine[]): UncategorisedGroup[] {
   return [...groups.values()];
 }
 
-export function classifyLines(lines: ImportDraftLine[]): ReviewModel {
-  const model: ReviewModel = {
+function emptyModel(): ReviewModel {
+  return {
     toDecide: [],
     probableDuplicates: [],
     unreadable: [],
@@ -90,6 +90,30 @@ export function classifyLines(lines: ImportDraftLine[]): ReviewModel {
     skipped: [],
     newCount: 0,
   };
+}
+
+/** Une ligne `READY` : rapprochee, ou a creer (avec la categorie qu'elle porte, ou sans). */
+function classifyReadyLine(
+  line: ImportDraftLine,
+  model: ReviewModel,
+  withoutCategory: ImportDraftLine[],
+): void {
+  if (line.matchedTransactionId) {
+    model.matched.push(line);
+    return;
+  }
+  model.newCount++;
+  if (!line.categoryId) {
+    withoutCategory.push(line);
+  } else if (line.categorySource === 'USER') {
+    model.userCategorised.push(line);
+  } else {
+    model.autoCategorised.push(line);
+  }
+}
+
+export function classifyLines(lines: ImportDraftLine[]): ReviewModel {
+  const model = emptyModel();
   const withoutCategory: ImportDraftLine[] = [];
 
   for (const line of lines) {
@@ -104,18 +128,7 @@ export function classifyLines(lines: ImportDraftLine[]): ReviewModel {
         (isAlreadyImported(line) ? model.alreadyImported : model.skipped).push(line);
         break;
       case 'READY':
-        if (line.matchedTransactionId) {
-          model.matched.push(line);
-          break;
-        }
-        model.newCount++;
-        if (!line.categoryId) {
-          withoutCategory.push(line);
-        } else if (line.categorySource === 'USER') {
-          model.userCategorised.push(line);
-        } else {
-          model.autoCategorised.push(line);
-        }
+        classifyReadyLine(line, model, withoutCategory);
         break;
     }
   }

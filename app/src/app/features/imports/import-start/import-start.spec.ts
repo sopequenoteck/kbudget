@@ -143,8 +143,8 @@ describe('ImportStart', () => {
     expect(importServiceMock.detect).toHaveBeenCalledWith(file);
     expect(fixture.componentInstance.accountId()).toBe('acc-2');
     expect(el(fixture).textContent).toContain('Reconnu : Société Générale · compte …1596');
-    const selected = el(fixture).querySelector('[role="radio"][aria-checked="true"]');
-    expect(selected?.textContent).toContain('Livret');
+    const selected = el(fixture).querySelector('input[type="radio"]:checked');
+    expect(selected?.closest('label')?.textContent).toContain('Livret');
   });
 
   it('should_show_the_account_suffix_in_the_account_rows_when_known', async () => {
@@ -152,7 +152,7 @@ describe('ImportStart', () => {
 
     await chooseFile(fixture);
 
-    const rows = Array.from(el(fixture).querySelectorAll('[role="radio"]'));
+    const rows = Array.from(el(fixture).querySelectorAll('label.list-row'));
     expect(rows).toHaveLength(2);
     expect(rows[0].textContent).not.toContain('…');
     expect(rows[1].textContent).toContain('…1596');
@@ -200,7 +200,7 @@ describe('ImportStart', () => {
     const fixture = setup();
     await chooseFile(fixture);
 
-    (el(fixture).querySelectorAll('[role="radio"]')[0] as HTMLButtonElement).click();
+    (el(fixture).querySelectorAll('input[type="radio"]')[0] as HTMLInputElement).click();
     fixture.detectChanges();
 
     expect(fixture.componentInstance.accountId()).toBe('acc-1');

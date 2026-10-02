@@ -225,8 +225,10 @@ class ImportReimportIT {
                 .filter(l -> "ALREADY_IMPORTED".equals(l.skipReason()))
                 .findFirst().orElseThrow().id();
 
-        assertThatThrownBy(() -> importService.updateLine(
-                draft.id(), alreadyImported, new ImportLineUpdateRequest(null, "READY", null, null), userId))
+        UUID draftId = draft.id();
+        ImportLineUpdateRequest restore = new ImportLineUpdateRequest(null, "READY", null, null);
+
+        assertThatThrownBy(() -> importService.updateLine(draftId, alreadyImported, restore, userId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid status transition");
     }

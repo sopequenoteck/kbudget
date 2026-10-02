@@ -1,5 +1,12 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -88,7 +95,7 @@ interface CategoryTarget {
   styleUrl: './import-review.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImportReview {
+export class ImportReview implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly importService = inject(ImportService);
@@ -162,7 +169,7 @@ export class ImportReview {
     this.model().uncategorised.reduce((total, group) => total + group.lines.length, 0),
   );
 
-  constructor() {
+  ngOnInit(): void {
     void this.load();
   }
 

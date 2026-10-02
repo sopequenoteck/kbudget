@@ -70,10 +70,10 @@
       </span>
     </p>
   } @else {
-    <p class="start__message start__message--warning" role="status">
+    <output class="start__message start__message--warning">
       <ng-icon name="phosphorWarningCircle" size="18" />
       <span>{{ 'imports.detail.notRecognized' | transloco }}</span>
-    </p>
+    </output>
   }
 
   <h2 class="start__section-title">{{ 'imports.form.account' | transloco }}</h2>
@@ -87,15 +87,19 @@
       [attr.aria-label]="'imports.form.account' | transloco"
     >
       @for (account of accounts(); track account.id) {
-        <button
-          type="button"
-          class="list-row"
-          role="radio"
-          [attr.aria-checked]="accountId() === account.id"
+        <label
+          class="list-row start__account"
           [class.start__account--selected]="accountId() === account.id"
-          [disabled]="uploading()"
-          (click)="selectAccount(account.id)"
         >
+          <input
+            type="radio"
+            class="sr-only"
+            name="import-account"
+            [value]="account.id"
+            [checked]="accountId() === account.id"
+            [disabled]="uploading()"
+            (change)="selectAccount(account.id)"
+          />
           <span class="list-row__icon">{{ account.icone }}</span>
           <span class="list-row__content">
             <span class="list-row__title">{{ account.nom }}</span>
@@ -108,7 +112,7 @@
           @if (accountId() === account.id) {
             <ng-icon name="phosphorCheck" size="18" class="start__account-check" />
           }
-        </button>
+        </label>
       }
     </div>
     @if (accountId() === null) {

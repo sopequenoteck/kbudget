@@ -104,8 +104,23 @@
   color: var(--text-tertiary);
 }
 
-.start__account--selected {
-  background: var(--primary-subtle);
+.start__account {
+  // Ancre le radio masque (`sr-only`, en absolu) sur sa ligne : pas de saut de defilement au focus clavier.
+  position: relative;
+
+  // Le radio natif est masque (`sr-only`) : le focus clavier se voit sur la ligne, a l'interieur du groupe qui rogne.
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
+
+  &:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  &--selected {
+    background: var(--primary-subtle);
+  }
 }
 
 .start__account-check {

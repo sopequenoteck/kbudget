@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -47,7 +54,7 @@ interface DraftConflict {
   styleUrl: './import-start.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImportStart {
+export class ImportStart implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
@@ -73,9 +80,10 @@ export class ImportStart {
     () => this.file() !== null && this.accountId() !== null && !this.uploading(),
   );
 
-  private readonly accountsLoaded: Promise<void>;
+  /** Chargement des comptes lance a l'initialisation ; la detection l'attend avant de choisir un compte. */
+  private accountsLoaded: Promise<void> = Promise.resolve();
 
-  constructor() {
+  ngOnInit(): void {
     this.accountsLoaded = this.loadAccounts();
   }
 

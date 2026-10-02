@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +28,7 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
   styleUrl: './csv-mapping.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CsvMapping {
+export class CsvMapping implements OnInit {
   private readonly importService = inject(ImportService);
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
@@ -87,11 +87,14 @@ export class CsvMapping {
       this.file = state.file;
       this.accountId.set(state.accountId);
       this.fileName.set(state.file.name);
-      this.loadPreview();
     } else {
       // Rechargement de la page : le fichier n'a pas survecu a la navigation.
       this.router.navigate(['/transactions/import'], { replaceUrl: true });
     }
+  }
+
+  ngOnInit(): void {
+    if (this.file) void this.loadPreview();
   }
 
   async loadPreview(): Promise<void> {
