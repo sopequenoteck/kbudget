@@ -11,6 +11,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -32,7 +33,7 @@ class SnoozeDialog extends ConsumerStatefulWidget {
     final l10n = AppLocalizations.of(context)!;
     AppModal.show(
       context,
-      title: l10n.snoozeTitle,
+      title: l10n.debtsDialogSnoozeTitle,
       child: SnoozeDialog(debt: debt, onSnoozed: onSnoozed),
       onClose: () {},
     );
@@ -47,8 +48,6 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
   late TimeOfDay _selectedTime;
   bool _showErrors = false;
   bool _isSubmitting = false;
-
-  static final _dateFormat = DateFormat('dd/MM/yyyy');
 
   @override
   void initState() {
@@ -75,7 +74,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     if (!_selectedDate.isAfter(today)) {
-      return l10n.snoozeDateFutureRequired;
+      return l10n.debtsDialogReminderDatePast;
     }
     return null;
   }
@@ -86,7 +85,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
       initialDate: _selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      locale: const Locale('fr'),
+      locale: ref.read(displayLocaleProvider),
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
@@ -125,13 +124,13 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
     if (success) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.snoozeSuccess)),
+        SnackBar(content: Text(l10n.debtsFeedbackSnoozed)),
       );
       widget.onSnoozed?.call();
     } else {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.snoozeError)),
+        SnackBar(content: Text(l10n.debtsFeedbackSnoozeError)),
       );
     }
   }
@@ -148,7 +147,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
       children: [
         // Date
         AppFormField(
-          label: l10n.snoozeDateLabel,
+          label: l10n.debtsFormReminderDate,
           showError: _showErrors && dateError != null,
           errorMessage: dateError ?? '',
           child: GestureDetector(
@@ -158,7 +157,8 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    _dateFormat.format(_selectedDate),
+                    DateFormat.yMd(ref.watch(intlLocaleProvider))
+                        .format(_selectedDate),
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface,
@@ -178,7 +178,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
 
         // Heure
         AppFormField(
-          label: l10n.snoozeTimeLabel,
+          label: l10n.debtsFormReminderTime,
           child: GestureDetector(
             onTap: _pickTime,
             behavior: HitTestBehavior.opaque,
@@ -211,7 +211,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
             OutlinedButton(
               onPressed:
                   _isSubmitting ? null : () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
+              child: Text(l10n.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -225,7 +225,7 @@ class _SnoozeDialogState extends ConsumerState<SnoozeDialog> {
                         color: colorScheme.onPrimary,
                       ),
                     )
-                  : Text(l10n.snoozeSubmitButton),
+                  : Text(l10n.debtsActionSnooze),
             ),
           ],
         ),

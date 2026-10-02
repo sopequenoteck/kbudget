@@ -74,10 +74,17 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
       }
     } on DioException catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       final message = errorLabel(
-        AppLocalizations.of(context)!,
+        l10n,
         apiErrorCode(e),
-        fallback: 'Erreur lors de la suppression',
+        fallback: l10n.usersFeedbackDeleteAccountError,
+        // Sur cet ecran, le libelle generique ne dit pas quoi faire : le
+        // texte propre a la suppression de compte le dit, comme Angular.
+        overrides: {
+          'LAST_ADMIN_DELETION_FORBIDDEN':
+              l10n.usersFeedbackLastAdminDeletionForbidden,
+        },
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
@@ -85,7 +92,11 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la suppression')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.usersFeedbackDeleteAccountError,
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -97,6 +108,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -109,14 +121,14 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Supprimer mon compte',
+              l10n.usersActionDeleteAccount,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: AppColors.error,
               ),
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Votre compte sera désactivé. Vous ne pourrez plus vous connecter avec ces identifiants. Vos données restent conservées en base pour traçabilité.',
+              l10n.usersDialogDeleteAccountMessage,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -129,7 +141,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
               obscureText: !_showPassword,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                labelText: 'Mot de passe actuel',
+                labelText: l10n.usersFormCurrentPassword,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: PhosphorIcon(
@@ -149,9 +161,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
               value: _confirmed,
               onChanged: (value) =>
                   setState(() => _confirmed = value ?? false),
-              title: const Text(
-                'Je comprends que cette action est définitive',
-              ),
+              title: Text(l10n.usersFormDeleteAccountConfirm),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -165,7 +175,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
                   onPressed: _isSubmitting
                       ? null
                       : () => Navigator.of(context).pop(false),
-                  child: const Text('Annuler'),
+                  child: Text(l10n.commonActionCancel),
                 ),
                 const SizedBox(width: AppSpacing.space3),
                 FilledButton(
@@ -185,7 +195,7 @@ class _DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Supprimer mon compte'),
+                      : Text(l10n.usersActionDeleteAccount),
                 ),
               ],
             ),

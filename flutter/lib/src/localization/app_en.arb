@@ -1,0 +1,1059 @@
+{
+  "@@locale": "en",
+  "commonActionCancel": "Cancel",
+  "commonActionSave": "Save",
+  "commonActionDelete": "Delete",
+  "commonActionEdit": "Edit",
+  "commonActionRetry": "Retry",
+  "errorsClientGeneric": "An error occurred",
+  "errorsClientNetwork": "Unable to reach the server",
+  "errorsClientUnknown": "Unknown error",
+  "errorsApiBadRequest": "The request could not be processed.",
+  "errorsApiValidationError": "Please check the information you entered.",
+  "errorsApiMalformedRequest": "Invalid request.",
+  "errorsApiPasswordIncorrect": "Incorrect password.",
+  "usersFeedbackCurrentPasswordIncorrect": "Current password incorrect.",
+  "usersFeedbackLastAdminDeletionForbidden": "You are the last administrator. Please appoint another administrator before deleting your account.",
+  "errorsApiPasswordUnchanged": "The new password must be different from the current one.",
+  "errorsApiConfirmationRequired": "Explicit confirmation required.",
+  "errorsApiUnauthenticated": "Authentication required.",
+  "errorsApiTokenExpired": "Your session has expired. Please sign in again.",
+  "errorsApiTokenRevoked": "Your session has been revoked. Please sign in again.",
+  "errorsApiTokenReuseDetected": "Session interrupted for security reasons. Please sign in again.",
+  "errorsApiTokenInvalid": "Invalid session. Please sign in again.",
+  "errorsApiAccessDenied": "Access denied",
+  "errorsApiPasswordResetRequired": "Credentials reset required",
+  "errorsApiPasswordResetNotRequired": "Credentials reset is not required for this account.",
+  "errorsApiFeatureDisabled": "Feature disabled",
+  "errorsApiLastAdminDeletionForbidden": "At least one active administrator must exist.",
+  "errorsApiNotFound": "Resource not found",
+  "errorsApiConflict": "Data conflict",
+  "errorsApiLastAdminCannotBeDisabled": "The last active administrator cannot be disabled.",
+  "errorsApiEmailAlreadyExists": "Email already in use",
+  "errorsApiTooManyRequests": "Too many attempts. Please try again shortly.",
+  "errorsApiInternalError": "An internal error occurred",
+  "budgetsFormAmount": "Amount",
+  "budgetsFormCurrencyAria": "Currency",
+  "budgetsFormFrequencyAria": "Frequency",
+  "budgetsFormCategory": "Category",
+  "budgetsFormCategoryPlaceholder": "Choose a category",
+  "budgetsFormThresholdAria": "Alert threshold",
+  "authFeedbackInvalidCredentials": "Incorrect email or password",
+  "transactionsEmptyNoneInMonth": "No transactions in {month}",
+  "@transactionsEmptyNoneInMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsListNoCategory": "No category",
+  "transactionsFormDescriptionPlaceholder": "Description",
+  "transactionsFormAccount": "Account",
+  "transactionsDialogDeleteTitle": "Delete transaction",
+  "transactionsDialogDeleteMessage": "Are you sure you want to delete this transaction?",
+  "subscriptionsFormNamePlaceholder": "Name",
+  "subscriptionsFormAccount": "Account",
+  "commonValueActive": "Active",
+  "subscriptionsDialogDeleteTitle": "Delete subscription",
+  "subscriptionsDialogDeleteMessage": "Are you sure you want to delete this subscription?",
+  "subscriptionsEmptyTitle": "No subscriptions",
+  "subscriptionsValuePerMonth": "/month",
+  "subscriptionsValuePerYear": "/year",
+  "subscriptionsListNextRenewal": "Next: {date}",
+  "@subscriptionsListNextRenewal": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValueInactive": "Inactive",
+  "subscriptionsActionPay": "Pay",
+  "subscriptionsFeedbackPaid": "Payment recorded",
+  "subscriptionsDetailHistory": "History",
+  "subscriptionsDetailPaymentCount": "{count, plural, one {{count} payment} other {{count} payments}}",
+  "@subscriptionsDetailPaymentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsFormPersonPlaceholder": "Person",
+  "debtsDialogDeleteFormTitle": "Delete debt",
+  "debtsDialogDeleteFormMessage": "Are you sure you want to delete this debt?",
+  "debtsEmptyTitle": "No debts",
+  "debtsValueRepaid": "Repaid",
+  "debtsDetailInitialAmount": "Initial amount",
+  "debtsDetailRemainingAmount": "Remaining amount",
+  "debtsActionRepay": "Repay",
+  "debtsDialogSnoozeTitle": "Snooze the reminder",
+  "debtsDetailProgress": "Progress",
+  "debtsDetailDate": "Date",
+  "debtsFormCurrency": "Currency",
+  "debtsFormAccount": "Account",
+  "debtsDetailAccountDeleted": "Account deleted",
+  "debtsFormDueDate": "Due date",
+  "debtsFormCategory": "Category",
+  "debtsDetailIncludedInBalance": "Included in balance",
+  "debtsFormReminderAria": "Reminder",
+  "debtsDetailPayments": "Payments",
+  "debtsDetailTotalRepaid": "Total repaid",
+  "commonEmptyNoPayments": "No payments recorded",
+  "debtsFeedbackPaymentsLoadError": "Unable to load payments",
+  "debtsValueBorrowed": "Borrowed",
+  "debtsValueLent": "Lent",
+  "debtsFormAccountPlaceholder": "Select an account",
+  "debtsFormAccountRequired": "Account required",
+  "debtsFormAmount": "Amount",
+  "debtsFormAmountRequired": "Amount required",
+  "debtsFeedbackAmountInvalid": "Invalid amount",
+  "debtsFormAmountMax": "Maximum: {amount}",
+  "@debtsFormAmountMax": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsEmptyNoAccounts": "No active accounts. Create an account in settings.",
+  "debtsFeedbackRepaymentSaved": "Repayment recorded",
+  "debtsFeedbackRepayError": "Repayment failed",
+  "debtsFormReminderDate": "Reminder date",
+  "debtsFormReminderTime": "Reminder time",
+  "debtsDialogReminderDatePast": "The date cannot be in the past",
+  "debtsFeedbackSnoozed": "Reminder snoozed",
+  "debtsFeedbackSnoozeError": "Failed to snooze the reminder",
+  "debtsActionSnooze": "Snooze",
+  "commonValueYes": "Yes",
+  "commonValueNo": "No",
+  "transactionsFormTransferFromPlaceholder": "Source account",
+  "transactionsFormTransferToPlaceholder": "Destination account",
+  "transactionsFormAmount": "Amount",
+  "transactionsFormNoteAria": "Note",
+  "transactionsActionTransferSubmit": "Make the transfer",
+  "transactionsFormTransferAccountsMismatch": "The source and destination accounts must be different",
+  "commonValidationRequired": "This field is required.",
+  "commonValidationAmountPositive": "The amount must be greater than 0",
+  "commonValidationMaxLength": "{max} characters maximum",
+  "@commonValidationMaxLength": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsPageTitle": "Accounts",
+  "accountsEmptyTitle": "No accounts",
+  "accountsDialogCreateTitle": "New account",
+  "accountsDialogEditTitle": "Edit account",
+  "accountsValueCurrent": "Current account",
+  "accountsValueSavings": "Savings",
+  "accountsValueCash": "Cash",
+  "accountsFormName": "Account name",
+  "accountsFormOpeningBalance": "Opening balance",
+  "accountsFormCurrency": "Currency",
+  "accountsFormIcon": "Icon",
+  "commonFormColour": "Colour",
+  "accountsFormActiveHint": "Set another default account before deactivating this one",
+  "accountsFormCurrentBalance": "Current balance",
+  "accountsFormNewBalance": "New balance",
+  "accountsFormPreviewPlaceholder": "Account preview",
+  "accountsValueDefault": "Default",
+  "accountsDialogDeleteTitle": "Delete account",
+  "accountsDialogDeleteWarningMessage": "Are you sure you want to delete this account? This action is irreversible.",
+  "accountsFeedbackLoadError": "Error loading accounts",
+  "categoriesPageTitle": "Categories",
+  "categoriesEmptyNoCategories": "No categories",
+  "categoriesDialogCreateTitle": "New category",
+  "categoriesDialogEditTitle": "Edit category",
+  "categoriesFormName": "Name",
+  "categoriesFormIcon": "Icon",
+  "commonValidationNameRequired": "Name required",
+  "categoriesFormNameMaxLength": "30 characters maximum",
+  "categoriesFormNameDuplicate": "This category name already exists",
+  "categoriesFormIconRequired": "Icon is required",
+  "categoriesDialogDeleteTitle": "Delete category",
+  "categoriesDialogDeleteMessage": "This category will be unlinked from all related items.",
+  "budgetsEmptyTitle": "No budget for this period",
+  "budgetsDialogDeleteTitle": "Delete budget",
+  "budgetsDialogDeleteMessage": "Are you sure you want to delete this budget?",
+  "budgetsEmptyAllCategoriesBudgeted": "All categories already have a budget.",
+  "notificationsPageTitle": "Notifications",
+  "notificationsActionMarkAllReadHint": "Mark all as read",
+  "notificationsActionDeleteAllHint": "Clear history",
+  "notificationsEmptyTitle": "No notifications",
+  "notificationsDialogDeleteAllMessage": "Delete all notifications? This action is irreversible.",
+  "debtsFeedbackLoadError": "Unable to load debt",
+  "commonValueToday": "Today",
+  "commonValueYesterday": "Yesterday",
+  "recurringPageTitle": "Recurring",
+  "recurringValueOverdue": "Overdue",
+  "recurringValueUpcoming": "Upcoming",
+  "recurringActionMarkAsPaid": "Mark as paid",
+  "recurringActionSkipOccurrence": "Skip this occurrence",
+  "recurringActionDeactivate": "Deactivate the recurring transaction",
+  "recurringActionPayAll": "All paid",
+  "recurringDetailNext": "Next: {date}",
+  "@recurringDetailNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringSummaryTitle": "Monthly summary",
+  "recurringSummaryExpenseCount": "{count, plural, one {{count} expense} other {{count} expenses}}",
+  "@recurringSummaryExpenseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringEmptyTitle": "No recurring transactions",
+  "recurringFeedbackValidatedOne": "Transaction validated",
+  "recurringFeedbackSkipped": "Occurrence skipped",
+  "recurringFeedbackDeactivated": "Recurring transaction deactivated",
+  "authPageLoginTagline": "Sign in to your account",
+  "authFormEmailRequired": "Email required",
+  "authFormPasswordRequired": "Password required",
+  "authPageFirstLoginTitle": "First sign-in",
+  "authPageFirstLoginNotice": "You are signed in with the initial credentials generated by the system. Set your final email, a personal password and your display name now to access the application.",
+  "authFormDisplayNameRequired": "Name required (100 characters max)",
+  "authFeedbackResetError": "Error updating your credentials. Please try again.",
+  "authFormPasswordConfirmRequired": "Please confirm your password",
+  "authFeedbackInvalidLink": "Invalid, expired, already used or revoked link.",
+  "authFeedbackCreateAccountError": "Error creating the account. Please try again.",
+  "authFeedbackCheckingLink": "Checking the link...",
+  "authPageInvalidLinkTitle": "Invalid link",
+  "authActionBackToLogin": "Back to sign-in",
+  "authPageAcceptInviteTitle": "Create your account",
+  "authPageAcceptInviteTagline": "A few details to finish signing up",
+  "authFormEmail": "Email",
+  "authFormEmailInvalid": "Invalid email",
+  "authFormPassword": "Password",
+  "authFormDisplayName": "Display name",
+  "authFormConfirmPassword": "Confirm password",
+  "authFormPasswordMismatch": "Passwords do not match",
+  "authFormCurrency": "Currency",
+  "authActionCreateAccount": "Create my account",
+  "authActionSignIn": "Sign in",
+  "authFormPasswordMinLength": "{min} characters minimum",
+  "@authFormPasswordMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authActionUnlockBiometricReason": "Unlock K-Budget",
+  "authFeedbackBiometricError": "Biometric error. Use your PIN.",
+  "authFormPinMinLength": "The PIN must contain at least 4 digits",
+  "authFeedbackPinIncorrect": "Incorrect PIN",
+  "authDialogForgotPinTitle": "Forgot your PIN?",
+  "authDialogForgotPinServerMessage": "You will be signed out and will need to sign in again with your credentials.",
+  "authDialogForgotPinLocalMessage": "In local mode, resetting the PIN will erase all your data. This action is irreversible.",
+  "authPagePinTagline": "Enter your PIN to continue",
+  "authActionUnlock": "Unlock",
+  "authActionBiometric": "Biometrics",
+  "commonActionConfirm": "Confirm",
+  "commonActionClose": "Close",
+  "commonActionChooseEmoji": "Choose an emoji",
+  "commonFormEmojiSearchPlaceholder": "Search for an emoji…",
+  "commonEmptyNoRecentEmoji": "No recent emoji",
+  "transactionsActionCreate": "Transaction",
+  "subscriptionsActionCreate": "Subscription",
+  "debtsActionCreate": "Debt",
+  "budgetsActionCreate": "Budget",
+  "transactionsActionTransfer": "Transfer",
+  "commonActionPreviousMonthAria": "Previous month",
+  "commonActionNextMonthAria": "Next month",
+  "commonNavSettings": "Settings",
+  "commonActionLogout": "Sign out",
+  "commonActionReset": "Reset",
+  "commonFormSearchPlaceholder": "Search...",
+  "commonFormSelectPlaceholder": "Select...",
+  "commonEmptyNoResults": "No results",
+  "categoriesActionCreateNamed": "Create \"{name}\"",
+  "@categoriesActionCreateNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesFormSearchPlaceholder": "Search for a category…",
+  "categoriesEmptyTitle": "No categories yet — create one",
+  "categoriesActionCreate": "Create",
+  "categoriesListNoResults": "No categories found",
+  "commonActionBack": "Back",
+  "accountsFormSelectBankPlaceholder": "Select a bank",
+  "accountsFormBankTitle": "Bank",
+  "accountsValueOtherCustom": "Other / Custom",
+  "accountsFilterBankSearchPlaceholder": "Search for a bank…",
+  "accountsFeedbackBanksLoadError": "Unable to load banks",
+  "accountsEmptyBankNotFound": "No bank found",
+  "accountsListBankGroupFrance": "France",
+  "accountsListBankGroupWestAfrica": "West Africa",
+  "accountsListBankGroupInternational": "International",
+  "commonFeedbackSaveError": "Save failed",
+  "commonFeedbackDeleteError": "Delete failed",
+  "commonFeedbackLoadError": "Loading error",
+  "onboardingDialogSwitchToLocalTitle": "Switch to local mode?",
+  "onboardingDialogSwitchToLocalMessage": "Your data will be stored only on this device. You can switch back to server mode from settings.",
+  "onboardingActionUseLocalMode": "Use in local mode",
+  "onboardingPageTitle": "Welcome to K-Budget",
+  "onboardingPageTagline": "Choose your data mode",
+  "onboardingValueLocalMode": "Local mode",
+  "onboardingValueLocalModeHint": "Your data stays on this device",
+  "onboardingValueServerMode": "Server mode",
+  "onboardingValueServerModeHint": "Sync with your K-Budget server",
+  "onboardingPageServerSetupTitle": "Server setup",
+  "onboardingFormServerUrlHint": "Enter your K-Budget server URL",
+  "onboardingFormServerUrl": "Server URL",
+  "onboardingFormServerUrlRequired": "The URL is required",
+  "onboardingFormServerUrlInvalid": "Invalid URL",
+  "onboardingFeedbackConnected": "Connected successfully",
+  "onboardingFeedbackConnecting": "Connecting…",
+  "onboardingActionCheckConnection": "Check connection",
+  "compatibilityPageClientTitle": "App update required",
+  "compatibilityPageServerTitle": "Server update required",
+  "compatibilityPageTagline": "This version of the application and your server cannot work together.",
+  "compatibilityFeedbackOffline": "Server unreachable. Check the URL and your connection.",
+  "compatibilityFeedbackServerTooOldUnknown": "This server is too old to report its version. This application requires at least version {requiredVersion}. Update your instance, then restart the application.",
+  "@compatibilityFeedbackServerTooOldUnknown": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackServerTooOldVersion": "This server is running version {serverVersion}. This application requires at least version {requiredVersion}. Update your instance, then restart the application.",
+  "@compatibilityFeedbackServerTooOldVersion": {
+    "placeholders": {
+      "serverVersion": {
+        "type": "String"
+      },
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackClientTooOld": "This server requires at least version {requiredVersion} of the application. Update K-Budget from your app store.",
+  "@compatibilityFeedbackClientTooOld": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "compatibilityFeedbackClientTooOldVerbose": "This server requires at least version {requiredVersion} of the application. You are using version {clientVersion}. Update K-Budget from your app store.",
+  "@compatibilityFeedbackClientTooOldVerbose": {
+    "placeholders": {
+      "requiredVersion": {
+        "type": "String"
+      },
+      "clientVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "commonValueTomorrow": "Tomorrow",
+  "commonValueDaysAgo": "{count, plural, one {{count} day ago} other {{count} days ago}}",
+  "@commonValueDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueWeeksAgo": "{count, plural, one {{count} week ago} other {{count} weeks ago}}",
+  "@commonValueWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueDaysAgoShort": "{count}d ago",
+  "@commonValueDaysAgoShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonValueInDaysShort": "in {count}d",
+  "@commonValueInDaysShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardSummaryMonthVariation": "{amount} this month",
+  "@dashboardSummaryMonthVariation": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsPageTitle": "Transactions",
+  "transactionsListThisWeek": "This week",
+  "transactionsListLastWeek": "Last week",
+  "transactionsListOlder": "Older",
+  "transactionsSummaryBalance": "Balance",
+  "transactionsDialogCreateTitle": "New transaction",
+  "transactionsDialogEditTitle": "Edit transaction",
+  "transactionsValueExpense": "Expense",
+  "transactionsValueIncome": "Income",
+  "transactionsFormCategory": "Category",
+  "transactionsFormNotePlaceholder": "Add a note…",
+  "transactionsFormIsRecurring": "Recurring transaction",
+  "transactionsFormRecurringAria": "Recurring",
+  "transactionsFeedbackRecurringFailed": "Transaction created. The recurring transaction could not be created.",
+  "recurringValueWeekly": "Weekly",
+  "recurringValueMonthly": "Monthly",
+  "recurringValueYearly": "Yearly",
+  "recurringFeedbackValidatedCount": "{count, plural, one {{count} transaction validated} other {{count} transactions validated}}",
+  "@recurringFeedbackValidatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringFeedbackValidationError": "Validation failed",
+  "recurringFeedbackSkipFailed": "Failed to skip",
+  "recurringFeedbackDeactivateError": "Failed to deactivate",
+  "categoriesFeedbackSystemEditForbidden": "System categories cannot be edited",
+  "categoriesFeedbackSystemDeleteForbidden": "System categories cannot be deleted",
+  "categoriesValueSubscription": "Subscription",
+  "categoriesValueDebt": "Debt",
+  "categoriesValueTransfer": "Transfer",
+  "categoriesValueAdjustment": "Balance adjustment",
+  "accountsActionCreate": "Create an account",
+  "accountsActionLater": "Later",
+  "accountsActionEnterRate": "Enter the rate",
+  "accountsListCount": "{count, plural, one {{count} account} other {{count} accounts}}",
+  "@accountsListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsDialogDeleteMessage": "Delete this account?",
+  "accountsFormTypeTitle": "Account type",
+  "accountsFormCustomisationTitle": "Customisation",
+  "accountsFormDetailsTitle": "Details",
+  "accountsFormBankName": "Bank name (optional)",
+  "accountsFormBankNamePlaceholder": "e.g. My bank",
+  "accountsFormCustomLogo": "Custom logo (optional)",
+  "accountsFormLogoCamera": "Camera",
+  "accountsFormLogoGallery": "Gallery",
+  "accountsFormRateProposalTitle": "Missing exchange rate",
+  "accountsFormRateProposalMessage": "No {from} → {to} rate is defined.",
+  "@accountsFormRateProposalMessage": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsFormRateProposalHint": "Would you like to enter it now?",
+  "exchangeRatesDialogAddRateTitle": "Add a rate",
+  "recurringSummaryMonthlyExpenses": "~{amount} /month",
+  "@recurringSummaryMonthlyExpenses": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "commonNavDebts": "Debts",
+  "commonNavSubscriptions": "Subscriptions",
+  "debtsSummaryNet": "Net balance",
+  "debtsSummaryOutstandingCount": "{count, plural, one {{count} outstanding} other {{count} outstanding}}",
+  "@debtsSummaryOutstandingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsSummaryLentTotal": "{amount} lent",
+  "@debtsSummaryLentTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSummaryBorrowedTotal": "{amount} borrowed",
+  "@debtsSummaryBorrowedTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsListOverdue": "Overdue",
+  "debtsListThisWeek": "This week",
+  "debtsListThisMonth": "This month",
+  "debtsListLater": "Later",
+  "debtsListNoDueDate": "No due date",
+  "debtsListRepaid": "Repaid",
+  "debtsDialogCreateTitle": "New debt",
+  "debtsDialogEditTitle": "Edit debt",
+  "debtsDialogRepayTitle": "Repayment",
+  "debtsValueNotRepaid": "Not repaid",
+  "debtsFormCurrencyPlaceholder": "Default currency",
+  "debtsFormReminderSummary": "Reminder: {date} at {time}",
+  "@debtsFormReminderSummary": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsDetailReminderAt": "{date} at {time}",
+  "@debtsDetailReminderAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsActionClearReminder": "Clear the reminder",
+  "subscriptionsSummaryMonthlyTotal": "Monthly total",
+  "subscriptionsSummaryActiveCount": "{count, plural, one {{count} subscription} other {{count} subscriptions}}",
+  "@subscriptionsSummaryActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsListActiveCount": "{count, plural, one {{count} active} other {{count} active}}",
+  "@subscriptionsListActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionsListActive": "Active",
+  "subscriptionsListInactive": "Inactive",
+  "subscriptionsValuePerWeek": "/week",
+  "subscriptionsValueWeekly": "Weekly",
+  "subscriptionsValueMonthly": "Monthly",
+  "subscriptionsValueYearly": "Yearly",
+  "subscriptionsDialogCreateTitle": "New subscription",
+  "subscriptionsDialogEditTitle": "Edit subscription",
+  "subscriptionsFormCategory": "Category",
+  "subscriptionsFormCurrency": "Currency",
+  "subscriptionsFormCurrencyPlaceholder": "Default currency",
+  "subscriptionsDetailAmount": "Amount",
+  "subscriptionsDetailStartDate": "Start date",
+  "exchangeRatesValueEur": "Euro",
+  "exchangeRatesValueXof": "CFA Franc (BCEAO)",
+  "exchangeRatesValueUsd": "US Dollar",
+  "exchangeRatesValueGbp": "Pound Sterling",
+  "exchangeRatesValueChf": "Swiss Franc",
+  "exchangeRatesValueCad": "Canadian Dollar",
+  "exchangeRatesValueMad": "Moroccan Dirham",
+  "budgetsPageTitle": "Budgets",
+  "budgetsPageUnbudgetedTitle": "Unbudgeted",
+  "budgetsDialogCreateTitle": "New budget",
+  "budgetsActionDeactivate": "Deactivate",
+  "budgetsEmptyNoTransactions": "No transactions this month",
+  "budgetsListInactive": "Inactive",
+  "budgetsDetailOverBudget": "over {amount}",
+  "@budgetsDetailOverBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsDetailRemaining": "{amount} remaining",
+  "@budgetsDetailRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummarySpent": "Spent",
+  "budgetsSummaryActiveCount": "{count, plural, one {{count} budget} other {{count} budgets}}",
+  "@budgetsSummaryActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryOverBudgetCount": "{count, plural, one {{count} over budget} other {{count} over budget}}",
+  "@budgetsSummaryOverBudgetCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryExceededCount": "{count, plural, one {{count} budget exceeded} other {{count} budgets exceeded}}",
+  "@budgetsSummaryExceededCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsSummaryUnbudgeted": "{amount} unbudgeted",
+  "@budgetsSummaryUnbudgeted": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummaryMonthlyInCurrency": "Monthly · in {currency}",
+  "@budgetsSummaryMonthlyInCurrency": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSummaryTotal": "Total: {amount}",
+  "@budgetsSummaryTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsValueWeekly": "Weekly",
+  "budgetsValueMonthly": "Monthly",
+  "budgetsValueYearly": "Yearly",
+  "dashboardPageRecentTransactionsTitle": "Recent transactions",
+  "dashboardSummaryGreetingMorning": "{hasName, select, yes {Good morning {name}} other {Good morning}}",
+  "@dashboardSummaryGreetingMorning": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryGreetingAfternoon": "{hasName, select, yes {Good afternoon {name}} other {Good afternoon}}",
+  "@dashboardSummaryGreetingAfternoon": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryGreetingEvening": "{hasName, select, yes {Good evening {name}} other {Good evening}}",
+  "@dashboardSummaryGreetingEvening": {
+    "placeholders": {
+      "hasName": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardSummaryMonthPositive": "Positive month",
+  "dashboardSummaryMonthNegative": "Negative month",
+  "dashboardSummaryMonthQuiet": "Quiet month",
+  "dashboardEmptyTitle": "Welcome!",
+  "dashboardEmptyMessage": "Start by creating an account\nto track your finances.",
+  "recurringSummaryOverdueCount": "{count, plural, one {{count} expense overdue} other {{count} expenses overdue}}",
+  "@recurringSummaryOverdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringActionValidate": "Validate",
+  "recurringActionSkip": "Skip",
+  "accountsSummaryNetWorth": "Total net worth",
+  "exchangeRatesFeedbackConversionIncompleteHint": "Some amounts could not be converted",
+  "transactionsEmptyTitle": "No transactions",
+  "commonActionViewAll": "View all",
+  "commonNavHome": "Home",
+  "commonNavTransactions": "Transactions",
+  "commonNavBudgets": "Budgets",
+  "commonActionDisable": "Disable",
+  "settingsPageManagementTitle": "Management",
+  "settingsPageAdministrationTitle": "Administration",
+  "settingsPageAppearanceTitle": "Appearance",
+  "settingsPageNavigationTitle": "Navigation",
+  "settingsPageNotificationsTitle": "Notifications",
+  "settingsPageTimezoneTitle": "Time zone",
+  "settingsListAccounts": "Accounts & Currencies",
+  "settingsListAccountsHint": "Manage accounts and currencies",
+  "settingsListCategories": "Categories",
+  "settingsListCategoriesHint": "Manage categories",
+  "settingsListTextScalePreview": "Here is a preview of the chosen text size.",
+  "settingsListVersion": "K-Budget v{version}",
+  "@settingsListVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFormTheme": "Theme",
+  "settingsFormTextScale": "Text size",
+  "settingsFormLanguage": "Language",
+  "settingsFormTimezoneHint": "Used for the day-before reminders",
+  "settingsValueThemeLight": "Light",
+  "settingsValueThemeDark": "Dark",
+  "settingsValueThemeAuto": "Auto",
+  "settingsValueLanguageAuto": "Auto",
+  "settingsValueTextScaleSmall": "Small",
+  "settingsValueTextScaleMedium": "Normal",
+  "settingsValueTextScaleLarge": "Large",
+  "settingsValueChecking": "Checking…",
+  "settingsValueOnline": "Online",
+  "settingsValueOffline": "Offline",
+  "settingsDialogDisableFeatureTitle": "Disable {feature}?",
+  "@settingsDialogDisableFeatureTitle": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDialogDisableFeatureMessage": "Your data will be hidden, not deleted.",
+  "settingsFeedbackLoadError": "Unable to load preferences",
+  "settingsFeedbackSaveError": "Unable to save preferences",
+  "settingsPageDataTitle": "Data",
+  "settingsFormDataSource": "Data source",
+  "settingsValueDataSourceLocal": "Local",
+  "settingsValueDataSourceServer": "Server",
+  "settingsFormServerUrl": "Server URL",
+  "settingsFormServerUrlRequired": "The server URL is required",
+  "settingsFormServerUrlHttpsRequired": "The URL must start with https://",
+  "settingsFeedbackServerUrlSaved": "URL saved",
+  "settingsFeedbackServerUnreachable": "Server unreachable",
+  "settingsFeedbackServerTimeout": "Connection timed out",
+  "settingsFeedbackServerAccessDenied": "Access denied by the server",
+  "settingsFeedbackServerNotFound": "Endpoint not found — check the URL",
+  "settingsDialogChangeDataSourceTitle": "Change data source?",
+  "settingsDialogChangeDataSourceMessage": "Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.",
+  "notificationsValueSubscriptionDue": "Subscription due",
+  "notificationsValueDebtDue": "Debt due",
+  "notificationsValueDebtReminder": "Debt reminder",
+  "notificationsValueRecurringTransactionDue": "Recurring transaction due",
+  "notificationsValueBudgetThreshold": "Budget threshold reached",
+  "notificationsValueBudgetExceeded": "Budget exceeded",
+  "usersListProfile": "Profile",
+  "usersListProfileHint": "Profile, security, sign out",
+  "usersListManageHint": "Invitations and access management",
+  "usersListChangePassword": "Change password",
+  "usersListExportJson": "Export my data (JSON)",
+  "usersListExportCsv": "Export my transactions (CSV)",
+  "usersPageAdminTitle": "Users",
+  "usersPageProfileTitle": "Profile",
+  "usersPageIdentityTitle": "Identity",
+  "usersPageSecurityTitle": "Security",
+  "usersPageDataTitle": "Data",
+  "usersPageDangerZoneTitle": "Danger zone",
+  "usersFormEmailManagedHint": "Managed by the admin",
+  "usersFormCurrentPassword": "Current password",
+  "usersFormNewPassword": "New password",
+  "usersFormConfirmNewPassword": "Confirm the new password",
+  "usersFormPasswordMismatch": "Passwords do not match.",
+  "usersFormDeleteAccountConfirm": "I understand that this action is permanent",
+  "usersValueNameNotSet": "Not set",
+  "usersActionDeleteAccount": "Delete my account",
+  "usersActionChangePhoto": "Change photo",
+  "usersActionDeletePhoto": "Delete photo",
+  "usersActionEditPhoto": "Edit photo",
+  "usersDialogDeleteAccountMessage": "Your account will be deactivated. You will no longer be able to sign in with these credentials. Your data is kept in the database for traceability.",
+  "usersFeedbackProfileLoadError": "Unable to load the profile",
+  "usersFeedbackNameSaveError": "Unable to save the name. Please try again.",
+  "usersFeedbackExportJsonError": "Error during the JSON export. Please try again.",
+  "usersFeedbackExportCsvError": "Error during the CSV export. Please try again.",
+  "usersFeedbackDownloading": "Downloading…",
+  "usersFeedbackAvatarUploadError": "Unable to upload the photo. Please try again.",
+  "usersFeedbackPasswordChanged": "Password changed",
+  "usersFeedbackPasswordChangeError": "Unable to change the password",
+  "usersFeedbackDeleteAccountError": "Error during deletion. Please try again.",
+  "errorsApiFileTooLarge": "File too large. The maximum size is 2 MB.",
+  "errorsApiInvalidImageFormat": "Only JPG and PNG formats are accepted.",
+  "commonActionEnable": "Enable",
+  "authFormEmailAddress": "Email address",
+  "usersPageInvitationsTab": "Invitations",
+  "usersActionInvite": "Invite a user",
+  "usersActionCreateInvite": "Create and copy the link",
+  "usersActionCopyLink": "Copy the link",
+  "usersActionRevoke": "Revoke",
+  "usersEmptyInvitations": "No invitations yet",
+  "usersEmptyUsers": "No users found",
+  "usersFormEmailPlaceholder": "new@example.com",
+  "usersListInvitedBy": "By {email}",
+  "@usersListInvitedBy": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "usersValueAdmin": "Admin",
+  "usersValueInvitationActive": "Active",
+  "usersValueInvitationExpired": "Expired",
+  "usersValueInvitationUsed": "Used",
+  "usersValueInvitationRevoked": "Revoked",
+  "usersFeedbackLinkCopied": "Link copied to the clipboard.",
+  "usersFeedbackInviteCreated": "Invitation created and link copied to the clipboard.",
+  "usersFeedbackInviteCreateError": "Unable to create the invitation.",
+  "usersFeedbackInviteRevokeError": "Unable to revoke the invitation.",
+  "usersFeedbackLoadUsersError": "Unable to load users.",
+  "usersFeedbackLoadInvitationsError": "Unable to load invitations.",
+  "usersFeedbackUserDisableError": "Unable to disable the user.",
+  "usersFeedbackUserEnableError": "Unable to re-enable the user.",
+  "exchangeRatesPageTitle": "Currencies & Rates",
+  "exchangeRatesPageCurrenciesTitle": "My currencies",
+  "exchangeRatesPageRatesTitle": "Conversion rates",
+  "exchangeRatesPageCalculatorTitle": "Calculator",
+  "exchangeRatesDialogEditRateTitle": "Edit the rate",
+  "exchangeRatesDialogAddCurrencyTitle": "Add a currency",
+  "exchangeRatesDialogDeleteRateMessage": "Delete the rate {baseCurrency} → {targetCurrency}?",
+  "@exchangeRatesDialogDeleteRateMessage": {
+    "placeholders": {
+      "baseCurrency": {
+        "type": "String"
+      },
+      "targetCurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesDialogRemoveTitle": "Remove {currency}?",
+  "@exchangeRatesDialogRemoveTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesDialogRemoveMessage": "The currency {currency} is used by existing accounts. Remove anyway?",
+  "@exchangeRatesDialogRemoveMessage": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesDialogRemoveUnusedMessage": "Remove {currency} from your currencies?",
+  "@exchangeRatesDialogRemoveUnusedMessage": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesActionRemove": "Remove",
+  "exchangeRatesActionRemoveCurrencyAria": "Remove this currency",
+  "exchangeRatesValuePrimary": "Primary",
+  "exchangeRatesValueCalculatedRate": "Rate: 1 {from} = {rate} {to}",
+  "@exchangeRatesValueCalculatedRate": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesEmptyTitle": "No rates configured",
+  "exchangeRatesEmptyCalculator": "Enter two amounts to calculate the rate",
+  "exchangeRatesFeedbackLoadError": "Unable to load exchange rates",
+  "exchangeRatesFeedbackSaveError": "Error saving the rate.",
+  "exchangeRatesFormBaseCurrency": "Base currency",
+  "exchangeRatesFormTargetCurrency": "Target currency",
+  "exchangeRatesFormCurrency": "Currency",
+  "exchangeRatesFormCalculatorFrom": "I have",
+  "exchangeRatesFormRateWithPair": "Rate (1 {base} = X {target})",
+  "@exchangeRatesFormRateWithPair": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeRatesFormRateInvalid": "Please enter a valid rate (> 0).",
+  "exchangeRatesFormRatePlaceholder": "e.g. 655.957",
+  "transactionsValueTransferTo": "Transfer to {account}",
+  "@transactionsValueTransferTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsValueTransferFrom": "Transfer from {account}",
+  "@transactionsValueTransferFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsValueBalanceAdjustment": "Balance adjustment",
+  "debtsValueRepayment": "Repayment - {person}",
+  "@debtsValueRepayment": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsValueDefaultAccountName": "Main account",
+  "notificationsListSubscriptionDueTitle": "Subscription {name}",
+  "@notificationsListSubscriptionDueTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListSubscriptionDueMessage": "{name} is due tomorrow",
+  "@notificationsListSubscriptionDueMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtDueTitle": "Debt with {person}",
+  "@notificationsListDebtDueTitle": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtDueMessage": "Debt with {person} is due tomorrow",
+  "@notificationsListDebtDueMessage": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtReminderTitle": "Debt reminder - {person}",
+  "@notificationsListDebtReminderTitle": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListDebtReminderMessage": "Reminder: {amount} left on the debt with {person}",
+  "@notificationsListDebtReminderMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetThresholdTitle": "Budget {category}: {percentage}%",
+  "@notificationsListBudgetThresholdTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetThresholdMessage": "You have reached {percentage}% of the {category} budget",
+  "@notificationsListBudgetThresholdMessage": {
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetExceededTitle": "Budget {category} exceeded",
+  "@notificationsListBudgetExceededTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListBudgetExceededMessage": "You have exceeded the {category} budget ({percentage}%)",
+  "@notificationsListBudgetExceededMessage": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListRecurringTransactionDueTitle": "Recurring transaction {label}",
+  "@notificationsListRecurringTransactionDueTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsListRecurringTransactionDueMessage": "{label} {amount} due on {dueDate}",
+  "@notificationsListRecurringTransactionDueMessage": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "dueDate": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsPageChannelDescription": "K-Budget notifications"
+}

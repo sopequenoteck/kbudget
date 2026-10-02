@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { provideIcons } from '@ng-icons/core';
 import { phosphorEnvelope, phosphorLock } from '@ng-icons/phosphor-icons/regular';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { AuthService } from '../../core/services/auth';
 import { FormField } from '../../shared/components/form-field/form-field';
@@ -12,7 +13,7 @@ import { AuthShell } from './components/auth-shell/auth-shell';
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField, AuthShell],
+  imports: [ReactiveFormsModule, FormField, AuthShell, TranslocoPipe],
   viewProviders: [provideIcons({ phosphorEnvelope, phosphorLock })],
   templateUrl: './auth.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

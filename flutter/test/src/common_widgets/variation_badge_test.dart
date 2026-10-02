@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/variation_badge.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 
 import '../../helpers/theme_test_helpers.dart';
@@ -12,18 +13,19 @@ Future<void> pumpVariationBadge(
   required num delta,
   String? currency,
   num? percentage,
-  String suffix = 'ce mois',
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: theme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: Center(
           child: VariationBadge(
             delta: delta,
             currency: currency,
             percentage: percentage,
-            suffix: suffix,
           ),
         ),
       ),
@@ -132,6 +134,23 @@ void main() {
 
         // Vérifier que le pourcentage est formaté avec 1 décimale
         expect(textContent, contains('(+12,5%)'));
+      },
+    );
+
+    testWidgets(
+      'should_include_month_variation_sentence_in_french_$themeName',
+      (tester) async {
+        await pumpVariationBadge(
+          tester,
+          theme,
+          delta: 150.50,
+          currency: '€',
+        );
+
+        final textWidget = tester.widget<Text>(find.byType(Text));
+        final textContent = textWidget.data ?? '';
+
+        expect(textContent, contains('ce mois'));
       },
     );
   });

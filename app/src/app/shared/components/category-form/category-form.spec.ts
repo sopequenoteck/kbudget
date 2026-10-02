@@ -5,6 +5,7 @@ import { CategoryForm } from './category-form';
 import { CategoryService } from '../../../core/services/category';
 import { ModalService } from '../../../core/services/modal.service';
 import { Category } from '../../../core/models/category.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const mockCategory: Category = {
   id: 'cat-1',
@@ -37,6 +38,7 @@ describe('CategoryForm', () => {
     TestBed.configureTestingModule({
       imports: [CategoryForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: CategoryService, useValue: categoryServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
       ],

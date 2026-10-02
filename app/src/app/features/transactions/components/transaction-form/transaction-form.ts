@@ -8,8 +8,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
   viewChild,
@@ -18,6 +16,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -52,30 +51,17 @@ import { RecurringTransactionRequest } from '../../../../core/models/recurring-t
 import { Frequency } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 
 type ExpandableSection = 'category' | 'date' | 'account' | 'recurring' | 'note' | null;
 
-@Pipe({ name: 'shortDate', standalone: true })
-export class ShortDatePipe implements PipeTransform {
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
-  }
-}
-
 @Component({
   selector: 'app-transaction-form',
-  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, Autocomplete, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -103,8 +89,11 @@ export class TransactionForm {
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly TransactionType = TransactionType;
+  readonly Frequency = Frequency;
 
   readonly transaction = computed(() => this.modalService.editingEntity() as Transaction | null);
   readonly type = input(TransactionType.DEPENSE);
@@ -122,12 +111,6 @@ export class TransactionForm {
   readonly categoryCreating = signal(false);
 
   readonly amountWidth: Signal<string>;
-
-  readonly frequencyOptions: SelectPickerItem[] = [
-    { id: Frequency.HEBDOMADAIRE, label: 'Hebdomadaire', icon: null, secondaryText: null, color: null },
-    { id: Frequency.MENSUEL, label: 'Mensuel', icon: null, secondaryText: null, color: null },
-    { id: Frequency.ANNUEL, label: 'Annuel', icon: null, secondaryText: null, color: null },
-  ];
 
   private readonly allAccounts = toSignal(this.accountService.getAll(), {
     initialValue: [] as Account[],
@@ -173,10 +156,7 @@ export class TransactionForm {
 
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0).toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace('0', '').trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? 'EUR', this.languageService.displayLocale()));
 
   private readonly allCategories = signal<Category[]>([]);
 
@@ -300,9 +280,7 @@ export class TransactionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   onLibelleQuery(q: string): void {
@@ -333,7 +311,7 @@ export class TransactionForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('transactions.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -351,7 +329,7 @@ export class TransactionForm {
           accountId: raw.accountId || undefined,
         };
         await firstValueFrom(this.recurringTransactionService.create(request));
-        this.toastService.success('Transaction récurrente créée');
+        this.toastService.success(this.transloco.translate('recurring.feedback.created'));
       } else {
         const request: TransactionRequest = {
           libelle: raw.libelle,
@@ -372,7 +350,7 @@ export class TransactionForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -382,16 +360,14 @@ export class TransactionForm {
     const tx = this.transaction();
     if (!tx) return;
     const currency = tx.account?.currency ?? 'EUR';
-    const amount = tx.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
-    let message = 'Voulez-vous vraiment supprimer cette transaction ?';
+    const amount = formatCurrencyAmount(tx.montant, currency, this.languageService.displayLocale());
+    let message = this.transloco.translate('transactions.dialog.deleteMessage');
     if (tx.transferId) {
-      message += '\nLa contrepartie du virement sera aussi supprimée.';
+      message += '\n' + this.transloco.translate('transactions.dialog.deleteTransferMessage');
     }
-    const ok = await this.confirmService.confirm({
+    const ok = await this.confirmService.confirmDelete({
       title: `${tx.libelle} — ${amount}`,
       message,
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
       icon: 'phosphorReceipt',
     });
     if (!ok) return;
@@ -399,7 +375,7 @@ export class TransactionForm {
       await firstValueFrom(this.transactionService.delete(tx.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

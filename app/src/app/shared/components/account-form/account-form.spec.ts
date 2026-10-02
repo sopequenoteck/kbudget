@@ -11,9 +11,16 @@ import { PreferenceService } from '../../../core/services/preference';
 import { ModalService } from '../../../core/services/modal.service';
 import { Account, AccountType } from '../../../core/models/account.model';
 import { BankResponse } from '../../../core/models/bank.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const MOCK_BANKS: BankResponse[] = [
-  { code: 'SG', name: 'Société Générale', country: 'FR', brandColor: '#e2001a', logoUrl: '/api/bank-logos/sg.svg' },
+  {
+    code: 'SG',
+    name: 'Société Générale',
+    country: 'FR',
+    brandColor: '#e2001a',
+    logoUrl: '/api/bank-logos/sg.svg',
+  },
   { code: 'OTHER', name: 'Autre', country: null, brandColor: null, logoUrl: null },
 ];
 
@@ -66,6 +73,8 @@ describe('AccountForm', () => {
 
   let preferenceServiceMock: {
     primaryCurrency: ReturnType<typeof signal<string>>;
+    language: ReturnType<typeof signal<string | null>>;
+    loaded: ReturnType<typeof signal<boolean>>;
   };
 
   let modalServiceMock: {
@@ -88,7 +97,9 @@ describe('AccountForm', () => {
       error: signal(null),
       loadBanks: vi.fn().mockResolvedValue(undefined),
       getBankByCode: vi.fn((code: string) => MOCK_BANKS.find((b) => b.code === code)),
-      getBankLogoUrl: vi.fn((code: string) => MOCK_BANKS.find((b) => b.code === code)?.logoUrl ?? null),
+      getBankLogoUrl: vi.fn(
+        (code: string) => MOCK_BANKS.find((b) => b.code === code)?.logoUrl ?? null,
+      ),
     };
 
     currencyServiceMock = {
@@ -103,6 +114,8 @@ describe('AccountForm', () => {
 
     preferenceServiceMock = {
       primaryCurrency: signal('EUR'),
+      language: signal<string | null>(null),
+      loaded: signal(false),
     };
 
     modalServiceMock = {
@@ -114,6 +127,7 @@ describe('AccountForm', () => {
     TestBed.configureTestingModule({
       imports: [AccountForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: AccountService, useValue: accountServiceMock },
         { provide: BankService, useValue: bankServiceMock },
         { provide: CurrencyService, useValue: currencyServiceMock },
@@ -151,7 +165,9 @@ describe('AccountForm', () => {
     const allLegends: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('.account-form__section legend'),
     );
-    const personnalisationLegend = allLegends.find((el) => el.textContent?.includes('Personnalisation'));
+    const personnalisationLegend = allLegends.find((el) =>
+      el.textContent?.includes('Personnalisation'),
+    );
     expect(personnalisationLegend).toBeFalsy();
   });
 
@@ -174,7 +190,9 @@ describe('AccountForm', () => {
     const allLegends: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('.account-form__section legend'),
     );
-    const personnalisationLegend = allLegends.find((el) => el.textContent?.includes('Personnalisation'));
+    const personnalisationLegend = allLegends.find((el) =>
+      el.textContent?.includes('Personnalisation'),
+    );
     expect(personnalisationLegend).toBeTruthy();
   });
 
@@ -213,7 +231,9 @@ describe('AccountForm', () => {
 
     expect(accountServiceMock.create).toHaveBeenCalledTimes(1);
 
-    const [request] = accountServiceMock.create.mock.calls[0] as [Parameters<typeof accountServiceMock.create>[0]];
+    const [request] = accountServiceMock.create.mock.calls[0] as [
+      Parameters<typeof accountServiceMock.create>[0],
+    ];
     expect(request.bankCode).toBe('SG');
     // When a known bank is selected, bankCustomName and bankCustomLogo must not be set
     expect(request.bankCustomName).toBeUndefined();
@@ -235,7 +255,9 @@ describe('AccountForm', () => {
 
     expect(accountServiceMock.create).toHaveBeenCalledTimes(1);
 
-    const [request] = accountServiceMock.create.mock.calls[0] as [Parameters<typeof accountServiceMock.create>[0]];
+    const [request] = accountServiceMock.create.mock.calls[0] as [
+      Parameters<typeof accountServiceMock.create>[0],
+    ];
     expect(request.bankCode).toBe('OTHER');
     expect(request.bankCustomName).toBe('Ma banque perso');
     expect(request.bankCustomLogo).toBeUndefined();
@@ -275,6 +297,52 @@ describe('AccountForm', () => {
     expect(request.bankCode).toBe('SG');
     expect(request.bankCustomName).toBeUndefined();
     expect(request.bankCustomLogo).toBeUndefined();
+  });
+
+  it('should_compose_balance_adjustment_label_when_balance_changes', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ newBalance: '250' });
+
+    await component.onSubmit();
+
+    expect(accountServiceMock.adjustBalance).toHaveBeenCalledWith('1', {
+      newBalance: 250,
+      libelle: 'Ajustement de solde',
+    });
+  });
+
+  it('should_translate_balance_adjustment_label_when_language_switches_to_en', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const preferenceService = TestBed.inject(PreferenceService);
+    preferenceService.language.set('en');
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ newBalance: '250' });
+
+    await component.onSubmit();
+
+    expect(accountServiceMock.adjustBalance).toHaveBeenCalledWith('1', {
+      newBalance: 250,
+      libelle: 'Balance adjustment',
+    });
   });
 
   it('should_set_selected_bank_code_to_OTHER_by_default', () => {
@@ -322,5 +390,34 @@ describe('AccountForm', () => {
     await component.onSubmit();
 
     expect(component.errorMessage()).toBeTruthy();
+  });
+
+  it('should_use_server_message_when_delete_fails_with_error_instance', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+    accountServiceMock.delete.mockReturnValue({
+      subscribe: (obs: { error: (e: Error) => void }) => obs.error(new Error('Compte introuvable')),
+    });
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Compte introuvable');
+  });
+
+  it('should_use_french_fallback_message_when_delete_fails_without_error_instance', async () => {
+    modalServiceMock.editingEntity.set(mockAccount);
+    accountServiceMock.delete.mockReturnValue({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      subscribe: (obs: { error: (e: any) => void }) => obs.error('boom'),
+    });
+
+    const fixture = TestBed.createComponent(AccountForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Erreur lors de la suppression');
   });
 });

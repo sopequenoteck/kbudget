@@ -10,6 +10,7 @@ import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/data/remote/dtos/transfer_dtos.dart';
 import 'package:k_budget/src/domain/models/account.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
@@ -56,16 +57,18 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
   String? _validateSource() {
     if (_sourceAccountId == null) {
-      return AppLocalizations.of(context)!.validationRequired;
+      return AppLocalizations.of(context)!.commonValidationRequired;
     }
     return null;
   }
 
   String? _validateDestination() {
     final l10n = AppLocalizations.of(context)!;
-    if (_destinationAccountId == null) return l10n.validationRequired;
+    if (_destinationAccountId == null) {
+      return l10n.commonValidationRequired;
+    }
     if (_destinationAccountId == _sourceAccountId) {
-      return l10n.validationSameAccount;
+      return l10n.transactionsFormTransferAccountsMismatch;
     }
     return null;
   }
@@ -73,17 +76,23 @@ class _TransferFormState extends ConsumerState<TransferForm> {
   String? _validateMontant() {
     final value = _montantController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value);
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationRequired;
+    }
+    if (parsed <= 0) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 
   String? _validateNote() {
     final value = _noteController.text.trim();
     if (value.isNotEmpty && value.length > 500) {
-      return AppLocalizations.of(context)!.validationMaxLength(500);
+      return AppLocalizations.of(context)!.commonValidationMaxLength(500);
     }
     return null;
   }
@@ -95,6 +104,9 @@ class _TransferFormState extends ConsumerState<TransferForm> {
         _validateNote() == null;
   }
 
+  Account? _accountById(String id) =>
+      widget.accounts.where((a) => a.id == id).firstOrNull;
+
   // --- Actions ---
 
   Future<void> _onSubmit() async {
@@ -103,6 +115,9 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
     setState(() => _isSubmitting = true);
 
+    final l10n = AppLocalizations.of(context)!;
+    final source = _accountById(_sourceAccountId!);
+    final destination = _accountById(_destinationAccountId!);
     final request = TransferRequest(
       fromAccountId: _sourceAccountId!,
       toAccountId: _destinationAccountId!,
@@ -110,6 +125,12 @@ class _TransferFormState extends ConsumerState<TransferForm> {
       note: _noteController.text.trim().isEmpty
           ? null
           : _noteController.text.trim(),
+      libelleDebit: destination == null
+          ? null
+          : l10n.transactionsValueTransferTo(destination.nom),
+      libelleCredit: source == null
+          ? null
+          : l10n.transactionsValueTransferFrom(source.nom),
     );
 
     try {
@@ -118,7 +139,9 @@ class _TransferFormState extends ConsumerState<TransferForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -138,8 +161,11 @@ class _TransferFormState extends ConsumerState<TransferForm> {
               label: a.nom,
               icon: a.icone,
               color: parseHexColor(a.couleur),
-              secondaryText:
-                  AmountFormatter.format(a.solde, currency: a.currency),
+              secondaryText: AmountFormatter.format(
+                a.solde,
+                currency: a.currency,
+                locale: ref.watch(intlLocaleProvider),
+              ),
               imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
@@ -151,8 +177,11 @@ class _TransferFormState extends ConsumerState<TransferForm> {
               label: a.nom,
               icon: a.icone,
               color: parseHexColor(a.couleur),
-              secondaryText:
-                  AmountFormatter.format(a.solde, currency: a.currency),
+              secondaryText: AmountFormatter.format(
+                a.solde,
+                currency: a.currency,
+                locale: ref.watch(intlLocaleProvider),
+              ),
               imageUrl: resolveBankAssetPath(a),
             ))
         .toList();
@@ -168,7 +197,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
           onChanged: (id) {
             setState(() => _sourceAccountId = id);
           },
-          label: l10n.transferFormSourcePicker,
+          label: l10n.transactionsFormTransferFromPlaceholder,
           validator: (_) => _showErrors ? _validateSource() : null,
           autovalidateMode: AutovalidateMode.always,
         ),
@@ -181,7 +210,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
           onChanged: (id) {
             setState(() => _destinationAccountId = id);
           },
-          label: l10n.transferFormDestinationPicker,
+          label: l10n.transactionsFormTransferToPlaceholder,
           validator: (_) => _showErrors ? _validateDestination() : null,
           autovalidateMode: AutovalidateMode.always,
         ),
@@ -189,7 +218,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
         // Montant
         AppFormField(
-          label: l10n.transferFormAmountField,
+          label: l10n.transactionsFormAmount,
           showError: _showErrors && _validateMontant() != null,
           errorMessage: _validateMontant() ?? '',
           child: TextField(
@@ -207,7 +236,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
 
         // Note (optionnel)
         AppFormField(
-          label: l10n.transferFormNoteField,
+          label: l10n.transactionsFormNoteAria,
           showError: _showErrors && _validateNote() != null,
           errorMessage: _validateNote() ?? '',
           child: TextField(
@@ -234,7 +263,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
             const Spacer(),
             OutlinedButton(
               onPressed: _isSubmitting ? null : widget.onCancelled,
-              child: Text(l10n.cancel),
+              child: Text(l10n.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -248,7 +277,7 @@ class _TransferFormState extends ConsumerState<TransferForm> {
                         color: colorScheme.onPrimary,
                       ),
                     )
-                  : Text(l10n.transferFormSaveButton),
+                  : Text(l10n.transactionsActionTransferSubmit),
             ),
           ],
         ),

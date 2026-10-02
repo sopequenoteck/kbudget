@@ -7,11 +7,13 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/subscription_payment.dart';
 import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
+import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/subscription_detail_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -69,6 +71,7 @@ void main() {
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: SubscriptionDetailScreen(
           subscriptionId: 'sub-1',
           initialSubscription: initialSubscription,
@@ -100,7 +103,7 @@ void main() {
       await tester.pumpWidget(buildApp(initialSubscription: sub1));
       await tester.pumpAndSettle();
 
-      expect(find.text('Historique des paiements'), findsOneWidget);
+      expect(find.text('Historique'), findsOneWidget);
     });
 
     testWidgets('should_show_pay_button_when_subscription_loaded',
@@ -112,6 +115,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Payer'), findsOneWidget);
+    });
+
+    testWidgets('should_show_translated_category_when_category_is_system',
+        (tester) async {
+      when(mockSubRepo.getPayments(any)).thenAnswer((_) async => []);
+      when(mockSubRepo.getTotalPaid(any)).thenAnswer((_) async => totalPaid);
+      when(mockCatRepo.getAll())
+          .thenAnswer((_) async => [TestFixtures.systemCategory]);
+      final systemSub = sub1.copyWith(categoryId: 'cat-sys');
+      when(mockSubRepo.getById(any)).thenAnswer((_) async => systemSub);
+
+      await tester.pumpWidget(buildApp(initialSubscription: systemSub));
+      await tester.pumpAndSettle();
+      await ProviderScope.containerOf(tester.element(find.byType(Scaffold)))
+          .read(categoryNotifierProvider.notifier)
+          .loadItems();
+      await tester.pumpAndSettle();
+
+      expect(find.text('🔁 Abonnement'), findsOneWidget);
+      expect(find.textContaining('Subscription'), findsNothing);
     });
   });
 }

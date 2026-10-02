@@ -25,11 +25,15 @@ import 'package:k_budget/src/features/budgets/application/budget_list_state.dart
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_transactions_provider.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -108,12 +112,13 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
   // ── Delete ───────────────────────────────────────────────────────────────
 
   Future<void> _onDelete(String budgetId) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
       icon: PhosphorIconsRegular.trash,
-      title: 'Supprimer ce budget ?',
-      message: 'Cette action est irréversible.',
-      confirmLabel: 'Supprimer',
+      title: l10n.budgetsDialogDeleteTitle,
+      message: l10n.budgetsDialogDeleteMessage,
+      confirmLabel: l10n.commonActionDelete,
       variant: ConfirmVariant.danger,
     );
     if (confirmed != true) return;
@@ -159,10 +164,20 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
     final fallbackBudget = _findFallbackBudget(state);
 
     // Données du hero (depuis overview ou fallback)
-    final String categoryNom = overviewItem?.categoryNom ??
-        fallbackBudget?.categoryNom ??
-        fallbackBudget?.categoryId ??
-        'Budget';
+    final l10n = AppLocalizations.of(context)!;
+    final categoryNom = overviewItem != null
+        ? categoryDisplayName(
+            overviewItem.categoryNom,
+            overviewItem.categorySystemKey,
+            l10n,
+          )
+        : fallbackBudget != null
+            ? categoryDisplayName(
+                fallbackBudget.categoryNom ?? fallbackBudget.categoryId,
+                fallbackBudget.categorySystemKey,
+                l10n,
+              )
+            : l10n.budgetsActionCreate;
     final String categoryIcone =
         overviewItem?.categoryIcone ?? fallbackBudget?.categoryIcone ?? '';
     final String categoryCouleur =
@@ -203,9 +218,6 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
 
   Widget _buildTitle(
       String categoryNom, String categoryIcone, String categoryCouleur) {
-    if (categoryNom == 'Budget' && categoryIcone.isEmpty) {
-      return const Text('Budget');
-    }
     final bgColor = parseHexColor(categoryCouleur);
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -255,28 +267,33 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
       ?..sort((a, b) => b.date.compareTo(a.date));
 
     final txCount = filteredTx?.length ?? 0;
+    final l10n = AppLocalizations.of(context)!;
 
     final transactionSlivers = txAsync.when(
       loading: () => [_buildTransactionSkeletons()],
       error: (e, _) => [
-        const SliverFillRemaining(
+        SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(child: Text('Erreur de chargement des transactions')),
+          child: Center(child: Text(l10n.commonFeedbackLoadError)),
         ),
       ],
       data: (_) {
         if (filteredTx == null || filteredTx.isEmpty) {
           return [
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: EmptyStateWidget(
                 icon: PhosphorIconsRegular.receipt,
-                message: 'Aucune transaction ce mois',
+                message: l10n.budgetsEmptyNoTransactions,
               ),
             ),
           ];
         }
-        final groups = _groupByDate(filteredTx);
+        final groups = _groupByDate(
+          filteredTx,
+          l10n,
+          ref.watch(intlLocaleProvider),
+        );
         return groups
             .expand((group) => [
                   SliverToBoxAdapter(child: _DateLabel(label: group.label)),
@@ -348,23 +365,34 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final themeExt = Theme.of(context).extension<AppThemeExtension>()!;
+    final l10n = AppLocalizations.of(context)!;
     final isExceeded = percentage > 100;
     final isWarning = percentage > 80 && percentage <= 100;
 
-    final formattedSpent =
-        AmountFormatter.format(montantDepense, currency: currency);
-    final formattedBudget =
-        AmountFormatter.format(montantBudget, currency: currency);
+    final locale = ref.watch(intlLocaleProvider);
+    final formattedSpent = AmountFormatter.format(
+      montantDepense,
+      currency: currency,
+      locale: locale,
+    );
+    final formattedBudget = AmountFormatter.format(
+      montantBudget,
+      currency: currency,
+      locale: locale,
+    );
     final reste = montantBudget - montantDepense;
-    final formattedReste =
-        AmountFormatter.format(reste.abs(), currency: currency);
+    final formattedReste = AmountFormatter.format(
+      reste.abs(),
+      currency: currency,
+      locale: locale,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'DÉPENSÉ',
+          l10n.budgetsSummarySpent.toUpperCase(),
           style: TextStyle(
             fontSize: AppTypography.sizeXs,
             fontWeight: AppTypography.medium,
@@ -414,8 +442,8 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
             const SizedBox(width: 4),
             Text(
               isExceeded
-                  ? 'dépassement de $formattedReste'
-                  : 'reste $formattedReste',
+                  ? l10n.budgetsDetailOverBudget(formattedReste)
+                  : l10n.budgetsDetailRemaining(formattedReste),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 color: isExceeded
@@ -451,24 +479,25 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
   // ── Action pills ─────────────────────────────────────────────────────────
 
   Widget _buildActionPills(String budgetId) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         _ActionPill(
           icon: PhosphorIconsRegular.trash,
-          label: 'Supprimer',
+          label: l10n.commonActionDelete,
           isDanger: true,
           onTap: () => _onDelete(budgetId),
         ),
         const Spacer(),
         _ActionPill(
           icon: PhosphorIconsRegular.pause,
-          label: 'Désactiver',
+          label: l10n.budgetsActionDeactivate,
           onTap: () => _onToggle(budgetId),
         ),
         const SizedBox(width: AppSpacing.space2),
         _ActionPill(
           icon: PhosphorIconsRegular.pencilSimple,
-          label: 'Modifier',
+          label: l10n.commonActionEdit,
           onTap: () => _onEdit(budgetId),
         ),
       ],
@@ -516,7 +545,7 @@ class _BudgetDetailScreenState extends ConsumerState<BudgetDetailScreen> {
               onPressed: _loadData,
               icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise,
                   size: 20),
-              label: const Text('Réessayer'),
+              label: Text(AppLocalizations.of(context)!.commonActionRetry),
             ),
           ],
         ),
@@ -573,40 +602,50 @@ class _TxGroup {
   final List<Transaction> transactions;
 }
 
-List<_TxGroup> _groupByDate(List<Transaction> transactions) {
+List<_TxGroup> _groupByDate(
+  List<Transaction> transactions,
+  AppLocalizations l10n,
+  String locale,
+) {
   final today = DateTime.now();
   final todayDate = DateTime(today.year, today.month, today.day);
   final yesterdayDate = todayDate.subtract(const Duration(days: 1));
 
-  final Map<String, List<Transaction>> grouped = {};
-
+  final grouped = <DateTime, List<Transaction>>{};
   for (final tx in transactions) {
-    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    final String label;
-    if (txDate == todayDate) {
-      label = "Aujourd'hui";
-    } else if (txDate == yesterdayDate) {
-      label = 'Hier';
-    } else {
-      label = DateFormat('d MMMM', 'fr_FR').format(tx.date);
-    }
-    grouped.putIfAbsent(label, () => []).add(tx);
+    final day = DateTime(tx.date.year, tx.date.month, tx.date.day);
+    grouped.putIfAbsent(day, () => []).add(tx);
   }
 
-  final keys = grouped.keys.toList();
-  keys.sort((a, b) {
-    if (a == "Aujourd'hui") return -1;
-    if (b == "Aujourd'hui") return 1;
-    if (a == 'Hier') return -1;
-    if (b == 'Hier') return 1;
-    final aFirst = grouped[a]!.first.date;
-    final bFirst = grouped[b]!.first.date;
-    return bFirst.compareTo(aFirst);
-  });
+  // Aujourd'hui puis hier en tete, les autres jours du plus recent au plus
+  // ancien : le tri porte sur la date, jamais sur le libelle traduit.
+  int rank(DateTime day) {
+    if (day == todayDate) {
+      return 0;
+    }
+    return day == yesterdayDate ? 1 : 2;
+  }
 
-  return keys
-      .map((k) => _TxGroup(label: k, transactions: grouped[k]!))
-      .toList();
+  final days = grouped.keys.toList()
+    ..sort((a, b) {
+      final byRank = rank(a).compareTo(rank(b));
+      return byRank != 0 ? byRank : b.compareTo(a);
+    });
+
+  String label(DateTime day) {
+    if (day == todayDate) {
+      return l10n.commonValueToday;
+    }
+    if (day == yesterdayDate) {
+      return l10n.commonValueYesterday;
+    }
+    return DateFormat.MMMMd(locale).format(day);
+  }
+
+  return [
+    for (final day in days)
+      _TxGroup(label: label(day), transactions: grouped[day]!),
+  ];
 }
 
 // ── Widgets privés ─────────────────────────────────────────────────────────
@@ -703,7 +742,12 @@ class _TransactionRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final account = accounts.firstWhereOrNull((a) => a.id == tx.accountId);
     final currency = account?.currency ?? budgetCurrency;
-    final formatted = AmountFormatter.format(tx.montant, currency: currency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formatted = AmountFormatter.format(
+      tx.montant,
+      currency: currency,
+      locale: locale,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -742,7 +786,7 @@ class _TransactionRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  DateFormat('d MMM', 'fr_FR').format(tx.date),
+                  DateFormat.MMMd(locale).format(tx.date),
                   style: TextStyle(
                     fontSize: AppTypography.sizeXs,
                     color: colorScheme.onSurfaceVariant,
@@ -786,7 +830,7 @@ class _StickyTransactionHeader extends SliverPersistentHeaderDelegate {
       child: Row(
         children: [
           Text(
-            'Transactions',
+            AppLocalizations.of(context)!.transactionsPageTitle,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.semiBold,

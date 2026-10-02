@@ -50,15 +50,19 @@ class DebtRepositoryLocal implements DebtRepository {
   }
 
   @override
-  Future<Debt> repay(String id, String accountId, double? amount) async {
-    throw Exception('Remboursement disponible en mode serveur uniquement');
-  }
+  Future<Debt> repay(
+    String id,
+    String accountId,
+    double? amount, {
+    String? libelle,
+  }) =>
+      throw Exception('Debt repayments are only available in server mode');
 
   @override
   Future<List<DebtPayment>> getPayments(String id) async => [];
 
   @override
   Future<Debt> snooze(String id, String reminderDate, String reminderTime) async {
-    throw Exception('Report de rappel disponible en mode serveur uniquement');
+    throw Exception('Reminder snoozing is only available in server mode');
   }
 }

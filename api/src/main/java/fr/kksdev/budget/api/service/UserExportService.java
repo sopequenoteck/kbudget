@@ -1,7 +1,7 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.response.UserExportResponse;
-import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.*;
 import fr.kksdev.budget.api.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +80,7 @@ public class UserExportService {
 
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         CSVFormat format = CSVFormat.RFC4180.builder()
-                .setHeader("Date", "Libellé", "Montant", "Devise", "Compte", "Catégorie", "Type")
+                .setHeader("date", "label", "amount", "currency", "account", "category", "type")
                 .build();
 
         try (CSVPrinter printer = new CSVPrinter(writer, format)) {
@@ -96,22 +96,13 @@ public class UserExportService {
                         currency,
                         accountNom,
                         categoryNom,
-                        translateType(t.getType())
+                        t.getType() != null ? t.getType().name() : ""
                 );
             }
             printer.flush();
             writer.flush();
             log.info("User {} exported transactions (format=csv, count={})", user.getId(), transactions.size());
         }
-    }
-
-    private String translateType(TransactionType type) {
-        if (type == null) return "";
-        return switch (type) {
-            case RECETTE -> "Revenu";
-            case DEPENSE -> "Dépense";
-            case AJUSTEMENT -> "Ajustement";
-        };
     }
 
     // --- Mappers ---
@@ -146,6 +137,7 @@ public class UserExportService {
                         : List.of(),
                 pref.getTimezone(),
                 pref.getTextScale() != null ? pref.getTextScale().name() : null,
+                pref.getLanguage(),
                 pref.getUpdatedAt()
         );
     }
@@ -174,6 +166,7 @@ public class UserExportService {
                 c.getIcone(),
                 c.getCouleur(),
                 c.getIsSystem() != null && c.getIsSystem(),
+                SystemCategoryKey.nameOf(c.getSystemKey()),
                 c.getUpdatedAt()
         );
     }

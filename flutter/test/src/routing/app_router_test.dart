@@ -123,6 +123,7 @@ void main() {
             theme: app_theme.AppTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
           );
         },
       ),
@@ -173,6 +174,23 @@ void main() {
       expect(find.text('Dettes'), findsOneWidget);
     });
 
+    testWidgets('should_show_budgets_tab_when_budgets_enabled',
+        (WidgetTester tester) async {
+      when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
+      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getEnabledFeatures())
+          .thenAnswer((_) async => Feature.values.toList());
+
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Budgets'), findsWidgets);
+    });
+
     testWidgets('should_navigate_to_transactions_when_tab_tapped',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
@@ -188,7 +206,7 @@ void main() {
       await tester.tap(find.text('Transactions').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune transaction ce mois-ci'), findsOneWidget);
+      expect(find.textContaining('Aucune transaction en '), findsOneWidget);
     });
 
     testWidgets('should_show_fab_when_onboarding_done',
@@ -249,7 +267,7 @@ void main() {
       ]));
       await tester.pumpAndSettle();
 
-      expect(find.text('Finalisez votre compte'), findsOneWidget);
+      expect(find.text('Premier accès'), findsOneWidget);
     });
 
     testWidgets(
@@ -269,7 +287,7 @@ void main() {
       ]));
       await tester.pumpAndSettle();
 
-      expect(find.text('Finalisez votre compte'), findsNothing);
+      expect(find.text('Premier accès'), findsNothing);
       expect(find.text('Accueil'), findsWidgets);
     });
   });

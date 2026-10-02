@@ -8,6 +8,7 @@ import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/domain/repositories/notification_repository.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
 
 final notificationNotifierProvider =
@@ -39,10 +40,10 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
         currentPage: 0,
         hasMore: items.length >= _pageSize,
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les notifications: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -57,8 +58,10 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
         currentPage: nextPage,
         hasMore: newItems.length >= _pageSize,
       );
-    } on Exception catch (e) {
-      state = state.copyWith(error: 'Erreur: $e');
+    } on Exception catch (_) {
+      state = state.copyWith(
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
+      );
     }
   }
 
@@ -82,10 +85,10 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
           mutatingIds: {...state.mutatingIds}..remove(id),
         );
       }
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -99,8 +102,11 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
         items: state.items.map((n) => n.copyWith(read: true, readAt: now)).toList(),
         isLoading: false,
       );
-    } on Exception catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Erreur: $e');
+    } on Exception catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
+      );
     }
   }
 
@@ -115,13 +121,13 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
     try {
       await (await _repo).deleteNotification(id);
       state = state.copyWith(mutatingIds: {...state.mutatingIds}..remove(id));
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       final restored = List<NotificationModel>.of(state.items)..insert(index, saved);
       restored.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       state = state.copyWith(
         items: restored,
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
       );
     }
   }
@@ -131,8 +137,11 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
     try {
       await (await _repo).deleteAll();
       state = state.copyWith(items: [], isLoading: false, currentPage: 0, hasMore: false);
-    } on Exception catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Erreur: $e');
+    } on Exception catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
+      );
     }
   }
 

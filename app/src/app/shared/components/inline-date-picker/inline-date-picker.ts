@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   model,
   signal,
 } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageService } from '../../../core/services/language';
 
 interface CalendarDay {
   date: Date;
@@ -18,22 +21,10 @@ interface CalendarDay {
   isoDate: string;
 }
 
-const MONTH_NAMES = [
-  'janvier',
-  'février',
-  'mars',
-  'avril',
-  'mai',
-  'juin',
-  'juillet',
-  'août',
-  'septembre',
-  'octobre',
-  'novembre',
-  'décembre',
-];
-
-const DAY_HEADERS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+// Lundi 1er janvier 2024 : semaine de reference pour deriver les initiales de
+// jour depuis la locale active (KKS-374), plutot qu'un tableau fige en
+// francais — voir `docs/i18n.md#formats`.
+const REFERENCE_MONDAY = new Date(2024, 0, 1);
 
 function toIsoDate(date: Date): string {
   const y = date.getFullYear();
@@ -51,18 +42,34 @@ function isoToDate(iso: string): Date | null {
 @Component({
   selector: 'app-inline-date-picker',
   standalone: true,
-  imports: [],
+  imports: [TranslocoPipe],
   templateUrl: './inline-date-picker.html',
   styleUrl: './inline-date-picker.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InlineDatePicker {
+  private readonly languageService = inject(LanguageService);
+
   readonly value = model<string>('');
   readonly originalValue = input<string>();
   readonly min = input<string>();
   readonly max = input<string>();
 
-  readonly dayHeaders = DAY_HEADERS;
+  private readonly monthFormatter = computed(
+    () => new Intl.DateTimeFormat(this.languageService.displayLocale(), { month: 'long' }),
+  );
+
+  private readonly dayHeaderFormatter = computed(
+    () => new Intl.DateTimeFormat(this.languageService.displayLocale(), { weekday: 'narrow' }),
+  );
+
+  readonly dayHeaders = computed(() =>
+    Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(REFERENCE_MONDAY);
+      date.setDate(REFERENCE_MONDAY.getDate() + i);
+      return this.dayHeaderFormatter().format(date);
+    }),
+  );
 
   private readonly today = new Date();
   private readonly todayIso = toIsoDate(this.today);
@@ -80,7 +87,7 @@ export class InlineDatePicker {
   readonly currentYear = signal<number>(this._initMonth().year);
 
   readonly monthLabel = computed(() => {
-    const name = MONTH_NAMES[this.currentMonth()];
+    const name = this.monthFormatter().format(new Date(this.currentYear(), this.currentMonth(), 1));
     return name.charAt(0).toUpperCase() + name.slice(1) + ' ' + this.currentYear();
   });
 

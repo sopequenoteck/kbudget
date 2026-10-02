@@ -7,9 +7,9 @@
     <div class="bsheet__handle"></div>
     <div class="bsheet__top-title">
       <ng-icon name="phosphorArrowCircleDown" size="16" />
-      <span>Remboursement</span>
+      <span>{{ 'debts.dialog.repayTitle' | transloco }}</span>
     </div>
-    <span class="repay-form__remaining">Restant : {{ debtMontantRestant() | amount: null : debtCurrency() }}</span>
+    <span class="repay-form__remaining">{{ 'debts.dialog.remaining' | transloco: { amount: (debtMontantRestant() | amount: null : debtCurrency()) } }}</span>
   </div>
 
   <div class="bsheet__main-row bsheet__main-row--between">
@@ -35,10 +35,10 @@
         class="bsheet__tool-pill"
         [class.active]="expandedSection() === 'account'"
         (click)="toggleSection('account')"
-        aria-label="Compte"
+        [attr.aria-label]="'debts.form.accountAria' | transloco"
       >
         <ng-icon name="phosphorWallet" size="16" [style.color]="selectedAccountColor()" style="opacity: 0.7" />
-        <span>{{ selectedAccountName() ?? 'Compte' }}</span>
+        <span>{{ selectedAccountName() ?? ('debts.form.account' | transloco) }}</span>
       </button>
     </div>
   </div>
@@ -48,7 +48,7 @@
       <app-select-picker
         formControlName="accountId"
         [items]="accountItems()"
-        placeholder="Sélectionner un compte"
+        [placeholder]="'debts.form.accountPlaceholder' | transloco"
         [clearable]="false"
       />
     </div>
@@ -60,14 +60,14 @@
       class="bsheet__action-pill bsheet__action-pill--cancel"
       (click)="onCancel()"
     >
-      Annuler
+      {{ 'common.action.cancel' | transloco }}
     </button>
     <button
       type="submit"
       class="bsheet__action-pill bsheet__action-pill--primary"
       [disabled]="submitting()"
     >
-      {{ submitting() ? '...' : 'Rembourser' }}
+      {{ submitting() ? '...' : ('debts.action.repay' | transloco) }}
     </button>
   </div>
 </form>

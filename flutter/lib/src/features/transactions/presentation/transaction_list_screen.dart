@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/list_item.dart';
 import 'package:k_budget/src/common_widgets/month_selector.dart';
 import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
@@ -20,6 +21,7 @@ import 'package:k_budget/src/features/categories/application/category_notifier.d
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_day_group.dart';
@@ -90,7 +92,7 @@ class _TransactionListScreenState
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -124,7 +126,7 @@ class _TransactionListScreenState
           ),
 
           // SectionHeaderSticky
-          const SectionHeaderSticky(title: 'Transactions'),
+          SectionHeaderSticky(title: l10n.transactionsPageTitle),
 
           // Contenu principal (groupement sémantique)
           ..._buildContent(
@@ -179,7 +181,7 @@ class _TransactionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -190,7 +192,7 @@ class _TransactionListScreenState
                   FilledButton.icon(
                     onPressed: () => ref.read(transactionListNotifierProvider.notifier).refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.transactionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -223,7 +225,11 @@ class _TransactionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.transactionsEmptyMonth,
+                    l10n.transactionsEmptyNoneInMonth(
+                      DateFormat.yMMMM(ref.watch(intlLocaleProvider)).format(
+                        DateTime(state.selectedYear, state.selectedMonth),
+                      ),
+                    ),
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -240,9 +246,9 @@ class _TransactionListScreenState
     // Données
     final widgets = <Widget>[];
     for (final entry in semanticGroups.entries) {
-      final bucketLabel = entry.key;
+      final bucket = entry.key;
       final bucketTxs = entry.value;
-      final labelColor = bucketLabel == "Aujourd'hui"
+      final labelColor = bucket == _DateBucket.today
           ? AppColors.amber500
           : colorScheme.onSurfaceVariant;
 
@@ -255,7 +261,7 @@ class _TransactionListScreenState
               vertical: AppSpacing.space2,
             ),
             child: Text(
-              bucketLabel,
+              _bucketLabel(bucket, l10n),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -302,44 +308,47 @@ class _TransactionListScreenState
     return widgets;
   }
 
-  Map<String, List<Transaction>> _groupBySemantics(
+  Map<_DateBucket, List<Transaction>> _groupBySemantics(
     List<Transaction> items,
     DateTime today,
   ) {
-    const kSemanticGroups = [
-      "Aujourd'hui",
-      'Hier',
-      'Cette semaine',
-      'Semaine dernière',
-      'Plus ancien',
-    ];
-
     final yesterday = today.subtract(const Duration(days: 1));
     final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
     final startOfLastWeek = startOfWeek.subtract(const Duration(days: 7));
 
-    final raw = <String, List<Transaction>>{};
+    final raw = <_DateBucket, List<Transaction>>{};
     for (final tx in items) {
       final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-      final String bucket;
+      final _DateBucket bucket;
       if (txDate == today) {
-        bucket = "Aujourd'hui";
+        bucket = _DateBucket.today;
       } else if (txDate == yesterday) {
-        bucket = 'Hier';
+        bucket = _DateBucket.yesterday;
       } else if (!txDate.isBefore(startOfWeek)) {
-        bucket = 'Cette semaine';
+        bucket = _DateBucket.thisWeek;
       } else if (!txDate.isBefore(startOfLastWeek)) {
-        bucket = 'Semaine dernière';
+        bucket = _DateBucket.lastWeek;
       } else {
-        bucket = 'Plus ancien';
+        bucket = _DateBucket.older;
       }
       raw.putIfAbsent(bucket, () => []).add(tx);
     }
 
-    final ordered = <String, List<Transaction>>{};
-    for (final key in kSemanticGroups) {
-      if (raw.containsKey(key)) ordered[key] = raw[key]!;
-    }
-    return ordered;
+    return {
+      for (final bucket in _DateBucket.values)
+        if (raw.containsKey(bucket)) bucket: raw[bucket]!,
+    };
   }
+
+  String _bucketLabel(_DateBucket bucket, AppLocalizations l10n) =>
+      switch (bucket) {
+        _DateBucket.today => l10n.commonValueToday,
+        _DateBucket.yesterday => l10n.commonValueYesterday,
+        _DateBucket.thisWeek => l10n.transactionsListThisWeek,
+        _DateBucket.lastWeek => l10n.transactionsListLastWeek,
+        _DateBucket.older => l10n.transactionsListOlder,
+      };
 }
+
+/// Groupes de la liste, dans leur ordre d'affichage.
+enum _DateBucket { today, yesterday, thisWeek, lastWeek, older }

@@ -12,8 +12,10 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 class TransactionDayGroup extends StatelessWidget {
   const TransactionDayGroup({
@@ -49,7 +51,9 @@ class TransactionDayGroup extends StatelessWidget {
           final icon = category?.icone ?? '\u{1F4DD}';
           final iconBg = parseHexColor(category?.couleur);
           final l10n = AppLocalizations.of(context)!;
-          final subtitle = category?.nom ?? l10n.transactionsNoCategory;
+          final subtitle = category == null
+              ? l10n.transactionsListNoCategory
+              : categoryDisplayName(category.nom, category.systemKey, l10n);
           final typeName = tx.type.name;
           final valueColor =
               AmountFormatter.amountColor(typeName, colors) ??
@@ -73,8 +77,12 @@ class TransactionDayGroup extends StatelessWidget {
                 rates: exchangeRates,
               );
               if (converted != null) {
-                convertedSubtitle =
-                    '~ ${AmountFormatter.format(converted, currency: primaryCurrency!)}';
+                final formattedConverted = AmountFormatter.format(
+                  converted,
+                  currency: primaryCurrency!,
+                  locale: intlLocaleFor(Localizations.localeOf(context)),
+                );
+                convertedSubtitle = '~ $formattedConverted';
               }
             }
           }
@@ -84,7 +92,11 @@ class TransactionDayGroup extends StatelessWidget {
             iconBackgroundColor: iconBg,
             title: tx.libelle,
             subtitle: subtitle,
-            value: AmountFormatter.format(tx.montant, type: typeName),
+            value: AmountFormatter.format(
+              tx.montant,
+              type: typeName,
+              locale: intlLocaleFor(Localizations.localeOf(context)),
+            ),
             valueColor: valueColor,
             rightSubtitle: convertedSubtitle,
             onPressed: onTransactionTap != null

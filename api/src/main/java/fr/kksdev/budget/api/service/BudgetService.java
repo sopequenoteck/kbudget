@@ -7,6 +7,7 @@ import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
@@ -174,6 +175,7 @@ public class BudgetService {
                     budget.getId(),
                     budget.getCategory().getId(),
                     budget.getCategory().getNom(),
+                    SystemCategoryKey.nameOf(budget.getCategory().getSystemKey()),
                     budget.getCategory().getIcone(),
                     budget.getCategory().getCouleur(),
                     budget.getMontant(),
@@ -245,6 +247,7 @@ public class BudgetService {
             items.add(new BudgetHistoryItemResponse(
                     snapshot.getCategory().getId(),
                     snapshot.getCategory().getNom(),
+                    SystemCategoryKey.nameOf(snapshot.getCategory().getSystemKey()),
                     snapshot.getCategory().getIcone(),
                     snapshot.getCategory().getCouleur(),
                     snapshot.getMontantBudget(),
@@ -281,6 +284,7 @@ public class BudgetService {
             String couleur = (String) row[3];
             BigDecimal montant = (BigDecimal) row[4];
             String currencyCode = (String) row[5];
+            String systemKey = (String) row[6];
             Currency rowCurrency = Currency.valueOf(currencyCode);
             BigDecimal montantConverti = montant;
             if (rowCurrency != primaryCurrency) {
@@ -294,9 +298,9 @@ public class BudgetService {
             if (merged.containsKey(catId)) {
                 UnbudgetedItemResponse existing = merged.get(catId);
                 BigDecimal newTotal = existing.montantDepense().add(montantConverti);
-                merged.put(catId, new UnbudgetedItemResponse(catId, nom, icone, couleur, newTotal, primaryCurrency.name()));
+                merged.put(catId, new UnbudgetedItemResponse(catId, nom, systemKey, icone, couleur, newTotal, primaryCurrency.name()));
             } else {
-                merged.put(catId, new UnbudgetedItemResponse(catId, nom, icone, couleur, montantConverti, primaryCurrency.name()));
+                merged.put(catId, new UnbudgetedItemResponse(catId, nom, systemKey, icone, couleur, montantConverti, primaryCurrency.name()));
             }
         }
         return new ArrayList<>(merged.values());
@@ -341,9 +345,9 @@ public class BudgetService {
                     userId, NotificationType.BUDGET_THRESHOLD, budget.getId(), monthStart);
             if (!alreadyNotified) {
                 String categoryName = budget.getCategory().getNom();
-                String title = "Budget " + categoryName + " : " + percentage.intValue() + "%";
-                String body = "Vous avez atteint " + percentage.intValue() + "% du budget " + categoryName;
-                notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, title, body, EntityType.BUDGET, budget.getId());
+                String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
+                NotificationContent content = NotificationContentFactory.budgetThreshold(categoryName, categorySystemKey, percentage.intValue());
+                notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
                 log.info("Notification BUDGET_THRESHOLD envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
             }
         }
@@ -353,9 +357,9 @@ public class BudgetService {
                     userId, NotificationType.BUDGET_EXCEEDED, budget.getId(), monthStart);
             if (!alreadyNotified) {
                 String categoryName = budget.getCategory().getNom();
-                String title = "Budget " + categoryName + " dépassé !";
-                String body = "Vous avez dépassé le budget " + categoryName + " (" + percentage.intValue() + "%)";
-                notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, title, body, EntityType.BUDGET, budget.getId());
+                String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
+                NotificationContent content = NotificationContentFactory.budgetExceeded(categoryName, categorySystemKey, percentage.intValue());
+                notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
                 log.info("Notification BUDGET_EXCEEDED envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
             }
         }

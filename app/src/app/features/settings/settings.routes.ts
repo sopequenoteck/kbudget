@@ -22,14 +22,19 @@ export const SETTINGS_ROUTES: Routes = [
       import('./components/import-settings/import-settings').then((m) => m.ImportSettings),
   },
   {
+    // Ancienne revue (avant KKS-386) : les liens et favoris existants suivent.
     path: 'import/review/:draftId',
-    loadComponent: () =>
-      import('./components/import-review/import-review').then((m) => m.ImportReview),
+    redirectTo: '/transactions/import/review/:draftId',
   },
   {
     path: 'import/mapping',
     loadComponent: () =>
       import('./components/csv-mapping/csv-mapping').then((m) => m.CsvMapping),
+  },
+  {
+    path: 'import/history-cleanup',
+    loadComponent: () =>
+      import('../imports/history-cleanup/history-cleanup').then((m) => m.HistoryCleanup),
   },
   {
     path: 'users',

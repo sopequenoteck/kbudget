@@ -179,7 +179,7 @@ class CategorySuggestionIT {
                 "05/03/2026;CARTE X0000 04/03 ;CARTE X0000 04/03 EPICERIE TEST 110600000000003IOPD ;-9,00;EUR");
         ImportDraftLineResponse first = lineLabelled(draft, "BOULANGERIE TEST", "3.20");
 
-        importService.updateLine(draft.id(), first.id(), new ImportLineUpdateRequest(groceries.getId(), null), user.getId());
+        importService.updateLine(draft.id(), first.id(), new ImportLineUpdateRequest(groceries.getId(), null, null, null), user.getId());
 
         ImportDraftResponse reloaded = importService.getDraft(draft.id(), user.getId());
         assertThat(lineLabelled(reloaded, "BOULANGERIE TEST", "4.10").categoryId()).isEqualTo(groceries.getId());
@@ -195,8 +195,8 @@ class CategorySuggestionIT {
         ImportDraftResponse draft = upload(
                 "02/03/2026;CARTE X0000 01/03 ;CARTE X0000 01/03 BOULANGERIE TEST 110600000000001IOPD ;-3,20;EUR");
         importService.updateLine(draft.id(), draft.lines().getFirst().id(),
-                new ImportLineUpdateRequest(groceries.getId(), null), user.getId());
-        importService.confirm(draft.id(), user.getId());
+                new ImportLineUpdateRequest(groceries.getId(), null, null, null), user.getId());
+        importService.confirm(draft.id(), false, user.getId());
 
         ImportDraftResponse next = upload(
                 "09/03/2026;CARTE X0000 08/03 ;CARTE X0000 08/03 BOULANGERIE TEST 110600000000004IOPD ;-2,60;EUR");
@@ -214,7 +214,7 @@ class CategorySuggestionIT {
                 "04/03/2026;CARTE X0000 03/03 ;CARTE X0000 03/03 APPLE COMMERCE ELECTRONIQUE 110600000000002IOPD ;-2,99;EUR");
         UUID lineWithoutRule = lineLabelled(draft, "APPLE", "2.99").id();
 
-        importService.updateLine(draft.id(), lineWithoutRule, new ImportLineUpdateRequest(storage.getId(), null), user.getId());
+        importService.updateLine(draft.id(), lineWithoutRule, new ImportLineUpdateRequest(storage.getId(), null, null, null), user.getId());
 
         ImportDraftLineResponse ruled = lineLabelled(importService.getDraft(draft.id(), user.getId()), "APPLE.COM/BILL", "10.00");
         assertThat(ruled.categoryId()).isEqualTo(software.getId());
@@ -228,7 +228,7 @@ class CategorySuggestionIT {
         UUID lineId = draft.lines().getFirst().id();
 
         ImportDraftLineResponse updated = importService.updateLine(draft.id(), lineId,
-                new ImportLineUpdateRequest(groceries.getId(), "READY"), user.getId());
+                new ImportLineUpdateRequest(groceries.getId(), "READY", null, null), user.getId());
 
         assertThat(updated.categoryId()).isEqualTo(groceries.getId());
         assertThat(updated.status()).isEqualTo(ImportLineStatus.READY.name());

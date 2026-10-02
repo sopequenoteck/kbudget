@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -22,6 +23,7 @@ import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.ExchangeRateRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.ClientText;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DebtService {
+
+    // KKS-396 : defaut anglais ecrit par l'API quand le client ne fournit pas
+    // de libelle (principe VII, l'API ne traduit jamais).
+    private static final String DEFAULT_REPAYMENT_LABEL_PREFIX = "Repayment - ";
 
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
@@ -199,7 +205,7 @@ public class DebtService {
 
         Transaction transaction = Transaction.builder()
                 .montant(amount)
-                .libelle("Remboursement - " + debt.getPersonne())
+                .libelle(ClientText.orDefault(request.libelle(), DEFAULT_REPAYMENT_LABEL_PREFIX + debt.getPersonne()))
                 .type(txType)
                 .date(LocalDate.now())
                 .category(debt.getCategory())
@@ -292,7 +298,7 @@ public class DebtService {
 
     private Category resolveCategory(UUID categoryId, UUID userId) {
         if (categoryId == null) {
-            return categoryService.findSystemCategoryByNom("Dette", userId);
+            return categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId);
         }
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))

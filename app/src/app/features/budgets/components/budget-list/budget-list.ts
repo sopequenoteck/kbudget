@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorTray,
@@ -26,7 +27,8 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { formatMonthYearLabel } from '../../../../shared/utils/locale-format.utils';
 import {
   type Budget,
   type BudgetOverview,
@@ -37,6 +39,7 @@ import {
 } from '../../../../core/models/budget.model';
 import { type Category } from '../../../../core/models/category.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
 import { CurrencyPillSelector } from '../../../dashboard/components/currency-pill-selector';
@@ -44,7 +47,7 @@ import { CurrencyPillSelector } from '../../../dashboard/components/currency-pil
 @Component({
   selector: 'app-budget-list',
   standalone: true,
-  imports: [AmountPipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector],
+  imports: [AmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, CurrencyPillSelector, TranslocoPipe],
   providers: [provideIcons({ phosphorTray, phosphorWarning, phosphorChartPie })],
   templateUrl: './budget-list.html',
   styleUrl: './budget-list.scss',
@@ -59,6 +62,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   readonly Math = Math;
   readonly isOverviewItem = isOverviewItem;
@@ -90,10 +94,10 @@ export class BudgetList implements AfterViewInit, OnDestroy {
   });
 
   readonly selectedMonthLabel = computed(() =>
-    new Date(this.selectedYear(), this.selectedMonth() - 1).toLocaleDateString(APP_LOCALE, {
-      month: 'long',
-      year: 'numeric',
-    }),
+    formatMonthYearLabel(
+      new Date(this.selectedYear(), this.selectedMonth() - 1),
+      this.languageService.displayLocale(),
+    ),
   );
 
   readonly activeItems = computed(() =>
@@ -282,6 +286,7 @@ export class BudgetList implements AfterViewInit, OnDestroy {
             categoryNom: b.category.nom,
             categoryIcone: b.category.icone,
             categoryCouleur: b.category.couleur,
+            categorySystemKey: b.category.systemKey ?? null,
             montantBudget: b.montant,
             montantBudgetNormalise: b.montant,
             currency: b.currency,

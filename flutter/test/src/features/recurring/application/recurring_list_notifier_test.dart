@@ -7,6 +7,7 @@ import 'package:k_budget/src/features/recurring/application/recurring_list_notif
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -59,6 +60,7 @@ void main() {
     mockRepo = MockRecurringTransactionRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         recurringTransactionRepositoryProvider
             .overrideWith((_) async => mockRepo),
       ],
@@ -235,7 +237,7 @@ void main() {
       await notifier().loadItems();
 
       expect(state().error, isNotNull);
-      expect(state().error, contains('Network error'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().isLoading, false);
     });
 

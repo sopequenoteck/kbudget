@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { BankService } from './bank';
 import { ApiService } from './api';
 import { type BankResponse } from '../models/bank.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 const MOCK_BANKS: BankResponse[] = [
   { code: 'SG', name: 'Société Générale', country: 'FR', brandColor: '#e2001a', logoUrl: '/api/bank-logos/sg.svg' },
@@ -23,7 +24,11 @@ describe('BankService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [BankService, { provide: ApiService, useValue: apiService }],
+      providers: [
+        BankService,
+        { provide: ApiService, useValue: apiService },
+        ...provideTranslocoTesting(),
+      ],
     });
 
     service = TestBed.inject(BankService);

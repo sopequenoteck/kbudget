@@ -2,11 +2,13 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.CategoryRuleRequest;
 import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
+import fr.kksdev.budget.api.dto.request.ImportConfirmRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
 import fr.kksdev.budget.api.dto.response.CategoryRuleResponse;
 import fr.kksdev.budget.api.dto.response.CsvPreviewResponse;
 import fr.kksdev.budget.api.dto.response.ImportConfirmResponse;
+import fr.kksdev.budget.api.dto.response.ImportDetectionResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftLineResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftSummaryResponse;
@@ -52,6 +54,15 @@ public class ImportController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Reconnaître le format d'un fichier CSV sans rien créer")
+    @PostMapping("/detect")
+    public ResponseEntity<ImportDetectionResponse> detect(
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        return ResponseEntity.ok(importService.detect(file, userId));
+    }
+
     @Operation(summary = "Consulter un draft d'import")
     @GetMapping("/drafts/{draftId}")
     public ResponseEntity<ImportDraftResponse> getDraft(
@@ -86,9 +97,11 @@ public class ImportController {
     @PostMapping("/drafts/{draftId}/confirm")
     public ResponseEntity<ImportConfirmResponse> confirm(
             @PathVariable UUID draftId,
+            @RequestBody(required = false) ImportConfirmRequest request,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        return ResponseEntity.ok(importService.confirm(draftId, userId));
+        boolean applyOpeningBalance = request != null && request.applyOpeningBalanceRequested();
+        return ResponseEntity.ok(importService.confirm(draftId, applyOpeningBalance, userId));
     }
 
     @Operation(summary = "Lister les drafts d'import en attente")

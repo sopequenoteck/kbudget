@@ -5,14 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:k_budget/src/common_widgets/account_bank_icon.dart';
+import 'package:k_budget/src/common_widgets/account_select_expand.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
 import 'package:k_budget/src/common_widgets/bsheet_delete_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_meta_pill.dart';
 import 'package:k_budget/src/common_widgets/bsheet_type_toggle.dart';
 import 'package:k_budget/src/common_widgets/category_select_expand.dart';
 import 'package:k_budget/src/common_widgets/inline_date_picker.dart';
-import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -24,11 +23,12 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/libelle_autocomplete_field.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
-import 'package:k_budget/src/utils/amount_formatter.dart';
-import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/form_validators.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TransactionForm extends ConsumerStatefulWidget {
@@ -68,7 +68,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   bool _isCreatingCategory = false;
   late TransactionType _currentType;
 
-  static final _dateFormat = DateFormat('dd/MM/yyyy');
   static final _isoFormat = DateFormat('yyyy-MM-dd');
 
   bool get _isEditMode => widget.transaction != null;
@@ -125,23 +124,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   // --- Validation ---
 
-  String? _validateLibelle() {
-    final value = _libelleController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
-    if (value.length > 255) return l10n.validationMaxLength(255);
-    return null;
-  }
+  String? _validateLibelle() => validateRequiredText(
+        _libelleController.text,
+        AppLocalizations.of(context)!,
+        maxLength: 255,
+      );
 
-  String? _validateMontant() {
-    final value = _montantController.text.trim();
-    final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
-    final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
-    return null;
-  }
+  String? _validateMontant() => validatePositiveAmount(
+        _montantController.text,
+        AppLocalizations.of(context)!,
+      );
 
   bool _isValid() {
     return _validateLibelle() == null && _validateMontant() == null;
@@ -191,8 +183,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         } catch (_) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Transaction créée. Échec de la récurrence.'),
+              SnackBar(
+                content: Text(
+                  AppLocalizations.of(context)!
+                      .transactionsFeedbackRecurringFailed,
+                ),
               ),
             );
           }
@@ -202,7 +197,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -211,8 +208,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDeleteConfirmDialog(
       context: context,
-      title: l10n.transactionFormDeleteConfirmTitle,
-      message: l10n.transactionFormDeleteConfirmMessage,
+      title: l10n.transactionsDialogDeleteTitle,
+      message: l10n.transactionsDialogDeleteMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {
@@ -223,7 +220,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -265,40 +264,19 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     };
   }
 
-  Widget _buildAccountExpand(List<Account> accounts) {
-    final accountItems = accounts
-        .where((a) => a.actif)
-        .map(
-          (a) => SelectPickerItem(
-            id: a.id,
-            label: a.nom,
-            icon: a.icone,
-            color: parseHexColor(a.couleur),
-            secondaryText: AmountFormatter.format(a.solde),
-            imageUrl: resolveBankAssetPath(a),
-          ),
-        )
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.space4,
-        vertical: AppSpacing.space2,
-      ),
-      child: SelectPicker(
-        items: accountItems,
+  Widget _buildAccountExpand(List<Account> accounts) => AccountSelectExpand(
+        accounts: accounts,
         selectedId: _selectedAccountId,
+        label: AppLocalizations.of(context)!.transactionsFormAccount,
         onChanged: (id) => setState(() {
           _selectedAccountId = id;
           _expandedSection = null;
         }),
-        label: AppLocalizations.of(context)!.transactionFormAccountPicker,
-      ),
-    );
-  }
+      );
 
   Widget _buildNoteExpand() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.space4,
@@ -309,7 +287,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       child: TextField(
         controller: _noteController,
         decoration: InputDecoration(
-          hintText: 'Ajouter une note...',
+          hintText: l10n.transactionsFormNotePlaceholder,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -346,6 +324,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
   Widget _buildRecurringExpand() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final frequencies = [
       Frequency.hebdomadaire,
       Frequency.mensuel,
@@ -361,7 +340,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(
-              'Transaction récurrente',
+              l10n.transactionsFormIsRecurring,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 color: colorScheme.onSurface,
@@ -373,7 +352,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           if (_isRecurring) ...[
             const SizedBox(height: AppSpacing.space2),
             BSheetTypeToggle(
-              labels: const ['Hebdo', 'Mensuel', 'Annuel'],
+              labels: [
+                l10n.recurringValueWeekly,
+                l10n.recurringValueMonthly,
+                l10n.recurringValueYearly,
+              ],
               selectedIndex: selectedFreqIndex.clamp(0, 2),
               onChanged: (i) =>
                   setState(() => _recurringFrequency = frequencies[i]),
@@ -401,6 +384,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     List<Account> accounts,
   ) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final selectedCategory = _selectedCategoryId != null
         ? categories.where((c) => c.id == _selectedCategoryId).firstOrNull
@@ -411,19 +395,26 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
     return [
       BSheetMetaPill(
-        label: _dateFormat.format(_selectedDate),
+        label: DateFormat.yMd(ref.watch(intlLocaleProvider))
+            .format(_selectedDate),
         isActive: _expandedSection == 'date',
         onTap: () => _toggleSection('date'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedCategory?.nom ?? 'Catégorie',
+        label: selectedCategory == null
+            ? l10n.transactionsFormCategory
+            : categoryDisplayName(
+                selectedCategory.nom,
+                selectedCategory.systemKey,
+                l10n,
+              ),
         isActive: _expandedSection == 'categorie',
         onTap: () => _toggleSection('categorie'),
         colorScheme: cs,
       ),
       BSheetMetaPill(
-        label: selectedAccount?.nom ?? 'Compte',
+        label: selectedAccount?.nom ?? l10n.transactionsFormAccount,
         isActive: _expandedSection == 'compte',
         onTap: () => _toggleSection('compte'),
         colorScheme: cs,
@@ -453,9 +444,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         if (!didPop) setState(() => _expandedSection = null);
       },
       child: BottomSheet4RowsWidget(
-        title: _isEditMode ? 'Modifier transaction' : 'Nouvelle transaction',
+        title: _isEditMode
+            ? l10n.transactionsDialogEditTitle
+            : l10n.transactionsDialogCreateTitle,
         topTrailing: BSheetTypeToggle(
-          labels: const ['Dépense', 'Recette'],
+          labels: [
+            l10n.transactionsValueExpense,
+            l10n.transactionsValueIncome,
+          ],
           selectedIndex: _currentType == TransactionType.depense ? 0 : 1,
           onChanged: (i) => setState(
             () => _currentType =
@@ -510,7 +506,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             LibelleAutocompleteField(
               controller: _libelleController,
               decoration: InputDecoration(
-                hintText: l10n.transactionFormLabelField,
+                hintText: l10n.transactionsFormDescriptionPlaceholder,
                 hintStyle: TextStyle(color: cs.onSurfaceVariant),
                 border: InputBorder.none,
                 isDense: true,
@@ -549,7 +545,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   : cs.onSurfaceVariant,
             ),
             onPressed: () => _toggleSection('note'),
-            tooltip: 'Note',
+            tooltip: l10n.transactionsFormNoteAria,
           ),
           if (!_isEditMode)
             IconButton(
@@ -563,7 +559,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     : (_isRecurring ? cs.primary : cs.onSurfaceVariant),
               ),
               onPressed: () => _toggleSection('recurring'),
-              tooltip: 'Récurrence',
+              tooltip: l10n.transactionsFormRecurringAria,
             ),
         ],
         metaPills: _buildMetaPills(categories, accounts),
@@ -573,7 +569,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 BSheetDeletePill(
                   isLoading: _isSubmitting,
                   onTap: _onDelete,
-                  label: l10n.transactionFormDeleteButton,
+                  label: l10n.commonActionDelete,
                 ),
               ]
             : null,
@@ -582,7 +578,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         loading: _isSubmitting,
         onSubmit: _onSubmit,
         submitLabel:
-            _isEditMode ? l10n.transactionFormUpdateButton : l10n.transactionFormSaveButton,
+            _isEditMode ? l10n.commonActionEdit : l10n.commonActionSave,
       ),
     );
   }

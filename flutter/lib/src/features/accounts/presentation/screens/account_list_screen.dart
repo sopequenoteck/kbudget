@@ -81,7 +81,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.accountsTitle),
+        title: Text(l10n.accountsPageTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -90,7 +90,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           } on Exception {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.errorGeneric)),
+                SnackBar(content: Text(l10n.errorsClientGeneric)),
               );
             }
           }
@@ -122,8 +122,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           hasScrollBody: false,
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.warning,
-            message: l10n.accountErrorLoad,
-            ctaLabel: l10n.accountsRetry,
+            message: l10n.accountsFeedbackLoadError,
+            ctaLabel: l10n.commonActionRetry,
             onCtaTap: () =>
                 ref.read(accountNotifierProvider.notifier).refresh(),
           ),
@@ -138,8 +138,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
           hasScrollBody: false,
           child: EmptyStateWidget(
             icon: PhosphorIconsRegular.bank,
-            message: l10n.accountsEmpty,
-            ctaLabel: 'Créer un compte',
+            message: l10n.accountsEmptyTitle,
+            ctaLabel: l10n.accountsActionCreate,
             onCtaTap: () => context.push(
               '${RouteNames.settings}/${RouteNames.settingsAccounts}/${RouteNames.settingsAccountsNew}',
             ),
@@ -164,7 +164,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
               Row(
                 children: [
                   Text(
-                    '${items.length} comptes'.toUpperCase(),
+                    l10n.accountsListCount(items.length).toUpperCase(),
                     style: TextStyle(
                       fontSize: AppTypography.sizeXs,
                       fontWeight: AppTypography.semiBold,

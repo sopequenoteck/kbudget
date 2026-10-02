@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component, effect, input, signal } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { type BudgetOverview, type BudgetOverviewItem } from '../../../../core/models/budget.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 
 @Component({
   selector: 'app-budget-summary',
   standalone: true,
-  imports: [AmountPipe],
+  imports: [AmountPipe, CategoryNamePipe, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (overview(); as ov) {
       <div class="budget-summary__subtitle">
-        <span>MENSUEL · EN {{ ov.currency }}</span>
+        <span>{{ 'budgets.summary.monthlyInCurrency' | transloco: { currency: ov.currency } }}</span>
         <span>{{ ov.totalSpent | amount: null : ov.currency }} / {{ ov.totalBudget | amount: null : ov.currency }}</span>
       </div>
     }
@@ -37,7 +39,7 @@ import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
           <li class="budget-item">
             <div class="budget-item__header">
               <span class="budget-item__icon">{{ item.categoryIcone }}</span>
-              <span class="budget-item__name">{{ item.categoryNom }}</span>
+              <span class="budget-item__name">{{ item.categoryNom | categoryName: item.categorySystemKey }}</span>
               <span
                 class="budget-item__amounts"
                 [class.over-budget]="item.percentage > 100"

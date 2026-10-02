@@ -5,6 +5,472 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.7.0] - 2026-10-02
+
+> L'import de releves devient utilisable de bout en bout : il part de l'ecran
+> Transactions, reconnait le format et le compte depuis le fichier, verifie le
+> solde avec celui de la banque, rapproche les saisies manuelles et les
+> paiements d'abonnement, et la revue ne montre que les exceptions. Un ecran de
+> rattrapage corrige l'historique deja en base. Les deux clients sont
+> disponibles en anglais et en francais. `MIN_CLIENT_VERSION` reste a 6.0.0,
+> aucune variable d'environnement nouvelle, aucun champ de reponse retire. Le
+> format de l'export CSV change en revanche (en-tetes et types, voir *Changed*) :
+> un script qui le lisait est a adapter.
+>
+> Une instance qui suit `latest` avec un outil de mise a jour automatique
+> appliquerait les migrations ci-dessous sans sauvegarde : epingler la version
+> d'abord ([docs/deployment.md](docs/deployment.md#updating)).
+
+> **Changement de comportement (KKS-380) : l'interface passe en anglais par
+> defaut.** Un utilisateur qui n'a pas choisi de langue voit desormais
+> l'interface dans la langue de son navigateur, et en anglais si celle-ci n'est
+> ni l'anglais ni le francais. Un navigateur en francais continue d'afficher le
+> francais. Le choix se fait dans Reglages > Apparence > Langue. L'application
+> Flutter suit la meme regle avec la langue du telephone (KKS-405).
+
+> **Cinq migrations de base (V38, V39, V40, V41, V42) : sauvegarder avant de mettre
+> a jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
+> aucune donnee existante. V39 ajoute une colonne et la renseigne pour les
+> categories systeme existantes, sans modifier d'autre donnee. V40 ajoute une
+> colonne nullable aux notifications, sans modifier de donnee. V41 ajoute deux
+> colonnes nullables aux comptes et quatre aux brouillons d'import, sans modifier
+> de donnee. V42 ajoute des colonnes nullables aux lignes de brouillon et aux
+> abonnements, et un compteur a zero aux brouillons, sans modifier de donnee.
+
+### Added
+
+- **Nouvelle revue d'import : les exceptions seules (KKS-386)** : l'import de releve
+  quitte Parametres et passe par l'ecran Transactions. La revue ne montre plus toutes
+  les lignes a plat avec un menu par ligne, mais ce qui demande une decision.
+  - **Entree** : icone « Importer un releve » dans l'en-tete de l'ecran Transactions
+    (`/transactions/import`). L'icone d'import d'un compte mene au meme parcours
+    (`?accountId=`). Parametres → Import ne garde que la gestion (brouillons,
+    historique, regles, profils) et un lien vers le nouveau parcours ; l'ancienne
+    URL `/settings/import/review/:draftId` redirige vers la nouvelle revue.
+  - **Depart** : choix du fichier, reconnaissance du format (`/imports/detect`), puis
+    choix **explicite** du compte. Le compte n'est coche que si l'API en reconnait un
+    (`suggestedAccountId`) ou si l'URL en porte un : jamais le compte par defaut — un
+    reimport partait sinon, sans bruit, sur le mauvais compte. Format inconnu : passage
+    au mappage existant, dont la navigation suit le nouveau parcours (un rechargement
+    de la page renvoie au depart au lieu d'un ecran vide). Brouillon deja ouvert pour
+    le compte : lien « Reprendre le brouillon en cours ».
+  - **Revue** : solde de la banque a la date du releve, compteurs (nouvelles, deja
+    importees, rapprochees, categorisees automatiquement) et, au premier import,
+    interrupteur « Aligner le solde initial sur la banque » (actif par defaut). Le
+    corps ne liste que les exceptions : lignes a trancher (choisir un candidat, creer
+    une transaction, ignorer ; doublon probable : importer quand meme ou ignorer),
+    erreurs de lecture, et lignes sans categorie **regroupees par commercant** (un seul
+    choix par groupe, l'API propage et cree la regle). Les lignes sans categorie ne
+    bloquent jamais la confirmation. Les decisions deja prises restent dans des groupes
+    repliables, chacun corrigible : rapprochees (« Defaire »), categorisees
+    automatiquement ou par l'utilisateur, deja importees (lecture seule), ignorees
+    (« Restaurer »).
+  - **Resultat** : transactions creees, rapprochees, deja importees, puis le controle
+    du solde — « Solde identique a celui de la banque », ou l'ecart et la liste des
+    operations de la periode absentes du releve (doublons probables).
+  - API (ajout seul) : `merchantKey` sur les lignes de brouillon, la cle sur laquelle
+    l'API propage une correction de categorie. **Correction** : une ligne ignoree par
+    l'utilisateur (`skipReason` nul) peut repasser `READY` ; une ligne ecartee par
+    l'import (`ALREADY_IMPORTED`) reste non restaurable. L'action groupee « valider »
+    n'echoue plus en 400 des qu'une ligne ignoree figure dans la selection.
+  - Les cles i18n de l'ancienne revue sont retirees ; les nouvelles sont en anglais et
+    en francais (domaine `imports`).
+
+- **Rattrapage de l'historique deja en base (KKS-387)** : les imports futurs sont
+  corriges par KKS-382 a KKS-386, pas les donnees existantes. Sur un compte reel :
+  681,09 EUR de transactions en double (11 saisies retrouvees dans le releve,
+  8 paiements d'abonnement crees a cote du prelevement reel dont 3 sur un double
+  clic), 104 transactions sans categorie dont 63 categorisables par l'historique,
+  et un ajustement de solde qui compensait ces erreurs. Un passage unique,
+  declenche par l'utilisateur, qui **propose** et ne modifie rien sans validation :
+  les `GET` ne changent rien, chaque `POST` applique une proposition validee, et
+  seules les donnees de l'utilisateur authentifie sont lues ou ecrites.
+  - `GET /history-cleanup/duplicates` : operations importees deja saisies (memes
+    compte, sens et montant, date dans la fenetre du rapprochement de KKS-385) et
+    paiements d'un meme abonnement pour une meme echeance. `POST
+    /history-cleanup/duplicates/merge` garde la saisie, lui donne l'empreinte de
+    l'importee (un reimport la reconnait) et supprime l'importee ; `POST
+    /history-cleanup/subscription-duplicates/merge` ne garde qu'un paiement.
+    Une transaction qui rembourse une dette n'est supprimee que si celle conservee
+    rembourse la meme dette.
+  - `GET /history-cleanup/uncategorized` : transactions sans categorie groupees par
+    commercant, avec la categorie proposee (regle, historique au meme montant, puis
+    historique du commercant). `POST /history-cleanup/uncategorized/apply` applique
+    la categorie choisie et retient une regle `AUTO` ; une regle `MANUAL` n'est jamais
+    modifiee.
+  - `GET /history-cleanup/adjustments` : ajustements de solde par compte, avec
+    `probablyUnnecessary` quand le dernier solde bancaire connu (KKS-384) egalerait le
+    solde calcule sans eux. Lecture seule. Un ajustement deja compense par un
+    ajustement de montant oppose, date le meme jour ou apres, n'est plus signale.
+  - **Ecran** (Parametres → Import → « Lancer le rattrapage »,
+    `/settings/import/history-cleanup`) : quatre sections, chacune absente si vide.
+    Operations deja saisies et paiements d'abonnement en double : choisir ce qu'on
+    garde, puis fusionner ; un paiement issu d'un releve est toujours garde. Sans
+    categorie : un groupe par commercant, « Appliquer » la categorie proposee ou en
+    choisir une ; les transactions sans commercant reconnaissable sont seulement
+    comptees. Ajustements a recaler : « Recaler sur la banque » cree l'ajustement
+    inverse par `adjust-balance`, rien n'est supprime. « Ce n'est pas un doublon »
+    et « Ignorer » ne masquent une proposition que pour la session.
+  - API (ajouts seuls, aucune migration) : nouveaux endpoints sous `/history-cleanup`
+    et deux codes d'erreur `409`, `CLEANUP_PROPOSAL_STALE` et
+    `CLEANUP_DEBT_LINK_MISSING`.
+
+- **Rapprochement des saisies manuelles et des lignes de releve (KKS-385)** : une
+  operation saisie a la main puis retrouvee dans le releve n'est plus comptee deux
+  fois. Sur des donnees reelles, 11 saisies en double (355,90 EUR comptes deux fois)
+  avaient un libelle sans rapport avec celui de la banque ; les paiements carte,
+  67 % des operations, sont comptabilises 1 a 4 jours apres l'achat.
+  - **Date d'achat** : lue dans le libelle brut quand le profil la declare
+    (`CARTE X1596 21/08`) et exposee en `purchaseDate` ; la date comptable reste
+    celle de la ligne et de l'empreinte. La transaction creee a la confirmation
+    prend la date d'achat si elle est connue.
+  - **Rapprochement** : meme utilisateur, meme compte, transaction sans empreinte,
+    meme sens, meme montant, dans une fenetre de dates — 8 jours si la transaction
+    est liee a un abonnement, sinon 2 jours autour de la date d'achat, sinon de
+    5 jours avant a 1 jour apres la date comptable. **Le libelle n'est pas un
+    critere.** Un candidat : la ligne est rapprochee (`matchedTransactionId`), et a
+    la confirmation la transaction existante est conservee telle quelle (date,
+    libelle, categorie, lien a une dette ou un abonnement) et recoit l'empreinte, sans
+    rien creer. Plusieurs candidats : la ligne devient `DUPLICATE` avec
+    `matchCandidateIds`, rien n'est decide.
+  - **Revue** : `PUT /imports/drafts/{id}/lines/{lineId}` accepte les champs
+    **optionnels** `matchedTransactionId` (choisir une transaction) et `clearMatch`
+    (defaire le rapprochement). Le solde verifie (KKS-384) compte une transaction
+    rapprochee comme expliquee.
+  - **Abonnements** : une ligne qui correspond, par libelle de releve et montant, a un
+    seul abonnement actif cree une transaction rattachee a cet abonnement
+    (`subscriptionId`) ; le libelle de releve d'un abonnement est appris quand une
+    ligne est rapprochee d'un de ses paiements. Un abonnement dont le paiement a
+    ete saisi n'est plus doublonne.
+  - **`POST /subscriptions/{id}/pay` est idempotent** : si une transaction liee a
+    l'abonnement existe deja dans la periode courante, elle est renvoyee et rien n'est
+    cree (un double clic creait trois paiements).
+  - API (ajouts seuls) : `purchaseDate`, `matchedTransactionId`, `matchCandidateIds`
+    et `subscriptionId` sur les lignes, avec le detail des transactions concernees
+    (KKS-386) en `matchedTransaction` et `matchCandidates` (`id`, `date`, `libelle`,
+    `montant`, `type`), lu en une requete et limite aux transactions de l'utilisateur ; `matchedCount` sur le brouillon, la liste des
+    brouillons et la reponse de confirmation (`importedCount` ne compte plus que les
+    transactions creees). Migration V42, additive.
+  - Changement de comportement : une saisie manuelle de meme sens et de meme montant
+    a la meme date n'est plus un doublon probable a trancher mais un rapprochement,
+    quel que soit son libelle ; le doublon probable (libelle proche) ne concerne
+    plus que les transactions deja importees d'un releve.
+
+- **Solde du releve : solde d'ouverture, controle apres import, compte reconnu
+  (KKS-384)** : la banque donne le solde reel dans l'en-tete de chaque releve ;
+  l'import s'en sert au lieu de l'ajustement manuel. Sans en-tete exploitable
+  (profil personnalise, valeur illisible), tous les nouveaux champs valent `null`
+  et le comportement est inchange.
+  - API (ajouts seuls) : le brouillon expose `statementAccountSuffix`,
+    `statementBalance`, `statementBalanceDate`, `projectedBalance` et, au premier
+    import du compte, `proposedOpeningBalance`. `POST /imports/drafts/{id}/confirm`
+    accepte un corps **optionnel** `{"applyOpeningBalance": true}` (une confirmation
+    sans corps fonctionne comme avant) et renvoie `balanceCheck` (solde bancaire,
+    solde calcule, difference, transactions suspectes : celles de la periode du
+    releve qu'aucune ligne n'explique, ajustements exceptes). `POST /imports/detect`
+    renvoie `accountSuffix` et `suggestedAccountId` ; `GET /accounts` expose
+    `statementAccountSuffix`.
+  - Le compte est reconnu par profil + 4 derniers chiffres du numero : le numero
+    complet n'est jamais stocke. Deux comptes actifs de l'utilisateur avec la meme
+    association : aucune suggestion. Jamais lue ni ecrite d'un utilisateur a l'autre.
+  - Migration V41, additive (colonnes nullables).
+
+- **Profils d'import en fichiers et reconnaissance du format (KKS-440)** :
+  Le profil Societe Generale n'est plus code en dur :
+  il est lu dans `api/src/main/resources/import-profiles/sg.yaml`, un format de
+  fichier versionne (`formatVersion: 1`) qui decrit aussi la signature du format,
+  l'en-tete bancaire (compte, solde, date du solde) et la date d'achat portee par
+  le libelle. Un fichier invalide est journalise et ignore, il n'empeche jamais
+  le demarrage.
+  - API : `POST /imports/detect` reconnait le format d'un fichier sans rien
+    creer (`recognized`, `profileSource`, `bankCode`, `profileName`). Le
+    `/imports/upload` reconnait desormais le fichier par ses colonnes, y compris
+    avec un profil personnalise de l'utilisateur, et ne se replie sur le
+    `bankCode` du compte qu'ensuite : un releve Societe Generale charge sur le
+    compte d'une autre banque n'exige plus de mapping manuel, et un mapping
+    sauvegarde est reutilise au reimport. Aucune migration de base.
+
+- **Infrastructure d'internationalisation d'Angular et preference de langue
+  (KKS-373)** : etape 1 sur 8 de KKS-325. **Aucun changement visible** : le
+  francais reste la langue par defaut, et aucun selecteur n'apparait avant
+  KKS-380.
+  - API : preference `language` sur `/users/me/preferences` et dans l'export.
+    C'est une chaine BCP 47 validee par motif (`en`, `fr`, `pt-BR`), pas un
+    enum : ajouter une langue communautaire ne doit demander aucune release de
+    l'API. Colonne nullable sans valeur par defaut, car `NULL` signifie « pas
+    choisi » et permettra a KKS-380 de retenir la langue du navigateur. Trois
+    champs de reponse ajoutes au contrat, aucun champ de requete.
+  - Angular : Transloco avec MessageFormat (ICU), catalogues `/i18n/en.json` et
+    `/i18n/fr.json` charges a l'execution et mis en cache par le service
+    worker, francais precharge avant le premier rendu. Une seule image sert
+    toutes les langues.
+  - La constante `APP_LOCALE` disparait au profit de `LanguageService`
+    (`fr-FR`, `en-GB`) : montants, dates et tris suivent la langue active, y
+    compris les valeurs deja affichees.
+  - Les messages d'erreur de KKS-324 passent dans les catalogues, a
+    l'identique.
+  - `docs/i18n.md` est corrige : il prescrivait de regler l'interpolation de
+    Transloco sur `{ }`, ce qui vide tout pluriel ICU. Un test verrouille desormais
+    ce comportement.
+- **Textes partages d'Angular dans les catalogues (KKS-374)** : etape 2 sur 8
+  de KKS-325, **aucun changement visible**. Les textes de `shared/` et `core/`
+  (formulaires de compte, de categorie et de virement, navigation, bouton +,
+  modales, notifications, selecteurs) passent dans les catalogues, et fixent le
+  vocabulaire `common.*` que les etapes par domaine reutiliseront. Le
+  calendrier tire noms de mois et initiales de jour de la langue active.
+  Restent en francais jusqu'a leur etape : les descriptions des
+  fonctionnalites optionnelles et les regles de mot de passe.
+- **Transactions et recurrences dans les catalogues (KKS-377)** : etape 5 sur 8
+  de KKS-325. L'ecran des transactions, le formulaire de transaction et la
+  liste des recurrences passent dans les catalogues, pluriels compris. Deux
+  textes changent : « 0 revenus » devient « 0 recettes » (le vocabulaire de
+  l'application est Recette), et le bilan des recurrences affiche « 1 charge »
+  au lieu de « 1 charges ».
+- **Dettes et abonnements dans les catalogues (KKS-378)** : etape 6 sur 8 de
+  KKS-325. Ecrans, detail, formulaires et dialogues de remboursement et de
+  report passent dans les catalogues. Emprunt et Pret se traduisent *Borrowed*
+  et *Lent*. Seuls les pluriels changent a l'ecran : « 1 pret », « 1 emprunt »,
+  « 1 paiement », « 1 abonnement ».
+- **Budgets, tableau de bord, connexion et compatibilite dans les catalogues
+  (KKS-379)** : etape 7 sur 8 de KKS-325, la derniere extraction par domaine
+  avant la bascule. « Non budgete » se traduit *Unbudgeted*, « Patrimoine
+  total » *Total net worth*. A l'ecran, seuls changent les pluriels (« 1
+  budget », « 1 actif », « 1 transaction ») et « 0 revenus », devenu « 0
+  recettes » sur le tableau de bord comme sur l'ecran des transactions.
+- **Import CSV dans les catalogues (KKS-376)** : etape 4 sur 8 de KKS-325.
+  Profils d'import, brouillons, regles de categorisation, correspondance des
+  colonnes et revue passent dans les catalogues ; les noms de banques restent
+  des donnees. Seuls les accords changent a l'ecran (« 1 transaction », « 2
+  lignes selectionnees » au lieu de « ligne(s) selectionnee(s) »).
+- **Reglages dans les catalogues (KKS-375)** : etape 3 sur 8 de KKS-325, la
+  derniere extraction avant la bascule. Ecran des reglages, « Mon compte »
+  (*Profile*), administration des utilisateurs, comptes, categories et devises.
+  La liste des comptes affiche desormais « Courant », « Epargne » ou « Especes »
+  au lieu du code interne (`COURANT`) ; « 1 compte » et « 1 categorie » au
+  singulier.
+- **Noms de devises dans les catalogues (KKS-393)** : ils venaient de quatre
+  sources qui ne concordaient pas, dont le nom francais servi par l'API. Deux
+  libelles changent : « Dollar US » (au lieu de « Dollar americain ») et « Franc
+  CFA (BCEAO) » (au lieu de « Franc CFA ») dans les reglages des devises. Le
+  champ `name` de `/currencies` reste servi, mais les clients ne l'affichent
+  plus.
+- **Choix de la langue de l'interface (KKS-380)** : derniere etape de
+  KKS-325. Anglais par defaut, francais complet ; sans choix, l'interface suit
+  le navigateur. Nouvelle ligne « Langue » dans Reglages > Apparence :
+  « Automatique », « English », « Francais ». Le changement s'applique sans
+  recharger la page. La derniere langue utilisee est memorisee sur l'appareil,
+  pour que la page de connexion s'affiche deja dans la bonne langue.
+  - API : `DELETE /users/me/preferences/language` remet la preference a `null`
+    (retour au choix automatique) ; `PUT` ne le permettait pas, un `language`
+    absent y signifiant « inchange ».
+- **Categories systeme traduites (KKS-395)** : « Abonnement », « Dette »,
+  « Virement » et « Ajustement » s'affichent dans la langue de l'interface.
+  L'API les retrouve desormais par une cle stable (`systemKey`), et non plus
+  par leur nom francais.
+  - API : nouveaux champs `systemKey` (categorie) et `categorySystemKey`
+    (budgets, regles et lignes d'import) dans les reponses ; `nom` reste servi.
+- **Textes generes dans la langue de l'interface (KKS-396)** : libelles de
+  virement, de remboursement et d'ajustement de solde, et nom du compte cree a
+  l'invitation. Angular les envoie dans la langue affichee ; en francais, rien
+  ne change a l'ecran.
+  - API : champs optionnels `libelleDebit` / `libelleCredit` (virement),
+    `libelle` (ajustement, remboursement), `defaultAccountName` (acceptation
+    d'invitation).
+- **Notifications dans la langue de l'interface (KKS-397)** : echeances
+  d'abonnement, de dette et de transaction recurrente, rappels de dette, seuils
+  et depassements de budget. Le texte suit la langue affichee ; montants et
+  dates sont formates selon la langue. Les notifications anterieures gardent
+  leur texte d'origine, jusqu'a leur purge au bout de 90 jours.
+  - API : champ `params` sur les notifications (REST et WebSocket).
+- **Captures du README dans les deux langues (KKS-394)** : `README.md` montre
+  l'interface anglaise, `README.fr.md` l'interface francaise, sur des donnees
+  equivalentes. Nouvel utilisateur de demo anglais `demo@local.test`, miroir
+  traduit de `dev@local.test` (profil `dev` uniquement). Captures obsoletes
+  supprimees.
+- **Infrastructure d'internationalisation de Flutter (KKS-398)** : etape 1 sur
+  8 de KKS-326. **Aucun changement visible** : le francais reste force jusqu'a
+  KKS-405. `app_en.arb` devient le catalogue de reference. Les cles dont le
+  texte correspond a une cle Angular du meme domaine prennent son nom, et 98
+  cles mortes sont supprimees (179 cles au lieu de 302). La locale d'affichage
+  vient d'un seul provider, qui remplace toutes les locales francaises codees
+  en dur.
+- **Ecrans partages et non connectes de Flutter dans les catalogues
+  (KKS-399)** : etape 2 sur 8 de KKS-326. Connexion, premier acces,
+  acceptation d'invitation, ecran de verrouillage, onboarding, ecran
+  d'incompatibilite, composants partages et messages d'erreur. Certains textes
+  francais reprennent la formulation d'Angular, par exemple « Connectez-vous a
+  votre compte », « Ce champ est requis. » ou « Impossible de contacter le
+  serveur ». Les accents manquants sont corriges. Les messages d'erreur
+  n'affichent plus le detail technique de l'exception. Le nom d'affichage est
+  limite a 100 caracteres, comme cote API.
+- **Transactions, recurrences, categories et comptes de Flutter dans les
+  catalogues (KKS-400)** : etape 3 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Aucune
+  transaction en septembre 2026 », « Effectuer le virement », « Occurrence
+  passee » ou « Nom requis ». Les recurrences affichent leur frequence
+  (« Mensuel ») au lieu d'un suffixe (« /mois »), et les compteurs de charges
+  et de comptes accordent le singulier. Les messages d'erreur n'affichent
+  plus le detail technique de l'exception. Cote Angular, trois accents
+  manquants sont corriges dans le formulaire de categorie.
+- **Dettes et abonnements de Flutter dans les catalogues (KKS-401)** : etape
+  4 sur 8 de KKS-326. Plusieurs textes francais reprennent la formulation
+  d'Angular, par exemple « Solde net » et « Total mensuel » en tete des
+  ecrans, « Remboursement », « Date du rappel » ou « Voulez-vous vraiment
+  supprimer cette dette ? ». Les compteurs accordent le singulier (« 1
+  paiement », « 1 actif »), la progression d'une dette suit le format de la
+  langue (« 50 % ») et les messages d'erreur n'affichent plus le detail
+  technique de l'exception. Les noms de devises sont traduits dans toute
+  l'application (« Dollar US »).
+- **Budgets, tableau de bord et panneau de notifications de Flutter dans les
+  catalogues (KKS-402)** : etape 5 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Aucun budget
+  pour cette periode », « Nouveau budget », « Voulez-vous vraiment supprimer
+  ce budget ? » ou « Non budgete » en titre des depenses hors budget. Le
+  compteur de budgets accorde le singulier (« 1 budget »), les pourcentages
+  suivent le format de la langue (« 80 % », « +12,3 % ») et les messages
+  d'erreur n'affichent plus le detail technique de l'exception.
+- **Reglages, profil et barre de navigation de Flutter dans les catalogues
+  (KKS-403, 1re partie)** : etape 6 sur 8 de KKS-326. Plusieurs textes
+  francais reprennent la formulation d'Angular, par exemple « Parametres »
+  en titre des reglages, « Profil, securite, deconnexion », « Gere par
+  l'admin » ou « Ce champ est requis. ». Les messages d'erreur des
+  preferences et du profil n'affichent plus le detail technique de
+  l'exception. Le message de suppression de compte garde le texte Flutter,
+  fidele au comportement de l'API : compte desactive, donnees conservees.
+- **Administration et devises & taux de Flutter dans les catalogues (KKS-403,
+  2e partie)** : fin de l'etape 6 sur 8 de KKS-326. Les textes francais
+  reprennent la formulation d'Angular, par exemple « Inviter un utilisateur »,
+  « Aucune invitation pour le moment », « Mes devises » ou « Aucun taux
+  configure », et les statuts d'invitation passent au feminin (« Active »,
+  « Expiree »). Le second onglet de l'administration s'appelle « Utilisateurs »
+  et non plus « Comptes ». Les noms de devise sont traduits partout, y compris
+  dans les listes du formulaire de taux, du calculateur et de l'ajout de
+  devise, qui affichaient le code brut. Les taux suivent le format de la langue
+  (« 655,957 ») avec au plus six decimales. Les messages d'erreur n'affichent
+  plus le detail technique de l'exception. Le calculateur de taux, sans
+  equivalent Angular, est conserve et traduit.
+- **Textes generes envoyes par Flutter (KKS-423)** : premiere partie de
+  l'etape 7 sur 8 de KKS-326. Comme Angular, Flutter envoie dans la langue
+  affichee les libelles de virement (« Virement vers X », « Virement depuis
+  X »), d'ajustement de solde (« Ajustement de solde ») et de remboursement
+  de dette (« Remboursement - X »), ainsi que le nom du compte cree a
+  l'acceptation d'une invitation (« Compte Principal »). L'API n'y ecrit plus
+  son defaut anglais. La liste des devises du formulaire de compte affiche le
+  nom traduit (« Dollar US ») au lieu du code brut, et l'enum `Currency` ne
+  porte plus de noms francais en dur.
+- **Categories systeme traduites dans Flutter (KKS-424)** : seconde partie de
+  l'etape 7 sur 8 de KKS-326. Flutter lit `systemKey` (categories) et
+  `categorySystemKey` (vue d'ensemble, historique et hors-budget des budgets)
+  et affiche le nom d'une categorie systeme dans la langue de l'interface
+  (« Abonnement », « Dette », « Virement », « Ajustement ») au lieu du nom
+  anglais stocke pour un nouvel utilisateur. Le selecteur de categorie
+  cherche sur le nom affiche. Une categorie utilisateur, ou une cle inconnue,
+  garde son nom. Le widget `CategoryPicker`, sans appelant, est supprime.
+- **Notifications traduites dans Flutter (KKS-425)** : suite de l'etape 7 sur
+  8 de KKS-326, pendant Flutter de KKS-397. Le panneau et la notification
+  systeme construisent titre et message depuis `type` et `params`, dans la
+  langue affichee, avec les textes d'Angular : montant formate avec sa devise,
+  date d'echeance en toutes lettres, categorie systeme traduite. Une
+  notification sans `params` (anterieure a V40), d'un type inconnu ou a qui
+  manque un parametre garde son texte stocke. Le canal Android est nomme et
+  decrit dans la langue affichee.
+- **Langue de Flutter : anglais par defaut, langue du systeme et selecteur
+  (KKS-405)** : derniere etape (8 sur 8) de KKS-326, pendant Flutter de
+  KKS-380. **Changement visible** : le francais n'est plus impose. Sans choix
+  de langue, l'application suit la langue du telephone, et l'anglais si
+  celle-ci n'est ni l'anglais ni le francais. Le choix se fait dans Reglages >
+  Apparence > Langue (« Auto », « English », « Français ») ; il est enregistre
+  sur le serveur et suit l'utilisateur d'un client a l'autre, ou sur
+  l'appareil en mode local. La bascule s'applique sans redemarrage.
+- **Traduction communautaire par pull request (KKS-439)** : le depot est pret
+  a recevoir une nouvelle langue. Guide « Translating k-budget » dans
+  `CONTRIBUTING.md`, politique et liste de controle d'activation dans
+  `docs/i18n.md` (« Adding a language ») : une langue est activee a 100 % des
+  cles, client par client, et n'est jamais retiree ; une traduction partielle
+  peut etre fusionnee sans etre activee. Controles bloquants de tous les
+  catalogues presents, Angular et Flutter : aucune cle inconnue de l'anglais,
+  toutes les cles pour une langue activee, memes parametres ICU que l'anglais,
+  ICU valide (Angular), listes de langues accordees. Weblate viendra avec le
+  premier traducteur (KKS-327).
+
+### Changed
+
+- **Flutter : une langue sans locale de formatage retombe sur l'anglais
+  (KKS-439)** : `intlLocaleFor` renvoie `en_GB`, plus `fr_FR`, pour une langue
+  autre que `fr` et `en`. Aucun effet sur les langues actuelles.
+- **Titre et message des notifications en anglais (KKS-397)** : le client
+  Flutter les affiche en anglais jusqu'a KKS-326.
+- **Textes par defaut de l'API en anglais (KKS-396)** : un client qui n'envoie
+  pas ces champs recoit des libelles anglais (`Transfer to X`, `Repayment - X`,
+  `Balance adjustment`, `Main account`) — c'est le cas du client Flutter
+  jusqu'a KKS-326 et du premier administrateur. Les categories systeme d'un
+  nouvel utilisateur s'appellent `Subscription`, `Debt`, `Transfer`, `Balance
+  adjustment`. Les donnees existantes ne changent pas.
+- **Export CSV : nouveau format (KKS-396)**. En-tetes
+  `date,label,amount,currency,account,category,type`, types en codes
+  (`RECETTE`, `DEPENSE`, `AJUSTEMENT`) au lieu de « Revenu / Depense /
+  Ajustement ». Un script qui lisait l'ancien format doit etre adapte.
+- **Analyse Sonar d'Angular : le blame git est recalcule a chaque analyse
+  (KKS-373)** : `sonar.scm.forceReloadAll=true`. Le nouveau code est determine
+  par `git blame`, que Sonar ne recalculait que pour les fichiers de contenu
+  modifie. Or toutes les analyses ecrasent le meme projet : une PR d'arbre
+  identique a une autre etait notee sur l'historique de celle-ci.
+
+### Fixed
+
+- **Double paiement d'un abonnement sur un double appui (KKS-444)** : payer un
+  abonnement verifie d'abord qu'aucun paiement n'existe sur l'echeance courante
+  (KKS-385), puis en cree un. Deux requetes quasi simultanees (double appui sur
+  mobile) lisaient toutes deux « aucun paiement » et en creaient chacune un.
+  La ligne de l'abonnement est desormais verrouillee pour la duree de la
+  transaction : la seconde requete attend la premiere, voit son paiement et le
+  renvoie. Aucune migration, aucun changement de contrat d'API.
+- **Solde initial propose qui absorbait une saisie que le releve n'explique pas
+  (KKS-443)** : au premier import d'un compte, le solde initial propose comptait
+  toutes les transactions existantes de la periode. Une saisie absente du releve
+  (un doublon a venir, ou une depense oubliee par la banque) etait donc
+  absorbee : « solde identique », depenses gonflees, et la saisie n'etait plus
+  jamais signalee. La proposition laisse desormais de cote les transactions de
+  la periode que ni une ligne rapprochee ni un doublon reconnu n'explique, les
+  memes que les « suspects » du controle de solde : apres confirmation avec le
+  solde initial propose, l'ecart apparait et la saisie est listee. Exemple :
+  solde banque 1 842,37 EUR, lignes du releve de +895,70 EUR, saisie de
+  30,00 EUR absente du releve : 946,67 EUR proposes (976,67 EUR avant), puis un
+  ecart de -30,00 EUR. Sans saisie de ce genre, rien ne change. Le solde projete
+  reste le solde reel de l'application, toutes transactions comptees.
+- **Pied des formulaires de Flutter sur un ecran etroit** : en modification
+  d'une dette, les boutons « Supprimer », « Non rembourse » et « Modifier »
+  debordaient d'un ecran de 360 px de large. Les boutons de gauche defilent
+  desormais horizontalement quand la place manque.
+- **Panneau des notifications bloque sur son chargement (Flutter)** : une
+  notification d'un type, ou liee a une entite, inconnu de l'application
+  faisait echouer le chargement de toute la liste. Elle s'affiche desormais
+  avec son texte stocke, une cloche et sans action rapide.
+- **Abonnements hebdomadaires affiches « /an » dans la liste (Flutter)** :
+  le suffixe suit desormais la frequence (« /sem »).
+- **Montants et pourcentages selon la langue affichee** : la variation du mois
+  du tableau de bord (« +64.4% » en francais) et l'equivalent converti sous un
+  montant en devise etrangere (« ~ 18.29 € » en anglais) suivent desormais la
+  langue de l'interface.
+- **Recurrences : resume mensuel dans la devise principale** : le solde
+  s'affichait toujours en euros, quelle que soit la devise principale.
+- **Recurrences : lignes de la liste a nouveau pleine largeur** : elles ne
+  remplissaient plus la carte et leur texte etait centre, depuis la v5.0.0.
+- **Dates decalees d'un jour dans les fuseaux en retard sur UTC (Ameriques)** :
+  dates affichees, echeances (« demain » au lieu d'« aujourd'hui »), groupes
+  « Aujourd'hui / Hier » et retards des dettes, recurrences, transactions,
+  budgets et abonnements. Le report d'un rappel de dette refusait la date du
+  jour. Le compteur de retards du tableau de bord se trompait de jour en debut
+  de nuit (fuseaux en avance) ou en soiree (fuseaux en retard).
+
+### Security
+
+- **Revue d'import : le bandeau de suggestion de regle echappe le libelle du
+  releve (KKS-376)**. Il affiche ce libelle et le nom de categorie en gras via
+  du HTML traduit ; sans echappement, un releve contenant du balisage (`<img>`,
+  `<a>`) l'aurait fait rendre par la page. Trouve a la relecture de l'etape
+  d'extraction, avant toute livraison : aucune version publiee n'est touchee.
+
 ## [6.6.1] - 2026-09-25
 
 > **Aucune migration de base.** Un correctif d'affichage dans l'ecran de revue
@@ -933,7 +1399,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...HEAD
+[6.7.0]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...v6.7.0
 [6.6.1]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...v6.6.1
 [6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0
 [6.5.2]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...v6.5.2

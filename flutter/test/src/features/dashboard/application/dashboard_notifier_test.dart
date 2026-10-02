@@ -14,6 +14,7 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -153,6 +154,7 @@ void main() {
   }) {
     return ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         appConfigRepositoryProvider.overrideWithValue(mockAppConfigRepo),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
@@ -425,8 +427,10 @@ void main() {
 
       expect(errorContainer.read(dashboardNotifierProvider).isLoading, false);
       expect(errorContainer.read(dashboardNotifierProvider).error, isNotNull);
-      expect(errorContainer.read(dashboardNotifierProvider).error,
-          contains('Storage error'));
+      expect(
+        errorContainer.read(dashboardNotifierProvider).error,
+        'Erreur de chargement',
+      );
     });
 
     test('should_setIsLoadingTrue_during_loadDashboard', () async {

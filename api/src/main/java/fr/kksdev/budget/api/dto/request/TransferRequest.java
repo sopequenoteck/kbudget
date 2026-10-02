@@ -11,5 +11,7 @@ public record TransferRequest(
         @NotNull UUID fromAccountId,
         @NotNull UUID toAccountId,
         @NotNull @DecimalMin("0.01") BigDecimal montant,
-        @Size(max = 500) String note
+        @Size(max = 500) String note,
+        @Size(max = 255) String libelleDebit,
+        @Size(max = 255) String libelleCredit
 ) {}

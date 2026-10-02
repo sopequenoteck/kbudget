@@ -1,20 +1,38 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { TranslocoService } from '@jsverse/transloco';
+import { LanguageService } from '../../core/services/language';
+import { parseLocalDate } from '../utils/date.utils';
 
-const longDateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
+// Cache par locale (KKS-373, D8) : le format long change de langue sans
+// reconstruire un `Intl.DateTimeFormat` a chaque rendu.
+const longDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
-@Pipe({ name: 'relativeDate', standalone: true, pure: true })
+function getLongDateFormatter(locale: string): Intl.DateTimeFormat {
+  let formatter = longDateFormatterCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    longDateFormatterCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
+// Impure (KKS-373, D8) : un pipe pur memorise sur l'identite de `value` et ne
+// rappellerait jamais `transform` au seul changement de langue.
+@Pipe({ name: 'relativeDate', standalone: true, pure: false })
 export class RelativeDatePipe implements PipeTransform {
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
   transform(value: string | null | undefined): string {
     if (!value) {
       return '';
     }
 
-    const date = new Date(value);
+    const date = parseLocalDate(value);
     if (isNaN(date.getTime())) {
       return '';
     }
@@ -29,26 +47,26 @@ export class RelativeDatePipe implements PipeTransform {
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return "Aujourd'hui";
+      return this.transloco.translate('common.value.today');
     }
 
     if (diffDays === 1) {
-      return 'Hier';
+      return this.transloco.translate('common.value.yesterday');
     }
 
     if (diffDays === -1) {
-      return 'Demain';
+      return this.transloco.translate('common.value.tomorrow');
     }
 
     if (diffDays >= 2 && diffDays <= 7) {
-      return `il y a ${diffDays} jours`;
+      return this.transloco.translate('common.value.daysAgo', { count: diffDays });
     }
 
     if (diffDays >= 8 && diffDays <= 30) {
       const weeks = Math.floor(diffDays / 7);
-      return `il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
+      return this.transloco.translate('common.value.weeksAgo', { count: weeks });
     }
 
-    return longDateFormatter.format(date);
+    return getLongDateFormatter(this.languageService.displayLocale()).format(date);
   }
 }

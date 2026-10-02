@@ -69,6 +69,7 @@ void main() {
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         home: const RecurringListScreen(),
       ),
     );
@@ -95,7 +96,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Aucune récurrence active'), findsOneWidget);
+      expect(find.text('Aucune transaction récurrente'), findsOneWidget);
     });
 
     testWidgets('should_show_recurring_items_sorted', (tester) async {
@@ -117,6 +118,158 @@ void main() {
       final netflixOffset = tester.getTopLeft(find.text('Netflix')).dy;
       final assuranceOffset = tester.getTopLeft(find.text('Assurance')).dy;
       expect(netflixOffset, lessThan(assuranceOffset));
+    });
+
+    testWidgets('should_showErrorStateWithRetry_when_loadFails',
+        (tester) async {
+      when(mockRepo.listActive()).thenThrow(Exception('boom'));
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erreur de chargement'), findsOneWidget);
+      expect(find.text('Réessayer'), findsOneWidget);
+
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+
+      verify(mockRepo.listActive()).called(greaterThanOrEqualTo(2));
+    });
+
+    testWidgets('should_showTodayGroup_when_itemDueToday', (tester) async {
+      final todayItem = RecurringTransaction(
+        id: 'today-1',
+        montant: 20.0,
+        libelle: 'Salle de sport',
+        type: TransactionType.depense,
+        frequency: Frequency.mensuel,
+        nextOccurrence: DateTime.now(),
+        recurringActive: true,
+      );
+      when(mockRepo.listActive()).thenAnswer((_) async => [todayItem]);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text("AUJOURD'HUI"), findsOneWidget);
+      expect(find.text('Salle de sport'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_openActionSheetWithAmountDateAndActions_when_itemTapped',
+        (tester) async {
+      when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Netflix'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('MENSUEL'), findsOneWidget);
+      expect(find.textContaining('50,00'), findsWidgets);
+      expect(find.text('Marquer comme payée'), findsOneWidget);
+      expect(find.text('Passer cette occurrence'), findsOneWidget);
+      expect(find.text('Désactiver la récurrence'), findsOneWidget);
+    });
+
+    for (final scenario in [
+      (
+        action: 'validate',
+        buttonLabel: 'Marquer comme payée',
+        successMessage: 'Transaction validée',
+        errorMessage: 'Erreur lors de la validation',
+      ),
+      (
+        action: 'deactivate',
+        buttonLabel: 'Désactiver la récurrence',
+        successMessage: 'Récurrence désactivée',
+        errorMessage: 'Erreur lors de la désactivation',
+      ),
+    ]) {
+      testWidgets(
+          'should_showSuccessSnackbar_when_${scenario.action}Succeeds',
+          (tester) async {
+        when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+        when(mockRepo.validate(any)).thenAnswer((_) async {});
+        when(mockRepo.deactivate(any)).thenAnswer((_) async => overdueItem);
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Netflix'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(scenario.buttonLabel));
+        await tester.pumpAndSettle();
+
+        expect(find.text(scenario.successMessage), findsOneWidget);
+      });
+
+      testWidgets(
+          'should_showErrorSnackbar_when_${scenario.action}Fails',
+          (tester) async {
+        when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+        when(mockRepo.validate(any)).thenThrow(Exception('boom'));
+        when(mockRepo.deactivate(any)).thenThrow(Exception('boom'));
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Netflix'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(scenario.buttonLabel));
+        await tester.pumpAndSettle();
+
+        expect(find.text(scenario.errorMessage), findsOneWidget);
+      });
+    }
+
+    testWidgets('should_showErrorSnackbar_when_skipFails', (tester) async {
+      when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+      when(mockRepo.skip(any)).thenThrow(Exception('boom'));
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Netflix'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Passer cette occurrence'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erreur lors du passage'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_showSuccessSnackbarAfterValidatingAll_when_payAllTapped',
+        (tester) async {
+      when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+      when(mockRepo.validate(any)).thenAnswer((_) async {});
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tout payé'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 transaction validée'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_showErrorSnackbarAfterValidatingAll_when_payAllFails',
+        (tester) async {
+      when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+      when(mockRepo.validate(any)).thenThrow(Exception('boom'));
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tout payé'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Erreur lors de la validation'), findsOneWidget);
     });
   });
 }

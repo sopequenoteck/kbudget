@@ -1,0 +1,69 @@
+# Import profile: Société Générale (current account statement, CSV export).
+#
+# Format reference (formatVersion 1). A file that fails validation is logged
+# as a warning at startup and ignored; it never prevents the application from
+# starting. Strings are quoted: YAML would otherwise read `no` or `on` as a
+# boolean and `00123` as a number.
+#
+# Required
+#   formatVersion      1
+#   bankCode           code of the bank, unique across profiles
+#   name               display name
+#   separator          field separator, one character
+#   encoding           charset of the file
+#   dateFormat         java.time pattern of the operation date
+#   dateColumn         column holding the operation date
+#   labelColumn        column holding the label
+#   decimalSeparator   decimal separator of the amounts, one character
+#   amountColumn       single signed amount column, or
+#   debitColumn +      debit and credit columns (both)
+#     creditColumn
+#   signature.headerColumns
+#                      columns that must all be present on the column header
+#                      line (after skipHeaderLines, compared trimmed, case
+#                      included) for the file to be recognized
+#
+# Optional
+#   skipHeaderLines    lines to skip before the column header (default 0)
+#   cleanupPatterns    regexes removed from the label
+#   statementHeader    bank header held in the skipped lines
+#     line               0-based index of the line among the skipped lines
+#     separator          field separator of that line
+#     accountNumberField / balanceField / balanceDateField
+#                        0-based field indexes (at least one is required)
+#     balanceDateFormat  pattern of the balance date, required with balanceDateField
+#   purchaseDate       purchase date carried by the label, year inferred from
+#                      the booking date
+#     pattern            regex with one capturing group
+#     format             pattern of the captured group, day and month (e.g. dd/MM)
+formatVersion: 1
+bankCode: "SG"
+name: "Société Générale"
+separator: ";"
+encoding: "ISO-8859-1"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date de l'opération"
+amountColumn: "Montant de l'opération"
+labelColumn: "Détail de l'écriture"
+decimalSeparator: ","
+skipHeaderLines: 1
+cleanupPatterns:
+  - 'CARTE\s+\w+\d{4}\s+\d{2}/\d{2}\s+'
+  - 'CARTE\s+\w+\d{4}\s+TRANSF\s+\d{2}/\d{2}\s+'
+  - 'UEP\*'
+signature:
+  headerColumns:
+    - "Date de l'opération"
+    - "Libellé"
+    - "Détail de l'écriture"
+    - "Montant de l'opération"
+statementHeader:
+  line: 0
+  separator: ";"
+  accountNumberField: 0
+  balanceDateField: 4
+  balanceDateFormat: "dd/MM/yyyy"
+  balanceField: 5
+purchaseDate:
+  pattern: 'CARTE X\d{4} (\d{2}/\d{2})'
+  format: "dd/MM"

@@ -7,6 +7,13 @@ export interface NotificationModel {
   type: NotificationType;
   title: string;
   message: string;
+  /**
+   * Parametres bruts servis par l'API (KKS-397), utilises par le client pour
+   * reconstruire `title`/`message` dans la langue appliquee. `null`/absent
+   * pour une notification anterieure a ce ticket : `title`/`message` sont
+   * alors affiches tels quels.
+   */
+  params?: Record<string, string> | null;
   entityType: EntityType | null;
   entityId: string | null;
   read: boolean;

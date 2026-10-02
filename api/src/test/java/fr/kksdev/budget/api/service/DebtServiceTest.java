@@ -7,6 +7,7 @@ import fr.kksdev.budget.api.dto.response.DebtPaymentResponse;
 import fr.kksdev.budget.api.dto.response.DebtResponse;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -24,6 +25,9 @@ import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,10 +38,12 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,7 +122,7 @@ class DebtServiceTest {
         var saved = buildDebt(user);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
@@ -157,7 +163,7 @@ class DebtServiceTest {
                 null, null, null, null, null);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(systemCat);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(debtRepository.save(any(Debt.class))).thenReturn(saved);
@@ -265,7 +271,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -284,7 +290,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), null);
+        var request = new DebtRepayRequest(account.getId(), null, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -304,7 +310,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         var account = buildAccount(user);
-        var request = new DebtRepayRequest(account.getId(), null);
+        var request = new DebtRepayRequest(account.getId(), null, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(new BigDecimal("30.00"));
@@ -326,7 +332,7 @@ class DebtServiceTest {
     void should_reject_when_amountExceedsRemaining() {
         var user = buildUser();
         var debt = buildDebt(user);
-        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("200.00"));
+        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("200.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -341,7 +347,7 @@ class DebtServiceTest {
         var user = buildUser();
         var debt = buildDebt(user);
         debt.setRembourse(true);
-        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(UUID.randomUUID(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
 
@@ -356,7 +362,7 @@ class DebtServiceTest {
         var debt = buildDebt(user);
         var account = buildAccount(user);
         account.setActif(false);
-        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"));
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
@@ -389,6 +395,38 @@ class DebtServiceTest {
     }
 
     // -------------------------------------------------------------------------
+    // KKS-396 — libelle fourni par le client pour le remboursement, sinon
+    // defaut anglais "Repayment - <personne>"
+    // -------------------------------------------------------------------------
+
+    @ParameterizedTest(name = "[{index}] libelle={0} -> libelle attendu={1}")
+    @MethodSource("repayLibelleCases")
+    void should_useExpectedLibelle_when_repayLibelleVaries(String libelle, String expectedLibelle) {
+        var user = buildUser();
+        var debt = buildDebt(user);
+        var account = buildAccount(user);
+        var request = new DebtRepayRequest(account.getId(), new BigDecimal("50.00"), libelle);
+
+        when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
+        when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);
+        when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        debtService.repay(debtId, request, userId);
+
+        verify(transactionRepository).save(argThat(tx -> expectedLibelle.equals(tx.getLibelle())));
+    }
+
+    static Stream<Arguments> repayLibelleCases() {
+        return Stream.of(
+                Arguments.of("Remboursement partiel", "Remboursement partiel"),
+                Arguments.of(null, "Repayment - Alice"),
+                Arguments.of("   ", "Repayment - Alice")
+        );
+    }
+
+    // -------------------------------------------------------------------------
     // T019 — US2: association compte, devise, conversion
     // -------------------------------------------------------------------------
 
@@ -403,7 +441,7 @@ class DebtServiceTest {
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(debtRepository.save(any(Debt.class))).thenAnswer(inv -> {
             Debt d = inv.getArgument(0);
             d.setId(debtId);
@@ -427,7 +465,7 @@ class DebtServiceTest {
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
-        when(categoryService.findSystemCategoryByNom("Dette", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.DEBT, userId)).thenReturn(null);
         when(debtRepository.save(any(Debt.class))).thenAnswer(inv -> {
             Debt d = inv.getArgument(0);
             d.setId(debtId);
@@ -642,7 +680,7 @@ class DebtServiceTest {
     void should_reject_when_zeroAmount() {
         var user = buildUser();
         var debt = buildDebt(user);
-        var request = new DebtRepayRequest(UUID.randomUUID(), BigDecimal.ZERO);
+        var request = new DebtRepayRequest(UUID.randomUUID(), BigDecimal.ZERO, null);
 
         when(debtRepository.findByIdForUpdate(debtId)).thenReturn(Optional.of(debt));
         when(transactionRepository.sumByDebtId(debtId)).thenReturn(BigDecimal.ZERO);

@@ -9,6 +9,7 @@ import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -30,7 +31,7 @@ class PaymentHistorySection extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final paymentsAsync = ref.watch(subscriptionPaymentsProvider(subscriptionId));
     final totalAsync = ref.watch(subscriptionTotalPaidProvider(subscriptionId));
-    final dateFormat = DateFormat('d MMM yyyy', 'fr_FR');
+    final dateFormat = DateFormat('d MMM yyyy', ref.watch(intlLocaleProvider));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +40,7 @@ class PaymentHistorySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              l10n.subscriptionPaymentHistory,
+              l10n.subscriptionsDetailHistory,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -57,7 +58,11 @@ class PaymentHistorySection extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    AmountFormatter.format(total.totalPaid, currency: currency),
+                    AmountFormatter.format(
+                      total.totalPaid,
+                      currency: currency,
+                      locale: ref.watch(intlLocaleProvider),
+                    ),
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       fontWeight: AppTypography.semiBold,
@@ -65,7 +70,7 @@ class PaymentHistorySection extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    l10n.subscriptionPayments(total.paymentCount),
+                    l10n.subscriptionsDetailPaymentCount(total.paymentCount),
                     style: TextStyle(
                       fontSize: AppTypography.sizeXs,
                       color: colorScheme.onSurfaceVariant,
@@ -87,7 +92,7 @@ class PaymentHistorySection extends ConsumerWidget {
           error: (e, s) => Padding(
             padding: const EdgeInsets.all(AppSpacing.space4),
             child: Text(
-              l10n.errorGeneric,
+              l10n.errorsClientGeneric,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 color: colorScheme.error,
@@ -108,7 +113,7 @@ class PaymentHistorySection extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.space2),
                       Text(
-                        l10n.subscriptionNoPayments,
+                        l10n.commonEmptyNoPayments,
                         style: TextStyle(
                           fontSize: AppTypography.sizeSm,
                           color: colorScheme.onSurfaceVariant,
@@ -163,7 +168,7 @@ class PaymentHistorySection extends ConsumerWidget {
                               AmountFormatter.format(
                                 payment.montant,
                                 currency: currency,
-                              ),
+                                locale: ref.watch(intlLocaleProvider)),
                               style: TextStyle(
                                 fontSize: AppTypography.sizeSm,
                                 fontWeight: AppTypography.medium,

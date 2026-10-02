@@ -1,35 +1,31 @@
-<app-auth-shell [title]="title()" tagline="Cette version de l'application et votre serveur ne peuvent pas fonctionner ensemble.">
+<app-auth-shell [title]="titleKey() | transloco" [tagline]="'compatibility.page.tagline' | transloco">
   <div class="incompatible">
     @if (isClientTooOld()) {
       <p class="incompatible__text">
-        Votre serveur exige au minimum la version
-        <strong>{{ requiredVersion() }}</strong> de l'application.
+        <span [innerHTML]="'compatibility.page.clientTooOldMessage' | transloco: { requiredVersion: requiredVersion() }"></span>
         @if (currentVersion()) {
-          Vous utilisez la version <strong>{{ currentVersion() }}</strong>.
+          <span [innerHTML]="'compatibility.page.clientTooOldCurrentVersionMessage' | transloco: { currentVersion: currentVersion() }"></span>
         }
       </p>
       <p class="incompatible__hint">
-        Mettez l'application à jour depuis votre navigateur ou votre magasin
-        d'applications, puis reconnectez-vous.
+        {{ 'compatibility.page.clientTooOldHint' | transloco }}
       </p>
     } @else {
       <p class="incompatible__text">
         @if (currentVersion()) {
-          Votre serveur est en version <strong>{{ currentVersion() }}</strong>.
+          <span [innerHTML]="'compatibility.page.serverVersionMessage' | transloco: { currentVersion: currentVersion() }"></span>
         } @else {
-          Votre serveur est trop ancien pour indiquer sa version.
+          <span>{{ 'compatibility.page.serverVersionUnknownMessage' | transloco }}</span>
         }
-        Cette application requiert au minimum la version
-        <strong>{{ requiredVersion() }}</strong>.
+        <span [innerHTML]="'compatibility.page.requiredVersionMessage' | transloco: { requiredVersion: requiredVersion() }"></span>
       </p>
       <p class="incompatible__hint">
-        Mettez votre instance à jour, puis rechargez cette page. La procédure est
-        décrite dans le guide de déploiement du projet.
+        {{ 'compatibility.page.serverTooOldHint' | transloco }}
       </p>
     }
 
     <button type="button" class="btn-primary incompatible__retry" (click)="retry()">
-      Réessayer
+      {{ 'common.action.retry' | transloco }}
     </button>
   </div>
 </app-auth-shell>

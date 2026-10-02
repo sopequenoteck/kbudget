@@ -8,6 +8,7 @@ import 'package:k_budget/src/features/transactions/application/transaction_list_
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -56,6 +57,7 @@ void main() {
     mockRepo = MockTransactionRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         transactionRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -100,7 +102,7 @@ void main() {
 
       final s = state();
       expect(s.isLoading, false);
-      expect(s.error, contains('Impossible de charger'));
+      expect(s.error, 'Erreur de chargement');
     });
 
     test('should_filter_depenses_when_setFilter_depense', () async {

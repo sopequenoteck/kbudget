@@ -6,7 +6,7 @@
     (keydown.space)="open()"
     role="button"
     tabindex="0"
-    aria-label="Choisir un emoji"
+    [attr.aria-label]="'common.action.chooseEmojiAria' | transloco"
   >
     {{ value() || '...' }}
   </div>

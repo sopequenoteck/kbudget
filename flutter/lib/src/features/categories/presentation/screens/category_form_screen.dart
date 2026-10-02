@@ -44,16 +44,16 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.categoryDeleteConfirmTitle),
-        content: Text(l10n.categoryDeleteConfirmMessage),
+        title: Text(l10n.categoriesDialogDeleteTitle),
+        content: Text(l10n.categoriesDialogDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
+            child: Text(l10n.commonActionCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.delete),
+            child: Text(l10n.commonActionDelete),
           ),
         ],
       ),
@@ -68,7 +68,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         if (mounted) {
           final l10nInner = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10nInner.categoryErrorDelete)),
+            SnackBar(content: Text(l10nInner.commonFeedbackDeleteError)),
           );
         }
       }
@@ -84,8 +84,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       appBar: AppBar(
         title: Text(
           _isEditMode
-              ? l10n.categoryFormTitleEdit
-              : l10n.categoryFormTitleCreate,
+              ? l10n.categoriesDialogEditTitle
+              : l10n.categoriesDialogCreateTitle,
         ),
         actions: [
           if (_isSubmitting)
@@ -132,7 +132,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       size: 20,
                     ),
                     label: Text(
-                      l10n.delete,
+                      l10n.commonActionDelete,
                       style: TextStyle(color: colorScheme.error),
                     ),
                   ),

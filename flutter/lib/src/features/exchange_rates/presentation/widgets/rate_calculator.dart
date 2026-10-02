@@ -9,6 +9,9 @@ import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 
 class RateCalculator extends StatefulWidget {
   const RateCalculator({super.key});
@@ -46,8 +49,15 @@ class _RateCalculatorState extends State<RateCalculator> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final intlLocale = intlLocaleFor(Localizations.localeOf(context));
     final currencyItems = Currency.values
-        .map((c) => SelectPickerItem(id: c.name, label: '${c.symbol} — ${c.name}'))
+        .map(
+          (c) => SelectPickerItem(
+            id: c.name,
+            label: '${c.symbol} — ${currencyName(c, l10n)}',
+          ),
+        )
         .toList();
 
     return Column(
@@ -61,7 +71,7 @@ class _RateCalculatorState extends State<RateCalculator> {
             Expanded(
               flex: 3,
               child: AppFormField(
-                label: "J'ai",
+                label: l10n.exchangeRatesFormCalculatorFrom,
                 child: TextField(
                   controller: _fromController,
                   decoration: InputDecoration.collapsed(
@@ -85,7 +95,7 @@ class _RateCalculatorState extends State<RateCalculator> {
             Expanded(
               flex: 4,
               child: SelectPicker(
-                label: 'Devise',
+                label: l10n.exchangeRatesFormCurrency,
                 items: currencyItems,
                 selectedId: _fromCurrency.name,
                 onChanged: (id) {
@@ -133,7 +143,7 @@ class _RateCalculatorState extends State<RateCalculator> {
             Expanded(
               flex: 4,
               child: SelectPicker(
-                label: 'Devise',
+                label: l10n.exchangeRatesFormCurrency,
                 items: currencyItems,
                 selectedId: _toCurrency.name,
                 onChanged: (id) {
@@ -159,7 +169,11 @@ class _RateCalculatorState extends State<RateCalculator> {
               borderRadius: BorderRadius.circular(AppSpacing.space3),
             ),
             child: Text(
-              'Taux : 1 ${_fromCurrency.symbol} = ${_computedRate!.toStringAsFixed(6)} ${_toCurrency.symbol}',
+              l10n.exchangeRatesValueCalculatedRate(
+                _fromCurrency.symbol,
+                formatRate(_computedRate!, intlLocale),
+                _toCurrency.symbol,
+              ),
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -176,7 +190,7 @@ class _RateCalculatorState extends State<RateCalculator> {
               borderRadius: BorderRadius.circular(AppSpacing.space3),
             ),
             child: Text(
-              'Saisissez deux montants pour calculer le taux',
+              l10n.exchangeRatesEmptyCalculator,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 color: colorScheme.onSurfaceVariant,

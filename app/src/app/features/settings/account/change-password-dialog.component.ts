@@ -15,11 +15,11 @@ import {
   phosphorEyeSlash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_LENGTH_MESSAGE,
 } from '../../../core/constants/password.constants';
 import { UserService } from '../../../core/services/user';
 import { AuthResponse } from '../../../core/models/auth.model';
@@ -34,7 +34,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-change-password-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon],
+  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorX,
@@ -50,6 +50,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 export class ChangePasswordDialogComponent {
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
 
   readonly isOpen = signal(false);
   readonly isSubmitting = signal(false);
@@ -60,7 +61,7 @@ export class ChangePasswordDialogComponent {
 
   private resolveCallback: ((result: AuthResponse | null) => void) | null = null;
 
-  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
+  readonly passwordMinLength = PASSWORD_MIN_LENGTH;
 
   readonly form = this.fb.nonNullable.group({
     currentPassword: ['', Validators.required],
@@ -127,19 +128,19 @@ export class ChangePasswordDialogComponent {
       if (error.status === 401) {
         const code = error.error?.error;
         if (code === 'PASSWORD_INCORRECT') {
-          this.errorMessage.set('Mot de passe actuel incorrect.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.currentPasswordIncorrect'));
         } else {
-          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+          this.errorMessage.set(this.transloco.translate('auth.feedback.genericError'));
         }
       } else if (error.status === 400) {
         const code = error.error?.error;
         if (code === 'PASSWORD_UNCHANGED') {
-          this.errorMessage.set('Le nouveau mot de passe doit être différent de l\'actuel.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.passwordUnchanged'));
         } else {
-          this.errorMessage.set('Données invalides. Veuillez vérifier les champs.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.invalidData'));
         }
       } else {
-        this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+        this.errorMessage.set(this.transloco.translate('auth.feedback.genericError'));
       }
     } finally {
       this.isSubmitting.set(false);

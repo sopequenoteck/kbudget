@@ -13,6 +13,7 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/decimal_input_formatter.dart';
@@ -36,7 +37,7 @@ class RepayBottomSheet extends ConsumerStatefulWidget {
     final l10n = AppLocalizations.of(context)!;
     AppModal.show(
       context,
-      title: l10n.repayTitle,
+      title: l10n.debtsDialogRepayTitle,
       child: RepayBottomSheet(debt: debt, onRepaid: onRepaid),
       onClose: () {},
     );
@@ -70,18 +71,29 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
   }
 
   String? _validateAccount(AppLocalizations l10n) {
-    if (_selectedAccountId == null) return l10n.repayAccountRequired;
+    if (_selectedAccountId == null) {
+      return l10n.debtsFormAccountRequired;
+    }
     return null;
   }
 
   String? _validateAmount(AppLocalizations l10n) {
     final value = _amountController.text.trim();
-    if (value.isEmpty) return l10n.repayAmountRequired;
+    if (value.isEmpty) {
+      return l10n.debtsFormAmountRequired;
+    }
     final parsed = double.tryParse(value);
-    if (parsed == null || parsed <= 0) return l10n.repayAmountInvalid;
+    if (parsed == null || parsed <= 0) {
+      return l10n.debtsFeedbackAmountInvalid;
+    }
     if (parsed > _remaining) {
-      return l10n.repayAmountMax(
-          AmountFormatter.format(_remaining, currency: widget.debt.currency));
+      return l10n.debtsFormAmountMax(
+        AmountFormatter.format(
+          _remaining,
+          currency: widget.debt.currency,
+          locale: ref.read(intlLocaleProvider),
+        ),
+      );
     }
     return null;
   }
@@ -99,7 +111,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
     if (accountId == null) return;
 
     final success = await ref.read(debtNotifierProvider.notifier).repay(
-          widget.debt.id,
+          widget.debt,
           accountId,
           amount,
         );
@@ -110,13 +122,13 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
       ref.invalidate(debtPaymentsProvider(widget.debt.id));
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.repaySuccess)),
+        SnackBar(content: Text(l10n.debtsFeedbackRepaymentSaved)),
       );
       widget.onRepaid?.call();
     } else {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.repayError)),
+        SnackBar(content: Text(l10n.debtsFeedbackRepayError)),
       );
     }
   }
@@ -145,7 +157,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
             const SizedBox(width: AppSpacing.space2),
             Expanded(
               child: Text(
-                l10n.repayNoAccounts,
+                l10n.debtsEmptyNoAccounts,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -175,8 +187,8 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
               .toList(),
           selectedId: effectiveAccountId,
           onChanged: (id) => setState(() => _selectedAccountId = id),
-          label: l10n.repayAccountLabel,
-          placeholder: l10n.repayAccountPlaceholder,
+          label: l10n.debtsFormAccount,
+          placeholder: l10n.debtsFormAccountPlaceholder,
           validator: (_) => _showErrors ? _validateAccount(l10n) : null,
           autovalidateMode: _showErrors
               ? AutovalidateMode.always
@@ -186,14 +198,17 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
 
         // Montant
         AppFormField(
-          label: l10n.repayAmountLabel,
+          label: l10n.debtsFormAmount,
           showError: _showErrors && amountError != null,
           errorMessage: amountError ?? '',
           child: TextField(
             controller: _amountController,
             decoration: InputDecoration.collapsed(
-              hintText: AmountFormatter.format(_remaining,
-                  currency: widget.debt.currency),
+              hintText: AmountFormatter.format(
+                _remaining,
+                currency: widget.debt.currency,
+                locale: ref.watch(intlLocaleProvider),
+              ),
             ),
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
@@ -212,7 +227,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
             OutlinedButton(
               onPressed:
                   _isSubmitting ? null : () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
+              child: Text(l10n.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -226,7 +241,7 @@ class _RepayBottomSheetState extends ConsumerState<RepayBottomSheet> {
                         color: colorScheme.onPrimary,
                       ),
                     )
-                  : Text(l10n.repayTitle),
+                  : Text(l10n.debtsActionRepay),
             ),
           ],
         ),

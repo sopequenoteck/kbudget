@@ -55,7 +55,10 @@ class AccountRepositoryLocal implements AccountRepository {
   }
 
   @override
-  Future<Account> adjustBalance(String id, double newBalance) async {
-    throw UnimplementedError('adjustBalance is not supported in local mode');
-  }
+  Future<Account> adjustBalance(
+    String id,
+    double newBalance, {
+    String? libelle,
+  }) =>
+      throw UnimplementedError('adjustBalance is not supported in local mode');
 }

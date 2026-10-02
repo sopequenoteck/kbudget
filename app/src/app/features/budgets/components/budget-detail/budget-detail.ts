@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
@@ -33,7 +34,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -44,17 +45,29 @@ import {
 import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { formatCurrencyAmount, formatDayMonthLabel } from '../../../../shared/utils/locale-format.utils';
+import { categoryDisplayName } from '../../../../shared/utils/category-name.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
+/**
+ * `labelKey` traduit un groupe "aujourd'hui"/"hier" ; `label` porte une date
+ * deja formatee dans la locale d'affichage (jamais les deux a la fois),
+ * pour que le template n'ait qu'a choisir entre traduire et afficher tel
+ * quel (KKS-379).
+ */
 interface TransactionGroup {
-  label: string;
+  key: string;
+  labelKey: string | null;
+  label: string | null;
   transactions: Transaction[];
 }
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -84,6 +97,10 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+  readonly formatDate = (dateStr: string): string =>
+    formatDayMonthLabel(dateStr, this.languageService.displayLocale());
 
   readonly Math = Math;
   readonly budgetAmount = budgetAmount;
@@ -156,25 +173,25 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
 
     const groups = new Map<string, TransactionGroup>();
 
-    const add = (key: string, label: string, tx: Transaction) => {
-      if (!groups.has(key)) groups.set(key, { label, transactions: [] });
+    const add = (key: string, labelKey: string | null, label: string | null, tx: Transaction) => {
+      if (!groups.has(key)) groups.set(key, { key, labelKey, label, transactions: [] });
       groups.get(key)!.transactions.push(tx);
     };
 
     for (const tx of txs) {
-      const txDate = new Date(tx.date);
+      const txDate = parseLocalDate(tx.date);
       txDate.setHours(0, 0, 0, 0);
 
       if (txDate.getTime() === today.getTime()) {
-        add('today', "Aujourd'hui", tx);
+        add('today', 'common.value.today', null, tx);
       } else if (txDate.getTime() === yesterday.getTime()) {
-        add('yesterday', 'Hier', tx);
+        add('yesterday', 'common.value.yesterday', null, tx);
       } else {
-        const label = new Intl.DateTimeFormat(APP_LOCALE, {
+        const label = new Intl.DateTimeFormat(this.languageService.displayLocale(), {
           day: 'numeric',
           month: 'long',
         }).format(txDate);
-        add(tx.date, label, tx);
+        add(tx.date, null, label, tx);
       }
     }
 
@@ -238,6 +255,7 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
             categoryNom: b.category.nom,
             categoryIcone: b.category.icone,
             categoryCouleur: b.category.couleur,
+            categorySystemKey: b.category.systemKey ?? null,
             montantBudget: b.montant,
             montantBudgetNormalise: b.montant,
             currency: b.currency,
@@ -269,14 +287,6 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     } finally {
       this.transactionsLoading.set(false);
     }
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(APP_LOCALE, {
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
   }
 
   goBack(): void {
@@ -319,8 +329,14 @@ export class BudgetDetail implements AfterViewInit, OnDestroy {
     const budgetId = this.overviewBudgetId();
     const item = this.budgetItem();
     if (!budgetId) return;
-    const title = item ? `${item.categoryNom} — ${budgetAmount(item).toLocaleString(APP_LOCALE, { style: 'currency', currency: item.currency })}` : 'Ce budget';
-    const ok = await this.confirmService.confirm({ title, message: 'Voulez-vous vraiment supprimer ce budget ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorChartPie' });
+    const title = item
+      ? `${categoryDisplayName(item.categoryNom, item.categorySystemKey, this.transloco, this.languageService.activeLanguage())} — ${formatCurrencyAmount(budgetAmount(item), item.currency, this.languageService.displayLocale())}`
+      : this.transloco.translate('budgets.action.create');
+    const ok = await this.confirmService.confirmDelete({
+      title,
+      message: this.transloco.translate('budgets.dialog.deleteMessage'),
+      icon: 'phosphorChartPie',
+    });
     if (!ok) return;
     try {
       await firstValueFrom(this.budgetService.delete(budgetId));

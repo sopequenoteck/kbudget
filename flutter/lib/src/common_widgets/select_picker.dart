@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, StringProperty;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:k_budget/src/common_widgets/app_modal.dart';
@@ -12,6 +14,9 @@ import 'package:k_budget/src/constants/app_durations.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
+
+const _searchThreshold = 5;
 
 class SelectPickerItem {
   final String id;
@@ -36,13 +41,11 @@ class SelectPicker extends FormField<String?> {
   final List<SelectPickerItem> items;
   final ValueChanged<String?>? onChanged;
   final String label;
-  final String placeholder;
-  final bool clearable;
-  final bool? searchable;
-  final int searchThreshold;
-  final String emptyMessage;
-  final ValueChanged<String>? onSearchChanged;
-  final Widget Function(String searchTerm)? emptyActionBuilder;
+
+  /// Placeholder affiché tant qu'aucun élément n'est sélectionné.
+  ///
+  /// `null` retombe sur [AppLocalizations.commonFormSelectPlaceholder].
+  final String? placeholder;
 
   SelectPicker({
     super.key,
@@ -50,13 +53,7 @@ class SelectPicker extends FormField<String?> {
     String? selectedId,
     this.onChanged,
     required this.label,
-    this.placeholder = 'Sélectionner...',
-    this.clearable = false,
-    this.searchable,
-    this.searchThreshold = 5,
-    this.emptyMessage = 'Aucun résultat',
-    this.onSearchChanged,
-    this.emptyActionBuilder,
+    this.placeholder,
     super.validator,
     super.onSaved,
     super.autovalidateMode,
@@ -71,6 +68,12 @@ class SelectPicker extends FormField<String?> {
 
   @override
   FormFieldState<String?> createState() => _SelectPickerState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('placeholder', placeholder));
+  }
 }
 
 class _SelectPickerState extends FormFieldState<String?> {
@@ -82,6 +85,10 @@ class _SelectPickerState extends FormFieldState<String?> {
     final matches = widget.items.where((item) => item.id == value);
     return matches.isEmpty ? null : matches.first;
   }
+
+  String _placeholder(BuildContext ctx) =>
+      widget.placeholder ??
+      AppLocalizations.of(ctx)!.commonFormSelectPlaceholder;
 
   @override
   void didUpdateWidget(covariant SelectPicker oldWidget) {
@@ -113,21 +120,14 @@ class _SelectPickerState extends FormFieldState<String?> {
     Navigator.of(context).pop();
   }
 
-  void _onClear() {
-    didChange(null);
-    widget.onChanged?.call(null);
-  }
-
   void _openModal() {
-    final showSearch = widget.searchable == true ||
-        (widget.searchable == null &&
-            widget.items.length >= widget.searchThreshold);
+    final showSearch = widget.items.length >= _searchThreshold;
 
     if (showSearch) {
       final searchNotifier = ValueNotifier<String>('');
       AppModal.show(
         context,
-        title: widget.placeholder,
+        title: _placeholder(context),
         headerActions: _buildSearchField(searchNotifier),
         child: ValueListenableBuilder<String>(
           valueListenable: searchNotifier,
@@ -138,7 +138,7 @@ class _SelectPickerState extends FormFieldState<String?> {
     } else {
       AppModal.show(
         context,
-        title: widget.placeholder,
+        title: _placeholder(context),
         child: _buildItemsList(context, ''),
         onClose: () {},
       );
@@ -147,6 +147,7 @@ class _SelectPickerState extends FormFieldState<String?> {
 
   Widget _buildSearchField(ValueNotifier<String> notifier) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
@@ -162,16 +163,13 @@ class _SelectPickerState extends FormFieldState<String?> {
           color: colorScheme.onSurface,
         ),
         decoration: InputDecoration.collapsed(
-          hintText: 'Rechercher...',
+          hintText: l10n.commonFormSearchPlaceholder,
           hintStyle: TextStyle(
             fontSize: AppTypography.sizeMd,
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-        onChanged: (query) {
-          notifier.value = query;
-          widget.onSearchChanged?.call(query);
-        },
+        onChanged: (query) => notifier.value = query,
       ),
     );
   }
@@ -186,14 +184,11 @@ class _SelectPickerState extends FormFieldState<String?> {
             .toList();
 
     if (filteredItems.isEmpty) {
-      if (widget.emptyActionBuilder != null) {
-        return widget.emptyActionBuilder!(searchQuery);
-      }
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.space6),
           child: Text(
-            widget.emptyMessage,
+            AppLocalizations.of(ctx)!.commonEmptyNoResults,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               color: colorScheme.onSurfaceVariant,
@@ -301,13 +296,14 @@ class _SelectPickerState extends FormFieldState<String?> {
     final selectedItem = _selectedItem;
     final hasSelection = selectedItem != null;
     final showError = hasError && errorText != null && errorText!.isNotEmpty;
+    final placeholder = _placeholder(context);
 
     return Opacity(
       opacity: widget.enabled ? 1.0 : 0.5,
       child: MergeSemantics(
         child: Semantics(
           button: true,
-          label: selectedItem?.label ?? widget.placeholder,
+          label: selectedItem?.label ?? placeholder,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -389,7 +385,7 @@ class _SelectPickerState extends FormFieldState<String?> {
                       ] else
                         Expanded(
                           child: Text(
-                            widget.placeholder,
+                            placeholder,
                             style: TextStyle(
                               fontSize: AppTypography.sizeMd,
                               color: colorScheme.onSurfaceVariant,
@@ -399,20 +395,10 @@ class _SelectPickerState extends FormFieldState<String?> {
                           ),
                         ),
                       const SizedBox(width: AppSpacing.space2),
-                      if (widget.clearable && hasSelection && widget.enabled)
-                        GestureDetector(
-                          onTap: _onClear,
-                          child: PhosphorIcon(
-                            PhosphorIconsBold.x,
-                            size: 18,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      else
-                        PhosphorIcon(
-                          PhosphorIconsRegular.caretDown,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      PhosphorIcon(
+                        PhosphorIconsRegular.caretDown,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ],
                   ),
                 ),

@@ -28,9 +28,9 @@ class AccountPreviewCard extends StatelessWidget {
   });
 
   String _typeLabel(AppLocalizations l10n) => switch (accountType!) {
-    AccountType.courant => l10n.accountTypeCourant.toUpperCase(),
-    AccountType.epargne => l10n.accountTypeEpargne.toUpperCase(),
-    AccountType.especes => l10n.accountTypeEspeces.toUpperCase(),
+    AccountType.courant => l10n.accountsValueCurrent.toUpperCase(),
+    AccountType.epargne => l10n.accountsValueSavings.toUpperCase(),
+    AccountType.especes => l10n.accountsValueCash.toUpperCase(),
   };
 
   @override
@@ -75,7 +75,7 @@ class AccountPreviewCard extends StatelessWidget {
                 Text(
                   hasContent && name != null && name!.isNotEmpty
                       ? name!
-                      : l10n.accountFormPreviewPlaceholder,
+                      : l10n.accountsFormPreviewPlaceholder,
                   style: TextStyle(
                     fontSize: AppTypography.sizeMd,
                     fontWeight: AppTypography.medium,

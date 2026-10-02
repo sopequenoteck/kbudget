@@ -83,10 +83,21 @@ public class PreferenceService {
         if (request.textScale() != null) {
             preference.setTextScale(request.textScale());
         }
+        if (request.language() != null) {
+            preference.setLanguage(request.language());
+        }
         userPreferenceRepository.save(preference);
 
         log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
         return toResponse(preference);
+    }
+
+    @Transactional
+    public void resetLanguage(UUID userId) {
+        UserPreference preference = getOrCreate(userId);
+        preference.setLanguage(null);
+        userPreferenceRepository.save(preference);
+        log.info("Language preference reset to automatic for userId={}", userId);
     }
 
     public boolean isFeatureEnabled(UUID userId, Feature feature) {
@@ -203,7 +214,8 @@ public class PreferenceService {
                 preference.getCurrencies(),
                 preference.getEnabledNotificationTypes(),
                 preference.getTimezone(),
-                preference.getTextScale()
+                preference.getTextScale(),
+                preference.getLanguage()
         );
     }
 }

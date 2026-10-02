@@ -11,6 +11,7 @@ import { type NotificationModel } from '../../../core/models/notification.model'
 import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const makeNotification = (overrides: Partial<NotificationModel> = {}): NotificationModel => ({
   id: 'notif-1',
@@ -137,6 +138,7 @@ describe('NotificationPanel', () => {
     TestBed.configureTestingModule({
       imports: [NotificationPanel],
       providers: [
+        provideTranslocoTesting(),
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
@@ -184,7 +186,7 @@ describe('NotificationPanel', () => {
       id: 'notif-debt-reminder',
       type: 'DEBT_REMINDER',
       title: 'Rappel dette',
-      message: 'Rappel : Bob vous doit de l\'argent',
+      message: "Rappel : Bob vous doit de l'argent",
       entityType: 'DEBT',
       entityId: 'debt-1',
     });
@@ -244,6 +246,47 @@ describe('NotificationPanel', () => {
 
     const actionButtons = fixture.nativeElement.querySelectorAll('.notification-action-btn');
     expect(actionButtons.length).toBe(0);
+  });
+
+  it('should_render_text_built_from_type_and_params_when_params_are_present', () => {
+    const subscriptionNotification = makeNotification({
+      id: 'notif-with-params',
+      type: 'SUBSCRIPTION_DUE',
+      title: 'Titre serveur obsolete',
+      message: 'Message serveur obsolete',
+      params: { name: 'Netflix' },
+    });
+    notificationServiceMock = createNotificationServiceMock([subscriptionNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const title: HTMLElement = fixture.nativeElement.querySelector('.notification-title');
+    const message: HTMLElement = fixture.nativeElement.querySelector('.notification-message');
+    expect(title.textContent?.trim()).toBe('Abonnement Netflix');
+    expect(message.textContent?.trim()).toBe('Netflix — échéance demain');
+  });
+
+  it('should_render_raw_title_and_message_when_notification_has_no_params', () => {
+    const legacyNotification = makeNotification({
+      id: 'notif-legacy',
+      type: 'SUBSCRIPTION_DUE',
+      title: 'Abonnement',
+      message: 'Votre abonnement arrive à échéance',
+    });
+    notificationServiceMock = createNotificationServiceMock([legacyNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const title: HTMLElement = fixture.nativeElement.querySelector('.notification-title');
+    const message: HTMLElement = fixture.nativeElement.querySelector('.notification-message');
+    expect(title.textContent?.trim()).toBe('Abonnement');
+    expect(message.textContent?.trim()).toBe('Votre abonnement arrive à échéance');
   });
 
   it('should_show_empty_state_when_no_notifications', () => {
@@ -370,5 +413,206 @@ describe('NotificationPanel', () => {
     const component = fixture.componentInstance;
 
     expect(component.getIconForType('RECURRING_TRANSACTION_DUE')).toBe('phosphorRepeat');
+  });
+
+  it('should_group_notification_under_localized_date_when_older_than_yesterday', () => {
+    const oldDate = new Date();
+    oldDate.setDate(oldDate.getDate() - 10);
+    const oldNotification = makeNotification({
+      id: 'notif-old',
+      createdAt: oldDate.toISOString(),
+    });
+    notificationServiceMock = createNotificationServiceMock([oldNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups.length).toBe(1);
+    expect(groups[0].labelKey).toBeNull();
+    expect(groups[0].dateLabel).toContain(String(oldDate.getFullYear()));
+  });
+
+  it('should_group_notification_under_today_key_when_created_today', () => {
+    const todayNotification = makeNotification({ id: 'notif-today' });
+    notificationServiceMock = createNotificationServiceMock([todayNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups[0].labelKey).toBe('common.value.today');
+  });
+
+  it('should_group_notification_under_yesterday_key_when_created_yesterday', () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayNotification = makeNotification({
+      id: 'notif-yesterday',
+      createdAt: yesterday.toISOString(),
+    });
+    notificationServiceMock = createNotificationServiceMock([yesterdayNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    const component = fixture.componentInstance;
+
+    const groups = component.groupedNotifications();
+    expect(groups[0].labelKey).toBe('common.value.yesterday');
+  });
+
+  it('should_render_french_today_label_in_the_dom', () => {
+    const todayNotification = makeNotification({ id: 'notif-today' });
+    notificationServiceMock = createNotificationServiceMock([todayNotification]);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const groupLabel: HTMLElement = fixture.nativeElement.querySelector('.group-label');
+    expect(groupLabel.textContent?.trim()).toBe("Aujourd'hui");
+  });
+
+  it('should_show_error_toast_when_snooze_action_fails', async () => {
+    const { throwError } = await import('rxjs');
+    const debtReminderNotification = makeNotification({
+      id: 'notif-debt-reminder',
+      type: 'DEBT_REMINDER',
+      entityId: 'debt-1',
+    });
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const fakeEvent = { stopPropagation: vi.fn() } as unknown as Event;
+
+    debtServiceMock.getById.mockReturnValue(throwError(() => new Error('Not found')));
+
+    await component.onSnoozeAction(fakeEvent, debtReminderNotification);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Impossible de charger la dette');
+  });
+
+  it('should_show_french_success_toast_when_snoozed', () => {
+    const debtReminderNotification = makeNotification({
+      id: 'notif-debt-reminder',
+      type: 'DEBT_REMINDER',
+      entityId: 'debt-1',
+    });
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onSnoozed(mockDebt, debtReminderNotification);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Rappel reporté');
+  });
+
+  it('should_show_french_success_toast_when_recurring_validated', async () => {
+    const recurringNotification = makeNotification({
+      id: 'notif-recurring',
+      type: 'RECURRING_TRANSACTION_DUE',
+      entityId: 'rt-1',
+    });
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onValidateRecurring(recurringNotification);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Transaction créée');
+  });
+
+  it('should_show_error_toast_when_recurring_validation_fails', async () => {
+    const { throwError } = await import('rxjs');
+    const recurringNotification = makeNotification({
+      id: 'notif-recurring',
+      type: 'RECURRING_TRANSACTION_DUE',
+      entityId: 'rt-1',
+    });
+
+    setupTestBed();
+    recurringTransactionServiceMock.validate.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onValidateRecurring(recurringNotification);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Impossible de valider la transaction');
+  });
+
+  it('should_show_french_success_toast_when_recurring_skipped', async () => {
+    const recurringNotification = makeNotification({
+      id: 'notif-recurring',
+      type: 'RECURRING_TRANSACTION_DUE',
+      entityId: 'rt-1',
+    });
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onSkipRecurring(recurringNotification);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Occurrence passée');
+  });
+
+  it('should_show_error_toast_when_recurring_skip_fails', async () => {
+    const { throwError } = await import('rxjs');
+    const recurringNotification = makeNotification({
+      id: 'notif-recurring',
+      type: 'RECURRING_TRANSACTION_DUE',
+      entityId: 'rt-1',
+    });
+
+    setupTestBed();
+    recurringTransactionServiceMock.skip.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onSkipRecurring(recurringNotification);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith("Impossible de passer l'occurrence");
+  });
+
+  it('should_show_french_success_toast_when_subscription_paid', async () => {
+    const subscriptionNotification = makeNotification({
+      id: 'notif-subscription',
+      type: 'SUBSCRIPTION_DUE',
+      entityId: 'sub-1',
+    });
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onPaySubscription(subscriptionNotification);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Paiement enregistré');
+  });
+
+  it('should_show_error_toast_when_subscription_payment_fails', async () => {
+    const { throwError } = await import('rxjs');
+    const subscriptionNotification = makeNotification({
+      id: 'notif-subscription',
+      type: 'SUBSCRIPTION_DUE',
+      entityId: 'sub-1',
+    });
+
+    setupTestBed();
+    subscriptionServiceMock.pay.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onPaySubscription(subscriptionNotification);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith("Impossible d'enregistrer le paiement");
   });
 });

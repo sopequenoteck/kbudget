@@ -28,7 +28,8 @@ public class UserOnboardingService {
             Currency currency,
             String timezone,
             boolean isAdmin,
-            boolean passwordResetRequired
+            boolean passwordResetRequired,
+            String defaultAccountName
     ) {}
 
     public User provisionUser(UserProvisioningRequest request) {
@@ -44,7 +45,7 @@ public class UserOnboardingService {
                 .build();
         userRepository.save(user);
         categoryService.seedSystemCategories(user);
-        accountService.createDefaultAccount(user, request.currency());
+        accountService.createDefaultAccount(user, request.currency(), request.defaultAccountName());
         preferenceService.createInitialPreference(user, request.currency(), request.timezone());
         return user;
     }

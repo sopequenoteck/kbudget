@@ -15,6 +15,7 @@ import {
   phosphorEyeSlash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
@@ -22,7 +23,7 @@ import { AuthService } from '../../../core/services/auth';
 @Component({
   selector: 'app-delete-account-confirm-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon],
+  imports: [ReactiveFormsModule, CdkTrapFocus, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorX,
@@ -38,6 +39,7 @@ import { AuthService } from '../../../core/services/auth';
 export class DeleteAccountConfirmDialogComponent {
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly isOpen = signal(false);
   readonly isSubmitting = signal(false);
@@ -110,21 +112,19 @@ export class DeleteAccountConfirmDialogComponent {
       if (error.status === 401) {
         const code = error.error?.error;
         if (code === 'PASSWORD_INCORRECT') {
-          this.errorMessage.set('Mot de passe incorrect.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.passwordIncorrect'));
         } else {
-          this.errorMessage.set('Une erreur est survenue. Veuillez réessayer.');
+          this.errorMessage.set(this.transloco.translate('auth.feedback.genericError'));
         }
       } else if (error.status === 403) {
         const code = error.error?.error;
         if (code === 'LAST_ADMIN_DELETION_FORBIDDEN') {
-          this.errorMessage.set(
-            'Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.',
-          );
+          this.errorMessage.set(this.transloco.translate('users.feedback.lastAdminDeletionForbidden'));
         } else {
-          this.errorMessage.set('Action non autorisée.');
+          this.errorMessage.set(this.transloco.translate('users.feedback.actionNotAllowed'));
         }
       } else {
-        this.errorMessage.set('Erreur lors de la suppression. Veuillez réessayer.');
+        this.errorMessage.set(this.transloco.translate('users.feedback.deleteAccountError'));
       }
     } finally {
       this.isSubmitting.set(false);

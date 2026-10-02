@@ -68,6 +68,7 @@ import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/compatibility/presentation/incompatible_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/services/local_notification_service.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
@@ -465,16 +466,17 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       RouteNames.dashboard,
       RouteNames.transactions,
     ];
+    final l10n = AppLocalizations.of(context)!;
     final destinations = <NavDestination>[
-      const NavDestination(
+      NavDestination(
         icon: PhosphorIconsRegular.house,
         selectedIcon: PhosphorIconsFill.house,
-        label: 'Accueil',
+        label: l10n.commonNavHome,
       ),
-      const NavDestination(
+      NavDestination(
         icon: PhosphorIconsRegular.receipt,
         selectedIcon: PhosphorIconsFill.receipt,
-        label: 'Transactions',
+        label: l10n.commonNavTransactions,
       ),
     ];
 
@@ -484,26 +486,26 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       final (path, destination) = switch (feature) {
         Feature.subscriptions => (
           RouteNames.subscriptions,
-          const NavDestination(
+          NavDestination(
             icon: PhosphorIconsRegular.arrowsClockwise,
             selectedIcon: PhosphorIconsFill.arrowsClockwise,
-            label: 'Abonnements',
+            label: l10n.commonNavSubscriptions,
           ),
         ),
         Feature.debts => (
           RouteNames.debts,
-          const NavDestination(
+          NavDestination(
             icon: PhosphorIconsRegular.handshake,
             selectedIcon: PhosphorIconsFill.handshake,
-            label: 'Dettes',
+            label: l10n.commonNavDebts,
           ),
         ),
         Feature.budgets => (
           RouteNames.budgets,
-          const NavDestination(
+          NavDestination(
             icon: PhosphorIconsRegular.chartPie,
             selectedIcon: PhosphorIconsFill.chartPie,
-            label: 'Budgets',
+            label: l10n.commonNavBudgets,
           ),
         ),
       };

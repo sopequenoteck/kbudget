@@ -58,6 +58,9 @@ public class UserPreference {
     @Builder.Default
     private String timezone = "Europe/Paris";
 
+    @Column(name = "language", length = 16)
+    private String language;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "text_scale", length = 20)

@@ -12,7 +12,7 @@
       <button
         class="toast-close"
         type="button"
-        aria-label="Fermer"
+        [attr.aria-label]="'common.action.close' | transloco"
         (click)="toastService.dismiss(toast.id)"
       >✕</button>
     </div>

@@ -11,6 +11,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecurringListItem extends StatelessWidget {
@@ -28,6 +29,12 @@ class RecurringListItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final themeExt = Theme.of(context).extension<AppThemeExtension>()!;
     final colorScheme = Theme.of(context).colorScheme;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final nextOccurrence = RelativeDateFormatter.formatCompact(
+      item.nextOccurrence,
+      locale: locale,
+      l10n: l10n,
+    );
 
     final amountColor = item.type == TransactionType.depense
         ? themeExt.expenseColor
@@ -63,7 +70,7 @@ class RecurringListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${_frequencyLabel(l10n)} · ${RelativeDateFormatter.formatCompact(item.nextOccurrence)}',
+                    '${_frequencyLabel(l10n)} · $nextOccurrence',
                     style: TextStyle(
                       fontSize: AppTypography.sizeXs,
                       color: colorScheme.onSurfaceVariant,
@@ -79,6 +86,7 @@ class RecurringListItem extends StatelessWidget {
               AmountFormatter.format(
                 item.montant,
                 currency: item.accountCurrency ?? Currency.eur,
+                locale: locale,
               ),
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
@@ -94,9 +102,9 @@ class RecurringListItem extends StatelessWidget {
 
   String _frequencyLabel(AppLocalizations l10n) {
     return switch (item.frequency) {
-      Frequency.hebdomadaire => l10n.frequencyHebdomadaire,
-      Frequency.mensuel => l10n.frequencyMensuel,
-      Frequency.annuel => l10n.frequencyAnnuel,
+      Frequency.hebdomadaire => l10n.recurringValueWeekly,
+      Frequency.mensuel => l10n.recurringValueMonthly,
+      Frequency.annuel => l10n.recurringValueYearly,
     };
   }
 }

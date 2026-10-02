@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.dto.response.TransferResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.DebtType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -20,6 +21,7 @@ import fr.kksdev.budget.api.repository.DebtRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.ClientText;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AccountService {
+
+    // KKS-396 : defauts anglais ecrits par l'API quand le client ne fournit pas
+    // de texte (principe VII, l'API ne traduit jamais).
+    private static final String DEFAULT_TRANSFER_DEBIT_LABEL_PREFIX = "Transfer to ";
+    private static final String DEFAULT_TRANSFER_CREDIT_LABEL_PREFIX = "Transfer from ";
+    private static final String DEFAULT_ADJUST_BALANCE_LABEL = "Balance adjustment";
+    private static final String DEFAULT_ACCOUNT_NAME = "Main account";
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
@@ -212,17 +221,22 @@ public class AccountService {
             throw new IllegalArgumentException("Transfers between accounts with different currencies are not allowed");
         }
 
-        Category virementCategory = categoryService.findSystemCategoryByNom("Virement", userId);
+        Category virementCategory = categoryService.findSystemCategory(SystemCategoryKey.TRANSFER, userId);
         if (virementCategory == null) {
-            throw new IllegalStateException("System category 'Virement' not found");
+            throw new IllegalStateException("System category 'Transfer' not found");
         }
         UUID transferId = UUID.randomUUID();
         LocalDate today = LocalDate.now();
         User userRef = userRepository.getReferenceById(userId);
 
+        String debitLibelle = ClientText.orDefault(
+                request.libelleDebit(), DEFAULT_TRANSFER_DEBIT_LABEL_PREFIX + toAccount.getNom());
+        String creditLibelle = ClientText.orDefault(
+                request.libelleCredit(), DEFAULT_TRANSFER_CREDIT_LABEL_PREFIX + fromAccount.getNom());
+
         Transaction debit = Transaction.builder()
                 .montant(request.montant())
-                .libelle("Virement vers " + toAccount.getNom())
+                .libelle(debitLibelle)
                 .type(TransactionType.DEPENSE)
                 .date(today)
                 .category(virementCategory)
@@ -234,7 +248,7 @@ public class AccountService {
 
         Transaction credit = Transaction.builder()
                 .montant(request.montant())
-                .libelle("Virement depuis " + fromAccount.getNom())
+                .libelle(creditLibelle)
                 .type(TransactionType.RECETTE)
                 .date(today)
                 .category(virementCategory)
@@ -260,7 +274,7 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountResponse adjustBalance(UUID accountId, BigDecimal newBalance, UUID userId) {
+    public AccountResponse adjustBalance(UUID accountId, BigDecimal newBalance, String libelle, UUID userId) {
         Account account = findByIdAndUser(accountId, userId);
 
         if (!Boolean.TRUE.equals(account.getActif())) {
@@ -280,7 +294,7 @@ public class AccountService {
 
         Transaction adjustment = Transaction.builder()
                 .montant(diff)
-                .libelle("Ajustement de solde")
+                .libelle(ClientText.orDefault(libelle, DEFAULT_ADJUST_BALANCE_LABEL))
                 .type(TransactionType.AJUSTEMENT)
                 .date(LocalDate.now())
                 .category(adjustmentCategory)
@@ -354,10 +368,10 @@ public class AccountService {
     }
 
     @Transactional
-    public void createDefaultAccount(User user, Currency currency) {
+    public void createDefaultAccount(User user, Currency currency, String accountName) {
         try {
             Account defaultAccount = Account.builder()
-                    .nom("Compte Principal")
+                    .nom(ClientText.orDefault(accountName, DEFAULT_ACCOUNT_NAME))
                     .type(AccountType.COURANT)
                     .soldeInitial(BigDecimal.ZERO)
                     .icone(AccountType.COURANT.getDefaultIcone())
@@ -404,7 +418,8 @@ public class AccountService {
                 bankInfo.bankBrandColor(),
                 bankInfo.bankLogoUrl(),
                 bankInfo.bankCustomName(),
-                bankInfo.bankCustomLogo()
+                bankInfo.bankCustomLogo(),
+                account.getStatementAccountSuffix()
         );
     }
 }

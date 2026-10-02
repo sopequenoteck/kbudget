@@ -1,27 +1,31 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="category-form">
   <div class="category-form__field">
-    <label for="categoryNom">Nom</label>
+    <label for="categoryNom">{{ 'categories.form.name' | transloco }}</label>
     <input
       id="categoryNom"
       type="text"
       formControlName="nom"
       maxlength="30"
-      placeholder="Nom de la categorie"
+      [placeholder]="'categories.form.namePlaceholder' | transloco"
     />
     @if (form.get('nom')?.touched && form.get('nom')?.invalid) {
       <span class="category-form__error">
-        {{ form.get('nom')?.hasError('required') ? 'Nom requis' : '30 caracteres maximum' }}
+        {{
+          form.get('nom')?.hasError('required')
+            ? ('common.validation.nameRequired' | transloco)
+            : ('categories.form.nameMaxLength' | transloco)
+        }}
       </span>
     }
   </div>
 
   <div class="category-form__field">
-    <span id="iconLabel" class="category-form__label">Icone</span>
+    <span id="iconLabel" class="category-form__label">{{ 'categories.form.icon' | transloco }}</span>
     <app-emoji-input [value]="selectedEmoji()" (valueChange)="onEmojiSelected($event)" />
   </div>
 
   <div class="category-form__field">
-    <span id="colorLabel" class="category-form__label">Couleur</span>
+    <span id="colorLabel" class="category-form__label">{{ 'common.form.colour' | transloco }}</span>
     <div class="category-form__colors" role="radiogroup" aria-labelledby="colorLabel">
       @for (color of colors; track color) {
         <button
@@ -30,7 +34,7 @@
           [class.active]="selectedColor() === color"
           [style.background-color]="color"
           (click)="onColorSelected(color)"
-          [attr.aria-label]="'Couleur ' + color"
+          [attr.aria-label]="'common.form.colourAria' | transloco: { color: color }"
         ></button>
       }
     </div>

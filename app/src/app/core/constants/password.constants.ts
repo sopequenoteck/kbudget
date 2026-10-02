@@ -8,9 +8,12 @@
  * Le formulaire de connexion n'utilise pas ces constantes : il verifie un mot
  * de passe existant, lui imposer une longueur minimale bloquerait un compte
  * cree avant un durcissement.
+ *
+ * Les textes d'indication associes (premiere connexion, acceptation
+ * d'invitation, changement de mot de passe) sont passes en parametre ICU aux
+ * cles de traduction `auth.form.passwordMinLength`, `auth.form.passwordPlaceholder`
+ * et `common.validation.maxLength` (KKS-379) : ces deux constantes restent la
+ * source unique de synchronisation avec le validateur.
  */
 export const PASSWORD_MIN_LENGTH = 12;
 export const PASSWORD_MAX_LENGTH = 100;
-export const PASSWORD_MIN_LENGTH_MESSAGE = `${PASSWORD_MIN_LENGTH} caractères minimum`;
-export const PASSWORD_PLACEHOLDER = `Au moins ${PASSWORD_MIN_LENGTH} caractères`;
-export const PASSWORD_MAX_LENGTH_MESSAGE = `${PASSWORD_MAX_LENGTH} caractères maximum`;

@@ -11,6 +11,7 @@ import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Widget affichant un budget avec sa progression.
@@ -84,8 +85,17 @@ class BudgetItem extends StatelessWidget {
       Currency.eur,
     );
 
-    final formattedSpent = AmountFormatter.format(montantDepense, currency: currencyEnum);
-    final formattedBudget = AmountFormatter.format(montantBudget, currency: currencyEnum);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedSpent = AmountFormatter.format(
+      montantDepense,
+      currency: currencyEnum,
+      locale: locale,
+    );
+    final formattedBudget = AmountFormatter.format(
+      montantBudget,
+      currency: currencyEnum,
+      locale: locale,
+    );
 
     // Couleur montants : rouge si exceeded
     final Color amountsColor = isOverBudget ? colors.expenseColor : colorScheme.onSurfaceVariant;

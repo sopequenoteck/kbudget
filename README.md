@@ -10,14 +10,11 @@ machine, no telemetry.
 > 🇫🇷 [Version française](README.fr.md)
 
 <p>
-  <img src="docs/screenshots/dashboard.png"    alt="Dashboard"      width="240">
-  <img src="docs/screenshots/transactions.png" alt="Transactions"   width="240">
-  <img src="docs/screenshots/budget.png"       alt="Budgets"        width="240">
-  <img src="docs/screenshots/admin-users.png"  alt="User management" width="240">
+  <img src="docs/screenshots/en/dashboard.png" alt="Dashboard" width="240">
+  <img src="docs/screenshots/en/transactions.png" alt="Transactions" width="240">
+  <img src="docs/screenshots/en/budgets.png" alt="Budgets" width="240">
+  <img src="docs/screenshots/en/admin-users.png" alt="User management" width="240">
 </p>
-
-> Screenshots are in French — the interface ships in French today, English is
-> coming with the internationalisation work.
 
 ## Why this exists
 
@@ -177,6 +174,9 @@ Pull requests must be covered by the [CLA](CLA.md) — signed by posting a
 comment, nothing to print or email. [`CONTRIBUTING.md`](CONTRIBUTING.md)
 explains how to run the project, what is expected of a change, why the CLA
 exists and what it does not mean.
+
+Translations are welcome too, by pull request: see
+[Translating k-budget](CONTRIBUTING.md#translating-k-budget).
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 

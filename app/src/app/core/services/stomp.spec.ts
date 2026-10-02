@@ -4,6 +4,7 @@ import { StompService } from './stomp';
 import { NotificationService } from './notification';
 import { AuthService } from './auth';
 import { ApiService } from './api';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 // Mock Client from @stomp/stompjs
 vi.mock('@stomp/stompjs', () => {
@@ -55,6 +56,7 @@ describe('StompService', () => {
         NotificationService,
         { provide: ApiService, useValue: apiService },
         { provide: AuthService, useValue: authService },
+        ...provideTranslocoTesting(),
       ],
     });
 

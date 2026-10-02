@@ -26,6 +26,7 @@ void main() {
           theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
           home: Scaffold(
             body: Builder(
               builder: (context) => TextButton(
@@ -225,10 +226,45 @@ void main() {
 
         final l10n = AppLocalizationsFr();
         expect(
-          find.text(l10n.errorCodeLastAdminDeletionForbidden),
+          find.text(l10n.usersFeedbackLastAdminDeletionForbidden),
           findsOneWidget,
         );
       },
     );
+
+    testWidgets('should_showGenericError_when_deleteFailsOffline',
+        (tester) async {
+      when(mockUserProfileRepo.deleteAccount(any))
+          .thenThrow(Exception('offline'));
+
+      await openSheet(
+        tester,
+        overrides: [
+          userProfileRepositoryProvider.overrideWith(
+            (_) async => mockUserProfileRepo,
+          ),
+        ],
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Mot de passe actuel'),
+        'mon_mot_de_passe',
+      );
+      await tester.pump();
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Supprimer mon compte'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Erreur lors de la suppression. Veuillez réessayer.'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Vos données restent conservées'),
+        findsOneWidget,
+      );
+    });
   });
 }

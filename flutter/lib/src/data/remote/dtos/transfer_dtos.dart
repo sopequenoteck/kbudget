@@ -14,6 +14,8 @@ class TransferRequest with _$TransferRequest {
     required String toAccountId,
     required double montant,
     String? note,
+    String? libelleDebit,
+    String? libelleCredit,
   }) = _TransferRequest;
 
   factory TransferRequest.fromJson(Map<String, dynamic> json) =>

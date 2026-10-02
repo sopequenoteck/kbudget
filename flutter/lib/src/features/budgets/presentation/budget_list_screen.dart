@@ -32,6 +32,7 @@ import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_n
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -191,7 +192,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -246,7 +247,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -259,7 +260,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
                         ? ref.read(budgetNotifierProvider.notifier).loadOverview()
                         : ref.read(budgetNotifierProvider.notifier).loadHistory(historyMonth),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.retry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -374,21 +375,25 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
         IconButton(
           icon: const PhosphorIcon(PhosphorIconsRegular.tray, size: 20),
           onPressed: () => _openUnbudgetedSheet(context, overview),
-          tooltip: 'Non budgété',
+          tooltip: l10n.budgetsPageUnbudgetedTitle,
         ),
       IconButton(
         icon: const PhosphorIcon(PhosphorIconsRegular.plus, size: 20),
         onPressed: allCategoriesHaveBudget
             ? null
             : () => ref.read(modalNotifierProvider.notifier).open(ModalType.budget),
-        tooltip: 'Ajouter un budget',
+        tooltip: l10n.budgetsDialogCreateTitle,
       ),
     ];
 
     if (convertedItems.isEmpty && convertedUnbudgeted == 0) {
       return [
         heroSliver,
-        SectionHeaderSticky(title: 'Budgets', count: 0, actions: sectionActions),
+        SectionHeaderSticky(
+          title: l10n.budgetsPageTitle,
+          count: 0,
+          actions: sectionActions,
+        ),
         SliverFillRemaining(
           hasScrollBody: false,
           child: _buildEmptyState(colorScheme),
@@ -399,7 +404,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     return [
       heroSliver,
       SectionHeaderSticky(
-        title: 'Budgets',
+        title: l10n.budgetsPageTitle,
         count: convertedItems.length,
         actions: sectionActions,
       ),
@@ -409,7 +414,11 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
           (ctx, i) {
             final e = convertedItems[i];
             return BudgetItem(
-              categoryNom: e.item.categoryNom,
+              categoryNom: categoryDisplayName(
+                e.item.categoryNom,
+                e.item.categorySystemKey,
+                l10n,
+              ),
               categoryIcone: e.item.categoryIcone,
               categoryCouleur: e.item.categoryCouleur,
               montantBudget: e.budget,
@@ -446,7 +455,13 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
               return Opacity(
                 opacity: 0.5,
                 child: BudgetItem(
-                  categoryNom: cat?.nom ?? b.categoryNom ?? b.categoryId,
+                  categoryNom: cat != null
+                      ? categoryDisplayName(cat.nom, cat.systemKey, l10n)
+                      : categoryDisplayName(
+                          b.categoryNom ?? b.categoryId,
+                          b.categorySystemKey,
+                          l10n,
+                        ),
                   categoryIcone: cat?.icone ?? b.categoryIcone ?? '',
                   categoryCouleur: cat?.couleur ?? b.categoryCouleur ?? '',
                   montantBudget: convertedMontant,
@@ -545,7 +560,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
     if (convertedItems.isEmpty) {
       return [
         heroSliver,
-        const SectionHeaderSticky(title: 'Budgets', count: 0),
+        SectionHeaderSticky(title: l10n.budgetsPageTitle, count: 0),
         SliverFillRemaining(
           hasScrollBody: false,
           child: _buildEmptyState(colorScheme),
@@ -555,13 +570,20 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
 
     return [
       heroSliver,
-      SectionHeaderSticky(title: 'Budgets', count: convertedItems.length),
+      SectionHeaderSticky(
+        title: l10n.budgetsPageTitle,
+        count: convertedItems.length,
+      ),
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, i) {
             final e = convertedItems[i];
             return BudgetItem(
-              categoryNom: e.item.categoryNom,
+              categoryNom: categoryDisplayName(
+                e.item.categoryNom,
+                e.item.categorySystemKey,
+                l10n,
+              ),
               categoryIcone: e.item.categoryIcone,
               categoryCouleur: e.item.categoryCouleur,
               montantBudget: e.budget,
@@ -603,7 +625,7 @@ class _BudgetListScreenState extends ConsumerState<BudgetListScreen>
             ),
             const SizedBox(height: AppSpacing.space3),
             Text(
-              l10n.emptyBudgetList,
+              l10n.budgetsEmptyTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.medium,
@@ -633,7 +655,7 @@ class _InactiveLabel extends StatelessWidget {
         AppSpacing.space2,
       ),
       child: Text(
-        'Inactifs',
+        AppLocalizations.of(context)!.budgetsListInactive,
         style: TextStyle(
           fontSize: AppTypography.sizeXs,
           fontWeight: AppTypography.semiBold,

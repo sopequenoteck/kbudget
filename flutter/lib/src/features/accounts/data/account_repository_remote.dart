@@ -56,8 +56,15 @@ class AccountRepositoryRemote implements AccountRepository {
   }
 
   @override
-  Future<Account> adjustBalance(String id, double newBalance) async {
-    final request = AdjustBalanceRequest(newBalance: newBalance);
+  Future<Account> adjustBalance(
+    String id,
+    double newBalance, {
+    String? libelle,
+  }) async {
+    final request = AdjustBalanceRequest(
+      newBalance: newBalance,
+      libelle: libelle,
+    );
     final response = await _dataSource.adjustBalance(id, request);
     return _toDomain(response);
   }

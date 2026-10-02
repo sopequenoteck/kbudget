@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { FirstLoginResetComponent } from './first-login-reset';
 import { AuthService } from '../../../../core/services/auth';
 import { AuthResponse } from '../../../../core/models/auth.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 function createJwt(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256' }));
@@ -45,6 +46,7 @@ describe('FirstLoginResetComponent', () => {
     TestBed.configureTestingModule({
       imports: [FirstLoginResetComponent, NoopAnimationsModule],
       providers: [
+        provideTranslocoTesting(),
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
       ],
@@ -184,5 +186,55 @@ describe('FirstLoginResetComponent', () => {
 
     // Assert
     expect(component.isSubmitting()).toBe(false);
+  });
+
+  // ---------------------------------------------------------------------
+  // Cles de traduction des erreurs de champ (getEmailErrorInfo / getPasswordErrorInfo)
+  // ---------------------------------------------------------------------
+
+  it('should_return_the_email_required_key_when_email_is_empty', () => {
+    component.form.controls.email.setValue('');
+    component.form.controls.email.markAsTouched();
+
+    expect(component.getEmailErrorInfo()).toEqual({ key: 'auth.form.emailRequired' });
+  });
+
+  it('should_return_the_max_length_key_when_email_exceeds_255_characters', () => {
+    component.form.controls.email.setValue(`${'a'.repeat(250)}@mail.com`);
+
+    expect(component.getEmailErrorInfo()).toEqual({
+      key: 'common.validation.maxLength',
+      params: { max: 255 },
+    });
+  });
+
+  it('should_return_the_email_invalid_key_when_email_is_malformed', () => {
+    component.form.controls.email.setValue('not-an-email');
+
+    expect(component.getEmailErrorInfo()).toEqual({ key: 'auth.form.emailInvalid' });
+  });
+
+  it('should_return_the_password_required_key_when_password_is_empty', () => {
+    component.form.controls.password.setValue('');
+
+    expect(component.getPasswordErrorInfo()).toEqual({ key: 'auth.form.passwordRequired' });
+  });
+
+  it('should_return_the_password_min_length_key_when_password_is_too_short', () => {
+    component.form.controls.password.setValue('court1');
+
+    expect(component.getPasswordErrorInfo()).toEqual({
+      key: 'auth.form.passwordMinLength',
+      params: { min: 12 },
+    });
+  });
+
+  it('should_return_the_max_length_key_when_password_exceeds_100_characters', () => {
+    component.form.controls.password.setValue('a'.repeat(101));
+
+    expect(component.getPasswordErrorInfo()).toEqual({
+      key: 'common.validation.maxLength',
+      params: { max: 100 },
+    });
   });
 });

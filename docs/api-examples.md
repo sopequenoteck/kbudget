@@ -87,9 +87,14 @@ Request :
   "password": "motDePasse12",
   "displayName": "Kelly",
   "currency": "XOF",
-  "timezone": "Africa/Lome"
+  "timezone": "Africa/Lome",
+  "defaultAccountName": "Main account"
 }
 ```
+
+> `defaultAccountName` (optionnel, 50 caracteres au plus, KKS-396) : nom du
+> compte cree pour le nouvel utilisateur, fourni par le client dans sa langue.
+> Absent, vide ou blanc : `Main account`.
 
 > `email` n'est **pas** dans le body — l'email vient de l'invitation (verrouille cote serveur).
 
@@ -318,7 +323,8 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#4CAF50",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   "note": null,
   "account": {
@@ -345,7 +351,7 @@ Response `200` :
     "libelle": "Courses Carrefour",
     "type": "DEPENSE",
     "date": "2026-02-07",
-    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false },
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#4CAF50", "isSystem": false, "systemKey": null },
     "note": null,
     "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" },
     "transferId": null,
@@ -527,6 +533,13 @@ Response `201` :
 }
 ```
 
+**Idempotent (KKS-385)** : si une transaction liee a l'abonnement existe deja dans
+la periode courante, `pay` la renvoie telle quelle (meme `id`, sa propre `date`) et
+ne cree rien. La periode est celle de la `frequence` qui contient aujourd'hui,
+comptee depuis `dateDebut` (un mois a partir du 5, du 5 au 4 inclus). Une
+transaction importee d'un releve et rattachee a l'abonnement compte comme un
+paiement. Un double clic ne cree donc plus de doublon.
+
 ### Historique paiements `GET /api/v1/subscriptions/{id}/payments`
 
 Response `200` :
@@ -667,9 +680,14 @@ Request :
 ```json
 {
   "accountId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "amount": 20.00
+  "amount": 20.00,
+  "libelle": "Repayment - Awa"
 }
 ```
+
+> `libelle` (optionnel, 255 caracteres au plus, KKS-396) : libelle de la
+> transaction creee, fourni par le client dans sa langue. Defaut :
+> `Repayment - <personne>`.
 
 > `amount` optionnel — si omis, rembourse le montant restant (solde complet).
 
@@ -791,7 +809,8 @@ Response `200` :
     "bankBrandColor": "#6b7280",
     "bankLogoUrl": "/api/bank-logos/other.svg",
     "bankCustomName": null,
-    "bankCustomLogo": null
+    "bankCustomLogo": null,
+    "statementAccountSuffix": "1596"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -810,10 +829,15 @@ Response `200` :
     "bankBrandColor": "#6b7280",
     "bankLogoUrl": "/api/bank-logos/other.svg",
     "bankCustomName": null,
-    "bankCustomLogo": null
+    "bankCustomLogo": null,
+    "statementAccountSuffix": null
   }
 ]
 ```
+
+`statementAccountSuffix` (KKS-384) : 4 derniers chiffres du numero de compte lu dans
+le dernier releve importe sur ce compte, pour afficher « …1596 ». `null` tant qu'aucun
+releve exploitable n'a ete importe. Le numero complet n'est jamais stocke.
 
 ### Virement `POST /api/v1/accounts/transfer`
 
@@ -824,9 +848,16 @@ Request :
   "fromAccountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
   "toAccountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
   "montant": 200.00,
-  "note": "Epargne mensuelle"
+  "note": "Epargne mensuelle",
+  "libelleDebit": "Transfer to Livret A",
+  "libelleCredit": "Transfer from Compte Principal"
 }
 ```
+
+> `libelleDebit` / `libelleCredit` (optionnels, 255 caracteres au plus,
+> KKS-396) : libelles des transactions de debit (compte source) et de credit
+> (compte destination), fournis par le client dans sa langue. Defauts :
+> `Transfer to <compte destination>` / `Transfer from <compte source>`.
 
 Response `201` :
 
@@ -836,7 +867,7 @@ Response `201` :
   "debitTransaction": {
     "id": "11111111-1111-1111-1111-111111111111",
     "montant": 200.00,
-    "libelle": "Virement vers Livret A",
+    "libelle": "Transfer to Livret A",
     "type": "DEPENSE",
     "date": "2026-02-15",
     "accountId": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
@@ -845,7 +876,7 @@ Response `201` :
   "creditTransaction": {
     "id": "22222222-2222-2222-2222-222222222222",
     "montant": 200.00,
-    "libelle": "Virement depuis Compte Principal",
+    "libelle": "Transfer from Compte Principal",
     "type": "RECETTE",
     "date": "2026-02-15",
     "accountId": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -874,9 +905,14 @@ Request :
 
 ```json
 {
-  "newBalance": 1500.00
+  "newBalance": 1500.00,
+  "libelle": "Balance adjustment"
 }
 ```
+
+> `libelle` (optionnel, 255 caracteres au plus, KKS-396) : libelle de la
+> transaction d'ajustement, fourni par le client dans sa langue. Defaut :
+> `Balance adjustment`.
 
 Response `200` : le compte mis a jour avec le nouveau solde.
 
@@ -928,7 +964,8 @@ Response `200` :
   "nom": "Alimentation",
   "icone": "🛒",
   "couleur": "#4CAF50",
-  "isSystem": false
+  "isSystem": false,
+  "systemKey": null
 }
 ```
 
@@ -957,14 +994,16 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#4CAF50",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   {
     "id": "d2e3f4a5-b6c7-8901-defa-234567890bcd",
-    "nom": "Transport",
-    "icone": "🚗",
-    "couleur": "#2196F3",
-    "isSystem": true
+    "nom": "Abonnement",
+    "icone": "🔄",
+    "couleur": "#6366f1",
+    "isSystem": true,
+    "systemKey": "SUBSCRIPTION"
   }
 ]
 ```
@@ -1069,6 +1108,24 @@ Response `200` :
 }
 ```
 
+Request (choisir la langue de l'interface, code BCP 47 restreint) :
+
+```json
+{
+  "language": "fr"
+}
+```
+
+Un champ absent ou `null` laisse la preference inchangee : `PUT` ne sait donc
+pas revenir au choix automatique. C'est le role de l'endpoint suivant.
+
+### Revenir a la langue automatique `DELETE /api/v1/users/me/preferences/language`
+
+Remet `language` a `null` : le client suit alors la langue du navigateur
+(KKS-380). Aucun corps de requete.
+
+Response `204` (sans corps). Un `GET` suivant renvoie `"language": null`.
+
 ## Budgets
 
 ### Creer `POST /api/v1/budgets`
@@ -1100,7 +1157,8 @@ Response `200` :
     "nom": "Alimentation",
     "icone": "🛒",
     "couleur": "#f59e0b",
-    "isSystem": false
+    "isSystem": false,
+    "systemKey": null
   },
   "spent": 0.00,
   "updatedAt": "2026-03-08T10:00:00"
@@ -1120,7 +1178,7 @@ Response `200` :
     "frequence": "MENSUEL",
     "seuilNotification": 80,
     "actif": true,
-    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false },
+    "category": { "id": "uuid", "nom": "Alimentation", "icone": "🛒", "couleur": "#f59e0b", "isSystem": false, "systemKey": null },
     "spent": 320.50,
     "updatedAt": "2026-03-08T10:00:00"
   }
@@ -1155,6 +1213,7 @@ Response `200` :
       "budgetId": "uuid-budget",
       "categoryId": "uuid-category",
       "categoryNom": "Alimentation",
+      "categorySystemKey": null,
       "categoryIcone": "🛒",
       "categoryCouleur": "#f59e0b",
       "montantBudget": 400.00,
@@ -1169,6 +1228,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Courses",
+      "categorySystemKey": null,
       "categoryIcone": "🛍️",
       "categoryCouleur": "#6b7280",
       "montantDepense": 45.00,
@@ -1194,6 +1254,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Alimentation",
+      "categorySystemKey": null,
       "categoryIcone": "🛒",
       "categoryCouleur": "#f59e0b",
       "montantBudget": 400.00,
@@ -1208,6 +1269,7 @@ Response `200` :
     {
       "categoryId": "uuid-category",
       "categoryNom": "Courses",
+      "categorySystemKey": null,
       "categoryIcone": "🛍️",
       "categoryCouleur": "#6b7280",
       "montantDepense": 52.30,
@@ -1291,7 +1353,7 @@ Response `201` :
   "frequency": "MENSUEL",
   "nextOccurrence": "2026-04-01",
   "recurringActive": true,
-  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false },
+  "category": { "id": "uuid", "nom": "Logement", "icone": "🏠", "couleur": "#ef4444", "isSystem": false, "systemKey": null },
   "account": { "id": "uuid", "nom": "Compte Principal", "icone": "🏦", "couleur": "#3b82f6" }
 }
 ```
@@ -1330,13 +1392,14 @@ Response `200` :
     {
       "id": "uuid",
       "type": "SUBSCRIPTION_DUE",
-      "title": "Echeance abonnement",
-      "message": "Netflix arrive a echeance dans 3 jours",
+      "title": "Subscription Netflix",
+      "message": "Netflix is due tomorrow",
       "entityType": "SUBSCRIPTION",
       "entityId": "uuid-subscription",
       "read": false,
       "readAt": null,
-      "createdAt": "2026-03-27T08:00:00"
+      "createdAt": "2026-03-27T08:00:00",
+      "params": { "name": "Netflix" }
     }
   ],
   "number": 0,
@@ -1345,6 +1408,22 @@ Response `200` :
   "totalPages": 1
 }
 ```
+
+> `params` (KKS-397) : parametres de la notification, a partir desquels le
+> client construit titre et message dans sa langue. Valeurs en chaines :
+> montants decimaux exacts, dates ISO, pourcentage entier, devise en code ISO.
+>
+> | Type | Cles |
+> |------|------|
+> | `SUBSCRIPTION_DUE` | `name` |
+> | `DEBT_DUE` | `person` |
+> | `DEBT_REMINDER` | `person`, `amount`, `currency` |
+> | `BUDGET_THRESHOLD`, `BUDGET_EXCEEDED` | `category`, `categorySystemKey` (categorie systeme seulement), `percentage` |
+> | `RECURRING_TRANSACTION_DUE` | `label`, `amount`, `currency` (absente sans compte), `dueDate` |
+>
+> `null` pour une notification anterieure : le client affiche alors `title` /
+> `message`, desormais ecrits en anglais. Le meme objet est pousse par
+> WebSocket.
 
 ### Compteur non lues `GET /api/v1/notifications/unread-count`
 
@@ -1528,14 +1607,16 @@ Response `200` :
 - `Content-Disposition: attachment; filename="k-budget-transactions-2026-04-27.csv"`
 - Body : transactions du user uniquement (pas les abonnements/dettes/budgets), prefixees du **BOM UTF-8** (`EF BB BF`) pour ouverture correcte dans Excel.
 
-Colonnes : `date,libelle,montant,type,devise,compte,categorie,note`.
+Colonnes (format stable depuis KKS-396, en-tetes non traduits) :
+`date,label,amount,currency,account,category,type`. `type` : `RECETTE`,
+`DEPENSE`, `AJUSTEMENT` (codes du JSON). `category` : nom tel que stocke.
 
 Exemple :
 
 ```
-date,libelle,montant,type,devise,compte,categorie,note
-2026-04-15,Courses Carrefour,42.50,DEPENSE,EUR,Compte Principal,Alimentation,
-2026-04-10,Salaire,2500.00,RECETTE,EUR,Compte Principal,,
+date,label,amount,currency,account,category,type
+2026-04-15,Courses Carrefour,42.50,EUR,Compte Principal,Alimentation,DEPENSE
+2026-04-10,Salaire,2500.00,EUR,Compte Principal,,RECETTE
 ```
 
 Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parametre `format` absent ou autre que `json`/`csv`.
@@ -1600,6 +1681,69 @@ Response `200` :
 
 ## Import CSV
 
+### Reconnaitre un fichier `POST /api/v1/imports/detect` (KKS-440)
+
+Identifie le profil d'import d'un fichier, sans rien creer : ni brouillon, ni
+profil. A appeler avant le choix du compte pour reconnaitre le format.
+
+Request (multipart/form-data) :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `file` | File | Fichier CSV (max 5 Mo, memes limites que `/upload`) |
+
+Response `200`, fichier reconnu :
+
+```json
+{
+  "recognized": true,
+  "profileSource": "REGISTRY",
+  "bankCode": "SG",
+  "profileName": "Société Générale",
+  "accountSuffix": "1596",
+  "suggestedAccountId": "36eace5f-..."
+}
+```
+
+Response `200`, fichier non reconnu :
+
+```json
+{
+  "recognized": false,
+  "profileSource": null,
+  "bankCode": null,
+  "profileName": null,
+  "accountSuffix": null,
+  "suggestedAccountId": null
+}
+```
+
+- `accountSuffix` (KKS-384) : 4 derniers chiffres du numero de compte lu dans l'en-tete
+  bancaire du releve ; `null` quand le profil n'a pas d'en-tete (profil personnalise)
+  ou que le numero est illisible ou a moins de 4 chiffres.
+- `suggestedAccountId` (KKS-384) : l'unique compte **actif de l'utilisateur
+  authentifie** deja importe avec le meme profil et le meme suffixe ; `null` s'il y
+  en a zero ou plusieurs (ambigu : pas de preselection). Le choix du compte reste
+  explicite au premier import et modifiable a chaque import ; a la confirmation, le
+  compte choisi recoit l'association (profil + suffixe) et remplace la precedente.
+  Cle de profil : `REGISTRY:<bankCode>` (profil embarque) ou `CUSTOM:<id>` (profil
+  personnalise). Le numero complet n'est jamais stocke, ni en clair ni en empreinte.
+
+- `profileSource` : `REGISTRY` (profil embarque) ou `CUSTOM` (profil personnalise
+  de l'utilisateur authentifie). `bankCode` vaut `null` pour `CUSTOM`.
+- Le fichier est reconnu quand toutes les colonnes de la signature du profil
+  figurent sur la ligne d'en-tete de colonnes (apres `skipHeaderLines`, lue avec
+  l'encodage et le separateur du profil ; espaces de bord ignores, casse
+  respectee, comme a la lecture des lignes). Un profil personnalise a pour
+  signature ses colonnes mappees. Profils
+  embarques d'abord, puis profils personnalises de l'utilisateur seulement
+  (le plus recemment modifie si plusieurs correspondent).
+- `/imports/upload` suit le meme ordre, puis se replie sur le profil embarque
+  du `bankCode` du compte ; `422` si rien ne correspond. Le brouillon porte alors
+  `profileSource` = `CUSTOM` quand un profil personnalise a ete reconnu.
+
+Erreur `400` : fichier absent, vide, trop gros ou qui n'est pas un CSV. Erreur `401` sans jeton.
+
 ### Upload CSV `POST /api/v1/imports/upload`
 
 Request (multipart/form-data) :
@@ -1624,10 +1768,16 @@ Response `201` :
   "duplicateCount": 2,
   "skippedCount": 7,
   "alreadyImportedCount": 7,
+  "matchedCount": 3,
   "profileName": "Societe Generale",
   "profileSource": "REGISTRY",
   "createdAt": "2026-03-20T14:30:00",
   "expiresAt": "2026-03-27T14:30:00",
+  "statementAccountSuffix": "1596",
+  "statementBalance": 1842.37,
+  "statementBalanceDate": "2026-10-01",
+  "projectedBalance": 895.70,
+  "proposedOpeningBalance": 946.67,
   "lines": [
     {
       "id": "uuid",
@@ -1641,10 +1791,24 @@ Response `201` :
       "statusMessage": null,
       "categoryId": null,
       "categoryName": null,
+      "categorySystemKey": null,
       "duplicateTransactionId": null,
       "suggestRule": false,
       "skipReason": null,
-      "categorySource": null
+      "categorySource": null,
+      "purchaseDate": "2026-03-14",
+      "matchedTransactionId": "uuid-transaction-saisie",
+      "matchCandidateIds": [],
+      "subscriptionId": null,
+      "matchedTransaction": {
+        "id": "uuid-transaction-saisie",
+        "date": "2026-03-14",
+        "libelle": "Tabac",
+        "montant": 17.32,
+        "type": "DEPENSE"
+      },
+      "matchCandidates": [],
+      "merchantKey": "SUPER U"
     },
     {
       "id": "uuid",
@@ -1658,10 +1822,18 @@ Response `201` :
       "statusMessage": null,
       "categoryId": null,
       "categoryName": null,
+      "categorySystemKey": null,
       "duplicateTransactionId": "uuid-transaction-existante",
       "suggestRule": false,
       "skipReason": "ALREADY_IMPORTED",
-      "categorySource": null
+      "categorySource": null,
+      "purchaseDate": null,
+      "matchedTransactionId": null,
+      "matchCandidateIds": [],
+      "subscriptionId": null,
+      "matchedTransaction": null,
+      "matchCandidates": [],
+      "merchantKey": "FRAIS BANCAIRES TEST"
     }
   ]
 }
@@ -1683,6 +1855,57 @@ Deux lignes identiques d'un meme releve sont deux operations : elles ne sont
 ecartees que si la base en contient autant. Un libelle seulement proche
 (Jaro-Winkler >= 0,85) donne toujours `DUPLICATE`, bloquant.
 
+**Saisies manuelles rapprochees (KKS-385)** : une operation que l'utilisateur a
+deja saisie a la main ne doit pas etre comptee deux fois. A l'upload, apres la
+reconnaissance des lignes deja importees et avant le doublon probable, chaque
+ligne `READY` est rapprochee des transactions du **meme utilisateur et du meme
+compte**, sans empreinte (non importees), de meme sens et de meme montant, dans une
+fenetre de dates. **Le libelle n'est pas un critere** : celui de l'utilisateur et
+celui de la banque n'ont rien en commun. La date de reference de la ligne est la
+date d'achat si elle est connue, sinon la date comptable :
+
+| Transaction candidate | Fenetre |
+|-----------------------|---------|
+| liee a un abonnement | 8 jours de part et d'autre de la date de reference |
+| sinon, date d'achat connue (paiement carte) | 2 jours de part et d'autre de la date d'achat |
+| sinon (virement, prelevement) | de 5 jours avant a 1 jour apres la date comptable |
+
+- `purchaseDate` : date d'achat lue dans le libelle brut quand le profil la
+  declare (`CARTE X1596 21/08`), `null` sinon. `date` reste la date comptable (elle
+  porte l'empreinte). A la confirmation, la transaction creee prend `purchaseDate`
+  si elle est connue, sinon `date`.
+- **Un candidat** : la ligne reste `READY` et porte `matchedTransactionId`. A la
+  confirmation, **aucune transaction n'est creee** : la transaction existante est
+  conservee telle quelle (date, libelle, categorie, liens a une dette ou un
+  abonnement) et recoit l'empreinte de la ligne. Les lignes rapprochees sont comptees
+  dans `matchedCount` (sous-ensemble de `readyCount`), hors `importedCount`.
+- **Plusieurs candidats** : aucune decision automatique. La ligne devient
+  `DUPLICATE` (bloquante) et `matchCandidateIds` liste les candidats, du plus ancien
+  au plus recent. Une transaction ne sert qu'a une ligne : les lignes sont traitees
+  dans l'ordre du fichier.
+- **Aucun** : la ligne suit son chemin habituel.
+- **Detail pour la revue (KKS-386)** : `matchedTransaction` (`id`, `date`, `libelle`,
+  `montant`, `type`) decrit la transaction rapprochee, et `matchCandidates` les memes
+  objets pour `matchCandidateIds`, dans le meme ordre. Ils sont lus en une seule
+  requete pour tout le brouillon, parmi les transactions de l'utilisateur et du compte
+  du brouillon : un identifiant qui n'est pas le sien, ou d'une transaction supprimee
+  depuis, n'a pas de detail (`matchedTransaction` vaut `null`, le candidat est absent
+  de `matchCandidates` ; `matchedTransactionId` et `matchCandidateIds` restent tels
+  quels). Presents dans toutes les reponses qui portent une ligne.
+- `subscriptionId` : une ligne `READY` non rapprochee, de sens `DEPENSE`, dont la
+  cle commercant et le montant sont ceux d'**un seul** abonnement actif de
+  l'utilisateur est rattachee a cet abonnement. Elle cree a la confirmation une
+  transaction liee a l'abonnement, avec sa categorie si la ligne n'en a pas. Plusieurs
+  abonnements de meme libelle (cinq abonnements d'un meme editeur) se distinguent par
+  le montant ; s'il ne suffit pas, aucun lien. La cle d'un abonnement est apprise a la
+  confirmation d'une ligne rapprochee d'un de ses paiements.
+
+- `merchantKey` (KKS-386) : cle commercant du libelle nettoye (`MerchantKey`), vide si le
+  libelle ne contient aucune lettre. C'est la cle sur laquelle l'API propage une
+  correction de categorie : un client regroupe les lignes par `merchantKey` et par
+  `transactionType` pour proposer un seul choix de categorie par commercant. Ajout
+  seulement, rien n'est retire.
+
 **Categorie pre-remplie (KKS-383)** : `categorySource` indique d'ou vient la
 categorie — `RULE` (une regle), `HISTORY` (categorie majoritaire des transactions
 passees de l'utilisateur chez le meme commercant, d'abord au meme montant, puis
@@ -1691,7 +1914,47 @@ tous montants), `USER` (choisie pendant la revue). `null` sans categorie.
 Erreur `409` : brouillon actif existant pour ce compte.
 Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
 
+**Profil retenu (KKS-440)** : le fichier est d'abord reconnu par ses colonnes
+(voir `/imports/detect`), quel que soit le `bankCode` du compte ; ce dernier ne
+sert plus que de repli. Un profil personnalise sauvegarde au mapping manuel est
+donc reutilise au reimport.
+
+**Solde du releve (KKS-384)** : la banque donne le solde reel dans l'en-tete du
+releve. Ces cinq champs sont `null` pour un profil sans en-tete exploitable
+(profil personnalise), et le comportement est alors strictement inchange.
+
+- `statementAccountSuffix` : 4 derniers chiffres du numero de compte (jamais le
+  numero complet) ; `statementBalance` et `statementBalanceDate` : solde donne par la
+  banque et sa date. Une valeur illisible vaut `null`, jamais une erreur.
+- `projectedBalance` : solde que l'application aura **a la date du solde** si le
+  brouillon est confirme tel quel = `soldeInitial` du compte + transactions du compte
+  datees jusqu'a cette date + lignes `READY` du brouillon datees jusqu'a cette date.
+  Recalcule a chaque lecture (une ligne ignoree le fait varier). `null` sans solde ni
+  date, et une fois le brouillon confirme.
+- `proposedOpeningBalance` : **premier import du compte seulement** (aucun
+  historique d'import pour ce compte) : le `soldeInitial` qui rend le solde de
+  l'application egal au solde bancaire **une fois ecartees les transactions que le
+  releve n'explique pas** (KKS-443), pour qu'elles restent visibles comme ecart et comme
+  `suspects` apres confirmation au lieu d'etre absorbees. Ce sont les memes
+  transactions que les `suspects` de `balanceCheck` : transactions du compte datees de
+  la plus petite date des lignes lisibles au plus tard de la derniere ligne et de la date
+  du solde, hors `AJUSTEMENT`, que ni une ligne `READY` rapprochee ni une ligne `SKIPPED`
+  reconnue comme doublon n'explique. Sans transaction de ce type, il egale
+  `soldeInitial + solde bancaire - projectedBalance` ; sinon il en differe du net signe
+  de celles datees jusqu'a la date du solde (`projectedBalance` les compte toutes).
+  `null` aux imports suivants.
+
 ### Confirmer import `POST /api/v1/imports/drafts/{draftId}/confirm`
+
+Corps **optionnel** : une confirmation sans corps fonctionne comme avant.
+
+```json
+{ "applyOpeningBalance": true }
+```
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `applyOpeningBalance` | boolean (optionnel, defaut `false`) | Si `true` **et** premier import du compte, le `soldeInitial` du compte est fixe a la valeur proposee, recalculee a la confirmation (le solde de l'application egale alors celui de la banque a la date du releve, sans ajustement manuel, a l'ecart pres des transactions que le releve n'explique pas, listees dans `balanceCheck.suspects`). Ignore sinon (import suivant, releve sans solde). |
 
 Response `200` :
 
@@ -1700,12 +1963,52 @@ Response `200` :
   "importedCount": 151,
   "skippedCount": 9,
   "historyId": "uuid",
-  "alreadyImportedCount": 7
+  "alreadyImportedCount": 7,
+  "matchedCount": 3,
+  "balanceCheck": {
+    "bankBalance": 1842.37,
+    "balanceDate": "2026-10-01",
+    "computedBalance": 1238.07,
+    "difference": -604.30,
+    "suspects": [
+      {
+        "id": "uuid",
+        "date": "2026-09-16",
+        "libelle": "Pain",
+        "montant": 4.30,
+        "type": "DEPENSE"
+      }
+    ]
+  }
 }
 ```
 
-Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues. Les lignes deja
-importees ne bloquent jamais.
+**Controle de solde (KKS-384)** : `balanceCheck` vaut `null` quand le releve ne donne
+pas de solde et sa date.
+
+- `computedBalance` : solde reel de l'application a `balanceDate`, **apres** la
+  creation des transactions (et apres `applyOpeningBalance` le cas echeant) ;
+  `difference` = `computedBalance` − `bankBalance`, `0` quand les deux concordent.
+- `suspects` : transactions du compte dont la date est dans la periode du releve (de
+  la plus petite date de ses lignes a la plus tardive de ses lignes et de la date du
+  solde, puisque le solde bancaire couvre toutes les operations jusqu'a cette date)
+  et qui ne correspondent a
+  **aucune** ligne du releve — ni creees par cet import, ni reconnues comme deja
+  importees ou ecartees comme doublon (`duplicateTransactionId` d'une ligne
+  `SKIPPED`). Les transactions de type `AJUSTEMENT` n'y figurent jamais (elles restent
+  dans le solde). Triees par date puis libelle. Quand l'application contient des
+  doublons de lignes bancaires, `difference` est egale a la somme signee de leurs
+  montants et `suspects` les designe. Une transaction datee avant la periode du
+  releve compte dans `difference` sans etre listee ; une transaction datee apres la
+  date du solde n'est ni comptee ni listee.
+
+`importedCount` ne compte que les transactions **creees** ; `matchedCount` (KKS-385)
+compte les lignes rapprochees d'une transaction existante, qui n'ont rien cree. Une
+transaction rapprochee n'est jamais un suspect.
+
+Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues (dont les lignes aux
+candidats multiples), ou transaction rapprochee supprimee ou importee depuis l'upload
+(defaire le rapprochement de la ligne). Les lignes deja importees ne bloquent jamais.
 
 Les actions groupees ignorent les lignes deja importees : un « tout
 selectionner » ne les modifie pas et n'echoue pas sur elles.
@@ -1723,6 +2026,37 @@ Request :
 
 Redemander le statut courant d'une ligne est sans effet : `READY` sur une ligne
 deja `READY` n'est plus une erreur (KKS-383).
+
+**Restaurer une ligne ignoree (KKS-386)** : `READY` est accepte depuis `NEEDS_REVIEW`,
+`DUPLICATE` et `SKIPPED` **quand l'utilisateur a lui-meme ignore la ligne**
+(`skipReason: null`) : la transaction sera creee a la confirmation. Une ligne que
+l'import a ecartee (`skipReason: "ALREADY_IMPORTED"`) ne peut pas revenir, pas plus
+qu'une ligne illisible ignoree (`statusMessage` non nul : montant et date ne sont
+pas fiables) : `400` sur `PUT .../lines/{lineId}`, ignoree sans erreur par l'action
+groupee.
+
+**Rapprochement (KKS-385)** : deux champs **optionnels** tranchent ou defont le
+rapprochement d'une ligne `READY` ou `DUPLICATE` :
+
+```json
+{ "matchedTransactionId": "uuid-transaction" }
+```
+
+```json
+{ "clearMatch": true }
+```
+
+- `matchedTransactionId` rapproche la ligne de cette transaction : elle doit etre
+  celle de l'utilisateur, sur le compte du brouillon, sans empreinte, de meme sens
+  et de meme montant que la ligne, et ne pas deja servir une autre ligne du brouillon.
+  La fenetre de dates n'est pas controlee : l'utilisateur sait. La ligne devient
+  `READY` rapprochee. `404` si la transaction n'est pas la sienne ou pas sur ce
+  compte, `409` si une autre ligne la porte, `400` sinon.
+- `clearMatch: true` defait le rapprochement (ou renonce aux candidats) : la ligne
+  est `READY` sans rapprochement, une transaction sera creee. `400` si la ligne n'a
+  ni rapprochement ni candidats, ou si les deux champs sont donnes.
+- Passer une ligne rapprochee a `SKIPPED` defait aussi son rapprochement ; passer
+  une ligne aux candidats multiples a `READY` vaut `clearMatch` (creer la transaction).
 
 **Correction de categorie (KKS-383)** : quand `categoryId` change la categorie
 d'une ligne, elle est propagee aux autres lignes du brouillon du meme commercant
@@ -1743,6 +2077,11 @@ Request :
 }
 ```
 
+Une ligne aux candidats multiples (KKS-385) n'est pas touchee par `status: "READY"` :
+creer une transaction a sa place est un choix explicite, ligne par ligne
+(`PUT .../lines/{lineId}`). Passer des lignes rapprochees a `SKIPPED` defait leur
+rapprochement.
+
 ### Regles de categorisation `POST /api/v1/imports/rules`
 
 Request :
@@ -1762,6 +2101,7 @@ Response `201` :
   "pattern": "CARREFOUR",
   "categoryId": "uuid-categorie",
   "categoryName": "Courses",
+  "categorySystemKey": null,
   "categoryIcon": "shopping-cart",
   "createdAt": "2026-03-20T14:30:00",
   "origin": "MANUAL"
@@ -1817,6 +2157,155 @@ Response `200` : la regle mise a jour.
 ### Profils `GET /api/v1/imports/profiles` — profils pre-configures + personnalises
 
 ### Supprimer profil `DELETE /api/v1/imports/profiles/{profileId}` — `204`
+
+## Rattrapage de l'historique (KKS-387)
+
+> Endpoints proteges par JWT, sur le user authentifie uniquement. Un passage unique, declenche par l'utilisateur : les `GET` **proposent** et ne modifient rien, chaque `POST` applique **une** proposition validee. Une transaction d'un autre utilisateur est toujours `404 NOT_FOUND`, rien n'est modifie. Les ajustements de solde, les jambes de virement et les modeles recurrents ne sont jamais proposes ni fusionnes.
+
+### Doublons probables `GET /api/v1/history-cleanup/duplicates`
+
+Response `200` :
+
+```json
+{
+  "importedDuplicates": [
+    {
+      "imported": {
+        "id": "a1b2c3d4-0000-4000-8000-000000000001",
+        "date": "2026-09-15",
+        "libelle": "CARTE BOULANGERIE TEST",
+        "montant": 3.20,
+        "type": "DEPENSE",
+        "category": null,
+        "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+        "imported": true,
+        "debtId": null,
+        "subscriptionId": null
+      },
+      "candidates": [
+        {
+          "id": "a1b2c3d4-0000-4000-8000-000000000002",
+          "date": "2026-09-16",
+          "libelle": "Pain",
+          "montant": 3.20,
+          "type": "DEPENSE",
+          "category": { "id": "c0000000-0000-4000-8000-000000000001", "nom": "Courses", "icone": "🏷️", "couleur": "#111111", "isSystem": false, "systemKey": null },
+          "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+          "imported": false,
+          "debtId": null,
+          "subscriptionId": null
+        }
+      ]
+    }
+  ],
+  "subscriptionDuplicates": [
+    {
+      "subscriptionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "subscriptionName": "Netflix",
+      "periodStart": "2026-09-10",
+      "periodEnd": "2026-10-09",
+      "suggestedKeepTransactionId": "a1b2c3d4-0000-4000-8000-000000000003",
+      "transactions": [ { "id": "a1b2c3d4-0000-4000-8000-000000000003", "...": "meme forme que ci-dessus" } ]
+    }
+  ]
+}
+```
+
+- **Operation importee deja saisie** : une transaction importee d'un releve (`imported: true`) et une ou plusieurs transactions saisies a la main du meme compte, du meme sens et du meme montant, dont la date entre dans la fenetre du rapprochement de l'import (KKS-385) : 8 jours de part et d'autre pour un paiement d'abonnement, sinon de 5 jours avant a 2 jours apres la date de la transaction importee (une transaction importee ne retient pas si sa date est celle d'achat — 2 jours de part et d'autre — ou la date comptable — de 5 jours avant a 1 jour apres : les deux fenetres sont admises). Le libelle n'est pas un critere. Une transaction n'apparait que dans une proposition ; l'importee est identifiee par `imported.id`, et l'utilisateur choisit parmi `candidates` (la plus proche en date d'abord). Un candidat deja pris par une autre proposition n'est pas repete : une fois la premiere fusionnee, une nouvelle lecture montre la suite.
+- **Paiements d'abonnement multiples** : transactions liees au meme abonnement dans la meme echeance (periode de sa frequence comptee depuis sa date de debut). `suggestedKeepTransactionId` est le paiement importe s'il y en a un, sinon le plus ancien. Une echeance qui compte deux paiements importes n'est pas proposee : ce sont deux operations de la banque.
+
+### Fusionner une operation importee `POST /api/v1/history-cleanup/duplicates/merge`
+
+Request :
+
+```json
+{
+  "importedTransactionId": "a1b2c3d4-0000-4000-8000-000000000001",
+  "keptTransactionId": "a1b2c3d4-0000-4000-8000-000000000002"
+}
+```
+
+Response `200` : `{ "kept": <transaction telle qu'elle est apres fusion>, "removedIds": ["a1b2c3d4-0000-4000-8000-000000000001"] }`.
+
+La transaction **saisie** est conservee (libelle, date, categorie, liens a une dette et a un abonnement) et recoit l'empreinte d'import de la transaction importee, qui est supprimee : un reimport du meme releve reconnait la ligne comme deja importee. Si la saisie n'avait pas d'abonnement et l'importee en avait un, la saisie prend ce lien. Les criteres sont reverifies a l'appel.
+
+Erreurs : `404 NOT_FOUND` (transaction inconnue ou d'un autre utilisateur) ; `400 BAD_REQUEST` (deux fois la meme transaction) ; `400 VALIDATION_ERROR` (champ manquant) ; `409 CLEANUP_PROPOSAL_STALE` (la paire ne satisfait plus les criteres : transaction deja importee ou modifiee depuis, montant, sens, compte ou date hors fenetre, ajustement, virement ou modele recurrent) ; `409 CLEANUP_DEBT_LINK_MISSING` (la transaction a supprimer rembourse une dette que la conservee ne rembourse pas : le restant du est la somme des transactions de la dette). Une dette remboursee par les deux transactions est rouverte si la suppression la laisse sous son montant.
+
+### Ne garder qu'un paiement d'abonnement `POST /api/v1/history-cleanup/subscription-duplicates/merge`
+
+Request :
+
+```json
+{
+  "keptTransactionId": "a1b2c3d4-0000-4000-8000-000000000003",
+  "removedTransactionIds": ["a1b2c3d4-0000-4000-8000-000000000004", "a1b2c3d4-0000-4000-8000-000000000005"]
+}
+```
+
+Response `200` : `{ "kept": <transaction>, "removedIds": [...] }`. Les transactions a supprimer doivent etre liees au meme abonnement et a la meme echeance que la conservee, et ne pas etre importees d'un releve (`409 CLEANUP_PROPOSAL_STALE` sinon). Memes erreurs que ci-dessus, `400 BAD_REQUEST` si la conservee figure aussi parmi les supprimees ; 50 transactions au plus.
+
+### Transactions sans categorie `GET /api/v1/history-cleanup/uncategorized`
+
+Response `200` :
+
+```json
+{
+  "groups": [
+    {
+      "merchantKey": "BOULANGERIE TEST",
+      "type": "DEPENSE",
+      "amount": null,
+      "count": 2,
+      "totalAmount": 7.30,
+      "suggestion": {
+        "category": { "id": "c0000000-0000-4000-8000-000000000001", "nom": "Courses", "icone": "🏷️", "couleur": "#111111", "isSystem": false, "systemKey": null },
+        "source": "HISTORY_AMOUNT"
+      },
+      "transactions": [ { "id": "a1b2c3d4-0000-4000-8000-000000000006", "...": "meme forme que ci-dessus" } ]
+    }
+  ]
+}
+```
+
+Transactions sans categorie, hors ajustements et modeles recurrents, groupees par cle commercant (`MerchantKey`) et par sens. La categorie proposee est, dans l'ordre, celle de la premiere regle de l'utilisateur qui correspond au libelle (`RULE`), la categorie majoritaire de ses transactions passees chez le meme commercant **au meme montant** (`HISTORY_AMOUNT`), puis chez le meme commercant (`HISTORY_MERCHANT`). Un commercant dont les montants recoivent des propositions differentes (plusieurs abonnements sous un meme libelle) est **decoupe par montant** : `amount` est alors renseigne, et le client n'y demande pas de regle (`createRule: false`). Un libelle sans commercant reconnaissable donne la cle vide, sans proposition ni regle possible. `suggestion` vaut `null` sans proposition ; ces groupes sont listes apres les autres, les plus gros d'abord.
+
+### Appliquer une categorie `POST /api/v1/history-cleanup/uncategorized/apply`
+
+Request :
+
+```json
+{
+  "categoryId": "c0000000-0000-4000-8000-000000000001",
+  "transactionIds": ["a1b2c3d4-0000-4000-8000-000000000006", "a1b2c3d4-0000-4000-8000-000000000007"],
+  "createRule": true
+}
+```
+
+Response `200` : `{ "categorizedCount": 2, "skippedCount": 0 }`.
+
+La categorie est celle de l'utilisateur, systeme ou non. Les transactions qui ont deja une categorie au moment de l'appel (ainsi que les ajustements et modeles recurrents) sont ignorees et comptees dans `skippedCount`. `createRule` est optionnel (`true` par defaut) : la categorie est retenue comme regle `AUTO` sur la cle commercant, creee ou reorientee ; une regle `MANUAL` n'est jamais modifiee. Aucune regle si les transactions couvrent plusieurs commercants ou si la cle est vide. `404 NOT_FOUND` si la categorie ou une transaction n'est pas a l'utilisateur (rien n'est modifie) ; `400 VALIDATION_ERROR` si `categoryId` manque ou si `transactionIds` est vide ou depasse 500 elements.
+
+### Ajustements de solde `GET /api/v1/history-cleanup/adjustments`
+
+Response `200` :
+
+```json
+{
+  "accounts": [
+    {
+      "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+      "bankBalance": 80.00,
+      "bankBalanceDate": "2026-09-30",
+      "computedBalance": 85.00,
+      "adjustments": [
+        { "id": "a1b2c3d4-0000-4000-8000-000000000008", "date": "2026-09-12", "libelle": "Balance adjustment", "montant": 5.00, "probablyUnnecessary": true }
+      ]
+    }
+  ]
+}
+```
+
+Lecture seule : aucune suppression ici (la suppression de transaction existante refuse les ajustements). `bankBalance` et `bankBalanceDate` sont ceux du dernier releve termine qui donne un solde bancaire (KKS-384), la date de solde la plus recente l'emportant ; `computedBalance` est le solde de l'application a cette date, ajustements compris. `probablyUnnecessary` : l'ajustement est date au plus tard a la date du solde bancaire et, sans lui, le solde calcule a cette date egalerait le solde bancaire au centime ; un ajustement deja compense par un ajustement de montant oppose du meme compte, date le meme jour ou apres, n'est plus signale (c'est ce que cree « Recaler sur la banque » cote client via `adjust-balance`), chaque ajustement n'entrant que dans une paire ; le plus recent de la paire reste juge seul, sauf le meme jour ou les deux sont compenses. Ces trois champs valent `null`, et `probablyUnnecessary` `false`, pour un compte sans solde bancaire connu.
 
 ## Voir aussi
 

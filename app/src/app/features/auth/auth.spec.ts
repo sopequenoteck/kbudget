@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { Auth } from './auth';
 import { AuthService } from '../../core/services/auth';
 import { AuthResponse } from '../../core/models/auth.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 function createJwt(payload: Record<string, unknown>): string {
   const header = btoa(JSON.stringify({ alg: 'HS256' }));
@@ -53,6 +54,7 @@ describe('Auth (LoginComponent)', () => {
     TestBed.configureTestingModule({
       imports: [Auth, NoopAnimationsModule],
       providers: [
+        provideTranslocoTesting(),
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router },
         {

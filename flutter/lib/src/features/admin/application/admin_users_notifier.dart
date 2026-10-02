@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_list_state.dart';
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final adminUsersNotifierProvider =
     NotifierProvider<AdminUsersNotifier, AdminUsersListState>(
@@ -24,10 +25,10 @@ class AdminUsersNotifier extends Notifier<AdminUsersListState> {
     try {
       final items = await _repo.listUsers();
       state = state.copyWith(items: items, isLoading: false);
-    } on Exception catch (e) {
+    } on Exception {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les utilisateurs: $e',
+        error: ref.read(appLocalizationsProvider).usersFeedbackLoadUsersError,
       );
     }
   }
@@ -56,10 +57,10 @@ class AdminUsersNotifier extends Notifier<AdminUsersListState> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la réactivation: $e',
+        error: ref.read(appLocalizationsProvider).usersFeedbackUserEnableError,
       );
     }
   }

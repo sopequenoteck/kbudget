@@ -6,8 +6,10 @@ import { SubscriptionDetail } from './subscription-detail';
 import { SubscriptionService } from '../../../../core/services/subscription';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Subscription, Frequency } from '../../../../core/models/subscription.model';
 import { SubscriptionPaymentResponse } from '../../../../core/models/subscription-payment.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const flushAsync = () => new Promise((r) => setTimeout(r, 0));
 
@@ -48,6 +50,13 @@ describe('SubscriptionDetail', () => {
     getPayments: ReturnType<typeof vi.fn>;
     getTotalPaid: ReturnType<typeof vi.fn>;
     pay: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+  };
+
+  let confirmServiceMock: {
+    confirm: ReturnType<typeof vi.fn>;
+    confirmDelete: ReturnType<typeof vi.fn>;
   };
 
   let modalServiceMock: {
@@ -74,6 +83,13 @@ describe('SubscriptionDetail', () => {
       getPayments: vi.fn().mockReturnValue(of(mockPayments)),
       getTotalPaid: vi.fn().mockReturnValue(of(mockTotal)),
       pay: vi.fn().mockReturnValue(of(mockPayments[0])),
+      update: vi.fn().mockReturnValue(of(mockSubscription)),
+      delete: vi.fn().mockReturnValue(of(undefined)),
+    };
+
+    confirmServiceMock = {
+      confirm: vi.fn().mockResolvedValue(true),
+      confirmDelete: vi.fn().mockResolvedValue(true),
     };
 
     modalServiceMock = {
@@ -101,9 +117,11 @@ describe('SubscriptionDetail', () => {
     TestBed.configureTestingModule({
       imports: [SubscriptionDetail],
       providers: [
+        provideTranslocoTesting(),
         { provide: SubscriptionService, useValue: subscriptionServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
       ],
@@ -192,7 +210,9 @@ describe('SubscriptionDetail', () => {
 
     // Assert
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe('Aucun paiement enregistré');
+    expect(compiled.querySelector('.payments-empty')?.textContent?.trim()).toBe(
+      'Aucun paiement enregistré',
+    );
     expect(compiled.querySelectorAll('.payment-item').length).toBe(0);
   });
 
@@ -281,5 +301,117 @@ describe('SubscriptionDetail', () => {
     // Assert
     expect(toastServiceMock.error).toHaveBeenCalledWith('Échec du paiement');
     expect(fixture.componentInstance.payInProgress()).toBe(false);
+  });
+
+  it('should_delete_subscription_when_confirmed_and_frequency_is_mensuel', async () => {
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onDelete();
+
+    const title = confirmServiceMock.confirmDelete.mock.calls[0][0].title;
+    expect(title).toContain('/mois');
+    expect(subscriptionServiceMock.delete).toHaveBeenCalledWith('sub-1');
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Abonnement supprimé');
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/subscriptions']);
+  });
+
+  it('should_show_annuel_suffix_in_confirm_title_when_frequency_is_annuel', async () => {
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
+    subscriptionServiceMock.getById.mockReturnValue(
+      of({ ...mockSubscription, frequence: Frequency.ANNUEL }),
+    );
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onDelete();
+
+    const title = confirmServiceMock.confirmDelete.mock.calls[0][0].title;
+    expect(title).toContain('/an');
+    expect(subscriptionServiceMock.delete).not.toHaveBeenCalled();
+  });
+
+  it('should_show_hebdomadaire_suffix_in_confirm_title_when_frequency_is_hebdomadaire', async () => {
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
+    subscriptionServiceMock.getById.mockReturnValue(
+      of({ ...mockSubscription, frequence: Frequency.HEBDOMADAIRE }),
+    );
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onDelete();
+
+    const title = confirmServiceMock.confirmDelete.mock.calls[0][0].title;
+    expect(title).toContain('/sem');
+  });
+
+  it('should_show_error_toast_when_delete_fails', async () => {
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
+    subscriptionServiceMock.delete.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Échec de la suppression');
+  });
+
+  it('should_format_date_using_display_locale', async () => {
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    const result = fixture.componentInstance.formatDate('2026-03-15');
+    expect(result).toContain('2026');
+  });
+
+  it('should_show_activated_toast_when_toggling_inactive_subscription_active', async () => {
+    subscriptionServiceMock.getById.mockReturnValue(of({ ...mockSubscription, actif: false }));
+    const updated = { ...mockSubscription, actif: true };
+    subscriptionServiceMock.update.mockReturnValue(of(updated));
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onToggleActive();
+
+    expect(fixture.componentInstance.subscription()).toEqual(updated);
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Abonnement activé');
+  });
+
+  it('should_show_deactivated_toast_when_toggling_active_subscription_inactive', async () => {
+    const updated = { ...mockSubscription, actif: false };
+    subscriptionServiceMock.update.mockReturnValue(of(updated));
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onToggleActive();
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Abonnement désactivé');
+  });
+
+  it('should_show_error_toast_when_toggle_active_fails', async () => {
+    subscriptionServiceMock.update.mockReturnValue(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(SubscriptionDetail);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await flushAsync();
+
+    await fixture.componentInstance.onToggleActive();
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Échec de la mise à jour');
   });
 });

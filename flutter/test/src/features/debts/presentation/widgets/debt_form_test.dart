@@ -3,18 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:k_budget/src/common_widgets/bottom_sheet_4_rows_widget.dart';
+import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
+import 'package:k_budget/src/domain/models/list_state.dart';
+import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_form.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as theme;
 import 'package:mockito/mockito.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../../../../helpers/app_fonts.dart';
+import '../../../../../helpers/display_locale.dart';
+import '../../../../../helpers/fixtures/test_fixtures.dart';
 import '../../../../../helpers/mocks.mocks.dart';
+
+class _TestAccountNotifier extends AccountNotifier {
+  _TestAccountNotifier(this.preloadedItems);
+
+  final List<Account> preloadedItems;
+
+  @override
+  ListState<Account> build() => ListState<Account>(items: preloadedItems);
+}
 
 void main() {
   setUpAll(() async {
@@ -71,18 +87,25 @@ void main() {
     Future<void> Function(Debt)? onSaved,
     Future<void> Function(String)? onDeleted,
     VoidCallback? onCancelled,
+    List<Account>? preloadedAccounts,
+    Locale locale = const Locale('fr'),
   }) {
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(locale),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         debtRepositoryProvider.overrideWithValue(mockDebtRepo),
+        if (preloadedAccounts != null)
+          accountNotifierProvider.overrideWith(
+            () => _TestAccountNotifier(preloadedAccounts),
+          ),
       ],
       child: MaterialApp(
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('fr'),
+        locale: locale,
         home: Scaffold(
           body: SingleChildScrollView(
             child: DebtForm(
@@ -167,5 +190,194 @@ void main() {
       // La dette de test n'est pas remboursée
       expect(find.text('Non remboursé'), findsOneWidget);
     });
+
+    testWidgets('should_showAccountSecondaryBalance_when_accountSectionOpened',
+        (tester) async {
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+
+      // Aucun compte pré-sélectionné en création : la pastille affiche le placeholder
+      await tester.tap(find.text('Compte'));
+      await tester.pumpAndSettle();
+
+      // Ouvre la modale du SelectPicker de compte imbriqué dans la section
+      final trigger = find.descendant(
+        of: find.byType(SelectPicker),
+        matching: find.byType(GestureDetector),
+      );
+      await tester.tap(trigger.first);
+      await tester.pumpAndSettle();
+
+      // Le solde formaté du compte est affiché dans la liste déroulante
+      expect(find.textContaining('500,00'), findsWidgets);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_saveFails', (tester) async {
+      await tester.pumpWidget(
+        buildApp(onSaved: (_) async => throw Exception('boom')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('tf_montant')), '100');
+      await tester.enterText(find.byKey(const Key('tf_personne')), 'Bob');
+
+      await tester.tap(find.byKey(const Key('bsheet_submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    testWidgets('should_showErrorSnackbar_when_deleteFails', (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt,
+        debtType: testDebt.sens,
+        onDeleted: (_) async => throw Exception('boom'),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(PhosphorIconsRegular.trash));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Supprimer'),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Une erreur est survenue'), findsOneWidget);
+    });
+
+    Future<void> openPicker(WidgetTester tester) async {
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(SelectPicker),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('should_hideCurrencyPill_when_accountChosen', (tester) async {
+      await tester.pumpWidget(
+        buildApp(preloadedAccounts: const [testAccount]),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Devise par défaut'), findsOneWidget);
+
+      await tester.tap(find.text('Compte'));
+      await tester.pumpAndSettle();
+      await openPicker(tester);
+      await tester.tap(find.text('Compte courant').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Devise par défaut'), findsNothing);
+      expect(find.text('Compte courant'), findsOneWidget);
+    });
+
+    testWidgets('should_showCurrencyName_when_currencyChosen', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Devise par défaut'));
+      await tester.tap(find.text('Devise par défaut'));
+      await tester.pumpAndSettle();
+
+      await openPicker(tester);
+      await tester.tap(find.text(r'Dollar US ($)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dollar US'), findsOneWidget);
+    });
+
+    testWidgets('should_showReminderSummary_when_debtHasReminder',
+        (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt.copyWith(
+          reminderDate: DateTime(2026, 2, 1),
+          reminderTime: '14:00',
+        ),
+        onDeleted: (_) async {},
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Rappel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Rappel : 01/02/2026 à 14:00'), findsOneWidget);
+
+      await tester.tap(find.text('Effacer le rappel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Effacer le rappel'), findsNothing);
+    });
+
+    testWidgets('should_showDueDateAndRepaidStatus_when_debtRepaid',
+        (tester) async {
+      await tester.pumpWidget(buildApp(
+        debt: testDebt.copyWith(
+          dueDate: DateTime(2026, 3, 10),
+          rembourse: true,
+        ),
+        onDeleted: (_) async {},
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('10/03/2026'), findsOneWidget);
+      expect(find.text('Remboursé'), findsOneWidget);
+    });
+
+    testWidgets('should_showTranslatedCategory_when_categoryIsSystem',
+        (tester) async {
+      when(mockCategoryRepo.getAll())
+          .thenAnswer((_) async => [TestFixtures.systemCategory]);
+
+      await tester.pumpWidget(buildApp(
+        debt: testDebt.copyWith(categoryId: 'cat-sys'),
+      ));
+      await tester.pumpAndSettle();
+      await ProviderScope.containerOf(tester.element(find.byType(Scaffold)))
+          .read(categoryNotifierProvider.notifier)
+          .loadItems();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abonnement'), findsOneWidget);
+      expect(find.text('Subscription'), findsNothing);
+    });
+  });
+
+  group('DebtForm at 360 px', () {
+    setUpAll(loadAppFonts);
+
+    Future<void> pumpNarrow(WidgetTester tester, Widget app) async {
+      tester.view.physicalSize = const Size(360, 780);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(app);
+      await tester.pumpAndSettle();
+    }
+
+    for (final locale in const [Locale('fr'), Locale('en')]) {
+      testWidgets(
+          'should_notOverflow_when_creating_${locale.languageCode}',
+          (tester) async {
+        await pumpNarrow(tester, buildApp(locale: locale));
+
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets(
+          'should_notOverflow_when_editing_${locale.languageCode}',
+          (tester) async {
+        await pumpNarrow(
+          tester,
+          buildApp(debt: testDebt, onDeleted: (_) async {}, locale: locale),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

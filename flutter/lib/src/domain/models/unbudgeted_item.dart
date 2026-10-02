@@ -15,6 +15,7 @@ class UnbudgetedItem with _$UnbudgetedItem {
     required String categoryIcone,
     required String categoryCouleur,
     required double montantDepense,
+    String? categorySystemKey,
   }) = _UnbudgetedItem;
 
   factory UnbudgetedItem.fromJson(Map<String, dynamic> json) =>

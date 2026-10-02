@@ -7,11 +7,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DecimalPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt } from '@ng-icons/phosphor-icons/regular';
 import {filter, firstValueFrom} from 'rxjs';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { TransactionService } from '../../core/services/transaction';
 import { AccountService } from '../../core/services/account';
@@ -21,7 +22,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate';
 import { BudgetService } from '../../core/services/budget';
 import { RecurringTransactionService } from '../../core/services/recurring-transaction';
 import { DevLogger } from '../../core/services/dev-logger';
-import { APP_LOCALE } from '../../core/constants/locale.constants';
+import { LanguageService } from '../../core/services/language';
 import { CurrencyPillSelector } from './components/currency-pill-selector';
 import { BudgetSummary } from './components/budget-summary/budget-summary';
 import {
@@ -34,14 +35,30 @@ import { type BudgetOverview } from '../../core/models/budget.model';
 import { ListItem } from '../../shared/components/list-item/list-item';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
+import { formatSignedPercent } from '../../shared/utils/locale-format.utils';
+import { toLocalIsoDate } from '../../shared/utils/date.utils';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {AuthService} from '../../core/services/auth';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 
+type GreetingPeriod = 'morning' | 'afternoon' | 'evening';
+
+const GREETING_KEYS: Record<GreetingPeriod, string> = {
+  morning: 'dashboard.summary.greetingMorning',
+  afternoon: 'dashboard.summary.greetingAfternoon',
+  evening: 'dashboard.summary.greetingEvening',
+};
+
+function getGreetingPeriod(hour: number): GreetingPeriod {
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe, NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState],
+  imports: [NgClass, RouterLink, NgIcon, ListItem, AmountPipe, RelativeDatePipe, CurrencyPillSelector, BudgetSummary, EmptyState, TranslocoPipe],
   providers: [provideIcons({ phosphorWarningCircle, phosphorTrendUp, phosphorTrendDown, phosphorReceipt })],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -59,6 +76,7 @@ export class Dashboard {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
 
   private persistTimeout: ReturnType<typeof setTimeout> | null = null;
   private autoRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -148,7 +166,7 @@ export class Dashboard {
   readonly budgetOverview = signal<BudgetOverview | null>(null);
   readonly budgetLoading = signal(true);
   readonly budgetCurrentMonth = computed(() => {
-    return new Date().toLocaleDateString(APP_LOCALE, { month: 'long', year: 'numeric' });
+    return new Date().toLocaleDateString(this.languageService.displayLocale(), { month: 'long', year: 'numeric' });
   });
 
   // -- Dernières transactions --
@@ -225,6 +243,12 @@ export class Dashboard {
     return (this.convertedNet() / debut) * 100;
   });
 
+  readonly convertedVariationPctLabel = computed(() => {
+    const pct = this.convertedVariationPct();
+    if (pct === null) return null;
+    return formatSignedPercent(pct, this.languageService.displayLocale());
+  });
+
   // -- Budget overview converti dans activeCurrency --
   readonly convertedBudgetOverview = computed<BudgetOverview | null>(() => {
     const ov = this.budgetOverview();
@@ -271,7 +295,7 @@ export class Dashboard {
   readonly previousMonthName = computed(() => {
     const now = new Date();
     const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    return prev.toLocaleDateString(APP_LOCALE, { month: 'short' }).replace('.', '');
+    return prev.toLocaleDateString(this.languageService.displayLocale(), { month: 'short' }).replace('.', '');
   });
 
   readonly sortedBudgetItems = computed(() => {
@@ -287,7 +311,7 @@ export class Dashboard {
   });
 
   readonly overdueCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalIsoDate(new Date());
     return this.recurringService.recurringTransactions()
       .filter(r => r.recurringActive && r.nextOccurrence < today)
       .length;
@@ -297,23 +321,31 @@ export class Dashboard {
     return (this.budgetOverview()?.items ?? []).filter(b => b.percentage > 100).length;
   });
 
-  readonly greeting = computed(() => {
-    const hour = new Date().getHours();
+  readonly greetingSalutation = computed<{ key: string; params: Record<string, unknown> }>(() => {
+    const period = getGreetingPeriod(new Date().getHours());
     const name = this.userName()?.name;
-    const salut = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
-    const prefix = name ? `${salut} ${name}` : salut;
+    return { key: GREETING_KEYS[period], params: { hasName: name ? 'yes' : 'no', name: name ?? '' } };
+  });
 
+  readonly greetingStatus = computed<{ key: string; params?: Record<string, unknown> }>(() => {
     const overdue = this.overdueCount();
-    if (overdue > 0) return `${prefix} · ${overdue} charge${overdue > 1 ? 's' : ''} en retard`;
+    if (overdue > 0) {
+      return { key: 'recurring.summary.overdueCount', params: { count: overdue } };
+    }
 
     const exceeded = this.exceededBudgetCount();
-    if (exceeded > 0) return `${prefix} · ${exceeded} budget${exceeded > 1 ? 's' : ''} dépassé${exceeded > 1 ? 's' : ''}`;
+    if (exceeded > 0) {
+      return { key: 'budgets.summary.exceededCount', params: { count: exceeded } };
+    }
 
-    const net = this.netDuMois();
     const hasTransactions = (this.currentSummary()?.totalRecettes ?? 0) > 0 || (this.currentSummary()?.totalDepenses ?? 0) > 0;
-    if (hasTransactions) return `${prefix} · Mois ${net >= 0 ? 'positif' : 'négatif'}`;
+    if (hasTransactions) {
+      return this.netDuMois() >= 0
+        ? { key: 'dashboard.summary.monthPositive' }
+        : { key: 'dashboard.summary.monthNegative' };
+    }
 
-    return `${prefix} · Mois calme`;
+    return { key: 'dashboard.summary.monthQuiet' };
   });
 
   constructor() {
@@ -485,7 +517,7 @@ export class Dashboard {
     const converted = this.conversionService.convert(t.montant, txCurrency, target);
     if (converted === null) return '';
 
-    const formatted = new Intl.NumberFormat(APP_LOCALE, {
+    const formatted = new Intl.NumberFormat(this.languageService.displayLocale(), {
       style: 'currency',
       currency: target,
     }).format(Math.abs(converted));

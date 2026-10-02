@@ -1,0 +1,1045 @@
+{
+  "accounts": {
+    "action": {
+      "create": "Créer un compte",
+      "createFirst": "Créer mon premier compte",
+      "later": "Plus tard",
+      "setDefault": "Définir par défaut"
+    },
+    "dialog": {
+      "createTitle": "Nouveau compte",
+      "deleteMessage": "Supprimer ce compte ?",
+      "editTitle": "Modifier le compte"
+    },
+    "empty": {
+      "bankNotFound": "Aucune banque trouvée",
+      "hint": "Créez votre premier compte pour commencer",
+      "title": "Aucun compte"
+    },
+    "feedback": {
+      "banksLoadError": "Impossible de charger les banques",
+      "loadError": "Erreur de chargement des comptes"
+    },
+    "filter": {
+      "bankSearchPlaceholder": "Rechercher une banque..."
+    },
+    "form": {
+      "active": "Compte actif",
+      "activeHint": "Définissez un autre compte par défaut avant de désactiver celui-ci",
+      "bankName": "Nom de la banque (optionnel)",
+      "bankNamePlaceholder": "Ex: Ma banque",
+      "bankTitle": "Banque",
+      "chooseFile": "Choisir un fichier",
+      "currency": "Devise",
+      "currencyPlaceholder": "Devise par défaut",
+      "currentBalance": "Solde actuel",
+      "customLogo": "Logo personnalisé (optionnel)",
+      "customLogoAria": "Logo personnalisé",
+      "customisationTitle": "Personnalisation",
+      "detailsTitle": "Détails",
+      "icon": "Icône",
+      "name": "Nom du compte",
+      "namePlaceholder": "Ex: Compte courant",
+      "newBalance": "Nouveau solde",
+      "openingBalance": "Solde initial",
+      "rate": "1 {currency} =",
+      "ratePlaceholder": "Ex: 655.957",
+      "rateProposalMessage": "Aucun taux {from} → {to} n'est défini.",
+      "rateProposalTitle": "Taux de conversion manquant",
+      "typeTitle": "Type de compte"
+    },
+    "list": {
+      "bankGroupFrance": "France",
+      "bankGroupInternational": "International",
+      "bankGroupWestAfrica": "Afrique de l'Ouest",
+      "count": "{count, plural, one {# compte} other {# comptes}}"
+    },
+    "page": {
+      "title": "Comptes & Devises"
+    },
+    "summary": {
+      "netWorth": "Patrimoine total"
+    },
+    "value": {
+      "cash": "Espèces",
+      "current": "Courant",
+      "default": "Défaut",
+      "defaultAccountName": "Compte Principal",
+      "other": "Autre",
+      "otherCustom": "Autre / Personnalisé",
+      "savings": "Épargne"
+    }
+  },
+  "auth": {
+    "action": {
+      "confirmCredentials": "Valider mes identifiants",
+      "createAccount": "Créer mon compte",
+      "signIn": "Se connecter"
+    },
+    "feedback": {
+      "checkingLink": "Vérification du lien...",
+      "creatingAccount": "Création du compte...",
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "invalidCredentials": "Email ou mot de passe incorrect",
+      "invalidFormData": "Données invalides. Vérifiez le formulaire.",
+      "invalidLink": "Lien invalide, expiré, déjà utilisé ou révoqué.",
+      "invalidLinkHint": "Demandez à un administrateur de vous envoyer un nouveau lien.",
+      "signingIn": "Connexion..."
+    },
+    "form": {
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répétez votre mot de passe",
+      "currency": "Devise",
+      "displayName": "Nom d'affichage",
+      "displayNamePlaceholder": "Votre prénom ou pseudo",
+      "displayNameRequired": "Nom requis (100 caractères max)",
+      "email": "Email",
+      "emailAddress": "Adresse email",
+      "emailInvalid": "Email invalide",
+      "emailPlaceholder": "votre@email.com",
+      "emailRequired": "Email requis",
+      "finalEmail": "Email définitif",
+      "loginPasswordPlaceholder": "Votre mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "password": "Mot de passe",
+      "passwordMinLength": "{min} caractères minimum",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordPlaceholder": "Au moins {min} caractères",
+      "passwordRequired": "Mot de passe requis",
+      "timezone": "Fuseau horaire"
+    },
+    "page": {
+      "acceptInviteTagline": "Quelques informations pour finaliser l'inscription",
+      "acceptInviteTitle": "Créer votre compte",
+      "firstLoginNotice": "Vous êtes connecté avec les identifiants initiaux générés par le système. Définissez dès maintenant votre email définitif, un mot de passe personnel et votre nom d'affichage pour accéder à l'application.",
+      "firstLoginTagline": "Configurez vos identifiants",
+      "firstLoginTitle": "Premier accès",
+      "identitySectionTitle": "Votre identité",
+      "loginTagline": "Connectez-vous à votre compte",
+      "preferencesSectionTitle": "Préférences"
+    }
+  },
+  "budgets": {
+    "action": {
+      "activate": "Activer",
+      "add": "Créer un budget",
+      "addAria": "Créer un budget",
+      "create": "Budget",
+      "deactivate": "Désactiver"
+    },
+    "detail": {
+      "overBudget": "dépassement {amount}",
+      "remaining": "reste {amount}"
+    },
+    "dialog": {
+      "createTitle": "Nouveau budget",
+      "deleteMessage": "Voulez-vous vraiment supprimer ce budget ?",
+      "editTitle": "Modifier le budget"
+    },
+    "empty": {
+      "allCategoriesBudgeted": "Toutes les catégories ont déjà un budget.",
+      "noTransactions": "Aucune transaction ce mois",
+      "noUnbudgeted": "Toutes vos catégories ont un budget",
+      "notFound": "Budget introuvable",
+      "title": "Aucun budget pour cette période"
+    },
+    "feedback": {
+      "amountInvalid": "Montant invalide"
+    },
+    "form": {
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "categoryPlaceholder": "Choisir une catégorie",
+      "currencyAria": "Devise",
+      "frequencyAria": "Fréquence",
+      "thresholdAria": "Seuil d'alerte",
+      "thresholdPlaceholder": "Seuil d'alerte (%)"
+    },
+    "list": {
+      "activeCount": "{count, plural, one {# actif} other {# actifs}}",
+      "inactive": "Inactifs",
+      "transactionCount": "{count, plural, one {# transaction} other {# transactions}}"
+    },
+    "page": {
+      "byCategoryTitle": "Par catégorie",
+      "title": "Budgets",
+      "unbudgetedTitle": "Non budgété"
+    },
+    "summary": {
+      "activeCount": "{count, plural, one {# budget} other {# budgets}}",
+      "exceededCount": "{count, plural, one {# budget dépassé} other {# budgets dépassés}}",
+      "monthlyInCurrency": "Mensuel · en {currency}",
+      "overBudgetCount": "{count, plural, one {# en dépassement} other {# en dépassement}}",
+      "spent": "Dépensé",
+      "unbudgeted": "{amount} non budgété",
+      "unbudgetedCategoryCount": "{count, plural, one {# catégorie sans budget} other {# catégories sans budget}}"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
+    }
+  },
+  "categories": {
+    "action": {
+      "create": "Créer",
+      "createCategory": "Créer une catégorie",
+      "createNamed": "Créer « {name} »"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle catégorie",
+      "deleteMessage": "Cette catégorie sera dissociée de tous les items liés.",
+      "editTitle": "Modifier la catégorie"
+    },
+    "empty": {
+      "noCategories": "Aucune catégorie",
+      "title": "Aucune catégorie — créez-en une"
+    },
+    "form": {
+      "icon": "Icône",
+      "name": "Nom",
+      "nameMaxLength": "30 caractères maximum",
+      "namePlaceholder": "Nom de la catégorie",
+      "searchPlaceholder": "Rechercher une catégorie..."
+    },
+    "list": {
+      "count": "{count, plural, one {# catégorie} other {# catégories}}",
+      "noResults": "Aucune catégorie trouvée",
+      "regionAria": "Catégories"
+    },
+    "page": {
+      "title": "Catégories"
+    },
+    "value": {
+      "adjustment": "Ajustement",
+      "debt": "Dette",
+      "subscription": "Abonnement",
+      "transfer": "Virement"
+    }
+  },
+  "common": {
+    "action": {
+      "back": "Retour",
+      "cancel": "Annuler",
+      "chooseEmojiAria": "Choisir un emoji",
+      "clearSelectionAria": "Effacer la selection",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "create": "Créer",
+      "currentMonthHint": "Revenir au mois actuel",
+      "delete": "Supprimer",
+      "disable": "Désactiver",
+      "edit": "Modifier",
+      "enable": "Réactiver",
+      "hidePasswordAria": "Masquer",
+      "logout": "Déconnexion",
+      "nextMonthAria": "Mois suivant",
+      "previousMonthAria": "Mois précédent",
+      "quickActionsAria": "Actions rapides",
+      "reset": "Réinitialiser",
+      "resetFilters": "Réinitialiser les filtres",
+      "retry": "Réessayer",
+      "save": "Enregistrer",
+      "showPasswordAria": "Afficher",
+      "viewAll": "Voir tout"
+    },
+    "empty": {
+      "noItems": "Aucun element disponible",
+      "noPayments": "Aucun paiement enregistré"
+    },
+    "feedback": {
+      "deleteError": "Erreur lors de la suppression",
+      "deleting": "Suppression...",
+      "loadError": "Erreur de chargement",
+      "loading": "Chargement...",
+      "saveError": "Erreur lors de la sauvegarde",
+      "saving": "Enregistrement..."
+    },
+    "filter": {
+      "all": "Tout",
+      "filterAria": "Filtrer",
+      "searchAria": "Rechercher"
+    },
+    "form": {
+      "colour": "Couleur",
+      "colourAria": "Couleur {color}",
+      "searchPlaceholder": "Rechercher...",
+      "selectPlaceholder": "Selectionner..."
+    },
+    "list": {
+      "resultsCount": "{count} resultats"
+    },
+    "nav": {
+      "avatarAria": "Photo de profil",
+      "budgets": "Budgets",
+      "debts": "Dettes",
+      "home": "Accueil",
+      "settings": "Paramètres",
+      "subscriptions": "Abonnements",
+      "transactions": "Transactions",
+      "userMenuAria": "Menu utilisateur"
+    },
+    "validation": {
+      "maxLength": "{max} caractères maximum",
+      "nameRequired": "Nom requis",
+      "required": "Ce champ est requis."
+    },
+    "value": {
+      "active": "Actif",
+      "daysAgo": "{count, plural, one {il y a # jour} other {il y a # jours}}",
+      "inactive": "Inactif",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "weeksAgo": "{count, plural, one {il y a # semaine} other {il y a # semaines}}",
+      "yesterday": "Hier"
+    }
+  },
+  "compatibility": {
+    "page": {
+      "clientTitle": "Application à mettre à jour",
+      "clientTooOldCurrentVersionMessage": " Vous utilisez la version <strong>{currentVersion}</strong>.",
+      "clientTooOldHint": "Mettez l'application à jour depuis votre navigateur ou votre magasin d'applications, puis reconnectez-vous.",
+      "clientTooOldMessage": "Votre serveur exige au minimum la version <strong>{requiredVersion}</strong> de l'application.",
+      "requiredVersionMessage": " Cette application requiert au minimum la version <strong>{requiredVersion}</strong>.",
+      "serverTitle": "Serveur à mettre à jour",
+      "serverTooOldHint": "Mettez votre instance à jour, puis rechargez cette page. La procédure est décrite dans le guide de déploiement du projet.",
+      "serverVersionMessage": "Votre serveur est en version <strong>{currentVersion}</strong>.",
+      "serverVersionUnknownMessage": "Votre serveur est trop ancien pour indiquer sa version.",
+      "tagline": "Cette version de l'application et votre serveur ne peuvent pas fonctionner ensemble."
+    }
+  },
+  "dashboard": {
+    "page": {
+      "recentTransactionsTitle": "Dernières opérations"
+    },
+    "summary": {
+      "greetingAfternoon": "{hasName, select, yes {Bon après-midi {name}} other {Bon après-midi}}",
+      "greetingEvening": "{hasName, select, yes {Bonsoir {name}} other {Bonsoir}}",
+      "greetingMorning": "{hasName, select, yes {Bonjour {name}} other {Bonjour}}",
+      "monthNegative": "Mois négatif",
+      "monthPositive": "Mois positif",
+      "monthQuiet": "Mois calme",
+      "monthVariation": "{amount} ce mois"
+    }
+  },
+  "debts": {
+    "action": {
+      "add": "Ajouter une dette",
+      "create": "Dette",
+      "repay": "Rembourser",
+      "snooze": "Reporter"
+    },
+    "detail": {
+      "due": "Échéance {date}",
+      "initial": "Initial {amount}",
+      "paymentCount": "{count, plural, one {# paiement} other {# paiements}}",
+      "payments": "Paiements",
+      "reminderAt": "{date} à {time}",
+      "repaidAmount": "{amount} remboursé"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle dette",
+      "deleteFormMessage": "Voulez-vous vraiment supprimer cette dette ?",
+      "deleteMessage": "Voulez-vous vraiment supprimer cette dette ?\nLes remboursements enregistrés seront conservés.",
+      "deleteTitle": "{person} — {amount} restants",
+      "editTitle": "Modifier la dette",
+      "remaining": "Restant : {amount}",
+      "reminderDatePast": "La date ne peut pas être dans le passé",
+      "reminderDateRequired": "La date est requise",
+      "reminderTimeRequired": "L'heure est requise",
+      "repayTitle": "Remboursement",
+      "snoozeTitle": "Reporter le rappel",
+      "snoozing": "Report..."
+    },
+    "empty": {
+      "title": "Aucune dette"
+    },
+    "feedback": {
+      "amountInvalid": "Montant invalide",
+      "deleted": "Dette supprimée",
+      "loadError": "Impossible de charger la dette",
+      "repaid": "Dette remboursée !",
+      "repayError": "Erreur lors du remboursement",
+      "repaymentRecorded": "Remboursement enregistré. Reste : {amount}",
+      "snoozeError": "Erreur lors du report du rappel",
+      "snoozed": "Rappel reporté"
+    },
+    "form": {
+      "account": "Compte",
+      "accountAria": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "currencyPlaceholder": "Devise par défaut",
+      "dateAria": "Date",
+      "personPlaceholder": "Personne",
+      "reminderAria": "Rappel",
+      "reminderDate": "Date du rappel",
+      "reminderTime": "Heure du rappel",
+      "typeAria": "Sens de la dette"
+    },
+    "list": {
+      "daysOverdue": "{count, plural, one {# j. en retard} other {# j. en retard}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "later": "Plus tard",
+      "noDueDate": "Sans échéance",
+      "overdue": "En retard",
+      "repaid": "Remboursées",
+      "thisMonth": "Ce mois-ci",
+      "thisWeek": "Cette semaine",
+      "today": "aujourd'hui",
+      "tomorrow": "demain"
+    },
+    "summary": {
+      "borrowedCount": "{count, plural, one {# emprunt} other {# emprunts}}",
+      "lentCount": "{count, plural, one {# prêt} other {# prêts}}",
+      "net": "Solde net",
+      "outstandingCount": "{count, plural, one {# en cours} other {# en cours}}"
+    },
+    "value": {
+      "borrowed": "Emprunt",
+      "lent": "Prêt",
+      "notRepaid": "Non remboursé",
+      "repaid": "Remboursé",
+      "repayment": "Remboursement - {person}"
+    }
+  },
+  "errors": {
+    "api": {
+      "accessDenied": "Accès refusé",
+      "avatarNotFound": "Avatar introuvable",
+      "badRequest": "La demande n'a pas pu être traitée.",
+      "cleanupDebtLinkMissing": "Cette transaction rembourse une dette que l'autre ne rembourse pas : elle ne peut pas être supprimée.",
+      "cleanupProposalStale": "Cette proposition n'est plus valable : la liste a été rechargée.",
+      "confirmationRequired": "Confirmation explicite requise.",
+      "conflict": "Conflit de données",
+      "csvProfileNotFound": "Profil CSV introuvable",
+      "emailAlreadyExists": "Email déjà utilisé",
+      "featureDisabled": "Fonctionnalité désactivée",
+      "fileTooLarge": "Fichier trop volumineux. La taille maximale est 2 MB.",
+      "internalError": "Une erreur interne est survenue",
+      "invalidExportFormat": "Format d'export invalide. Formats acceptés : json, csv.",
+      "invalidImageFormat": "Seuls les formats JPG et PNG sont acceptés.",
+      "lastAdminCannotBeDisabled": "Impossible de désactiver le dernier administrateur actif.",
+      "lastAdminDeletionForbidden": "Au moins un administrateur actif doit exister.",
+      "malformedRequest": "Requête invalide.",
+      "notFound": "Ressource introuvable",
+      "passwordIncorrect": "Mot de passe incorrect.",
+      "passwordResetNotRequired": "La réinitialisation des identifiants n'est pas requise pour ce compte.",
+      "passwordResetRequired": "Reset requis",
+      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "tokenExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+      "tokenInvalid": "Session invalide. Veuillez vous reconnecter.",
+      "tokenReuseDetected": "Session interrompue par sécurité. Veuillez vous reconnecter.",
+      "tokenRevoked": "Votre session a été révoquée. Veuillez vous reconnecter.",
+      "tooManyRequests": "Trop de tentatives. Réessayez dans quelques instants.",
+      "unauthenticated": "Authentification requise.",
+      "validationError": "Veuillez vérifier les informations saisies."
+    },
+    "client": {
+      "generic": "Une erreur est survenue",
+      "network": "Impossible de contacter le serveur",
+      "serverError": "Erreur serveur",
+      "timeout": "Délai de réponse dépassé",
+      "unknown": "Erreur inconnue",
+      "unreachable": "Serveur injoignable"
+    }
+  },
+  "exchangeRates": {
+    "action": {
+      "remove": "Retirer",
+      "removeCurrencyAria": "Supprimer cette devise"
+    },
+    "dialog": {
+      "addCurrencyTitle": "Ajouter une devise",
+      "addRateTitle": "Ajouter un taux",
+      "deleteRateMessage": "Supprimer le taux <strong>{baseCurrency} → {targetCurrency}</strong> ?",
+      "editRateTitle": "Modifier le taux",
+      "removeMessage": "La devise <strong>{currency}</strong> est utilisée par des comptes existants. Retirer quand même ?"
+    },
+    "empty": {
+      "title": "Aucun taux configuré"
+    },
+    "feedback": {
+      "conversionIncompleteHint": "Certains montants n'ont pas pu être convertis",
+      "loadError": "Impossible de charger les taux de change",
+      "saveError": "Erreur lors de l'enregistrement du taux."
+    },
+    "form": {
+      "baseCurrency": "Devise de base",
+      "rate": "Taux",
+      "rateInvalid": "Veuillez saisir un taux valide (> 0).",
+      "ratePlaceholder": "Ex: 655.957",
+      "targetCurrency": "Devise cible",
+      "targetCurrencyPlaceholder": "Choisir une devise",
+      "targetRequired": "Veuillez sélectionner une devise cible."
+    },
+    "list": {
+      "reference": "Référence"
+    },
+    "page": {
+      "currenciesTitle": "Mes devises",
+      "ratesTitle": "Taux de conversion"
+    },
+    "value": {
+      "cad": "Dollar canadien",
+      "chf": "Franc suisse",
+      "eur": "Euro",
+      "gbp": "Livre sterling",
+      "mad": "Dirham marocain",
+      "primary": "Principale",
+      "usd": "Dollar US",
+      "xof": "Franc CFA (BCEAO)"
+    }
+  },
+  "imports": {
+    "action": {
+      "addRule": "Ajouter une règle",
+      "analyse": "Analyser le relevé",
+      "apply": "Appliquer",
+      "changeFile": "Choisir un autre fichier",
+      "checkBalanceAndFinish": "Vérifier le solde et terminer",
+      "chooseCategory": "Choisir",
+      "configureColumns": "Configurer les colonnes",
+      "confirmImport": "{count, plural, one {Confirmer l'import (# transaction)} other {Confirmer l'import (# transactions)}}",
+      "createNew": "Créer une nouvelle transaction",
+      "deleteDraft": "Supprimer le brouillon",
+      "deleteProfile": "Supprimer le profil",
+      "deleteRule": "Supprimer la règle",
+      "editRule": "Modifier la règle",
+      "forceImport": "Importer quand même",
+      "import": "Importer",
+      "importCsv": "Importer un CSV",
+      "importStatement": "Importer un relevé",
+      "keepThisPayment": "Garder ce paiement, supprimer les autres",
+      "merge": "Fusionner",
+      "notDuplicate": "Ce n'est pas un doublon",
+      "pickCategory": "Choisir une catégorie",
+      "realignOnBank": "Recaler sur la banque",
+      "restore": "Restaurer",
+      "resume": "Reprendre",
+      "resumeDraft": "Reprendre le brouillon en cours",
+      "skip": "Ignorer",
+      "skipLine": "Ignorer la ligne",
+      "startCleanup": "Lancer le rattrapage",
+      "undoMatch": "Défaire",
+      "viewTransactions": "Voir mes transactions"
+    },
+    "detail": {
+      "cleanupAdjustmentUnneeded": "Sans cet ajustement, le solde du {date} égale celui de la banque ({amount}).",
+      "notRecognized": "Le format de ce fichier n'est pas reconnu. Choisissez le compte, puis configurez les colonnes à la main.",
+      "recognized": "Reconnu : {profile}",
+      "recognizedWithSuffix": "Reconnu : {profile} · compte …{suffix}"
+    },
+    "empty": {
+      "accounts": "Aucun compte disponible.",
+      "cleanupNothing": "Rien à rattraper",
+      "cleanupNothingHint": "Votre historique ne contient ni doublon probable, ni transaction sans catégorie, ni ajustement à recaler.",
+      "columns": "Chargez l'aperçu pour sélectionner les colonnes.",
+      "drafts": "Aucun brouillon en cours.",
+      "history": "Aucun import finalisé.",
+      "profiles": "Aucun profil disponible.",
+      "resolved": "Tout est résolu",
+      "resolvedHint": "Il ne reste rien à trancher. Vous pouvez confirmer l'import.",
+      "rules": "Aucune règle définie."
+    },
+    "feedback": {
+      "accountsLoadError": "Impossible de charger vos comptes.",
+      "analysing": "Analyse…",
+      "blocked": "{kind, select, both {Pour confirmer, tranchez {toDecide, plural, one {# ligne} other {# lignes}} et résolvez {unreadable, plural, one {# erreur de lecture} other {# erreurs de lecture}}.} decide {Pour confirmer, tranchez {toDecide, plural, one {# ligne} other {# lignes}}.} other {Pour confirmer, résolvez {unreadable, plural, one {# erreur de lecture} other {# erreurs de lecture}}.}}",
+      "cleanupCategoriseError": "La catégorie n'a pas pu être appliquée.",
+      "cleanupCategorised": "{count, plural, one {# transaction catégorisée.} other {# transactions catégorisées.}}",
+      "cleanupLoadError": "Impossible de charger les propositions de rattrapage.",
+      "cleanupMergeError": "La fusion n'a pas pu être effectuée.",
+      "cleanupMerged": "Transactions fusionnées.",
+      "cleanupPaymentsMerged": "Paiement conservé, doublons supprimés.",
+      "cleanupRealignError": "Le solde n'a pas pu être recalé.",
+      "cleanupRealigned": "Solde recalé sur la banque.",
+      "confirmError": "Erreur lors de la confirmation de l'import.",
+      "confirming": "Confirmation…",
+      "detectError": "Impossible de lire ce fichier. Vérifiez qu'il s'agit d'un export CSV de votre banque.",
+      "draftExists": "Un brouillon d'import est déjà en cours pour ce compte.",
+      "lineUpdateError": "Cette modification n'a pas pu être enregistrée.",
+      "loadError": "Erreur de chargement du brouillon",
+      "mappingImportError": "Erreur lors de l'import. Vérifiez le mapping et réessayez.",
+      "previewError": "Impossible de prévisualiser le fichier. Vérifiez les paramètres.",
+      "ruleSaveError": "Erreur lors de la sauvegarde de la règle.",
+      "uploadError": "Erreur lors de l'import. Veuillez réessayer."
+    },
+    "form": {
+      "account": "Compte de destination",
+      "accountRequired": "Veuillez sélectionner un compte.",
+      "alignOpeningBalance": "Aligner le solde initial sur la banque ({amount})",
+      "alignOpeningBalanceHint": "Premier import de ce compte : votre solde sera celui de la banque à la date du relevé.",
+      "amountColumn": "Colonne Montant",
+      "amountMode": "Mode montant",
+      "category": "Catégorie",
+      "categoryPlaceholder": "-- Sélectionner une catégorie --",
+      "categoryRequired": "La catégorie est requise.",
+      "creditColumn": "Colonne Crédit",
+      "dateColumn": "Colonne Date",
+      "dateFormat": "Format de date",
+      "debitColumn": "Colonne Débit",
+      "decimalSeparator": "Séparateur décimal",
+      "encoding": "Encodage",
+      "labelColumn": "Colonne Libellé",
+      "pattern": "Pattern",
+      "patternPlaceholder": "ex: CARREFOUR",
+      "patternRequired": "Le pattern est requis.",
+      "profileName": "Nom du profil",
+      "profileNamePlaceholder": "ex: Ma banque togolaise",
+      "saveAsProfile": "Sauvegarder ce mapping comme profil réutilisable",
+      "selectColumnOption": "-- Sélectionner --",
+      "separator": "Séparateur",
+      "skipHeaderLines": "Lignes d'en-tête à ignorer",
+      "uploadHint": "Fichier .csv ou .txt exporté depuis votre banque",
+      "uploadPrompt": "Choisir un relevé"
+    },
+    "list": {
+      "accountSuffix": "…{suffix}",
+      "alreadyImportedTitle": "Déjà importées",
+      "autoCategorisedTitle": "Catégorisées automatiquement",
+      "chooseMatch": "Est-ce l'une de ces transactions déjà saisies ?",
+      "cleanupAdjustmentsHint": "Le relevé montre que ces ajustements ne sont plus utiles. Recaler ajoute un ajustement inverse ; rien n'est supprimé.",
+      "cleanupAdjustmentsTitle": "Ajustements à recaler",
+      "cleanupGroupCount": "{count, plural, one {# transaction} other {# transactions}}",
+      "cleanupGroupCountAt": "{count, plural, one {# transaction} other {# transactions}} de {amount}",
+      "cleanupImportedHint": "La saisie est gardée (libellé, catégorie, liens) ; l'opération importée est supprimée.",
+      "cleanupImportedTitle": "Opérations déjà saisies",
+      "cleanupPeriod": "Échéance du {start} au {end}",
+      "cleanupSameAs": "Même opération que :",
+      "cleanupSubscriptionHint": "Un seul paiement est gardé par échéance ; les autres sont supprimés. Un paiement issu d'un relevé est toujours conservé.",
+      "cleanupSubscriptionTitle": "Paiements d'abonnement en double",
+      "cleanupSuggestion": "Proposé : {category}, {source, select, RULE {d'après une règle} HISTORY_AMOUNT {d'après l'historique au même montant} other {d'après l'historique de ce commerçant}}",
+      "cleanupUncategorisedHint": "Un choix s'applique à toutes les transactions du groupe.",
+      "cleanupUnrecognised": "{count, plural, one {# transaction sans commerçant reconnaissable, à catégoriser depuis l'écran Transactions.} other {# transactions sans commerçant reconnaissable, à catégoriser depuis l'écran Transactions.}}",
+      "cleanupWhichPayment": "Paiement à garder :",
+      "draftMeta": "{count, plural, one {# ligne} other {# lignes}} · {date}",
+      "encodingInfo": "Encodage : {encoding}",
+      "groupCount": "{count, plural, one {# opération} other {# opérations}}",
+      "historyMeta": "{count, plural, one {# transaction} other {# transactions}} · {date}",
+      "matchedMissing": "La transaction rapprochée n'existe plus",
+      "matchedTitle": "Rapprochées",
+      "matchedWith": "Rapprochée de « {label} » du {date}",
+      "probableDuplicate": "Ressemble à une transaction déjà présente dans ce compte.",
+      "rowsDetected": "{count, plural, one {# ligne détectée} other {# lignes détectées}}",
+      "separator": "Séparateur :",
+      "skipped": "ignorées",
+      "skippedTitle": "Ignorées",
+      "suspectsHint": "Doublons probables : vérifiez-les et supprimez celles que vous ne reconnaissez pas.",
+      "suspectsTitle": "Opérations de la période absentes du relevé",
+      "toDecideTitle": "À trancher",
+      "uncategorisedHint": "Importées sans catégorie si vous n'en choisissez pas. Un choix vaut pour toutes les lignes du même commerçant et pour les prochains relevés.",
+      "uncategorisedTitle": "Sans catégorie",
+      "unreadableTitle": "Erreurs de lecture",
+      "userCategorisedTitle": "Catégorisées par vous"
+    },
+    "page": {
+      "cleanupDescription": "Doublons, catégories manquantes et ajustements devenus inutiles parmi les transactions déjà enregistrées. Rien n'est modifié sans votre validation.",
+      "cleanupHint": "Passez en revue les doublons, les transactions sans catégorie et les ajustements de solde devenus inutiles parmi vos transactions déjà enregistrées.",
+      "cleanupTitle": "Rattrapage de l'historique",
+      "description": "Importez vos transactions depuis un relevé bancaire au format CSV.",
+      "draftsTitle": "Brouillons en cours",
+      "historyTitle": "Historique",
+      "mappingDescription": "Le format de votre fichier n'a pas été reconnu automatiquement. Configurez le mapping des colonnes pour importer vos transactions.",
+      "mappingTitle": "Mapping des colonnes",
+      "newImportTitle": "Nouvel import",
+      "parsingTitle": "Paramètres de lecture",
+      "previewTitle": "Aperçu du fichier",
+      "profileTitle": "Profil d'import",
+      "profilesHint": "Les profils pré-configurés sont fournis par le système. Vos profils personnalisés sont créés lors du mapping manuel.",
+      "profilesTitle": "Profils d'import",
+      "reviewTitle": "Revue d'import",
+      "rulesHint": "Les règles permettent de catégoriser automatiquement les lignes dont le libellé contient le pattern défini.",
+      "rulesTitle": "Règles de catégorisation",
+      "startDescription": "Choisissez le fichier exporté par votre banque. Son format est reconnu automatiquement, puis vous choisissez le compte qui reçoit les opérations.",
+      "startTitle": "Importer un relevé",
+      "title": "Import CSV"
+    },
+    "summary": {
+      "accountWithSuffix": "{name} · …{suffix}",
+      "alreadyImported": "{count, plural, one {# déjà importée} other {# déjà importées}}",
+      "autoCategorised": "{count, plural, one {# catégorisée automatiquement} other {# catégorisées automatiquement}}",
+      "balanceDetail": "Solde de la banque : {bank} au {date}",
+      "balanceGap": "Écart avec la banque",
+      "balanceMatch": "Solde identique à celui de la banque",
+      "bankBalanceAt": "Solde de la banque au {date}",
+      "created": "{count, plural, one {# transaction créée} other {# transactions créées}}",
+      "doneTitle": "Import terminé",
+      "matched": "{count, plural, one {# rapprochée d'une transaction existante} other {# rapprochées de transactions existantes}}",
+      "newTransactions": "{count, plural, one {# nouvelle transaction} other {# nouvelles transactions}}"
+    },
+    "value": {
+      "adjustmentReversal": "Annulation de l'ajustement du {date}",
+      "amountModeSingle": "Colonne unique (montant signé)",
+      "amountModeSplit": "Deux colonnes (débit / crédit)",
+      "categorySourceHistory": "Historique",
+      "categorySourceRule": "Règle",
+      "custom": "Personnalisé",
+      "registry": "Pré-configuré",
+      "separatorComma": "Virgule (,)",
+      "separatorDot": "Point (.)",
+      "separatorPipe": "Pipe (|)",
+      "separatorSemicolon": "Point-virgule (;)",
+      "separatorTab": "Tabulation (\\t)",
+      "statement": "Relevé"
+    }
+  },
+  "notifications": {
+    "action": {
+      "deleteAllHint": "Vider l'historique",
+      "markAllReadHint": "Tout marquer lu"
+    },
+    "empty": {
+      "title": "Aucune notification"
+    },
+    "list": {
+      "budgetExceededMessage": "Vous avez dépassé le budget {category} ({percentage} %)",
+      "budgetExceededTitle": "Budget {category} dépassé !",
+      "budgetThresholdMessage": "Vous avez atteint {percentage} % du budget {category}",
+      "budgetThresholdTitle": "Budget {category} : {percentage} %",
+      "debtDueMessage": "Dette envers {person} — échéance demain",
+      "debtDueTitle": "Dette {person}",
+      "debtReminderMessage": "Rappel : dette envers {person} — {amount} restant",
+      "debtReminderTitle": "Rappel dette - {person}",
+      "recurringTransactionDueMessage": "{label} {amount} — échéance le {dueDate}",
+      "recurringTransactionDueTitle": "Transaction récurrente {label}",
+      "subscriptionDueMessage": "{name} — échéance demain",
+      "subscriptionDueTitle": "Abonnement {name}"
+    },
+    "page": {
+      "title": "Notifications"
+    }
+  },
+  "recurring": {
+    "action": {
+      "deactivate": "Désactiver la récurrence",
+      "markAsPaid": "Marquer comme payée",
+      "payAll": "Tout payé",
+      "skip": "Passer",
+      "skipOccurrence": "Passer cette occurrence",
+      "validate": "Valider"
+    },
+    "detail": {
+      "next": "Prochaine :"
+    },
+    "empty": {
+      "title": "Aucune transaction récurrente"
+    },
+    "feedback": {
+      "created": "Transaction récurrente créée",
+      "deactivateError": "Erreur lors de la désactivation",
+      "deactivated": "Récurrence désactivée",
+      "loadError": "Impossible de charger les transactions récurrentes",
+      "skipError": "Impossible de passer l'occurrence",
+      "skipFailed": "Erreur lors du passage",
+      "skipped": "Occurrence passée",
+      "validateError": "Impossible de valider la transaction",
+      "validated": "Transaction créée",
+      "validatedCount": "{count, plural, one {# transaction validée} other {# transactions validées}}",
+      "validatedOne": "Transaction validée",
+      "validationError": "Erreur lors de la validation"
+    },
+    "list": {
+      "daysOverdue": "{count, plural, one {il y a # j.} other {il y a # j.}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "today": "aujourd'hui",
+      "tomorrow": "demain",
+      "yesterday": "hier"
+    },
+    "page": {
+      "title": "Récurrences"
+    },
+    "summary": {
+      "expenseCount": "{count, plural, one {# charge} other {# charges}}",
+      "monthlyExpenses": "~{amount} /mois",
+      "overdueCount": "{count, plural, one {# charge en retard} other {# charges en retard}}",
+      "title": "Bilan mensuel"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "overdue": "En retard",
+      "upcoming": "À venir",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
+    }
+  },
+  "settings": {
+    "dialog": {
+      "disableFeatureMessage": "Vos données seront masquées mais pas supprimées."
+    },
+    "feedback": {
+      "exchangeRatesStale": "Taux de change périmés — rechargez la page",
+      "loadError": "Impossible de charger les préférences",
+      "navOrderSaveError": "Impossible de sauvegarder l'ordre de navigation",
+      "saveError": "Impossible de sauvegarder les préférences"
+    },
+    "form": {
+      "language": "Langue",
+      "timezone": "Zone"
+    },
+    "list": {
+      "accounts": "Comptes & Devises",
+      "accountsHint": "Comptes, devises et taux de conversion",
+      "categories": "Catégories",
+      "categoriesHint": "Gérer les catégories",
+      "debtReminders": "Rappels dettes",
+      "debtRemindersHint": "Notification la veille d'une échéance de dette",
+      "subscriptionReminders": "Rappels abonnements",
+      "subscriptionRemindersHint": "Notification la veille d'une échéance d'abonnement",
+      "textScalePreview": "Voici un aperçu de la taille du texte choisie.",
+      "version": "K-Budget v{version}"
+    },
+    "page": {
+      "administrationTitle": "Administration",
+      "appearanceTitle": "Apparence",
+      "managementTitle": "Gestion",
+      "navigationTitle": "Navigation",
+      "notificationsTitle": "Notifications"
+    },
+    "value": {
+      "envDev": "Dev",
+      "envProd": "Prod",
+      "languageAuto": "Automatique ({language})",
+      "offline": "Hors ligne",
+      "online": "En ligne",
+      "textScaleLarge": "Grand",
+      "textScaleMedium": "Normal",
+      "textScaleSmall": "Petit",
+      "themeAuto": "Auto",
+      "themeDark": "Sombre",
+      "themeLight": "Clair"
+    }
+  },
+  "subscriptions": {
+    "action": {
+      "activate": "Activer",
+      "add": "Ajouter un abonnement",
+      "create": "Abonnement",
+      "deactivate": "Désactiver",
+      "pay": "Payer"
+    },
+    "detail": {
+      "history": "Historique",
+      "paymentCount": "{count, plural, one {# paiement} other {# paiements}}"
+    },
+    "dialog": {
+      "createTitle": "Nouvel abonnement",
+      "deleteMessage": "Voulez-vous vraiment supprimer cet abonnement ?",
+      "editTitle": "Modifier l'abonnement"
+    },
+    "empty": {
+      "title": "Aucun abonnement"
+    },
+    "feedback": {
+      "activated": "Abonnement activé",
+      "amountInvalid": "Montant invalide",
+      "deactivated": "Abonnement désactivé",
+      "deleteFailed": "Échec de la suppression",
+      "deleted": "Abonnement supprimé",
+      "paid": "Paiement enregistré",
+      "payError": "Impossible d'enregistrer le paiement",
+      "payFailed": "Échec du paiement",
+      "updateFailed": "Échec de la mise à jour"
+    },
+    "form": {
+      "account": "Compte",
+      "accountAria": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
+      "category": "Catégorie",
+      "categoryAria": "Catégorie",
+      "currencyPlaceholder": "Devise par défaut",
+      "frequencyAria": "Fréquence",
+      "namePlaceholder": "Nom",
+      "startDateAria": "Date de début"
+    },
+    "list": {
+      "activeCount": "{count, plural, one {# actif} other {# actifs}}",
+      "daysUntil": "{count, plural, one {dans # j.} other {dans # j.}}",
+      "inactive": "Inactifs",
+      "later": "Plus tard",
+      "nextMonth": "Mois prochain",
+      "thisMonth": "Ce mois-ci",
+      "thisWeek": "Cette semaine",
+      "today": "aujourd'hui",
+      "tomorrow": "demain"
+    },
+    "summary": {
+      "activeCount": "{count, plural, one {# abonnement} other {# abonnements}}",
+      "monthlyTotal": "Total mensuel"
+    },
+    "value": {
+      "monthly": "Mensuel",
+      "perMonth": "/mois",
+      "perWeek": "/sem",
+      "perYear": "/an",
+      "weekly": "Hebdomadaire",
+      "yearly": "Annuel"
+    }
+  },
+  "transactions": {
+    "action": {
+      "add": "Ajouter une transaction",
+      "create": "Transaction",
+      "transfer": "Virement",
+      "transferSubmit": "Effectuer le virement"
+    },
+    "dialog": {
+      "createTitle": "Nouvelle transaction",
+      "deleteMessage": "Voulez-vous vraiment supprimer cette transaction ?",
+      "deleteTransferMessage": "La contrepartie du virement sera aussi supprimée.",
+      "editTitle": "Modifier la transaction",
+      "transferCreateTitle": "Nouveau virement",
+      "transferEditTitle": "Virement"
+    },
+    "empty": {
+      "noExpenseInMonth": "Aucune dépense en {month}",
+      "noIncomeInMonth": "Aucune recette en {month}",
+      "noResults": "Aucune transaction trouvée",
+      "noneInMonth": "Aucune transaction en {month}",
+      "notEnoughAccounts": "Vous devez avoir au moins 2 comptes actifs pour effectuer un virement.",
+      "title": "Aucune transaction"
+    },
+    "feedback": {
+      "amountInvalid": "Montant invalide",
+      "transferFailed": "Erreur lors du virement",
+      "transferring": "Virement..."
+    },
+    "filter": {
+      "expense": "Dépenses",
+      "income": "Recettes"
+    },
+    "form": {
+      "account": "Compte",
+      "accountPlaceholder": "Sélectionner un compte",
+      "amount": "Montant",
+      "amountInvalid": "Le montant doit être supérieur à 0",
+      "category": "Catégorie",
+      "dateAria": "Date",
+      "descriptionPlaceholder": "Libellé",
+      "frequencyPlaceholder": "Fréquence",
+      "isRecurring": "Transaction récurrente",
+      "note": "Note (optionnel)",
+      "noteAria": "Note",
+      "notePlaceholder": "Ajouter une note...",
+      "recurringAria": "Récurrence",
+      "transferAccountsMismatch": "Les comptes source et destination doivent être différents",
+      "transferFrom": "Depuis",
+      "transferFromPlaceholder": "Compte source",
+      "transferFromRequired": "Compte source requis",
+      "transferTo": "Vers",
+      "transferToPlaceholder": "Compte destination",
+      "transferToRequired": "Compte destination requis",
+      "typeAria": "Type de transaction"
+    },
+    "list": {
+      "lastWeek": "Semaine dernière",
+      "older": "Plus ancien",
+      "thisWeek": "Cette semaine"
+    },
+    "page": {
+      "title": "Transactions"
+    },
+    "summary": {
+      "balance": "Solde",
+      "noExpense": "0 dépenses",
+      "noIncome": "0 recettes"
+    },
+    "value": {
+      "balanceAdjustment": "Ajustement de solde",
+      "expense": "Dépense",
+      "income": "Recette",
+      "transferFrom": "Virement depuis {account}",
+      "transferTo": "Virement vers {account}"
+    }
+  },
+  "users": {
+    "action": {
+      "copyLink": "Copier le lien",
+      "createInvite": "Créer et copier le lien",
+      "deleteAccount": "Supprimer mon compte",
+      "invite": "Inviter un utilisateur",
+      "revoke": "Révoquer"
+    },
+    "dialog": {
+      "deleteAccountMessage": "Cette action est <strong>irréversible</strong>. Votre compte et toutes vos données seront supprimés définitivement."
+    },
+    "empty": {
+      "invitations": "Aucune invitation pour le moment",
+      "users": "Aucun utilisateur trouvé"
+    },
+    "feedback": {
+      "actionNotAllowed": "Action non autorisée.",
+      "avatarDeleteError": "Impossible de supprimer la photo.",
+      "avatarUploadError": "Impossible d'uploader la photo. Veuillez réessayer.",
+      "currentPasswordIncorrect": "Mot de passe actuel incorrect.",
+      "deleteAccountError": "Erreur lors de la suppression. Veuillez réessayer.",
+      "deletingAccount": "Suppression...",
+      "downloading": "Téléchargement en cours…",
+      "exportCsvError": "Erreur lors de l'export CSV. Veuillez réessayer.",
+      "exportJsonError": "Erreur lors de l'export JSON. Veuillez réessayer.",
+      "invalidData": "Données invalides. Veuillez vérifier les champs.",
+      "inviteCreateError": "Impossible de créer l'invitation.",
+      "inviteCreated": "Invitation créée et lien copié dans le presse-papiers.",
+      "inviteRevokeError": "Impossible de révoquer l'invitation.",
+      "inviteRevoked": "Invitation révoquée.",
+      "lastAdminDeletionForbidden": "Vous êtes le dernier administrateur. Veuillez nommer un autre administrateur avant de supprimer votre compte.",
+      "lastAdminDisableForbidden": "Impossible de désactiver le dernier administrateur actif.",
+      "linkCopied": "Lien copié dans le presse-papiers.",
+      "linkCopyError": "Impossible de copier le lien.",
+      "loadInvitationsError": "Impossible de charger les invitations.",
+      "loadUsersError": "Impossible de charger les utilisateurs.",
+      "nameSaveError": "Impossible de sauvegarder le nom. Veuillez réessayer.",
+      "passwordIncorrect": "Mot de passe incorrect.",
+      "passwordUnchanged": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "sendingInvite": "Envoi...",
+      "userDisableError": "Impossible de désactiver l'utilisateur.",
+      "userDisabled": "Utilisateur désactivé.",
+      "userEnableError": "Impossible de réactiver l'utilisateur.",
+      "userEnabled": "Utilisateur réactivé."
+    },
+    "form": {
+      "confirmNewPassword": "Confirmer le nouveau mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "deleteAccountConfirm": "Je comprends que cette action est définitive",
+      "editNameAria": "Modifier le nom",
+      "emailManagedHint": "Géré par l'admin",
+      "emailPlaceholder": "nouveau@exemple.com",
+      "inviteLinkHint": "Le lien sera automatiquement copié dans votre presse-papiers.",
+      "name": "Nom",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "validEmailRequired": "Email valide requis"
+    },
+    "list": {
+      "changePassword": "Changer le mot de passe",
+      "changePasswordHint": "Modifiez votre mot de passe",
+      "deleteAccountHint": "Suppression définitive du compte et des données",
+      "exportCsv": "Exporter mes transactions (CSV)",
+      "exportCsvHint": "Mes transactions au format tableur",
+      "exportJson": "Exporter mes données (JSON)",
+      "exportJsonHint": "Toutes mes données en format JSON",
+      "invitedBy": "Par {email}",
+      "logoutHint": "Quitter cette session",
+      "manageHint": "Invitations et gestion des accès",
+      "profile": "Mon compte",
+      "profileHint": "Profil, sécurité, déconnexion"
+    },
+    "page": {
+      "adminTitle": "Utilisateurs",
+      "dangerZoneTitle": "Zone de danger",
+      "dataTitle": "Données",
+      "identityTitle": "Identité",
+      "invitationsTab": "Invitations",
+      "profileTitle": "Mon compte",
+      "securityTitle": "Sécurité"
+    },
+    "value": {
+      "admin": "Admin",
+      "disabled": "Désactivé",
+      "invitationActive": "Active",
+      "invitationExpired": "Expirée",
+      "invitationRevoked": "Révoquée",
+      "invitationUsed": "Utilisée"
+    }
+  }
+}

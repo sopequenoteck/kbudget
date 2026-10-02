@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.SubscriptionPeriod;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -34,15 +37,37 @@ public class SubscriptionPaymentService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final BudgetService budgetService;
+    private final Clock clock;
 
+    /**
+     * Records the payment of the current period of a subscription. Idempotent: when a
+     * transaction linked to the subscription already exists in that period, whether
+     * paid here or imported from a statement, it is returned and nothing is created.
+     * The subscription row is locked for the whole transaction (KKS-444): two simultaneous
+     * requests are serialised, so the second one sees the payment of the first instead of
+     * both finding none and each creating one.
+     */
     @Transactional
     public SubscriptionPaymentResponse pay(UUID subscriptionId, UUID userId) {
-        Subscription sub = subscriptionRepository.findById(subscriptionId)
-                .filter(s -> s.getUser().getId().equals(userId))
+        Subscription sub = subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(SUBSCRIPTION_NOT_FOUND));
 
         if (!Boolean.TRUE.equals(sub.getActif())) {
             throw new IllegalStateException("The subscription is inactive");
+        }
+
+        LocalDate today = LocalDate.now(clock);
+        SubscriptionPeriod period = SubscriptionPeriod.containing(sub.getDateDebut(), sub.getFrequence(), today);
+        Optional<Transaction> existing = transactionRepository
+                .findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
+                        subscriptionId, userId, period.start(), period.end())
+                .stream().findFirst();
+        if (existing.isPresent()) {
+            Transaction paid = existing.get();
+            log.info("Subscription payment already recorded for the period {} to {}: transactionId={}, subscriptionId={}",
+                    period.start(), period.end(), paid.getId(), subscriptionId);
+            return new SubscriptionPaymentResponse(
+                    paid.getId(), paid.getMontant(), paid.getDate(), sub.getNom(), paid.getAccount().getNom());
         }
 
         Account account = sub.getAccount();
@@ -55,7 +80,7 @@ public class SubscriptionPaymentService {
                 .montant(sub.getMontant())
                 .libelle(sub.getNom())
                 .type(TransactionType.DEPENSE)
-                .date(LocalDate.now())
+                .date(today)
                 .category(sub.getCategory())
                 .account(account)
                 .user(userRepository.getReferenceById(userId))

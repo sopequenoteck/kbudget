@@ -15,17 +15,19 @@ import {
   Validators,
 } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { DebtService } from '../../../../core/services/debt';
 import { Debt, DebtSnoozeRequest } from '../../../../core/models/debt.model';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 
 function futureDateValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
   if (!value) return null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const selected = new Date(value);
+  const selected = parseLocalDate(value);
   selected.setHours(0, 0, 0, 0);
   return selected < today ? { pastDate: true } : null;
 }
@@ -33,7 +35,7 @@ function futureDateValidator(control: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-snooze-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule, FormField, TranslocoPipe],
   templateUrl: './snooze-dialog.html',
   styleUrl: './snooze-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +43,7 @@ function futureDateValidator(control: AbstractControl): ValidationErrors | null 
 export class SnoozeDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly debtService = inject(DebtService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly debt = input.required<Debt>();
 
@@ -82,7 +85,7 @@ export class SnoozeDialog implements OnInit {
       this.snoozed.emit(updated);
     } catch (err: unknown) {
       this.errorMessage.set(
-        err instanceof Error ? err.message : 'Erreur lors du report du rappel',
+        err instanceof Error ? err.message : this.transloco.translate('debts.feedback.snoozeError'),
       );
     } finally {
       this.submitting.set(false);
@@ -100,8 +103,8 @@ export class SnoozeDialog implements OnInit {
   getDateError(): string {
     const control = this.form.get('reminderDate');
     if (!control || !control.touched || !control.invalid) return '';
-    if (control.hasError('required')) return 'La date est requise';
-    if (control.hasError('pastDate')) return 'La date ne peut pas être dans le passé';
+    if (control.hasError('required')) return this.transloco.translate('debts.dialog.reminderDateRequired');
+    if (control.hasError('pastDate')) return this.transloco.translate('debts.dialog.reminderDatePast');
     return '';
   }
 }

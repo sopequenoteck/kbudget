@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/data/remote/compatibility_provider.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Ecran affiche quand cette application et le serveur configure ne peuvent pas
@@ -27,6 +28,7 @@ class IncompatibleScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(compatibilityNotifierProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isClientTooOld = status is CompatibilityClientTooOld;
 
     return Scaffold(
@@ -45,18 +47,18 @@ class IncompatibleScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.space4),
               Text(
                 isClientTooOld
-                    ? 'Application a mettre a jour'
-                    : 'Serveur a mettre a jour',
+                    ? l10n.compatibilityPageClientTitle
+                    : l10n.compatibilityPageServerTitle,
                 style: theme.textTheme.headlineSmall,
               ),
               const SizedBox(height: AppSpacing.space3),
-              Text(_message(status), style: theme.textTheme.bodyMedium),
+              Text(_message(status, l10n), style: theme.textTheme.bodyMedium),
               const SizedBox(height: AppSpacing.space6),
               FilledButton(
                 onPressed: () {
                   ref.read(compatibilityNotifierProvider.notifier).reset();
                 },
-                child: const Text('Reessayer'),
+                child: Text(l10n.commonActionRetry),
               ),
             ],
           ),
@@ -65,7 +67,7 @@ class IncompatibleScreen extends ConsumerWidget {
     );
   }
 
-  String _message(CompatibilityStatus? status) =>
-      status?.userMessage(verbose: true) ??
-      'Cette application et votre serveur ne peuvent pas fonctionner ensemble.';
+  String _message(CompatibilityStatus? status, AppLocalizations l10n) =>
+      status?.userMessage(l10n, verbose: true) ??
+      l10n.compatibilityPageTagline;
 }

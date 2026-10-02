@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { RecurringList } from './recurring-list';
@@ -12,6 +12,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { RecurringTransactionResponse } from '../../../../core/models/recurring-transaction.model';
 import { TransactionType } from '../../../../core/models/transaction.model';
 import { Frequency } from '../../../../core/models/subscription.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 // ---------------------------------------------------------------------------
 // Données de test
@@ -112,6 +113,8 @@ function createMockPreferenceService() {
     primaryCurrency: signal('EUR'),
     currencies: signal(['EUR']),
     enabledFeatures: signal([]),
+    language: signal<string | null>(null),
+    loaded: signal(false),
   };
 }
 
@@ -152,6 +155,7 @@ describe('RecurringList', () => {
     TestBed.configureTestingModule({
       imports: [RecurringList],
       providers: [
+        provideTranslocoTesting(),
         { provide: RecurringTransactionService, useValue: mockService },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: Router, useValue: routerMock },
@@ -236,6 +240,73 @@ describe('RecurringList', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Résumé mensuel — devise principale et locale (KKS-373 suite)
+  // -------------------------------------------------------------------------
+
+  // Intl insère une espace insécable (U+00A0 ou U+202F selon l'ICU) entre le
+  // montant et la devise : on la normalise pour comparer à une chaîne
+  // littérale sans dépendre de la version d'ICU de l'environnement de test.
+  const normalizeSpaces = (value: string) => value.replace(/[\u00A0\u202F]/g, ' ');
+
+  const incomeItem: RecurringTransactionResponse = {
+    id: 'rt-income',
+    montant: 100,
+    libelle: 'Salaire',
+    type: TransactionType.RECETTE,
+    frequency: Frequency.MENSUEL,
+    nextOccurrence: toDateStr(tomorrow),
+    recurringActive: true,
+    category: mockCategory,
+    account: mockAccount,
+  };
+
+  it('should_render_negative_monthly_net_without_plus_sign_when_primary_currency_is_eur', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-expense');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-50,00 €');
+  });
+
+  it('should_render_positive_monthly_net_without_decimals_when_primary_currency_is_xof', async () => {
+    preferenceServiceMock.primaryCurrency.set('XOF');
+    const mockService = createMockService([incomeItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-income');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('+100 F CFA');
+  });
+
+  it('should_reformat_monthly_net_in_english_when_language_switches_without_recreating_fixture', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const netEl: HTMLElement = fixture.nativeElement.querySelector('.monthly-summary .amount-expense');
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-50,00 €');
+
+    preferenceServiceMock.language.set('en');
+    fixture.detectChanges();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(normalizeSpaces(netEl.textContent ?? '')).toBe('-€50.00');
+  });
+
+  // -------------------------------------------------------------------------
   // T012-5 : boutons désactivés pendant une action
   // -------------------------------------------------------------------------
 
@@ -265,6 +336,81 @@ describe('RecurringList', () => {
   // T012-6 : toast succès après validate
   // -------------------------------------------------------------------------
 
+  // -------------------------------------------------------------------------
+  // Libellé de date relative — branches de getRelativeDateInfo
+  // -------------------------------------------------------------------------
+
+  it('should_return_days_overdue_label_when_negative_diff_is_more_than_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(today.getDate() - 3);
+
+    expect(component.getRelativeDateInfo(toDateStr(threeDaysAgo))).toEqual({
+      key: 'recurring.list.daysOverdue',
+      params: { count: 3 },
+    });
+  });
+
+  it('should_return_hier_label_when_negative_diff_is_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDateInfo(toDateStr(yesterday))).toEqual({ key: 'recurring.list.yesterday' });
+  });
+
+  it('should_return_aujourdhui_label_when_diff_is_zero', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDateInfo(toDateStr(today))).toEqual({ key: 'recurring.list.today' });
+  });
+
+  it('should_return_demain_label_when_diff_is_one_day', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    expect(component.getRelativeDateInfo(toDateStr(tomorrow))).toEqual({ key: 'recurring.list.tomorrow' });
+  });
+
+  it('should_return_days_count_label_when_diff_is_between_two_and_thirty', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const inTenDays = new Date(today);
+    inTenDays.setDate(today.getDate() + 10);
+
+    expect(component.getRelativeDateInfo(toDateStr(inTenDays))).toEqual({
+      key: 'recurring.list.daysUntil',
+      params: { count: 10 },
+    });
+  });
+
+  it('should_return_short_localized_date_when_diff_is_more_than_thirty_days', () => {
+    const mockService = createMockService([]);
+    setupTestBed(mockService);
+    const fixture = TestBed.createComponent(RecurringList);
+    const component = fixture.componentInstance;
+
+    const inFortyFiveDays = new Date(today);
+    inFortyFiveDays.setDate(today.getDate() + 45);
+
+    const result = component.getRelativeDateInfo(toDateStr(inFortyFiveDays));
+    expect(result.key).toBeUndefined();
+    expect(result.formatted).toBeTruthy();
+  });
+
   it('should_show_toast_after_successful_validate', async () => {
     const mockService = createMockService([overdueItem]);
     mockService.validate = vi.fn().mockReturnValue(of({ id: 'tx-new' }));
@@ -278,6 +424,115 @@ describe('RecurringList', () => {
     await component.onValidate(overdueItem);
 
     expect(toastServiceMock.success).toHaveBeenCalledWith('Transaction validée');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_error_toast_when_validate_fails', async () => {
+    const mockService = createMockService([overdueItem]);
+    mockService.validate = vi.fn().mockReturnValue(throwError(() => new Error('fail')));
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onValidate(overdueItem);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Erreur lors de la validation');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_toast_after_successful_validate_all', async () => {
+    const mockService = createMockService([overdueItem, upcomingItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onValidateAll([overdueItem, upcomingItem]);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('2 transactions validées');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_error_toast_when_validate_all_fails', async () => {
+    const mockService = createMockService([overdueItem]);
+    mockService.validate = vi.fn().mockReturnValue(throwError(() => new Error('fail')));
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onValidateAll([overdueItem]);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Erreur lors de la validation');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_toast_after_successful_skip', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onSkip(overdueItem);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Occurrence passée');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_error_toast_when_skip_fails', async () => {
+    const mockService = createMockService([overdueItem]);
+    mockService.skip = vi.fn().mockReturnValue(throwError(() => new Error('fail')));
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onSkip(overdueItem);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Erreur lors du passage');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_toast_after_successful_deactivate', async () => {
+    const mockService = createMockService([overdueItem]);
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onDeactivate(overdueItem);
+
+    expect(toastServiceMock.success).toHaveBeenCalledWith('Récurrence désactivée');
+    expect(component.actionInProgress()).toBeNull();
+  });
+
+  it('should_show_error_toast_when_deactivate_fails', async () => {
+    const mockService = createMockService([overdueItem]);
+    mockService.deactivate = vi.fn().mockReturnValue(throwError(() => new Error('fail')));
+    setupTestBed(mockService);
+
+    const fixture = TestBed.createComponent(RecurringList);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    await component.onDeactivate(overdueItem);
+
+    expect(toastServiceMock.error).toHaveBeenCalledWith('Erreur lors de la désactivation');
     expect(component.actionInProgress()).toBeNull();
   });
 });

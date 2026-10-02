@@ -25,4 +25,10 @@ abstract class AppConfigRepository {
   Future<void> setEnabledFeatures(List<Feature> features);
   Future<List<Feature>> getNavOrder();
   Future<void> setNavOrder(List<Feature> order);
+
+  /// The language stored on this device, `null` when none is stored.
+  Future<String?> getLanguage();
+
+  /// Stores [language] on this device; `null` clears it.
+  Future<void> setLanguage(String? language);
 }

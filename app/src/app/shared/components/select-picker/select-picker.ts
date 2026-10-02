@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { SelectPickerItem } from './select-picker.model';
 
 const DROPDOWN_MIN_SPACE = 224;
@@ -21,7 +22,7 @@ const DROPDOWN_MIN_SPACE = 224;
 @Component({
   selector: 'app-select-picker',
   standalone: true,
-  imports: [CdkTrapFocus],
+  imports: [CdkTrapFocus, TranslocoPipe],
   templateUrl: './select-picker.html',
   styleUrl: './select-picker.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,12 +38,12 @@ export class SelectPicker implements ControlValueAccessor {
   private readonly elementRef = inject(ElementRef);
 
   readonly items = input<SelectPickerItem[]>([]);
-  readonly placeholder = input('Selectionner...');
+  readonly placeholder = input<string | undefined>(undefined);
   readonly searchable = input<boolean | null>(null);
   readonly searchThreshold = input(5);
-  readonly searchPlaceholder = input('Rechercher...');
+  readonly searchPlaceholder = input<string | undefined>(undefined);
   readonly clearable = input(true);
-  readonly emptyMessage = input('Aucun element disponible');
+  readonly emptyMessage = input<string | undefined>(undefined);
 
   readonly opened = output<void>();
   readonly closed = output<void>();

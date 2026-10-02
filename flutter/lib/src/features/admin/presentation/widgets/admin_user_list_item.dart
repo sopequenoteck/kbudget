@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/admin/data/admin_user_model.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class AdminUserListItem extends StatelessWidget {
   final AdminUser user;
@@ -24,6 +25,7 @@ class AdminUserListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDisabled = user.disabledAt != null;
 
     return ListTile(
@@ -57,7 +59,7 @@ class AdminUserListItem extends StatelessWidget {
           if (user.isAdmin) ...[
             const SizedBox(width: AppSpacing.space1),
             Tooltip(
-              message: 'Admin',
+              message: l10n.usersValueAdmin,
               child: Icon(
                 Icons.shield_outlined,
                 size: 16,
@@ -86,7 +88,7 @@ class AdminUserListItem extends StatelessWidget {
                     size: 20,
                     color: AppColors.success,
                   ),
-                  tooltip: 'Réactiver',
+                  tooltip: l10n.commonActionEnable,
                   onPressed: onEnable,
                 )
               : IconButton(
@@ -95,7 +97,7 @@ class AdminUserListItem extends StatelessWidget {
                     size: 20,
                     color: theme.colorScheme.error,
                   ),
-                  tooltip: 'Désactiver',
+                  tooltip: l10n.commonActionDisable,
                   onPressed: onDisable,
                 ),
     );

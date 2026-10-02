@@ -11,6 +11,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -47,6 +48,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(dataSettingsNotifierProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -54,14 +56,14 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
           padding: const EdgeInsets.all(AppSpacing.space4),
           children: [
             PageHeader(
-              title: 'Données',
+              title: l10n.settingsPageDataTitle,
               onBack: () => context.pop(),
               icon: const PhosphorIcon(PhosphorIconsRegular.database, size: 16),
             ),
 
             // Source active
             Text(
-              'SOURCE DE DONNÉES',
+              l10n.settingsFormDataSource.toUpperCase(),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -73,16 +75,22 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             SizedBox(
               width: double.infinity,
               child: SegmentedButton<DataMode>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: DataMode.local,
-                    label: Text('Local'),
-                    icon: PhosphorIcon(PhosphorIconsRegular.deviceMobile, size: 20),
+                    label: Text(l10n.settingsValueDataSourceLocal),
+                    icon: const PhosphorIcon(
+                      PhosphorIconsRegular.deviceMobile,
+                      size: 20,
+                    ),
                   ),
                   ButtonSegment(
                     value: DataMode.server,
-                    label: Text('Serveur'),
-                    icon: PhosphorIcon(PhosphorIconsRegular.cloud, size: 20),
+                    label: Text(l10n.settingsValueDataSourceServer),
+                    icon: const PhosphorIcon(
+                      PhosphorIconsRegular.cloud,
+                      size: 20,
+                    ),
                   ),
                 ],
                 selected: {state.dataMode},
@@ -97,7 +105,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
 
             // URL serveur
             Text(
-              'URL DU SERVEUR',
+              l10n.settingsFormServerUrl.toUpperCase(),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -123,7 +131,7 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             FilledButton.icon(
               onPressed: state.isLoading ? null : _onSaveUrl,
               icon: const PhosphorIcon(PhosphorIconsRegular.floppyDisk, size: 20),
-              label: const Text('Enregistrer'),
+              label: Text(l10n.commonActionSave),
             ),
 
             if (state.isLoading) ...[
@@ -151,7 +159,11 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     }
     notifier.saveServerUrl(url);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('URL enregistrée')),
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context)!.settingsFeedbackServerUrlSaved,
+        ),
+      ),
     );
   }
 
@@ -172,15 +184,13 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
       }
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
       icon: PhosphorIconsRegular.arrowsLeftRight,
-      title: 'Changer de source ?',
-      message: 'Les sources de données sont indépendantes. '
-          'Les données de la source actuelle ne seront pas visibles '
-          'après le changement.\n\n'
-          "L'application va redémarrer pour appliquer la nouvelle source.",
-      confirmLabel: 'Confirmer',
+      title: l10n.settingsDialogChangeDataSourceTitle,
+      message: l10n.settingsDialogChangeDataSourceMessage,
+      confirmLabel: l10n.commonActionConfirm,
       variant: ConfirmVariant.primary,
     ) ?? false;
 

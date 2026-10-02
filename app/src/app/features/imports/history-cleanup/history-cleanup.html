@@ -1,0 +1,396 @@
+<div class="page-header">
+  <button
+    type="button"
+    class="page-header__back"
+    (click)="goBack()"
+    [attr.aria-label]="'common.action.back' | transloco"
+  >
+    <ng-icon name="phosphorArrowLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">{{ 'imports.page.cleanupTitle' | transloco }}</h1>
+</div>
+
+<p class="cleanup__description">{{ 'imports.page.cleanupDescription' | transloco }}</p>
+
+@if (loading()) {
+  <div class="list-group" aria-busy="true">
+    @for (placeholder of [1, 2, 3]; track placeholder) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (loadFailed()) {
+  <app-empty-state
+    icon="phosphorWarningCircle"
+    [message]="'imports.feedback.cleanupLoadError' | transloco"
+    [ctaLabel]="'common.action.retry' | transloco"
+    (ctaClick)="load()"
+  />
+} @else {
+  <!-- a. Operations deja saisies -->
+  @if (importedProposals().length > 0) {
+    <section class="review__section" data-testid="section-imported">
+      <div class="section-header">
+        <h2 class="section-header__title">{{ 'imports.list.cleanupImportedTitle' | transloco }}</h2>
+        <span class="section-header__count">{{ importedProposals().length }}</span>
+      </div>
+      <p class="review__hint">{{ 'imports.list.cleanupImportedHint' | transloco }}</p>
+      <div class="list-group">
+        @for (proposal of importedProposals(); track importedKey(proposal)) {
+          <div class="review__item" data-testid="imported-proposal">
+            <div class="review__line">
+              <span class="list-row__content">
+                <span class="list-row__title">{{ proposal.imported.libelle }}</span>
+                <span class="list-row__subtitle">{{ shortDate(proposal.imported.date) }}</span>
+              </span>
+              <span class="list-row__amount" [class]="amountClass(proposal.imported.type)">
+                {{
+                  proposal.imported.montant
+                    | amount: proposal.imported.type : proposal.imported.account.currency
+                }}
+              </span>
+            </div>
+            <fieldset class="cleanup__choices">
+              <legend class="review__prompt">{{ 'imports.list.cleanupSameAs' | transloco }}</legend>
+              <div class="review__options">
+                @for (candidate of proposal.candidates; track candidate.id) {
+                  <label
+                    class="review__option cleanup__option"
+                    [class.cleanup__option--selected]="chosenCandidateId(proposal) === candidate.id"
+                  >
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      data-testid="candidate-radio"
+                      [name]="'candidate-' + importedKey(proposal)"
+                      [value]="candidate.id"
+                      [checked]="chosenCandidateId(proposal) === candidate.id"
+                      [disabled]="busy()"
+                      (change)="choose(importedKey(proposal), candidate.id)"
+                    />
+                    <span class="review__option-main">
+                      <span class="review__option-title">{{ candidate.libelle }}</span>
+                      <span class="review__option-subtitle">
+                        {{ shortDate(candidate.date) }}
+                        @if (candidate.category; as category) {
+                          · {{ category.nom | categoryName: category.systemKey }}
+                        }
+                      </span>
+                    </span>
+                    <span class="review__option-amount">{{
+                      candidate.montant | amount: candidate.type : candidate.account.currency
+                    }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+            <div class="review__actions">
+              <button
+                type="button"
+                class="review__action"
+                data-testid="merge-imported"
+                [disabled]="busy()"
+                (click)="mergeImported(proposal)"
+              >
+                {{ 'imports.action.merge' | transloco }}
+              </button>
+              <button
+                type="button"
+                class="review__action review__action--muted"
+                data-testid="dismiss-proposal"
+                [disabled]="busy()"
+                (click)="dismiss(importedKey(proposal))"
+              >
+                {{ 'imports.action.notDuplicate' | transloco }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- b. Paiements d'abonnement en double -->
+  @if (subscriptionProposals().length > 0) {
+    <section class="review__section" data-testid="section-subscriptions">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          {{ 'imports.list.cleanupSubscriptionTitle' | transloco }}
+        </h2>
+        <span class="section-header__count">{{ subscriptionProposals().length }}</span>
+      </div>
+      <p class="review__hint">{{ 'imports.list.cleanupSubscriptionHint' | transloco }}</p>
+      <div class="list-group">
+        @for (proposal of subscriptionProposals(); track subscriptionKey(proposal)) {
+          <div class="review__item" data-testid="subscription-proposal">
+            <div class="review__line">
+              <span class="list-row__content">
+                <span class="list-row__title">{{ proposal.subscriptionName }}</span>
+                <span class="list-row__subtitle">{{
+                  'imports.list.cleanupPeriod'
+                    | transloco
+                      : {
+                          start: shortDate(proposal.periodStart),
+                          end: shortDate(proposal.periodEnd),
+                        }
+                }}</span>
+              </span>
+            </div>
+            <fieldset class="cleanup__choices">
+              <legend class="review__prompt">
+                {{ 'imports.list.cleanupWhichPayment' | transloco }}
+              </legend>
+              <div class="review__options">
+                @for (payment of proposal.transactions; track payment.id) {
+                  <label
+                    class="review__option cleanup__option"
+                    [class.cleanup__option--selected]="chosenPaymentId(proposal) === payment.id"
+                  >
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      data-testid="payment-radio"
+                      [name]="'payment-' + subscriptionKey(proposal)"
+                      [value]="payment.id"
+                      [checked]="chosenPaymentId(proposal) === payment.id"
+                      [disabled]="busy() || !isPaymentKeepable(proposal, payment)"
+                      (change)="choose(subscriptionKey(proposal), payment.id)"
+                    />
+                    <span class="review__option-main">
+                      <span class="review__option-title">{{ payment.libelle }}</span>
+                      <span class="review__option-subtitle">
+                        {{ shortDate(payment.date) }}
+                        @if (payment.imported) {
+                          · {{ 'imports.value.statement' | transloco }}
+                        }
+                      </span>
+                    </span>
+                    <span class="review__option-amount">{{
+                      payment.montant | amount: payment.type : payment.account.currency
+                    }}</span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+            <div class="review__actions">
+              <button
+                type="button"
+                class="review__action"
+                data-testid="keep-payment"
+                [disabled]="busy()"
+                (click)="keepPayment(proposal)"
+              >
+                {{ 'imports.action.keepThisPayment' | transloco }}
+              </button>
+              <button
+                type="button"
+                class="review__action review__action--muted"
+                data-testid="dismiss-proposal"
+                [disabled]="busy()"
+                (click)="dismiss(subscriptionKey(proposal))"
+              >
+                {{ 'imports.action.skip' | transloco }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- c. Sans categorie, regroupees par commercant -->
+  @if (showUncategorized()) {
+    <section class="review__section" data-testid="section-uncategorised">
+      <div class="section-header">
+        <h2 class="section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
+        <span class="section-header__count">{{ uncategorizedCount() }}</span>
+      </div>
+      @if (uncategorizedGroups().length > 0) {
+        <p class="review__hint">{{ 'imports.list.cleanupUncategorisedHint' | transloco }}</p>
+        <div class="list-group">
+          @for (group of uncategorizedGroups(); track groupTrackKey(group)) {
+            <div class="review__item" data-testid="uncategorised-group">
+              <div class="review__line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ group.merchantKey }}</span>
+                  <span class="list-row__subtitle">
+                    @if (group.amount !== null) {
+                      {{
+                        'imports.list.cleanupGroupCountAt'
+                          | transloco
+                            : {
+                                count: group.count,
+                                amount: (group.amount | amount: null : currencyOf(group)),
+                              }
+                      }}
+                    } @else {
+                      {{ 'imports.list.cleanupGroupCount' | transloco: { count: group.count } }}
+                    }
+                  </span>
+                </span>
+                <span class="list-row__amount" [class]="amountClass(group.type)">
+                  {{ group.totalAmount | amount: group.type : currencyOf(group) }}
+                </span>
+              </div>
+              @if (group.suggestion; as suggestion) {
+                <p class="review__prompt" data-testid="suggestion">
+                  {{
+                    'imports.list.cleanupSuggestion'
+                      | transloco
+                        : {
+                            category:
+                              (suggestion.category.nom
+                              | categoryName: suggestion.category.systemKey),
+                            source: suggestion.source,
+                          }
+                  }}
+                </p>
+              }
+              <div class="review__actions">
+                @if (group.suggestion) {
+                  <button
+                    type="button"
+                    class="review__action"
+                    data-testid="apply-suggestion"
+                    [disabled]="busy()"
+                    (click)="applySuggestion(group)"
+                  >
+                    {{ 'imports.action.apply' | transloco }}
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="review__action"
+                  [class.review__action--muted]="group.suggestion"
+                  data-testid="choose-category"
+                  [disabled]="busy()"
+                  (click)="openCategorySheet(group)"
+                >
+                  {{ 'imports.action.pickCategory' | transloco }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @if (withoutMerchantCount() > 0) {
+        <p class="review__hint cleanup__footnote" data-testid="without-merchant">
+          {{ 'imports.list.cleanupUnrecognised' | transloco: { count: withoutMerchantCount() } }}
+        </p>
+      }
+    </section>
+  }
+
+  <!-- d. Ajustements a recaler -->
+  @if (adjustmentCount() > 0) {
+    <section class="review__section" data-testid="section-adjustments">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          {{ 'imports.list.cleanupAdjustmentsTitle' | transloco }}
+        </h2>
+        <span class="section-header__count">{{ adjustmentCount() }}</span>
+      </div>
+      <p class="review__hint">{{ 'imports.list.cleanupAdjustmentsHint' | transloco }}</p>
+      @for (entry of adjustmentAccounts(); track entry.account.id) {
+        <h3 class="cleanup__account" data-testid="adjustment-account">{{ entry.account.nom }}</h3>
+        <div class="list-group">
+          @for (adjustment of entry.adjustments; track adjustment.id) {
+            <div class="review__item" data-testid="adjustment">
+              <div class="review__line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ adjustment.libelle }}</span>
+                  <span class="list-row__subtitle">{{ shortDate(adjustment.date) }}</span>
+                </span>
+                <span
+                  class="list-row__amount"
+                  [class]="amountClass(signedType(adjustment.montant))"
+                >
+                  {{
+                    adjustment.montant
+                      | amount: signedType(adjustment.montant) : entry.account.currency
+                  }}
+                </span>
+              </div>
+              @if (entry.bankBalanceDate; as balanceDate) {
+                <p class="review__prompt" data-testid="adjustment-explanation">
+                  {{
+                    'imports.detail.cleanupAdjustmentUnneeded'
+                      | transloco
+                        : {
+                            date: fullDate(balanceDate),
+                            amount: (entry.bankBalance | amount: null : entry.account.currency),
+                          }
+                  }}
+                </p>
+              }
+              <div class="review__actions">
+                <button
+                  type="button"
+                  class="review__action"
+                  data-testid="realign"
+                  [disabled]="busy() || !canRealign(entry)"
+                  (click)="realign(entry, adjustment)"
+                >
+                  {{ 'imports.action.realignOnBank' | transloco }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (nothingToCatchUp()) {
+    <app-empty-state
+      icon="phosphorSealCheck"
+      [message]="'imports.empty.cleanupNothing' | transloco"
+      [hint]="'imports.empty.cleanupNothingHint' | transloco"
+    />
+  }
+}
+
+<!-- Choix de categorie : une feuille, sans second niveau -->
+<app-modal
+  [isOpen]="categoryTarget() !== null"
+  [title]="categoryTarget()?.merchantKey ?? ''"
+  [hideHeader]="true"
+  (closed)="closeCategorySheet()"
+>
+  @if (categoryTarget(); as target) {
+    <div class="bsheet">
+      <div class="bsheet__top">
+        <span class="bsheet__handle"></span>
+        <span class="bsheet__top-title">{{ target.merchantKey }}</span>
+      </div>
+      <div class="bsheet__expand">
+        <app-category-select
+          [categories]="categories()"
+          (selected)="onCategorySelected($event)"
+          (created)="onCategoryCreated($event)"
+          (isCreating)="categoryCreating.set($event)"
+        />
+      </div>
+      <div class="bsheet__bottom-row">
+        <div class="bsheet__bottom-left">
+          <button
+            type="button"
+            class="bsheet__action-pill bsheet__action-pill--cancel"
+            [disabled]="categoryCreating()"
+            (click)="closeCategorySheet()"
+          >
+            {{ 'common.action.cancel' | transloco }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</app-modal>

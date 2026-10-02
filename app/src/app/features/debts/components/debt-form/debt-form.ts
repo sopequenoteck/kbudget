@@ -6,8 +6,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
 } from '@angular/core';
@@ -15,6 +13,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -38,33 +37,20 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
-import { Debt, DebtRequest, DebtType } from '../../../../core/models/debt.model';
+import { Debt, DebtRequest, DebtType, DEBT_TYPE_LABEL_KEYS } from '../../../../core/models/debt.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | 'reminder' | null;
 
-@Pipe({ name: 'shortDate', standalone: true })
-export class ShortDatePipe implements PipeTransform {
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
-  }
-}
-
 @Component({
   selector: 'app-debt-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -90,6 +76,10 @@ export class DebtForm {
   private readonly debtService = inject(DebtService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly DEBT_TYPE_LABEL_KEYS = DEBT_TYPE_LABEL_KEYS;
 
   readonly debt = computed(() => this.modalService.editingEntity() as Debt | null);
   readonly sens = input(DebtType.EMPRUNT);
@@ -167,13 +157,7 @@ export class DebtForm {
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR');
-    return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? (this.form.get('currency')?.value || 'EUR'), this.languageService.displayLocale()));
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
@@ -254,9 +238,7 @@ export class DebtForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -286,7 +268,7 @@ export class DebtForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('debts.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -315,7 +297,7 @@ export class DebtForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -325,12 +307,10 @@ export class DebtForm {
     const d = this.debt();
     if (!d) return;
     const currency = d.account?.currency ?? d.currency ?? 'EUR';
-    const amount = d.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
-    const ok = await this.confirmService.confirm({
+    const amount = formatCurrencyAmount(d.montant, currency, this.languageService.displayLocale());
+    const ok = await this.confirmService.confirmDelete({
       title: `${d.personne} — ${amount}`,
-      message: 'Voulez-vous vraiment supprimer cette dette ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
+      message: this.transloco.translate('debts.dialog.deleteFormMessage'),
       icon: 'phosphorHandCoins',
     });
     if (!ok) return;
@@ -338,7 +318,7 @@ export class DebtForm {
       await firstValueFrom(this.debtService.delete(d.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

@@ -27,13 +27,18 @@ import java.util.function.BiPredicate;
 
 /**
  * Rapproche les lignes d'un releve des transactions deja en base, en trois
- * passes de la plus sure a la plus incertaine (KKS-382).
+ * passes de la plus sure a la plus incertaine (KKS-382), puis rattache a leur
+ * abonnement les lignes qui en sont un prelevement (KKS-385).
  *
  * <ol>
  *   <li><strong>Empreinte</strong> : la ligne a deja ete importee depuis KKS-382.
  *       Certain, meme si la transaction a ete renommee ou recategorisee depuis.</li>
  *   <li><strong>Import anterieur</strong> : transaction sans empreinte, de meme
  *       date, montant et sens, au libelle nettoye identique.</li>
+ *   <li><strong>Saisie manuelle</strong> (KKS-385, {@link ImportMatchingService}) : entre les
+ *       passes 2 et 3, une transaction sans empreinte de meme compte, type et montant dans une
+ *       fenetre de dates, sans regarder le libelle. Un candidat unique est rapproche ; plusieurs,
+ *       la ligne devient {@code DUPLICATE} et l'utilisateur tranche.</li>
  *   <li><strong>Doublon probable</strong> : meme date, montant et sens, libelle
  *       seulement proche. Reste bloquant : c'est a l'utilisateur de trancher.</li>
  * </ol>
@@ -54,6 +59,7 @@ public class DeduplicationService {
     private static final int DATE_MARGIN_DAYS = 3;
 
     private final TransactionRepository transactionRepository;
+    private final ImportMatchingService importMatchingService;
 
     public void detectDuplicates(List<ImportDraftLine> lines, UUID accountId, UUID userId) {
         List<ImportDraftLine> candidates = lines == null ? List.of() : lines.stream()
@@ -71,8 +77,12 @@ public class DeduplicationService {
         int byLabel = matchRemaining(candidates, withoutFingerprint, consumed,
                 DeduplicationService::sameCleanLabel, DeduplicationService::markAlreadyImported);
 
+        importMatchingService.match(candidates, accountId, userId, consumed);
+
         int duplicates = matchRemaining(candidates, window, consumed,
                 DeduplicationService::similarLabel, DeduplicationService::markDuplicate);
+
+        importMatchingService.linkSubscriptions(candidates, userId);
 
         log.info("Deduplication: {} already imported ({} by fingerprint, {} by label), {} probable duplicates out of {} lines",
                 byFingerprint + byLabel, byFingerprint, byLabel, duplicates, lines.size());
@@ -112,7 +122,8 @@ public class DeduplicationService {
                                BiConsumer<ImportDraftLine, Transaction> mark) {
         int matched = 0;
         for (ImportDraftLine line : lines) {
-            if (line.getStatus() != ImportLineStatus.READY) {
+            // A line matched with a manual transaction is settled: its label is not looked at.
+            if (line.getStatus() != ImportLineStatus.READY || line.getMatchedTransactionId() != null) {
                 continue;
             }
             for (Transaction candidate : existing) {

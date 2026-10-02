@@ -100,14 +100,20 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
 
   String? _validateNom(String value) {
     final l10n = AppLocalizations.of(context)!;
-    if (value.trim().isEmpty) return l10n.categoryNameRequired;
-    if (value.length > 30) return l10n.categoryNameMaxLength;
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationNameRequired;
+    }
+    if (value.length > 30) {
+      return l10n.categoriesFormNameMaxLength;
+    }
     return null;
   }
 
   String? _validateEmoji() {
     final l10n = AppLocalizations.of(context)!;
-    if (_selectedEmoji.isEmpty) return l10n.categoryEmojiRequired;
+    if (_selectedEmoji.isEmpty) {
+      return l10n.categoriesFormIconRequired;
+    }
     return null;
   }
 
@@ -147,8 +153,8 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
           SnackBar(
             content: Text(
               isDuplicate
-                  ? l10n.categoryNameDuplicate
-                  : l10n.categoryErrorUpdate,
+                  ? l10n.categoriesFormNameDuplicate
+                  : l10n.commonFeedbackSaveError,
             ),
           ),
         );
@@ -173,8 +179,8 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
           SnackBar(
             content: Text(
               isDuplicate
-                  ? l10n.categoryNameDuplicate
-                  : l10n.categoryErrorCreate,
+                  ? l10n.categoriesFormNameDuplicate
+                  : l10n.commonFeedbackSaveError,
             ),
           ),
         );
@@ -210,7 +216,7 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EmojiInput(
-                label: l10n.categoryFormIconField,
+                label: l10n.categoriesFormIcon,
                 initialValue: _selectedEmoji.isNotEmpty ? _selectedEmoji : null,
                 onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
                 validator: (_) => _showErrors ? _validateEmoji() : null,
@@ -221,7 +227,7 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
               const SizedBox(width: AppSpacing.space4),
               Expanded(
                 child: ColorPalettePicker(
-                  label: l10n.categoryFormColorField,
+                  label: l10n.commonFormColour,
                   selectedColor: _selectedColor,
                   onChanged: (color) => setState(() => _selectedColor = color),
                 ),
@@ -232,7 +238,7 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
 
           // Name field
           AppFormField(
-            label: l10n.categoryFormNameField,
+            label: l10n.categoriesFormName,
             showError: nomError != null,
             errorMessage: nomError ?? '',
             child: TextField(

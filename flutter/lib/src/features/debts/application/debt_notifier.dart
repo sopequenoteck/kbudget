@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final debtNotifierProvider =
     NotifierProvider<DebtNotifier, DebtListState>(
@@ -30,10 +31,10 @@ class DebtNotifier extends Notifier<DebtListState> {
       _allItems = await _repo.getAll();
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage(resetPage: true);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Impossible de charger les dettes: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
       );
     }
   }
@@ -65,10 +66,10 @@ class DebtNotifier extends Notifier<DebtListState> {
       _allItems.add(created);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur lors de la création: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -87,10 +88,10 @@ class DebtNotifier extends Notifier<DebtListState> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
-        error: 'Erreur lors de la modification: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -109,24 +110,34 @@ class DebtNotifier extends Notifier<DebtListState> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       _allItems.insert(index, saved);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de la suppression: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackDeleteError,
       );
     }
   }
 
-  Future<bool> repay(String debtId, String accountId, double? amount) async {
+  /// Rembourse [debt] depuis [accountId]. Le libelle de la transaction
+  /// est envoye dans la langue affichee (KKS-423).
+  Future<bool> repay(Debt debt, String accountId, double? amount) async {
+    final debtId = debt.id;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, debtId},
       error: null,
     );
     try {
-      final updated = await _repo.repay(debtId, accountId, amount);
+      final updated = await _repo.repay(
+        debtId,
+        accountId,
+        amount,
+        libelle: ref
+            .read(appLocalizationsProvider)
+            .debtsValueRepayment(debt.personne),
+      );
       final index = _allItems.indexWhere((e) => e.id == debtId);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
@@ -135,10 +146,10 @@ class DebtNotifier extends Notifier<DebtListState> {
         mutatingIds: {...state.mutatingIds}..remove(debtId),
       );
       return true;
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(debtId),
-        error: 'Erreur lors du remboursement: $e',
+        error: ref.read(appLocalizationsProvider).debtsFeedbackRepayError,
       );
       return false;
     }
@@ -159,10 +170,10 @@ class DebtNotifier extends Notifier<DebtListState> {
         mutatingIds: {...state.mutatingIds}..remove(debtId),
       );
       return true;
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(debtId),
-        error: 'Erreur lors du report: $e',
+        error: ref.read(appLocalizationsProvider).debtsFeedbackSnoozeError,
       );
       return false;
     }

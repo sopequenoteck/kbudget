@@ -7,6 +7,8 @@ import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/domain/repositories/notification_repository.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 
+import '../../../../helpers/display_locale.dart';
+
 // Mock manuel — NotificationRepository n'est pas encore dans mocks.mocks.dart
 class MockNotificationRepository implements NotificationRepository {
   List<NotificationModel> _items = [];
@@ -90,6 +92,7 @@ void main() {
     mockRepo = MockNotificationRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         notificationRepositoryProvider.overrideWith((ref) async => mockRepo),
       ],
     );
@@ -151,7 +154,7 @@ void main() {
       await notifier().loadItems();
 
       // Assert
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().isLoading, false);
     });
 
@@ -232,7 +235,7 @@ void main() {
 
       // Assert — rollback : l'item est restauré
       expect(state().items, hasLength(1));
-      expect(state().error, contains('Erreur'));
+      expect(state().error, 'Erreur lors de la suppression');
     });
 
     test('should_load_more_when_has_more', () async {
@@ -317,6 +320,57 @@ void main() {
       // Assert
       expect(state().items, isEmpty);
       expect(state().isLoading, false);
+    });
+
+    test('should_setLoadError_when_loadMoreFails', () async {
+      mockRepo.setItems(List.generate(
+        25,
+        (i) => makeNotification(
+          id: '${i + 1}',
+          createdAt: DateTime(2026, 3, 1).subtract(Duration(seconds: i)),
+        ),
+      ));
+      await notifier().loadItems();
+      mockRepo.shouldThrow = true;
+
+      await notifier().loadMore();
+
+      expect(state().items, hasLength(20));
+      expect(state().error, 'Erreur de chargement');
+    });
+
+    test('should_setSaveError_when_markAsReadFails', () async {
+      mockRepo.setItems([makeNotification(id: '1')]);
+      await notifier().loadItems();
+      mockRepo.shouldThrow = true;
+
+      await notifier().markAsRead('1');
+
+      expect(state().items.single.read, false);
+      expect(state().mutatingIds, isEmpty);
+      expect(state().error, 'Erreur lors de la sauvegarde');
+    });
+
+    test('should_setSaveError_when_markAllAsReadFails', () async {
+      mockRepo.setItems([makeNotification(id: '1')]);
+      await notifier().loadItems();
+      mockRepo.shouldThrow = true;
+
+      await notifier().markAllAsRead();
+
+      expect(state().isLoading, false);
+      expect(state().error, 'Erreur lors de la sauvegarde');
+    });
+
+    test('should_setDeleteError_when_deleteAllFails', () async {
+      mockRepo.setItems([makeNotification(id: '1')]);
+      await notifier().loadItems();
+      mockRepo.shouldThrow = true;
+
+      await notifier().deleteAll();
+
+      expect(state().items, hasLength(1));
+      expect(state().error, 'Erreur lors de la suppression');
     });
   });
 }

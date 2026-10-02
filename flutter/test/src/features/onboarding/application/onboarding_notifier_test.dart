@@ -5,6 +5,7 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/onboarding/application/onboarding_state.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -15,6 +16,7 @@ void main() {
     mockRepo = MockAppConfigRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );

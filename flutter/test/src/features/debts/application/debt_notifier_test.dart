@@ -8,6 +8,7 @@ import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -49,6 +50,7 @@ void main() {
     mockRepo = MockDebtRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         debtRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -62,6 +64,9 @@ void main() {
       container.read(debtNotifierProvider.notifier);
 
   DebtListState state() => container.read(debtNotifierProvider);
+
+  Future<Debt> anyRepay() =>
+      mockRepo.repay(any, any, any, libelle: anyNamed('libelle'));
 
   group('DebtNotifier', () {
     test('should_haveEmptyState_when_created', () {
@@ -91,7 +96,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
     });
 
     test('should_addItem_when_createSucceeds', () async {
@@ -113,6 +118,26 @@ void main() {
       await notifier().update(updated);
 
       expect(state().items.first.montant, 75.0);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_showSaveError_when_createFails', () async {
+      when(mockRepo.create(any)).thenThrow(Exception('Server error'));
+
+      await notifier().create(debt2);
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
+      expect(state().isLoading, isFalse);
+    });
+
+    test('should_showSaveError_when_updateFails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+
+      when(mockRepo.update(any)).thenThrow(Exception('Server error'));
+      await notifier().update(debt1.copyWith(montant: 75.0));
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -286,14 +311,49 @@ void main() {
       await notifier().loadItems();
 
       final repaidDebt = debt1.copyWith(remainingAmount: 0.0, rembourse: false);
-      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => repaidDebt);
+      when(anyRepay()).thenAnswer((_) async => repaidDebt);
 
-      final result = await notifier().repay('1', 'account-1', 50.0);
+      final result = await notifier().repay(debt1, 'account-1', 50.0);
 
       expect(result, isTrue);
       expect(state().items.first.remainingAmount, 0.0);
       expect(state().error, isNull);
       expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_sendRepaymentLabel_when_repaying', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await notifier().loadItems();
+      when(anyRepay())
+          .thenAnswer((_) async => debt1);
+
+      await notifier().repay(debt1, 'account-1', 50.0);
+
+      verify(
+        mockRepo.repay(
+          '1',
+          'account-1',
+          50.0,
+          libelle: 'Remboursement - Alice',
+        ),
+      ).called(1);
+    });
+
+    test('should_sendRepaymentLabel_when_debtNotLoaded', () async {
+      when(anyRepay())
+          .thenAnswer((_) async => debt2);
+
+      final result = await notifier().repay(debt2, 'account-1', null);
+
+      expect(result, isTrue);
+      verify(
+        mockRepo.repay(
+          '2',
+          'account-1',
+          null,
+          libelle: 'Remboursement - Bob',
+        ),
+      ).called(1);
     });
 
     test('should_update_remaining_when_partial_repay', () async {
@@ -302,10 +362,11 @@ void main() {
       await notifier().loadItems();
 
       final partiallyRepaid = debtWithAmount.copyWith(remainingAmount: 300.0);
-      when(mockRepo.repay(any, any, any))
+      when(anyRepay())
           .thenAnswer((_) async => partiallyRepaid);
 
-      final result = await notifier().repay('1', 'account-1', 200.0);
+      final result =
+          await notifier().repay(debtWithAmount, 'account-1', 200.0);
 
       expect(result, isTrue);
       expect(state().items.first.remainingAmount, 300.0);
@@ -321,9 +382,9 @@ void main() {
         remainingAmount: 0.0,
         rembourse: true,
       );
-      when(mockRepo.repay(any, any, any)).thenAnswer((_) async => fullyRepaid);
+      when(anyRepay()).thenAnswer((_) async => fullyRepaid);
 
-      await notifier().repay('1', 'account-1', 100.0);
+      await notifier().repay(debtWithAmount, 'account-1', 100.0);
 
       expect(state().items.first.rembourse, isTrue);
       expect(state().items.first.remainingAmount, 0.0);
@@ -333,13 +394,13 @@ void main() {
       when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
       await notifier().loadItems();
 
-      when(mockRepo.repay(any, any, any))
+      when(anyRepay())
           .thenThrow(Exception('Server error'));
 
-      final result = await notifier().repay('1', 'account-1', 50.0);
+      final result = await notifier().repay(debt1, 'account-1', 50.0);
 
       expect(result, isFalse);
-      expect(state().error, contains('Erreur lors du remboursement'));
+      expect(state().error, 'Erreur lors du remboursement');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -347,14 +408,14 @@ void main() {
       when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
       await notifier().loadItems();
 
-      when(mockRepo.repay(any, any, any)).thenAnswer(
+      when(anyRepay()).thenAnswer(
         (_) => Future.delayed(
           const Duration(milliseconds: 100),
           () => debt1.copyWith(remainingAmount: 0.0),
         ),
       );
 
-      final future = notifier().repay('1', 'account-1', 50.0);
+      final future = notifier().repay(debt1, 'account-1', 50.0);
       expect(state().mutatingIds, contains('1'));
 
       await future;
@@ -392,7 +453,7 @@ void main() {
       final result = await notifier().snooze('1', '2026-04-01', '14:00');
 
       expect(result, isFalse);
-      expect(state().error, contains('Erreur lors du report'));
+      expect(state().error, 'Erreur lors du report du rappel');
       expect(state().mutatingIds, isEmpty);
     });
 

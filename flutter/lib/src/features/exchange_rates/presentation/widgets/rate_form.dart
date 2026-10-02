@@ -12,7 +12,9 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 
 class RateForm extends ConsumerStatefulWidget {
   final Currency baseCurrency;
@@ -72,16 +74,21 @@ class _RateFormState extends ConsumerState<RateForm> {
     }
   }
 
-  String? _validateRate(String value) {
-    if (value.trim().isEmpty) return 'Le taux est requis';
+  String? _validateRate(String value, AppLocalizations l10n) {
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null || parsed <= 0) return 'Entrez un taux valide (> 0)';
+    if (parsed == null || parsed <= 0) {
+      return l10n.exchangeRatesFormRateInvalid;
+    }
     return null;
   }
 
   Future<void> _onSubmit() async {
     setState(() => _showErrors = true);
-    final rateError = _validateRate(_rateController.text);
+    final l10n = AppLocalizations.of(context)!;
+    final rateError = _validateRate(_rateController.text, l10n);
     if (rateError != null) return;
 
     setState(() => _isSubmitting = true);
@@ -97,7 +104,7 @@ class _RateFormState extends ConsumerState<RateForm> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur lors de l'enregistrement")),
+          SnackBar(content: Text(l10n.exchangeRatesFeedbackSaveError)),
         );
       }
     }
@@ -106,11 +113,18 @@ class _RateFormState extends ConsumerState<RateForm> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final rateError = _showErrors ? _validateRate(_rateController.text) : null;
+    final l10n = AppLocalizations.of(context)!;
+    final rateError =
+        _showErrors ? _validateRate(_rateController.text, l10n) : null;
 
     final targetItems = Currency.values
         .where((c) => c != widget.baseCurrency)
-        .map((c) => SelectPickerItem(id: c.name, label: '${c.symbol} — ${c.name}'))
+        .map(
+          (c) => SelectPickerItem(
+            id: c.name,
+            label: '${c.symbol} — ${currencyName(c, l10n)}',
+          ),
+        )
         .toList();
 
     return Column(
@@ -122,7 +136,7 @@ class _RateFormState extends ConsumerState<RateForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Devise de base',
+              l10n.exchangeRatesFormBaseCurrency,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -140,7 +154,8 @@ class _RateFormState extends ConsumerState<RateForm> {
                 horizontal: AppSpacing.space4,
               ),
               child: Text(
-                '${widget.baseCurrency.symbol} — ${widget.baseCurrency.displayName}',
+                '${widget.baseCurrency.symbol} — '
+                '${currencyName(widget.baseCurrency, l10n)}',
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurfaceVariant,
@@ -153,7 +168,7 @@ class _RateFormState extends ConsumerState<RateForm> {
 
         // Devise cible
         SelectPicker(
-          label: 'Devise cible',
+          label: l10n.exchangeRatesFormTargetCurrency,
           items: targetItems,
           selectedId: _selectedTarget.name,
           onChanged: (id) {
@@ -171,14 +186,16 @@ class _RateFormState extends ConsumerState<RateForm> {
 
         // Taux
         AppFormField(
-          label:
-              'Taux (1 ${widget.baseCurrency.symbol} = X ${_selectedTarget.symbol})',
+          label: l10n.exchangeRatesFormRateWithPair(
+            widget.baseCurrency.symbol,
+            _selectedTarget.symbol,
+          ),
           showError: rateError != null,
           errorMessage: rateError ?? '',
           child: TextField(
             controller: _rateController,
             decoration: InputDecoration.collapsed(
-              hintText: '0.000000',
+              hintText: l10n.exchangeRatesFormRatePlaceholder,
               hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             style: TextStyle(
@@ -204,7 +221,7 @@ class _RateFormState extends ConsumerState<RateForm> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Enregistrer'),
+              : Text(l10n.commonActionSave),
         ),
         const SizedBox(height: AppSpacing.space4),
       ],

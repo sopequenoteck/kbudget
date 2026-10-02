@@ -13,5 +13,6 @@ public record AcceptInviteRequest(
         @NotBlank @Size(min = PasswordPolicy.MIN_LENGTH, max = PasswordPolicy.MAX_LENGTH) String password,
         @NotBlank @Size(max = 100) String displayName,
         @NotNull Currency currency,
-        @NotBlank String timezone
+        @NotBlank String timezone,
+        @Size(max = 50) String defaultAccountName
 ) {}

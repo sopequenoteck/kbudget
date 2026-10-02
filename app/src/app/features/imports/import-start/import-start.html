@@ -1,0 +1,158 @@
+<div class="page-header">
+  <button
+    type="button"
+    class="page-header__back"
+    (click)="goBack()"
+    [attr.aria-label]="'common.action.back' | transloco"
+  >
+    <ng-icon name="phosphorArrowLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">{{ 'imports.page.startTitle' | transloco }}</h1>
+</div>
+
+<p class="start__description">{{ 'imports.page.startDescription' | transloco }}</p>
+
+<input
+  #fileInput
+  type="file"
+  accept=".csv,.txt"
+  class="start__file-input"
+  (change)="onFileSelected($event)"
+/>
+
+<button
+  type="button"
+  class="start__file"
+  [disabled]="detecting() || uploading()"
+  (click)="fileInput.click()"
+>
+  <ng-icon name="phosphorUploadSimple" size="20" />
+  <span class="start__file-text">
+    @if (file(); as selected) {
+      <span class="start__file-name">{{ selected.name }}</span>
+      <span class="start__file-hint">{{ 'imports.action.changeFile' | transloco }}</span>
+    } @else {
+      <span class="start__file-name">{{ 'imports.form.uploadPrompt' | transloco }}</span>
+      <span class="start__file-hint">{{ 'imports.form.uploadHint' | transloco }}</span>
+    }
+  </span>
+</button>
+
+@if (error(); as message) {
+  <p class="start__message" role="alert">
+    <ng-icon name="phosphorXCircle" size="18" />
+    <span>{{ message }}</span>
+  </p>
+}
+
+@if (detecting()) {
+  <div class="list-group start__skeleton" aria-busy="true">
+    <div class="skeleton-item">
+      <div class="skeleton-lines">
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line skeleton-line--subtitle"></div>
+      </div>
+    </div>
+  </div>
+} @else if (showAccounts()) {
+  @if (recognized()) {
+    <p class="start__message start__message--recognized">
+      <ng-icon name="phosphorCheckCircle" size="18" />
+      <span>
+        @if (detection()?.accountSuffix; as suffix) {
+          {{
+            'imports.detail.recognizedWithSuffix'
+              | transloco: { profile: detection()?.profileName, suffix: suffix }
+          }}
+        } @else {
+          {{ 'imports.detail.recognized' | transloco: { profile: detection()?.profileName } }}
+        }
+      </span>
+    </p>
+  } @else {
+    <output class="start__message">
+      <ng-icon name="phosphorWarning" size="18" />
+      <span>{{ 'imports.detail.notRecognized' | transloco }}</span>
+    </output>
+  }
+
+  <h2 class="start__section-title">{{ 'imports.form.account' | transloco }}</h2>
+
+  @if (accounts().length === 0) {
+    <p class="start__hint">{{ 'imports.empty.accounts' | transloco }}</p>
+  } @else {
+    <div
+      class="list-group"
+      role="radiogroup"
+      [attr.aria-label]="'imports.form.account' | transloco"
+    >
+      @for (account of accounts(); track account.id) {
+        <label
+          class="list-row start__account"
+          [class.start__account--selected]="accountId() === account.id"
+        >
+          <input
+            type="radio"
+            class="sr-only"
+            name="import-account"
+            [value]="account.id"
+            [checked]="accountId() === account.id"
+            [disabled]="uploading()"
+            (change)="selectAccount(account.id)"
+          />
+          <span class="list-row__icon">{{ account.icone }}</span>
+          <span class="list-row__content">
+            <span class="list-row__title">{{ account.nom }}</span>
+            @if (account.statementAccountSuffix; as suffix) {
+              <span class="list-row__subtitle">{{
+                'imports.list.accountSuffix' | transloco: { suffix: suffix }
+              }}</span>
+            }
+          </span>
+          @if (accountId() === account.id) {
+            <ng-icon name="phosphorCheck" size="18" class="start__account-check" />
+          }
+        </label>
+      }
+    </div>
+    @if (accountId() === null) {
+      <p class="start__hint">{{ 'imports.form.accountRequired' | transloco }}</p>
+    }
+  }
+
+  @if (conflict(); as pending) {
+    <p class="start__message" role="alert">
+      <ng-icon name="phosphorXCircle" size="18" />
+      <span>
+        {{ 'imports.feedback.draftExists' | transloco }}
+        @if (pending.draftId) {
+          <a class="start__link" [routerLink]="['/transactions/import/review', pending.draftId]">
+            {{ 'imports.action.resumeDraft' | transloco }}
+          </a>
+        }
+      </span>
+    </p>
+  }
+
+  <div class="start__actions">
+    @if (recognized()) {
+      <button
+        type="button"
+        class="btn-primary start__submit"
+        [disabled]="!canSubmit()"
+        (click)="analyse()"
+      >
+        {{ (uploading() ? 'imports.feedback.analysing' : 'imports.action.analyse') | transloco }}
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="btn-primary start__submit"
+        [disabled]="accountId() === null"
+        (click)="openMapping()"
+      >
+        {{ 'imports.action.configureColumns' | transloco }}
+      </button>
+    }
+  </div>
+}

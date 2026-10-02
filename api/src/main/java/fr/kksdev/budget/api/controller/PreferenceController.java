@@ -36,4 +36,12 @@ public class PreferenceController {
         UUID userId = (UUID) authentication.getPrincipal();
         return ResponseEntity.ok(preferenceService.updatePreferences(request, userId));
     }
+
+    @Operation(summary = "Revenir à la langue automatique (suivre le navigateur) pour l'utilisateur connecté")
+    @DeleteMapping("/language")
+    public ResponseEntity<Void> resetLanguage(Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        preferenceService.resetLanguage(userId);
+        return ResponseEntity.noContent().build();
+    }
 }

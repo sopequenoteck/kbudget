@@ -6,6 +6,9 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
+import 'package:k_budget/src/localization/app_localizations.dart';
+
+import '../../../../helpers/display_locale.dart';
 
 void main() {
   Widget buildApp({DataMode initialMode = DataMode.local, String? serverUrl}) {
@@ -21,12 +24,16 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        displayLocaleOverride(),
         dataSettingsNotifierProvider.overrideWith(() {
           final notifier = DataSettingsNotifier();
           return notifier;
         }),
       ],
       child: MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
         routerConfig: router,
         theme: app_theme.AppTheme.light,
       ),
@@ -140,6 +147,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Enregistrer'), findsOneWidget);
+    });
+
+    testWidgets('should_confirmSave_when_validUrlSaved', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'https://example.com/api');
+      await tester.tap(find.text('Enregistrer'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('URL enregistrée'), findsOneWidget);
     });
   });
 }

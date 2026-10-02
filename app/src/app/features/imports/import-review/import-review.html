@@ -1,0 +1,626 @@
+<div class="page-header">
+  <button
+    type="button"
+    class="page-header__back"
+    (click)="goToTransactions()"
+    [attr.aria-label]="'common.action.back' | transloco"
+  >
+    <ng-icon name="phosphorArrowLeft" size="20" />
+  </button>
+  <h1 class="page-header__title">{{ 'imports.page.reviewTitle' | transloco }}</h1>
+</div>
+
+<!-- En-tete repliable d'un groupe d'operations deja decidees -->
+<ng-template #groupHeader let-id="id" let-titleKey="titleKey" let-count="count">
+  <button
+    type="button"
+    class="group-label"
+    [attr.aria-expanded]="isExpanded(id)"
+    (click)="toggleGroup(id)"
+  >
+    <span>{{ titleKey | transloco }}</span>
+    <span class="group-label__count">{{ count }}</span>
+    <span class="group-label__chevron" [class.group-label__chevron--collapsed]="!isExpanded(id)">
+      <ng-icon name="phosphorCaretDown" size="14" />
+    </span>
+  </button>
+</ng-template>
+
+@if (loading()) {
+  <div class="skeleton-hero" aria-busy="true">
+    <div class="skeleton-bar skeleton-bar--xs"></div>
+    <div class="skeleton-bar skeleton-bar--lg"></div>
+    <div class="skeleton-bar skeleton-bar--sm"></div>
+  </div>
+  <div class="list-group" aria-busy="true">
+    @for (placeholder of [1, 2, 3]; track placeholder) {
+      <div class="skeleton-item">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--title"></div>
+          <div class="skeleton-line skeleton-line--subtitle"></div>
+        </div>
+        <div class="skeleton-lines skeleton-lines--right">
+          <div class="skeleton-line skeleton-line--value"></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (loadFailed() || !draft()) {
+  <app-empty-state
+    icon="phosphorWarningCircle"
+    [message]="'imports.feedback.loadError' | transloco"
+    [ctaLabel]="'common.action.retry' | transloco"
+    (ctaClick)="load()"
+  />
+} @else {
+  @let current = draft()!;
+
+  <div class="hero">
+    <span class="hero__amount-label">
+      @if (accountSuffix(); as suffix) {
+        {{
+          'imports.summary.accountWithSuffix'
+            | transloco: { name: current.accountName, suffix: suffix }
+        }}
+      } @else {
+        {{ current.accountName }}
+      }
+    </span>
+    @if (current.statementBalance !== null && current.statementBalanceDate) {
+      <div class="hero__amount">
+        <span class="hero__amount-value" data-testid="bank-balance">
+          {{ current.statementBalance | amount: null : currency() }}
+        </span>
+        <span class="hero__converted">
+          {{
+            'imports.summary.bankBalanceAt'
+              | transloco: { date: fullDate(current.statementBalanceDate) }
+          }}
+        </span>
+      </div>
+    }
+    @if (!result()) {
+      <div class="hero__meta">
+        <div class="hero__meta-line" data-testid="meta-new">
+          <ng-icon name="phosphorReceipt" size="14" />
+          <span>{{
+            'imports.summary.newTransactions' | transloco: { count: model().newCount }
+          }}</span>
+        </div>
+        @if (model().alreadyImported.length > 0) {
+          <div class="hero__meta-line" data-testid="meta-already-imported">
+            <ng-icon name="phosphorCheckCircle" size="14" />
+            <span>{{
+              'imports.summary.alreadyImported'
+                | transloco: { count: model().alreadyImported.length }
+            }}</span>
+          </div>
+        }
+        @if (model().matched.length > 0) {
+          <div class="hero__meta-line" data-testid="meta-matched">
+            <ng-icon name="phosphorLinkSimple" size="14" />
+            <span>{{
+              'imports.summary.matched' | transloco: { count: model().matched.length }
+            }}</span>
+          </div>
+        }
+        @if (autoCategorisedCount() > 0) {
+          <div class="hero__meta-line" data-testid="meta-auto">
+            <ng-icon name="phosphorTag" size="14" />
+            <span>{{
+              'imports.summary.autoCategorised' | transloco: { count: autoCategorisedCount() }
+            }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (result(); as summary) {
+    <app-import-result [result]="summary" [currency]="currency()" (done)="goToTransactions()" />
+  } @else {
+    @if (current.proposedOpeningBalance !== null) {
+      <label class="bsheet__toggle-row review__opening">
+        <span class="review__opening-text">
+          <span class="bsheet__toggle-text">
+            {{
+              'imports.form.alignOpeningBalance'
+                | transloco
+                  : { amount: (current.proposedOpeningBalance | amount: null : currency()) }
+            }}
+          </span>
+          <span class="review__hint">{{ 'imports.form.alignOpeningBalanceHint' | transloco }}</span>
+        </span>
+        <input
+          type="checkbox"
+          class="bsheet__toggle-input"
+          data-testid="align-opening-balance"
+          [checked]="alignOpeningBalance()"
+          (change)="alignOpeningBalance.set($any($event.target).checked)"
+        />
+        <span class="bsheet__toggle-track"></span>
+      </label>
+    }
+
+    <!-- a. A trancher -->
+    @if (toDecideCount() > 0) {
+      <section class="review__section" data-testid="section-to-decide">
+        <div class="section-header">
+          <h2 class="section-header__title">{{ 'imports.list.toDecideTitle' | transloco }}</h2>
+          <span class="section-header__count">{{ toDecideCount() }}</span>
+        </div>
+        <div class="list-group">
+          @for (line of model().toDecide; track line.id) {
+            <div class="review__item" data-testid="to-decide-line">
+              <div class="review__line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+                </span>
+                <span
+                  class="list-row__amount"
+                  [class.review__amount--income]="line.transactionType === 'RECETTE'"
+                  [class.review__amount--expense]="line.transactionType === 'DEPENSE'"
+                >
+                  {{ line.amount | amount: line.transactionType : currency() }}
+                </span>
+              </div>
+              <p class="review__prompt">{{ 'imports.list.chooseMatch' | transloco }}</p>
+              <div class="review__options">
+                @for (candidate of line.matchCandidates; track candidate.id) {
+                  <button
+                    type="button"
+                    class="review__option"
+                    data-testid="match-candidate"
+                    [disabled]="busy()"
+                    (click)="chooseCandidate(line, candidate.id)"
+                  >
+                    <span class="review__option-main">
+                      <span class="review__option-title">{{ candidate.libelle }}</span>
+                      <span class="review__option-subtitle">{{ shortDate(candidate.date) }}</span>
+                    </span>
+                    <span class="review__option-amount">{{
+                      candidate.montant | amount: candidate.type : currency()
+                    }}</span>
+                  </button>
+                }
+              </div>
+              <div class="review__actions">
+                <button
+                  type="button"
+                  class="review__action"
+                  data-testid="create-new"
+                  [disabled]="busy()"
+                  (click)="createNew(line)"
+                >
+                  {{ 'imports.action.createNew' | transloco }}
+                </button>
+                <button
+                  type="button"
+                  class="review__action review__action--muted"
+                  data-testid="skip-line"
+                  [disabled]="busy()"
+                  (click)="skip(line)"
+                >
+                  {{ 'imports.action.skipLine' | transloco }}
+                </button>
+              </div>
+            </div>
+          }
+          @for (line of model().probableDuplicates; track line.id) {
+            <div class="review__item" data-testid="probable-duplicate-line">
+              <div class="review__line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+                </span>
+                <span
+                  class="list-row__amount"
+                  [class.review__amount--income]="line.transactionType === 'RECETTE'"
+                  [class.review__amount--expense]="line.transactionType === 'DEPENSE'"
+                >
+                  {{ line.amount | amount: line.transactionType : currency() }}
+                </span>
+              </div>
+              <p class="review__prompt">{{ 'imports.list.probableDuplicate' | transloco }}</p>
+              <div class="review__actions">
+                <button
+                  type="button"
+                  class="review__action"
+                  data-testid="import-anyway"
+                  [disabled]="busy()"
+                  (click)="makeReady(line)"
+                >
+                  {{ 'imports.action.forceImport' | transloco }}
+                </button>
+                <button
+                  type="button"
+                  class="review__action review__action--muted"
+                  data-testid="skip-line"
+                  [disabled]="busy()"
+                  (click)="skip(line)"
+                >
+                  {{ 'imports.action.skipLine' | transloco }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- b. Erreurs de lecture -->
+    @if (unreadableCount() > 0) {
+      <section class="review__section" data-testid="section-unreadable">
+        <div class="section-header">
+          <h2 class="section-header__title">{{ 'imports.list.unreadableTitle' | transloco }}</h2>
+          <span class="section-header__count">{{ unreadableCount() }}</span>
+        </div>
+        <div class="list-group">
+          @for (line of model().unreadable; track line.id) {
+            <div class="review__item" data-testid="unreadable-line">
+              <div class="review__line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.rawLabel }}</span>
+                  <span class="list-row__subtitle">{{ line.statusMessage }}</span>
+                </span>
+              </div>
+              <div class="review__actions">
+                <button
+                  type="button"
+                  class="review__action review__action--muted"
+                  data-testid="skip-line"
+                  [disabled]="busy()"
+                  (click)="skip(line)"
+                >
+                  {{ 'imports.action.skipLine' | transloco }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- c. Sans categorie, regroupees par commercant -->
+    @if (model().uncategorised.length > 0) {
+      <section class="review__section" data-testid="section-uncategorised">
+        <div class="section-header">
+          <h2 class="section-header__title">{{ 'imports.list.uncategorisedTitle' | transloco }}</h2>
+          <span class="section-header__count">{{ uncategorisedLineCount() }}</span>
+        </div>
+        <p class="review__hint">{{ 'imports.list.uncategorisedHint' | transloco }}</p>
+        <div class="list-group">
+          @for (group of model().uncategorised; track group.key) {
+            <button
+              type="button"
+              class="list-row"
+              data-testid="uncategorised-group"
+              [disabled]="busy()"
+              (click)="openCategoryForGroup(group)"
+            >
+              <span class="list-row__icon"><ng-icon name="phosphorTag" size="18" /></span>
+              <span class="list-row__content">
+                <span class="list-row__title">{{ group.label }}</span>
+                <span class="list-row__subtitle">{{
+                  'imports.list.groupCount' | transloco: { count: group.lines.length }
+                }}</span>
+              </span>
+              <span class="list-row__right">
+                <span
+                  class="list-row__amount"
+                  [class.review__amount--income]="group.transactionType === 'RECETTE'"
+                  [class.review__amount--expense]="group.transactionType === 'DEPENSE'"
+                >
+                  {{ group.total | amount: group.transactionType : currency() }}
+                </span>
+                <span class="review__choose">{{
+                  'imports.action.chooseCategory' | transloco
+                }}</span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @if (nothingToResolve()) {
+      <app-empty-state
+        icon="phosphorSealCheck"
+        [message]="'imports.empty.resolved' | transloco"
+        [hint]="'imports.empty.resolvedHint' | transloco"
+      />
+    }
+
+    <!-- Groupes repliables : ce que l'import a deja decide -->
+    @if (model().matched.length > 0) {
+      <section class="review__group" data-testid="group-matched">
+        <ng-container
+          *ngTemplateOutlet="
+            groupHeader;
+            context: {
+              id: 'matched',
+              titleKey: 'imports.list.matchedTitle',
+              count: model().matched.length,
+            }
+          "
+        />
+        @if (isExpanded('matched')) {
+          <div class="list-group">
+            @for (line of model().matched; track line.id) {
+              <div class="list-row review__row" data-testid="matched-line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">
+                    @if (line.matchedTransaction; as existing) {
+                      {{
+                        'imports.list.matchedWith'
+                          | transloco: { label: existing.libelle, date: shortDate(existing.date) }
+                      }}
+                    } @else {
+                      {{ 'imports.list.matchedMissing' | transloco }}
+                    }
+                  </span>
+                </span>
+                <span class="list-row__right">
+                  <span class="list-row__amount">{{
+                    line.amount | amount: line.transactionType : currency()
+                  }}</span>
+                  <button
+                    type="button"
+                    class="review__link"
+                    data-testid="undo-match"
+                    [disabled]="busy()"
+                    (click)="undoMatch(line)"
+                  >
+                    {{ 'imports.action.undoMatch' | transloco }}
+                  </button>
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (model().autoCategorised.length > 0) {
+      <section class="review__group" data-testid="group-auto">
+        <ng-container
+          *ngTemplateOutlet="
+            groupHeader;
+            context: {
+              id: 'auto',
+              titleKey: 'imports.list.autoCategorisedTitle',
+              count: model().autoCategorised.length,
+            }
+          "
+        />
+        @if (isExpanded('auto')) {
+          <div class="list-group">
+            @for (line of model().autoCategorised; track line.id) {
+              <button
+                type="button"
+                class="list-row"
+                data-testid="auto-line"
+                [disabled]="busy()"
+                (click)="openCategoryForLine(line)"
+              >
+                <span
+                  class="list-row__icon"
+                  [style.background-color]="
+                    categoryOf(line) ? categoryOf(line)!.couleur + '26' : null
+                  "
+                  >{{ categoryOf(line)?.icone }}</span
+                >
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">
+                    {{ line.categoryName | categoryName: line.categorySystemKey }}
+                    ·
+                    {{
+                      (line.categorySource === 'RULE'
+                        ? 'imports.value.categorySourceRule'
+                        : 'imports.value.categorySourceHistory'
+                      ) | transloco
+                    }}
+                  </span>
+                </span>
+                <span class="list-row__right">
+                  <span class="list-row__amount">{{
+                    line.amount | amount: line.transactionType : currency()
+                  }}</span>
+                  <span class="list-row__converted">{{ shortDate(line.date) }}</span>
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (model().userCategorised.length > 0) {
+      <section class="review__group" data-testid="group-user">
+        <ng-container
+          *ngTemplateOutlet="
+            groupHeader;
+            context: {
+              id: 'user',
+              titleKey: 'imports.list.userCategorisedTitle',
+              count: model().userCategorised.length,
+            }
+          "
+        />
+        @if (isExpanded('user')) {
+          <div class="list-group">
+            @for (line of model().userCategorised; track line.id) {
+              <button
+                type="button"
+                class="list-row"
+                data-testid="user-line"
+                [disabled]="busy()"
+                (click)="openCategoryForLine(line)"
+              >
+                <span
+                  class="list-row__icon"
+                  [style.background-color]="
+                    categoryOf(line) ? categoryOf(line)!.couleur + '26' : null
+                  "
+                  >{{ categoryOf(line)?.icone }}</span
+                >
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">{{
+                    line.categoryName | categoryName: line.categorySystemKey
+                  }}</span>
+                </span>
+                <span class="list-row__right">
+                  <span class="list-row__amount">{{
+                    line.amount | amount: line.transactionType : currency()
+                  }}</span>
+                  <span class="list-row__converted">{{ shortDate(line.date) }}</span>
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (model().alreadyImported.length > 0) {
+      <section class="review__group" data-testid="group-imported">
+        <ng-container
+          *ngTemplateOutlet="
+            groupHeader;
+            context: {
+              id: 'imported',
+              titleKey: 'imports.list.alreadyImportedTitle',
+              count: model().alreadyImported.length,
+            }
+          "
+        />
+        @if (isExpanded('imported')) {
+          <div class="list-group">
+            @for (line of model().alreadyImported; track line.id) {
+              <div class="list-row review__row" data-testid="imported-line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">{{ shortDate(line.date) }}</span>
+                </span>
+                <span class="list-row__right">
+                  <span class="list-row__amount">{{
+                    line.amount | amount: line.transactionType : currency()
+                  }}</span>
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (model().skipped.length > 0) {
+      <section class="review__group" data-testid="group-skipped">
+        <ng-container
+          *ngTemplateOutlet="
+            groupHeader;
+            context: {
+              id: 'skipped',
+              titleKey: 'imports.list.skippedTitle',
+              count: model().skipped.length,
+            }
+          "
+        />
+        @if (isExpanded('skipped')) {
+          <div class="list-group">
+            @for (line of model().skipped; track line.id) {
+              <div class="list-row review__row" data-testid="skipped-line">
+                <span class="list-row__content">
+                  <span class="list-row__title">{{ line.cleanLabel }}</span>
+                  <span class="list-row__subtitle">{{
+                    line.statusMessage ?? shortDate(line.date)
+                  }}</span>
+                </span>
+                <span class="list-row__right">
+                  @if (canRestore(line)) {
+                    <span class="list-row__amount">{{
+                      line.amount | amount: line.transactionType : currency()
+                    }}</span>
+                    <button
+                      type="button"
+                      class="review__link"
+                      data-testid="restore-line"
+                      [disabled]="busy()"
+                      (click)="makeReady(line)"
+                    >
+                      {{ 'imports.action.restore' | transloco }}
+                    </button>
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Barre d'action -->
+    <div class="review__bar">
+      @if (blockingCount() > 0) {
+        <p class="review__bar-text" data-testid="blocked-message">
+          {{
+            'imports.feedback.blocked'
+              | transloco
+                : { kind: blockedKind(), toDecide: toDecideCount(), unreadable: unreadableCount() }
+          }}
+        </p>
+      }
+      <button
+        type="button"
+        class="btn-primary review__confirm"
+        data-testid="confirm-import"
+        [disabled]="!canConfirm()"
+        (click)="confirm()"
+      >
+        {{ confirmLabelKey() | transloco: { count: model().newCount } }}
+      </button>
+    </div>
+  }
+}
+
+<!-- Choix de categorie : une feuille, sans second niveau -->
+<app-modal
+  [isOpen]="categoryTarget() !== null"
+  [title]="categoryTarget()?.title ?? ''"
+  [hideHeader]="true"
+  (closed)="closeCategorySheet()"
+>
+  @if (categoryTarget(); as target) {
+    <div class="bsheet">
+      <div class="bsheet__top">
+        <span class="bsheet__handle"></span>
+        <span class="bsheet__top-title">{{ target.title }}</span>
+      </div>
+      <div class="bsheet__expand">
+        <app-category-select
+          [categories]="categories()"
+          (selected)="onCategorySelected($event)"
+          (created)="onCategoryCreated($event)"
+          (isCreating)="categoryCreating.set($event)"
+        />
+      </div>
+      <div class="bsheet__bottom-row">
+        <div class="bsheet__bottom-left">
+          <button
+            type="button"
+            class="bsheet__action-pill bsheet__action-pill--cancel"
+            [disabled]="categoryCreating()"
+            (click)="closeCategorySheet()"
+          >
+            {{ 'common.action.cancel' | transloco }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</app-modal>

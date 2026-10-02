@@ -4,9 +4,9 @@
   class="dialog-panel"
   (click)="$event.stopPropagation()"
   role="dialog"
-  aria-label="Reporter le rappel"
+  [attr.aria-label]="'debts.dialog.snoozeTitle' | transloco"
 >
-  <h3>Reporter le rappel</h3>
+  <h3>{{ 'debts.dialog.snoozeTitle' | transloco }}</h3>
 
   @if (errorMessage()) {
     <div class="form-error-banner">{{ errorMessage() }}</div>
@@ -14,7 +14,7 @@
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <app-form-field
-      label="Date du rappel"
+      [label]="'debts.form.reminderDate' | transloco"
       fieldId="reminderDate"
       [showError]="isInvalid('reminderDate')"
       [errorMessage]="getDateError()"
@@ -23,18 +23,18 @@
     </app-form-field>
 
     <app-form-field
-      label="Heure du rappel"
+      [label]="'debts.form.reminderTime' | transloco"
       fieldId="reminderTime"
       [showError]="isInvalid('reminderTime')"
-      [errorMessage]="'L\'heure est requise'"
+      [errorMessage]="'debts.dialog.reminderTimeRequired' | transloco"
     >
       <input id="reminderTime" type="time" formControlName="reminderTime" />
     </app-form-field>
 
     <div class="dialog-actions">
-      <button type="button" class="btn-outline" (click)="onCancel()">Annuler</button>
+      <button type="button" class="btn-outline" (click)="onCancel()">{{ 'common.action.cancel' | transloco }}</button>
       <button type="submit" class="btn-primary" [disabled]="submitting() || form.invalid">
-        {{ submitting() ? 'Report...' : 'Reporter' }}
+        {{ submitting() ? ('debts.dialog.snoozing' | transloco) : ('debts.action.snooze' | transloco) }}
       </button>
     </div>
   </form>

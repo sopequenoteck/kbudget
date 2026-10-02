@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -14,9 +15,12 @@ import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/confirm_delete_dialog.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/utils/decimal_input_formatter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class BudgetForm extends ConsumerStatefulWidget {
@@ -88,16 +92,22 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
   String? _validateMontant() {
     final value = _montantController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    if (value.isEmpty) return l10n.validationRequired;
+    if (value.isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value);
-    if (parsed == null) return l10n.validationRequired;
-    if (parsed <= 0) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationRequired;
+    }
+    if (parsed <= 0) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 
   String? _validateCategory() {
     if (_selectedCategoryId == null) {
-      return AppLocalizations.of(context)!.validationRequired;
+      return AppLocalizations.of(context)!.commonValidationRequired;
     }
     return null;
   }
@@ -124,6 +134,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       seuilNotification: _seuilNotification,
       actif: _actif,
       categoryNom: widget.budget?.categoryNom,
+      categorySystemKey: widget.budget?.categorySystemKey,
       categoryIcone: widget.budget?.categoryIcone,
       categoryCouleur: widget.budget?.categoryCouleur,
     );
@@ -134,7 +145,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+        ),
       );
     }
   }
@@ -143,8 +156,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDeleteConfirmDialog(
       context: context,
-      title: l10n.deleteBudgetTitle,
-      message: l10n.deleteBudgetMessage,
+      title: l10n.budgetsDialogDeleteTitle,
+      message: l10n.budgetsDialogDeleteMessage,
     );
 
     if (confirmed == true && widget.onDeleted != null) {
@@ -155,7 +168,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         if (!mounted) return;
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorGeneric)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.errorsClientGeneric),
+          ),
         );
       }
     }
@@ -182,10 +197,11 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             .where((c) => !existingBudgetCategoryIds.contains(c.id))
             .toList();
 
+    final l10n = AppLocalizations.of(context)!;
     final categoryItems = availableCategories
         .map((c) => SelectPickerItem(
               id: c.id,
-              label: c.nom,
+              label: categoryDisplayName(c.nom, c.systemKey, l10n),
               icon: c.icone,
               color: parseHexColor(c.couleur),
             ))
@@ -194,14 +210,23 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     final currencyItems = currencies
         .map((c) => SelectPickerItem(
               id: c.name,
-              label: '${c.displayName} (${c.symbol})',
+              label: '${currencyName(c, l10n)} (${c.symbol})',
             ))
         .toList();
 
     final frequenceItems = [
-      SelectPickerItem(id: Frequency.hebdomadaire.name, label: 'Hebdomadaire'),
-      SelectPickerItem(id: Frequency.mensuel.name, label: 'Mensuel'),
-      SelectPickerItem(id: Frequency.annuel.name, label: 'Annuel'),
+      SelectPickerItem(
+        id: Frequency.hebdomadaire.name,
+        label: l10n.budgetsValueWeekly,
+      ),
+      SelectPickerItem(
+        id: Frequency.mensuel.name,
+        label: l10n.budgetsValueMonthly,
+      ),
+      SelectPickerItem(
+        id: Frequency.annuel.name,
+        label: l10n.budgetsValueYearly,
+      ),
     ];
 
     return Column(
@@ -211,7 +236,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         // Catégorie
         if (availableCategories.isEmpty && !_isEditMode)
           _buildEmptyMessage(
-            AppLocalizations.of(context)!.allCategoriesHaveBudgets,
+            AppLocalizations.of(context)!.budgetsEmptyAllCategoriesBudgeted,
             colorScheme,
           )
         else
@@ -225,7 +250,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
             Expanded(
               flex: 3,
               child: AppFormField(
-                label: AppLocalizations.of(context)!.amount,
+                label: AppLocalizations.of(context)!.budgetsFormAmount,
                 showError: _showErrors && _validateMontant() != null,
                 errorMessage: _validateMontant() ?? '',
                 child: TextField(
@@ -256,8 +281,9 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                     });
                   }
                 },
-                label: AppLocalizations.of(context)!.currency,
-                placeholder: AppLocalizations.of(context)!.currency,
+                label: AppLocalizations.of(context)!.budgetsFormCurrencyAria,
+                placeholder:
+                    AppLocalizations.of(context)!.budgetsFormCurrencyAria,
               ),
             ),
           ],
@@ -275,8 +301,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
               });
             }
           },
-          label: AppLocalizations.of(context)!.frequency,
-          placeholder: AppLocalizations.of(context)!.frequency,
+          label: AppLocalizations.of(context)!.budgetsFormFrequencyAria,
+          placeholder: AppLocalizations.of(context)!.budgetsFormFrequencyAria,
         ),
         const SizedBox(height: AppSpacing.space4),
 
@@ -287,7 +313,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         // Toggle actif (mode édition uniquement)
         if (_isEditMode) ...[
           SwitchListTile(
-            title: Text(AppLocalizations.of(context)!.budgetActive),
+            title: Text(AppLocalizations.of(context)!.commonValueActive),
             value: _actif,
             onChanged: (v) => setState(() => _actif = v),
             contentPadding: EdgeInsets.zero,
@@ -305,12 +331,12 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                 onPressed: _isSubmitting ? null : _onDelete,
                 icon: const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
                 color: colorScheme.error,
-                tooltip: AppLocalizations.of(context)!.deleteBudgetTitle,
+                tooltip: AppLocalizations.of(context)!.budgetsDialogDeleteTitle,
               ),
             const Spacer(),
             OutlinedButton(
               onPressed: _isSubmitting ? null : widget.onCancelled,
-              child: Text(AppLocalizations.of(context)!.cancel),
+              child: Text(AppLocalizations.of(context)!.commonActionCancel),
             ),
             const SizedBox(width: AppSpacing.space3),
             FilledButton(
@@ -326,8 +352,8 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                     )
                   : Text(
                       _isEditMode
-                          ? AppLocalizations.of(context)!.edit
-                          : AppLocalizations.of(context)!.save,
+                          ? AppLocalizations.of(context)!.commonActionEdit
+                          : AppLocalizations.of(context)!.commonActionSave,
                     ),
             ),
           ],
@@ -344,7 +370,11 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
     if (_isEditMode) {
       // In edit mode, category is locked — show a read-only field
       final budget = widget.budget!;
-      final label = budget.categoryNom ?? AppLocalizations.of(context)!.category;
+      final l10n = AppLocalizations.of(context)!;
+      final categoryNom = budget.categoryNom;
+      final label = categoryNom == null
+          ? l10n.budgetsFormCategory
+          : categoryDisplayName(categoryNom, budget.categorySystemKey, l10n);
       final icon = budget.categoryIcone;
       final color = parseHexColor(budget.categoryCouleur);
 
@@ -353,7 +383,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            AppLocalizations.of(context)!.category,
+            AppLocalizations.of(context)!.budgetsFormCategory,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.medium,
@@ -422,13 +452,18 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
         setState(() => _selectedCategoryId = id);
         if (_showErrors) setState(() {});
       },
-      label: AppLocalizations.of(context)!.category,
-      placeholder: AppLocalizations.of(context)!.selectCategory,
+      label: AppLocalizations.of(context)!.budgetsFormCategory,
+      placeholder: AppLocalizations.of(context)!.budgetsFormCategoryPlaceholder,
       validator: _showErrors
           ? (_) => _validateCategory()
           : null,
     );
   }
+
+  /// [value] en pourcentage, au format de la locale d'affichage.
+  String _percent(int value) => NumberFormat.percentPattern(
+        intlLocaleFor(Localizations.localeOf(context)),
+      ).format(value / 100);
 
   Widget _buildSeuilSlider(ColorScheme colorScheme) {
     return Column(
@@ -439,7 +474,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              AppLocalizations.of(context)!.alertThreshold,
+              AppLocalizations.of(context)!.budgetsFormThresholdAria,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -447,7 +482,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
               ),
             ),
             Text(
-              '$_seuilNotification%',
+              _percent(_seuilNotification),
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.semiBold,
@@ -462,7 +497,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
           min: 50,
           max: 100,
           divisions: 10,
-          label: '$_seuilNotification%',
+          label: _percent(_seuilNotification),
           onChanged: (value) {
             setState(() => _seuilNotification = value.round());
           },
@@ -471,14 +506,14 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '50%',
+              _percent(50),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
             Text(
-              '100%',
+              _percent(100),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 color: colorScheme.onSurfaceVariant,

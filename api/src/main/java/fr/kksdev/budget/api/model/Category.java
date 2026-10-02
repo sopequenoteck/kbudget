@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.model;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -35,6 +36,10 @@ public class Category {
     @Column(name = "is_system", nullable = false)
     @Builder.Default
     private Boolean isSystem = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_key")
+    private SystemCategoryKey systemKey;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

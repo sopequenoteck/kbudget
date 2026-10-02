@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:mockito/mockito.dart';
 
@@ -26,6 +27,9 @@ void main() {
         ...overrides,
       ],
       child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('fr'),
         home: OnboardingScreen(),
       ),
     );
@@ -51,7 +55,12 @@ void main() {
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
         ...overrides,
       ],
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
+      ),
     );
   }
 
@@ -139,6 +148,41 @@ void main() {
       expect(find.text('Configuration serveur'), findsOneWidget);
       expect(find.text('URL du serveur'), findsOneWidget);
     });
+
+    testWidgets(
+      'should_showUrlRequiredError_when_serverUrlEmptyOnCheck',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildApp());
+
+        await tester.tap(find.text('Mode serveur'));
+        await tester.pump();
+        await tester.tap(find.text('Confirmer'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Vérifier la connexion'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('L\'URL est requise'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showUrlInvalidError_when_serverUrlMalformed',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildApp());
+
+        await tester.tap(find.text('Mode serveur'));
+        await tester.pump();
+        await tester.tap(find.text('Confirmer'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextFormField), 'not-a-url');
+        await tester.tap(find.text('Vérifier la connexion'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('URL invalide'), findsOneWidget);
+      },
+    );
 
     testWidgets('should_show_check_icon_when_mode_selected',
         (WidgetTester tester) async {

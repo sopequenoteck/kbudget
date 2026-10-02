@@ -188,8 +188,10 @@ contrat passe par un nouvel endpoint.
 L'agrégation étant écartée, le besoin « ne pas saisir à la main » trouve sa réponse dans
 l'import de relevés.
 
-État réel : `ImportProfileRegistry` ne contient **qu'un seul profil** — Société Générale —
-codé en dur en Java. Les 28 autres banques ont un logo, pas de profil. Pour en ajouter une,
+État réel au 2026-08-26 : `ImportProfileRegistry` ne contient **qu'un seul profil** — Société Générale —
+codé en dur en Java. *Depuis KKS-440, ce profil est un fichier de données
+(`api/src/main/resources/import-profiles/sg.yaml`) ; le répertoire externe monté en volume
+reste à faire (KKS-329).* Les 28 autres banques ont un logo, pas de profil. Pour en ajouter une,
 il faut aujourd'hui écrire du Java, compiler, publier une release. Seul le mainteneur peut
 le faire, et avec 28 banques, cela n'arrivera pas.
 

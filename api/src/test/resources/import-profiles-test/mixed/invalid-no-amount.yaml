@@ -1,0 +1,12 @@
+formatVersion: 1
+bankCode: "NOAMOUNT"
+name: "No Amount Bank"
+separator: ";"
+encoding: "UTF-8"
+dateFormat: "dd/MM/yyyy"
+dateColumn: "Date"
+debitColumn: "Debit"
+labelColumn: "Label"
+decimalSeparator: ","
+signature:
+  headerColumns: ["Date", "Label"]

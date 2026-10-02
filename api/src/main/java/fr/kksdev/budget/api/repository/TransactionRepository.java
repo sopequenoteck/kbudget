@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.repository;
 
+import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findBySubscriptionIdAndUserIdOrderByDateDesc(UUID subscriptionId, UUID userId);
 
+    /** Payments of a subscription dated within {@code from} to {@code to}, both included, oldest first (KKS-385). */
+    List<Transaction> findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
+            UUID subscriptionId, UUID userId, LocalDate from, LocalDate to);
+
     @Query("SELECT COALESCE(SUM(t.montant), 0) FROM Transaction t WHERE t.subscription.id = :subscriptionId AND t.user.id = :userId")
     BigDecimal sumBySubscriptionIdAndUserId(@Param("subscriptionId") UUID subscriptionId, @Param("userId") UUID userId);
 
@@ -35,6 +40,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             "WHEN t.type = 'AJUSTEMENT' THEN t.montant ELSE -t.montant END), 0) " +
             "FROM transactions t WHERE t.account_id = :accountId", nativeQuery = true)
     BigDecimal calculateBalanceByAccountId(@Param("accountId") UUID accountId);
+
+    /** Same sum as {@link #calculateBalanceByAccountId}, limited to transactions dated up to {@code date} (KKS-384). */
+    @Query(value = "SELECT COALESCE(SUM(CASE WHEN t.type = 'RECETTE' THEN t.montant " +
+            "WHEN t.type = 'AJUSTEMENT' THEN t.montant ELSE -t.montant END), 0) " +
+            "FROM transactions t WHERE t.account_id = :accountId AND t.date <= :date", nativeQuery = true)
+    BigDecimal calculateBalanceByAccountIdUntil(@Param("accountId") UUID accountId, @Param("date") LocalDate date);
 
     List<Transaction> findByTransferId(UUID transferId);
 
@@ -76,15 +87,37 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByUserIdAndAccountIdAndIdIn(UUID userId, UUID accountId, Collection<UUID> ids);
 
+    List<Transaction> findByUserIdAndIdIn(UUID userId, Collection<UUID> ids);
+
+    List<Transaction> findByUserIdAndTypeOrderByDateAscIdAsc(UUID userId, TransactionType type);
+
+    /**
+     * Transactions of the user that the history cleanup may merge, oldest first (KKS-387): neither an
+     * adjustment, nor a recurring template, nor one leg of a transfer.
+     */
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.category LEFT JOIN FETCH t.account " +
+            "LEFT JOIN FETCH t.subscription " +
+            "WHERE t.user.id = :userId AND t.type <> :excludedType AND t.isRecurring = false " +
+            "AND t.transferId IS NULL ORDER BY t.date ASC, t.id ASC")
+    List<Transaction> findMergeableByUserId(@Param("userId") UUID userId,
+                                            @Param("excludedType") TransactionType excludedType);
+
+    /** Transactions of the user with no category, oldest first, recurring templates and {@code excludedType} left out (KKS-387). */
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.account " +
+            "WHERE t.user.id = :userId AND t.category IS NULL AND t.type <> :excludedType " +
+            "AND t.isRecurring = false ORDER BY t.date ASC, t.id ASC")
+    List<Transaction> findUncategorizedByUserId(@Param("userId") UUID userId,
+                                                @Param("excludedType") TransactionType excludedType);
+
     List<Transaction> findByUserIdAndCategoryIsNotNullAndIsRecurringFalse(UUID userId);
 
     boolean existsByUserIdAndDateBetween(UUID userId, LocalDate from, LocalDate to);
 
-    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt " +
+    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, c.is_system, COUNT(t.id) as cnt, c.system_key " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "WHERE t.user_id = :userId AND t.is_recurring = false " +
             "AND t.date >= :since AND t.category_id IS NOT NULL " +
-            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, c.is_system " +
+            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, c.is_system, c.system_key " +
             "ORDER BY cnt DESC LIMIT :limit",
             nativeQuery = true)
     List<Object[]> findMostUsedCategories(
@@ -92,14 +125,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             @Param("since") LocalDate since,
             @Param("limit") int limit);
 
-    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency " +
+    @Query(value = "SELECT t.category_id, c.nom, c.icone, c.couleur, COALESCE(SUM(t.montant), 0), a.currency, c.system_key " +
             "FROM transactions t JOIN categories c ON t.category_id = c.id " +
             "JOIN accounts a ON t.account_id = a.id " +
             "WHERE t.user_id = :userId AND t.type = 'DEPENSE' AND t.is_recurring = false " +
             "AND t.date >= :startDate AND t.date <= :endDate " +
             "AND t.category_id IS NOT NULL " +
             "AND t.category_id NOT IN (SELECT b.category_id FROM budgets b WHERE b.user_id = :userId AND b.actif = true) " +
-            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, a.currency",
+            "GROUP BY t.category_id, c.nom, c.icone, c.couleur, a.currency, c.system_key",
             nativeQuery = true)
     List<Object[]> findUnbudgetedSpendingByMonth(
             @Param("userId") UUID userId,

@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 import { ApiService } from './api';
 import { BankResponse } from '../models/bank.model';
 import { DevLogger } from './dev-logger';
@@ -8,6 +9,7 @@ import { DevLogger } from './dev-logger';
 export class BankService {
   private readonly apiService = inject(ApiService);
   private readonly logger = inject(DevLogger);
+  private readonly transloco = inject(TranslocoService);
 
   readonly banks = signal<BankResponse[]>([]);
   readonly error = signal<string | null>(null);
@@ -24,7 +26,7 @@ export class BankService {
       this.loaded = true;
     } catch (e) {
       this.logger.error('BankService.loadBanks error', e);
-      this.error.set('Impossible de charger les banques');
+      this.error.set(this.transloco.translate('accounts.feedback.banksLoadError'));
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_state.dart';
 import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 final appConfigRepositoryProvider = Provider<AppConfigRepository>((ref) {
@@ -59,7 +60,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         .read(compatibilityServiceProvider)
         .check(baseUrl: url, clientVersion: info.version);
 
-    final message = status.userMessage();
+    final message = status.userMessage(ref.read(appLocalizationsProvider));
 
     state = state.copyWith(
       isCheckingServer: false,
@@ -95,10 +96,10 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       }
       await _repository.setOnboardingCompleted(true);
       state = state.copyWith(isSaving: false, isCompleted: true);
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         isSaving: false,
-        error: 'Erreur lors de la sauvegarde: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }

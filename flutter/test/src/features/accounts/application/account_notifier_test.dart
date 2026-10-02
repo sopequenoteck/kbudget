@@ -7,6 +7,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -35,6 +36,7 @@ void main() {
     mockRepo = MockAccountRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         accountRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -79,7 +81,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().isLoading, false);
     });
 
@@ -166,7 +168,7 @@ void main() {
       when(mockRepo.setDefault('2')).thenThrow(Exception('Server error'));
       await notifier().setDefault('2');
 
-      expect(state().error, contains('Erreur lors du changement'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -213,7 +215,7 @@ void main() {
       await notifier().loadItems();
 
       final adjusted = acc1.copyWith(solde: 2000.0);
-      when(mockRepo.adjustBalance('1', 2000.0))
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
           .thenAnswer((_) async => adjusted);
       await notifier().adjustBalance('1', 2000.0);
 
@@ -221,15 +223,33 @@ void main() {
       expect(state().mutatingIds, isEmpty);
     });
 
+    test('should_sendAdjustmentLabel_when_adjustBalanceCalled', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+      when(
+        mockRepo.adjustBalance(any, any, libelle: anyNamed('libelle')),
+      ).thenAnswer((_) async => acc1.copyWith(solde: 2000.0));
+
+      await notifier().adjustBalance('1', 2000.0);
+
+      verify(
+        mockRepo.adjustBalance(
+          '1',
+          2000.0,
+          libelle: 'Ajustement de solde',
+        ),
+      ).called(1);
+    });
+
     test('should_setError_when_adjustBalanceFails', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
       await notifier().loadItems();
 
-      when(mockRepo.adjustBalance('1', 2000.0))
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
           .thenThrow(Exception('Server error'));
       await notifier().adjustBalance('1', 2000.0);
 
-      expect(state().error, contains('ajustement du solde'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -238,7 +258,8 @@ void main() {
       await notifier().loadItems();
 
       final adjusted = acc1.copyWith(solde: 2000.0);
-      when(mockRepo.adjustBalance('1', 2000.0)).thenAnswer(
+      when(mockRepo.adjustBalance('1', 2000.0, libelle: anyNamed('libelle')))
+          .thenAnswer(
         (_) =>
             Future.delayed(const Duration(milliseconds: 100), () => adjusted),
       );

@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.response.UserExportResponse;
 import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.*;
 import fr.kksdev.budget.api.repository.*;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -126,6 +128,36 @@ class UserExportServiceTest {
     }
 
     @Test
+    void should_exportNullLanguage_when_userHasNotChosenALanguage() {
+        stubAllRepositoriesEmpty();
+        UserPreference preference = UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .build();
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.preferences()).isNotNull();
+        assertThat(response.preferences().language()).isNull();
+    }
+
+    @Test
+    void should_exportLanguage_when_userHasChosenALanguage() {
+        stubAllRepositoriesEmpty();
+        UserPreference preference = UserPreference.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .language("fr")
+                .build();
+        when(userPreferenceRepository.findByUserId(userId)).thenReturn(Optional.of(preference));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.preferences().language()).isEqualTo("fr");
+    }
+
+    @Test
     void should_include_invitations_in_export() {
         when(accountRepository.findByUserId(userId)).thenReturn(List.of());
         when(categoryRepository.findByUserIdOrderByNomAsc(userId)).thenReturn(List.of());
@@ -191,8 +223,25 @@ class UserExportServiceTest {
         assertThat(csv).contains("Compte courant");
     }
 
+    // -------------------------------------------------------------------------
+    // KKS-396 — l'API n'ecrit plus de texte francais dans l'export CSV : le
+    // type reste le nom brut de l'enum, jamais traduit.
+    // -------------------------------------------------------------------------
+
     @Test
-    void should_translate_transaction_type_in_csv() throws Exception {
+    void should_writeExactHeaders_when_exportingCsv() throws Exception {
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        String firstLine = csv.replace("﻿", "").split("\r\n|\n", 2)[0];
+
+        assertThat(firstLine).isEqualTo("date,label,amount,currency,account,category,type");
+    }
+
+    @Test
+    void should_writeRawEnumName_when_exportingEachTransactionType() throws Exception {
         Account account = Account.builder()
                 .id(UUID.randomUUID())
                 .nom("Livret A")
@@ -229,7 +278,7 @@ class UserExportServiceTest {
         Transaction ajustement = Transaction.builder()
                 .id(UUID.randomUUID())
                 .montant(new BigDecimal("5.00"))
-                .libelle("Ajustement")
+                .libelle("Ajustement de solde")
                 .type(TransactionType.AJUSTEMENT)
                 .date(LocalDate.of(2026, 4, 3))
                 .account(account)
@@ -243,10 +292,84 @@ class UserExportServiceTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         userExportService.exportCsv(user, baos);
         String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
 
-        assertThat(csv).contains("Dépense");
-        assertThat(csv).contains("Revenu");
-        assertThat(csv).contains("Ajustement");
+        assertThat(lines).hasSize(4); // en-tete + une ligne par transaction
+        assertThat(lines.get(1)).endsWith("DEPENSE");
+        assertThat(lines.get(2)).endsWith("RECETTE");
+        assertThat(lines.get(3)).endsWith("AJUSTEMENT");
+        assertThat(csv).doesNotContain("Dépense").doesNotContain("Revenu");
+    }
+
+    @Test
+    void should_writeEmptyCategory_when_transactionHasNoCategory() throws Exception {
+        Account account = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte courant")
+                .currency(Currency.EUR)
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💳")
+                .couleur("#000000")
+                .user(user)
+                .build();
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("15.00"))
+                .libelle("Sans categorie")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, Month.APRIL, 27))
+                .account(account)
+                .category(null)
+                .isRecurring(false)
+                .recurringActive(true)
+                .build();
+
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of(transaction));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
+
+        assertThat(lines).hasSize(2);
+        assertThat(lines.get(1)).isEqualTo("2026-04-27,Sans categorie,15.00,EUR,Compte courant,,DEPENSE");
+    }
+
+    @Test
+    void should_writeEmptyType_when_transactionHasNoType() throws Exception {
+        Account account = Account.builder()
+                .id(UUID.randomUUID())
+                .nom("Compte courant")
+                .currency(Currency.EUR)
+                .type(AccountType.COURANT)
+                .soldeInitial(BigDecimal.ZERO)
+                .icone("💳")
+                .couleur("#000000")
+                .user(user)
+                .build();
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("15.00"))
+                .libelle("Sans type")
+                .type(null)
+                .date(LocalDate.of(2026, Month.APRIL, 27))
+                .account(account)
+                .isRecurring(false)
+                .recurringActive(true)
+                .build();
+
+        when(transactionRepository.findByUserIdOrderByDateDesc(userId)).thenReturn(List.of(transaction));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        userExportService.exportCsv(user, baos);
+        String csv = baos.toString(StandardCharsets.UTF_8);
+        List<String> lines = csv.replace("﻿", "").lines().toList();
+
+        assertThat(lines).hasSize(2);
+        assertThat(lines.get(1)).isEqualTo("2026-04-27,Sans type,15.00,EUR,Compte courant,,");
     }
 
     @Test
@@ -292,6 +415,46 @@ class UserExportServiceTest {
         assertThat(response.accounts().get(0).nom()).isEqualTo("Compte A");
         // Aucun compte de B ne doit figurer
         assertThat(response.accounts()).noneMatch(a -> a.nom().equals("Compte B"));
+    }
+
+    @Test
+    void should_exportSystemKey_when_categoryIsSystemAndNullForUserCategory() {
+        stubAllRepositoriesEmpty();
+
+        Category systemCategory = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Abonnement")
+                .icone("🔄")
+                .couleur("#6366f1")
+                .isSystem(true)
+                .systemKey(SystemCategoryKey.SUBSCRIPTION)
+                .user(user)
+                .build();
+        Category userCategory = Category.builder()
+                .id(UUID.randomUUID())
+                .nom("Alimentation")
+                .icone("🍔")
+                .couleur("#22c55e")
+                .isSystem(false)
+                .user(user)
+                .build();
+        when(categoryRepository.findByUserIdOrderByNomAsc(userId))
+                .thenReturn(List.of(systemCategory, userCategory));
+
+        UserExportResponse response = userExportService.exportJson(user);
+
+        assertThat(response.categories()).hasSize(2);
+        var exportedSystem = response.categories().stream()
+                .filter(c -> c.nom().equals("Abonnement"))
+                .findFirst().orElseThrow();
+        assertThat(exportedSystem.isSystem()).isTrue();
+        assertThat(exportedSystem.systemKey()).isEqualTo("SUBSCRIPTION");
+
+        var exportedUser = response.categories().stream()
+                .filter(c -> c.nom().equals("Alimentation"))
+                .findFirst().orElseThrow();
+        assertThat(exportedUser.isSystem()).isFalse();
+        assertThat(exportedUser.systemKey()).isNull();
     }
 
     @Test

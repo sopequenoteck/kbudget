@@ -243,6 +243,14 @@
 
 .settings-nav-drop-list { min-height: 0; }
 
+// KKS-380 : app-select-picker reutilise pour le selecteur de langue,
+// contraint a une largeur de pill comme .settings-select plutot que la
+// pleine largeur qu'il prend dans un formulaire.
+.settings-language-picker {
+  margin-left: auto;
+  max-width: 200px;
+}
+
 .settings-nav-row {
   display: flex;
   align-items: center;

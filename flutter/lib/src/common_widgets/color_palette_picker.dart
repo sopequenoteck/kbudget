@@ -29,10 +29,10 @@ class ColorPalettePicker extends StatelessWidget {
   final String label;
 
   const ColorPalettePicker({
-    super.key,
-    this.selectedColor,
     required this.onChanged,
-    this.label = 'Couleur',
+    required this.label,
+    this.selectedColor,
+    super.key,
   });
 
   @override

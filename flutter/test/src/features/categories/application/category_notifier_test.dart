@@ -6,6 +6,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -36,6 +37,7 @@ void main() {
     mockRepo = MockCategoryRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         categoryRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -71,7 +73,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
     });
 
     test('should_addItem_when_createSucceeds', () async {

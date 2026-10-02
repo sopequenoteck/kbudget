@@ -27,9 +27,11 @@ import 'package:k_budget/src/common_widgets/color_palette_picker.dart';
 import 'package:k_budget/src/features/exchange_rates/application/currency_config_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/widgets/rate_form.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/utils/image_utils.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -103,16 +105,24 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   String? _validateNom(String value) {
     final l10n = AppLocalizations.of(context)!;
-    if (value.trim().isEmpty) return l10n.validationRequired;
-    if (value.length > 50) return l10n.validationMaxLength(50);
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationRequired;
+    }
+    if (value.length > 50) {
+      return l10n.commonValidationMaxLength(50);
+    }
     return null;
   }
 
   String? _validateMontant(String value) {
     final l10n = AppLocalizations.of(context)!;
-    if (value.trim().isEmpty) return l10n.validationRequired;
+    if (value.trim().isEmpty) {
+      return l10n.commonValidationRequired;
+    }
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    if (parsed == null) return l10n.validationAmountPositive;
+    if (parsed == null) {
+      return l10n.commonValidationAmountPositive;
+    }
     return null;
   }
 
@@ -147,6 +157,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   }
 
   Future<void> _pickBankLogo() async {
+    final l10n = AppLocalizations.of(context)!;
     await showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -156,7 +167,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             ListTile(
               leading:
                   const PhosphorIcon(PhosphorIconsRegular.camera, size: 20),
-              title: const Text('Caméra'),
+              title: Text(l10n.accountsFormLogoCamera),
               onTap: () {
                 Navigator.pop(context);
                 _doPickBankLogo(ImageSource.camera);
@@ -165,7 +176,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             ListTile(
               leading:
                   const PhosphorIcon(PhosphorIconsRegular.image, size: 20),
-              title: const Text('Galerie'),
+              title: Text(l10n.accountsFormLogoGallery),
               onTap: () {
                 Navigator.pop(context);
                 _doPickBankLogo(ImageSource.gallery);
@@ -175,7 +186,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
               ListTile(
                 leading:
                     const PhosphorIcon(PhosphorIconsRegular.trash, size: 20),
-                title: const Text('Supprimer'),
+                title: Text(l10n.commonActionDelete),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -284,11 +295,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isEditMode ? l10n.accountErrorUpdate : l10n.accountErrorCreate,
-            ),
-          ),
+          SnackBar(content: Text(l10n.commonFeedbackSaveError)),
         );
       }
     }
@@ -309,21 +316,25 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
     if (hasRate) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Taux de conversion manquant'),
+        title: Text(l10n.accountsFormRateProposalTitle),
         content: Text(
-          'Aucun taux ${primaryCurrency.symbol} → ${accountCurrency.symbol} n\'est défini.\nVoulez-vous le saisir maintenant ?',
+          '${l10n.accountsFormRateProposalMessage(
+            primaryCurrency.symbol,
+            accountCurrency.symbol,
+          )}\n${l10n.accountsFormRateProposalHint}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Plus tard'),
+            child: Text(l10n.accountsActionLater),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Saisir le taux'),
+            child: Text(l10n.accountsActionEnterRate),
           ),
         ],
       ),
@@ -332,7 +343,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     if (confirmed == true && mounted) {
       await AppModal.show(
         context,
-        title: 'Ajouter un taux',
+        title: l10n.exchangeRatesDialogAddRateTitle,
         onClose: () {},
         child: RateForm(
           baseCurrency: primaryCurrency,
@@ -348,9 +359,9 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
       icon: PhosphorIconsRegular.trash,
-      title: l10n.accountDeleteConfirmTitle,
-      message: l10n.accountDeleteConfirmMessage,
-      confirmLabel: l10n.delete,
+      title: l10n.accountsDialogDeleteTitle,
+      message: l10n.accountsDialogDeleteWarningMessage,
+      confirmLabel: l10n.commonActionDelete,
       variant: ConfirmVariant.danger,
     );
 
@@ -363,7 +374,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     } on Exception {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.accountErrorDelete)),
+          SnackBar(content: Text(l10n.commonFeedbackDeleteError)),
         );
       }
     }
@@ -389,7 +400,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? l10n.accountsEditTitle : l10n.accountsNewTitle),
+        title: Text(
+          _isEditMode
+              ? l10n.accountsDialogEditTitle
+              : l10n.accountsDialogCreateTitle,
+        ),
         actions: [
           if (_isSubmitting)
             const Padding(
@@ -421,7 +436,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const SizedBox(height: AppSpacing.space6),
 
           // Type selector
-          const _SectionHeader('TYPE DE COMPTE'),
+          _SectionHeader(l10n.accountsFormTypeTitle),
           const SizedBox(height: AppSpacing.space2),
           AccountTypeSelector(
             selectedType: _selectedType,
@@ -431,7 +446,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           const SizedBox(height: AppSpacing.space6),
 
           // Bank selector
-          const _SectionHeader('BANQUE'),
+          _SectionHeader(l10n.accountsFormBankTitle),
           const SizedBox(height: AppSpacing.space2),
           BankSelectPicker(
             selectedBankCode: _selectedBankCode,
@@ -442,20 +457,20 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
           // Emoji + Color row (masqué si une banque connue est sélectionnée)
           if (_selectedBankCode == 'OTHER') ...[
-            const _SectionHeader('PERSONNALISATION'),
+            _SectionHeader(l10n.accountsFormCustomisationTitle),
             const SizedBox(height: AppSpacing.space2),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 EmojiInput(
-                  label: l10n.accountFormIconField,
+                  label: l10n.accountsFormIcon,
                   initialValue: _selectedEmoji,
                   onChanged: (emoji) => setState(() => _selectedEmoji = emoji),
                 ),
                 const SizedBox(width: AppSpacing.space4),
                 Expanded(
                   child: ColorPalettePicker(
-                    label: l10n.accountFormColorField,
+                    label: l10n.commonFormColour,
                     selectedColor: _selectedColor,
                     onChanged: (color) =>
                         setState(() => _selectedColor = color),
@@ -467,11 +482,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
             // Custom bank name
             AppFormField(
-              label: 'Nom de la banque',
+              label: l10n.accountsFormBankName,
               child: TextField(
                 controller: _bankCustomNameController,
-                decoration: const InputDecoration.collapsed(
-                  hintText: 'Optionnel',
+                decoration: InputDecoration.collapsed(
+                  hintText: l10n.accountsFormBankNamePlaceholder,
                 ),
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
@@ -502,10 +517,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             const SizedBox(height: AppSpacing.space0),
 
           // Name field
-          const _SectionHeader('DÉTAILS'),
+          _SectionHeader(l10n.accountsFormDetailsTitle),
           const SizedBox(height: AppSpacing.space2),
           AppFormField(
-            label: l10n.accountFormNameField,
+            label: l10n.accountsFormName,
             showError: nomError != null,
             errorMessage: nomError ?? '',
             child: TextField(
@@ -526,11 +541,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           // Currency picker (create mode only)
           if (!_isEditMode)
             SelectPicker(
-              label: l10n.accountFormCurrencyPicker,
+              label: l10n.accountsFormCurrency,
               items: Currency.values
                   .map((c) => SelectPickerItem(
                         id: c.name,
-                        label: '${c.symbol} — ${c.name}',
+                        label: '${c.symbol} — ${currencyName(c, l10n)}',
                       ))
                   .toList(),
               selectedId: _selectedCurrency.name,
@@ -547,7 +562,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
           // Initial balance (create mode) or current balance + adjust (edit mode)
           if (!_isEditMode) ...[
             AppFormField(
-              label: l10n.accountFormInitialBalanceField,
+              label: l10n.accountsFormOpeningBalance,
               showError: montantError != null,
               errorMessage: montantError ?? '',
               child: TextField(
@@ -583,7 +598,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.accountFormCurrentBalance,
+                    l10n.accountsFormCurrentBalance,
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       color: colorScheme.onSurfaceVariant,
@@ -593,7 +608,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     AmountFormatter.format(
                       widget.account!.solde,
                       currency: widget.account!.currency,
-                    ),
+                      locale: ref.watch(intlLocaleProvider)),
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       fontWeight: AppTypography.semiBold,
@@ -606,7 +621,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
             const SizedBox(height: AppSpacing.space6),
             // New balance field
             AppFormField(
-              label: l10n.accountFormNewBalance,
+              label: l10n.accountsFormNewBalance,
               child: TextField(
                 controller: _newBalanceController,
                 decoration: InputDecoration.collapsed(
@@ -637,7 +652,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.accountFormActiveSwitch,
+                        l10n.commonValueActive,
                         style: TextStyle(
                           fontSize: AppTypography.sizeMd,
                           fontWeight: AppTypography.medium,
@@ -646,7 +661,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       ),
                       if (widget.account!.isDefault)
                         Text(
-                          l10n.accountFormActiveDefaultHint,
+                          l10n.accountsFormActiveHint,
                           style: TextStyle(
                             fontSize: AppTypography.sizeXs,
                             color: colorScheme.onSurfaceVariant,
@@ -672,7 +687,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 onPressed: _onDelete,
                 icon: PhosphorIcon(PhosphorIconsRegular.trash, color: colorScheme.error, size: 20),
                 label: Text(
-                  l10n.delete,
+                  l10n.commonActionDelete,
                   style: TextStyle(color: colorScheme.error),
                 ),
               ),
@@ -707,7 +722,7 @@ class _BankLogoUpload extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Logo personnalisé',
+          AppLocalizations.of(context)!.accountsFormCustomLogo,
           style: TextStyle(
             fontSize: AppTypography.sizeSm,
             fontWeight: AppTypography.medium,

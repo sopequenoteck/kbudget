@@ -22,14 +22,14 @@ Future<bool?> showDeleteConfirmDialog({
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: Text(l10n.cancel),
+          child: Text(l10n.commonActionCancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: TextButton.styleFrom(
             foregroundColor: Theme.of(ctx).colorScheme.error,
           ),
-          child: Text(l10n.delete),
+          child: Text(l10n.commonActionDelete),
         ),
       ],
     ),

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/empty_state_widget.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
@@ -21,6 +22,7 @@ import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecurringListScreen extends ConsumerStatefulWidget {
@@ -63,15 +65,15 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     } else if (state.error != null && state.items.isEmpty) {
       body = EmptyStateWidget(
         icon: PhosphorIconsRegular.warning,
-        message: l10n.errorGeneric,
-        ctaLabel: l10n.retry,
+        message: l10n.commonFeedbackLoadError,
+        ctaLabel: l10n.commonActionRetry,
         onCtaTap: () =>
             ref.read(recurringListNotifierProvider.notifier).loadItems(),
       );
     } else if (state.items.isEmpty) {
       body = EmptyStateWidget(
         icon: PhosphorIconsRegular.repeat,
-        message: l10n.recurringEmpty,
+        message: l10n.recurringEmptyTitle,
       );
     } else {
       final isValidatingAll = state.mutatingIds.contains('__all__');
@@ -115,7 +117,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringOverdue.toUpperCase(),
+                    label: l10n.recurringValueOverdue.toUpperCase(),
                     labelColor: themeExt.expenseColor,
                     items: overdue,
                     showValidateAll: true,
@@ -140,7 +142,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringToday.toUpperCase(),
+                    label: l10n.commonValueToday.toUpperCase(),
                     labelColor: colorScheme.primary,
                     items: today,
                     showValidateAll: false,
@@ -161,7 +163,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                     AppSpacing.space2,
                   ),
                   child: _StatusGroupSection(
-                    label: l10n.recurringUpcoming.toUpperCase(),
+                    label: l10n.recurringValueUpcoming.toUpperCase(),
                     labelColor: colorScheme.onSurfaceVariant,
                     items: upcoming,
                     showValidateAll: false,
@@ -181,7 +183,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.recurringTitle)),
+      appBar: AppBar(title: Text(l10n.recurringPageTitle)),
       body: body,
     );
   }
@@ -220,7 +222,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                 AmountFormatter.format(
                   item.montant,
                   currency: item.accountCurrency ?? Currency.eur,
-                ),
+                  locale: ref.watch(intlLocaleProvider)),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXl,
                   fontWeight: AppTypography.semiBold,
@@ -228,8 +230,12 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
                 ),
               ),
               Text(
-                l10n.recurringNextOccurrence(
-                  RelativeDateFormatter.formatCompact(item.nextOccurrence),
+                l10n.recurringDetailNext(
+                  RelativeDateFormatter.formatCompact(
+                    item.nextOccurrence,
+                    locale: ref.watch(intlLocaleProvider),
+                    l10n: l10n,
+                  ),
                 ),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXs,
@@ -238,7 +244,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space4),
               _ActionButton(
-                label: l10n.recurringValidate,
+                label: l10n.recurringActionMarkAsPaid,
                 icon: PhosphorIconsRegular.check,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
@@ -250,7 +256,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space2),
               _ActionButton(
-                label: l10n.recurringSkip,
+                label: l10n.recurringActionSkipOccurrence,
                 icon: PhosphorIconsRegular.skipForward,
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 foregroundColor: colorScheme.onSurface,
@@ -262,7 +268,7 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
               ),
               const SizedBox(height: AppSpacing.space2),
               _ActionButton(
-                label: l10n.recurringDeactivate,
+                label: l10n.recurringActionDeactivate,
                 icon: PhosphorIconsRegular.pause,
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 foregroundColor: themeExt.expenseColor,
@@ -283,88 +289,69 @@ class _RecurringListScreenState extends ConsumerState<RecurringListScreen> {
     BuildContext context,
     List<String> ids,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).validateAll(ids);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.validateAll(ids),
+        success: l10n.recurringFeedbackValidatedCount(ids.length),
+        failure: l10n.recurringFeedbackValidationError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringValidateSuccess)),
-      );
-    }
-  }
 
   Future<void> _handleValidate(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).validate(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.validate(id),
+        success: l10n.recurringFeedbackValidatedOne,
+        failure: l10n.recurringFeedbackValidationError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringValidateSuccess)),
-      );
-    }
-  }
 
   Future<void> _handleSkip(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).skip(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.skip(id),
+        success: l10n.recurringFeedbackSkipped,
+        failure: l10n.recurringFeedbackSkipFailed,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringSkipSuccess)),
-      );
-    }
-  }
 
   Future<void> _handleDeactivate(
     BuildContext context,
     String id,
     AppLocalizations l10n,
-  ) async {
-    await ref.read(recurringListNotifierProvider.notifier).deactivate(id);
-    if (!context.mounted) return;
-    final error = ref.read(recurringListNotifierProvider).error;
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.errorGeneric),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+  ) =>
+      _runWithFeedback(
+        context,
+        (notifier) => notifier.deactivate(id),
+        success: l10n.recurringFeedbackDeactivated,
+        failure: l10n.recurringFeedbackDeactivateError,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recurringDeactivateSuccess)),
-      );
+
+  /// Lance [action], puis affiche [failure] si elle a laisse une erreur dans
+  /// l'etat, [success] sinon.
+  Future<void> _runWithFeedback(
+    BuildContext context,
+    Future<void> Function(RecurringListNotifier notifier) action, {
+    required String success,
+    required String failure,
+  }) async {
+    await action(ref.read(recurringListNotifierProvider.notifier));
+    if (!context.mounted) {
+      return;
     }
+    final failed = ref.read(recurringListNotifierProvider).error != null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(failed ? failure : success),
+        backgroundColor: failed ? Theme.of(context).colorScheme.error : null,
+      ),
+    );
   }
 }
 
@@ -471,7 +458,7 @@ class _StatusGroupSection extends StatelessWidget {
                     ),
                     onPressed: onValidateAll,
                     child: Text(
-                      l10n.recurringValidateAll,
+                      l10n.recurringActionPayAll,
                       style: const TextStyle(
                         fontSize: AppTypography.sizeXs,
                         fontWeight: AppTypography.semiBold,
@@ -566,10 +553,17 @@ class _MonthlySummaryCard extends StatelessWidget {
     }
 
     final displayCurrency = primaryCurrency ?? Currency.eur;
-    final netFormatted =
-        AmountFormatter.format(net.abs(), currency: displayCurrency);
-    final totalFormatted =
-        AmountFormatter.format(totalExpenses, currency: displayCurrency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final netFormatted = AmountFormatter.format(
+      net.abs(),
+      currency: displayCurrency,
+      locale: locale,
+    );
+    final totalFormatted = AmountFormatter.format(
+      totalExpenses,
+      currency: displayCurrency,
+      locale: locale,
+    );
     final netColor = net >= 0 ? themeExt.incomeColor : themeExt.expenseColor;
     final netPrefix = net >= 0 ? '+' : '−';
 
@@ -586,7 +580,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.recurringMonthlySummaryTitle,
+                  l10n.recurringSummaryTitle.toUpperCase(),
                   style: TextStyle(
                     fontSize: AppTypography.sizeXs,
                     fontWeight: AppTypography.semiBold,
@@ -610,7 +604,7 @@ class _MonthlySummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                l10n.recurringChargesCount(expenseCount),
+                l10n.recurringSummaryExpenseCount(expenseCount).toUpperCase(),
                 style: TextStyle(
                   fontSize: AppTypography.sizeXs,
                   fontWeight: AppTypography.semiBold,
@@ -620,7 +614,7 @@ class _MonthlySummaryCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '~$totalFormatted/mois',
+                l10n.recurringSummaryMonthlyExpenses(totalFormatted),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.semiBold,

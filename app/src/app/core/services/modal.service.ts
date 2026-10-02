@@ -19,26 +19,26 @@ export type ModalType =
 
 type EditableEntity = Transaction | Subscription | Debt | Category | Account | Budget;
 
-const CREATE_TITLES: Record<ModalType, string> = {
-  transaction: 'Nouvelle transaction',
-  subscription: 'Nouvel abonnement',
-  debt: 'Nouvelle dette',
-  category: 'Nouvelle catégorie',
-  account: 'Nouveau compte',
-  transfer: 'Nouveau virement',
-  budget: 'Nouveau budget',
-  repay: 'Remboursement',
+const CREATE_TITLE_KEYS: Record<ModalType, string> = {
+  transaction: 'transactions.dialog.createTitle',
+  subscription: 'subscriptions.dialog.createTitle',
+  debt: 'debts.dialog.createTitle',
+  category: 'categories.dialog.createTitle',
+  account: 'accounts.dialog.createTitle',
+  transfer: 'transactions.dialog.transferCreateTitle',
+  budget: 'budgets.dialog.createTitle',
+  repay: 'debts.dialog.repayTitle',
 };
 
-const EDIT_TITLES: Record<ModalType, string> = {
-  transaction: 'Modifier la transaction',
-  subscription: "Modifier l'abonnement",
-  debt: 'Modifier la dette',
-  category: 'Modifier la catégorie',
-  account: 'Modifier le compte',
-  transfer: 'Virement',
-  budget: 'Modifier le budget',
-  repay: 'Remboursement',
+const EDIT_TITLE_KEYS: Record<ModalType, string> = {
+  transaction: 'transactions.dialog.editTitle',
+  subscription: 'subscriptions.dialog.editTitle',
+  debt: 'debts.dialog.editTitle',
+  category: 'categories.dialog.editTitle',
+  account: 'accounts.dialog.editTitle',
+  transfer: 'transactions.dialog.transferEditTitle',
+  budget: 'budgets.dialog.editTitle',
+  repay: 'debts.dialog.repayTitle',
 };
 
 const CLOSE_DURATION = 200;
@@ -50,10 +50,10 @@ export class ModalService {
   readonly asRecurring = signal(false);
   readonly isClosing = signal(false);
   readonly modalOpen = computed(() => this.activeModal() !== null);
-  readonly modalTitle = computed(() => {
+  readonly modalTitleKey = computed(() => {
     const type = this.activeModal();
-    if (!type) return '';
-    return this.editingEntity() ? EDIT_TITLES[type] : CREATE_TITLES[type];
+    if (!type) return null;
+    return this.editingEntity() ? EDIT_TITLE_KEYS[type] : CREATE_TITLE_KEYS[type];
   });
 
   private closeTimer: ReturnType<typeof setTimeout> | null = null;

@@ -18,11 +18,13 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
-import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_hero_widget.dart';
-import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/frequency_suffix.dart';
+import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_hero_widget.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
@@ -88,7 +90,7 @@ class _SubscriptionListScreenState
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -128,7 +130,7 @@ class _SubscriptionListScreenState
             isLoading: true,
           ),
         ),
-        SectionHeaderSticky(title: 'Abonnements · $activeCount actifs'),
+        SectionHeaderSticky(title: _sectionTitle(l10n, activeCount)),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(top: AppSpacing.space4),
@@ -158,7 +160,7 @@ class _SubscriptionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -171,7 +173,7 @@ class _SubscriptionListScreenState
                         .read(subscriptionNotifierProvider.notifier)
                         .refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.subscriptionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -191,7 +193,7 @@ class _SubscriptionListScreenState
             isLoading: false,
           ),
         ),
-        const SectionHeaderSticky(title: 'Abonnements · 0 actifs'),
+        SectionHeaderSticky(title: _sectionTitle(l10n, 0)),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Center(
@@ -207,7 +209,7 @@ class _SubscriptionListScreenState
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.subscriptionsEmpty,
+                    l10n.subscriptionsEmptyTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -222,7 +224,7 @@ class _SubscriptionListScreenState
     }
 
     // Data
-    final dateFormat = DateFormat('d MMMM', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM', ref.watch(intlLocaleProvider));
 
     final actifs = state.items.where((s) => s.actif).toList();
     final inactifs = state.items.where((s) => !s.actif).toList();
@@ -235,7 +237,7 @@ class _SubscriptionListScreenState
           isLoading: false,
         ),
       ),
-      SectionHeaderSticky(title: 'Abonnements · $activeCount actifs'),
+      SectionHeaderSticky(title: _sectionTitle(l10n, activeCount)),
 
       // Section Actifs
       if (actifs.isNotEmpty) ...[
@@ -246,7 +248,7 @@ class _SubscriptionListScreenState
               vertical: AppSpacing.space2,
             ),
             child: Text(
-              'Actifs',
+              l10n.subscriptionsListActive,
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -278,7 +280,7 @@ class _SubscriptionListScreenState
               vertical: AppSpacing.space2,
             ),
             child: Text(
-              'Inactifs',
+              l10n.subscriptionsListInactive,
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -306,6 +308,10 @@ class _SubscriptionListScreenState
     ];
   }
 
+  String _sectionTitle(AppLocalizations l10n, int activeCount) =>
+      '${l10n.commonNavSubscriptions} · '
+      '${l10n.subscriptionsListActiveCount(activeCount)}';
+
   Widget _buildSubscriptionItem(
     Subscription sub,
     Map<String, Category> categoryMap,
@@ -317,17 +323,16 @@ class _SubscriptionListScreenState
   }) {
     final cat = sub.categoryId != null ? categoryMap[sub.categoryId] : null;
 
-    final frequencySuffix = sub.frequence == Frequency.mensuel
-        ? l10n.subscriptionFrequencyMensuel
-        : l10n.subscriptionFrequencyAnnuel;
+    final suffix = frequencySuffix(sub.frequence, l10n);
 
     final formattedAmount = AmountFormatter.format(
       sub.montant,
       currency: sub.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     final renewal = nextRenewalDate(sub.dateDebut, sub.frequence);
-    final renewalLabel = l10n.subscriptionNextRenewal(dateFormat.format(renewal));
+    final renewalLabel =
+        l10n.subscriptionsListNextRenewal(dateFormat.format(renewal));
 
     // Sous-texte montant converti si devise étrangère
     String? convertedSubtitle;
@@ -341,8 +346,12 @@ class _SubscriptionListScreenState
         rates: exchangeRates,
       );
       if (converted != null) {
-        convertedSubtitle =
-            '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+        final formattedConverted = AmountFormatter.format(
+          converted,
+          currency: primaryCurrency,
+          locale: ref.watch(intlLocaleProvider),
+        );
+        convertedSubtitle = '~ $formattedConverted';
       }
     }
 
@@ -353,9 +362,9 @@ class _SubscriptionListScreenState
           : colorScheme.surfaceContainerHighest,
       title: sub.nom,
       subtitle: renewalLabel,
-      value: '$formattedAmount$frequencySuffix',
+      value: '$formattedAmount$suffix',
       rightSubtitle: convertedSubtitle ??
-          (sub.actif ? null : l10n.subscriptionBadgeInactif),
+          (sub.actif ? null : l10n.commonValueInactive),
       onPressed: () {
         context.push(
           '${RouteNames.subscriptions}/${sub.id}',

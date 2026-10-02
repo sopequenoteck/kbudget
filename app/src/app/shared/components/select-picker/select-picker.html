@@ -38,13 +38,13 @@
           type="button"
           class="select-picker__clear"
           (click)="clearSelection($event)"
-          aria-label="Effacer la selection"
+          [attr.aria-label]="'common.action.clearSelectionAria' | transloco"
         >
           &times;
         </button>
       }
     } @else {
-      <span class="select-picker__placeholder">{{ placeholder() }}</span>
+      <span class="select-picker__placeholder">{{ placeholder() ?? ('common.form.selectPlaceholder' | transloco) }}</span>
     }
     <span class="select-picker__chevron">&#9662;</span>
   </div>
@@ -58,12 +58,12 @@
             #searchInput
             type="text"
             class="select-picker__search-input"
-            [placeholder]="searchPlaceholder()"
+            [placeholder]="searchPlaceholder() ?? ('common.form.searchPlaceholder' | transloco)"
             [value]="searchTerm()"
             (input)="onSearchInput($event)"
             (keydown)="onKeydown($event)"
             autocomplete="off"
-            aria-label="Rechercher"
+            [attr.aria-label]="'common.filter.searchAria' | transloco"
           />
         </div>
       }
@@ -95,10 +95,10 @@
             }
           </div>
         } @empty {
-          <div class="select-picker__empty">{{ emptyMessage() }}</div>
+          <div class="select-picker__empty">{{ emptyMessage() ?? ('common.empty.noItems' | transloco) }}</div>
         }
       </div>
-      <div class="sr-only" aria-live="polite">{{ filteredItems().length }} resultats</div>
+      <div class="sr-only" aria-live="polite">{{ 'common.list.resultsCount' | transloco: { count: filteredItems().length } }}</div>
     </div>
 
     <!-- Mobile bottom-sheet -->
@@ -118,12 +118,12 @@
         (keydown.escape)="close()"
       >
         <div class="select-picker__sheet-header">
-          <span class="select-picker__sheet-title">{{ placeholder() }}</span>
+          <span class="select-picker__sheet-title">{{ placeholder() ?? ('common.form.selectPlaceholder' | transloco) }}</span>
           <button
             type="button"
             class="select-picker__sheet-close"
             (click)="close()"
-            aria-label="Fermer"
+            [attr.aria-label]="'common.action.close' | transloco"
           >
             &times;
           </button>
@@ -133,12 +133,12 @@
             <input
               type="text"
               class="select-picker__search-input"
-              [placeholder]="searchPlaceholder()"
+              [placeholder]="searchPlaceholder() ?? ('common.form.searchPlaceholder' | transloco)"
               [value]="searchTerm()"
               (input)="onSearchInput($event)"
               (keydown)="onKeydown($event)"
               autocomplete="off"
-              aria-label="Rechercher"
+              [attr.aria-label]="'common.filter.searchAria' | transloco"
             />
           </div>
         }
@@ -173,7 +173,7 @@
               }
             </div>
           } @empty {
-            <div class="select-picker__empty">{{ emptyMessage() }}</div>
+            <div class="select-picker__empty">{{ emptyMessage() ?? ('common.empty.noItems' | transloco) }}</div>
           }
         </div>
       </div>

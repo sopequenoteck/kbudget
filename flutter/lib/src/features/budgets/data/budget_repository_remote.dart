@@ -59,6 +59,7 @@ class BudgetRepositoryRemote implements BudgetRepository {
         budgetId: item.budgetId,
         categoryId: item.categoryId,
         categoryNom: item.categoryNom,
+        categorySystemKey: item.categorySystemKey,
         categoryIcone: item.categoryIcone,
         categoryCouleur: item.categoryCouleur,
         montantBudget: item.montantBudget,
@@ -72,6 +73,7 @@ class BudgetRepositoryRemote implements BudgetRepository {
           .map((dto) => UnbudgetedItem(
                 categoryId: dto.categoryId,
                 categoryNom: dto.categoryNom,
+                categorySystemKey: dto.categorySystemKey,
                 categoryIcone: dto.categoryIcone,
                 categoryCouleur: dto.categoryCouleur,
                 montantDepense: dto.montantDepense,
@@ -93,6 +95,7 @@ class BudgetRepositoryRemote implements BudgetRepository {
       items: response.items.map((item) => BudgetHistoryItem(
         categoryId: item.categoryId,
         categoryNom: item.categoryNom,
+        categorySystemKey: item.categorySystemKey,
         categoryIcone: item.categoryIcone,
         categoryCouleur: item.categoryCouleur,
         montantBudget: item.montantBudget,
@@ -106,6 +109,7 @@ class BudgetRepositoryRemote implements BudgetRepository {
           .map((dto) => UnbudgetedItem(
                 categoryId: dto.categoryId,
                 categoryNom: dto.categoryNom,
+                categorySystemKey: dto.categorySystemKey,
                 categoryIcone: dto.categoryIcone,
                 categoryCouleur: dto.categoryCouleur,
                 montantDepense: dto.montantDepense,
@@ -132,6 +136,7 @@ class BudgetRepositoryRemote implements BudgetRepository {
       seuilNotification: r.seuilNotification,
       actif: r.actif,
       categoryNom: category['nom'] as String?,
+      categorySystemKey: category['systemKey'] as String?,
       categoryIcone: category['icone'] as String?,
       categoryCouleur: category['couleur'] as String?,
       spent: r.spent,

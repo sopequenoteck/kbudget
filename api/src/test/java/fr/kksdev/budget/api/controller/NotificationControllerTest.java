@@ -21,7 +21,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,6 +56,7 @@ class NotificationControllerTest {
     private AdminEmailResolver adminEmailResolver;
 
     private static final String BEARER_TOKEN = "Bearer test-token";
+    private static final LocalDateTime CREATED_AT = LocalDateTime.of(2026, Month.JANUARY, 15, 9, 0);
     private final UUID userId = UUID.randomUUID();
     private final UUID notificationId = UUID.randomUUID();
 
@@ -69,13 +72,14 @@ class NotificationControllerTest {
         return new NotificationResponse(
                 id,
                 NotificationType.SUBSCRIPTION_DUE,
-                "Abonnement Netflix",
-                "Abonnement Netflix — échéance demain",
+                "Subscription Netflix",
+                "Netflix is due tomorrow",
                 EntityType.SUBSCRIPTION,
                 UUID.randomUUID(),
                 read,
-                read ? LocalDateTime.now() : null,
-                LocalDateTime.now()
+                read ? CREATED_AT : null,
+                CREATED_AT,
+                Map.of("name", "Netflix")
         );
     }
 
@@ -90,8 +94,9 @@ class NotificationControllerTest {
                         .header("Authorization", BEARER_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(notificationId.toString()))
-                .andExpect(jsonPath("$.content[0].title").value("Abonnement Netflix"))
+                .andExpect(jsonPath("$.content[0].title").value("Subscription Netflix"))
                 .andExpect(jsonPath("$.content[0].read").value(false))
+                .andExpect(jsonPath("$.content[0].params.name").value("Netflix"))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 

@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorUploadSimple,
   phosphorArrowCounterClockwise,
-  phosphorWarningCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { ImportService } from '../../../../core/services/import';
@@ -17,23 +17,23 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
 @Component({
   selector: 'app-csv-mapping',
   standalone: true,
-  imports: [RouterLink, NgIcon, FormsModule],
+  imports: [RouterLink, NgIcon, FormsModule, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorUploadSimple,
       phosphorArrowCounterClockwise,
-      phosphorWarningCircle,
     }),
   ],
   templateUrl: './csv-mapping.html',
   styleUrl: './csv-mapping.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CsvMapping {
+export class CsvMapping implements OnInit {
   private readonly importService = inject(ImportService);
   private readonly router = inject(Router);
   private readonly logger = inject(DevLogger);
   private readonly apiError = inject(ApiErrorService);
+  private readonly transloco = inject(TranslocoService);
 
   // File & account (passed via router state)
   protected file: File | null = null;
@@ -73,10 +73,10 @@ export class CsvMapping {
   readonly DATE_FORMATS = ['dd/MM/yyyy', 'yyyy-MM-dd', 'MM/dd/yyyy', 'dd-MM-yyyy', 'MM/yyyy'];
   readonly ENCODINGS = ['UTF-8', 'ISO-8859-1', 'windows-1252'];
   readonly SEPARATORS = [
-    { label: 'Point-virgule (;)', value: ';' },
-    { label: 'Virgule (,)', value: ',' },
-    { label: 'Tabulation (\\t)', value: '\t' },
-    { label: 'Pipe (|)', value: '|' },
+    { labelKey: 'imports.value.separatorSemicolon', value: ';' },
+    { labelKey: 'imports.value.separatorComma', value: ',' },
+    { labelKey: 'imports.value.separatorTab', value: '\t' },
+    { labelKey: 'imports.value.separatorPipe', value: '|' },
   ];
 
   constructor() {
@@ -87,7 +87,15 @@ export class CsvMapping {
       this.file = state.file;
       this.accountId.set(state.accountId);
       this.fileName.set(state.file.name);
-      this.loadPreview();
+    }
+  }
+
+  ngOnInit(): void {
+    if (this.file) {
+      void this.loadPreview();
+    } else {
+      // Rechargement de la page : le fichier n'a pas survecu a la navigation.
+      void this.router.navigate(['/transactions/import'], { replaceUrl: true });
     }
   }
 
@@ -123,7 +131,7 @@ export class CsvMapping {
       this.autoSelectColumns(result.headers);
     } catch (err) {
       this.logger.error('Failed to preview CSV', err);
-      this.previewError.set('Impossible de prévisualiser le fichier. Vérifiez les paramètres.');
+      this.previewError.set(this.transloco.translate('imports.feedback.previewError'));
     } finally {
       this.previewLoading.set(false);
     }
@@ -188,12 +196,12 @@ export class CsvMapping {
       const draft = await firstValueFrom(
         this.importService.uploadWithMapping(this.file, this.accountId(), mapping),
       );
-      this.router.navigate(['/settings/import/review', draft.id]);
+      this.router.navigate(['/transactions/import/review', draft.id]);
     } catch (err: unknown) {
       this.logger.error('Failed to import with mapping', err);
       const httpErr = err as { error?: { message?: string } };
       this.importError.set(
-        this.apiError.label(httpErr, "Erreur lors de l'import. Vérifiez le mapping et réessayez."),
+        this.apiError.label(httpErr, this.transloco.translate('imports.feedback.mappingImportError')),
       );
       this.importing.set(false);
     }

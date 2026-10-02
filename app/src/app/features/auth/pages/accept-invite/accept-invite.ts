@@ -10,23 +10,28 @@ import {
   phosphorCoin,
   phosphorGlobe,
 } from '@ng-icons/phosphor-icons/regular';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { InvitationService } from '../../../../core/services/invitation.service';
 import { AuthService } from '../../../../core/services/auth';
 import { ApiErrorService } from '../../../../core/services/api-error';
+import { LanguageService } from '../../../../core/services/language';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { AuthShell } from '../../components/auth-shell/auth-shell';
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_LENGTH_MESSAGE,
-  PASSWORD_PLACEHOLDER,
 } from '../../../../core/constants/password.constants';
+import {
+  CURRENCY_NAME_KEYS,
+  CURRENCY_SYMBOLS,
+  SUPPORTED_CURRENCIES,
+} from '../../../../core/models/currency.model';
 
 @Component({
   selector: 'app-accept-invite',
   standalone: true,
-  imports: [ReactiveFormsModule, FormField, AuthShell],
+  imports: [ReactiveFormsModule, FormField, AuthShell, TranslocoPipe],
   viewProviders: [
     provideIcons({ phosphorEnvelope, phosphorLock, phosphorUser, phosphorCoin, phosphorGlobe }),
   ],
@@ -40,6 +45,8 @@ export class AcceptInvite implements OnInit {
   private readonly apiError = inject(ApiErrorService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly transloco = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
 
   readonly token = input.required<string>();
 
@@ -66,18 +73,15 @@ export class AcceptInvite implements OnInit {
     'Asia/Shanghai',
   ];
 
-  readonly currencies = [
-    { code: 'EUR', label: '€ - Euro' },
-    { code: 'XOF', label: 'CFA - Franc CFA (BCEAO)' },
-    { code: 'USD', label: '$ - Dollar américain' },
-    { code: 'GBP', label: '£ - Livre sterling' },
-    { code: 'CHF', label: 'CHF - Franc suisse' },
-    { code: 'CAD', label: 'CA$ - Dollar canadien' },
-    { code: 'MAD', label: 'MAD - Dirham marocain' },
-  ];
+  /** Devise proposee a l'inscription : symbole et cle de nom traduit,
+   * partages avec les reglages de devises (KKS-393). */
+  readonly currencies = SUPPORTED_CURRENCIES.map((code) => ({
+    code,
+    symbol: CURRENCY_SYMBOLS[code],
+    nameKey: CURRENCY_NAME_KEYS[code],
+  }));
 
-  readonly passwordMinLengthMessage = PASSWORD_MIN_LENGTH_MESSAGE;
-  readonly passwordPlaceholder = PASSWORD_PLACEHOLDER;
+  readonly passwordMinLength = PASSWORD_MIN_LENGTH;
 
   readonly form = this.fb.nonNullable.group({
     password: [
@@ -99,7 +103,7 @@ export class AcceptInvite implements OnInit {
       const result = await firstValueFrom(this.invitationService.lookup(this.token()));
       this.email.set(result.email);
     } catch {
-      this.error.set('Lien invalide, expiré, déjà utilisé ou révoqué.');
+      this.error.set(this.transloco.translate('auth.feedback.invalidLink'));
     } finally {
       this.loading.set(false);
     }
@@ -115,6 +119,11 @@ export class AcceptInvite implements OnInit {
     const { password, displayName, currency, timezone } = this.form.getRawValue();
 
     try {
+      const defaultAccountName = this.transloco.translate(
+        'accounts.value.defaultAccountName',
+        {},
+        this.languageService.activeLanguage(),
+      );
       const response = await firstValueFrom(
         this.invitationService.accept({
           token: this.token(),
@@ -122,6 +131,7 @@ export class AcceptInvite implements OnInit {
           displayName,
           currency,
           timezone,
+          defaultAccountName,
         }),
       );
       // Stockage JWT via AuthService
@@ -130,11 +140,11 @@ export class AcceptInvite implements OnInit {
     } catch (err: unknown) {
       const httpErr = err as { status?: number; error?: { message?: string } };
       if (httpErr?.status === 404) {
-        this.error.set('Lien invalide, expiré, déjà utilisé ou révoqué.');
+        this.error.set(this.transloco.translate('auth.feedback.invalidLink'));
       } else if (httpErr?.status === 400) {
-        this.error.set(this.apiError.label(httpErr, 'Données invalides. Vérifiez le formulaire.'));
+        this.error.set(this.apiError.label(httpErr, this.transloco.translate('auth.feedback.invalidFormData')));
       } else {
-        this.error.set('Une erreur est survenue. Veuillez réessayer.');
+        this.error.set(this.transloco.translate('auth.feedback.genericError'));
       }
       this.loading.set(false);
     }

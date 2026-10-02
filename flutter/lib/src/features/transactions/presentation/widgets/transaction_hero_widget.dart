@@ -8,8 +8,10 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -60,6 +62,12 @@ class TransactionHeroWidget extends StatelessWidget {
         (summary?.totalRecettes ?? 0) - (summary?.totalDepenses ?? 0);
     final bilanColor =
         bilan >= 0 ? colors.incomeColor : colors.expenseColor;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedBilan = AmountFormatter.format(
+      bilan,
+      currency: currency,
+      locale: locale,
+    );
 
     return Padding(
       key: const Key('transaction_hero'),
@@ -72,7 +80,9 @@ class TransactionHeroWidget extends StatelessWidget {
         children: [
           // Label
           Text(
-            'SOLDE',
+            AppLocalizations.of(context)!
+                .transactionsSummaryBalance
+                .toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
@@ -85,7 +95,7 @@ class TransactionHeroWidget extends StatelessWidget {
 
           // Bilan
           Text(
-            AmountFormatter.format(bilan, currency: currency),
+            formattedBilan,
             style: TextStyle(
               fontSize: AppTypography.size3xl,
               fontWeight: AppTypography.bold,
@@ -108,6 +118,7 @@ class TransactionHeroWidget extends StatelessWidget {
                 AmountFormatter.format(
                   summary?.totalRecettes ?? 0,
                   currency: currency,
+                  locale: locale,
                 ),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
@@ -132,6 +143,7 @@ class TransactionHeroWidget extends StatelessWidget {
                 AmountFormatter.format(
                   summary?.totalDepenses ?? 0,
                   currency: currency,
+                  locale: locale,
                 ),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,

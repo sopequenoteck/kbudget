@@ -8,15 +8,36 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:k_budget/src/domain/models/notification.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/services/local_notification_service.dart';
+import 'package:k_budget/src/utils/notification_text.dart';
 
 final stompServiceProvider = Provider<StompService>((ref) {
-  final stompService = StompService();
+  final stompService = StompService(
+    readL10n: () => ref.read(appLocalizationsProvider),
+    readIntlLocale: () => ref.read(intlLocaleProvider),
+  );
   ref.onDispose(() => stompService.dispose());
   return stompService;
 });
 
 class StompService with WidgetsBindingObserver {
+  /// Cree le service ; [readL10n] et [readIntlLocale] sont lus a l'arrivee
+  /// de chaque notification, pour l'afficher dans la langue de ce moment.
+  /// [localNotificationService] est remplace par celui passe a [connect].
+  StompService({
+    required this.readL10n,
+    required this.readIntlLocale,
+    LocalNotificationService? localNotificationService,
+  }) : _localNotificationService = localNotificationService;
+
+  /// Traductions de la langue affichee, lues a l'appel.
+  final AppLocalizations Function() readL10n;
+
+  /// Locale `intl` de la langue affichee, lue a l'appel.
+  final String Function() readIntlLocale;
+
   StompClient? _client;
   final _notificationController = StreamController<NotificationModel>.broadcast();
   final _exchangeRatesUpdatedController = StreamController<void>.broadcast();
@@ -68,22 +89,7 @@ class StompService with WidgetsBindingObserver {
   void _onConnect(StompFrame frame) {
     _client?.subscribe(
       destination: '/user/queue/notifications',
-      callback: (frame) {
-        if (frame.body != null) {
-          final notification = NotificationModel.fromJson(
-            jsonDecode(frame.body!) as Map<String, dynamic>,
-          );
-          _notificationController.add(notification);
-
-          if (_appState != AppLifecycleState.resumed) {
-            _localNotificationService?.showNotification(
-              id: notification.id,
-              title: notification.title,
-              body: notification.message,
-            );
-          }
-        }
-      },
+      callback: handleNotificationFrame,
     );
     _client?.subscribe(
       destination: '/user/queue/exchange-rates',
@@ -97,6 +103,32 @@ class StompService with WidgetsBindingObserver {
       },
     );
     _onReconnect?.call();
+  }
+
+  /// Publie la notification portee par [frame] et, hors premier plan,
+  /// l'affiche dans le systeme avec son texte traduit.
+  @visibleForTesting
+  void handleNotificationFrame(StompFrame frame) {
+    final body = frame.body;
+    if (body == null) {
+      return;
+    }
+    final notification = NotificationModel.fromJson(
+      jsonDecode(body) as Map<String, dynamic>,
+    );
+    _notificationController.add(notification);
+
+    if (_appState != AppLifecycleState.resumed) {
+      final text =
+          buildNotificationText(notification, readL10n(), readIntlLocale());
+      unawaited(
+        _localNotificationService?.showNotification(
+          id: notification.id,
+          title: text.title,
+          body: text.message,
+        ),
+      );
+    }
   }
 
   void disconnect() {

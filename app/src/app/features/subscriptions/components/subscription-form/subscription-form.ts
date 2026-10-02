@@ -6,8 +6,6 @@ import {
   inject,
   input,
   output,
-  Pipe,
-  PipeTransform,
   Signal,
   signal,
 } from '@angular/core';
@@ -15,6 +13,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorCalendarBlank,
   phosphorWallet,
@@ -41,33 +40,21 @@ import {
   Frequency,
   Subscription,
   SubscriptionRequest,
+  SUBSCRIPTION_FREQUENCY_LABEL_KEYS,
 } from '../../../../core/models/subscription.model';
 import { isFieldInvalid, validateForm, normalizeDecimal, decimalMin } from '../../../../shared/utils/form.utils';
 import { createAmountWidth } from '../../../../shared/utils/amount-width.utils';
+import { getCurrencySymbol, formatCurrencyAmount, insertSortedByNom } from '../../../../shared/utils/locale-format.utils';
 import { expandCollapse } from '../../../../shared/animations/expand-collapse';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
+import { ShortDatePipe } from '../../../../shared/pipes/short-date.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 
 type ExpandableSection = 'date' | 'category' | 'account' | 'currency' | null;
 
-@Pipe({ name: 'shortDate', standalone: true })
-export class ShortDatePipe implements PipeTransform {
-  transform(value: string): string {
-    if (!value) return '';
-    const date = new Date(value + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = date.getTime() - today.getTime();
-    const days = Math.round(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === -1) return 'Hier';
-    if (days === 1) return 'Demain';
-    return date.toLocaleDateString(APP_LOCALE, { day: 'numeric', month: 'short' });
-  }
-}
-
 @Component({
   selector: 'app-subscription-form',
-  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe],
+  imports: [ReactiveFormsModule, CategorySelect, InlineDatePicker, SelectPicker, NgIcon, ShortDatePipe, CategoryNamePipe, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorCalendarBlank,
@@ -92,6 +79,8 @@ export class SubscriptionForm {
   private readonly currencyService = inject(CurrencyService);
   private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly subscription = computed(() => this.modalService.editingEntity() as Subscription | null);
   readonly frequence = input(Frequency.MENSUEL);
@@ -99,6 +88,7 @@ export class SubscriptionForm {
   readonly cancelled = output<void>();
 
   readonly Frequency = Frequency;
+  readonly SUBSCRIPTION_FREQUENCY_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_LABEL_KEYS;
   readonly currentFrequency = signal(Frequency.MENSUEL);
   readonly isEditing = computed(() => this.subscription() !== null);
   readonly submitting = signal(false);
@@ -158,13 +148,7 @@ export class SubscriptionForm {
   readonly selectedAccountName = computed(() => this.selectedAccount()?.nom ?? null);
   readonly selectedAccountColor = computed(() => this.selectedAccount()?.couleur ?? null);
 
-  readonly currencySymbol = computed(() => {
-    const currency = this.selectedAccount()?.currency ?? 'EUR';
-    return (0)
-      .toLocaleString(APP_LOCALE, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 })
-      .replace('0', '')
-      .trim();
-  });
+  readonly currencySymbol = computed(() => getCurrencySymbol(this.selectedAccount()?.currency ?? 'EUR', this.languageService.displayLocale()));
 
   readonly showCurrencyPicker = computed(() => !this.accountIdSignal());
 
@@ -231,9 +215,7 @@ export class SubscriptionForm {
   }
 
   onCategoryCreated(cat: Category): void {
-    this.allCategories.update(cats =>
-      [...cats, cat].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
-    );
+    this.allCategories.update((cats) => insertSortedByNom(cats, cat, this.languageService.displayLocale()));
   }
 
   toggleSection(section: ExpandableSection): void {
@@ -263,7 +245,7 @@ export class SubscriptionForm {
     const montant = normalizeDecimal(raw.montant);
 
     if (isNaN(montant) || montant < 0.01) {
-      this.errorMessage.set('Montant invalide');
+      this.errorMessage.set(this.transloco.translate('subscriptions.feedback.amountInvalid'));
       this.submitting.set(false);
       return;
     }
@@ -289,7 +271,7 @@ export class SubscriptionForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'));
     } finally {
       this.submitting.set(false);
     }
@@ -299,12 +281,10 @@ export class SubscriptionForm {
     const sub = this.subscription();
     if (!sub) return;
     const currency = sub.account?.currency ?? sub.currency ?? 'EUR';
-    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency });
-    const ok = await this.confirmService.confirm({
+    const amount = formatCurrencyAmount(sub.montant, currency, this.languageService.displayLocale());
+    const ok = await this.confirmService.confirmDelete({
       title: `${sub.nom} — ${amount}`,
-      message: 'Voulez-vous vraiment supprimer cet abonnement ?',
-      confirmLabel: 'Supprimer',
-      variant: 'danger',
+      message: this.transloco.translate('subscriptions.dialog.deleteMessage'),
       icon: 'phosphorRepeat',
     });
     if (!ok) return;
@@ -312,7 +292,7 @@ export class SubscriptionForm {
       await firstValueFrom(this.subscriptionService.delete(sub.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'));
     }
   }
 

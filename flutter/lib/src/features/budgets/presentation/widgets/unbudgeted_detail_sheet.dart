@@ -11,8 +11,10 @@ import 'package:k_budget/src/domain/models/unbudgeted_item.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/enum_utils.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Bottom sheet affichant la liste des catégories non budgétées avec leurs dépenses.
@@ -52,7 +54,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
     );
   }
 
-  /// Widget réutilisable pour la ligne "Autre" (dépenses non budgétées).
+  /// Widget réutilisable pour la ligne des dépenses non budgétées.
   static Widget buildOtherRow(
     BuildContext context,
     double total,
@@ -62,6 +64,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
     final currencyEnum = Currency.values.byNameOrDefault(
       currency.toLowerCase(),
       Currency.eur,
+    );
+    final formattedTotal = AmountFormatter.format(
+      total,
+      currency: currencyEnum,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -85,7 +92,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              AppLocalizations.of(context)!.budgetOtherCategory,
+              AppLocalizations.of(context)!.budgetsPageUnbudgetedTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 fontWeight: AppTypography.medium,
@@ -94,7 +101,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
             ),
           ),
           Text(
-            AmountFormatter.format(total, currency: currencyEnum),
+            formattedTotal,
             style: TextStyle(
               fontSize: AppTypography.sizeSm,
               fontWeight: AppTypography.semiBold,
@@ -118,6 +125,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
     final currencyEnum = Currency.values.byNameOrDefault(
       currency.toLowerCase(),
       Currency.eur,
+    );
+    final formattedTotal = AmountFormatter.format(
+      total,
+      currency: currencyEnum,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
     );
 
     return SafeArea(
@@ -164,7 +176,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    l10n.budgetOtherCategory,
+                    l10n.budgetsPageUnbudgetedTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeXl,
                       fontWeight: AppTypography.semiBold,
@@ -177,7 +189,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.space3),
             // Total
             Text(
-              '${l10n.total} : ${AmountFormatter.format(total, currency: currencyEnum)}',
+              l10n.budgetsSummaryTotal(formattedTotal),
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -210,7 +222,11 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        item.categoryNom,
+                        categoryDisplayName(
+                          item.categoryNom,
+                          item.categorySystemKey,
+                          l10n,
+                        ),
                         style: TextStyle(
                           fontSize: AppTypography.sizeSm,
                           fontWeight: AppTypography.medium,
@@ -224,7 +240,7 @@ class UnbudgetedDetailSheet extends StatelessWidget {
                       AmountFormatter.format(
                         item.montantDepense,
                         currency: currencyEnum,
-                      ),
+                        locale: intlLocaleFor(Localizations.localeOf(context))),
                       style: TextStyle(
                         fontSize: AppTypography.sizeSm,
                         fontWeight: AppTypography.semiBold,

@@ -1,8 +1,8 @@
 <div class="page-header">
-  <button class="page-header__back" routerLink="/settings" aria-label="Retour">
+  <button class="page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
     <ng-icon name="phosphorCaretLeft" size="20" />
   </button>
-  <h1 class="page-header__title"><ng-icon name="phosphorBank" size="20" /> Comptes &amp; Devises</h1>
+  <h1 class="page-header__title"><ng-icon name="phosphorBank" size="20" /> {{ 'accounts.page.title' | transloco }}</h1>
 </div>
 
 @if (loading()) {
@@ -23,22 +23,22 @@
 } @else if (error()) {
   <app-empty-state
     icon="phosphorWarning"
-    message="Erreur de chargement"
-    ctaLabel="Réessayer"
+    [message]="'common.feedback.loadError' | transloco"
+    [ctaLabel]="'common.action.retry' | transloco"
     (ctaClick)="loadAccounts()"
   />
 } @else if (accounts().length === 0) {
   <app-empty-state
     icon="phosphorBank"
-    message="Aucun compte"
-    hint="Créez votre premier compte pour commencer"
-    ctaLabel="Créer un compte"
+    [message]="'accounts.empty.title' | transloco"
+    [hint]="'accounts.empty.hint' | transloco"
+    [ctaLabel]="'accounts.action.create' | transloco"
     (ctaClick)="createAccount()"
   />
 } @else {
   <div class="accounts-section">
     <div class="accounts-section__header">
-      <span class="accounts-section__label">{{ accounts().length }} comptes</span>
+      <span class="accounts-section__label">{{ 'accounts.list.count' | transloco: { count: accounts().length } }}</span>
       <button class="accounts-section__add" (click)="createAccount()">
         <ng-icon name="phosphorPlus" size="16" />
       </button>
@@ -51,49 +51,49 @@
             <div class="account-row__top">
               <span class="account-row__name">{{ account.nom }}</span>
               @if (account.isDefault) {
-                <span class="account-row__badge">Défaut</span>
+                <span class="account-row__badge">{{ 'accounts.value.default' | transloco }}</span>
               }
               @if (!account.actif) {
-                <span class="account-row__badge">Inactif</span>
+                <span class="account-row__badge">{{ 'common.value.inactive' | transloco }}</span>
               }
             </div>
             <span class="account-row__subtitle">
               @if (account.bankName) {
                 {{ account.bankName }} ·
               }
-              {{ account.type }}
+              {{ ACCOUNT_TYPE_LABEL_KEYS[account.type] | transloco }}
             </span>
           </div>
           <span class="account-row__solde" [class.amount-expense]="account.solde < 0">
             {{ account.solde | amount: null : account.currency }}
           </span>
           <div class="account-row__actions">
-            <button class="btn-action btn-action--danger" (click)="requestDelete(account.id)" aria-label="Supprimer">
+            <button class="btn-action btn-action--danger" (click)="requestDelete(account.id)" [attr.aria-label]="'common.action.delete' | transloco">
               <ng-icon name="phosphorTrash" size="16" />
             </button>
             <span class="account-row__actions-spacer"></span>
             @if (!account.isDefault && account.actif) {
-              <button class="btn-action" (click)="setDefault(account)" title="Définir par défaut">
+              <button class="btn-action" (click)="setDefault(account)" [title]="'accounts.action.setDefault' | transloco">
                 <ng-icon name="phosphorStar" size="16" />
               </button>
             }
-            <button class="btn-action" (click)="editAccount(account)" aria-label="Modifier">
+            <button class="btn-action" (click)="editAccount(account)" [attr.aria-label]="'common.action.edit' | transloco">
               <ng-icon name="phosphorPencilSimple" size="16" />
             </button>
-            <button class="btn-action" (click)="triggerImport(account.id)" title="Importer un CSV">
+            <button class="btn-action" (click)="triggerImport(account.id)" [title]="'imports.action.importCsv' | transloco">
               <ng-icon name="phosphorUploadSimple" size="16" />
             </button>
           </div>
 
           @if (confirmDeleteId() === account.id) {
             <div class="account-row__confirm">
-              <p>Supprimer ce compte ?</p>
+              <p>{{ 'accounts.dialog.deleteMessage' | transloco }}</p>
               @if (deleteError()) {
                 <p class="account-row__confirm-error">{{ deleteError() }}</p>
               }
               <div class="account-row__confirm-actions">
-                <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
-                <button class="btn-delete" (click)="confirmDelete()">Supprimer</button>
+                <button class="btn-cancel" (click)="cancelDelete()">{{ 'common.action.cancel' | transloco }}</button>
+                <button class="btn-delete" (click)="confirmDelete()">{{ 'common.action.delete' | transloco }}</button>
               </div>
             </div>
           }

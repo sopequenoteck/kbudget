@@ -13,7 +13,10 @@ import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
+import 'package:k_budget/src/utils/currency_name.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // Provider public (sans intercepteur auth) pour le lookup invitation
@@ -53,6 +56,8 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
   Future<void> _handleSubmit(String email) async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _isSubmitting = true;
       _submitError = null;
@@ -74,6 +79,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           'displayName': _displayNameController.text.trim(),
           'currency': _selectedCurrency,
           'timezone': timezone,
+          'defaultAccountName': l10n.accountsValueDefaultAccountName,
         },
       );
 
@@ -94,18 +100,14 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
     } on DioException catch (e) {
       setState(() {
         _isSubmitting = false;
-        if (e.response?.statusCode == 404) {
-          _submitError =
-              'Le lien d\'invitation est invalide, expiré ou déjà utilisé.';
-        } else {
-          _submitError =
-              'Erreur lors de la création du compte. Veuillez réessayer.';
-        }
+        _submitError = e.response?.statusCode == 404
+            ? l10n.authFeedbackInvalidLink
+            : l10n.authFeedbackCreateAccountError;
       });
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       setState(() {
         _isSubmitting = false;
-        _submitError = 'Erreur inattendue: $e';
+        _submitError = l10n.errorsClientUnknown;
       });
     }
   }
@@ -113,6 +115,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
   @override
   Widget build(BuildContext context) {
     final lookupAsync = ref.watch(_invitationLookupProvider(widget.token));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -122,12 +125,12 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
               child: lookupAsync.when(
-                loading: () => const Column(
+                loading: () => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: AppSpacing.space4),
-                    Text('Vérification de l\'invitation…'),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: AppSpacing.space4),
+                    Text(l10n.authFeedbackCheckingLink),
                   ],
                 ),
                 error: (_, _) => Column(
@@ -140,13 +143,13 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                     ),
                     const SizedBox(height: AppSpacing.space4),
                     Text(
-                      'Lien invalide',
+                      l10n.authPageInvalidLinkTitle,
                       style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.space2),
                     Text(
-                      'Ce lien d\'invitation est invalide, expiré, déjà utilisé ou révoqué.',
+                      l10n.authFeedbackInvalidLink,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -157,11 +160,11 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                     const SizedBox(height: AppSpacing.space6),
                     FilledButton(
                       onPressed: () => context.go(RouteNames.login),
-                      child: const Text('Retour à la connexion'),
+                      child: Text(l10n.authActionBackToLogin),
                     ),
                   ],
                 ),
-                data: (email) => _buildForm(context, email),
+                data: (email) => _buildForm(context, email, l10n),
               ),
             ),
           ),
@@ -170,7 +173,11 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
     );
   }
 
-  Widget _buildForm(BuildContext context, String email) {
+  Widget _buildForm(
+    BuildContext context,
+    String email,
+    AppLocalizations l10n,
+  ) {
     final theme = Theme.of(context);
 
     return Form(
@@ -186,13 +193,13 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           ),
           const SizedBox(height: AppSpacing.space4),
           Text(
-            'Créer votre compte',
+            l10n.authPageAcceptInviteTitle,
             style: theme.textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.space2),
           Text(
-            'Complétez votre profil pour rejoindre l\'instance.',
+            l10n.authPageAcceptInviteTagline,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -203,33 +210,16 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           TextFormField(
             initialValue: email,
             enabled: false,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              prefixIcon: PhosphorIcon(
+            decoration: InputDecoration(
+              labelText: l10n.authFormEmail,
+              prefixIcon: const PhosphorIcon(
                 PhosphorIconsRegular.envelope,
                 size: 20,
               ),
             ),
           ),
           const SizedBox(height: AppSpacing.space4),
-          TextFormField(
-            controller: _displayNameController,
-            textInputAction: TextInputAction.next,
-            autofillHints: const [AutofillHints.name],
-            decoration: const InputDecoration(
-              labelText: 'Nom d\'affichage',
-              prefixIcon: PhosphorIcon(
-                PhosphorIconsRegular.user,
-                size: 20,
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Veuillez saisir un nom';
-              }
-              return null;
-            },
-          ),
+          AuthDisplayNameField(controller: _displayNameController),
           const SizedBox(height: AppSpacing.space4),
           TextFormField(
             controller: _passwordController,
@@ -237,7 +227,7 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
             textInputAction: TextInputAction.done,
             autofillHints: const [AutofillHints.newPassword],
             decoration: InputDecoration(
-              labelText: 'Mot de passe',
+              labelText: l10n.authFormPassword,
               prefixIcon: const PhosphorIcon(
                 PhosphorIconsRegular.lock,
                 size: 20,
@@ -252,14 +242,14 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
-              helperText: PasswordPolicy.helperText,
+              helperText: PasswordPolicy.helperText(l10n),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez saisir un mot de passe';
+                return l10n.authFormPasswordRequired;
               }
               if (value.length < PasswordPolicy.minLength) {
-                return PasswordPolicy.tooShortMessage;
+                return PasswordPolicy.tooShortMessage(l10n);
               }
               return null;
             },
@@ -268,9 +258,9 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           const SizedBox(height: AppSpacing.space4),
           DropdownButtonFormField<String>(
             initialValue: _selectedCurrency,
-            decoration: const InputDecoration(
-              labelText: 'Devise principale',
-              prefixIcon: PhosphorIcon(
+            decoration: InputDecoration(
+              labelText: l10n.authFormCurrency,
+              prefixIcon: const PhosphorIcon(
                 PhosphorIconsRegular.currencyCircleDollar,
                 size: 20,
               ),
@@ -278,7 +268,9 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
             items: Currency.values.map((currency) {
               return DropdownMenuItem<String>(
                 value: currency.name.toUpperCase(),
-                child: Text('${currency.symbol} - ${currency.displayName}'),
+                child: Text(
+                  '${currency.symbol} - ${currencyName(currency, l10n)}',
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -305,13 +297,13 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Créer mon compte'),
+                : Text(l10n.authActionCreateAccount),
           ),
           const SizedBox(height: AppSpacing.space4),
           TextButton(
             onPressed:
                 _isSubmitting ? null : () => context.go(RouteNames.login),
-            child: const Text('Retour à la connexion'),
+            child: Text(l10n.authActionBackToLogin),
           ),
         ],
       ),

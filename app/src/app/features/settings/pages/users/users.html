@@ -1,10 +1,10 @@
 <div class="users-page">
   <!-- Header (pattern partagé) -->
   <div class="page-header">
-    <a class="page-header__back" routerLink="/settings" aria-label="Retour">
+    <a class="page-header__back" routerLink="/settings" [attr.aria-label]="'common.action.back' | transloco">
       <ng-icon name="phosphorCaretLeft" size="20" />
     </a>
-    <h1 class="page-header__title"><ng-icon name="phosphorUsers" size="20" /> Utilisateurs</h1>
+    <h1 class="page-header__title"><ng-icon name="phosphorUsers" size="20" /> {{ 'users.page.adminTitle' | transloco }}</h1>
   </div>
 
   <!-- Tabs -->
@@ -15,7 +15,7 @@
       [class.users-tab--active]="activeTab() === 'invitations'"
       (click)="setTab('invitations')"
     >
-      Invitations
+      {{ 'users.page.invitationsTab' | transloco }}
     </button>
     <button
       type="button"
@@ -23,7 +23,7 @@
       [class.users-tab--active]="activeTab() === 'users'"
       (click)="setTab('users')"
     >
-      Utilisateurs
+      {{ 'users.page.adminTitle' | transloco }}
     </button>
   </div>
 
@@ -38,7 +38,7 @@
           (click)="openInviteForm()"
         >
           <ng-icon name="phosphorPlus" size="16" />
-          Inviter un utilisateur
+          {{ 'users.action.invite' | transloco }}
         </button>
       }
 
@@ -47,12 +47,12 @@
         <div class="users-invite-form">
           <form [formGroup]="inviteForm" (ngSubmit)="onInvite()">
             <div class="users-invite-form__field">
-              <label for="invite-email" class="users-invite-form__label">Adresse email</label>
+              <label for="invite-email" class="users-invite-form__label">{{ 'auth.form.emailAddress' | transloco }}</label>
               <input
                 id="invite-email"
                 type="email"
                 formControlName="email"
-                placeholder="nouveau@exemple.com"
+                [placeholder]="'users.form.emailPlaceholder' | transloco"
                 class="users-invite-form__input"
                 [class.users-invite-form__input--error]="
                   inviteForm.controls.email.touched && inviteForm.controls.email.invalid
@@ -60,11 +60,11 @@
                 autocomplete="off"
               />
               @if (inviteForm.controls.email.touched && inviteForm.controls.email.invalid) {
-                <span class="users-invite-form__error">Email valide requis</span>
+                <span class="users-invite-form__error">{{ 'users.form.validEmailRequired' | transloco }}</span>
               }
             </div>
             <p class="users-invite-form__hint">
-              Le lien sera automatiquement copié dans votre presse-papiers.
+              {{ 'users.form.inviteLinkHint' | transloco }}
             </p>
             <div class="users-invite-form__actions">
               <button
@@ -72,14 +72,14 @@
                 class="users-btn users-btn--ghost"
                 (click)="closeInviteForm()"
               >
-                Annuler
+                {{ 'common.action.cancel' | transloco }}
               </button>
               <button
                 type="submit"
                 class="users-btn users-btn--primary"
                 [disabled]="loading()"
               >
-                @if (loading()) { Envoi... } @else { Créer et copier le lien }
+                {{ (loading() ? 'users.feedback.sendingInvite' : 'users.action.createInvite') | transloco }}
               </button>
             </div>
           </form>
@@ -90,7 +90,7 @@
       @if (invitations().length === 0) {
         <div class="users-empty">
           <ng-icon name="phosphorEnvelope" size="32" />
-          <span>Aucune invitation pour le moment</span>
+          <span>{{ 'users.empty.invitations' | transloco }}</span>
         </div>
       } @else {
         <div class="users-list">
@@ -105,11 +105,11 @@
                   [class.users-list-item__status--expired]="invitation.status === 'EXPIRED'"
                   [class.users-list-item__status--revoked]="invitation.status === 'REVOKED'"
                 >
-                  {{ statusLabel(invitation.status) }}
+                  {{ statusKey(invitation.status) | transloco }}
                 </span>
               </div>
               <span class="users-list-item__meta">
-                Par {{ invitation.invitedByEmail }}
+                {{ 'users.list.invitedBy' | transloco: { email: invitation.invitedByEmail } }}
               </span>
               @if (invitation.status === 'ACTIVE') {
                 <div class="users-list-item__actions">
@@ -121,7 +121,7 @@
                       [disabled]="loading()"
                     >
                       <ng-icon name="phosphorCopy" size="14" />
-                      Copier le lien
+                      {{ 'users.action.copyLink' | transloco }}
                     </button>
                   }
                   <button
@@ -131,7 +131,7 @@
                     [disabled]="loading()"
                   >
                     <ng-icon name="phosphorTrash" size="14" />
-                    Révoquer
+                    {{ 'users.action.revoke' | transloco }}
                   </button>
                 </div>
               }
@@ -148,7 +148,7 @@
       @if (users().length === 0) {
         <div class="users-empty">
           <ng-icon name="phosphorUsers" size="32" />
-          <span>Aucun utilisateur trouvé</span>
+          <span>{{ 'users.empty.users' | transloco }}</span>
         </div>
       } @else {
         <div class="users-list">
@@ -159,7 +159,7 @@
                 @if (user.isAdmin) {
                   <span class="users-list-item__badge">
                     <ng-icon name="phosphorShieldCheck" size="12" />
-                    Admin
+                    {{ 'users.value.admin' | transloco }}
                   </span>
                 }
                 <span
@@ -167,7 +167,7 @@
                   [class.users-list-item__status--active]="user.disabledAt === null"
                   [class.users-list-item__status--revoked]="user.disabledAt !== null"
                 >
-                  {{ user.disabledAt === null ? 'Actif' : 'Désactivé' }}
+                  {{ (user.disabledAt === null ? 'common.value.active' : 'users.value.disabled') | transloco }}
                 </span>
               </div>
               <span class="users-list-item__meta">{{ user.email }}</span>
@@ -180,7 +180,7 @@
                     [disabled]="loading()"
                   >
                     <ng-icon name="phosphorLock" size="14" />
-                    Désactiver
+                    {{ 'common.action.disable' | transloco }}
                   </button>
                 } @else {
                   <button
@@ -190,7 +190,7 @@
                     [disabled]="loading()"
                   >
                     <ng-icon name="phosphorLockSimpleOpen" size="14" />
-                    Réactiver
+                    {{ 'common.action.enable' | transloco }}
                   </button>
                 }
               </div>

@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
@@ -80,13 +81,15 @@ public class NotificationScheduler {
                 if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(userId, NotificationType.SUBSCRIPTION_DUE, sub.getId(), since)) {
                     continue;
                 }
+                NotificationContent content = NotificationContentFactory.subscriptionDue(sub.getNom());
                 notificationService.createNotification(
                         userId,
                         NotificationType.SUBSCRIPTION_DUE,
-                        "Abonnement " + sub.getNom(),
-                        "Abonnement " + sub.getNom() + " — échéance demain",
+                        content.title(),
+                        content.message(),
                         EntityType.SUBSCRIPTION,
-                        sub.getId()
+                        sub.getId(),
+                        content.params()
                 );
                 log.info("Notification abonnement créée: {} pour userId={}", sub.getNom(), userId);
                 count++;
@@ -108,13 +111,15 @@ public class NotificationScheduler {
                 if (notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(userId, NotificationType.DEBT_DUE, debt.getId(), since)) {
                     continue;
                 }
+                NotificationContent content = NotificationContentFactory.debtDue(debt.getPersonne());
                 notificationService.createNotification(
                         userId,
                         NotificationType.DEBT_DUE,
-                        "Dette " + debt.getPersonne(),
-                        "Dette envers " + debt.getPersonne() + " — échéance demain",
+                        content.title(),
+                        content.message(),
                         EntityType.DEBT,
-                        debt.getId()
+                        debt.getId(),
+                        content.params()
                 );
                 log.info("Notification dette créée: {} pour userId={}", debt.getPersonne(), userId);
                 count++;
@@ -149,13 +154,16 @@ public class NotificationScheduler {
                     BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
                     BigDecimal remaining = debt.getMontant().subtract(paid != null ? paid : BigDecimal.ZERO);
 
+                    NotificationContent content = NotificationContentFactory.debtReminder(
+                            debt.getPersonne(), remaining.toPlainString(), debt.getCurrency());
                     notificationService.createNotification(
                             userId,
                             NotificationType.DEBT_REMINDER,
-                            "Rappel dette - " + debt.getPersonne(),
-                            "Rappel : dette envers " + debt.getPersonne() + " — " + remaining + " " + debt.getCurrency().getSymbol() + " restant",
+                            content.title(),
+                            content.message(),
                             EntityType.DEBT,
-                            debt.getId()
+                            debt.getId(),
+                            content.params()
                     );
                     count++;
                     log.info("Notification rappel dette créée: {} pour userId={}", debt.getPersonne(), userId);
@@ -207,14 +215,17 @@ public class NotificationScheduler {
                 continue;
             }
 
-            String currency = recurring.getAccount() != null ? recurring.getAccount().getCurrency().getSymbol() : "€";
+            Currency currency = recurring.getAccount() != null ? recurring.getAccount().getCurrency() : null;
+            NotificationContent content = NotificationContentFactory.recurringTransactionDue(
+                    recurring.getLibelle(), recurring.getMontant().toPlainString(), currency, recurring.getNextOccurrence());
             notificationService.createNotification(
                     userId,
                     NotificationType.RECURRING_TRANSACTION_DUE,
-                    "Transaction récurrente " + recurring.getLibelle(),
-                    recurring.getLibelle() + " " + recurring.getMontant() + currency + " — échéance " + recurring.getNextOccurrence(),
+                    content.title(),
+                    content.message(),
                     EntityType.TRANSACTION,
-                    recurring.getId()
+                    recurring.getId(),
+                    content.params()
             );
             log.info("Notification récurrence créée: {} pour userId={}", recurring.getLibelle(), userId);
             count++;

@@ -12,9 +12,12 @@ import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/presentation/widgets/budget_item.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BudgetSummarySection extends ConsumerWidget {
@@ -40,6 +43,7 @@ class BudgetSummarySection extends ConsumerWidget {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // Top 4 items tries par pourcentage decroissant (depasses en premier)
     final topItems = [...overview.items]
@@ -50,6 +54,18 @@ class BudgetSummarySection extends ConsumerWidget {
       (c) => c.name == overview.currency || c.name == overview.currency.toLowerCase(),
       orElse: () => Currency.eur,
     );
+    final locale = ref.watch(intlLocaleProvider);
+    final monthLabel = DateFormat.yMMMM(locale).format(DateTime.now());
+    final spentFormatted = AmountFormatter.format(
+      overview.totalSpent,
+      currency: currencyEnum,
+      locale: locale,
+    );
+    final budgetFormatted = AmountFormatter.format(
+      overview.totalBudget,
+      currency: currencyEnum,
+      locale: locale,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +75,7 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Budgets · ${DateFormat('MMMM yyyy', 'fr_FR').format(DateTime.now())}',
+              '${l10n.budgetsPageTitle} · $monthLabel',
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,
                 fontWeight: AppTypography.semiBold,
@@ -68,7 +84,7 @@ class BudgetSummarySection extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () => context.push(RouteNames.budgets),
-              child: const Text('Voir tout'),
+              child: Text(l10n.commonActionViewAll),
             ),
           ],
         ),
@@ -78,7 +94,9 @@ class BudgetSummarySection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'MENSUEL · EN ${overview.currency.toUpperCase()}',
+              l10n
+                  .budgetsSummaryMonthlyInCurrency(overview.currency)
+                  .toUpperCase(),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -87,7 +105,7 @@ class BudgetSummarySection extends ConsumerWidget {
               ),
             ),
             Text(
-              '${AmountFormatter.format(overview.totalSpent, currency: currencyEnum)} / ${AmountFormatter.format(overview.totalBudget, currency: currencyEnum)}',
+              '$spentFormatted / $budgetFormatted',
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -107,7 +125,11 @@ class BudgetSummarySection extends ConsumerWidget {
           child: Column(
             children: displayItems.map(
               (item) => BudgetItem(
-                categoryNom: item.categoryNom,
+                categoryNom: categoryDisplayName(
+                  item.categoryNom,
+                  item.categorySystemKey,
+                  l10n,
+                ),
                 categoryIcone: item.categoryIcone,
                 categoryCouleur: item.categoryCouleur,
                 montantBudget: item.montantBudgetNormalise,

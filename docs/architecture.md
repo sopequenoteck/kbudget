@@ -53,7 +53,7 @@ Architecture en couches : Controller → Service → Repository. Les entites JPA
 - **`User.isAdmin`** (KKS-233) : flag boolean **autoritaire en DB** (`users.is_admin`, colonne ajoutee via migration V30, defaut `FALSE`). Remplace la resolution dynamique via `ADMIN_EMAILS` pour eviter qu'un self-hoster perde son acces admin apres un changement d'email.
 - **`AdminEmailResolver`** (KKS-232) : composant Spring lisant la property `app.admin-emails` (env var `ADMIN_EMAILS`, liste CSV). Normalise trim+lowercase au `@PostConstruct`. Expose `isAdminEmail(email)` + `listAdminEmails()`. Emet `WARN` au boot si la liste est vide. **Depuis KKS-233, il n'est plus utilise pour l'autorisation** — uniquement consomme par `AdminSyncRunner` et par les services d'invitation.
 - **`AdminSyncRunner`** (KKS-233) : `ApplicationRunner @Order(2)`, `@Transactional`. Au boot, pour chaque email de `ADMIN_EMAILS` : si le user existe avec `isAdmin=false`, passe a `true` (promotion). **Jamais de retrogradation** (`true → false`). Idempotent.
-- **`DevCurrentMonthSeedRunner`** (KKS-355) : `ApplicationRunner @Order(3)`, **`@Profile("dev")`**. Genere dix transactions sur les jours ecoules du mois courant pour `dev@local.test`, en reutilisant les categories et le compte du seed — il n'en cree aucun. Idempotent (garde sur l'existence d'une transaction du mois), et jamais de date future : chaque jour cible est ramene a aujourd'hui s'il deborde, ce qui couvre le 1er du mois. **La garde de profil n'est pas un detail de configuration** : le profil `prod` est le defaut du projet, un runner mal garde injecterait de fausses transactions chez un self-hoster. Un test l'enregistre dans un contexte Spring reel et verifie que le bean n'existe pas hors du profil `dev`.
+- **`DevCurrentMonthSeedRunner`** (KKS-355) : `ApplicationRunner @Order(3)`, **`@Profile("dev")`**. Genere dix transactions sur les jours ecoules du mois courant pour `dev@local.test` et pour `demo@local.test` (miroir anglais, libelles traduits, KKS-394), en reutilisant les categories et le compte du seed de chacun — il n'en cree aucun. Idempotent (garde sur l'existence d'une transaction du mois), et jamais de date future : chaque jour cible est ramene a aujourd'hui s'il deborde, ce qui couvre le 1er du mois. **La garde de profil n'est pas un detail de configuration** : le profil `prod` est le defaut du projet, un runner mal garde injecterait de fausses transactions chez un self-hoster. Un test l'enregistre dans un contexte Spring reel et verifie que le bean n'existe pas hors du profil `dev`.
 
   Il existe parce que `R__dev_seed.sql` est une migration *repeatable* : elle ne rejoue que si son checksum change. Ses dates sont relatives a `CURRENT_DATE` (KKS-354), donc une base recreee est fraiche — mais une base conservee plusieurs mois se retrouve sans aucune transaction sur le mois en cours.
 - **`MetaController`** (KKS-314) : expose `GET /api/meta` — `serverVersion`
@@ -153,8 +153,12 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | bankCode | String | Code de la banque associee (default "OTHER") |
 | bankCustomName | String | Nom personnalise si bankCode="OTHER" (nullable) |
 | bankCustomLogo | String | Logo personnalise en base64 data URI (nullable) |
+| statementProfileKey | String | Profil du dernier releve importe sur ce compte : `REGISTRY:<bankCode>` ou `CUSTOM:<id du profil>` (nullable, max 64) — KKS-384 |
+| statementAccountSuffix | String | 4 derniers chiffres du numero de compte lu dans l'en-tete du releve (nullable, max 4) — KKS-384. Le numero complet n'est **jamais** stocke, ni en clair ni en empreinte |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
+
+> Reconnaissance du compte (KKS-384) : `statementProfileKey` + `statementAccountSuffix` sont ecrits a la confirmation d'un import, sur le compte choisi par l'utilisateur (ils remplacent les precedents de ce compte). `POST /imports/detect` suggere l'unique compte **actif de l'utilisateur authentifie** qui porte la meme paire ; aucune suggestion s'il y en a zero ou plusieurs. Une association n'est jamais lue ni ecrite au-dela de son utilisateur. Le solde d'un compte reste `soldeInitial` + somme de ses transactions, jamais stocke.
 
 ### Transaction
 
@@ -193,6 +197,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | actif | Boolean | Abonnement actif ou non |
 | category | Category | FK → Category (nullable) |
 | account | Account | FK → Account (nullable) |
+| statementMerchantKey | String | Cle commercant (`MerchantKey`) du libelle de releve, apprise quand une ligne est rapprochee d'un de ses paiements ; nullable — KKS-385 |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -227,6 +232,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | icone | String | Icone (emoji ou identifiant) |
 | couleur | String | Couleur hexadecimale (#RRGGBB) |
 | isSystem | Boolean | Categorie systeme (non modifiable) |
+| systemKey | SystemCategoryKey | Cle stable d'une categorie systeme (`SUBSCRIPTION`, `DEBT`, `TRANSFER`, `ADJUSTMENT`), null pour une categorie utilisateur. Unique par utilisateur (KKS-395) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -252,6 +258,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | enabledNotificationTypes | List\<NotificationType\> | Types de notifications activees (nullable — null = tous actifs, opt-out) |
 | timezone | String | Fuseau horaire (default "Europe/Paris") |
 | textScale | TextScale | Taille de texte (SMALL/MEDIUM/LARGE, default MEDIUM) |
+| language | String | Langue d'interface, code BCP 47 restreint (`en`, `fr`, `pt-BR`). Nullable sans defaut : null = pas choisi, le client suit alors le navigateur (Angular, KKS-373) ou la langue du telephone (Flutter, KKS-405). Retour a null via `DELETE /users/me/preferences/language` (KKS-380) |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | @OneToOne → User (unique, non-null) |
 
@@ -275,11 +282,12 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | Champ | Type | Description |
 |-------|------|-------------|
 | id | UUID | Identifiant |
-| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED |
-| entityType | EntityType | SUBSCRIPTION / DEBT |
+| type | NotificationType | SUBSCRIPTION_DUE / DEBT_DUE / DEBT_REMINDER / BUDGET_THRESHOLD / BUDGET_EXCEEDED / RECURRING_TRANSACTION_DUE |
+| entityType | EntityType | SUBSCRIPTION / DEBT / BUDGET / TRANSACTION |
 | entityId | UUID | ID de l'entite liee |
 | title | String | Titre de la notification |
-| body | String | Corps du message |
+| message | String | Corps du message |
+| params | Map<String,String> (JSONB) | Parametres du texte construit par le client, null avant KKS-397 |
 | read | Boolean | Lue ou non (default false) |
 | readAt | LocalDateTime | Date de lecture (nullable) |
 | createdAt | LocalDateTime | Date de creation |
@@ -326,13 +334,20 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | duplicateCount | Integer | Doublons detectes |
 | skippedCount | Integer | Lignes ignorees |
 | alreadyImportedCount | Integer | Sous-ensemble de skippedCount : lignes ecartees d'office car deja importees (KKS-382) |
+| matchedCount | Integer | Sous-ensemble de readyCount : lignes rapprochees d'une transaction existante, qui ne creeront rien ; NOT NULL defaut 0 — KKS-385 |
 | profileId | UUID | Identifiant du profil utilise (nullable) |
 | profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
+| statementProfileKey | String | Cle du profil du releve (voir Account) ; nullable sans en-tete exploitable — KKS-384 |
+| statementAccountSuffix | String | 4 derniers chiffres du numero de compte lus dans l'en-tete (nullable) — KKS-384 |
+| statementBalance | BigDecimal | Solde donne par la banque dans l'en-tete du releve (nullable) — KKS-384 |
+| statementBalanceDate | LocalDate | Date de ce solde (nullable) — KKS-384 |
 | createdAt | LocalDateTime | Date de creation |
 | expiresAt | LocalDateTime | Date d'expiration |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 | account | Account | FK → Account cible. UNIQUE(user_id, account_id) WHERE status = 'PENDING' |
+
+> Solde du releve (KKS-384) : lu a l'upload dans les lignes sautees par `statementHeader` du profil (valeur illisible → `null`, jamais une erreur). `ImportBalanceService` en tire `projectedBalance` (solde de l'application a la date du solde si le brouillon est confirme : `soldeInitial` + transactions du compte datees jusqu'a cette date + lignes `READY` datees jusqu'a cette date), `proposedOpeningBalance` (premier import du compte seulement, c'est-a-dire aucun `ImportHistory` pour ce compte : le `soldeInitial` qui rend le solde de l'application egal au solde bancaire une fois ecartees les transactions de la periode que le releve n'explique pas, les futurs `suspects` — KKS-443) et, apres confirmation, le controle de solde (`balanceCheck`). Un profil sans `statementHeader` laisse tous ces champs a `null`.
 
 ### ImportDraftLine
 
@@ -350,10 +365,18 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | statusMessage | String | Message de statut (nullable) |
 | skipReason | Enum | ImportSkipReason (ALREADY_IMPORTED) — SKIPPED decide par l'import, nullable si ignoree par l'utilisateur (KKS-382) |
 | duplicateTransactionId | UUID | ID de la transaction doublon ou deja importee (nullable) |
+| purchaseDate | LocalDate | Date d'achat lue dans le libelle brut (paiement carte) quand le profil la declare, nullable ; `date` reste la date comptable — KKS-385 |
+| matchedTransactionId | UUID | Transaction existante (saisie manuelle) a laquelle la ligne est rapprochee, nullable, sans FK ; la confirmation la reverifie — KKS-385 |
+| matchCandidateIds | Texte | Candidats d'un rapprochement ambigu (statut DUPLICATE) : identifiants separes par des virgules (`UuidListConverter`), nullable — KKS-385 |
+| subscriptionId | UUID | Abonnement auquel la transaction creee sera rattachee, nullable, sans FK — KKS-385 |
 | category | Category | FK → Category (nullable) |
 | categorySource | Enum | CategorySource (RULE / HISTORY / USER), nullable sans categorie — KKS-383 |
 | createdAt | LocalDateTime | Date de creation |
 | updatedAt | LocalDateTime | Date de mise a jour |
+
+> Rapprochement des saisies manuelles (KKS-385) : `ImportMatchingService`, appele par `DeduplicationService` entre l'import anterieur (passe 2) et le doublon probable (passe 3). Candidates : meme utilisateur, meme compte, sans empreinte, meme sens, meme montant, dans une fenetre autour de la date de reference (date d'achat si connue, sinon date comptable) — 8 jours si la transaction est liee a un abonnement, 2 jours autour de la date d'achat, sinon de 5 jours avant a 1 jour apres la date comptable. Le libelle n'est pas un critere. Un candidat : `matchedTransactionId` ; plusieurs : statut `DUPLICATE` et `matchCandidateIds`, rien n'est decide. A la confirmation, une ligne rapprochee ne cree rien : la transaction recoit l'empreinte, et l'abonnement lie apprend la cle commercant du libelle. La transaction creee par une ligne non rapprochee est datee de `purchaseDate` si connue, et liee a `subscriptionId`. Les colonnes sont stockees sans cle etrangere, comme `duplicateTransactionId` : supprimer une transaction ne doit pas etre bloque par un brouillon en attente. Le candidat multiple tient dans une colonne texte plutot qu'une table de jointure : il n'est jamais interroge par candidat, et se lit avec la ligne sans chargement supplementaire.
+>
+> `SubscriptionPaymentService.pay` est idempotent : une transaction liee a l'abonnement dans la periode courante (`SubscriptionPeriod`, comptee depuis `dateDebut`) est renvoyee au lieu d'en creer une.
 
 ### CategoryRule
 
@@ -449,7 +472,7 @@ app/src/app/
 
 ### Bouton flottant (FAB speed-dial)
 
-- Masque sur `/settings/**` et ecran login
+- Masque sur l'ecran login et les parcours dedies a une tache : `/settings/**` et `/transactions/import/**` (`isTaskFlowRoute` du shell, constitution 4.1.0, principe IV)
 - Actions contextuelles par page :
   - `/dashboard` : Transaction, Abonnement*, Dette*, Virement**
   - `/transactions`, `/subscriptions`, `/debts` (+ pages detail) : Transaction, Abonnement*, Dette*

@@ -9,6 +9,7 @@ import fr.kksdev.budget.api.enums.EntityType;
 import fr.kksdev.budget.api.enums.Feature;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.NotificationType;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.FeatureDisabledException;
 import fr.kksdev.budget.api.model.Budget;
@@ -37,6 +38,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -707,6 +709,70 @@ class BudgetServiceTest {
     }
 
     // -------------------------------------------------------------------------
+    // Unbudgeted spending — mapping des lignes natives (KKS-395, system_key)
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_mapSystemKeyAndUserCategory_when_getUnbudgetedSpending() {
+        UUID subscriptionCategoryId = UUID.randomUUID();
+        UUID userCategoryId = UUID.randomUUID();
+
+        // Colonnes natives : category_id, nom, icone, couleur, montant, currency, system_key
+        Object[] systemRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("50.00"), "EUR", "SUBSCRIPTION"};
+        Object[] userRow = {userCategoryId, "Loisirs", "🎮", "#a855f7",
+                new BigDecimal("30.00"), "EUR", null};
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of());
+        when(transactionRepository.findUnbudgetedSpendingByMonth(
+                eq(userId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(systemRow, userRow));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        assertThat(response.unbudgetedItems()).hasSize(2);
+
+        var systemItem = response.unbudgetedItems().stream()
+                .filter(item -> item.categoryId().equals(subscriptionCategoryId))
+                .findFirst().orElseThrow();
+        assertThat(systemItem.categoryNom()).isEqualTo("Abonnement");
+        assertThat(systemItem.categorySystemKey()).isEqualTo("SUBSCRIPTION");
+        assertThat(systemItem.montantDepense()).isEqualByComparingTo("50.00");
+
+        var userItem = response.unbudgetedItems().stream()
+                .filter(item -> item.categoryId().equals(userCategoryId))
+                .findFirst().orElseThrow();
+        assertThat(userItem.categoryNom()).isEqualTo("Loisirs");
+        assertThat(userItem.categorySystemKey()).isNull();
+        assertThat(userItem.montantDepense()).isEqualByComparingTo("30.00");
+    }
+
+    @Test
+    void should_mergeRows_when_getUnbudgetedSpendingHasSameCategoryTwice() {
+        UUID subscriptionCategoryId = UUID.randomUUID();
+
+        // Deux lignes de la meme categorie (ex. deux comptes) : la branche
+        // merged.containsKey doit cumuler les montants sans dupliquer l'item.
+        Object[] firstRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("10.00"), "EUR", "SUBSCRIPTION"};
+        Object[] secondRow = {subscriptionCategoryId, "Abonnement", "🔄", "#6366f1",
+                new BigDecimal("5.00"), "EUR", "SUBSCRIPTION"};
+
+        when(budgetRepository.findByUserIdAndActifTrue(userId)).thenReturn(List.of());
+        when(transactionRepository.findUnbudgetedSpendingByMonth(
+                eq(userId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(firstRow, secondRow));
+
+        BudgetOverviewResponse response = budgetService.getOverview(userId);
+
+        assertThat(response.unbudgetedItems()).hasSize(1);
+        var merged = response.unbudgetedItems().getFirst();
+        assertThat(merged.categoryId()).isEqualTo(subscriptionCategoryId);
+        assertThat(merged.categorySystemKey()).isEqualTo("SUBSCRIPTION");
+        assertThat(merged.montantDepense()).isEqualByComparingTo("15.00");
+    }
+
+    // -------------------------------------------------------------------------
     // US3 — History tests (T029)
     // -------------------------------------------------------------------------
 
@@ -857,12 +923,44 @@ class BudgetServiceTest {
         budgetService.checkThresholdsForCategory(userId, categoryId);
 
         verify(notificationService).createNotification(
-                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
-                any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                userId, NotificationType.BUDGET_THRESHOLD,
+                "Budget Alimentation: 80%", "You have reached 80% of the Alimentation budget",
+                EntityType.BUDGET, budgetId,
+                Map.of("category", "Alimentation", "percentage", "80"));
         verify(notificationService, never()).createNotification(
                 eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void should_include_categorySystemKey_when_category_is_system() {
+        // Categorie systeme (KKS-395) : le param categorySystemKey est present
+        var systemCategory = Category.builder()
+                .id(categoryId)
+                .nom("Abonnements")
+                .icone("💳")
+                .couleur("#ff5733")
+                .isSystem(true)
+                .systemKey(SystemCategoryKey.SUBSCRIPTION)
+                .user(buildUser(userId))
+                .build();
+        var budget = buildBudget(budgetId, systemCategory);
+
+        when(budgetRepository.findByCategoryIdAndUserId(categoryId, userId)).thenReturn(Optional.of(budget));
+        when(transactionRepository.sumDepenseByUserIdAndCategoryIdAndDateBetween(
+                eq(userId), eq(categoryId), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("400.00"));
+        when(notificationRepository.existsByUserIdAndTypeAndEntityIdAndCreatedAtAfter(
+                eq(userId), eq(NotificationType.BUDGET_THRESHOLD), eq(budgetId), any(LocalDateTime.class)))
+                .thenReturn(false);
+
+        budgetService.checkThresholdsForCategory(userId, categoryId);
+
+        verify(notificationService).createNotification(
+                userId, NotificationType.BUDGET_THRESHOLD,
+                "Budget Abonnements: 80%", "You have reached 80% of the Abonnements budget",
+                EntityType.BUDGET, budgetId,
+                Map.of("category", "Abonnements", "categorySystemKey", "SUBSCRIPTION", "percentage", "80"));
     }
 
     @Test
@@ -887,13 +985,15 @@ class BudgetServiceTest {
         budgetService.checkThresholdsForCategory(userId, categoryId);
 
         verify(notificationService).createNotification(
-                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
-                any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                userId, NotificationType.BUDGET_THRESHOLD,
+                "Budget Alimentation: 100%", "You have reached 100% of the Alimentation budget",
+                EntityType.BUDGET, budgetId,
+                Map.of("category", "Alimentation", "percentage", "100"));
         verify(notificationService).createNotification(
-                eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
-                any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                userId, NotificationType.BUDGET_EXCEEDED,
+                "Budget Alimentation exceeded", "You have exceeded the Alimentation budget (100%)",
+                EntityType.BUDGET, budgetId,
+                Map.of("category", "Alimentation", "percentage", "100"));
     }
 
     @Test
@@ -914,7 +1014,7 @@ class BudgetServiceTest {
         budgetService.checkThresholdsForCategory(userId, categoryId);
 
         verify(notificationService, never()).createNotification(
-                any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -942,12 +1042,12 @@ class BudgetServiceTest {
         verify(notificationService, never()).createNotification(
                 eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
                 any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                eq(EntityType.BUDGET), eq(budgetId), any());
         // EXCEEDED doit être envoyé
         verify(notificationService).createNotification(
                 eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
                 any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                eq(EntityType.BUDGET), eq(budgetId), any());
     }
 
     @Test
@@ -972,7 +1072,7 @@ class BudgetServiceTest {
         verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
                 any(), any(), any(), any());
         verify(notificationService, never()).createNotification(
-                any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -985,7 +1085,7 @@ class BudgetServiceTest {
         verify(transactionRepository, never()).sumDepenseByUserIdAndCategoryIdAndDateBetween(
                 any(), any(), any(), any());
         verify(notificationService, never()).createNotification(
-                any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -1015,11 +1115,12 @@ class BudgetServiceTest {
         budgetService.checkThresholdsForCategory(userId, categoryId);
 
         verify(notificationService).createNotification(
-                eq(userId), eq(NotificationType.BUDGET_THRESHOLD),
-                any(String.class), any(String.class),
-                eq(EntityType.BUDGET), eq(budgetId));
+                userId, NotificationType.BUDGET_THRESHOLD,
+                "Budget Alimentation: 65%", "You have reached 65% of the Alimentation budget",
+                EntityType.BUDGET, budgetId,
+                Map.of("category", "Alimentation", "percentage", "65"));
         verify(notificationService, never()).createNotification(
                 eq(userId), eq(NotificationType.BUDGET_EXCEEDED),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
     }
 }

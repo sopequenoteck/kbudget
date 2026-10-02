@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/subscriptions/presentation/widgets/subscription_hero_widget.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 import '../../../../../helpers/theme_test_helpers.dart';
 
@@ -15,6 +16,9 @@ void main() {
   }) async {
     await tester.pumpWidget(MaterialApp(
       theme: theme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: SubscriptionHeroWidget(
           monthlyTotals: monthlyTotals,

@@ -50,6 +50,17 @@ class TestFixtures {
         updatedAt: DateTime(2026, 1, 1),
       );
 
+  /// Categorie systeme d'un nouvel utilisateur : `nom` anglais stocke,
+  /// affiche « Abonnement » en francais via sa `systemKey`.
+  static Category get systemCategory => const Category(
+        id: 'cat-sys',
+        nom: 'Subscription',
+        icone: '🔁',
+        couleur: '#8B5CF6',
+        isSystem: true,
+        systemKey: 'SUBSCRIPTION',
+      );
+
   static Account get testAccount => Account(
         id: 'acc-001',
         nom: 'Compte courant',

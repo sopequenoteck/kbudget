@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorArrowLeft, phosphorCheckCircle, phosphorPlus, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
@@ -21,7 +22,7 @@ import { PreferenceService } from '../../../../core/services/preference';
 import { ConversionService } from '../../../../core/services/conversion';
 import { ExchangeRateService } from '../../../../core/services/exchange-rate';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 import {
   type BudgetOverview,
   type BudgetHistory,
@@ -30,14 +31,17 @@ import {
 import { type Transaction } from '../../../../core/models/transaction.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import { DoughnutMini } from '../doughnut-mini/doughnut-mini';
 import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
+import { formatDayMonthLabel } from '../../../../shared/utils/locale-format.utils';
 
 interface CategoryGroup {
   categoryId: string;
   categoryNom: string;
   categoryIcone: string;
   categoryCouleur: string;
+  categorySystemKey?: string | null;
   montantDepense: number;
   transactions: Transaction[];
 }
@@ -45,7 +49,7 @@ interface CategoryGroup {
 @Component({
   selector: 'app-budget-unbudgeted',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon, DoughnutMini, EmptyState],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, DoughnutMini, EmptyState, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -68,6 +72,9 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
   readonly conversionService = inject(ConversionService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
+  readonly formatDate = (dateStr: string): string =>
+    formatDayMonthLabel(dateStr, this.languageService.displayLocale());
 
   readonly stickySentinel = viewChild<ElementRef>('stickySentinel');
   readonly isStuck = signal(false);
@@ -192,14 +199,6 @@ export class BudgetUnbudgeted implements AfterViewInit, OnDestroy {
     } finally {
       this.transactionsLoading.set(false);
     }
-  }
-
-  formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat(APP_LOCALE, {
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
   }
 
   goBack(): void {

@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.dto.response;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Category;
 
 import java.util.UUID;
@@ -9,7 +10,9 @@ public record CategoryResponse(
         String nom,
         String icone,
         String couleur,
-        boolean isSystem
+        boolean isSystem,
+        /** Cle stable de la categorie systeme (nom de {@code SystemCategoryKey}), null pour une categorie utilisateur (KKS-395). */
+        String systemKey
 ) {
     public static CategoryResponse from(Category category) {
         if (category == null) {
@@ -20,7 +23,8 @@ public record CategoryResponse(
                 category.getNom(),
                 category.getIcone(),
                 category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
+                Boolean.TRUE.equals(category.getIsSystem()),
+                SystemCategoryKey.nameOf(category.getSystemKey())
         );
     }
 }

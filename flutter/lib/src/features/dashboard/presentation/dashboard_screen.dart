@@ -18,6 +18,7 @@ import 'package:k_budget/src/features/dashboard/presentation/widgets/dashboard_h
 import 'package:k_budget/src/features/dashboard/presentation/widgets/budget_summary_section.dart';
 import 'package:k_budget/src/features/dashboard/presentation/widgets/recent_transactions_section.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -160,6 +161,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildEmptyState(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.space8),
@@ -173,7 +175,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: AppSpacing.space4),
             Text(
-              'Bienvenue !',
+              l10n.dashboardEmptyTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeXl,
                 fontWeight: AppTypography.semiBold,
@@ -182,7 +184,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: AppSpacing.space2),
             Text(
-              'Commencez par créer un compte\npour suivre vos finances.',
+              l10n.dashboardEmptyMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppTypography.sizeMd,

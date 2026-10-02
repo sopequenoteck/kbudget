@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { DebtForm } from './debt-form';
@@ -8,8 +8,11 @@ import { DebtService } from '../../../../core/services/debt';
 import { ModalService } from '../../../../core/services/modal.service';
 import { AccountService } from '../../../../core/services/account';
 import { CategoryService } from '../../../../core/services/category';
+import { ConfirmService } from '../../../../core/services/confirm.service';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
+import { Category } from '../../../../core/models/category.model';
 import { Account, AccountType } from '../../../../core/models/account.model';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const mockAccounts: Account[] = [
   {
@@ -87,7 +90,17 @@ describe('DebtForm', () => {
     refreshTrigger: ReturnType<typeof vi.fn>;
   };
 
+  let confirmServiceMock: {
+    confirm: ReturnType<typeof vi.fn>;
+    confirmDelete: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
+    confirmServiceMock = {
+      confirm: vi.fn().mockResolvedValue(true),
+      confirmDelete: vi.fn().mockResolvedValue(true),
+    };
+
     categoryServiceMock = {
       getAll: vi.fn().mockReturnValue(of([])),
       refreshTrigger: vi.fn().mockReturnValue(0),
@@ -121,11 +134,13 @@ describe('DebtForm', () => {
     TestBed.configureTestingModule({
       imports: [DebtForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: CurrencyService, useValue: currencyServiceMock },
         { provide: DebtService, useValue: debtServiceMock },
         { provide: ModalService, useValue: modalServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: CategoryService, useValue: categoryServiceMock },
+        { provide: ConfirmService, useValue: confirmServiceMock },
       ],
     });
   };
@@ -134,6 +149,29 @@ describe('DebtForm', () => {
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should_display_the_translated_name_when_selected_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    const systemCategory: Category = {
+      id: 'sys-1',
+      nom: 'Virement-legacy',
+      icone: '🔁',
+      couleur: '#000000',
+      isSystem: true,
+      systemKey: 'TRANSFER',
+    };
+    categoryServiceMock.getAll.mockReturnValue(of([systemCategory]));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    fixture.componentInstance.form.patchValue({ categoryId: 'sys-1' });
+    fixture.detectChanges();
+
+    const pill = fixture.nativeElement.querySelector('button[aria-label="Catégorie"] span');
+    expect(pill.textContent.trim()).toBe('Virement');
   });
 
   it('should_force_currency_when_account_selected', async () => {
@@ -153,7 +191,9 @@ describe('DebtForm', () => {
 
   it('should_auto_set_include_in_balance_when_account_selected', async () => {
     // Désactiver le compte par défaut pour partir d'un état sans sélection
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -172,7 +212,9 @@ describe('DebtForm', () => {
   });
 
   it('should_hide_patrimoine_toggle_when_account_selected', async () => {
-    accountServiceMock.getAll.mockReturnValue(of(mockAccounts.map(a => ({ ...a, isDefault: false }))));
+    accountServiceMock.getAll.mockReturnValue(
+      of(mockAccounts.map((a) => ({ ...a, isDefault: false }))),
+    );
     setupTestBed();
     const fixture = TestBed.createComponent(DebtForm);
     fixture.detectChanges();
@@ -314,5 +356,108 @@ describe('DebtForm', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.form.getRawValue().currency).toBe('USD');
+  });
+
+  it('should_insert_created_category_sorted_by_name', async () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const nouvelle: Category = { id: 'cat-2', nom: 'Alimentation', icone: '🍔', couleur: '#000' };
+    component.onCategoryCreated(nouvelle);
+
+    expect(component.categories().map((c) => c.nom)).toContain('Alimentation');
+  });
+
+  it('should_delete_debt_when_confirmed', async () => {
+    modalServiceMock = {
+      editingEntity: signal(mockDebt),
+      closeModal: vi.fn(),
+    };
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(confirmServiceMock.confirmDelete).toHaveBeenCalled();
+    expect(debtServiceMock.delete).toHaveBeenCalledWith('debt-edit-1');
+    expect(modalServiceMock.closeModal).toHaveBeenCalled();
+  });
+
+  it('should_not_delete_debt_when_not_confirmed', async () => {
+    modalServiceMock = {
+      editingEntity: signal(mockDebt),
+      closeModal: vi.fn(),
+    };
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(debtServiceMock.delete).not.toHaveBeenCalled();
+  });
+
+  // ---------------------------------------------------------------------
+  // Traduction — montant invalide + repli sur erreur non standard
+  // ---------------------------------------------------------------------
+
+  it('should_set_translated_invalid_amount_message_when_amount_parses_to_nan', async () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ personne: 'Test', date: '2026-03-01' });
+    // Le montant desactive echappe a decimalMin (exclu de form.invalid) mais
+    // reste dans getRawValue(), ce qui declenche la verification manuelle.
+    component.form.get('montant')!.disable();
+    component.form.get('montant')!.setValue('abc');
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Montant invalide');
+    expect(debtServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should_fallback_to_translated_save_error_when_thrown_value_is_not_an_error', async () => {
+    debtServiceMock.create.mockReturnValue(throwError(() => 'boom'));
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ personne: 'Test', montant: '10', date: '2026-03-01' });
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Erreur lors de la sauvegarde');
+  });
+
+  it('should_fallback_to_translated_delete_error_when_thrown_value_is_not_an_error', async () => {
+    modalServiceMock = {
+      editingEntity: signal(mockDebt),
+      closeModal: vi.fn(),
+    };
+    debtServiceMock.delete.mockReturnValue(throwError(() => 'boom'));
+    setupTestBed();
+    const fixture = TestBed.createComponent(DebtForm);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Erreur lors de la suppression');
   });
 });

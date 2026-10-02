@@ -25,6 +25,21 @@ DECLARE
     v_cat_autre_salaire UUID;
     v_cat_autre_courses UUID;
     v_cat_restaurant UUID;
+    -- Miroir anglais de dev@local.test (KKS-394)
+    v_demo_user_id UUID;
+    v_demo_compte_eur UUID;
+    v_demo_compte_xof UUID;
+    v_demo_cat_food UUID;
+    v_demo_cat_transport UUID;
+    v_demo_cat_leisure UUID;
+    v_demo_cat_health UUID;
+    v_demo_cat_housing UUID;
+    v_demo_cat_salary UUID;
+    v_demo_cat_freelance UUID;
+    v_demo_cat_subscription UUID;
+    v_demo_cat_debt UUID;
+    v_demo_cat_groceries UUID;
+    v_demo_cat_restaurant UUID;
 BEGIN
     -- =============================================================
     -- USER DE DEV GENERIQUE
@@ -52,16 +67,17 @@ BEGIN
     -- 2. Categories systeme (reproduit CategoryService.seedSystemCategories)
     --    is_system = true, idempotent : INSERT uniquement si la categorie n'existe pas deja
     --    (l'index unique est sur LOWER(nom), user_id — index partiel, pas de contrainte nommee)
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Abonnement', '🔄', '#6366f1', true, v_user_id
+    --    system_key renseigne depuis V39 (KKS-395)
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Abonnement', '🔄', '#6366f1', true, 'SUBSCRIPTION', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'abonnement' AND user_id = v_user_id);
 
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Dette', '💰', '#ef4444', true, v_user_id
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Dette', '💰', '#ef4444', true, 'DEBT', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'dette' AND user_id = v_user_id);
 
-    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-    SELECT gen_random_uuid(), 'Virement', '🔄', '#8b5cf6', true, v_user_id
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Virement', '🔄', '#8b5cf6', true, 'TRANSFER', v_user_id
     WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'virement' AND user_id = v_user_id);
 
     -- 3. Compte principal EUR (reproduit AccountService.createDefaultAccount)
@@ -272,6 +288,217 @@ BEGIN
     (gen_random_uuid(),  620.00, 'Mission freelance', 'RECETTE', (CURRENT_DATE - INTERVAL '2 days'), 'Client Mensah', v_user_id, v_cat_freelance, v_compte_eur);
 
     -- ===========================================================
+    -- USER DE DEV ANGLAIS — miroir traduit de dev@local.test (KKS-394)
+    -- Email    : demo@local.test
+    -- Password : dev123 (meme hash BCrypt que dev@local.test)
+    -- Sert a produire des captures d'ecran anglaises sur des donnees
+    -- anglaises pour le README EN. Meme structure, memes montants,
+    -- memes dates relatives que dev@local.test ; libelles, notes et
+    -- noms de categories/comptes traduits, marques et lieux propres
+    -- conserves.
+    -- ===========================================================
+
+    INSERT INTO users (id, email, password, name, created_at)
+    VALUES (
+        gen_random_uuid(),
+        'demo@local.test',
+        '$2a$10$bRDCPqItSOFJNMihfnz3Eu3CBZC9jc0/ZtzSnLYDcdI4rm8AO2rKq',
+        'Alex Morgan',
+        NOW()
+    )
+    ON CONFLICT (email) DO NOTHING;
+
+    SELECT id INTO v_demo_user_id FROM users WHERE email = 'demo@local.test';
+
+    -- Categories systeme (reproduit CategoryService.seedSystemCategories, noms anglais depuis KKS-396)
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Subscription', '🔄', '#6366f1', true, 'SUBSCRIPTION', v_demo_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'subscription' AND user_id = v_demo_user_id);
+
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Debt', '💰', '#ef4444', true, 'DEBT', v_demo_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'debt' AND user_id = v_demo_user_id);
+
+    INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+    SELECT gen_random_uuid(), 'Transfer', '🔄', '#8b5cf6', true, 'TRANSFER', v_demo_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM categories WHERE LOWER(nom) = 'transfer' AND user_id = v_demo_user_id);
+
+    -- Compte principal EUR (reproduit AccountService.createDefaultAccount)
+    INSERT INTO accounts (id, nom, type, solde_initial, icone, couleur, is_default, actif, currency, bank_code, user_id)
+    SELECT gen_random_uuid(), 'Main account', 'COURANT', 0.00, '🏦', '#3b82f6', true, true, 'EUR', 'OTHER', v_demo_user_id
+    WHERE NOT EXISTS (SELECT 1 FROM accounts WHERE LOWER(nom) = 'main account' AND user_id = v_demo_user_id AND actif = true);
+
+    -- Preferences initiales (reproduit PreferenceService.createInitialPreference), langue anglaise (KKS-394)
+    INSERT INTO user_preferences (id, user_id, enabled_features, nav_order, currencies, timezone, text_scale, language)
+    VALUES (
+        gen_random_uuid(),
+        v_demo_user_id,
+        'SUBSCRIPTIONS,DEBTS,BUDGETS',
+        'SUBSCRIPTIONS,DEBTS,BUDGETS',
+        'EUR',
+        'Europe/Paris',
+        'MEDIUM',
+        'en'
+    )
+    ON CONFLICT (user_id) DO NOTHING;
+
+    -- Categories (custom, en plus des systeme)
+    INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
+    VALUES
+        (gen_random_uuid(), 'Food', '🛒', '#22c55e', false, v_demo_user_id),
+        (gen_random_uuid(), 'Transport', '🚗', '#3b82f6', false, v_demo_user_id),
+        (gen_random_uuid(), 'Leisure', '🎮', '#a855f7', false, v_demo_user_id),
+        (gen_random_uuid(), 'Health', '🏥', '#ef4444', false, v_demo_user_id),
+        (gen_random_uuid(), 'Housing', '🏠', '#f97316', false, v_demo_user_id),
+        (gen_random_uuid(), 'Salary', '💼', '#10b981', false, v_demo_user_id),
+        (gen_random_uuid(), 'Freelance', '💻', '#6366f1', false, v_demo_user_id),
+        (gen_random_uuid(), 'Groceries', '🧺', '#14b8a6', false, v_demo_user_id),
+        (gen_random_uuid(), 'Restaurant', '🍽️', '#f59e0b', false, v_demo_user_id)
+    ON CONFLICT DO NOTHING;
+
+    SELECT id INTO v_demo_cat_food FROM categories WHERE nom = 'Food' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_transport FROM categories WHERE nom = 'Transport' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_leisure FROM categories WHERE nom = 'Leisure' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_health FROM categories WHERE nom = 'Health' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_housing FROM categories WHERE nom = 'Housing' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_salary FROM categories WHERE nom = 'Salary' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_freelance FROM categories WHERE nom = 'Freelance' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_subscription FROM categories WHERE nom = 'Subscription' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_debt FROM categories WHERE nom = 'Debt' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_groceries FROM categories WHERE nom = 'Groceries' AND user_id = v_demo_user_id;
+    SELECT id INTO v_demo_cat_restaurant FROM categories WHERE nom = 'Restaurant' AND user_id = v_demo_user_id;
+
+    -- Comptes (2 : EUR + XOF)
+    DELETE FROM transactions WHERE account_id IN (
+        SELECT id FROM accounts WHERE user_id = v_demo_user_id AND nom IN ('Current account', 'CFA account')
+    );
+    DELETE FROM accounts WHERE user_id = v_demo_user_id AND nom IN ('Current account', 'CFA account');
+
+    v_demo_compte_eur := gen_random_uuid();
+    v_demo_compte_xof := gen_random_uuid();
+
+    INSERT INTO accounts (id, nom, type, solde_initial, icone, couleur, is_default, actif, currency, bank_code, user_id)
+    VALUES
+        (v_demo_compte_eur, 'Current account', 'COURANT', 2450.00, '🏦', '#3b82f6', true, true, 'EUR', 'BNP', v_demo_user_id),
+        (v_demo_compte_xof, 'CFA account', 'COURANT', 850000, '🌍', '#f59e0b', false, true, 'XOF', 'OTHER', v_demo_user_id);
+
+    UPDATE accounts SET is_default = false
+    WHERE user_id = v_demo_user_id AND id != v_demo_compte_eur;
+
+    -- Taux de change
+    INSERT INTO exchange_rates (id, user_id, base_currency, target_currency, rate)
+    VALUES (gen_random_uuid(), v_demo_user_id, 'EUR', 'XOF', 655.957)
+    ON CONFLICT (user_id, base_currency, target_currency) DO UPDATE SET rate = 655.957;
+
+    -- User preferences
+    UPDATE user_preferences
+    SET currencies = 'EUR,XOF',
+        enabled_features = 'SUBSCRIPTIONS,DEBTS,BUDGETS',
+        timezone = 'Europe/Paris',
+        language = 'en'
+    WHERE user_id = v_demo_user_id;
+
+    -- Transactions EUR — Mars 2026
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'March salary', 'RECETTE', (CURRENT_DATE - INTERVAL '36 days'), NULL, v_demo_user_id, v_demo_cat_salary, v_demo_compte_eur),
+    (gen_random_uuid(), 450.00, 'Freelance assignment', 'RECETTE', (CURRENT_DATE - INTERVAL '27 days'), 'Client Dupont', v_demo_user_id, v_demo_cat_freelance, v_demo_compte_eur),
+    (gen_random_uuid(), 750.00, 'March rent', 'DEPENSE', (CURRENT_DATE - INTERVAL '36 days'), NULL, v_demo_user_id, v_demo_cat_housing, v_demo_compte_eur),
+    (gen_random_uuid(), 85.50, 'Carrefour', 'DEPENSE', (CURRENT_DATE - INTERVAL '34 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_eur),
+    (gen_random_uuid(), 42.00, 'Fuel', 'DEPENSE', (CURRENT_DATE - INTERVAL '32 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur),
+    (gen_random_uuid(), 120.00, 'Doctor + pharmacy', 'DEPENSE', (CURRENT_DATE - INTERVAL '30 days'), NULL, v_demo_user_id, v_demo_cat_health, v_demo_compte_eur),
+    (gen_random_uuid(), 35.90, 'Lidl', 'DEPENSE', (CURRENT_DATE - INTERVAL '28 days'), NULL, v_demo_user_id, v_demo_cat_groceries, v_demo_compte_eur),
+    (gen_random_uuid(), 28.50, 'Sushi Shop', 'DEPENSE', (CURRENT_DATE - INTERVAL '25 days'), NULL, v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_eur),
+    (gen_random_uuid(), 65.00, 'Cinema + bowling', 'DEPENSE', (CURRENT_DATE - INTERVAL '22 days'), NULL, v_demo_user_id, v_demo_cat_leisure, v_demo_compte_eur),
+    (gen_random_uuid(), 92.30, 'Weekly groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '20 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_eur),
+    (gen_random_uuid(), 15.00, 'Uber', 'DEPENSE', (CURRENT_DATE - INTERVAL '18 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur),
+    (gen_random_uuid(), 48.00, 'Italian restaurant', 'DEPENSE', (CURRENT_DATE - INTERVAL '15 days'), NULL, v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_eur),
+    (gen_random_uuid(), 110.00, 'Auchan groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '12 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_eur),
+    (gen_random_uuid(), 55.00, 'Full tank', 'DEPENSE', (CURRENT_DATE - INTERVAL '9 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur);
+
+    -- Transactions EUR — Fevrier 2026
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'February salary', 'RECETTE', (CURRENT_DATE - INTERVAL '64 days'), NULL, v_demo_user_id, v_demo_cat_salary, v_demo_compte_eur),
+    (gen_random_uuid(), 750.00, 'February rent', 'DEPENSE', (CURRENT_DATE - INTERVAL '64 days'), NULL, v_demo_user_id, v_demo_cat_housing, v_demo_compte_eur),
+    (gen_random_uuid(), 95.00, 'Carrefour groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '61 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_eur),
+    (gen_random_uuid(), 38.00, 'Fuel', 'DEPENSE', (CURRENT_DATE - INTERVAL '57 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur),
+    (gen_random_uuid(), 22.00, 'Kebab + tacos', 'DEPENSE', (CURRENT_DATE - INTERVAL '55 days'), NULL, v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_eur),
+    (gen_random_uuid(), 180.00, 'Dentist', 'DEPENSE', (CURRENT_DATE - INTERVAL '51 days'), NULL, v_demo_user_id, v_demo_cat_health, v_demo_compte_eur),
+    (gen_random_uuid(), 73.50, 'Weekly groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '47 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_eur),
+    (gen_random_uuid(), 40.00, 'Video games', 'DEPENSE', (CURRENT_DATE - INTERVAL '44 days'), NULL, v_demo_user_id, v_demo_cat_leisure, v_demo_compte_eur),
+    (gen_random_uuid(), 52.00, 'Full tank', 'DEPENSE', (CURRENT_DATE - INTERVAL '40 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur);
+
+    -- Transactions EUR — Avril 2026 (1er au 3)
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'April salary',      'RECETTE', (CURRENT_DATE - INTERVAL '5 days'), NULL,             v_demo_user_id, v_demo_cat_salary,    v_demo_compte_eur),
+    (gen_random_uuid(),  750.00, 'April rent',        'DEPENSE', (CURRENT_DATE - INTERVAL '5 days'), NULL,             v_demo_user_id, v_demo_cat_housing,   v_demo_compte_eur),
+    (gen_random_uuid(),   29.99, 'Orange Fibre',      'DEPENSE', (CURRENT_DATE - INTERVAL '5 days'), 'Direct debit',   v_demo_user_id, v_demo_cat_subscription, v_demo_compte_eur),
+    (gen_random_uuid(),   67.40, 'Carrefour Market',  'DEPENSE', (CURRENT_DATE - INTERVAL '4 days'), NULL,             v_demo_user_id, v_demo_cat_food,      v_demo_compte_eur),
+    (gen_random_uuid(),    1.90, 'Metro ticket',      'DEPENSE', (CURRENT_DATE - INTERVAL '4 days'), NULL,             v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur),
+    (gen_random_uuid(),   12.50, 'Bakery',            'DEPENSE', (CURRENT_DATE - INTERVAL '4 days'), NULL,             v_demo_user_id, v_demo_cat_food,      v_demo_compte_eur),
+    (gen_random_uuid(),   14.90, 'Kebab lunch',       'DEPENSE', (CURRENT_DATE - INTERVAL '3 days'), NULL,             v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_eur),
+    (gen_random_uuid(),   43.20, 'Lidl',              'DEPENSE', (CURRENT_DATE - INTERVAL '3 days'), NULL,             v_demo_user_id, v_demo_cat_groceries, v_demo_compte_eur),
+    (gen_random_uuid(),   48.00, 'Full tank',         'DEPENSE', (CURRENT_DATE - INTERVAL '3 days'), NULL,             v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur);
+
+    -- Transactions XOF — Mars 2026
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 350000, 'Family transfer', 'RECETTE', (CURRENT_DATE - INTERVAL '35 days'), NULL, v_demo_user_id, v_demo_cat_salary, v_demo_compte_xof),
+    (gen_random_uuid(), 45000, 'Assigame market', 'DEPENSE', (CURRENT_DATE - INTERVAL '33 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_xof),
+    (gen_random_uuid(), 15000, 'Motorbike taxi', 'DEPENSE', (CURRENT_DATE - INTERVAL '31 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_xof),
+    (gen_random_uuid(), 75000, 'Local rent', 'DEPENSE', (CURRENT_DATE - INTERVAL '36 days'), NULL, v_demo_user_id, v_demo_cat_housing, v_demo_compte_xof),
+    (gen_random_uuid(), 8500, 'Pharmacy', 'DEPENSE', (CURRENT_DATE - INTERVAL '26 days'), NULL, v_demo_user_id, v_demo_cat_health, v_demo_compte_xof),
+    (gen_random_uuid(), 25000, 'Hedzranawoe market', 'DEPENSE', (CURRENT_DATE - INTERVAL '22 days'), NULL, v_demo_user_id, v_demo_cat_food, v_demo_compte_xof),
+    (gen_random_uuid(), 12000, 'Maquis', 'DEPENSE', (CURRENT_DATE - INTERVAL '19 days'), NULL, v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_xof),
+    (gen_random_uuid(), 35000, 'Weekly groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '15 days'), NULL, v_demo_user_id, v_demo_cat_groceries, v_demo_compte_xof),
+    (gen_random_uuid(), 5000, 'Zem', 'DEPENSE', (CURRENT_DATE - INTERVAL '11 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_xof);
+
+    -- Transactions XOF — Avril 2026 (1er au 3)
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 75000, 'April local rent', 'DEPENSE', (CURRENT_DATE - INTERVAL '5 days'), NULL, v_demo_user_id, v_demo_cat_housing,   v_demo_compte_xof),
+    (gen_random_uuid(), 18500, 'Assigame market',  'DEPENSE', (CURRENT_DATE - INTERVAL '4 days'), NULL, v_demo_user_id, v_demo_cat_food,      v_demo_compte_xof),
+    (gen_random_uuid(),  3500, 'Zem ride',         'DEPENSE', (CURRENT_DATE - INTERVAL '4 days'), NULL, v_demo_user_id, v_demo_cat_transport, v_demo_compte_xof),
+    (gen_random_uuid(), 12000, 'Market groceries', 'DEPENSE', (CURRENT_DATE - INTERVAL '3 days'), NULL, v_demo_user_id, v_demo_cat_groceries, v_demo_compte_xof),
+    (gen_random_uuid(),  4500, 'Maquis lunch',     'DEPENSE', (CURRENT_DATE - INTERVAL '3 days'), NULL, v_demo_user_id, v_demo_cat_restaurant, v_demo_compte_xof);
+
+    -- Abonnements
+    DELETE FROM subscriptions WHERE user_id = v_demo_user_id AND nom IN ('Netflix', 'Spotify', 'Canal+', 'Orange Fibre');
+
+    INSERT INTO subscriptions (id, nom, montant, frequence, date_debut, actif, user_id, category_id, account_id, currency) VALUES
+    (gen_random_uuid(), 'Netflix', 13.49, 'MENSUEL', (CURRENT_DATE - INTERVAL '309 days'), true, v_demo_user_id, v_demo_cat_subscription, v_demo_compte_eur, 'EUR'),
+    (gen_random_uuid(), 'Spotify', 10.99, 'MENSUEL', (CURRENT_DATE - INTERVAL '446 days'), true, v_demo_user_id, v_demo_cat_subscription, v_demo_compte_eur, 'EUR'),
+    (gen_random_uuid(), 'Canal+', 25.99, 'MENSUEL', (CURRENT_DATE - INTERVAL '217 days'), true, v_demo_user_id, v_demo_cat_subscription, v_demo_compte_xof, 'XOF'),
+    (gen_random_uuid(), 'Orange Fibre', 29.99, 'MENSUEL', (CURRENT_DATE - INTERVAL '392 days'), true, v_demo_user_id, v_demo_cat_subscription, v_demo_compte_eur, 'EUR');
+
+    -- Dettes ('Papa' devient 'Dad', role generique plutot que nom propre)
+    DELETE FROM debts WHERE user_id = v_demo_user_id AND personne IN ('Kofi', 'Marie', 'Dad');
+
+    INSERT INTO debts (id, personne, montant, sens, date, due_date, rembourse, user_id, category_id, account_id, currency) VALUES
+    (gen_random_uuid(), 'Kofi', 150000, 'PRET', (CURRENT_DATE - INTERVAL '50 days'), (CURRENT_DATE + INTERVAL '22 days'), false, v_demo_user_id, v_demo_cat_debt, v_demo_compte_xof, 'XOF'),
+    (gen_random_uuid(), 'Marie', 200.00, 'EMPRUNT', (CURRENT_DATE - INTERVAL '36 days'), (CURRENT_DATE - INTERVAL '3 days'), false, v_demo_user_id, v_demo_cat_debt, v_demo_compte_eur, 'EUR'),
+    (gen_random_uuid(), 'Dad', 500.00, 'EMPRUNT', (CURRENT_DATE - INTERVAL '86 days'), (CURRENT_DATE - INTERVAL '27 days'), true, v_demo_user_id, v_demo_cat_debt, v_demo_compte_eur, 'EUR');
+
+    -- Budgets
+    DELETE FROM budgets WHERE user_id = v_demo_user_id;
+
+    INSERT INTO budgets (id, montant, currency, frequence, seuil_notification, actif, category_id, user_id) VALUES
+    (gen_random_uuid(), 400.00, 'EUR', 'MENSUEL', 80, true, v_demo_cat_food, v_demo_user_id),
+    (gen_random_uuid(), 150.00, 'EUR', 'MENSUEL', 75, true, v_demo_cat_transport, v_demo_user_id),
+    (gen_random_uuid(), 100.00, 'EUR', 'MENSUEL', 90, true, v_demo_cat_leisure, v_demo_user_id),
+    (gen_random_uuid(), 200.00, 'EUR', 'MENSUEL', 80, true, v_demo_cat_restaurant, v_demo_user_id),
+    (gen_random_uuid(), 120000, 'XOF', 'MENSUEL', 80, true, v_demo_cat_groceries, v_demo_user_id);
+
+    -- Recurring transactions
+    DELETE FROM transactions WHERE user_id = v_demo_user_id AND is_recurring = true AND libelle IN ('Rent', 'Car insurance');
+
+    INSERT INTO transactions (id, montant, libelle, type, date, user_id, category_id, account_id, is_recurring, frequency, next_occurrence, recurring_active) VALUES
+    (gen_random_uuid(), 750.00, 'Rent', 'DEPENSE', (CURRENT_DATE - INTERVAL '36 days'), v_demo_user_id, v_demo_cat_housing, v_demo_compte_eur, true, 'MENSUEL', (CURRENT_DATE + INTERVAL '5 days'), true),
+    (gen_random_uuid(), 45.00, 'Car insurance', 'DEPENSE', (CURRENT_DATE - INTERVAL '22 days'), v_demo_user_id, v_demo_cat_transport, v_demo_compte_eur, true, 'MENSUEL', (CURRENT_DATE + INTERVAL '12 days'), true);
+
+    -- Salaire du mois courant (idem dev@local.test)
+    INSERT INTO transactions (id, montant, libelle, type, date, note, user_id, category_id, account_id) VALUES
+    (gen_random_uuid(), 2800.00, 'Salary', 'RECETTE', (CURRENT_DATE - INTERVAL '3 days'), NULL, v_demo_user_id, v_demo_cat_salary, v_demo_compte_eur),
+    (gen_random_uuid(),  620.00, 'Freelance assignment', 'RECETTE', (CURRENT_DATE - INTERVAL '2 days'), 'Client Mensah', v_demo_user_id, v_demo_cat_freelance, v_demo_compte_eur);
+
+    -- ===========================================================
     -- AUTRES UTILISATEURS (KKS-354)
     -- ===========================================================
     -- L'application est multi-utilisateurs : invitations, roles, isolation
@@ -306,15 +533,15 @@ BEGIN
         VALUES (gen_random_uuid(), v_other, 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'SUBSCRIPTIONS,DEBTS,BUDGETS', 'EUR', 'Europe/Paris', 'MEDIUM')
         ON CONFLICT (user_id) DO NOTHING;
 
-        INSERT INTO categories (id, nom, icone, couleur, is_system, user_id)
-        SELECT gen_random_uuid(), c.nom, c.icone, c.couleur, c.is_system, v_other
+        INSERT INTO categories (id, nom, icone, couleur, is_system, system_key, user_id)
+        SELECT gen_random_uuid(), c.nom, c.icone, c.couleur, c.is_system, c.system_key, v_other
         FROM (VALUES
-            ('Abonnement', '🔄', '#6366f1', true),
-            ('Dette',      '💰', '#ef4444', true),
-            ('Virement',   '🔄', '#8b5cf6', true),
-            ('Courses',    '🧺', '#14b8a6', false),
-            ('Salaire',    '💼', '#10b981', false)
-        ) AS c(nom, icone, couleur, is_system)
+            ('Abonnement', '🔄', '#6366f1', true,  'SUBSCRIPTION'),
+            ('Dette',      '💰', '#ef4444', true,  'DEBT'),
+            ('Virement',   '🔄', '#8b5cf6', true,  'TRANSFER'),
+            ('Courses',    '🧺', '#14b8a6', false, NULL),
+            ('Salaire',    '💼', '#10b981', false, NULL)
+        ) AS c(nom, icone, couleur, is_system, system_key)
         WHERE NOT EXISTS (
             SELECT 1 FROM categories x WHERE LOWER(x.nom) = LOWER(c.nom) AND x.user_id = v_other
         );
@@ -337,5 +564,6 @@ BEGIN
     END LOOP;
 
     RAISE NOTICE 'Dev seed OK — user: %, EUR: %, XOF: %', v_user_id, v_compte_eur, v_compte_xof;
+    RAISE NOTICE 'Demo seed OK — user: %, EUR: %, XOF: %', v_demo_user_id, v_demo_compte_eur, v_demo_compte_xof;
     RAISE NOTICE 'Autres utilisateurs — admin: %, invite: %', v_user_admin, v_user_invite;
 END $$;

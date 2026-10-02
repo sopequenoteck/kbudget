@@ -6,6 +6,14 @@ export enum AccountType {
   ESPECES = 'ESPECES',
 }
 
+/** Cle de traduction du type d'un compte (accounts.value.*), partagee par le
+ * formulaire et la liste pour eviter deux copies (KKS-375). */
+export const ACCOUNT_TYPE_LABEL_KEYS: Record<AccountType, string> = {
+  [AccountType.COURANT]: 'accounts.value.current',
+  [AccountType.EPARGNE]: 'accounts.value.savings',
+  [AccountType.ESPECES]: 'accounts.value.cash',
+};
+
 export interface Account {
   id: string;
   nom: string;
@@ -24,6 +32,8 @@ export interface Account {
   bankLogoUrl: string | null;
   bankCustomName: string | null;
   bankCustomLogo: string | null;
+  /** KKS-384 : 4 derniers chiffres du compte lus sur le dernier releve importe, `null` sinon. */
+  statementAccountSuffix?: string | null;
 }
 
 export interface AccountSummary {
@@ -54,6 +64,20 @@ export interface TransferRequest {
   toAccountId: string;
   montant: number;
   note?: string;
+  /** Libelle de la transaction de debit (compte source), compose par le
+   * client dans sa langue (KKS-396). Optionnel : l'API ecrit un defaut
+   * anglais si absent. */
+  libelleDebit?: string;
+  /** Libelle de la transaction de credit (compte destination), meme regle
+   * que {@link libelleDebit} (KKS-396). */
+  libelleCredit?: string;
+}
+
+export interface AdjustBalanceRequest {
+  newBalance: number;
+  /** Libelle de la transaction d'ajustement, compose par le client dans sa
+   * langue (KKS-396). Optionnel : l'API ecrit un defaut anglais si absent. */
+  libelle?: string;
 }
 
 export interface TransferResponse {

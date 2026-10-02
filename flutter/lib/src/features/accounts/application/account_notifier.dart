@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/account_repository.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
 import 'package:k_budget/src/features/common/application/crud_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final accountNotifierProvider =
     NotifierProvider<AccountNotifier, ListState<Account>>(
@@ -28,9 +29,6 @@ class AccountNotifier extends CrudNotifier<Account> {
   void sortItems(List<Account> items) =>
       items.sort((a, b) => a.nom.compareTo(b.nom));
 
-  @override
-  String get entityLabel => 'comptes';
-
   Future<void> setDefault(String id) async {
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},
@@ -49,10 +47,10 @@ class AccountNotifier extends CrudNotifier<Account> {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors du changement de compte par défaut: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }
@@ -63,17 +61,23 @@ class AccountNotifier extends CrudNotifier<Account> {
       error: null,
     );
     try {
-      final updated = await _typedRepo.adjustBalance(id, newBalance);
+      final updated = await _typedRepo.adjustBalance(
+        id,
+        newBalance,
+        libelle: ref
+            .read(appLocalizationsProvider)
+            .transactionsValueBalanceAdjustment,
+      );
       final index = allItems.indexWhere((e) => e.id == id);
       if (index != -1) allItems[index] = updated;
       refreshPage();
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: 'Erreur lors de l\'ajustement du solde: $e',
+        error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
       );
     }
   }

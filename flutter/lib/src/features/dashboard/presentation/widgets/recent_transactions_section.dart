@@ -18,11 +18,15 @@ import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
 import 'package:k_budget/src/utils/color_utils.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:k_budget/src/utils/relative_date_formatter.dart';
 
 class RecentTransactionsSection extends ConsumerWidget {
@@ -35,6 +39,7 @@ class RecentTransactionsSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final colors = theme.extension<AppThemeExtension>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     if (state.isLoading) return _buildSkeleton();
 
@@ -46,7 +51,7 @@ class RecentTransactionsSection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Dernières opérations',
+              l10n.dashboardPageRecentTransactionsTitle,
               style: TextStyle(
                 fontSize: AppTypography.sizeLg,
                 fontWeight: AppTypography.semiBold,
@@ -55,7 +60,7 @@ class RecentTransactionsSection extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () => context.go(RouteNames.transactions),
-              child: const Text('Voir tout'),
+              child: Text(l10n.commonActionViewAll),
             ),
           ],
         ),
@@ -65,7 +70,7 @@ class RecentTransactionsSection extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.space4),
             child: Center(
               child: Text(
-                'Aucune opération récente',
+                l10n.transactionsEmptyTitle,
                 style: TextStyle(
                   fontSize: AppTypography.sizeMd,
                   color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -88,7 +93,8 @@ class RecentTransactionsSection extends ConsumerWidget {
 
             // Subtitle : catégorie · nom du compte
             final parts = <String>[
-              if (category?.nom != null) category!.nom,
+              if (category != null)
+                categoryDisplayName(category.nom, category.systemKey, l10n),
               if (account?.nom != null) account!.nom,
             ];
             final subtitle = parts.isEmpty ? null : parts.join(' · ');
@@ -111,7 +117,8 @@ class RecentTransactionsSection extends ConsumerWidget {
                 convertedAmount = '≈ ${AmountFormatter.format(
                   converted,
                   currency: state.activeCurrency,
-                )}';
+                  locale: intlLocaleFor(Localizations.localeOf(context)),
+    )}';
               }
             }
 
@@ -128,7 +135,11 @@ class RecentTransactionsSection extends ConsumerWidget {
                 icon: category?.icone ?? '💰',
                 iconBackgroundColor: parseHexColor(category?.couleur),
                 subtitle: subtitle,
-                rightSubtitle: RelativeDateFormatter.format(transaction.date),
+                rightSubtitle: RelativeDateFormatter.format(
+                  transaction.date,
+                  locale: ref.watch(intlLocaleProvider),
+                  l10n: l10n,
+                ),
                 valueColor: AmountFormatter.amountColor(
                     transaction.type.name, colors),
                 accountCurrency: accountCurrency,
@@ -145,9 +156,13 @@ class RecentTransactionsSection extends ConsumerWidget {
                 transaction.montant,
                 type: transaction.type.name,
                 currency: accountCurrency ?? state.activeCurrency,
-              ),
+                locale: ref.watch(intlLocaleProvider)),
               subtitle: subtitle,
-              rightSubtitle: RelativeDateFormatter.format(transaction.date),
+              rightSubtitle: RelativeDateFormatter.format(
+                transaction.date,
+                locale: ref.watch(intlLocaleProvider),
+                l10n: l10n,
+              ),
               valueColor:
                   AmountFormatter.amountColor(transaction.type.name, colors),
               onPressed: onPressed,
@@ -287,6 +302,7 @@ class _TransactionListItemWithBadge extends StatelessWidget {
                       transaction.montant,
                       type: transaction.type.name,
                       currency: accountCurrency,
+                      locale: intlLocaleFor(Localizations.localeOf(context)),
                     ),
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
@@ -331,6 +347,7 @@ class _TransactionListItemWithBadge extends StatelessWidget {
       transaction.montant,
       type: transaction.type.name,
       currency: accountCurrency,
+      locale: intlLocaleFor(Localizations.localeOf(context)),
     )}';
 
     if (onPressed != null) {

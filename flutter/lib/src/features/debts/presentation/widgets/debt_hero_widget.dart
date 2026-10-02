@@ -8,8 +8,10 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -61,6 +63,24 @@ class DebtHeroWidget extends StatelessWidget {
       netColor = colorScheme.onSurface;
     }
 
+    final l10n = AppLocalizations.of(context)!;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedNet = AmountFormatter.format(
+      net.abs(),
+      currency: currency,
+      locale: locale,
+    );
+    final formattedPrets = AmountFormatter.format(
+      entry.totalPrets,
+      currency: currency,
+      locale: locale,
+    );
+    final formattedEmprunts = AmountFormatter.format(
+      entry.totalEmprunts,
+      currency: currency,
+      locale: locale,
+    );
+
     return Padding(
       key: const Key('debt_hero'),
       padding: const EdgeInsets.symmetric(
@@ -72,7 +92,7 @@ class DebtHeroWidget extends StatelessWidget {
         children: [
           // Label
           Text(
-            'DETTES',
+            l10n.debtsSummaryNet.toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
@@ -83,7 +103,7 @@ class DebtHeroWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.space2),
           // Montant solde net
           Text(
-            AmountFormatter.format(net.abs(), currency: currency),
+            formattedNet,
             style: TextStyle(
               fontSize: AppTypography.size3xl,
               fontWeight: AppTypography.bold,
@@ -101,7 +121,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '${AmountFormatter.format(entry.totalPrets, currency: currency)} prêts',
+                l10n.debtsSummaryLentTotal(formattedPrets),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -115,7 +135,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '${AmountFormatter.format(entry.totalEmprunts, currency: currency)} emprunts',
+                l10n.debtsSummaryBorrowedTotal(formattedEmprunts),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -134,7 +154,7 @@ class DebtHeroWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.space2),
               Text(
-                '$enCours en cours',
+                l10n.debtsSummaryOutstandingCount(enCours),
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,

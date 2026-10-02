@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, TimeoutError, catchError, map, of, timeout } from 'rxjs';
+import { TranslocoService } from '@jsverse/transloco';
 import { environment } from '../../../environments/environment';
 
 export interface HealthCheckResult {
@@ -20,6 +21,7 @@ export interface ServerInfo {
 })
 export class HealthService {
   private readonly http = inject(HttpClient);
+  private readonly transloco = inject(TranslocoService);
 
   getServerInfo(): ServerInfo {
     return {
@@ -45,17 +47,17 @@ export class HealthService {
         let error: string;
 
         if (err instanceof TimeoutError) {
-          error = 'Délai de réponse dépassé';
+          error = this.transloco.translate('errors.client.timeout');
         } else if (err instanceof HttpErrorResponse) {
           if (err.status === 0) {
-            error = 'Serveur injoignable';
+            error = this.transloco.translate('errors.client.unreachable');
           } else if (err.status >= 500) {
-            error = 'Erreur serveur';
+            error = this.transloco.translate('errors.client.serverError');
           } else {
-            error = 'Erreur inconnue';
+            error = this.transloco.translate('errors.client.unknown');
           }
         } else {
-          error = 'Erreur inconnue';
+          error = this.transloco.translate('errors.client.unknown');
         }
 
         return of({

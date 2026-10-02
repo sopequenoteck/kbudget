@@ -87,7 +87,7 @@ class BudgetControllerTest {
     }
 
     private BudgetResponse buildBudgetResponse() {
-        var category = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
+        var category = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false, null);
         return new BudgetResponse(
                 budgetId,
                 new BigDecimal("500.00"),
@@ -164,7 +164,7 @@ class BudgetControllerTest {
                 "MENSUEL",
                 70,
                 true,
-                new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false),
+                new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false, null),
                 new BigDecimal("200.00"),
                 LocalDateTime.of(2026, 3, 2, 10, 0)
         );
@@ -258,7 +258,7 @@ class BudgetControllerTest {
     @Test
     void should_return_overview_with_totals() throws Exception {
         var item = new BudgetOverviewItemResponse(
-                budgetId, categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733",
+                budgetId, categoryId, "Alimentation", null, "\uD83C\uDF54", "#FF5733",
                 new BigDecimal("500.00"), new BigDecimal("500.00"), "EUR",
                 new BigDecimal("200.00"), new BigDecimal("40.00"), "MENSUEL"
         );
@@ -288,7 +288,7 @@ class BudgetControllerTest {
     @Test
     void should_return_overview_with_normalized_amounts() throws Exception {
         var item = new BudgetOverviewItemResponse(
-                budgetId, categoryId, "Abonnements", "\uD83D\uDCFA", "#6366f1",
+                budgetId, categoryId, "Abonnements", null, "\uD83D\uDCFA", "#6366f1",
                 new BigDecimal("1200.00"), new BigDecimal("100.00"), "EUR",
                 new BigDecimal("45.00"), new BigDecimal("45.00"), "ANNUEL"
         );
@@ -317,7 +317,7 @@ class BudgetControllerTest {
     @Test
     void should_return_history_for_past_month() throws Exception {
         var item = new BudgetHistoryItemResponse(
-                categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733",
+                categoryId, "Alimentation", null, "\uD83C\uDF54", "#FF5733",
                 new BigDecimal("500.00"), "EUR", BigDecimal.ONE,
                 new BigDecimal("350.00"), new BigDecimal("70.00"),
                 LocalDateTime.of(2026, 2, 1, 0, 0)

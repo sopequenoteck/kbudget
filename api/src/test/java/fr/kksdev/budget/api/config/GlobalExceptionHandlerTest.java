@@ -5,6 +5,8 @@ import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpInputMessage;
@@ -88,6 +90,12 @@ class GlobalExceptionHandlerTest {
                 "CONFLICT", "Data conflict");
         assertResponse(handler.handleConflict(new ConflictException("  ")), 409,
                 "CONFLICT", "Data conflict");
+    }
+
+    @ParameterizedTest
+    @EnumSource(CleanupConflictCode.class)
+    void should_serve_the_stable_code_of_a_history_cleanup_conflict(CleanupConflictCode code) {
+        assertResponse(handler.handleConflict(code.toException()), 409, code.name(), code.description());
     }
 
     @Test

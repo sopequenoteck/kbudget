@@ -9,6 +9,7 @@ import 'package:k_budget/src/features/budgets/application/budget_list_state.dart
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -79,6 +80,7 @@ void main() {
     mockRepo = MockBudgetRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         budgetRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -134,7 +136,7 @@ void main() {
       await notifier().loadItems();
 
       expect(state().isLoading, false);
-      expect(state().error, contains('Impossible de charger les budgets'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().items, isEmpty);
     });
 
@@ -158,7 +160,7 @@ void main() {
       when(mockRepo.create(any)).thenThrow(Exception('Server error'));
       await notifier().create(budget2);
 
-      expect(state().error, contains('Erreur lors de la création'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().items, hasLength(1));
     });
 
@@ -183,7 +185,7 @@ void main() {
       when(mockRepo.update(any)).thenThrow(Exception('Server error'));
       await notifier().update(budget1.copyWith(montant: 500.0));
 
-      expect(state().error, contains('Erreur lors de la modification'));
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
       expect(state().items.first.montant, 300.0);
     });
@@ -209,7 +211,7 @@ void main() {
       await notifier().delete('1');
 
       expect(state().items, hasLength(2));
-      expect(state().error, contains('Erreur lors de la suppression'));
+      expect(state().error, 'Erreur lors de la suppression');
       expect(state().mutatingIds, isEmpty);
     });
 
@@ -230,7 +232,7 @@ void main() {
 
       await notifier().loadOverview();
 
-      expect(state().error, contains('Impossible de charger l\'aperçu'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().overview, isNull);
     });
 
@@ -250,7 +252,7 @@ void main() {
 
       await notifier().loadHistory('2026-02');
 
-      expect(state().error, contains('Impossible de charger l\'historique'));
+      expect(state().error, 'Erreur de chargement');
       expect(state().history, isNull);
     });
 

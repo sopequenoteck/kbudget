@@ -74,7 +74,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_201_when_create_category() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false, null);
 
         when(categoryService.create(any(CategoryRequest.class), any(UUID.class))).thenReturn(response);
 
@@ -91,7 +91,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_200_when_get_all_categories() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false, null);
 
         when(categoryService.getAllByUser(userId)).thenReturn(List.of(response));
 
@@ -104,7 +104,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_200_when_get_category_by_id() throws Exception {
-        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false);
+        var response = new CategoryResponse(categoryId, "Alimentation", "\uD83C\uDF54", "#FF5733", false, null);
 
         when(categoryService.getById(categoryId, userId)).thenReturn(response);
 
@@ -116,7 +116,7 @@ class CategoryControllerTest {
 
     @Test
     void should_return_200_when_update_category() throws Exception {
-        var response = new CategoryResponse(categoryId, "Transport", "\uD83D\uDE97", "#3498DB", false);
+        var response = new CategoryResponse(categoryId, "Transport", "\uD83D\uDE97", "#3498DB", false, null);
 
         when(categoryService.update(eq(categoryId), any(CategoryRequest.class), eq(userId)))
                 .thenReturn(response);

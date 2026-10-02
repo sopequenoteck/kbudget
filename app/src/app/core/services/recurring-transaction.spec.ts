@@ -6,6 +6,7 @@ import { ApiService } from './api';
 import { RecurringTransactionResponse } from '../models/recurring-transaction.model';
 import { Transaction, TransactionType } from '../models/transaction.model';
 import { Frequency } from '../models/subscription.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 const mockCategory = { id: 'cat-1', nom: 'Alimentation', icone: '🛒', couleur: '#f59e0b' };
 const mockAccount = { id: 'acc-1', nom: 'Compte courant', icone: '🏦', couleur: '#4f46e5' };
@@ -62,7 +63,11 @@ describe('RecurringTransactionService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [RecurringTransactionService, { provide: ApiService, useValue: apiService }],
+      providers: [
+        RecurringTransactionService,
+        { provide: ApiService, useValue: apiService },
+        ...provideTranslocoTesting(),
+      ],
     });
 
     service = TestBed.inject(RecurringTransactionService);

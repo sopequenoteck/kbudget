@@ -9,6 +9,7 @@ import 'package:k_budget/src/features/subscriptions/application/subscription_lis
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -44,6 +45,7 @@ void main() {
     mockRepo = MockSubscriptionRepository();
     container = ProviderContainer(
       overrides: [
+        displayLocaleOverride(),
         subscriptionRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -80,7 +82,7 @@ void main() {
 
       await notifier().loadItems();
 
-      expect(state().error, contains('Impossible de charger'));
+      expect(state().error, 'Erreur de chargement');
     });
 
     test('should_add_item_when_create_succeeds', () async {
@@ -102,6 +104,26 @@ void main() {
       await notifier().update(updated);
 
       expect(state().items.first.montant, 19.99);
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_show_save_error_when_create_fails', () async {
+      when(mockRepo.create(any)).thenThrow(Exception('Server error'));
+
+      await notifier().create(sub2);
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
+      expect(state().isLoading, isFalse);
+    });
+
+    test('should_show_save_error_when_update_fails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
+      await notifier().loadItems();
+
+      when(mockRepo.update(any)).thenThrow(Exception('Server error'));
+      await notifier().update(sub1.copyWith(montant: 19.99));
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
       expect(state().mutatingIds, isEmpty);
     });
 

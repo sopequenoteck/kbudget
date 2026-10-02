@@ -21,6 +21,7 @@ import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_hero_widget.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
@@ -80,7 +81,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
         } on Exception {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.errorGeneric)),
+              SnackBar(content: Text(l10n.errorsClientGeneric)),
             );
           }
         }
@@ -152,7 +153,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.errorGeneric,
+                    l10n.errorsClientGeneric,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       fontWeight: AppTypography.medium,
@@ -164,7 +165,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                     onPressed: () =>
                         ref.read(debtNotifierProvider.notifier).refresh(),
                     icon: const PhosphorIcon(PhosphorIconsRegular.arrowClockwise, size: 20),
-                    label: Text(l10n.transactionsRetry),
+                    label: Text(l10n.commonActionRetry),
                   ),
                 ],
               ),
@@ -200,7 +201,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
                   ),
                   const SizedBox(height: AppSpacing.space3),
                   Text(
-                    l10n.debtsEmpty,
+                    l10n.debtsEmptyTitle,
                     style: TextStyle(
                       fontSize: AppTypography.sizeMd,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -219,7 +220,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     final todayDate = DateTime(today.year, today.month, today.day);
     final groups = _groupByDueDate(state.items, todayDate);
     final themeExt = theme.extension<AppThemeExtension>();
-    final dateFormat = DateFormat('d MMMM', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM', ref.watch(intlLocaleProvider));
 
     final widgets = <Widget>[
       SliverToBoxAdapter(
@@ -230,18 +231,21 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
           isLoading: false,
         ),
       ),
-      SectionHeaderSticky(title: 'Dettes · $kEnCours en cours'),
+      SectionHeaderSticky(
+        title: '${l10n.commonNavDebts} · '
+            '${l10n.debtsSummaryOutstandingCount(kEnCours)}',
+      ),
     ];
 
     for (final entry in groups.entries) {
-      final bucketLabel = entry.key;
+      final bucket = entry.key;
       final bucketDebts = entry.value;
 
       // Couleur du date-label
       final Color labelColor;
-      if (bucketLabel == 'En retard') {
+      if (bucket == _DueBucket.overdue) {
         labelColor = themeExt?.expenseColor ?? colorScheme.error;
-      } else if (bucketLabel == "Aujourd'hui") {
+      } else if (bucket == _DueBucket.today) {
         labelColor = AppColors.amber500;
       } else {
         labelColor = colorScheme.onSurfaceVariant;
@@ -255,7 +259,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
               vertical: AppSpacing.space2,
             ),
             child: Text(
-              bucketLabel,
+              _bucketLabel(bucket, l10n),
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 fontWeight: AppTypography.medium,
@@ -292,27 +296,17 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     return widgets;
   }
 
-  Map<String, List<Debt>> _groupByDueDate(
+  Map<_DueBucket, List<Debt>> _groupByDueDate(
     List<Debt> items,
     DateTime today,
   ) {
-    const kDebtBuckets = [
-      'En retard',
-      "Aujourd'hui",
-      'Cette semaine',
-      'Ce mois-ci',
-      'Plus tard',
-      'Sans échéance',
-      'Remboursées',
-    ];
-
-    final raw = <String, List<Debt>>{};
+    final raw = <_DueBucket, List<Debt>>{};
     for (final debt in items) {
-      final String bucket;
+      final _DueBucket bucket;
       if (debt.rembourse) {
-        bucket = 'Remboursées';
+        bucket = _DueBucket.repaid;
       } else if (debt.dueDate == null) {
-        bucket = 'Sans échéance';
+        bucket = _DueBucket.noDueDate;
       } else {
         final dueDay = DateTime(
           debt.dueDate!.year,
@@ -320,15 +314,15 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
           debt.dueDate!.day,
         );
         if (dueDay.isBefore(today)) {
-          bucket = 'En retard';
+          bucket = _DueBucket.overdue;
         } else if (dueDay == today) {
-          bucket = "Aujourd'hui";
+          bucket = _DueBucket.today;
         } else if (!dueDay.isAfter(today.add(const Duration(days: 7)))) {
-          bucket = 'Cette semaine';
+          bucket = _DueBucket.thisWeek;
         } else if (dueDay.year == today.year && dueDay.month == today.month) {
-          bucket = 'Ce mois-ci';
+          bucket = _DueBucket.thisMonth;
         } else {
-          bucket = 'Plus tard';
+          bucket = _DueBucket.later;
         }
       }
       raw.putIfAbsent(bucket, () => []).add(debt);
@@ -348,12 +342,22 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       });
     }
 
-    final ordered = <String, List<Debt>>{};
-    for (final key in kDebtBuckets) {
-      if (raw.containsKey(key)) ordered[key] = raw[key]!;
-    }
-    return ordered;
+    return {
+      for (final bucket in _DueBucket.values)
+        if (raw.containsKey(bucket)) bucket: raw[bucket]!,
+    };
   }
+
+  String _bucketLabel(_DueBucket bucket, AppLocalizations l10n) =>
+      switch (bucket) {
+        _DueBucket.overdue => l10n.debtsListOverdue,
+        _DueBucket.today => l10n.commonValueToday,
+        _DueBucket.thisWeek => l10n.debtsListThisWeek,
+        _DueBucket.thisMonth => l10n.debtsListThisMonth,
+        _DueBucket.later => l10n.debtsListLater,
+        _DueBucket.noDueDate => l10n.debtsListNoDueDate,
+        _DueBucket.repaid => l10n.debtsListRepaid,
+      };
 
   Widget _buildDebtItem(
     Debt debt,
@@ -371,7 +375,7 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
     final formattedAmount = AmountFormatter.format(
       debt.montant,
       currency: debt.currency,
-    );
+      locale: ref.watch(intlLocaleProvider));
 
     // Sous-texte montant converti si devise étrangère
     String? convertedSubtitle;
@@ -385,8 +389,12 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
         rates: exchangeRates,
       );
       if (converted != null) {
-        convertedSubtitle =
-            '~ ${AmountFormatter.format(converted, currency: primaryCurrency)}';
+        final formattedConverted = AmountFormatter.format(
+          converted,
+          currency: primaryCurrency,
+          locale: ref.watch(intlLocaleProvider),
+        );
+        convertedSubtitle = '~ $formattedConverted';
       }
     }
 
@@ -399,10 +407,21 @@ class _DebtListScreenState extends ConsumerState<DebtListScreen> {
       subtitle: dateFormat.format(debt.date),
       value: formattedAmount,
       rightSubtitle:
-          convertedSubtitle ?? (debt.rembourse ? l10n.debtBadgeRembourse : null),
+          convertedSubtitle ?? (debt.rembourse ? l10n.debtsValueRepaid : null),
       onPressed: () {
         context.push('/debts/${debt.id}', extra: debt);
       },
     );
   }
+}
+
+/// Groupes de la liste, dans leur ordre d'affichage.
+enum _DueBucket {
+  overdue,
+  today,
+  thisWeek,
+  thisMonth,
+  later,
+  noDueDate,
+  repaid,
 }

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { TransactionForm } from './transaction-form';
@@ -16,6 +16,7 @@ import { type Category } from '../../../../core/models/category.model';
 import { type AccountSummary } from '../../../../core/models/account.model';
 import { CategoryService } from '../../../../core/services/category';
 import { ConfirmService } from '../../../../core/services/confirm.service';
+import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
 
 const makeTransaction = (overrides: Partial<Transaction> = {}): Transaction => ({
   id: 'tx-1',
@@ -87,6 +88,7 @@ describe('TransactionForm', () => {
 
   let confirmServiceMock: {
     confirm: ReturnType<typeof vi.fn>;
+    confirmDelete: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -134,6 +136,7 @@ describe('TransactionForm', () => {
 
     confirmServiceMock = {
       confirm: vi.fn().mockResolvedValue(false),
+      confirmDelete: vi.fn().mockResolvedValue(false),
     };
   });
 
@@ -141,6 +144,7 @@ describe('TransactionForm', () => {
     TestBed.configureTestingModule({
       imports: [TransactionForm],
       providers: [
+        provideTranslocoTesting(),
         { provide: TransactionService, useValue: transactionServiceMock },
         { provide: RecurringTransactionService, useValue: recurringTransactionServiceMock },
         { provide: TransactionLibelleService, useValue: libelleServiceMock },
@@ -165,6 +169,31 @@ describe('TransactionForm', () => {
     // Le bouton de récurrence est rendu en mode création (aria-label="Récurrence")
     const toggle = fixture.nativeElement.querySelector('button[aria-label="Récurrence"]');
     expect(toggle).not.toBeNull();
+  });
+
+  it('should_display_the_translated_name_when_selected_category_is_a_system_category', () => {
+    // Assert — `nom` volontairement different de la traduction pour prouver
+    // que l'affichage ne depend plus du `nom` brut cote serveur (KKS-395).
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+    const systemCategory: Category = {
+      id: 'sys-1',
+      nom: 'Abonnement-legacy',
+      icone: '🔄',
+      couleur: '#000000',
+      isSystem: true,
+      systemKey: 'SUBSCRIPTION',
+    };
+    categoryServiceMock.getAll.mockReturnValue(of([systemCategory]));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+    fixture.componentInstance.form.patchValue({ categoryId: 'sys-1' });
+    fixture.detectChanges();
+
+    const pill = fixture.nativeElement.querySelector('button[aria-label="Catégorie"] span');
+    expect(pill.textContent.trim()).toBe('Abonnement');
   });
 
   it('should_hide_recurring_toggle_in_edit_mode', () => {
@@ -272,5 +301,119 @@ describe('TransactionForm', () => {
     expect(component.form.get('isRecurring')!.value).toBe(true);
     // Le composant n'est pas en mode édition (asRecurring override isEditing)
     expect(component.isEditing()).toBe(false);
+  });
+
+  it('should_insert_created_category_sorted_by_name', () => {
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const nouvelle: Category = { id: 'cat-2', nom: 'Alimentation', icone: '🍔', couleur: '#000' };
+    component.onCategoryCreated(nouvelle);
+
+    expect(component.categories().map((c) => c.nom)).toContain('Alimentation');
+  });
+
+  it('should_delete_transaction_when_confirmed', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(confirmServiceMock.confirmDelete).toHaveBeenCalled();
+    expect(transactionServiceMock.delete).toHaveBeenCalledWith('tx-1');
+    expect(modalServiceMock.closeModal).toHaveBeenCalled();
+  });
+
+  it('should_not_delete_transaction_when_not_confirmed', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(transactionServiceMock.delete).not.toHaveBeenCalled();
+  });
+
+  it('should_reject_submit_when_amount_is_invalid_despite_form_validity', async () => {
+    // Garde-fou defensif de onSubmit (deja present avant KKS-377) : on
+    // desactive le controle montant pour l'exclure de la validite du
+    // formulaire tout en lui laissant une valeur non numerique.
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ libelle: 'Test' });
+    component.form.get('montant')!.disable();
+    component.form.get('montant')!.setValue('abc');
+    fixture.detectChanges();
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Montant invalide');
+    expect(transactionServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should_set_error_message_when_submit_fails', async () => {
+    modalServiceMock.editingEntity = signal(null);
+    modalServiceMock.asRecurring = signal(false);
+    transactionServiceMock.create = vi.fn().mockReturnValue(throwError(() => 'network down'));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component.form.patchValue({ libelle: 'Test', montant: '10' });
+    fixture.detectChanges();
+
+    await component.onSubmit();
+
+    expect(component.errorMessage()).toBe('Erreur lors de la sauvegarde');
+    expect(component.submitting()).toBe(false);
+  });
+
+  it('should_include_transfer_counterpart_message_when_deleting_transfer_transaction', async () => {
+    const existingTransaction = makeTransaction({ transferId: 'transfer-1' });
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirmDelete.mockResolvedValue(false);
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    const confirmArgs = confirmServiceMock.confirmDelete.mock.calls[0][0];
+    expect(confirmArgs.message).toContain('La contrepartie du virement sera aussi supprimée.');
+  });
+
+  it('should_set_error_message_when_delete_fails', async () => {
+    const existingTransaction = makeTransaction();
+    modalServiceMock.editingEntity = signal(existingTransaction);
+    confirmServiceMock.confirmDelete.mockResolvedValue(true);
+    transactionServiceMock.delete = vi.fn().mockReturnValue(throwError(() => 'server error'));
+
+    setupTestBed();
+    const fixture = TestBed.createComponent(TransactionForm);
+    fixture.detectChanges();
+
+    await fixture.componentInstance.onDelete();
+
+    expect(fixture.componentInstance.errorMessage()).toBe('Erreur lors de la suppression');
   });
 });

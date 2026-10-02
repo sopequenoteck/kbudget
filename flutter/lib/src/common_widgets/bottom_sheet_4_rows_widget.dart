@@ -541,18 +541,24 @@ class BottomSheet4RowsWidget extends StatelessWidget {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Zone gauche
+          // Zone gauche — défile si l'écran est trop étroit (KKS-405)
           if (footerLeading != null)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (int i = 0; i < footerLeading!.length; i++) ...[
-                  footerLeading![i],
-                  if (i < footerLeading!.length - 1)
-                    const SizedBox(width: AppSpacing.space2),
-                ],
-              ],
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < footerLeading!.length; i++) ...[
+                      footerLeading![i],
+                      if (i < footerLeading!.length - 1)
+                        const SizedBox(width: AppSpacing.space2),
+                    ],
+                  ],
+                ),
+              ),
             )
           else
             _BSheetActionPill(
@@ -561,8 +567,6 @@ class BottomSheet4RowsWidget extends StatelessWidget {
               label: cancelLabel,
               onTap: onCancel,
             ),
-
-          const Spacer(),
 
           // Bouton Valider
           _BSheetActionPill(

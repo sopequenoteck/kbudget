@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DeleteAccountConfirmDialogComponent } from './delete-account-confirm-dialog.component';
 import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 describe('DeleteAccountConfirmDialogComponent', () => {
   let userServiceMock: { deleteAccount: ReturnType<typeof vi.fn> };
@@ -21,6 +22,7 @@ describe('DeleteAccountConfirmDialogComponent', () => {
     TestBed.configureTestingModule({
       imports: [DeleteAccountConfirmDialogComponent],
       providers: [
+        provideTranslocoTesting(),
         { provide: UserService, useValue: userServiceMock },
         { provide: AuthService, useValue: authServiceMock },
       ],
@@ -132,6 +134,46 @@ describe('DeleteAccountConfirmDialogComponent', () => {
       await component.onSubmit();
 
       expect(component.errorMessage()).toContain('dernier administrateur');
+      expect(authServiceMock.logout).not.toHaveBeenCalled();
+    });
+
+    it('should_set_generic_error_message_when_401_with_an_unknown_code', async () => {
+      setup();
+      const error = new HttpErrorResponse({
+        status: 401,
+        error: { error: 'OTHER' },
+      });
+      userServiceMock.deleteAccount.mockReturnValue(throwError(() => error));
+
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      fixture.detectChanges();
+
+      const component = fixture.componentInstance;
+      component.form.patchValue({ currentPassword: 'MonMdpSecurisé123', confirmed: true });
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toBe('Une erreur est survenue. Veuillez réessayer.');
+      expect(authServiceMock.logout).not.toHaveBeenCalled();
+    });
+
+    it('should_set_action_not_allowed_message_when_403_with_an_unknown_code', async () => {
+      setup();
+      const error = new HttpErrorResponse({
+        status: 403,
+        error: { error: 'OTHER' },
+      });
+      userServiceMock.deleteAccount.mockReturnValue(throwError(() => error));
+
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      fixture.detectChanges();
+
+      const component = fixture.componentInstance;
+      component.form.patchValue({ currentPassword: 'MonMdpSecurisé123', confirmed: true });
+
+      await component.onSubmit();
+
+      expect(component.errorMessage()).toBe('Action non autorisée.');
       expect(authServiceMock.logout).not.toHaveBeenCalled();
     });
 

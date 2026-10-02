@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.enums.ImportSkipReason;
 import fr.kksdev.budget.api.enums.TransactionType;
+import fr.kksdev.budget.api.model.converter.UuidListConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -77,6 +79,24 @@ public class ImportDraftLine {
     @Column(name = "duplicate_transaction_id")
     private UUID duplicateTransactionId;
 
+    /** Date d'achat lue dans le libelle brut d'un paiement carte (KKS-385), nulle sinon. {@code date} reste la date comptable. */
+    @Column(name = "purchase_date")
+    private LocalDate purchaseDate;
+
+    /** Transaction existante a laquelle la ligne est rapprochee : aucune transaction n'est creee a la confirmation (KKS-385). */
+    @Column(name = "matched_transaction_id")
+    private UUID matchedTransactionId;
+
+    /** Transactions candidates quand le rapprochement est ambigu (statut DUPLICATE), vide sinon (KKS-385). */
+    @Convert(converter = UuidListConverter.class)
+    @Column(name = "match_candidate_ids")
+    @Builder.Default
+    private List<UUID> matchCandidateIds = List.of();
+
+    /** Abonnement auquel la transaction creee sera rattachee (KKS-385). */
+    @Column(name = "subscription_id")
+    private UUID subscriptionId;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -84,4 +104,9 @@ public class ImportDraftLine {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    /** Date de la transaction que la ligne cree : la date d'achat quand elle est connue, sinon la date comptable. */
+    public LocalDate transactionDate() {
+        return purchaseDate != null ? purchaseDate : date;
+    }
 }

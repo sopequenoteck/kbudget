@@ -80,9 +80,11 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
       );
 
       if (mounted) {
+        final message =
+            AppLocalizations.of(context)!.usersFeedbackPasswordChanged;
         Navigator.of(context).pop(authResponse);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mot de passe modifié avec succès')),
+          SnackBar(content: Text(message)),
         );
       }
     } on DioException catch (e) {
@@ -91,11 +93,11 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
         final message = errorLabel(
           l10n,
           apiErrorCode(e),
-          fallback: 'Erreur lors du changement de mot de passe',
+          fallback: l10n.usersFeedbackPasswordChangeError,
           // Sur cet ecran, PASSWORD_INCORRECT designe l'ancien mot de passe,
           // pas celui qu'on saisit : le libelle du catalogue serait ambigu.
           overrides: {
-            'PASSWORD_INCORRECT': l10n.errorCodeCurrentPasswordIncorrect,
+            'PASSWORD_INCORRECT': l10n.usersFeedbackCurrentPasswordIncorrect,
           },
         );
         setState(() {
@@ -105,7 +107,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
     } on Exception {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Erreur réseau, veuillez réessayer';
+          _errorMessage = AppLocalizations.of(context)!.errorsClientNetwork;
         });
       }
     } finally {
@@ -118,6 +120,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -132,7 +135,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Changer le mot de passe',
+                l10n.usersListChangePassword,
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.space6),
@@ -142,7 +145,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 controller: _currentCtrl,
                 obscureText: !_showCurrent,
                 decoration: InputDecoration(
-                  labelText: 'Mot de passe actuel',
+                  labelText: l10n.usersFormCurrentPassword,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: PhosphorIcon(
@@ -154,8 +157,9 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                         setState(() => _showCurrent = !_showCurrent),
                   ),
                 ),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Champ requis' : null,
+                validator: (v) => (v == null || v.isEmpty)
+                    ? l10n.commonValidationRequired
+                    : null,
               ),
               const SizedBox(height: AppSpacing.space4),
 
@@ -164,8 +168,8 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 controller: _newCtrl,
                 obscureText: !_showNew,
                 decoration: InputDecoration(
-                  labelText: 'Nouveau mot de passe',
-                  helperText: PasswordPolicy.helperText,
+                  labelText: l10n.usersFormNewPassword,
+                  helperText: PasswordPolicy.helperText(l10n),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: PhosphorIcon(
@@ -177,9 +181,11 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   ),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Champ requis';
+                  if (v == null || v.isEmpty) {
+                    return l10n.commonValidationRequired;
+                  }
                   if (v.length < PasswordPolicy.minLength) {
-                    return PasswordPolicy.tooShortMessage;
+                    return PasswordPolicy.tooShortMessage(l10n);
                   }
                   return null;
                 },
@@ -191,7 +197,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 controller: _confirmCtrl,
                 obscureText: !_showConfirm,
                 decoration: InputDecoration(
-                  labelText: 'Confirmer le nouveau mot de passe',
+                  labelText: l10n.usersFormConfirmNewPassword,
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: PhosphorIcon(
@@ -204,9 +210,11 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   ),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Champ requis';
+                  if (v == null || v.isEmpty) {
+                    return l10n.commonValidationRequired;
+                  }
                   if (v != _newCtrl.text) {
-                    return 'Les mots de passe ne correspondent pas';
+                    return l10n.usersFormPasswordMismatch;
                   }
                   return null;
                 },
@@ -229,7 +237,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   TextButton(
                     onPressed:
                         _isSubmitting ? null : () => Navigator.of(context).pop(),
-                    child: const Text('Annuler'),
+                    child: Text(l10n.commonActionCancel),
                   ),
                   const SizedBox(width: AppSpacing.space3),
                   FilledButton(
@@ -240,7 +248,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Modifier'),
+                        : Text(l10n.commonActionEdit),
                   ),
                 ],
               ),

@@ -13,9 +13,14 @@ abstract class DebtRepository {
   Future<Debt> update(Debt debt);
   Future<void> delete(String id);
 
-  Future<Debt> repay(String id, String accountId, double? amount) async {
-    throw Exception('Remboursement disponible en mode serveur uniquement');
-  }
+  /// Rembourse la dette [id]. [libelle] nomme la transaction creee ;
+  /// sans lui, l'API ecrit un defaut anglais.
+  Future<Debt> repay(
+    String id,
+    String accountId,
+    double? amount, {
+    String? libelle,
+  });
 
   Future<List<DebtPayment>> getPayments(String id) async {
     return [];

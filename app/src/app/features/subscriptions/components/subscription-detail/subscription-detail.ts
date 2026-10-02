@@ -16,24 +16,32 @@ import {
   phosphorTrash,
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { SubscriptionService } from '../../../../core/services/subscription';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { ConfirmService } from '../../../../core/services/confirm.service';
-import { Subscription, Frequency } from '../../../../core/models/subscription.model';
+import {
+  Subscription,
+  SUBSCRIPTION_FREQUENCY_LABEL_KEYS,
+  SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS,
+} from '../../../../core/models/subscription.model';
 import { SubscriptionPaymentResponse } from '../../../../core/models/subscription-payment.model';
 import { AccountSummary } from '../../../../core/models/account.model';
 import { AmountPipe } from '../../../../shared/pipes/amount.pipe';
 import { ConvertAmountPipe } from '../../../../shared/pipes/convert-amount.pipe';
+import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
+import { formatCurrencyAmount } from '../../../../shared/utils/locale-format.utils';
+import { parseLocalDate } from '../../../../shared/utils/date.utils';
 import { PreferenceService } from '../../../../core/services/preference';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { APP_LOCALE } from '../../../../core/constants/locale.constants';
+import { LanguageService } from '../../../../core/services/language';
 
 @Component({
   selector: 'app-subscription-detail',
   standalone: true,
-  imports: [AmountPipe, ConvertAmountPipe, NgIcon],
+  imports: [AmountPipe, ConvertAmountPipe, CategoryNamePipe, NgIcon, TranslocoPipe],
   providers: [
     provideIcons({
       phosphorArrowLeft,
@@ -57,6 +65,10 @@ export class SubscriptionDetail {
   private readonly confirmService = inject(ConfirmService);
   readonly preferenceService = inject(PreferenceService);
   private readonly logger = inject(DevLogger);
+  private readonly languageService = inject(LanguageService);
+  private readonly transloco = inject(TranslocoService);
+
+  readonly SUBSCRIPTION_FREQUENCY_LABEL_KEYS = SUBSCRIPTION_FREQUENCY_LABEL_KEYS;
 
   readonly subscription = signal<Subscription | null>(null);
   readonly payments = signal<SubscriptionPaymentResponse[]>([]);
@@ -131,10 +143,10 @@ export class SubscriptionDetail {
     this.payInProgress.set(true);
     try {
       await firstValueFrom(this.subscriptionService.pay(sub.id));
-      this.toastService.success('Paiement enregistré');
+      this.toastService.success(this.transloco.translate('subscriptions.feedback.paid'));
       await Promise.all([this.loadPayments(sub.id), this.loadTotalPaid(sub.id)]);
     } catch {
-      this.toastService.error('Échec du paiement');
+      this.toastService.error(this.transloco.translate('subscriptions.feedback.payFailed'));
     } finally {
       this.payInProgress.set(false);
     }
@@ -165,9 +177,11 @@ export class SubscriptionDetail {
         }),
       );
       this.subscription.set(updated);
-      this.toastService.success(updated.actif ? 'Abonnement activé' : 'Abonnement désactivé');
+      this.toastService.success(
+        this.transloco.translate(updated.actif ? 'subscriptions.feedback.activated' : 'subscriptions.feedback.deactivated'),
+      );
     } catch {
-      this.toastService.error('Échec de la mise à jour');
+      this.toastService.error(this.transloco.translate('subscriptions.feedback.updateFailed'));
     }
   }
 
@@ -175,17 +189,21 @@ export class SubscriptionDetail {
     const sub = this.subscription();
     if (!sub) return;
 
-    const freq = sub.frequence === 'ANNUEL' ? '/an' : sub.frequence === 'HEBDOMADAIRE' ? '/sem' : '/mois';
-    const amount = sub.montant.toLocaleString(APP_LOCALE, { style: 'currency', currency: sub.currency });
-    const ok = await this.confirmService.confirm({ title: `${sub.nom} — ${amount}${freq}`, message: 'Voulez-vous vraiment supprimer cet abonnement ?', confirmLabel: 'Supprimer', variant: 'danger', icon: 'phosphorRepeat' });
+    const freq = this.transloco.translate(SUBSCRIPTION_FREQUENCY_SHORT_LABEL_KEYS[sub.frequence]);
+    const amount = formatCurrencyAmount(sub.montant, sub.currency, this.languageService.displayLocale());
+    const ok = await this.confirmService.confirmDelete({
+      title: `${sub.nom} — ${amount}${freq}`,
+      message: this.transloco.translate('subscriptions.dialog.deleteMessage'),
+      icon: 'phosphorRepeat',
+    });
     if (!ok) return;
 
     try {
       await firstValueFrom(this.subscriptionService.delete(sub.id));
-      this.toastService.success('Abonnement supprimé');
+      this.toastService.success(this.transloco.translate('subscriptions.feedback.deleted'));
       this.router.navigate(['/subscriptions']);
     } catch {
-      this.toastService.error('Échec de la suppression');
+      this.toastService.error(this.transloco.translate('subscriptions.feedback.deleteFailed'));
     }
   }
 
@@ -200,19 +218,11 @@ export class SubscriptionDetail {
     }
   }
 
-  getFrequencyLabel(freq: Frequency): string {
-    switch (freq) {
-      case Frequency.HEBDOMADAIRE: return 'Hebdomadaire';
-      case Frequency.MENSUEL: return 'Mensuel';
-      case Frequency.ANNUEL: return 'Annuel';
-    }
-  }
-
   getAccountLogo(account: AccountSummary): string | null {
     return account.bankCustomLogo || account.bankLogoUrl || null;
   }
 
   formatDate(date: string): string {
-    return new Intl.DateTimeFormat(APP_LOCALE).format(new Date(date));
+    return new Intl.DateTimeFormat(this.languageService.displayLocale()).format(parseLocalDate(date));
   }
 }

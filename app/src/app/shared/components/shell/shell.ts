@@ -14,6 +14,7 @@ import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } fro
 import { trigger, transition, style, animate, query } from '@angular/animations';
 import { filter, firstValueFrom } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import {
   phosphorGear,
   phosphorSignOut,
@@ -58,6 +59,14 @@ import { Modal } from '../modal/modal';
 import { Toast } from '../toast/toast';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
+/**
+ * Parcours dedies a une tache (parametres, import de releve) : le FAB n'y a pas d'usage
+ * et n'y est pas affiche (constitution 4.1.0, principe IV).
+ */
+export function isTaskFlowRoute(url: string): boolean {
+  return url.startsWith('/settings') || url.startsWith('/transactions/import');
+}
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -81,6 +90,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
     NotificationPanel,
     Toast,
     ConfirmDialog,
+    TranslocoPipe,
   ],
   providers: [
     provideIcons({
@@ -153,8 +163,18 @@ export class Shell {
   readonly DebtType = DebtType;
   readonly navItems = computed(() => {
     const fixed = [
-      { label: 'Accueil', route: '/dashboard', icon: 'phosphorHouse', filledIcon: 'phosphorHouseFill' },
-      { label: 'Transactions', route: '/transactions', icon: 'phosphorCurrencyDollar', filledIcon: 'phosphorCurrencyDollarFill' },
+      {
+        labelKey: 'common.nav.home',
+        route: '/dashboard',
+        icon: 'phosphorHouse',
+        filledIcon: 'phosphorHouseFill',
+      },
+      {
+        labelKey: 'common.nav.transactions',
+        route: '/transactions',
+        icon: 'phosphorCurrencyDollar',
+        filledIcon: 'phosphorCurrencyDollarFill',
+      },
     ];
     const navOrder = this.preferenceService.navOrder();
     const enabled = this.preferenceService.enabledFeatures();
@@ -162,7 +182,12 @@ export class Shell {
       .filter((f: Feature) => enabled.includes(f))
       .map((f: Feature) => {
         const meta = FEATURES.find((m) => m.value === f)!;
-        return { label: meta.label, route: meta.route, icon: meta.icon, filledIcon: meta.filledIcon };
+        return {
+          labelKey: meta.labelKey,
+          route: meta.route,
+          icon: meta.icon,
+          filledIcon: meta.filledIcon,
+        };
       });
     return [...fixed, ...optional];
   });
@@ -170,7 +195,7 @@ export class Shell {
     const e = this.navigationEnd();
     return e instanceof NavigationEnd ? e.urlAfterRedirects : this.router.url;
   });
-  readonly isOnSettingsRoute = computed(() => this.currentRoute().startsWith('/settings'));
+  readonly isOnTaskFlowRoute = computed(() => isTaskFlowRoute(this.currentRoute()));
 
   constructor() {
     effect(() => {

@@ -1,16 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TranslocoService } from '@jsverse/transloco';
 
 import { ApiErrorService } from './api-error';
 import { DevLogger } from './dev-logger';
-import {
-  ERROR_MESSAGES,
-  GENERIC_ERROR_MESSAGE,
-  LOGIN_ERROR_OVERRIDES,
-  NETWORK_ERROR_MESSAGE,
-  VALIDATION_ERROR_MESSAGE,
-} from '../constants/error-messages.constants';
-import { PASSWORD_MIN_LENGTH_MESSAGE } from '../constants/password.constants';
+import { ERROR_CODES, errorCodeToKey } from '../constants/error-messages.constants';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 function httpError(status: number, body: unknown): HttpErrorResponse {
   return new HttpErrorResponse({ status, error: body });
@@ -18,45 +13,43 @@ function httpError(status: number, body: unknown): HttpErrorResponse {
 
 describe('ApiErrorService', () => {
   let service: ApiErrorService;
+  let transloco: TranslocoService;
   let logger: { warn: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     logger = { warn: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
-      providers: [ApiErrorService, { provide: DevLogger, useValue: logger }],
+      providers: [
+        ApiErrorService,
+        provideTranslocoTesting(),
+        { provide: DevLogger, useValue: logger },
+      ],
     });
     service = TestBed.inject(ApiErrorService);
+    transloco = TestBed.inject(TranslocoService);
   });
 
   describe('catalogue', () => {
-    it('should_cover_the_27_codes_emitted_by_the_api', () => {
-      // Le catalogue est tenu a la main : ce test est le seul garde-fou contre
-      // un libelle manquant. Les 27 codes sont verrouilles par KKS-357.
-      expect(Object.keys(ERROR_MESSAGES)).toHaveLength(27);
+    it.each(ERROR_CODES)('should_return_the_catalogue_label_when_code_is_%s', (code) => {
+      // Arrange
+      const error = httpError(400, { error: code, message: 'texte serveur arbitraire' });
+      const expected = transloco.translate(errorCodeToKey(code));
+
+      // Act
+      const label = service.label(error);
+
+      // Assert — `VALIDATION_ERROR` passe par l'affinage, qui retombe sur le
+      // meme libelle en l'absence de `details`.
+      expect(label).toBe(expected);
+      expect(label).not.toContain('texte serveur arbitraire');
     });
-
-    it.each(Object.entries(ERROR_MESSAGES))(
-      'should_return_the_catalogue_label_when_code_is_%s',
-      (code, expected) => {
-        // Arrange
-        const error = httpError(400, { error: code, message: 'texte serveur arbitraire' });
-
-        // Act
-        const label = service.label(error);
-
-        // Assert — `VALIDATION_ERROR` passe par l'affinage, qui retombe sur le
-        // meme libelle en l'absence de `details`.
-        expect(label).toBe(expected);
-        expect(label).not.toContain('texte serveur arbitraire');
-      },
-    );
 
     it('should_never_expose_the_server_message_when_code_is_known', () => {
       // Arrange
       const error = httpError(404, { error: 'NOT_FOUND', message: 'Transaction non trouvee' });
 
       // Act & Assert
-      expect(service.label(error)).toBe(ERROR_MESSAGES['NOT_FOUND']);
+      expect(service.label(error)).toBe(transloco.translate('errors.api.notFound'));
     });
   });
 
@@ -83,7 +76,18 @@ describe('ApiErrorService', () => {
       const error = httpError(418, { error: 'BREWING_COFFEE' });
 
       // Act & Assert
-      expect(service.label(error)).toBe(GENERIC_ERROR_MESSAGE);
+      expect(service.label(error)).toBe(transloco.translate('errors.client.generic'));
+    });
+
+    it('should_use_generic_message_in_english_when_active_lang_is_english', () => {
+      // Arrange — le repli de KKS-324 sur un code inconnu est teste dans les
+      // deux langues (FR-030).
+      transloco.setActiveLang('en');
+      transloco.load('en').subscribe();
+      const error = httpError(418, { error: 'BREWING_COFFEE' });
+
+      // Act & Assert
+      expect(service.label(error)).toBe('An error occurred');
     });
   });
 
@@ -121,8 +125,18 @@ describe('ApiErrorService', () => {
       const label = service.label(error, 'Repli contextuel');
 
       // Assert — distinct du libelle generique : l'utilisateur peut agir dessus.
-      expect(label).toBe(NETWORK_ERROR_MESSAGE);
-      expect(label).not.toBe(GENERIC_ERROR_MESSAGE);
+      expect(label).toBe(transloco.translate('errors.client.network'));
+      expect(label).not.toBe(transloco.translate('errors.client.generic'));
+    });
+
+    it('should_return_network_message_in_english_when_active_lang_is_english', () => {
+      // Arrange — teste dans les deux langues (FR-030).
+      transloco.setActiveLang('en');
+      transloco.load('en').subscribe();
+      const error = httpError(0, null);
+
+      // Act & Assert
+      expect(service.label(error)).toBe('Unable to reach the server');
     });
   });
 
@@ -136,7 +150,9 @@ describe('ApiErrorService', () => {
       });
 
       // Act & Assert — precision heritee de KKS-351, conservee a l'identique.
-      expect(service.label(error)).toBe(PASSWORD_MIN_LENGTH_MESSAGE);
+      expect(service.label(error)).toBe(
+        transloco.translate('auth.form.passwordMinLength', { min: 12 }),
+      );
     });
 
     it('should_return_generic_validation_message_when_no_detail_is_recognised', () => {
@@ -148,7 +164,7 @@ describe('ApiErrorService', () => {
       });
 
       // Act & Assert
-      expect(service.label(error)).toBe(VALIDATION_ERROR_MESSAGE);
+      expect(service.label(error)).toBe(transloco.translate('errors.api.validationError'));
     });
 
     it.each([
@@ -161,7 +177,7 @@ describe('ApiErrorService', () => {
       const error = httpError(400, { error: 'VALIDATION_ERROR', details });
 
       // Act & Assert
-      expect(service.label(error)).toBe(VALIDATION_ERROR_MESSAGE);
+      expect(service.label(error)).toBe(transloco.translate('errors.api.validationError'));
     });
   });
 
@@ -172,22 +188,24 @@ describe('ApiErrorService', () => {
         error: 'BAD_REQUEST',
         message: 'Email ou mot de passe incorrect',
       });
+      const overrides = { BAD_REQUEST: 'auth.feedback.invalidCredentials' };
 
       // Act
-      const label = service.label(error, GENERIC_ERROR_MESSAGE, LOGIN_ERROR_OVERRIDES);
+      const label = service.label(error, transloco.translate('errors.client.generic'), overrides);
 
       // Assert
-      expect(label).toBe('Email ou mot de passe incorrect');
-      expect(label).not.toBe(ERROR_MESSAGES['BAD_REQUEST']);
+      expect(label).toBe(transloco.translate('auth.feedback.invalidCredentials'));
+      expect(label).not.toBe(transloco.translate('errors.api.badRequest'));
     });
 
     it('should_fall_back_to_catalogue_when_code_is_not_overridden', () => {
       // Arrange
       const error = httpError(429, { error: 'TOO_MANY_REQUESTS' });
+      const overrides = { BAD_REQUEST: 'auth.feedback.invalidCredentials' };
 
       // Act & Assert
-      expect(service.label(error, GENERIC_ERROR_MESSAGE, LOGIN_ERROR_OVERRIDES)).toBe(
-        ERROR_MESSAGES['TOO_MANY_REQUESTS'],
+      expect(service.label(error, transloco.translate('errors.client.generic'), overrides)).toBe(
+        transloco.translate('errors.api.tooManyRequests'),
       );
     });
   });

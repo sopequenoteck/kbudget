@@ -5,7 +5,13 @@ export interface Budget {
   frequence: string;
   seuilNotification: number;
   actif: boolean;
-  category: { id: string; nom: string; icone: string; couleur: string };
+  category: {
+    id: string;
+    nom: string;
+    icone: string;
+    couleur: string;
+    systemKey?: string | null;
+  };
   spent: number;
   updatedAt: string;
 }
@@ -36,6 +42,8 @@ export interface BudgetOverviewItem {
   categoryNom: string;
   categoryIcone: string;
   categoryCouleur: string;
+  /** Clef de la categorie systeme (KKS-395), `null` pour une categorie utilisateur. */
+  categorySystemKey?: string | null;
   montantBudget: number;
   montantBudgetNormalise: number;
   currency: string;
@@ -61,6 +69,8 @@ export interface BudgetHistoryItem {
   categoryNom: string;
   categoryIcone: string;
   categoryCouleur: string;
+  /** Clef de la categorie systeme (KKS-395), `null` pour une categorie utilisateur. */
+  categorySystemKey?: string | null;
   montantBudget: number;
   currency: string;
   tauxChange: number | null;
@@ -74,13 +84,17 @@ export interface UnbudgetedItem {
   categoryNom: string;
   categoryIcone: string;
   categoryCouleur: string;
+  /** Clef de la categorie systeme (KKS-395), `null` pour une categorie utilisateur. */
+  categorySystemKey?: string | null;
   montantDepense: number;
 }
 
+/** Cle de traduction du libelle d'une frequence de budget (budgets.value.*),
+ * partagee par la liste et le formulaire pour eviter des copies (KKS-379). */
 export const FREQUENCIES = [
-  { value: 'HEBDOMADAIRE', label: 'Hebdomadaire' },
-  { value: 'MENSUEL', label: 'Mensuel' },
-  { value: 'ANNUEL', label: 'Annuel' },
+  { value: 'HEBDOMADAIRE', labelKey: 'budgets.value.weekly' },
+  { value: 'MENSUEL', labelKey: 'budgets.value.monthly' },
+  { value: 'ANNUEL', labelKey: 'budgets.value.yearly' },
 ] as const;
 
 export type BudgetItem = BudgetOverviewItem | BudgetHistoryItem;

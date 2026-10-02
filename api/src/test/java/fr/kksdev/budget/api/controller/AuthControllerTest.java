@@ -28,6 +28,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -188,7 +190,7 @@ class AuthControllerTest {
     @Test
     void should_return_201_when_accept_invite_success() throws Exception {
         var request = new AcceptInviteRequest(
-                UUID.randomUUID(), "motDePasse12", "Alice", Currency.EUR, "Europe/Paris");
+                UUID.randomUUID(), "motDePasse12", "Alice", Currency.EUR, "Europe/Paris", null);
         var response = new AuthResponse("jwt-token", "refresh-token", "invitee@example.com", "Alice", false);
 
         when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class))).thenReturn(response);
@@ -201,6 +203,37 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.email").value("invitee@example.com"))
                 .andExpect(jsonPath("$.name").value("Alice"))
                 .andExpect(jsonPath("$.mustResetCredentials").value(false));
+    }
+
+    // --- KKS-396 : nom du compte par defaut fourni par le client ---
+
+    @Test
+    void should_forwardDefaultAccountName_when_provided() throws Exception {
+        var request = new AcceptInviteRequest(
+                UUID.randomUUID(), "motDePasse12", "Alice", Currency.EUR, "Europe/Paris", "Mon compte");
+        var response = new AuthResponse("jwt-token", "refresh-token", "invitee@example.com", "Alice", false);
+
+        when(acceptInviteService.acceptInvite(any(AcceptInviteRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/v1/auth/accept-invite")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        verify(acceptInviteService).acceptInvite(
+                argThat(r -> "Mon compte".equals(r.defaultAccountName())));
+    }
+
+    @Test
+    void should_return_400_when_defaultAccountNameTooLong() throws Exception {
+        String tooLong = "a".repeat(51);
+        var request = new AcceptInviteRequest(
+                UUID.randomUUID(), "motDePasse12", "Alice", Currency.EUR, "Europe/Paris", tooLong);
+
+        mockMvc.perform(post("/v1/auth/accept-invite")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

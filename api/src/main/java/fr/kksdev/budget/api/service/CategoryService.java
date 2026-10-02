@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.CategoryRequest;
 import fr.kksdev.budget.api.dto.response.CategoryResponse;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -22,6 +23,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CategoryService {
+
+    // KKS-396 : noms anglais des categories systeme, ecrits par l'API a la
+    // creation de l'utilisateur (principe VII, l'API ne traduit jamais).
+    private static final String SUBSCRIPTION_CATEGORY_NAME = "Subscription";
+    private static final String DEBT_CATEGORY_NAME = "Debt";
+    private static final String TRANSFER_CATEGORY_NAME = "Transfer";
+    private static final String ADJUSTMENT_CATEGORY_NAME = "Balance adjustment";
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
@@ -96,28 +104,31 @@ public class CategoryService {
     public void seedSystemCategories(User user) {
         try {
             Category abonnement = Category.builder()
-                    .nom("Abonnement")
+                    .nom(SUBSCRIPTION_CATEGORY_NAME)
                     .icone("\uD83D\uDD04")
                     .couleur("#6366f1")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.SUBSCRIPTION)
                     .user(user)
                     .build();
             categoryRepository.save(abonnement);
 
             Category dette = Category.builder()
-                    .nom("Dette")
+                    .nom(DEBT_CATEGORY_NAME)
                     .icone("\uD83D\uDCB0")
                     .couleur("#ef4444")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.DEBT)
                     .user(user)
                     .build();
             categoryRepository.save(dette);
 
             Category virement = Category.builder()
-                    .nom("Virement")
+                    .nom(TRANSFER_CATEGORY_NAME)
                     .icone("\uD83D\uDD04")
                     .couleur("#8b5cf6")
                     .isSystem(true)
+                    .systemKey(SystemCategoryKey.TRANSFER)
                     .user(user)
                     .build();
             categoryRepository.save(virement);
@@ -131,16 +142,17 @@ public class CategoryService {
 
     @Transactional
     public Category findOrCreateAdjustmentCategory(UUID userId) {
-        Category existing = findSystemCategoryByNom("Ajustement", userId);
+        Category existing = findSystemCategory(SystemCategoryKey.ADJUSTMENT, userId);
         if (existing != null) {
             return existing;
         }
 
         Category ajustement = Category.builder()
-                .nom("Ajustement")
+                .nom(ADJUSTMENT_CATEGORY_NAME)
                 .icone("⚖️")
                 .couleur("#6b7280")
                 .isSystem(true)
+                .systemKey(SystemCategoryKey.ADJUSTMENT)
                 .user(userRepository.getReferenceById(userId))
                 .build();
         ajustement = categoryRepository.save(ajustement);
@@ -157,14 +169,14 @@ public class CategoryService {
                         (String) row[1],
                         (String) row[2],
                         (String) row[3],
-                        (Boolean) row[4]
+                        (Boolean) row[4],
+                        (String) row[6]
                 ))
                 .toList();
     }
 
-    public Category findSystemCategoryByNom(String nom, UUID userId) {
-        return categoryRepository.findByNomIgnoreCaseAndUserId(nom, userId)
-                .filter(c -> Boolean.TRUE.equals(c.getIsSystem()))
+    public Category findSystemCategory(SystemCategoryKey key, UUID userId) {
+        return categoryRepository.findByUserIdAndSystemKey(userId, key)
                 .orElse(null);
     }
 
@@ -183,7 +195,8 @@ public class CategoryService {
                 category.getNom(),
                 category.getIcone(),
                 category.getCouleur(),
-                Boolean.TRUE.equals(category.getIsSystem())
+                Boolean.TRUE.equals(category.getIsSystem()),
+                SystemCategoryKey.nameOf(category.getSystemKey())
         );
     }
 }

@@ -4,12 +4,15 @@ import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.response.CsvPreviewResponse;
 import fr.kksdev.budget.api.dto.response.ImportConfirmResponse;
+import fr.kksdev.budget.api.dto.response.ImportDetectionResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftLineResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftSummaryResponse;
 import fr.kksdev.budget.api.dto.response.ImportHistoryResponse;
+import fr.kksdev.budget.api.dto.response.ImportMatchedTransactionResponse;
 import fr.kksdev.budget.api.dto.response.ImportProfileResponse;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
+import fr.kksdev.budget.api.dto.response.ImportBalanceCheckResponse;
 import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
@@ -18,10 +21,12 @@ import fr.kksdev.budget.api.enums.ImportSkipReason;
 import fr.kksdev.budget.api.exception.ConflictException;
 import fr.kksdev.budget.api.exception.CsvProfileNotFoundException;
 import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.ImportDraft;
 import fr.kksdev.budget.api.model.ImportDraftLine;
 import fr.kksdev.budget.api.model.ImportHistory;
 import fr.kksdev.budget.api.model.ImportProfile;
+import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -42,13 +47,21 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -70,6 +83,10 @@ public class ImportService {
     private final CategoryRuleService categoryRuleService;
     private final DeduplicationService deduplicationService;
     private final ImportProfileRepository importProfileRepository;
+    private final ImportProfileRegistry importProfileRegistry;
+    private final ImportProfileDetector importProfileDetector;
+    private final ImportBalanceService importBalanceService;
+    private final ImportMatchingService importMatchingService;
 
     @Transactional
     public ImportDraftResponse upload(MultipartFile file, UUID accountId, UUID userId) {
@@ -77,27 +94,39 @@ public class ImportService {
 
         Account account = validateAccountForImport(accountId, userId);
 
-        ImportProfileRegistry.ImportProfileConfig profile = csvParsingService.detectProfile(account.getBankCode())
+        byte[] content = readContent(file);
+
+        // The file is recognized by its columns first; the bank of the account is only a fallback.
+        ImportProfileDetector.Detection detection = importProfileDetector.resolve(content, account.getBankCode(), userId)
                 .orElseThrow(() -> new CsvProfileNotFoundException(
                         "No import profile available for bank: " + account.getBankCode()));
+        ImportProfileRegistry.ImportProfileConfig profile = detection.config();
 
-        List<ImportDraftLine> parsedLines;
-        try {
-            parsedLines = csvParsingService.parse(file.getInputStream(), profile, userId);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
-        }
+        List<ImportDraftLine> parsedLines = csvParsingService.parse(new ByteArrayInputStream(content), profile, userId);
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
 
         log.info("CSV import uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
 
-        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(), null, ImportProfileSource.REGISTRY);
-        return buildResponseWithProfileName(savedDraft, profile.name());
+        StatementInfo statement = readStatementInfo(content, detection);
+        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
+                detection.customProfileId(), detection.source(), statement);
+        return buildResponseWithProfileName(savedDraft, profile.name(), userId);
+    }
+
+    /** Recognizes the profile of a file without creating anything (KKS-440). */
+    public ImportDetectionResponse detect(MultipartFile file, UUID userId) {
+        validateFile(file);
+        byte[] content = readContent(file);
+        ImportDetectionResponse response = importProfileDetector.detect(content, userId)
+                .map(detection -> toDetectionResponse(detection, content, userId))
+                .orElseGet(ImportDetectionResponse::notRecognized);
+        log.info("Import file profile detection: recognized={}, source={}", response.recognized(), response.profileSource());
+        return response;
     }
 
     @Transactional
-    public ImportConfirmResponse confirm(UUID draftId, UUID userId) {
+    public ImportConfirmResponse confirm(UUID draftId, boolean applyOpeningBalance, UUID userId) {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
 
         if (draft.getStatus() != ImportDraftStatus.PENDING) {
@@ -118,6 +147,14 @@ public class ImportService {
                 .filter(l -> l.getStatus() == ImportLineStatus.READY)
                 .toList();
 
+        // A line matched with an existing transaction creates nothing: that transaction stands for it (KKS-385).
+        List<ImportDraftLine> matchedLines = readyLines.stream()
+                .filter(l -> l.getMatchedTransactionId() != null)
+                .toList();
+        List<ImportDraftLine> newLines = readyLines.stream()
+                .filter(l -> l.getMatchedTransactionId() == null)
+                .toList();
+
         int skippedCount = (int) allLines.stream()
                 .filter(l -> l.getStatus() == ImportLineStatus.SKIPPED)
                 .count();
@@ -126,15 +163,23 @@ public class ImportService {
                 .filter(ImportService::isAlreadyImported)
                 .toList();
 
-        List<Transaction> transactions = buildTransactionsFromLines(draft, readyLines);
+        // Computed before the transactions exist: the proposal accounts for the lines still to be created.
+        BigDecimal openingBalance = applyOpeningBalance
+                ? importBalanceService.draftBalances(draft, allLines, userId).proposedOpeningBalance()
+                : null;
+
+        List<Transaction> transactions = buildTransactionsFromLines(draft, newLines,
+                importMatchingService.subscriptionsOf(newLines, userId));
         transactionRepository.saveAll(transactions);
+        importMatchingService.confirmMatches(matchedLines, draft.getAccount().getId(), userId);
         backfillFingerprints(draft, alreadyImportedLines, userId);
+        updateAccountFromStatement(draft, openingBalance);
 
         // Create import history
         ImportHistory history = ImportHistory.builder()
                 .user(draft.getUser())
                 .account(draft.getAccount())
-                .transactionCount(readyLines.size())
+                .transactionCount(newLines.size())
                 .fileName(draft.getFileName())
                 .build();
         history = importHistoryRepository.save(history);
@@ -143,10 +188,14 @@ public class ImportService {
         draft.setStatus(ImportDraftStatus.COMPLETED);
         importDraftRepository.save(draft);
 
-        log.info("Import confirmé: {} transactions créées, {} ignorées dont {} déjà importées pour le draft {}",
-                readyLines.size(), skippedCount, alreadyImportedLines.size(), draftId);
+        log.info("Import confirmed: {} transactions created, {} matched with an existing transaction, {} skipped including {} already imported, draft {}",
+                newLines.size(), matchedLines.size(), skippedCount, alreadyImportedLines.size(), draftId);
 
-        return new ImportConfirmResponse(readyLines.size(), skippedCount, history.getId(), alreadyImportedLines.size());
+        ImportBalanceCheckResponse balanceCheck = importBalanceService.check(
+                draft, allLines, transactions.stream().map(Transaction::getId).toList(), userId);
+
+        return new ImportConfirmResponse(newLines.size(), skippedCount, history.getId(),
+                alreadyImportedLines.size(), balanceCheck, matchedLines.size());
     }
 
     public ImportDraftResponse getDraft(UUID draftId, UUID userId) {
@@ -154,7 +203,9 @@ public class ImportService {
         List<ImportDraftLine> lines = importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId);
         draft.getLines().clear();
         draft.getLines().addAll(lines);
-        return ImportDraftResponse.from(draft);
+        ImportBalanceService.DraftBalances balances = importBalanceService.draftBalances(draft, lines, userId);
+        return ImportDraftResponse.from(draft, balances.projectedBalance(), balances.proposedOpeningBalance(),
+                matchedTransactionsOf(draft, lines, userId));
     }
 
     @Transactional
@@ -204,10 +255,10 @@ public class ImportService {
         }
 
         if (request.status() != null) {
-            ImportLineStatus newStatus = parseLineStatus(request.status());
-            validateStatusTransition(line.getStatus(), newStatus);
-            line.setStatus(newStatus);
+            changeStatus(line, parseLineStatus(request.status()));
         }
+
+        applyMatchChange(line, request, draft, userId);
 
         line = importDraftLineRepository.save(line);
 
@@ -217,7 +268,7 @@ public class ImportService {
 
         log.info("Import draft line updated: lineId={}, draftId={}, newStatus={}", lineId, draftId, line.getStatus());
 
-        return ImportDraftLineResponse.from(line, suggestRule);
+        return ImportDraftLineResponse.from(line, suggestRule, matchedTransactionsOf(draft, List.of(line), userId));
     }
 
     @Transactional
@@ -240,38 +291,39 @@ public class ImportService {
                     });
         }
 
-        ImportLineStatus newStatus = null;
-        if (request.status() != null) {
-            newStatus = parseLineStatus(request.status());
-        }
+        ImportLineStatus newStatus = request.status() != null ? parseLineStatus(request.status()) : null;
 
         // Une ligne deja importee n'a rien a recevoir : la reactiver creerait un
         // doublon, et un "tout selectionner + valider" ne doit pas echouer sur elle.
-        List<ImportDraftLine> matchedLines = allLines.stream()
+        // Une ligne aux candidats multiples attend un choix explicite (KKS-385) : valider
+        // le lot ne doit pas decider a la place de l'utilisateur de creer une transaction en double.
+        List<ImportDraftLine> updatedLines = allLines.stream()
                 .filter(l -> request.lineIds().contains(l.getId()))
                 .filter(l -> !isAlreadyImported(l))
+                .filter(l -> !(newStatus == ImportLineStatus.READY && !l.getMatchCandidateIds().isEmpty()))
+                .filter(l -> !(newStatus == ImportLineStatus.READY && isUnreadableSkipped(l)))
                 .toList();
 
-        for (ImportDraftLine line : matchedLines) {
+        for (ImportDraftLine line : updatedLines) {
             if (category != null) {
                 line.setCategory(category);
                 line.setCategorySource(CategorySource.USER);
             }
             if (newStatus != null) {
-                validateStatusTransition(line.getStatus(), newStatus);
-                line.setStatus(newStatus);
+                changeStatus(line, newStatus);
             }
         }
 
-        importDraftLineRepository.saveAll(matchedLines);
+        importDraftLineRepository.saveAll(updatedLines);
 
         recalculateDraftCounts(draft, allLines);
         importDraftRepository.save(draft);
 
-        log.info("Batch update: {} lignes mises à jour pour le draft {}", matchedLines.size(), draftId);
+        log.info("Batch update: {} lines updated for draft {}", updatedLines.size(), draftId);
 
-        return matchedLines.stream()
-                .map(ImportDraftLineResponse::from)
+        Map<UUID, ImportMatchedTransactionResponse> transactions = matchedTransactionsOf(draft, updatedLines, userId);
+        return updatedLines.stream()
+                .map(line -> ImportDraftLineResponse.from(line, false, transactions))
                 .toList();
     }
 
@@ -315,7 +367,10 @@ public class ImportService {
                 mapping.encoding(),
                 mapping.decimalSeparator(),
                 mapping.skipHeaderLines(),
-                List.of()
+                List.of(),
+                List.of(),
+                null,
+                null
         );
 
         List<ImportDraftLine> parsedLines;
@@ -351,15 +406,16 @@ public class ImportService {
 
         log.info("CSV import (mapping custom) uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
 
-        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(), savedProfileId, ImportProfileSource.CUSTOM);
-        return buildResponseWithProfileName(savedDraft, profile.name());
+        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
+                savedProfileId, ImportProfileSource.CUSTOM, StatementInfo.NONE);
+        return buildResponseWithProfileName(savedDraft, profile.name(), userId);
     }
 
     public List<ImportProfileResponse> listProfiles(UUID userId) {
         List<ImportProfileResponse> result = new ArrayList<>();
 
         // Registry profiles
-        for (ImportProfileRegistry.ImportProfileConfig cfg : ImportProfileRegistry.getAll()) {
+        for (ImportProfileRegistry.ImportProfileConfig cfg : importProfileRegistry.getAll()) {
             result.add(new ImportProfileResponse(null, cfg.bankCode(), cfg.name(), "REGISTRY", false));
         }
 
@@ -383,11 +439,13 @@ public class ImportService {
     }
 
     private ImportDraft createDraftFromLines(List<ImportDraftLine> lines, Account account, UUID userId,
-                                              String fileName, UUID profileId, ImportProfileSource profileSource) {
+                                              String fileName, UUID profileId, ImportProfileSource profileSource,
+                                              StatementInfo statement) {
         int readyCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.READY).count();
         int reviewCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.NEEDS_REVIEW).count();
         int duplicateCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.DUPLICATE).count();
         int skippedCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.SKIPPED).count();
+        int matchedCount = (int) lines.stream().filter(ImportService::isMatched).count();
 
         ImportDraft draft = ImportDraft.builder()
                 .user(userRepository.getReferenceById(userId))
@@ -399,8 +457,13 @@ public class ImportService {
                 .duplicateCount(duplicateCount)
                 .skippedCount(skippedCount)
                 .alreadyImportedCount((int) lines.stream().filter(ImportService::isAlreadyImported).count())
+                .matchedCount(matchedCount)
                 .profileId(profileId)
                 .profileSource(profileSource)
+                .statementProfileKey(statement.profileKey())
+                .statementAccountSuffix(statement.accountSuffix())
+                .statementBalance(statement.balance())
+                .statementBalanceDate(statement.balanceDate())
                 .expiresAt(LocalDateTime.now().plusDays(DRAFT_EXPIRY_DAYS))
                 .build();
 
@@ -414,6 +477,58 @@ public class ImportService {
         return savedDraft;
     }
 
+    /** What the bank header of the file gives; {@link StatementInfo#NONE} for a profile without a header. */
+    private StatementInfo readStatementInfo(byte[] content, ImportProfileDetector.Detection detection) {
+        ImportProfileRegistry.ImportProfileConfig profile = detection.config();
+        StatementHeaderSpec header = profile.statementHeader();
+        if (header == null) {
+            return StatementInfo.NONE;
+        }
+        List<String> skippedLines = csvParsingService.readSkippedLines(content, profile);
+        return new StatementInfo(
+                detection.profileKey(),
+                header.accountSuffix(skippedLines).orElse(null),
+                header.balance(skippedLines, profile.decimalSeparator()).orElse(null),
+                header.balanceDate(skippedLines).orElse(null));
+    }
+
+    private ImportDetectionResponse toDetectionResponse(ImportProfileDetector.Detection detection, byte[] content,
+                                                        UUID userId) {
+        StatementInfo statement = readStatementInfo(content, detection);
+        return new ImportDetectionResponse(true, detection.source().name(),
+                detection.config().bankCode(), detection.config().name(),
+                statement.accountSuffix(), suggestAccountId(statement, userId));
+    }
+
+    /** The one active account of the user already imported with this profile and suffix; none when ambiguous. */
+    private UUID suggestAccountId(StatementInfo statement, UUID userId) {
+        if (statement.profileKey() == null || statement.accountSuffix() == null) {
+            return null;
+        }
+        List<Account> matches = accountRepository
+                .findByUserIdAndActifTrueAndStatementProfileKeyAndStatementAccountSuffix(
+                        userId, statement.profileKey(), statement.accountSuffix());
+        return matches.size() == 1 ? matches.getFirst().getId() : null;
+    }
+
+    /**
+     * Applies what the statement taught about the account: its opening balance when the
+     * caller asked for it on a first import, and the profile and suffix that recognize it
+     * next time (replacing any previous ones: the account chosen at each import wins).
+     */
+    private void updateAccountFromStatement(ImportDraft draft, BigDecimal openingBalance) {
+        Account account = draft.getAccount();
+        if (openingBalance != null) {
+            log.info("Opening balance of account {} set from the statement balance", account.getId());
+            account.setSoldeInitial(openingBalance);
+        }
+        if (draft.getStatementProfileKey() != null && draft.getStatementAccountSuffix() != null) {
+            account.setStatementProfileKey(draft.getStatementProfileKey());
+            account.setStatementAccountSuffix(draft.getStatementAccountSuffix());
+        }
+        accountRepository.save(account);
+    }
+
     private ImportDraft findDraftByIdAndUser(UUID draftId, UUID userId) {
         return importDraftRepository.findById(draftId)
                 .filter(d -> d.getUser().getId().equals(userId))
@@ -421,6 +536,14 @@ public class ImportService {
                     log.error("Draft d'import non trouvé: id={}, userId={}", draftId, userId);
                     return new EntityNotFoundException("Import draft not found");
                 });
+    }
+
+    private byte[] readContent(MultipartFile file) {
+        try (InputStream in = file.getInputStream()) {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
+        }
     }
 
     private void validateFile(MultipartFile file) {
@@ -472,14 +595,62 @@ public class ImportService {
         }
     }
 
-    private void validateStatusTransition(ImportLineStatus current, ImportLineStatus next) {
+    /**
+     * Changes the status of a line. Any real change drops what the line held about a match:
+     * skipped, a line no longer stands for an existing transaction; made ready from several
+     * candidates, it becomes the creation of a new transaction, the user's explicit decision.
+     */
+    private void changeStatus(ImportDraftLine line, ImportLineStatus next) {
+        validateStatusTransition(line, next);
+        if (line.getStatus() != next) {
+            line.setMatchedTransactionId(null);
+            line.setMatchCandidateIds(List.of());
+        }
+        line.setStatus(next);
+    }
+
+    /** Settles the match of a line on the user's request: choose a transaction, or undo the match (KKS-385). */
+    private void applyMatchChange(ImportDraftLine line, ImportLineUpdateRequest request, ImportDraft draft, UUID userId) {
+        boolean clearMatch = Boolean.TRUE.equals(request.clearMatch());
+        if (clearMatch && request.matchedTransactionId() != null) {
+            throw new IllegalArgumentException("matchedTransactionId and clearMatch cannot be combined");
+        }
+        if (clearMatch) {
+            if (line.getMatchedTransactionId() == null && line.getMatchCandidateIds().isEmpty()) {
+                throw new IllegalArgumentException("The line has no match to undo");
+            }
+            line.setMatchedTransactionId(null);
+            line.setMatchCandidateIds(List.of());
+            line.setStatus(ImportLineStatus.READY);
+            log.info("Match undone: lineId={}, draftId={}", line.getId(), draft.getId());
+        } else if (request.matchedTransactionId() != null) {
+            if (line.getStatus() != ImportLineStatus.READY && line.getStatus() != ImportLineStatus.DUPLICATE) {
+                throw new IllegalArgumentException("Only a ready line or a duplicate line can be matched, status: " + line.getStatus());
+            }
+            importMatchingService.requireMatchable(line, request.matchedTransactionId(), draft.getAccount().getId(),
+                    userId, importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draft.getId()));
+            line.setMatchedTransactionId(request.matchedTransactionId());
+            line.setMatchCandidateIds(List.of());
+            line.setSubscriptionId(null);
+            line.setStatus(ImportLineStatus.READY);
+            log.info("Line matched by the user: lineId={}, draftId={}, transactionId={}",
+                    line.getId(), draft.getId(), request.matchedTransactionId());
+        }
+    }
+
+    private void validateStatusTransition(ImportDraftLine line, ImportLineStatus next) {
+        ImportLineStatus current = line.getStatus();
         // Redemander le statut courant ne change rien : l'ecran de revue envoie READY
         // avec chaque categorie, y compris pour une ligne deja READY (KKS-383).
         if (current == next) {
             return;
         }
+        // Une ligne ignoree par l'utilisateur (sans skipReason) se restaure ; celle que l'import a
+        // ecartee lui-meme (deja importee) ne revient pas : la reactiver creerait un doublon (KKS-386).
+        boolean restorable = current == ImportLineStatus.SKIPPED && line.getSkipReason() == null
+                && line.getStatusMessage() == null;
         boolean valid = switch (next) {
-            case READY -> current == ImportLineStatus.NEEDS_REVIEW || current == ImportLineStatus.DUPLICATE;
+            case READY -> current == ImportLineStatus.NEEDS_REVIEW || current == ImportLineStatus.DUPLICATE || restorable;
             case SKIPPED -> true;
             default -> false;
         };
@@ -500,6 +671,7 @@ public class ImportService {
         draft.setDuplicateCount((int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.DUPLICATE).count());
         draft.setSkippedCount((int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.SKIPPED).count());
         draft.setAlreadyImportedCount((int) lines.stream().filter(ImportService::isAlreadyImported).count());
+        draft.setMatchedCount((int) lines.stream().filter(ImportService::isMatched).count());
     }
 
     private Account validateAccountForImport(UUID accountId, UUID userId) {
@@ -516,19 +688,36 @@ public class ImportService {
         return account;
     }
 
-    private List<Transaction> buildTransactionsFromLines(ImportDraft draft, List<ImportDraftLine> readyLines) {
-        return readyLines.stream()
-                .map(line -> Transaction.builder()
-                        .montant(line.getAmount())
-                        .libelle(line.getCleanLabel())
-                        .type(line.getTransactionType())
-                        .date(line.getDate())
-                        .category(line.getCategory())
-                        .account(draft.getAccount())
-                        .user(draft.getUser())
-                        .importFingerprint(DeduplicationService.fingerprintOf(line))
-                        .build())
+    private List<Transaction> buildTransactionsFromLines(ImportDraft draft, List<ImportDraftLine> lines,
+                                                         Map<UUID, Subscription> subscriptions) {
+        return lines.stream()
+                .map(line -> buildTransaction(draft, line,
+                        line.getSubscriptionId() == null ? null : subscriptions.get(line.getSubscriptionId())))
                 .toList();
+    }
+
+    /**
+     * The date is the purchase date when the statement gives one. The fingerprint is
+     * computed on the booking date: it must not change, to recognize the line next time.
+     * A line linked to a subscription (KKS-385) gives its payment, with the category of
+     * the subscription when the line has none.
+     */
+    private static Transaction buildTransaction(ImportDraft draft, ImportDraftLine line, Subscription subscription) {
+        Category category = line.getCategory();
+        if (category == null && subscription != null) {
+            category = subscription.getCategory();
+        }
+        return Transaction.builder()
+                .montant(line.getAmount())
+                .libelle(line.getCleanLabel())
+                .type(line.getTransactionType())
+                .date(line.transactionDate())
+                .category(category)
+                .account(draft.getAccount())
+                .user(draft.getUser())
+                .subscription(subscription)
+                .importFingerprint(DeduplicationService.fingerprintOf(line))
+                .build();
     }
 
     /**
@@ -560,15 +749,46 @@ public class ImportService {
         }
     }
 
-    private static boolean isAlreadyImported(ImportDraftLine line) {
+    static boolean isAlreadyImported(ImportDraftLine line) {
         return line.getStatus() == ImportLineStatus.SKIPPED
                 && line.getSkipReason() == ImportSkipReason.ALREADY_IMPORTED;
     }
 
-    private ImportDraftResponse buildResponseWithProfileName(ImportDraft draft, String profileName) {
+    /** A line the user skipped although it could not be read: its amount and date are not reliable. */
+    private static boolean isUnreadableSkipped(ImportDraftLine line) {
+        return line.getStatus() == ImportLineStatus.SKIPPED && line.getStatusMessage() != null;
+    }
+
+    /** A line matched with an existing transaction (KKS-385): it creates nothing at confirmation. */
+    private static boolean isMatched(ImportDraftLine line) {
+        return line.getStatus() == ImportLineStatus.READY && line.getMatchedTransactionId() != null;
+    }
+
+    /**
+     * Detail of the existing transactions the lines are matched with or have as candidates, read in a
+     * single query for the whole set of lines and among the transactions of the user and of the account
+     * of the draft: an id that is not theirs, or that no longer exists, is simply absent (KKS-386).
+     */
+    private Map<UUID, ImportMatchedTransactionResponse> matchedTransactionsOf(ImportDraft draft,
+                                                                              Collection<ImportDraftLine> lines,
+                                                                              UUID userId) {
+        Set<UUID> ids = lines.stream()
+                .flatMap(l -> Stream.concat(Stream.of(l.getMatchedTransactionId()), l.getMatchCandidateIds().stream()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return transactionRepository.findByUserIdAndAccountIdAndIdIn(userId, draft.getAccount().getId(), ids).stream()
+                .collect(Collectors.toMap(Transaction::getId, ImportMatchedTransactionResponse::from));
+    }
+
+    private ImportDraftResponse buildResponseWithProfileName(ImportDraft draft, String profileName, UUID userId) {
+        Map<UUID, ImportMatchedTransactionResponse> transactions = matchedTransactionsOf(draft, draft.getLines(), userId);
         List<ImportDraftLineResponse> lineResponses = draft.getLines().stream()
-                .map(ImportDraftLineResponse::from)
+                .map(line -> ImportDraftLineResponse.from(line, false, transactions))
                 .toList();
+        ImportBalanceService.DraftBalances balances = importBalanceService.draftBalances(draft, draft.getLines(), userId);
         return new ImportDraftResponse(
                 draft.getId(),
                 draft.getAccount().getId(),
@@ -585,7 +805,13 @@ public class ImportService {
                 draft.getProfileSource() != null ? draft.getProfileSource().name() : null,
                 draft.getCreatedAt(),
                 draft.getExpiresAt(),
-                lineResponses
+                lineResponses,
+                draft.getStatementAccountSuffix(),
+                draft.getStatementBalance(),
+                draft.getStatementBalanceDate(),
+                balances.projectedBalance(),
+                balances.proposedOpeningBalance(),
+                draft.getMatchedCount()
         );
     }
 }

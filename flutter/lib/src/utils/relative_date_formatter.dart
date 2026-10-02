@@ -3,27 +3,33 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:intl/intl.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class RelativeDateFormatter {
   RelativeDateFormatter._();
 
-  static DateFormat? _longDateFormatter;
-  static DateFormat? _shortDateFormatter;
+  static final _longDateFormatters = <String, DateFormat>{};
+  static final _shortDateFormatters = <String, DateFormat>{};
 
-  static DateFormat get _formatter =>
-      _longDateFormatter ??= DateFormat.yMMMMd('fr');
+  static DateFormat _formatter(String locale) =>
+      _longDateFormatters.putIfAbsent(locale, () => DateFormat.yMMMMd(locale));
 
-  static DateFormat get _shortFormatter =>
-      _shortDateFormatter ??= DateFormat('dd MMM', 'fr');
+  static DateFormat _shortFormatter(String locale) => _shortDateFormatters
+      .putIfAbsent(locale, () => DateFormat('dd MMM', locale));
 
-  /// Formate une date en texte relatif francais.
+  /// Formate une date en texte relatif dans la langue de [l10n].
   ///
   /// Regles :
   /// - Aujourd'hui, Hier, Demain
   /// - il y a X jours (2-7j)
   /// - il y a X semaine(s) (8-30j)
   /// - Format long (ex: "15 janvier 2026") au-dela
-  static String format(DateTime? value, {DateTime? now}) {
+  static String format(
+    DateTime? value, {
+    required String locale,
+    required AppLocalizations l10n,
+    DateTime? now,
+  }) {
     if (value == null) return '';
 
     final today = now ?? DateTime.now();
@@ -32,20 +38,26 @@ class RelativeDateFormatter {
 
     final diffDays = todayDate.difference(targetDate).inDays;
 
-    if (diffDays == 0) return "Aujourd'hui";
-    if (diffDays == 1) return 'Hier';
-    if (diffDays == -1) return 'Demain';
+    if (diffDays == 0) {
+      return l10n.commonValueToday;
+    }
+    if (diffDays == 1) {
+      return l10n.commonValueYesterday;
+    }
+    if (diffDays == -1) {
+      return l10n.commonValueTomorrow;
+    }
 
     if (diffDays >= 2 && diffDays <= 7) {
-      return 'il y a $diffDays jours';
+      return l10n.commonValueDaysAgo(diffDays);
     }
 
     if (diffDays >= 8 && diffDays <= 30) {
       final weeks = diffDays ~/ 7;
-      return 'il y a $weeks semaine${weeks > 1 ? 's' : ''}';
+      return l10n.commonValueWeeksAgo(weeks);
     }
 
-    return _formatter.format(value);
+    return _formatter(locale).format(value);
   }
 
   /// Formate une date en texte relatif compact pour les sous-titres d'items.
@@ -54,20 +66,35 @@ class RelativeDateFormatter {
   /// - il y a N j. (2-7j passés)
   /// - dans N j. (1-30j futurs)
   /// - dd MMM (au-delà)
-  static String formatCompact(DateTime value, {DateTime? now}) {
+  static String formatCompact(
+    DateTime value, {
+    required String locale,
+    required AppLocalizations l10n,
+    DateTime? now,
+  }) {
     final today = now ?? DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final targetDate = DateTime(value.year, value.month, value.day);
 
     final diffDays = todayDate.difference(targetDate).inDays;
 
-    if (diffDays == 0) return "aujourd'hui";
-    if (diffDays == 1) return 'hier';
-    if (diffDays == -1) return 'demain';
+    if (diffDays == 0) {
+      return l10n.commonValueToday.toLowerCase();
+    }
+    if (diffDays == 1) {
+      return l10n.commonValueYesterday.toLowerCase();
+    }
+    if (diffDays == -1) {
+      return l10n.commonValueTomorrow.toLowerCase();
+    }
 
-    if (diffDays >= 2 && diffDays <= 7) return 'il y a $diffDays j.';
-    if (diffDays < -1 && diffDays >= -30) return 'dans ${-diffDays} j.';
+    if (diffDays >= 2 && diffDays <= 7) {
+      return l10n.commonValueDaysAgoShort(diffDays);
+    }
+    if (diffDays < -1 && diffDays >= -30) {
+      return l10n.commonValueInDaysShort(-diffDays);
+    }
 
-    return _shortFormatter.format(value);
+    return _shortFormatter(locale).format(value);
   }
 }

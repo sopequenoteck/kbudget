@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { BankSelect } from './bank-select';
 import { BankService } from '../../../core/services/bank';
 import { BankResponse } from '../../../core/models/bank.model';
+import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 
 const MOCK_BANKS: BankResponse[] = [
   { code: 'SG', name: 'Société Générale', country: 'FR', brandColor: '#e2001a', logoUrl: '/api/bank-logos/sg.svg' },
@@ -25,13 +26,26 @@ describe('BankSelect', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [BankSelect],
-      providers: [{ provide: BankService, useValue: mockBankService }],
+      providers: [{ provide: BankService, useValue: mockBankService }, ...provideTranslocoTesting()],
     });
   });
 
   it('should create the component', () => {
     const fixture = TestBed.createComponent(BankSelect);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should_render_french_group_labels_in_the_dom_when_open', () => {
+    const fixture = TestBed.createComponent(BankSelect);
+    fixture.detectChanges();
+    fixture.componentInstance.openDropdown();
+    fixture.detectChanges();
+
+    const labels = Array.from(
+      fixture.nativeElement.querySelectorAll('.bank-select__group-label') as NodeListOf<HTMLElement>,
+    ).map((el) => el.textContent?.trim());
+
+    expect(labels).toEqual(['France', "Afrique de l'Ouest", 'International', 'Autre']);
   });
 
   it('should_group_banks_by_region', () => {
@@ -42,15 +56,15 @@ describe('BankSelect', () => {
     const groups = component.groupedBanks();
 
     expect(groups).toHaveLength(3);
-    expect(groups[0].label).toBe('France');
+    expect(groups[0].labelKey).toBe('accounts.list.bankGroupFrance');
     expect(groups[0].banks).toHaveLength(1);
     expect(groups[0].banks[0].code).toBe('SG');
 
-    expect(groups[1].label).toBe("Afrique de l'Ouest");
+    expect(groups[1].labelKey).toBe('accounts.list.bankGroupWestAfrica');
     expect(groups[1].banks).toHaveLength(1);
     expect(groups[1].banks[0].code).toBe('ECOBANK');
 
-    expect(groups[2].label).toBe('International');
+    expect(groups[2].labelKey).toBe('accounts.list.bankGroupInternational');
     expect(groups[2].banks).toHaveLength(1);
     expect(groups[2].banks[0].code).toBe('WISE');
   });
@@ -66,7 +80,7 @@ describe('BankSelect', () => {
     expect(allGroupedCodes).not.toContain('OTHER');
 
     const lastGroup = groups[groups.length - 1];
-    expect(lastGroup.label).not.toBe('Autre');
+    expect(lastGroup.labelKey).not.toBe('accounts.value.other');
   });
 
   it('should_filter_by_search_query', () => {
@@ -79,7 +93,7 @@ describe('BankSelect', () => {
     const filtered = component.filteredGroups();
 
     expect(filtered).toHaveLength(1);
-    expect(filtered[0].label).toBe('France');
+    expect(filtered[0].labelKey).toBe('accounts.list.bankGroupFrance');
     expect(filtered[0].banks).toHaveLength(1);
     expect(filtered[0].banks[0].code).toBe('SG');
   });

@@ -1,6 +1,7 @@
 package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
+import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
 import fr.kksdev.budget.api.dto.response.ImportConfirmResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftLineResponse;
 import fr.kksdev.budget.api.dto.response.ImportDraftResponse;
@@ -12,6 +13,7 @@ import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import fr.kksdev.budget.api.util.MerchantKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,7 @@ class ImportReimportIT {
     private static final String DIRECT_DEBIT = "05/03/2026;PRELEVEMENT EUROPE;PRELEVEMENT EUROPEEN 1111111111 DE: OPERATEUR TEST ID: FR00ZZZ000000 REF: ref-0001 ;-19,99;EUR";
     private static final String SALARY = "06/03/2026;VIR RECU    123456;VIR RECU    1234567890S DE: EMPLOYEUR TEST REF: SALAIRE ;1500,00;EUR";
     private static final String GROCERY = "10/03/2026;CARTE X0000 09/03 ;CARTE X0000 09/03 EPICERIE TEST 110600000000002IOPD ;-12,50;EUR";
+    private static final String UNREADABLE_DATE = "32/13/2026;CARTE X0000 ;CARTE X0000 LIGNE ILLISIBLE TEST ;-1,00;EUR";
     private static final String LATER_FEE = "11/03/2026;FRAIS BANCAIRES;FRAIS BANCAIRES TEST ;-45,00;EUR";
 
     /** Premier releve : deux frais identiques le meme jour, deux operations reelles. */
@@ -63,6 +66,7 @@ class ImportReimportIT {
 
     @Autowired ImportService importService;
     @Autowired LabelCleaningService labelCleaningService;
+    @Autowired ImportProfileRegistry importProfileRegistry;
     @Autowired UserRepository userRepository;
     @Autowired AccountRepository accountRepository;
     @Autowired TransactionRepository transactionRepository;
@@ -94,7 +98,7 @@ class ImportReimportIT {
                     assertThat(l.duplicateTransactionId()).isNotNull();
                 });
 
-        ImportConfirmResponse confirmed = importService.confirm(draft.id(), userId);
+        ImportConfirmResponse confirmed = importService.confirm(draft.id(), false, userId);
 
         assertThat(confirmed.importedCount()).isEqualTo(2);
         assertThat(confirmed.alreadyImportedCount()).isEqualTo(4);
@@ -110,7 +114,7 @@ class ImportReimportIT {
         assertThat(draft.alreadyImportedCount()).isEqualTo(2);
         assertThat(draft.readyCount()).isEqualTo(1);
 
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
         assertThat(accountTransactions()).hasSize(3);
 
         ImportDraftResponse again = upload(List.of(FEE, FEE, FEE));
@@ -139,7 +143,7 @@ class ImportReimportIT {
         ImportDraftResponse draft = upload(List.of(BAKERY));
         assertThat(draft.alreadyImportedCount()).isEqualTo(1);
 
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
         Transaction backfilled = transactionRepository.findById(legacy.getId()).orElseThrow();
         assertThat(backfilled.getImportFingerprint()).isNotNull();
 
@@ -151,14 +155,18 @@ class ImportReimportIT {
 
     @Test
     void should_keep_probable_duplicate_blocking_when_label_is_only_similar() {
-        saveLegacyImport(cleanLabelOf(BAKERY) + "S", "3.20", LocalDate.of(2026, Month.MARCH, 2));
+        // A transaction without fingerprint would now be matched by date, amount and type whatever
+        // its label (KKS-385): the probable duplicate is one that already came from another line.
+        Transaction other = saveLegacyImport(cleanLabelOf(BAKERY) + "S", "3.20", LocalDate.of(2026, Month.MARCH, 2));
+        other.setImportFingerprint("fingerprint of another statement line");
+        transactionRepository.save(other);
 
         ImportDraftResponse draft = upload(List.of(BAKERY));
 
         assertThat(draft.alreadyImportedCount()).isZero();
         assertThat(draft.duplicateCount()).isEqualTo(1);
         UUID draftId = draft.id();
-        assertThatThrownBy(() -> importService.confirm(draftId, userId))
+        assertThatThrownBy(() -> importService.confirm(draftId, false, userId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -193,11 +201,106 @@ class ImportReimportIT {
                 .hasSize(4);
     }
 
+    @Test
+    void should_restore_a_line_skipped_by_the_user_and_import_it_at_confirmation() {
+        ImportDraftResponse draft = upload(List.of(BAKERY, GROCERY));
+        UUID bakeryLine = lineWithAmount(draft, "3.20");
+        importService.updateLine(draft.id(), bakeryLine, new ImportLineUpdateRequest(null, "SKIPPED", null, null), userId);
+
+        ImportDraftLineResponse restored = importService.updateLine(
+                draft.id(), bakeryLine, new ImportLineUpdateRequest(null, "READY", null, null), userId);
+
+        assertThat(restored.status()).isEqualTo("READY");
+        ImportDraftResponse reloaded = importService.getDraft(draft.id(), userId);
+        assertThat(reloaded.readyCount()).isEqualTo(2);
+        assertThat(reloaded.skippedCount()).isZero();
+        assertThat(importService.confirm(draft.id(), false, userId).importedCount()).isEqualTo(2);
+    }
+
+    @Test
+    void should_refuse_to_restore_a_line_the_import_skipped_as_already_imported() {
+        importAndConfirm(FIRST_STATEMENT);
+        ImportDraftResponse draft = upload(OVERLAPPING_STATEMENT);
+        UUID alreadyImported = draft.lines().stream()
+                .filter(l -> "ALREADY_IMPORTED".equals(l.skipReason()))
+                .findFirst().orElseThrow().id();
+
+        UUID draftId = draft.id();
+        ImportLineUpdateRequest restore = new ImportLineUpdateRequest(null, "READY", null, null);
+
+        assertThatThrownBy(() -> importService.updateLine(draftId, alreadyImported, restore, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid status transition");
+    }
+
+    @Test
+    void should_refuse_to_restore_an_unreadable_line_skipped_by_the_user() {
+        ImportDraftResponse draft = upload(List.of(BAKERY, UNREADABLE_DATE));
+        UUID unreadable = draft.lines().stream()
+                .filter(l -> "NEEDS_REVIEW".equals(l.status()))
+                .findFirst().orElseThrow().id();
+        importService.updateLine(draft.id(), unreadable, new ImportLineUpdateRequest(null, "SKIPPED", null, null), userId);
+        UUID draftId = draft.id();
+        ImportLineUpdateRequest restore = new ImportLineUpdateRequest(null, "READY", null, null);
+
+        assertThatThrownBy(() -> importService.updateLine(draftId, unreadable, restore, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid status transition");
+    }
+
+    @Test
+    void should_leave_an_unreadable_skipped_line_skipped_when_a_batch_validates_it() {
+        ImportDraftResponse draft = upload(List.of(BAKERY, UNREADABLE_DATE));
+        UUID unreadable = draft.lines().stream()
+                .filter(l -> "NEEDS_REVIEW".equals(l.status()))
+                .findFirst().orElseThrow().id();
+        importService.updateLine(draft.id(), unreadable, new ImportLineUpdateRequest(null, "SKIPPED", null, null), userId);
+        List<UUID> allLineIds = draft.lines().stream().map(ImportDraftLineResponse::id).toList();
+
+        importService.batchUpdateLines(draft.id(), new ImportLineBatchUpdateRequest(allLineIds, null, "READY"), userId);
+
+        assertThat(importService.getDraft(draft.id(), userId).lines())
+                .filteredOn(l -> l.id().equals(unreadable))
+                .extracting(ImportDraftLineResponse::status)
+                .containsExactly("SKIPPED");
+    }
+
+    @Test
+    void should_validate_a_batch_holding_a_line_skipped_by_the_user_and_leave_already_imported_lines_skipped() {
+        importAndConfirm(FIRST_STATEMENT);
+        ImportDraftResponse draft = upload(OVERLAPPING_STATEMENT);
+        UUID skippedByUser = draft.lines().stream().filter(l -> "READY".equals(l.status())).findFirst().orElseThrow().id();
+        importService.updateLine(draft.id(), skippedByUser, new ImportLineUpdateRequest(null, "SKIPPED", null, null), userId);
+        List<UUID> allLineIds = draft.lines().stream().map(ImportDraftLineResponse::id).toList();
+
+        importService.batchUpdateLines(draft.id(), new ImportLineBatchUpdateRequest(allLineIds, null, "READY"), userId);
+
+        ImportDraftResponse reloaded = importService.getDraft(draft.id(), userId);
+        assertThat(reloaded.readyCount()).isEqualTo(2);
+        assertThat(reloaded.alreadyImportedCount()).isEqualTo(4);
+        assertThat(reloaded.lines()).filteredOn(l -> "ALREADY_IMPORTED".equals(l.skipReason()))
+                .allSatisfy(l -> assertThat(l.status()).isEqualTo("SKIPPED"));
+    }
+
+    @Test
+    void should_expose_the_merchant_key_of_each_line() {
+        ImportDraftResponse draft = upload(List.of(BAKERY));
+
+        assertThat(draft.lines()).singleElement()
+                .satisfies(l -> assertThat(l.merchantKey()).isEqualTo(MerchantKey.of(l.cleanLabel())).isNotBlank());
+    }
+
+    private static UUID lineWithAmount(ImportDraftResponse draft, String amount) {
+        return draft.lines().stream()
+                .filter(l -> l.amount().compareTo(new BigDecimal(amount)) == 0)
+                .findFirst().orElseThrow().id();
+    }
+
     // -------------------------------------------------------------------------
 
     private void importAndConfirm(List<String> lines) {
         ImportDraftResponse draft = upload(lines);
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
     }
 
     private ImportDraftResponse upload(List<String> lines) {
@@ -211,7 +314,7 @@ class ImportReimportIT {
 
     private String cleanLabelOf(String csvLine) {
         String detail = csvLine.split(";")[2];
-        List<String> sgPatterns = ImportProfileRegistry.findByBankCode("SG").orElseThrow().cleanupPatterns();
+        List<String> sgPatterns = importProfileRegistry.findByBankCode("SG").orElseThrow().cleanupPatterns();
         return labelCleaningService.clean(detail.trim(), sgPatterns);
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "k-budget-app",
-  "version": "6.6.1",
+  "version": "6.7.0",
   "license": "AGPL-3.0-only",
   "scripts": {
     "ng": "ng",
@@ -27,6 +27,8 @@
     "@angular/router": "^21.1.0",
     "@angular/service-worker": "^21.1.0",
     "@emoji-mart/data": "^1.2.1",
+    "@jsverse/transloco": "^8.4.0",
+    "@jsverse/transloco-messageformat": "^8.4.0",
     "@ng-icons/core": "^33.1.0",
     "@ng-icons/phosphor-icons": "^33.1.0",
     "@stomp/stompjs": "^7.3.0",
@@ -43,6 +45,7 @@
     "@angular/cli": "^21.1.3",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/platform-browser-dynamic": "^21.1.3",
+    "@messageformat/parser": "^5.1.1",
     "@vitest/coverage-v8": "^4.1.8",
     "angular-eslint": "21.2.0",
     "eslint": "^9.39.2",

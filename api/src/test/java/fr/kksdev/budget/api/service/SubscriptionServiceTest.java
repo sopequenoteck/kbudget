@@ -3,6 +3,7 @@ package fr.kksdev.budget.api.service;
 import fr.kksdev.budget.api.dto.request.SubscriptionRequest;
 import fr.kksdev.budget.api.dto.response.SubscriptionResponse;
 import fr.kksdev.budget.api.enums.Currency;
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.model.Account;
 import fr.kksdev.budget.api.model.Category;
@@ -85,7 +86,7 @@ class SubscriptionServiceTest {
         var saved = buildSubscription(user);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
@@ -125,7 +126,7 @@ class SubscriptionServiceTest {
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
 
         var preference = UserPreference.builder().currencies(List.of(Currency.EUR)).build();
-        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(systemCat);
+        when(categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId)).thenReturn(systemCat);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
@@ -249,7 +250,7 @@ class SubscriptionServiceTest {
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, account.getId(), null);
 
         when(accountRepository.findById(account.getId())).thenReturn(Optional.of(account));
-        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
@@ -274,7 +275,7 @@ class SubscriptionServiceTest {
         var request = new SubscriptionRequest("Spotify", new BigDecimal("9.99"),
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, Currency.XOF);
 
-        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);
 
@@ -300,7 +301,7 @@ class SubscriptionServiceTest {
         var request = new SubscriptionRequest("Disney+", new BigDecimal("8.99"),
                 Frequency.MENSUEL, LocalDate.of(2026, 1, 1), null, null, null, null);
 
-        when(categoryService.findSystemCategoryByNom("Abonnement", userId)).thenReturn(null);
+        when(categoryService.findSystemCategory(SystemCategoryKey.SUBSCRIPTION, userId)).thenReturn(null);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(preferenceService.getOrCreatePreference(userId)).thenReturn(preference);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(saved);

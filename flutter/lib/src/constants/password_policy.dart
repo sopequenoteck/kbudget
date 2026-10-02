@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'package:k_budget/src/localization/app_localizations.dart';
+
 /// Politique de mot de passe, alignee sur `PasswordPolicy` cote API (KKS-351).
 ///
 /// Une longueur ecrite en dur dans un validateur se desynchronise du serveur
@@ -22,9 +24,14 @@ class PasswordPolicy {
   static const int maxLength = 100;
 
   /// Message affiche quand la saisie est trop courte.
-  static const String tooShortMessage =
-      'Le mot de passe doit contenir au moins $minLength caractères';
+  ///
+  /// Reutilise la meme cle que [helperText] (`authFormPasswordMinLength`),
+  /// alignee sur `auth.form.passwordMinLength` cote Angular, qui sert aussi
+  /// bien d'indication que de message d'erreur.
+  static String tooShortMessage(AppLocalizations l10n) =>
+      l10n.authFormPasswordMinLength(minLength);
 
   /// Indication affichee sous le champ, avant toute saisie.
-  static const String helperText = 'Minimum $minLength caractères';
+  static String helperText(AppLocalizations l10n) =>
+      l10n.authFormPasswordMinLength(minLength);
 }

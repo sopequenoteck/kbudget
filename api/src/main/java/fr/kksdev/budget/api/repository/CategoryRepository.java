@@ -1,5 +1,6 @@
 package fr.kksdev.budget.api.repository;
 
+import fr.kksdev.budget.api.enums.SystemCategoryKey;
 import fr.kksdev.budget.api.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -18,4 +19,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findByNomIgnoreCaseAndUserId(String nom, UUID userId);
 
     List<Category> findByUserIdAndIsSystemTrue(UUID userId);
+
+    Optional<Category> findByUserIdAndSystemKey(UUID userId, SystemCategoryKey systemKey);
 }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/debt_hero_widget.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 
 import '../../../../../helpers/theme_test_helpers.dart';
@@ -28,6 +29,9 @@ void main() {
   }) async {
     await tester.pumpWidget(MaterialApp(
       theme: theme,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(
         body: DebtHeroWidget(
           summary: summary,

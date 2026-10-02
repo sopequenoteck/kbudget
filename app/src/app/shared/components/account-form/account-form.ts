@@ -10,17 +10,24 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { FormField } from '../form-field/form-field';
 import { EmojiInput } from '../emoji-input/emoji-input';
 import { SelectPicker } from '../select-picker/select-picker';
 import { BankSelect } from '../bank-select/bank-select';
-import { Account, AccountRequest, AccountType } from '../../../core/models/account.model';
+import {
+  ACCOUNT_TYPE_LABEL_KEYS,
+  Account,
+  AccountRequest,
+  AccountType,
+} from '../../../core/models/account.model';
 import { AccountService } from '../../../core/services/account';
 import { BankService } from '../../../core/services/bank';
 import { CurrencyService } from '../../../core/services/currency';
 import { ExchangeRateService } from '../../../core/services/exchange-rate';
 import { PreferenceService } from '../../../core/services/preference';
+import { LanguageService } from '../../../core/services/language';
 import { ModalService } from '../../../core/services/modal.service';
 import { PALETTE_COLORS } from '../../../core/constants/palette.constants';
 import { isFieldInvalid, validateForm } from '../../utils/form.utils';
@@ -29,12 +36,6 @@ import { compressImage } from '../../utils/image.utils';
 const FIXED_RATES: Record<string, number> = {
   EUR_XOF: 655.957,
   XOF_EUR: 1 / 655.957,
-};
-
-const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
-  [AccountType.COURANT]: 'Courant',
-  [AccountType.EPARGNE]: 'Épargne',
-  [AccountType.ESPECES]: 'Espèces',
 };
 
 const DEFAULT_ICONS: Record<AccountType, string> = {
@@ -53,7 +54,15 @@ const DEFAULT_COLORS: Record<AccountType, string> = {
 @Component({
   selector: 'app-account-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, FormField, EmojiInput, SelectPicker, BankSelect],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    FormField,
+    EmojiInput,
+    SelectPicker,
+    BankSelect,
+    TranslocoPipe,
+  ],
   templateUrl: './account-form.html',
   styleUrl: './account-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,7 +74,9 @@ export class AccountForm {
   private readonly currencyService = inject(CurrencyService);
   private readonly exchangeRateService = inject(ExchangeRateService);
   private readonly preferenceService = inject(PreferenceService);
+  private readonly languageService = inject(LanguageService);
   private readonly modalService = inject(ModalService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly bankSelectRef = viewChild(BankSelect);
 
@@ -85,7 +96,7 @@ export class AccountForm {
   readonly isKnownBank = computed(() => this.bankSelectRef()?.isKnownBank() ?? false);
   readonly accountTypes = Object.values(AccountType);
   readonly AccountType = AccountType;
-  readonly typeLabels = ACCOUNT_TYPE_LABELS;
+  readonly typeLabels = ACCOUNT_TYPE_LABEL_KEYS;
   readonly defaultIcons = DEFAULT_ICONS;
   readonly accountColors = PALETTE_COLORS;
   readonly currencyItems = this.currencyService.currencyItems;
@@ -222,7 +233,14 @@ export class AccountForm {
         // Adjust balance if changed
         const newBalance = Number(raw.newBalance);
         if (!isNaN(newBalance) && newBalance !== acc.solde) {
-          await firstValueFrom(this.accountService.adjustBalance(acc.id, newBalance));
+          const libelle = this.transloco.translate(
+            'transactions.value.balanceAdjustment',
+            {},
+            this.languageService.activeLanguage(),
+          );
+          await firstValueFrom(
+            this.accountService.adjustBalance(acc.id, { newBalance, libelle }),
+          );
         }
       } else {
         await firstValueFrom(this.accountService.create(request));
@@ -231,7 +249,9 @@ export class AccountForm {
       this.modalService.closeModal();
       this.saved.emit();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      this.errorMessage.set(
+        err instanceof Error ? err.message : this.transloco.translate('common.feedback.saveError'),
+      );
     } finally {
       this.submitting.set(false);
     }
@@ -278,7 +298,9 @@ export class AccountForm {
       await firstValueFrom(this.accountService.delete(acc.id));
       this.modalService.closeModal();
     } catch (err: unknown) {
-      this.errorMessage.set(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      this.errorMessage.set(
+        err instanceof Error ? err.message : this.transloco.translate('common.feedback.deleteError'),
+      );
     }
   }
 

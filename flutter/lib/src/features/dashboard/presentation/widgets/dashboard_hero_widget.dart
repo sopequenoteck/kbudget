@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
@@ -11,9 +12,11 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
 import 'package:k_budget/src/utils/currency_converter.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -43,6 +46,8 @@ class DashboardHeroWidget extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final colors = Theme.of(context).extension<AppThemeExtension>()!;
+    final l10n = AppLocalizations.of(context)!;
+    final locale = intlLocaleFor(Localizations.localeOf(context));
 
     // Calcul du patrimoine total + détection taux manquants
     bool hasMissingRate = false;
@@ -84,7 +89,7 @@ class DashboardHeroWidget extends StatelessWidget {
         children: [
           // 1. Label
           Text(
-            'PATRIMOINE TOTAL',
+            l10n.accountsSummaryNetWorth.toUpperCase(),
             style: TextStyle(
               fontSize: AppTypography.sizeXs,
               fontWeight: AppTypography.medium,
@@ -105,7 +110,7 @@ class DashboardHeroWidget extends StatelessWidget {
                   AmountFormatter.format(
                     patrimoineTotal,
                     currency: activeCurrency,
-                  ),
+                    locale: locale),
                   style: TextStyle(
                     fontSize: AppTypography.size3xl,
                     fontWeight: AppTypography.bold,
@@ -114,9 +119,9 @@ class DashboardHeroWidget extends StatelessWidget {
                 ),
               ),
               if (hasMissingRate)
-                const Tooltip(
-                  message: 'Certains montants n\'ont pas pu être convertis',
-                  child: PhosphorIcon(
+                Tooltip(
+                  message: l10n.exchangeRatesFeedbackConversionIncompleteHint,
+                  child: const PhosphorIcon(
                     PhosphorIconsRegular.warningCircle,
                     size: 18,
                     color: AppColors.warning,
@@ -128,14 +133,18 @@ class DashboardHeroWidget extends StatelessWidget {
           // 4. Badge variation mensuelle
           if (currentSummary != null) ...[
             const SizedBox(height: AppSpacing.space2),
-            _buildVariationBadge(colors, patrimoineTotal),
+            _buildVariationBadge(context, colors, patrimoineTotal),
           ],
 
           // 5. Devise secondaire — avant les meta-lines (ordre Angular)
           if (patrimoineSecondaire != null && secondaryCurrency != null) ...[
             const SizedBox(height: AppSpacing.space1),
             Text(
-              '≈ ${AmountFormatter.format(patrimoineSecondaire, currency: secondaryCurrency)}',
+              '≈ ${AmountFormatter.format(
+                patrimoineSecondaire,
+                currency: secondaryCurrency,
+                locale: locale,
+              )}',
               style: TextStyle(
                 fontSize: AppTypography.sizeXs,
                 color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -162,7 +171,7 @@ class DashboardHeroWidget extends StatelessWidget {
                         currentSummary!.totalRecettes,
                         type: 'recette',
                         currency: activeCurrency,
-                      ),
+                        locale: locale),
                       style: TextStyle(
                         fontSize: AppTypography.sizeXs,
                         color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -183,7 +192,7 @@ class DashboardHeroWidget extends StatelessWidget {
                         currentSummary!.totalDepenses,
                         type: 'depense',
                         currency: activeCurrency,
-                      ),
+                        locale: locale),
                       style: TextStyle(
                         fontSize: AppTypography.sizeXs,
                         color: colors.expenseColor,
@@ -199,6 +208,7 @@ class DashboardHeroWidget extends StatelessWidget {
   }
 
   Widget _buildVariationBadge(
+    BuildContext context,
     AppThemeExtension colors,
     double patrimoineTotal,
   ) {
@@ -206,16 +216,24 @@ class DashboardHeroWidget extends StatelessWidget {
         currentSummary!.totalRecettes - currentSummary!.totalDepenses;
     final patrimoineDebutMois = patrimoineTotal - netDuMois;
     final sign = netDuMois >= 0 ? '+' : '';
-    final montantFormate =
-        AmountFormatter.format(netDuMois, currency: activeCurrency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final montantFormate = AmountFormatter.format(
+      netDuMois,
+      currency: activeCurrency,
+      locale: locale,
+    );
+    final montantLabel = AppLocalizations.of(context)!
+        .dashboardSummaryMonthVariation('$sign$montantFormate');
 
     final String variationLabel;
     if (patrimoineDebutMois != 0) {
-      final pct = (netDuMois / patrimoineDebutMois) * 100;
-      final pctFormate = pct.toStringAsFixed(1).replaceAll('.', ',');
-      variationLabel = '$sign$montantFormate ce mois ($sign$pctFormate%)';
+      final pctFormate = NumberFormat.decimalPercentPattern(
+        locale: locale,
+        decimalDigits: 1,
+      ).format(netDuMois / patrimoineDebutMois);
+      variationLabel = '$montantLabel ($sign$pctFormate)';
     } else {
-      variationLabel = '$sign$montantFormate ce mois';
+      variationLabel = montantLabel;
     }
 
     final variationColor =

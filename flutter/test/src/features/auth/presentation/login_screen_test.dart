@@ -47,6 +47,7 @@ void main() {
         theme: app_theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('fr'),
       ),
     );
   }
@@ -65,7 +66,7 @@ void main() {
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Erreur de connexion réseau'), findsNothing);
+      expect(find.text('Impossible de contacter le serveur'), findsNothing);
       expect(find.text('Email ou mot de passe incorrect'), findsNothing);
     });
 
@@ -86,7 +87,94 @@ void main() {
 
       await fillAndSubmit(tester);
 
-      expect(find.text('Erreur de connexion réseau'), findsOneWidget);
+      expect(find.text('Impossible de contacter le serveur'), findsOneWidget);
     });
+
+    testWidgets('should_showTagline_when_firstRender', (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Connectez-vous à votre compte'), findsOneWidget);
+    });
+
+    testWidgets(
+      'should_showEmailRequiredError_when_emailEmptyOnSubmit',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Se connecter'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Email requis'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showEmailInvalidError_when_emailHasNoAt',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Email'),
+          'not-an-email',
+        );
+        await tester.tap(find.text('Se connecter'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Email invalide'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showPasswordRequiredError_when_passwordEmptyOnSubmit',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Email'),
+          'test@test.com',
+        );
+        await tester.tap(find.text('Se connecter'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Mot de passe requis'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_showSwitchToLocalDialog_when_useLocalModeTapped',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Utiliser en mode local'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Passer en mode local ?'), findsOneWidget);
+        expect(
+          find.textContaining('Vos données seront stockées uniquement'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'should_closeSwitchToLocalDialog_when_cancelTapped',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Utiliser en mode local'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Annuler'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Passer en mode local ?'), findsNothing);
+      },
+    );
   });
 }

@@ -17,9 +17,12 @@ import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/repay_bottom_sheet.dart';
 import 'package:k_budget/src/features/debts/presentation/widgets/snooze_dialog.dart';
 import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
+import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme_extension.dart';
 import 'package:k_budget/src/utils/amount_formatter.dart';
+import 'package:k_budget/src/utils/category_name.dart';
+import 'package:k_budget/src/utils/locale_format.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -104,14 +107,14 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
               },
               icon: const PhosphorIcon(PhosphorIconsRegular.pencilSimple,
                   size: 20),
-              tooltip: l10n.edit,
+              tooltip: l10n.commonActionEdit,
             ),
         ],
       ),
       body: _isLoading && _debt == null
           ? _buildSkeleton(colorScheme)
           : _debt == null
-              ? Center(child: Text(l10n.errorGeneric))
+              ? Center(child: Text(l10n.errorsClientGeneric))
               : _buildContent(context, _debt!, colorScheme, themeExt, l10n),
     );
   }
@@ -123,19 +126,19 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
     AppThemeExtension? themeExt,
     AppLocalizations l10n,
   ) {
-    final dateFormat = DateFormat('d MMMM yyyy', 'fr_FR');
+    final dateFormat = DateFormat('d MMMM yyyy', ref.watch(intlLocaleProvider));
     final typeColor = debt.sens == DebtType.emprunt
         ? (themeExt?.debtOweColor ?? colorScheme.error)
         : (themeExt?.debtOwedColor ?? colorScheme.primary);
 
     // Résoudre le nom de catégorie depuis le provider
     final categories = ref.watch(categoryNotifierProvider).items;
-    final categoryName = debt.categoryId != null
-        ? categories
-            .where((c) => c.id == debt.categoryId)
-            .firstOrNull
-            ?.nom
+    final category = debt.categoryId != null
+        ? categories.where((c) => c.id == debt.categoryId).firstOrNull
         : null;
+    final categoryName = category == null
+        ? null
+        : categoryDisplayName(category.nom, category.systemKey, l10n);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.space4),
@@ -146,13 +149,15 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
           Row(
             children: [
               _Badge(
-                label: debt.sens == DebtType.emprunt ? l10n.debtDetailBadgeEmprunt : l10n.debtDetailBadgePret,
+                label: debt.sens == DebtType.emprunt
+                    ? l10n.debtsValueBorrowed
+                    : l10n.debtsValueLent,
                 color: typeColor,
               ),
               if (debt.rembourse) ...[
                 const SizedBox(width: AppSpacing.space2),
                 _Badge(
-                  label: l10n.debtDetailBadgeRepaid,
+                  label: l10n.debtsValueRepaid,
                   color: themeExt?.incomeColor ?? Colors.green,
                 ),
               ],
@@ -180,7 +185,7 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                 icon: const PhosphorIcon(
                     PhosphorIconsRegular.currencyCircleDollar,
                     size: 20),
-                label: Text(l10n.debtDetailRepayButton),
+                label: Text(l10n.debtsActionRepay),
               ),
             ),
           if (!debt.rembourse) const SizedBox(height: AppSpacing.space4),
@@ -193,7 +198,7 @@ class _DebtDetailScreenState extends ConsumerState<DebtDetailScreen> {
                 onPressed: () => _showSnoozeDialog(debt),
                 icon: const PhosphorIcon(PhosphorIconsRegular.bellSlash,
                     size: 20),
-                label: Text(l10n.debtDetailSnoozeButton),
+                label: Text(l10n.debtsDialogSnoozeTitle),
               ),
             ),
           if (debt.reminderDate != null) const SizedBox(height: AppSpacing.space4),
@@ -319,11 +324,18 @@ class _AmountSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final formattedTotal =
-        AmountFormatter.format(debt.montant, currency: debt.currency);
+    final locale = intlLocaleFor(Localizations.localeOf(context));
+    final formattedTotal = AmountFormatter.format(
+      debt.montant,
+      currency: debt.currency,
+      locale: locale,
+    );
     final remaining = debt.remainingAmount ?? debt.montant;
-    final formattedRemaining =
-        AmountFormatter.format(remaining, currency: debt.currency);
+    final formattedRemaining = AmountFormatter.format(
+      remaining,
+      currency: debt.currency,
+      locale: locale,
+    );
 
     return Container(
       width: double.infinity,
@@ -338,7 +350,7 @@ class _AmountSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailInitialAmount,
+                l10n.debtsDetailInitialAmount,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -359,7 +371,7 @@ class _AmountSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailRemainingAmount,
+                l10n.debtsDetailRemainingAmount,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   color: colorScheme.onSurfaceVariant,
@@ -403,7 +415,7 @@ class _InfoSection extends StatelessWidget {
     if (debt.reminderDate != null) {
       final dateStr = dateFormat.format(debt.reminderDate!);
       reminderValue = debt.reminderTime != null
-          ? '$dateStr à ${debt.reminderTime}'
+          ? l10n.debtsDetailReminderAt(dateStr, debt.reminderTime!)
           : dateStr;
     }
 
@@ -418,47 +430,49 @@ class _InfoSection extends StatelessWidget {
         children: [
           _InfoRow(
             icon: PhosphorIconsRegular.calendarBlank,
-            label: l10n.debtDetailDate,
+            label: l10n.debtsDetailDate,
             value: dateFormat.format(debt.date),
             colorScheme: colorScheme,
           ),
           _InfoRow(
             icon: PhosphorIconsRegular.currencyEur,
-            label: l10n.debtDetailCurrency,
+            label: l10n.debtsFormCurrency,
             value: debt.currency.name.toUpperCase(),
             colorScheme: colorScheme,
           ),
           if (debt.accountName != null || debt.accountId != null)
             _InfoRow(
               icon: PhosphorIconsRegular.bank,
-              label: l10n.debtDetailAccount,
-              value: debt.accountName ?? l10n.debtDetailAccountDeleted,
+              label: l10n.debtsFormAccount,
+              value: debt.accountName ?? l10n.debtsDetailAccountDeleted,
               colorScheme: colorScheme,
             ),
           if (debt.dueDate != null)
             _InfoRow(
               icon: PhosphorIconsRegular.calendarCheck,
-              label: l10n.debtDetailDueDate,
+              label: l10n.debtsFormDueDate,
               value: dateFormat.format(debt.dueDate!),
               colorScheme: colorScheme,
             ),
           if (categoryName != null)
             _InfoRow(
               icon: PhosphorIconsRegular.tag,
-              label: l10n.debtDetailCategory,
+              label: l10n.debtsFormCategory,
               value: categoryName!,
               colorScheme: colorScheme,
             ),
           _InfoRow(
             icon: PhosphorIconsRegular.scales,
-            label: l10n.debtDetailIncludedInBalance,
-            value: debt.includeInBalance ? l10n.yes : l10n.no,
+            label: l10n.debtsDetailIncludedInBalance,
+            value: debt.includeInBalance
+                ? l10n.commonValueYes
+                : l10n.commonValueNo,
             colorScheme: colorScheme,
           ),
           if (reminderValue != null)
             _InfoRow(
               icon: PhosphorIconsRegular.bell,
-              label: l10n.debtDetailReminder,
+              label: l10n.debtsFormReminderAria,
               value: reminderValue,
               colorScheme: colorScheme,
             ),
@@ -529,7 +543,9 @@ class _ProgressSection extends StatelessWidget {
     final paid = debt.montant - remaining;
     final progress =
         debt.montant > 0 ? (paid / debt.montant).clamp(0.0, 1.0) : 0.0;
-    final percentage = (progress * 100).round();
+    final percentage = NumberFormat.percentPattern(
+      intlLocaleFor(Localizations.localeOf(context)),
+    ).format(progress);
 
     final progressColor = debt.sens == DebtType.emprunt
         ? (themeExt?.debtOweColor ?? colorScheme.error)
@@ -549,7 +565,7 @@ class _ProgressSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.debtDetailProgress,
+                l10n.debtsDetailProgress,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.medium,
@@ -557,7 +573,7 @@ class _ProgressSection extends StatelessWidget {
                 ),
               ),
               Text(
-                '$percentage%',
+                percentage,
                 style: TextStyle(
                   fontSize: AppTypography.sizeSm,
                   fontWeight: AppTypography.semiBold,
@@ -595,13 +611,13 @@ class _PaymentsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final paymentsAsync = ref.watch(debtPaymentsProvider(debt.id));
-    final dateFormat = DateFormat('d MMM yyyy', 'fr_FR');
+    final dateFormat = DateFormat('d MMM yyyy', ref.watch(intlLocaleProvider));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.debtDetailPayments,
+          l10n.debtsDetailPayments,
           style: TextStyle(
             fontSize: AppTypography.sizeMd,
             fontWeight: AppTypography.semiBold,
@@ -619,7 +635,7 @@ class _PaymentsSection extends ConsumerWidget {
           error: (_, e) => Padding(
             padding: const EdgeInsets.all(AppSpacing.space4),
             child: Text(
-              l10n.debtDetailPaymentsError,
+              l10n.debtsFeedbackPaymentsLoadError,
               style: TextStyle(
                 fontSize: AppTypography.sizeSm,
                 color: colorScheme.error,
@@ -633,7 +649,7 @@ class _PaymentsSection extends ConsumerWidget {
                     vertical: AppSpacing.space4),
                 child: Center(
                   child: Text(
-                    l10n.debtDetailNoPayments,
+                    l10n.commonEmptyNoPayments,
                     style: TextStyle(
                       fontSize: AppTypography.sizeSm,
                       color: colorScheme.onSurfaceVariant,
@@ -659,15 +675,18 @@ class _PaymentsSection extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.debtDetailTotalRepaid,
+                          l10n.debtsDetailTotalRepaid,
                           style: TextStyle(
                             fontSize: AppTypography.sizeSm,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         Text(
-                          AmountFormatter.format(total,
-                              currency: debt.currency),
+                          AmountFormatter.format(
+                            total,
+                            currency: debt.currency,
+                            locale: ref.watch(intlLocaleProvider),
+                          ),
                           style: TextStyle(
                             fontSize: AppTypography.sizeSm,
                             fontWeight: AppTypography.semiBold,
@@ -709,8 +728,11 @@ class _PaymentsSection extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            AmountFormatter.format(payment.montant,
-                                currency: debt.currency),
+                            AmountFormatter.format(
+                              payment.montant,
+                              currency: debt.currency,
+                              locale: ref.watch(intlLocaleProvider),
+                            ),
                             style: TextStyle(
                               fontSize: AppTypography.sizeSm,
                               fontWeight: AppTypography.medium,

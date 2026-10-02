@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -12,6 +14,9 @@ Future<void> pumpSelectPicker(
   await tester.pumpWidget(
     MaterialApp(
       theme: theme ?? AppTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('fr'),
       home: Scaffold(body: Center(child: widget)),
     ),
   );
@@ -252,6 +257,27 @@ void main() {
     );
 
     testWidgets(
+      'should_showCaretOnly_when_itemSelected',
+      (tester) async {
+        await pumpSelectPicker(
+          tester,
+          SelectPicker(
+            label: 'Compte',
+            items: _testItems,
+            selectedId: '1',
+            onChanged: (_) {},
+          ),
+        );
+
+        expect(
+          find.byIcon(PhosphorIconsRegular.caretDown),
+          findsOneWidget,
+        );
+        expect(find.byIcon(PhosphorIconsBold.x), findsNothing);
+      },
+    );
+
+    testWidgets(
       'should_resetSelection_when_selectedItemRemovedFromList',
       (tester) async {
         String? changedId = 'not-called';
@@ -317,102 +343,6 @@ void main() {
     );
   });
 
-  // --- US3 - Clear (T009) ---
-  group('US3 - Clear', () {
-    testWidgets(
-      'should_showClearButton_when_clearableAndSelected',
-      (tester) async {
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Compte',
-            items: _testItems,
-            selectedId: '1',
-            clearable: true,
-            onChanged: (_) {},
-          ),
-        );
-
-        expect(
-          find.byIcon(PhosphorIconsBold.x),
-          findsOneWidget,
-        );
-        expect(
-          find.byIcon(PhosphorIconsRegular.caretDown),
-          findsNothing,
-        );
-      },
-    );
-
-    testWidgets(
-      'should_notShowClearButton_when_notClearable',
-      (tester) async {
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Compte',
-            items: _testItems,
-            selectedId: '1',
-            clearable: false,
-            onChanged: (_) {},
-          ),
-        );
-
-        expect(
-          find.byIcon(PhosphorIconsRegular.caretDown),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets(
-      'should_notShowClearButton_when_noSelection',
-      (tester) async {
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Compte',
-            items: _testItems,
-            clearable: true,
-            onChanged: (_) {},
-          ),
-        );
-
-        expect(
-          find.byIcon(PhosphorIconsRegular.caretDown),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets(
-      'should_clearSelection_when_clearButtonTapped',
-      (tester) async {
-        String? changedId = 'not-called';
-
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Compte',
-            items: _testItems,
-            selectedId: '1',
-            clearable: true,
-            onChanged: (id) => changedId = id,
-          ),
-        );
-
-        expect(find.text('Compte Courant'), findsOneWidget);
-
-        // Tap clear button
-        await tester.tap(find.byIcon(PhosphorIconsBold.x));
-        await tester.pumpAndSettle();
-
-        expect(changedId, isNull);
-        expect(find.text('S\u00E9lectionner...'), findsOneWidget);
-      },
-    );
-  });
-
   // --- US4 - Recherche (T011) ---
   group('US4 - Recherche', () {
     final manyItems = List.generate(
@@ -463,18 +393,13 @@ void main() {
     );
 
     testWidgets(
-      'should_showSearchField_when_searchableExplicit',
+      'should_showSearchField_when_itemsCountEqualsThreshold',
       (tester) async {
         await pumpSelectPicker(
           tester,
           SelectPicker(
             label: 'Test',
-            items: const [
-              SelectPickerItem(id: '1', label: 'A'),
-              SelectPickerItem(id: '2', label: 'B'),
-              SelectPickerItem(id: '3', label: 'C'),
-            ],
-            searchable: true,
+            items: _testItems,
             onChanged: (_) {},
           ),
         );
@@ -483,6 +408,25 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(TextField), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should_notShowSearchField_when_itemsCountJustBelowThreshold',
+      (tester) async {
+        await pumpSelectPicker(
+          tester,
+          SelectPicker(
+            label: 'Test',
+            items: _testItems.take(4).toList(),
+            onChanged: (_) {},
+          ),
+        );
+
+        await tester.tap(find.text('S\u00E9lectionner...'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(TextField), findsNothing);
       },
     );
 
@@ -519,7 +463,6 @@ void main() {
           SelectPicker(
             label: 'Test',
             items: manyItems,
-            emptyMessage: 'Rien trouv\u00E9',
             onChanged: (_) {},
           ),
         );
@@ -530,32 +473,7 @@ void main() {
         await tester.enterText(find.byType(TextField), 'zzzzz');
         await tester.pumpAndSettle();
 
-        expect(find.text('Rien trouv\u00E9'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'should_callOnSearchChanged_when_queryChanges',
-      (tester) async {
-        String? lastQuery;
-
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Test',
-            items: manyItems,
-            onChanged: (_) {},
-            onSearchChanged: (query) => lastQuery = query,
-          ),
-        );
-
-        await tester.tap(find.text('S\u00E9lectionner...'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byType(TextField), 'hello');
-        await tester.pumpAndSettle();
-
-        expect(lastQuery, 'hello');
+        expect(find.text('Aucun r\u00E9sultat'), findsOneWidget);
       },
     );
   });
@@ -810,95 +728,23 @@ void main() {
     );
   });
 
-  // --- emptyActionBuilder (T002) ---
-  group('emptyActionBuilder', () {
-    final manyItems = List.generate(
-      10,
-      (i) => SelectPickerItem(id: '$i', label: 'Item $i'),
-    );
-
-    testWidgets(
-      'should_renderBuilder_when_emptyActionBuilderProvidedAndListEmpty',
-      (tester) async {
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Test',
-            items: manyItems,
-            onChanged: (_) {},
-            emptyActionBuilder: (searchTerm) => Text('Créer « $searchTerm »'),
-          ),
-        );
-
-        // Open modal
-        await tester.tap(find.text('Sélectionner...'));
-        await tester.pumpAndSettle();
-
-        // Type a search term that yields no results
-        await tester.enterText(find.byType(TextField), 'zzzzz');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Créer « zzzzz »'), findsOneWidget);
-        expect(find.text('Aucun résultat'), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'should_showEmptyMessage_when_noEmptyActionBuilderAndListEmpty',
-      (tester) async {
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Test',
-            items: manyItems,
-            emptyMessage: 'Rien trouvé',
-            onChanged: (_) {},
-          ),
-        );
-
-        // Open modal
-        await tester.tap(find.text('Sélectionner...'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byType(TextField), 'zzzzz');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Rien trouvé'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'should_passSearchTerm_when_emptyActionBuilderCalled',
-      (tester) async {
-        String? receivedTerm;
-
-        await pumpSelectPicker(
-          tester,
-          SelectPicker(
-            label: 'Test',
-            items: manyItems,
-            onChanged: (_) {},
-            emptyActionBuilder: (searchTerm) {
-              receivedTerm = searchTerm;
-              return Text('Action: $searchTerm');
-            },
-          ),
-        );
-
-        await tester.tap(find.text('Sélectionner...'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byType(TextField), 'Voyages');
-        await tester.pumpAndSettle();
-
-        expect(receivedTerm, 'Voyages');
-        expect(find.text('Action: Voyages'), findsOneWidget);
-      },
-    );
-  });
-
   // --- Edge Cases & Polish (T018) ---
   group('Edge Cases & Polish', () {
+    test('should_describePlaceholder_when_debugPropertiesFilled', () {
+      final picker = SelectPicker(
+        label: 'Compte',
+        items: _testItems,
+        placeholder: 'Choisir',
+      );
+      final builder = DiagnosticPropertiesBuilder();
+
+      picker.debugFillProperties(builder);
+
+      final placeholder =
+          builder.properties.firstWhere((p) => p.name == 'placeholder');
+      expect(placeholder.value, 'Choisir');
+    });
+
     testWidgets(
       'should_showEmptyMessage_when_itemsListEmpty',
       (tester) async {
@@ -907,7 +753,6 @@ void main() {
           SelectPicker(
             label: 'Compte',
             items: const [],
-            emptyMessage: 'Aucun compte',
             onChanged: (_) {},
           ),
         );
@@ -915,7 +760,7 @@ void main() {
         await tester.tap(find.text('S\u00E9lectionner...'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Aucun compte'), findsOneWidget);
+        expect(find.text('Aucun r\u00E9sultat'), findsOneWidget);
       },
     );
 

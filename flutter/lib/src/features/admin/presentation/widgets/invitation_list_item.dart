@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 
 class InvitationListItem extends StatelessWidget {
   final Invitation invitation;
@@ -24,6 +25,7 @@ class InvitationListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isActive = invitation.status == InvitationStatus.active;
 
     return ListTile(
@@ -32,7 +34,7 @@ class InvitationListItem extends StatelessWidget {
         style: theme.textTheme.bodyMedium,
       ),
       subtitle: Text(
-        'Par ${invitation.invitedByEmail}',
+        l10n.usersListInvitedBy(invitation.invitedByEmail),
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -55,7 +57,7 @@ class InvitationListItem extends StatelessWidget {
                       size: 20,
                       color: theme.colorScheme.primary,
                     ),
-                    tooltip: 'Copier le lien',
+                    tooltip: l10n.usersActionCopyLink,
                     onPressed: onCopyLink,
                   ),
                   IconButton(
@@ -64,7 +66,7 @@ class InvitationListItem extends StatelessWidget {
                       size: 20,
                       color: theme.colorScheme.error,
                     ),
-                    tooltip: 'Révoquer',
+                    tooltip: l10n.usersActionRevoke,
                     onPressed: onRevoke,
                   ),
                 ],
@@ -74,6 +76,21 @@ class InvitationListItem extends StatelessWidget {
   }
 }
 
+String _invitationStatusLabel(InvitationStatus status, AppLocalizations l10n) =>
+    switch (status) {
+      InvitationStatus.active => l10n.usersValueInvitationActive,
+      InvitationStatus.expired => l10n.usersValueInvitationExpired,
+      InvitationStatus.used => l10n.usersValueInvitationUsed,
+      InvitationStatus.revoked => l10n.usersValueInvitationRevoked,
+    };
+
+Color _invitationStatusColor(InvitationStatus status) => switch (status) {
+      InvitationStatus.active => AppColors.success,
+      InvitationStatus.expired => AppColors.warning,
+      InvitationStatus.used => AppColors.info,
+      InvitationStatus.revoked => AppColors.error,
+    };
+
 class _InvitationStatusBadge extends StatelessWidget {
   final InvitationStatus status;
 
@@ -81,12 +98,9 @@ class _InvitationStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = switch (status) {
-      InvitationStatus.active => ('Actif', AppColors.success),
-      InvitationStatus.expired => ('Expiré', AppColors.warning),
-      InvitationStatus.used => ('Utilisé', AppColors.info),
-      InvitationStatus.revoked => ('Révoqué', AppColors.error),
-    };
+    final l10n = AppLocalizations.of(context)!;
+    final color = _invitationStatusColor(status);
+    final label = _invitationStatusLabel(status, l10n);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -94,7 +108,7 @@ class _InvitationStatusBadge extends StatelessWidget {
         vertical: AppSpacing.space1,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.space1),
       ),
       child: Text(

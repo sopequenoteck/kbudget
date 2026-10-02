@@ -4,11 +4,13 @@ import { signal } from '@angular/core';
 import { Incompatible } from './incompatible';
 import { CompatibilityService } from '../../core/services/compatibility';
 import { type CompatibilityStatus } from '../../core/models/meta.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 
 function render(status: CompatibilityStatus) {
   TestBed.configureTestingModule({
     imports: [Incompatible],
     providers: [
+      provideTranslocoTesting(),
       {
         provide: CompatibilityService,
         useValue: { status: signal<CompatibilityStatus | null>(status) },

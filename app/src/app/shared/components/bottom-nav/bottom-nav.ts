@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorHouse, phosphorCurrencyDollar, phosphorArrowsClockwise, phosphorHandshake } from '@ng-icons/phosphor-icons/regular';
 import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseFill, phosphorHandshakeFill } from '@ng-icons/phosphor-icons/fill';
@@ -7,7 +8,7 @@ import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseF
 @Component({
   selector: 'app-bottom-nav',
   standalone: true,
-  imports: [RouterLink, NgIcon],
+  imports: [RouterLink, NgIcon, TranslocoPipe],
   host: { '[attr.data-item-count]': 'items().length.toString()' },
   providers: [
     provideIcons({
@@ -36,7 +37,7 @@ import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseF
               <ng-icon [name]="item.icon" size="24" />
             }
           </span>
-          <span class="bottom-nav-label">{{ item.label }}</span>
+          <span class="bottom-nav-label">{{ item.labelKey | transloco }}</span>
         </a>
       }
     </nav>
@@ -45,6 +46,6 @@ import { phosphorHouseFill, phosphorCurrencyDollarFill, phosphorArrowsClockwiseF
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BottomNav {
-  readonly items = input.required<{ label: string; route: string; icon: string; filledIcon?: string }[]>();
+  readonly items = input.required<{ labelKey: string; route: string; icon: string; filledIcon?: string }[]>();
   readonly activeRoute = input<string>('');
 }
