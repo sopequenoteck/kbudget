@@ -2,6 +2,8 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  // Hors shell (connexion, invitation, version incompatible) : rien sous l'encoche.
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background-color: var(--bg-primary);
 }
 

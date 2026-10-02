@@ -21,6 +21,7 @@ import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from '../../../core/constants/password.constants';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { UserService } from '../../../core/services/user';
 import { AuthResponse } from '../../../core/models/auth.model';
 
@@ -71,6 +72,11 @@ export class ChangePasswordDialogComponent {
     ],
     confirmPassword: ['', [Validators.required, passwordMatchValidator]],
   });
+
+  constructor() {
+    // Le retour ferme le dialogue, sauf pendant l'envoi (meme regle que `onCancel`).
+    bindHistoryLayer(() => this.onCancel(), this.isOpen, () => this.isSubmitting());
+  }
 
   open(): Promise<AuthResponse | null> {
     this.form.reset();

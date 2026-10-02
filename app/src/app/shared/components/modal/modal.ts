@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   effect,
   inject,
   input,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { ModalService } from '../../../core/services/modal.service';
 
 @Component({
@@ -32,6 +34,11 @@ export class Modal {
   private previouslyFocusedElement: HTMLElement | null = null;
 
   constructor() {
+    // Retour arriere : ferme la feuille. Pendant son animation de fermeture elle ne compte plus.
+    bindHistoryLayer(
+      () => this.closed.emit(),
+      computed(() => this.isOpen() && !this.modalService.isClosing()),
+    );
     effect(() => {
       if (this.isOpen()) {
         this.previouslyFocusedElement = document.activeElement as HTMLElement;

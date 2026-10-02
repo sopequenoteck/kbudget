@@ -30,6 +30,7 @@ import { InlineDatePicker } from '../../../../shared/components/inline-date-pick
 import { SelectPicker } from '../../../../shared/components/select-picker/select-picker';
 import { SelectPickerItem } from '../../../../shared/components/select-picker/select-picker.model';
 import { AccountService } from '../../../../core/services/account';
+import { bindExpandedSectionLayer } from '../../../../core/services/history-layer.service';
 import { CategoryService } from '../../../../core/services/category';
 import { CurrencyService } from '../../../../core/services/currency';
 import { DebtService } from '../../../../core/services/debt';
@@ -188,6 +189,8 @@ export class DebtForm {
   constructor() {
     this.currencyService.loadIfEmpty();
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
+    // Retour arriere : replie la section depliee avant de fermer la feuille.
+    bindExpandedSectionLayer(this.expandedSection);
 
     // Fetch initial des catégories
     this.categoryService.getAll().pipe(takeUntilDestroyed()).subscribe(cats => {

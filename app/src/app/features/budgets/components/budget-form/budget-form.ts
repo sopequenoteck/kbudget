@@ -25,6 +25,7 @@ import {
   phosphorCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { bindExpandedSectionLayer } from '../../../../core/services/history-layer.service';
 import { CategoryService } from '../../../../core/services/category';
 import { BudgetService } from '../../../../core/services/budget';
 import { PreferenceService } from '../../../../core/services/preference';
@@ -148,6 +149,8 @@ export class BudgetForm {
     this.loadCategories();
     this.loadExistingBudgets();
     this.amountWidth = createAmountWidth(this.form.get('montant')!, 30);
+    // Retour arriere : replie la section depliee avant de fermer la feuille.
+    bindExpandedSectionLayer(this.expandedSection);
 
     effect(() => {
       const b = this.budget();

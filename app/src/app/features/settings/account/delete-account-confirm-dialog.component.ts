@@ -17,6 +17,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
 
@@ -56,6 +57,11 @@ export class DeleteAccountConfirmDialogComponent {
   get isSubmitDisabled(): boolean {
     const { currentPassword, confirmed } = this.form.getRawValue();
     return !currentPassword || !confirmed || this.isSubmitting();
+  }
+
+  constructor() {
+    // Le retour ferme le dialogue, sauf pendant l'envoi (meme regle que `onCancel`).
+    bindHistoryLayer(() => this.onCancel(), this.isOpen, () => this.isSubmitting());
   }
 
   open(): Promise<boolean> {

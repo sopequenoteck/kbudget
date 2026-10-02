@@ -114,6 +114,8 @@ Conteneur unique pour creation/edition. 4 rows :
 
 Sections expandables : une seule active a la fois. InlineDatePicker pour les dates.
 
+Retour arriere (geste Android, bouton precedent, KKS-447) : replie d'abord la section depliee (saisie intacte), puis ferme la feuille. Toute surface modale s'enregistre aupres de `HistoryLayerService` (`bindHistoryLayer`, `bindExpandedSectionLayer`) ; une surface ouverte au-dessus d'une feuille (confirm, select-picker) est fermee la premiere.
+
 Classes : `.bsheet__handle`, `.bsheet__main-row`, `.bsheet__amount`, `.bsheet__meta-row`, `.bsheet__tool-pill`, `.bsheet__expand`, `.bsheet__bottom-row`, `.bsheet__action-pill`
 
 ### Empty state
@@ -186,6 +188,10 @@ Classes : `.skeleton-item`, `.skeleton-circle`, `.skeleton-line`, `.skeleton-her
 | `--primary-border` | Bordure amber 25% |
 | `--icon-circle-bg` | Fond cercle icone (6% blanc dark, 4% noir light) |
 | `--highlight-subtle` | Press feedback (10%) |
+
+## Zones sures (PWA installee)
+
+`viewport-fit=cover` : le contenu passe sous l'encoche et la barre de gestes. Tout element colle a un bord (en-tete, barre du bas, FAB, feuilles, toasts, panneaux) ajoute `--safe-top` / `--safe-right` / `--safe-bottom` / `--safe-left` (`env(safe-area-inset-*)`, 0 hors iPhone a encoche). `--header-height` et `--bottom-nav-height` incluent deja la zone sure. Barre d'etat iOS en `black-translucent` : l'en-tete passe dessous (texte de la barre blanc, illisible en theme clair, limite acceptee) ; `theme-color` suit `--surface-raised` (Android, Safari hors PWA).
 
 ## Fichiers SCSS partages
 

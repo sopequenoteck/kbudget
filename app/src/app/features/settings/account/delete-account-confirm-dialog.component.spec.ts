@@ -6,6 +6,7 @@ import { DeleteAccountConfirmDialogComponent } from './delete-account-confirm-di
 import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../testing/history-testing';
 
 describe('DeleteAccountConfirmDialogComponent', () => {
   let userServiceMock: { deleteAccount: ReturnType<typeof vi.fn> };
@@ -224,6 +225,37 @@ describe('DeleteAccountConfirmDialogComponent', () => {
       const result = await promise;
       expect(result).toBe(false);
       expect(component.isOpen()).toBe(false);
+    });
+  });
+
+  describe('retour arriere (KKS-447)', () => {
+    beforeEach(resetHistory);
+
+    it('should_resolve_false_when_back_is_pressed_while_open', async () => {
+      setup();
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      const answer = fixture.componentInstance.open();
+      fixture.detectChanges();
+
+      await goBack();
+
+      expect(await answer).toBe(false);
+    });
+
+    it('should_stay_open_when_back_is_pressed_during_the_deletion', async () => {
+      setup();
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      const answer = fixture.componentInstance.open();
+      fixture.detectChanges();
+      fixture.componentInstance.isSubmitting.set(true);
+
+      await goBack();
+      const stayedOpen = fixture.componentInstance.isOpen();
+      fixture.componentInstance.isSubmitting.set(false);
+      fixture.componentInstance.onCancel();
+
+      expect(stayedOpen).toBe(true);
+      expect(await answer).toBe(false);
     });
   });
 });

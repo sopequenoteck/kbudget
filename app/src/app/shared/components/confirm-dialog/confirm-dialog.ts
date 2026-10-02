@@ -20,6 +20,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -48,6 +49,7 @@ export class ConfirmDialog {
   private previouslyFocusedElement: HTMLElement | null = null;
 
   constructor() {
+    bindHistoryLayer(() => this.confirmService.resolve(false), this.confirmService.isOpen);
     effect(() => {
       if (this.confirmService.isOpen()) {
         this.previouslyFocusedElement = document.activeElement as HTMLElement;

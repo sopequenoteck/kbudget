@@ -32,6 +32,7 @@
 22. [KKS-235 — Page Mon compte](#22-kks-235--page-mon-compte-angular--flutter)
 23. [KKS-386 — Import de relevé (Angular)](#23-kks-386--import-de-relevé-angular)
 24. [KKS-446 — Mises à jour de la PWA (Angular)](#24-kks-446--mises-à-jour-de-la-pwa-angular)
+25. [KKS-447 — Shell mobile de la PWA (Angular)](#25-kks-447--shell-mobile-de-la-pwa-angular)
 
 ---
 
@@ -649,6 +650,23 @@
 | PW-10 | Écran d'incompatibilité | Client trop ancien pour le serveur (version minimale relevée), N+1 compatible servie | Sur l'écran « Application à mettre à jour », toucher « Réessayer » | L'app active la nouvelle version, recharge et l'écran disparaît ; sans nouvelle version disponible, l'app recharge simplement | -- |
 | PW-11 | En-têtes de cache | Instance servie, outils de développement (Réseau) | Charger `/`, `/ngsw.json`, `/ngsw-worker.js`, `/manifest.webmanifest`, un `main-*.js`, une icône | `/` (index.html) : `no-cache, no-transform` ; `ngsw.json`, `ngsw-worker.js`, `manifest.webmanifest`, icônes, favicon, `i18n/*.json` : `no-cache` ; `main-*.js`, `chunk-*.js`, `styles-*.css` : `public, max-age=31536000, immutable` ; à la revalidation, réponses `304` avec le même `Cache-Control` | -- |
 | PW-12 | Worker de secours | Instance de test avec N installée | Suivre « Removing a faulty web app from installed browsers » de `docs/deployment.md`, rouvrir l'app | Le service worker disparaît (Application → Service Workers), les caches `ngsw:` sont supprimés ; après redéploiement d'une image saine, l'app réinstalle le service worker | -- |
+
+## 25. KKS-447 — Shell mobile de la PWA (Angular)
+
+> **Concerne** : application Angular, PWA installée et navigateur mobile.
+> **À vérifier sur un vrai appareil** : iOS (PWA installée, iPhone à encoche) pour les zones sûres et la barre d'état ; Android Chrome pour le geste de retour (iOS n'en a pas en PWA : vérifier le retour avec le bouton précédent d'un navigateur).
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| MS-1 | Retour ferme la feuille | Accueil | Ouvrir la saisie d'une transaction (FAB), faire retour | La feuille se ferme, la page reste l'accueil | -- |
+| MS-2 | Retour replie la section | Feuille de transaction ouverte, montant saisi | Ouvrir le choix de catégorie, faire retour, puis retour | 1er retour : section repliée, montant conservé ; 2e retour : feuille fermée | -- |
+| MS-3 | Surface du dessus d'abord | Feuille d'édition ouverte | Toucher Supprimer (confirmation), faire retour | Seule la confirmation se ferme, la feuille reste ouverte | -- |
+| MS-4 | Pas de retour à vide | Feuille ouverte | La fermer par le voile, puis faire retour | Le retour mène à la page précédente du parcours, jamais à « rien de visible » | -- |
+| MS-5 | Panneau de notifications | Notifications présentes | Ouvrir le panneau, faire retour ; rouvrir, toucher une notification qui navigue, faire retour | Retour : panneau fermé ; après la navigation, le retour revient à la page d'origine | -- |
+| MS-6 | Zones sûres iOS | iPhone à encoche, PWA installée, thème sombre | Parcourir accueil, transactions, une feuille, un toast, le panneau de notifications, la connexion | En-tête sous la barre d'état sans chevauchement du contenu ; barre du bas, FAB, bas des feuilles et toasts au-dessus de la barre de gestes ; sections collantes sous l'en-tête | -- |
+| MS-7 | Barre d'état iOS | PWA installée | Thème sombre puis thème clair (relancer l'app après le changement) | Sombre : barre d'état dans la couleur de l'en-tête, texte blanc ; clair : texte de la barre blanc peu lisible (limite acceptée) | -- |
+| MS-8 | Pas de seconde installation | PWA installée avant la mise à jour (manifest sans `id`) | Laisser la mise à jour s'appliquer, rouvrir depuis l'icône existante | Une seule icône, l'app s'ouvre ; aucune proposition de nouvelle installation | -- |
+| MS-9 | `theme-color` (Android / Safari) | Navigateur mobile Android | Basculer clair, sombre, auto (puis le thème du système en auto) | La barre du navigateur prend la couleur de l'en-tête du thème appliqué | -- |
 
 ---
 

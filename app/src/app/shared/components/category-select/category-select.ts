@@ -15,6 +15,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
 import { CategoryForm } from '../category-form/category-form';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { Category } from '../../../core/models/category.model';
 import { LanguageService } from '../../../core/services/language';
 import { normalize } from '../../utils/string.utils';
@@ -102,6 +103,11 @@ export class CategorySelect implements ControlValueAccessor, OnDestroy {
   });
 
   constructor() {
+    // Retour arriere : quitte la creation inline et revient a la liste (recherche conservee).
+    bindHistoryLayer(
+      () => this.popToList(),
+      computed(() => this.mode() === 'create'),
+    );
     effect(() => this.isCreating.emit(this.mode() === 'create'));
   }
 
