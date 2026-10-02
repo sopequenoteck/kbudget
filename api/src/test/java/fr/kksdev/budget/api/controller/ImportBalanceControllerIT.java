@@ -154,16 +154,17 @@ class ImportBalanceControllerIT {
 
     @Test
     void should_list_the_suspects_in_the_confirmation_response() throws Exception {
+        // Dated 17/09: the bakery purchase is dated 14/09, so the window of 2 days (KKS-385) does not reach it.
         Transaction duplicate = transactionRepository.save(Transaction.builder()
                 .libelle("Pain").montant(new BigDecimal("4.30")).type(TransactionType.DEPENSE)
-                .date(LocalDate.of(2026, Month.SEPTEMBER, 16)).account(account).user(user).build());
+                .date(LocalDate.of(2026, Month.SEPTEMBER, 17)).account(account).user(user).build());
         String draftId = uploadAndReadId();
 
         mockMvc.perform(post("/v1/imports/drafts/" + draftId + "/confirm").header("Authorization", bearer(user)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balanceCheck.suspects", hasSize(1)))
                 .andExpect(jsonPath("$.balanceCheck.suspects[0].id").value(duplicate.getId().toString()))
-                .andExpect(jsonPath("$.balanceCheck.suspects[0].date").value("2026-09-16"))
+                .andExpect(jsonPath("$.balanceCheck.suspects[0].date").value("2026-09-17"))
                 .andExpect(jsonPath("$.balanceCheck.suspects[0].libelle").value("Pain"))
                 .andExpect(jsonPath("$.balanceCheck.suspects[0].montant").value(4.30))
                 .andExpect(jsonPath("$.balanceCheck.suspects[0].type").value("DEPENSE"));

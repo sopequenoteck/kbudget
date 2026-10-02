@@ -533,6 +533,13 @@ Response `201` :
 }
 ```
 
+**Idempotent (KKS-385)** : si une transaction liee a l'abonnement existe deja dans
+la periode courante, `pay` la renvoie telle quelle (meme `id`, sa propre `date`) et
+ne cree rien. La periode est celle de la `frequence` qui contient aujourd'hui,
+comptee depuis `dateDebut` (un mois a partir du 5, du 5 au 4 inclus). Une
+transaction importee d'un releve et rattachee a l'abonnement compte comme un
+paiement. Un double clic ne cree donc plus de doublon.
+
 ### Historique paiements `GET /api/v1/subscriptions/{id}/payments`
 
 Response `200` :
@@ -1761,6 +1768,7 @@ Response `201` :
   "duplicateCount": 2,
   "skippedCount": 7,
   "alreadyImportedCount": 7,
+  "matchedCount": 3,
   "profileName": "Societe Generale",
   "profileSource": "REGISTRY",
   "createdAt": "2026-03-20T14:30:00",
@@ -1787,7 +1795,19 @@ Response `201` :
       "duplicateTransactionId": null,
       "suggestRule": false,
       "skipReason": null,
-      "categorySource": null
+      "categorySource": null,
+      "purchaseDate": "2026-03-14",
+      "matchedTransactionId": "uuid-transaction-saisie",
+      "matchCandidateIds": [],
+      "subscriptionId": null,
+      "matchedTransaction": {
+        "id": "uuid-transaction-saisie",
+        "date": "2026-03-14",
+        "libelle": "Tabac",
+        "montant": 17.32,
+        "type": "DEPENSE"
+      },
+      "matchCandidates": []
     },
     {
       "id": "uuid",
@@ -1805,7 +1825,13 @@ Response `201` :
       "duplicateTransactionId": "uuid-transaction-existante",
       "suggestRule": false,
       "skipReason": "ALREADY_IMPORTED",
-      "categorySource": null
+      "categorySource": null,
+      "purchaseDate": null,
+      "matchedTransactionId": null,
+      "matchCandidateIds": [],
+      "subscriptionId": null,
+      "matchedTransaction": null,
+      "matchCandidates": []
     }
   ]
 }
@@ -1826,6 +1852,51 @@ sous-ensemble de `skippedCount`. Une ligne est reconnue :
 Deux lignes identiques d'un meme releve sont deux operations : elles ne sont
 ecartees que si la base en contient autant. Un libelle seulement proche
 (Jaro-Winkler >= 0,85) donne toujours `DUPLICATE`, bloquant.
+
+**Saisies manuelles rapprochees (KKS-385)** : une operation que l'utilisateur a
+deja saisie a la main ne doit pas etre comptee deux fois. A l'upload, apres la
+reconnaissance des lignes deja importees et avant le doublon probable, chaque
+ligne `READY` est rapprochee des transactions du **meme utilisateur et du meme
+compte**, sans empreinte (non importees), de meme sens et de meme montant, dans une
+fenetre de dates. **Le libelle n'est pas un critere** : celui de l'utilisateur et
+celui de la banque n'ont rien en commun. La date de reference de la ligne est la
+date d'achat si elle est connue, sinon la date comptable :
+
+| Transaction candidate | Fenetre |
+|-----------------------|---------|
+| liee a un abonnement | 8 jours de part et d'autre de la date de reference |
+| sinon, date d'achat connue (paiement carte) | 2 jours de part et d'autre de la date d'achat |
+| sinon (virement, prelevement) | de 5 jours avant a 1 jour apres la date comptable |
+
+- `purchaseDate` : date d'achat lue dans le libelle brut quand le profil la
+  declare (`CARTE X1596 21/08`), `null` sinon. `date` reste la date comptable (elle
+  porte l'empreinte). A la confirmation, la transaction creee prend `purchaseDate`
+  si elle est connue, sinon `date`.
+- **Un candidat** : la ligne reste `READY` et porte `matchedTransactionId`. A la
+  confirmation, **aucune transaction n'est creee** : la transaction existante est
+  conservee telle quelle (date, libelle, categorie, liens a une dette ou un
+  abonnement) et recoit l'empreinte de la ligne. Les lignes rapprochees sont comptees
+  dans `matchedCount` (sous-ensemble de `readyCount`), hors `importedCount`.
+- **Plusieurs candidats** : aucune decision automatique. La ligne devient
+  `DUPLICATE` (bloquante) et `matchCandidateIds` liste les candidats, du plus ancien
+  au plus recent. Une transaction ne sert qu'a une ligne : les lignes sont traitees
+  dans l'ordre du fichier.
+- **Aucun** : la ligne suit son chemin habituel.
+- **Detail pour la revue (KKS-386)** : `matchedTransaction` (`id`, `date`, `libelle`,
+  `montant`, `type`) decrit la transaction rapprochee, et `matchCandidates` les memes
+  objets pour `matchCandidateIds`, dans le meme ordre. Ils sont lus en une seule
+  requete pour tout le brouillon, parmi les transactions de l'utilisateur et du compte
+  du brouillon : un identifiant qui n'est pas le sien, ou d'une transaction supprimee
+  depuis, n'a pas de detail (`matchedTransaction` vaut `null`, le candidat est absent
+  de `matchCandidates` ; `matchedTransactionId` et `matchCandidateIds` restent tels
+  quels). Presents dans toutes les reponses qui portent une ligne.
+- `subscriptionId` : une ligne `READY` non rapprochee, de sens `DEPENSE`, dont la
+  cle commercant et le montant sont ceux d'**un seul** abonnement actif de
+  l'utilisateur est rattachee a cet abonnement. Elle cree a la confirmation une
+  transaction liee a l'abonnement, avec sa categorie si la ligne n'en a pas. Plusieurs
+  abonnements de meme libelle (cinq abonnements d'un meme editeur) se distinguent par
+  le montant ; s'il ne suffit pas, aucun lien. La cle d'un abonnement est apprise a la
+  confirmation d'une ligne rapprochee d'un de ses paiements.
 
 **Categorie pre-remplie (KKS-383)** : `categorySource` indique d'ou vient la
 categorie — `RULE` (une regle), `HISTORY` (categorie majoritaire des transactions
@@ -1876,6 +1947,7 @@ Response `200` :
   "skippedCount": 9,
   "historyId": "uuid",
   "alreadyImportedCount": 7,
+  "matchedCount": 3,
   "balanceCheck": {
     "bankBalance": 1842.37,
     "balanceDate": "2026-10-01",
@@ -1913,8 +1985,13 @@ pas de solde et sa date.
   releve compte dans `difference` sans etre listee ; une transaction datee apres la
   date du solde n'est ni comptee ni listee.
 
-Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues. Les lignes deja
-importees ne bloquent jamais.
+`importedCount` ne compte que les transactions **creees** ; `matchedCount` (KKS-385)
+compte les lignes rapprochees d'une transaction existante, qui n'ont rien cree. Une
+transaction rapprochee n'est jamais un suspect.
+
+Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues (dont les lignes aux
+candidats multiples), ou transaction rapprochee supprimee ou importee depuis l'upload
+(defaire le rapprochement de la ligne). Les lignes deja importees ne bloquent jamais.
 
 Les actions groupees ignorent les lignes deja importees : un « tout
 selectionner » ne les modifie pas et n'echoue pas sur elles.
@@ -1932,6 +2009,29 @@ Request :
 
 Redemander le statut courant d'une ligne est sans effet : `READY` sur une ligne
 deja `READY` n'est plus une erreur (KKS-383).
+
+**Rapprochement (KKS-385)** : deux champs **optionnels** tranchent ou defont le
+rapprochement d'une ligne `READY` ou `DUPLICATE` :
+
+```json
+{ "matchedTransactionId": "uuid-transaction" }
+```
+
+```json
+{ "clearMatch": true }
+```
+
+- `matchedTransactionId` rapproche la ligne de cette transaction : elle doit etre
+  celle de l'utilisateur, sur le compte du brouillon, sans empreinte, de meme sens
+  et de meme montant que la ligne, et ne pas deja servir une autre ligne du brouillon.
+  La fenetre de dates n'est pas controlee : l'utilisateur sait. La ligne devient
+  `READY` rapprochee. `404` si la transaction n'est pas la sienne ou pas sur ce
+  compte, `409` si une autre ligne la porte, `400` sinon.
+- `clearMatch: true` defait le rapprochement (ou renonce aux candidats) : la ligne
+  est `READY` sans rapprochement, une transaction sera creee. `400` si la ligne n'a
+  ni rapprochement ni candidats, ou si les deux champs sont donnes.
+- Passer une ligne rapprochee a `SKIPPED` defait aussi son rapprochement ; passer
+  une ligne aux candidats multiples a `READY` vaut `clearMatch` (creer la transaction).
 
 **Correction de categorie (KKS-383)** : quand `categoryId` change la categorie
 d'une ligne, elle est propagee aux autres lignes du brouillon du meme commercant
@@ -1951,6 +2051,11 @@ Request :
   "status": "READY"
 }
 ```
+
+Une ligne aux candidats multiples (KKS-385) n'est pas touchee par `status: "READY"` :
+creer une transaction a sa place est un choix explicite, ligne par ligne
+(`PUT .../lines/{lineId}`). Passer des lignes rapprochees a `SKIPPED` defait leur
+rapprochement.
 
 ### Regles de categorisation `POST /api/v1/imports/rules`
 

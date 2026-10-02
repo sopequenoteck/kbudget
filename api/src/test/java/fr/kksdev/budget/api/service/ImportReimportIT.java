@@ -152,7 +152,11 @@ class ImportReimportIT {
 
     @Test
     void should_keep_probable_duplicate_blocking_when_label_is_only_similar() {
-        saveLegacyImport(cleanLabelOf(BAKERY) + "S", "3.20", LocalDate.of(2026, Month.MARCH, 2));
+        // A transaction without fingerprint would now be matched by date, amount and type whatever
+        // its label (KKS-385): the probable duplicate is one that already came from another line.
+        Transaction other = saveLegacyImport(cleanLabelOf(BAKERY) + "S", "3.20", LocalDate.of(2026, Month.MARCH, 2));
+        other.setImportFingerprint("fingerprint of another statement line");
+        transactionRepository.save(other);
 
         ImportDraftResponse draft = upload(List.of(BAKERY));
 

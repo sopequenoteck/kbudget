@@ -65,7 +65,7 @@ class ApiContractIT {
     private static final Path SNAPSHOT_PATH = Path.of("src/test/resources/api-contract.txt");
 
     private static final List<String> HTTP_METHODS = List.of("get", "post", "put", "patch", "delete");
-    private static final int MAX_DEPTH = 6;
+    private static final int MAX_DEPTH = 8;
 
     @Autowired
     private MockMvc mockMvc;

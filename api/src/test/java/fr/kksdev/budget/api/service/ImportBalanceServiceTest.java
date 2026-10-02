@@ -14,6 +14,7 @@ import fr.kksdev.budget.api.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
@@ -321,6 +322,56 @@ class ImportBalanceServiceTest {
         assertThat(unreadableOnly.suspects()).isEmpty();
         verify(transactionRepository, never())
                 .findByUserIdAndAccountIdAndDateBetween(userId, accountId, BALANCE_DATE, BALANCE_DATE);
+    }
+
+    @Test
+    void should_not_count_a_matched_line_in_the_projected_balance_since_its_transaction_is_already_there() {
+        ImportDraft draft = pendingDraft("100.00", "1842.37");
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("-12.50"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(true);
+        ImportDraftLine matched = readyLine(TransactionType.DEPENSE, "12.50", PERIOD_START);
+        matched.setMatchedTransactionId(UUID.randomUUID());
+
+        var balances = service.draftBalances(draft, List.of(matched, readyLine(TransactionType.DEPENSE, "4.30", PERIOD_END)), userId);
+
+        assertThat(balances.projectedBalance()).isEqualByComparingTo("83.20");
+    }
+
+    @Test
+    void should_count_a_line_at_the_date_of_the_transaction_it_creates_when_the_purchase_precedes_the_balance_date() {
+        ImportDraft draft = pendingDraft("0", "10.00");
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE)).thenReturn(BigDecimal.ZERO);
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(true);
+        ImportDraftLine booked = readyLine(TransactionType.RECETTE, "5.00", BALANCE_DATE.plusDays(1));
+        booked.setPurchaseDate(BALANCE_DATE);
+        ImportDraftLine purchasedAfter = readyLine(TransactionType.RECETTE, "7.00", BALANCE_DATE.plusDays(3));
+        purchasedAfter.setPurchaseDate(BALANCE_DATE.plusDays(2));
+
+        var balances = service.draftBalances(draft, List.of(booked, purchasedAfter), userId);
+
+        assertThat(balances.projectedBalance()).isEqualByComparingTo("5.00");
+    }
+
+    @ParameterizedTest(name = "line {0} matched with the transaction -> listed as suspect: {1}")
+    @CsvSource({"READY, false", "DUPLICATE, true", "NEEDS_REVIEW, true", "SKIPPED, true"})
+    void should_not_list_as_suspect_the_transaction_only_a_ready_line_is_matched_with(
+            ImportLineStatus status, boolean listed) {
+        UUID matchedTransaction = UUID.randomUUID();
+        UUID stranger = UUID.randomUUID();
+        ImportDraftLine matched = line(status, TransactionType.DEPENSE, "4.30", PERIOD_START);
+        matched.setMatchedTransactionId(matchedTransaction);
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE)).thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of(
+                        transaction(matchedTransaction, TransactionType.DEPENSE, "Pain", "4.30", PERIOD_START),
+                        transaction(stranger, TransactionType.DEPENSE, "Autre", "4.30", PERIOD_START)));
+
+        ImportBalanceCheckResponse check = service.check(pendingDraft("0", "10.00"), List.of(matched), List.of(), userId);
+
+        // Ordered by date then label: "Autre" before "Pain".
+        assertThat(check.suspects()).extracting(SuspectTransaction::id)
+                .containsExactlyElementsOf(listed ? List.of(stranger, matchedTransaction) : List.of(stranger));
     }
 
     @Test

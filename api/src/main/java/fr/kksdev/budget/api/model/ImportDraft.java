@@ -71,6 +71,11 @@ public class ImportDraft {
     @Builder.Default
     private Integer alreadyImportedCount = 0;
 
+    /** Sous-ensemble de readyCount : lignes rapprochees d'une transaction existante, qui ne creeront rien (KKS-385). */
+    @Column(name = "matched_count", nullable = false)
+    @Builder.Default
+    private Integer matchedCount = 0;
+
     @Column(name = "profile_id")
     private UUID profileId;
 
