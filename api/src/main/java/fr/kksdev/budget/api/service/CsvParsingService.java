@@ -122,6 +122,7 @@ public class CsvParsingService {
                     .cleanLabel(cleanLabel)
                     .amount(amount)
                     .date(date)
+                    .purchaseDate(purchaseDateOf(profile, rawLabel, date))
                     .transactionType(type)
                     .status(ImportLineStatus.READY)
                     .build();
@@ -163,6 +164,13 @@ public class CsvParsingService {
                     .statusMessage("Erreur de parsing: " + e.getMessage())
                     .build();
         }
+    }
+
+    /** Purchase date carried by the raw label when the profile declares one (KKS-385), {@code null} otherwise. */
+    private static LocalDate purchaseDateOf(ImportProfileRegistry.ImportProfileConfig profile, String rawLabel,
+                                            LocalDate bookingDate) {
+        PurchaseDateSpec spec = profile.purchaseDate();
+        return spec == null ? null : spec.extract(rawLabel, bookingDate).orElse(null);
     }
 
     /**

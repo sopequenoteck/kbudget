@@ -1,16 +1,21 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.model.ImportDraftLine;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-/** Reading of the bank header lines skipped before the column header (KKS-384). */
+/** Reading of the bank header lines skipped before the column header (KKS-384), purchase date of the lines (KKS-385). */
 class CsvParsingServiceTest {
 
     private final CsvParsingService service = new CsvParsingService(
@@ -59,4 +64,39 @@ class CsvParsingServiceTest {
         assertThat(service.readSkippedLines("one\n".getBytes(StandardCharsets.UTF_8), profile("NOT-A-CHARSET", 1)))
                 .isEmpty();
     }
+
+    private ImportProfileRegistry.ImportProfileConfig profileWithPurchaseDate(PurchaseDateSpec purchaseDate) {
+        return new ImportProfileRegistry.ImportProfileConfig(
+                "XX", "Test", ";", "dd/MM/yyyy", "Date", "Amount", null, null, "Label", "UTF-8", ",",
+                0, List.of(), List.of(), null, purchaseDate);
+    }
+
+    private List<ImportDraftLine> parse(String label, PurchaseDateSpec purchaseDate) {
+        byte[] content = ("Date;Amount;Label\n24/08/2026;-12,50;" + label + "\n").getBytes(StandardCharsets.UTF_8);
+        return service.parse(new ByteArrayInputStream(content), profileWithPurchaseDate(purchaseDate), UUID.randomUUID());
+    }
+
+    @Test
+    void should_read_the_purchase_date_from_the_raw_label_and_keep_the_booking_date_when_the_profile_declares_one() {
+        PurchaseDateSpec spec = PurchaseDateSpec.of("CARTE X\\d{4} (\\d{2}/\\d{2})", "dd/MM");
+
+        ImportDraftLine line = parse("CARTE X0000 21/08 BOUTIQUE TEST", spec).getFirst();
+
+        assertThat(line.getPurchaseDate()).isEqualTo(LocalDate.of(2026, Month.AUGUST, 21));
+        assertThat(line.getDate()).isEqualTo(LocalDate.of(2026, Month.AUGUST, 24));
+        assertThat(line.transactionDate()).isEqualTo(LocalDate.of(2026, Month.AUGUST, 21));
+    }
+
+    @ParameterizedTest(name = "label \"{0}\", profile declares a purchase date: {1}")
+    @CsvSource({"PRELEVEMENT EUROPEEN OPERATEUR TEST, true", "CARTE X0000 21/08 BOUTIQUE TEST, false"})
+    void should_leave_the_purchase_date_empty_when_the_label_carries_none_or_the_profile_declares_none(
+            String label, boolean declared) {
+        PurchaseDateSpec spec = declared ? PurchaseDateSpec.of("CARTE X\\d{4} (\\d{2}/\\d{2})", "dd/MM") : null;
+
+        ImportDraftLine line = parse(label, spec).getFirst();
+
+        assertThat(line.getPurchaseDate()).isNull();
+        assertThat(line.transactionDate()).isEqualTo(LocalDate.of(2026, Month.AUGUST, 24));
+    }
+
 }

@@ -56,6 +56,13 @@ public class Subscription {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    /**
+     * Cle commercant ({@code MerchantKey}) du libelle de releve de cet abonnement, apprise quand
+     * une ligne est rapprochee d'un de ses paiements (KKS-385). Nulle tant qu'aucun releve ne l'a appris.
+     */
+    @Column(name = "statement_merchant_key", length = 500)
+    private String statementMerchantKey;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

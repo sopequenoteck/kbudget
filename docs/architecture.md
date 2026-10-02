@@ -197,6 +197,7 @@ L'architecture reste en couches simples : Controller → Service → Repository.
 | actif | Boolean | Abonnement actif ou non |
 | category | Category | FK → Category (nullable) |
 | account | Account | FK → Account (nullable) |
+| statementMerchantKey | String | Cle commercant (`MerchantKey`) du libelle de releve, apprise quand une ligne est rapprochee d'un de ses paiements ; nullable — KKS-385 |
 | updatedAt | LocalDateTime | Date de mise a jour |
 | user | User | FK → User |
 
@@ -333,6 +334,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | duplicateCount | Integer | Doublons detectes |
 | skippedCount | Integer | Lignes ignorees |
 | alreadyImportedCount | Integer | Sous-ensemble de skippedCount : lignes ecartees d'office car deja importees (KKS-382) |
+| matchedCount | Integer | Sous-ensemble de readyCount : lignes rapprochees d'une transaction existante, qui ne creeront rien ; NOT NULL defaut 0 — KKS-385 |
 | profileId | UUID | Identifiant du profil utilise (nullable) |
 | profileSource | Enum | ImportProfileSource (REGISTRY / CUSTOM / MANUAL) |
 | statementProfileKey | String | Cle du profil du releve (voir Account) ; nullable sans en-tete exploitable — KKS-384 |
@@ -363,10 +365,18 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | statusMessage | String | Message de statut (nullable) |
 | skipReason | Enum | ImportSkipReason (ALREADY_IMPORTED) — SKIPPED decide par l'import, nullable si ignoree par l'utilisateur (KKS-382) |
 | duplicateTransactionId | UUID | ID de la transaction doublon ou deja importee (nullable) |
+| purchaseDate | LocalDate | Date d'achat lue dans le libelle brut (paiement carte) quand le profil la declare, nullable ; `date` reste la date comptable — KKS-385 |
+| matchedTransactionId | UUID | Transaction existante (saisie manuelle) a laquelle la ligne est rapprochee, nullable, sans FK ; la confirmation la reverifie — KKS-385 |
+| matchCandidateIds | Texte | Candidats d'un rapprochement ambigu (statut DUPLICATE) : identifiants separes par des virgules (`UuidListConverter`), nullable — KKS-385 |
+| subscriptionId | UUID | Abonnement auquel la transaction creee sera rattachee, nullable, sans FK — KKS-385 |
 | category | Category | FK → Category (nullable) |
 | categorySource | Enum | CategorySource (RULE / HISTORY / USER), nullable sans categorie — KKS-383 |
 | createdAt | LocalDateTime | Date de creation |
 | updatedAt | LocalDateTime | Date de mise a jour |
+
+> Rapprochement des saisies manuelles (KKS-385) : `ImportMatchingService`, appele par `DeduplicationService` entre l'import anterieur (passe 2) et le doublon probable (passe 3). Candidates : meme utilisateur, meme compte, sans empreinte, meme sens, meme montant, dans une fenetre autour de la date de reference (date d'achat si connue, sinon date comptable) — 8 jours si la transaction est liee a un abonnement, 2 jours autour de la date d'achat, sinon de 5 jours avant a 1 jour apres la date comptable. Le libelle n'est pas un critere. Un candidat : `matchedTransactionId` ; plusieurs : statut `DUPLICATE` et `matchCandidateIds`, rien n'est decide. A la confirmation, une ligne rapprochee ne cree rien : la transaction recoit l'empreinte, et l'abonnement lie apprend la cle commercant du libelle. La transaction creee par une ligne non rapprochee est datee de `purchaseDate` si connue, et liee a `subscriptionId`. Les colonnes sont stockees sans cle etrangere, comme `duplicateTransactionId` : supprimer une transaction ne doit pas etre bloque par un brouillon en attente. Le candidat multiple tient dans une colonne texte plutot qu'une table de jointure : il n'est jamais interroge par candidat, et se lit avec la ligne sans chargement supplementaire.
+>
+> `SubscriptionPaymentService.pay` est idempotent : une transaction liee a l'abonnement dans la periode courante (`SubscriptionPeriod`, comptee depuis `dateDebut`) est renvoyee au lieu d'en creer une.
 
 ### CategoryRule
 

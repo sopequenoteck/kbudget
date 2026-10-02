@@ -116,7 +116,7 @@ class ImportStatementBalanceIT {
                 .filter(line -> line.rawLabel().contains("BOULANGERIE"))
                 .findFirst().orElseThrow().id();
 
-        importService.updateLine(draft.id(), bakeryLine, new ImportLineUpdateRequest(null, "SKIPPED"), userId);
+        importService.updateLine(draft.id(), bakeryLine, new ImportLineUpdateRequest(null, "SKIPPED", null, null), userId);
         ImportDraftResponse reloaded = importService.getDraft(draft.id(), userId);
 
         assertThat(reloaded.projectedBalance()).isEqualByComparingTo("900.00");
@@ -198,8 +198,10 @@ class ImportStatementBalanceIT {
     void should_report_the_duplicates_as_the_difference_and_list_them_as_suspects_but_not_adjustments() {
         // 946.67 would match the bank; the adjustment (+50) is compensated by a lower opening balance.
         UUID duplicatesAccount = createAccount(user, "896.67").getId();
-        Transaction bread = saveTransaction(duplicatesAccount, TransactionType.DEPENSE, "Pain", "4.30", BAKERY_DATE);
-        Transaction rent = saveTransaction(duplicatesAccount, TransactionType.DEPENSE, "Loyer", "600.00", RENT_DATE);
+        // Same amounts as the bakery and the rent, but dated outside the matching windows (KKS-385):
+        // the bakery purchase is dated 14/09 (2 days either side), the rent booked on 21/09 (5 days before, 1 after).
+        Transaction bread = saveTransaction(duplicatesAccount, TransactionType.DEPENSE, "Pain", "4.30", BAKERY_DATE.plusDays(1));
+        Transaction rent = saveTransaction(duplicatesAccount, TransactionType.DEPENSE, "Loyer", "600.00", RENT_DATE.plusDays(2));
         saveTransaction(duplicatesAccount, TransactionType.AJUSTEMENT, "Balance adjustment", "50.00", LocalDate.of(2026, Month.SEPTEMBER, 18));
 
         ImportDraftResponse draft = importService.upload(statementFile(), duplicatesAccount, userId);
@@ -212,7 +214,7 @@ class ImportStatementBalanceIT {
         assertThat(check.difference()).isEqualByComparingTo("-604.30");
         assertThat(check.suspects()).extracting(SuspectTransaction::id).containsExactly(bread.getId(), rent.getId());
         assertThat(check.suspects().getFirst()).satisfies(suspect -> {
-            assertThat(suspect.date()).isEqualTo(BAKERY_DATE);
+            assertThat(suspect.date()).isEqualTo(BAKERY_DATE.plusDays(1));
             assertThat(suspect.libelle()).isEqualTo("Pain");
             assertThat(suspect.montant()).isEqualByComparingTo("4.30");
             assertThat(suspect.type()).isEqualTo(TransactionType.DEPENSE);

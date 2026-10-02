@@ -19,7 +19,9 @@ public record ImportDraftSummaryResponse(
         /** Sous-ensemble de skippedCount : lignes ecartees car deja importees (KKS-382). */
         int alreadyImportedCount,
         LocalDateTime createdAt,
-        LocalDateTime expiresAt
+        LocalDateTime expiresAt,
+        /** Sous-ensemble de readyCount : lignes rapprochees d'une transaction existante (KKS-385). */
+        int matchedCount
 ) {
     public static ImportDraftSummaryResponse from(ImportDraft draft) {
         return new ImportDraftSummaryResponse(
@@ -35,7 +37,8 @@ public record ImportDraftSummaryResponse(
                 draft.getSkippedCount(),
                 draft.getAlreadyImportedCount(),
                 draft.getCreatedAt(),
-                draft.getExpiresAt()
+                draft.getExpiresAt(),
+                draft.getMatchedCount()
         );
     }
 }

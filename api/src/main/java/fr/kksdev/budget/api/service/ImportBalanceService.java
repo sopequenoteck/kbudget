@@ -122,6 +122,12 @@ public class ImportBalanceService {
                 .map(ImportDraftLine::getDuplicateTransactionId)
                 .filter(Objects::nonNull)
                 .forEach(accountedFor::add);
+        // A line matched with an existing transaction accounts for it: it is the same operation (KKS-385).
+        lines.stream()
+                .filter(line -> line.getStatus() == ImportLineStatus.READY)
+                .map(ImportDraftLine::getMatchedTransactionId)
+                .filter(Objects::nonNull)
+                .forEach(accountedFor::add);
 
         return transactionRepository
                 .findByUserIdAndAccountIdAndDateBetween(userId, accountId, Collections.min(dates),
@@ -147,7 +153,9 @@ public class ImportBalanceService {
     private static BigDecimal sumOfReadyLinesUntil(List<ImportDraftLine> lines, LocalDate balanceDate) {
         return lines.stream()
                 .filter(line -> line.getStatus() == ImportLineStatus.READY)
-                .filter(line -> !line.getDate().isAfter(balanceDate))
+                // A matched line creates nothing: its transaction is already in the balance of the application.
+                .filter(line -> line.getMatchedTransactionId() == null)
+                .filter(line -> !line.transactionDate().isAfter(balanceDate))
                 .map(line -> line.getTransactionType() == TransactionType.DEPENSE
                         ? line.getAmount().negate()
                         : line.getAmount())

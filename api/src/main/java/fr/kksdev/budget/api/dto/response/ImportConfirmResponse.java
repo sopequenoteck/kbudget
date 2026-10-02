@@ -9,5 +9,7 @@ public record ImportConfirmResponse(
         /** Sous-ensemble de skippedCount : lignes ecartees car deja importees (KKS-382). */
         int alreadyImportedCount,
         /** Controle du solde bancaire apres import (KKS-384) ; nul quand le releve n'en donne pas. */
-        ImportBalanceCheckResponse balanceCheck
+        ImportBalanceCheckResponse balanceCheck,
+        /** Lignes rapprochees d'une transaction existante : elles n'ont rien cree et sont comptees hors importedCount (KKS-385). */
+        int matchedCount
 ) {}

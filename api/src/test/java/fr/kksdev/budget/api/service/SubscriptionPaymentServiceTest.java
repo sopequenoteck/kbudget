@@ -13,15 +13,18 @@ import fr.kksdev.budget.api.repository.SubscriptionRepository;
 import fr.kksdev.budget.api.repository.TransactionRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,8 +55,17 @@ class SubscriptionPaymentServiceTest {
     @Mock
     private BudgetService budgetService;
 
-    @InjectMocks
+    /** Date fixe : un test date verifie sinon un comportement different selon le jour ou il tourne (KKS-355). */
+    private static final LocalDate TODAY = LocalDate.of(2026, Month.OCTOBER, 2);
+
     private SubscriptionPaymentService subscriptionPaymentService;
+
+    @BeforeEach
+    void setUp() {
+        Clock clock = Clock.fixed(TODAY.atStartOfDay().toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+        subscriptionPaymentService = new SubscriptionPaymentService(
+                subscriptionRepository, transactionRepository, accountRepository, userRepository, budgetService, clock);
+    }
 
     private final UUID userId = UUID.randomUUID();
     private final UUID subscriptionId = UUID.randomUUID();
@@ -84,7 +96,7 @@ class SubscriptionPaymentServiceTest {
                 .nom("Netflix")
                 .montant(new BigDecimal("13.99"))
                 .frequence(Frequency.MENSUEL)
-                .dateDebut(LocalDate.of(2026, 1, 1))
+                .dateDebut(LocalDate.of(2026, Month.JANUARY, 1))
                 .actif(true)
                 .account(account)
                 .user(buildUser())
@@ -97,7 +109,7 @@ class SubscriptionPaymentServiceTest {
                 .montant(sub.getMontant())
                 .libelle(sub.getNom())
                 .type(TransactionType.DEPENSE)
-                .date(LocalDate.now())
+                .date(TODAY)
                 .account(account)
                 .subscription(sub)
                 .user(buildUser())
@@ -137,7 +149,7 @@ class SubscriptionPaymentServiceTest {
                 .nom("iCloud+")
                 .montant(new BigDecimal("28.99"))
                 .frequence(Frequency.ANNUEL)
-                .dateDebut(LocalDate.of(2026, 1, 1))
+                .dateDebut(LocalDate.of(2026, Month.JANUARY, 1))
                 .actif(true)
                 .account(account)
                 .user(buildUser())
@@ -195,7 +207,7 @@ class SubscriptionPaymentServiceTest {
                 .nom("Netflix")
                 .montant(new BigDecimal("13.99"))
                 .frequence(Frequency.MENSUEL)
-                .dateDebut(LocalDate.of(2026, 1, 1))
+                .dateDebut(LocalDate.of(2026, Month.JANUARY, 1))
                 .actif(true)
                 .account(null)
                 .user(user)
@@ -221,7 +233,7 @@ class SubscriptionPaymentServiceTest {
                 .nom("Netflix")
                 .montant(new BigDecimal("13.99"))
                 .frequence(Frequency.MENSUEL)
-                .dateDebut(LocalDate.of(2026, 1, 1))
+                .dateDebut(LocalDate.of(2026, Month.JANUARY, 1))
                 .actif(false)
                 .user(user)
                 .build();
@@ -244,6 +256,48 @@ class SubscriptionPaymentServiceTest {
                 .hasMessage("Subscription not found");
 
         verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
+    void should_createThePaymentAtTheDateOfTheDay_when_noPaymentInThePeriod() {
+        var account = buildAccount();
+        var sub = buildActiveMonthlySubscription(account);
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(buildSavedTransaction(sub, account));
+
+        subscriptionPaymentService.pay(subscriptionId, userId);
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionRepository).save(captor.capture());
+        assertThat(captor.getValue().getDate()).isEqualTo(TODAY);
+        // Monthly subscription starting on January 1st: the current period is October 1st to 31st.
+        verify(transactionRepository).findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
+                subscriptionId, userId, LocalDate.of(2026, Month.OCTOBER, 1), LocalDate.of(2026, Month.OCTOBER, 31));
+    }
+
+    @Test
+    void should_returnTheExistingPaymentWithoutCreatingAnother_when_thePeriodAlreadyHasOne() {
+        var account = buildAccount();
+        var sub = buildActiveMonthlySubscription(account);
+        var existing = buildSavedTransaction(sub, account);
+        existing.setDate(LocalDate.of(2026, Month.OCTOBER, 1));
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(transactionRepository.findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
+                subscriptionId, userId, LocalDate.of(2026, Month.OCTOBER, 1), LocalDate.of(2026, Month.OCTOBER, 31)))
+                .thenReturn(List.of(existing));
+
+        SubscriptionPaymentResponse response = subscriptionPaymentService.pay(subscriptionId, userId);
+
+        assertThat(response.id()).isEqualTo(transactionId);
+        assertThat(response.date()).isEqualTo(LocalDate.of(2026, Month.OCTOBER, 1));
+        assertThat(response.montant()).isEqualByComparingTo("13.99");
+        assertThat(response.subscriptionName()).isEqualTo("Netflix");
+        assertThat(response.accountName()).isEqualTo("Compte Principal");
+        verify(transactionRepository, never()).save(any());
+        verify(budgetService, never()).checkThresholdsForCategory(any(), any());
     }
 
     @Test

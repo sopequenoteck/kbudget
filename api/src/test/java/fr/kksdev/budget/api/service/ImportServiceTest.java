@@ -4,6 +4,7 @@ import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
 import fr.kksdev.budget.api.dto.response.ImportBalanceCheckResponse;
+import fr.kksdev.budget.api.dto.response.ImportMatchedTransactionResponse;
 import fr.kksdev.budget.api.dto.response.ImportProfileResponse;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
@@ -16,6 +17,7 @@ import fr.kksdev.budget.api.model.ImportDraft;
 import fr.kksdev.budget.api.model.ImportDraftLine;
 import fr.kksdev.budget.api.model.ImportHistory;
 import fr.kksdev.budget.api.model.ImportProfile;
+import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
 import fr.kksdev.budget.api.repository.CategoryRepository;
@@ -45,6 +47,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -55,6 +58,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -107,6 +111,9 @@ class ImportServiceTest {
 
     @Mock
     private ImportBalanceService importBalanceService;
+
+    @Mock
+    private ImportMatchingService importMatchingService;
 
     @InjectMocks
     private ImportService importService;
@@ -336,7 +343,7 @@ class ImportServiceTest {
         var user = buildUser();
         var account = buildActiveAccount(user);
         var draft = buildDraft(user, account, ImportDraftStatus.COMPLETED);
-        var request = new ImportLineUpdateRequest(null, null);
+        var request = new ImportLineUpdateRequest(null, null, null, null);
 
         when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
 
@@ -350,7 +357,7 @@ class ImportServiceTest {
         var user = buildUser();
         var account = buildActiveAccount(user);
         var draft = buildDraft(user, account, ImportDraftStatus.PENDING);
-        var request = new ImportLineUpdateRequest(null, null);
+        var request = new ImportLineUpdateRequest(null, null, null, null);
 
         when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
         when(importDraftLineRepository.findById(lineId)).thenReturn(Optional.empty());
@@ -366,7 +373,7 @@ class ImportServiceTest {
         var account = buildActiveAccount(user);
         var draft = buildDraft(user, account, ImportDraftStatus.PENDING);
         var line = buildLine(draft, ImportLineStatus.NEEDS_REVIEW);
-        var request = new ImportLineUpdateRequest(categoryId, null);
+        var request = new ImportLineUpdateRequest(categoryId, null, null, null);
 
         when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
         when(importDraftLineRepository.findById(lineId)).thenReturn(Optional.of(line));
@@ -383,7 +390,7 @@ class ImportServiceTest {
         var account = buildActiveAccount(user);
         var draft = buildDraft(user, account, ImportDraftStatus.PENDING);
         var line = buildLine(draft, ImportLineStatus.NEEDS_REVIEW);
-        var request = new ImportLineUpdateRequest(null, "BOGUS");
+        var request = new ImportLineUpdateRequest(null, "BOGUS", null, null);
 
         when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
         when(importDraftLineRepository.findById(lineId)).thenReturn(Optional.of(line));
@@ -679,6 +686,60 @@ class ImportServiceTest {
         assertThat(response.statementBalanceDate()).isEqualTo(LocalDate.of(2026, Month.OCTOBER, 1));
         assertThat(response.projectedBalance()).isEqualByComparingTo("10.00");
         assertThat(response.proposedOpeningBalance()).isEqualByComparingTo("20.00");
+    }
+
+    // -------------------------------------------------------------------------
+    // getDraft(): detail of the matched transactions (KKS-386)
+    // -------------------------------------------------------------------------
+
+    private Transaction existingTransaction(String libelle) {
+        return Transaction.builder().id(UUID.randomUUID()).libelle(libelle).montant(new BigDecimal("12.50"))
+                .type(TransactionType.DEPENSE).date(FIXED_DATE).build();
+    }
+
+    @Test
+    void should_read_every_matched_and_candidate_transaction_in_a_single_query_when_getting_a_draft() {
+        var draft = buildDraft(buildUser(), buildActiveAccount(buildUser()), ImportDraftStatus.PENDING);
+        Transaction matched = existingTransaction("Tabac");
+        Transaction firstCandidate = existingTransaction("Cafe 1");
+        Transaction secondCandidate = existingTransaction("Cafe 2");
+        var matchedLine = buildLine(draft, ImportLineStatus.READY);
+        matchedLine.setMatchedTransactionId(matched.getId());
+        var ambiguousLine = buildLine(draft, ImportLineStatus.DUPLICATE);
+        ambiguousLine.setMatchCandidateIds(List.of(secondCandidate.getId(), firstCandidate.getId()));
+        var otherAmbiguousLine = buildLine(draft, ImportLineStatus.DUPLICATE);
+        otherAmbiguousLine.setMatchCandidateIds(List.of(firstCandidate.getId()));
+        when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        when(importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId))
+                .thenReturn(List.of(matchedLine, ambiguousLine, otherAmbiguousLine, buildLine(draft, ImportLineStatus.READY)));
+        when(importBalanceService.draftBalances(any(), any(), eq(userId))).thenReturn(ImportBalanceService.DraftBalances.NONE);
+        when(transactionRepository.findByUserIdAndAccountIdAndIdIn(userId, accountId,
+                Set.of(matched.getId(), firstCandidate.getId(), secondCandidate.getId())))
+                .thenReturn(List.of(matched, firstCandidate, secondCandidate));
+
+        var response = importService.getDraft(draftId, userId);
+
+        assertThat(response.lines().get(0).matchedTransaction().libelle()).isEqualTo("Tabac");
+        assertThat(response.lines().get(1).matchCandidates()).extracting(ImportMatchedTransactionResponse::libelle)
+                .containsExactly("Cafe 2", "Cafe 1");
+        assertThat(response.lines().get(2).matchCandidates()).extracting(ImportMatchedTransactionResponse::id)
+                .containsExactly(firstCandidate.getId());
+        assertThat(response.lines().get(3).matchedTransaction()).isNull();
+        verify(transactionRepository, times(1)).findByUserIdAndAccountIdAndIdIn(any(), any(), any());
+    }
+
+    @Test
+    void should_not_read_any_transaction_when_getting_a_draft_without_matches() {
+        var draft = buildDraft(buildUser(), buildActiveAccount(buildUser()), ImportDraftStatus.PENDING);
+        when(importDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        when(importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId))
+                .thenReturn(List.of(buildLine(draft, ImportLineStatus.READY)));
+        when(importBalanceService.draftBalances(any(), any(), eq(userId))).thenReturn(ImportBalanceService.DraftBalances.NONE);
+
+        var response = importService.getDraft(draftId, userId);
+
+        assertThat(response.lines()).hasSize(1);
+        verifyNoInteractions(transactionRepository);
     }
 
     // -------------------------------------------------------------------------

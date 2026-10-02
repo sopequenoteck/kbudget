@@ -25,6 +25,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findBySubscriptionIdAndUserIdOrderByDateDesc(UUID subscriptionId, UUID userId);
 
+    /** Payments of a subscription dated within {@code from} to {@code to}, both included, oldest first (KKS-385). */
+    List<Transaction> findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
+            UUID subscriptionId, UUID userId, LocalDate from, LocalDate to);
+
     @Query("SELECT COALESCE(SUM(t.montant), 0) FROM Transaction t WHERE t.subscription.id = :subscriptionId AND t.user.id = :userId")
     BigDecimal sumBySubscriptionIdAndUserId(@Param("subscriptionId") UUID subscriptionId, @Param("userId") UUID userId);
 

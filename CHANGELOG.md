@@ -12,15 +12,57 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 > francais. Le choix se fait dans Reglages > Apparence > Langue. L'application
 > Flutter suit la meme regle avec la langue du telephone (KKS-405).
 
-> **Quatre migrations de base (V38, V39, V40, V41) : sauvegarder avant de mettre a
-> jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
+> **Cinq migrations de base (V38, V39, V40, V41, V42) : sauvegarder avant de mettre
+> a jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
 > aucune donnee existante. V39 ajoute une colonne et la renseigne pour les
 > categories systeme existantes, sans modifier d'autre donnee. V40 ajoute une
 > colonne nullable aux notifications, sans modifier de donnee. V41 ajoute deux
 > colonnes nullables aux comptes et quatre aux brouillons d'import, sans modifier
-> de donnee.
+> de donnee. V42 ajoute des colonnes nullables aux lignes de brouillon et aux
+> abonnements, et un compteur a zero aux brouillons, sans modifier de donnee.
 
 ### Added
+
+- **Rapprochement des saisies manuelles et des lignes de releve (KKS-385)** : une
+  operation saisie a la main puis retrouvee dans le releve n'est plus comptee deux
+  fois. Sur des donnees reelles, 11 saisies en double (355,90 EUR comptes deux fois)
+  avaient un libelle sans rapport avec celui de la banque ; les paiements carte,
+  67 % des operations, sont comptabilises 1 a 4 jours apres l'achat.
+  - **Date d'achat** : lue dans le libelle brut quand le profil la declare
+    (`CARTE X1596 21/08`) et exposee en `purchaseDate` ; la date comptable reste
+    celle de la ligne et de l'empreinte. La transaction creee a la confirmation
+    prend la date d'achat si elle est connue.
+  - **Rapprochement** : meme utilisateur, meme compte, transaction sans empreinte,
+    meme sens, meme montant, dans une fenetre de dates — 8 jours si la transaction
+    est liee a un abonnement, sinon 2 jours autour de la date d'achat, sinon de
+    5 jours avant a 1 jour apres la date comptable. **Le libelle n'est pas un
+    critere.** Un candidat : la ligne est rapprochee (`matchedTransactionId`), et a
+    la confirmation la transaction existante est conservee telle quelle (date,
+    libelle, categorie, lien a une dette ou un abonnement) et recoit l'empreinte, sans
+    rien creer. Plusieurs candidats : la ligne devient `DUPLICATE` avec
+    `matchCandidateIds`, rien n'est decide.
+  - **Revue** : `PUT /imports/drafts/{id}/lines/{lineId}` accepte les champs
+    **optionnels** `matchedTransactionId` (choisir une transaction) et `clearMatch`
+    (defaire le rapprochement). Le solde verifie (KKS-384) compte une transaction
+    rapprochee comme expliquee.
+  - **Abonnements** : une ligne qui correspond, par libelle de releve et montant, a un
+    seul abonnement actif cree une transaction rattachee a cet abonnement
+    (`subscriptionId`) ; le libelle de releve d'un abonnement est appris quand une
+    ligne est rapprochee d'un de ses paiements. Un abonnement dont le paiement a
+    ete saisi n'est plus doublonne.
+  - **`POST /subscriptions/{id}/pay` est idempotent** : si une transaction liee a
+    l'abonnement existe deja dans la periode courante, elle est renvoyee et rien n'est
+    cree (un double clic creait trois paiements).
+  - API (ajouts seuls) : `purchaseDate`, `matchedTransactionId`, `matchCandidateIds`
+    et `subscriptionId` sur les lignes, avec le detail des transactions concernees
+    (KKS-386) en `matchedTransaction` et `matchCandidates` (`id`, `date`, `libelle`,
+    `montant`, `type`), lu en une requete et limite aux transactions de l'utilisateur ; `matchedCount` sur le brouillon, la liste des
+    brouillons et la reponse de confirmation (`importedCount` ne compte plus que les
+    transactions creees). Migration V42, additive.
+  - Changement de comportement : une saisie manuelle de meme sens et de meme montant
+    a la meme date n'est plus un doublon probable a trancher mais un rapprochement,
+    quel que soit son libelle ; le doublon probable (libelle proche) ne concerne
+    plus que les transactions deja importees d'un releve.
 
 - **Solde du releve : solde d'ouverture, controle apres import, compte reconnu
   (KKS-384)** : la banque donne le solde reel dans l'en-tete de chaque releve ;
