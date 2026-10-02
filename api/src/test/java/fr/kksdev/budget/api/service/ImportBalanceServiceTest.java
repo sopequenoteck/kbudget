@@ -123,6 +123,140 @@ class ImportBalanceServiceTest {
     }
 
     @Test
+    void should_leave_out_of_the_proposed_opening_balance_a_transaction_no_line_accounts_for() {
+        ImportDraft draft = pendingDraft("100.00", "1842.37");
+        // 50.00 of earlier transactions, from which a 30.00 expense of the period no line explains.
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("20.00"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of(transaction(UUID.randomUUID(), TransactionType.DEPENSE, "Gym", "30.00", PERIOD_END)));
+        List<ImportDraftLine> lines = List.of(
+                readyLine(TransactionType.RECETTE, "895.70", PERIOD_END),
+                readyLine(TransactionType.DEPENSE, "0.00", PERIOD_START));
+
+        var balances = service.draftBalances(draft, lines, userId);
+
+        // projected keeps every transaction: 100 + 20 + 895.70 ; proposed = 1842.37 - 1015.70 + 100 + (-30)
+        assertThat(balances.projectedBalance()).isEqualByComparingTo("1015.70");
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("896.67");
+    }
+
+    @Test
+    void should_add_back_to_the_proposed_opening_balance_an_income_no_line_accounts_for() {
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("20.00"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of(transaction(UUID.randomUUID(), TransactionType.RECETTE, "Gift", "20.00", PERIOD_END)));
+        List<ImportDraftLine> lines = List.of(readyLine(TransactionType.RECETTE, "895.70", PERIOD_START));
+
+        var balances = service.draftBalances(pendingDraft("100.00", "1842.37"), lines, userId);
+
+        // projected = 100 + 20 + 895.70 ; proposed = 1842.37 - 1015.70 + 100 + 20
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("946.67");
+    }
+
+    @Test
+    void should_not_leave_out_of_the_proposed_opening_balance_the_transactions_a_line_accounts_for() {
+        UUID matched = UUID.randomUUID();
+        UUID recognized = UUID.randomUUID();
+        ImportDraftLine matchedLine = readyLine(TransactionType.DEPENSE, "12.50", PERIOD_START);
+        matchedLine.setMatchedTransactionId(matched);
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("-22.49"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of(
+                        transaction(matched, TransactionType.DEPENSE, "Matched", "12.50", PERIOD_START),
+                        transaction(recognized, TransactionType.DEPENSE, "Recognized", "9.99", PERIOD_END)));
+        List<ImportDraftLine> lines = List.of(matchedLine, skippedLineFor(recognized));
+
+        var balances = service.draftBalances(pendingDraft("0", "100.00"), lines, userId);
+
+        // Nothing is unaccounted for: projected = -22.49, proposed = 100 - (-22.49) + 0
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("122.49");
+    }
+
+    @Test
+    void should_not_leave_out_of_the_proposed_opening_balance_an_adjustment_of_the_period() {
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("50.00"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of(
+                        transaction(UUID.randomUUID(), TransactionType.AJUSTEMENT, "Balance adjustment", "50.00", PERIOD_END)));
+        List<ImportDraftLine> lines = List.of(readyLine(TransactionType.RECETTE, "10.00", PERIOD_START));
+
+        var balances = service.draftBalances(pendingDraft("0", "100.00"), lines, userId);
+
+        // An adjustment is deliberate: it stays in the balance, and check() does not list it either.
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("40.00");
+    }
+
+    @Test
+    void should_keep_counting_a_transaction_dated_before_the_first_line_in_the_proposed_opening_balance() {
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("-30.00"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE))
+                .thenReturn(List.of());
+        List<ImportDraftLine> lines = List.of(readyLine(TransactionType.RECETTE, "10.00", PERIOD_START));
+
+        var balances = service.draftBalances(pendingDraft("0", "100.00"), lines, userId);
+
+        // The 30.00 expense predates the period: it is not a suspect, the opening balance absorbs it.
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("120.00");
+        verify(transactionRepository).findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, BALANCE_DATE);
+    }
+
+    @Test
+    void should_not_subtract_from_the_proposed_opening_balance_a_transaction_dated_after_the_balance_date() {
+        LocalDate lateLine = BALANCE_DATE.plusDays(3);
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(BigDecimal.ZERO);
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+        when(transactionRepository.findByUserIdAndAccountIdAndDateBetween(userId, accountId, PERIOD_START, lateLine))
+                .thenReturn(List.of(
+                        transaction(UUID.randomUUID(), TransactionType.DEPENSE, "After the balance", "30.00", BALANCE_DATE.plusDays(1))));
+        List<ImportDraftLine> lines = List.of(
+                readyLine(TransactionType.RECETTE, "10.00", PERIOD_START),
+                readyLine(TransactionType.RECETTE, "0.00", lateLine));
+
+        var balances = service.draftBalances(pendingDraft("0", "100.00"), lines, userId);
+
+        // The suspect is in the period but not in the balance of the day: nothing to put back.
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("90.00");
+    }
+
+    @Test
+    void should_not_look_for_unaccounted_transactions_when_no_opening_balance_is_proposed() {
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(BigDecimal.ZERO);
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(true);
+
+        service.draftBalances(pendingDraft("0", "100.00"), List.of(readyLine(TransactionType.RECETTE, "10.00", PERIOD_START)), userId);
+
+        verify(transactionRepository, never()).findByUserIdAndAccountIdAndDateBetween(
+                userId, accountId, PERIOD_START, BALANCE_DATE);
+    }
+
+    @Test
+    void should_propose_the_plain_difference_when_no_line_has_a_date() {
+        ImportDraftLine unreadable = line(ImportLineStatus.NEEDS_REVIEW, TransactionType.DEPENSE, "0", BALANCE_DATE);
+        unreadable.setStatusMessage("Date invalide");
+        when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))
+                .thenReturn(new BigDecimal("30.00"));
+        when(importHistoryRepository.existsByUserIdAndAccountId(userId, accountId)).thenReturn(false);
+
+        var balances = service.draftBalances(pendingDraft("0", "100.00"), List.of(unreadable), userId);
+
+        assertThat(balances.proposedOpeningBalance()).isEqualByComparingTo("70.00");
+        verify(transactionRepository, never()).findByUserIdAndAccountIdAndDateBetween(
+                userId, accountId, BALANCE_DATE, BALANCE_DATE);
+    }
+
+    @Test
     void should_not_propose_an_opening_balance_when_account_already_has_an_import() {
         ImportDraft draft = pendingDraft("100.00", "1842.37");
         when(transactionRepository.calculateBalanceByAccountIdUntil(accountId, BALANCE_DATE))

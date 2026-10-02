@@ -34,7 +34,7 @@ public record ImportDraftResponse(
         LocalDate statementBalanceDate,
         /** Solde que l'application aura a la date du solde si l'import est confirme tel quel (KKS-384). */
         BigDecimal projectedBalance,
-        /** Premier import du compte seulement : solde initial qui ferait egaler solde de l'application et solde bancaire (KKS-384). */
+        /** Premier import du compte seulement : solde initial qui ferait egaler solde de l'application et solde bancaire, transactions inexpliquees de la periode ecartees (KKS-384, KKS-443). */
         BigDecimal proposedOpeningBalance,
         /** Sous-ensemble de readyCount : lignes rapprochees d'une transaction existante (KKS-385). */
         int matchedCount

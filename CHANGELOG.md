@@ -392,6 +392,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Solde initial propose qui absorbait une saisie que le releve n'explique pas
+  (KKS-443)** : au premier import d'un compte, le solde initial propose comptait
+  toutes les transactions existantes de la periode. Une saisie absente du releve
+  (un doublon a venir, ou une depense oubliee par la banque) etait donc
+  absorbee : « solde identique », depenses gonflees, et la saisie n'etait plus
+  jamais signalee. La proposition laisse desormais de cote les transactions de
+  la periode que ni une ligne rapprochee ni un doublon reconnu n'explique, les
+  memes que les « suspects » du controle de solde : apres confirmation avec le
+  solde initial propose, l'ecart apparait et la saisie est listee. Exemple :
+  solde banque 1 842,37 EUR, lignes du releve de +895,70 EUR, saisie de
+  30,00 EUR absente du releve : 946,67 EUR proposes (976,67 EUR avant), puis un
+  ecart de -30,00 EUR. Sans saisie de ce genre, rien ne change. Le solde projete
+  reste le solde reel de l'application, toutes transactions comptees.
 - **Pied des formulaires de Flutter sur un ecran etroit** : en modification
   d'une dette, les boutons « Supprimer », « Non rembourse » et « Modifier »
   debordaient d'un ecran de 360 px de large. Les boutons de gauche defilent

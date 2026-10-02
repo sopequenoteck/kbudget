@@ -347,7 +347,7 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | user | User | FK → User |
 | account | Account | FK → Account cible. UNIQUE(user_id, account_id) WHERE status = 'PENDING' |
 
-> Solde du releve (KKS-384) : lu a l'upload dans les lignes sautees par `statementHeader` du profil (valeur illisible → `null`, jamais une erreur). `ImportBalanceService` en tire `projectedBalance` (solde de l'application a la date du solde si le brouillon est confirme : `soldeInitial` + transactions du compte datees jusqu'a cette date + lignes `READY` datees jusqu'a cette date), `proposedOpeningBalance` (premier import du compte seulement, c'est-a-dire aucun `ImportHistory` pour ce compte : le `soldeInitial` qui rend `projectedBalance` egal au solde bancaire) et, apres confirmation, le controle de solde (`balanceCheck`). Un profil sans `statementHeader` laisse tous ces champs a `null`.
+> Solde du releve (KKS-384) : lu a l'upload dans les lignes sautees par `statementHeader` du profil (valeur illisible → `null`, jamais une erreur). `ImportBalanceService` en tire `projectedBalance` (solde de l'application a la date du solde si le brouillon est confirme : `soldeInitial` + transactions du compte datees jusqu'a cette date + lignes `READY` datees jusqu'a cette date), `proposedOpeningBalance` (premier import du compte seulement, c'est-a-dire aucun `ImportHistory` pour ce compte : le `soldeInitial` qui rend le solde de l'application egal au solde bancaire une fois ecartees les transactions de la periode que le releve n'explique pas, les futurs `suspects` — KKS-443) et, apres confirmation, le controle de solde (`balanceCheck`). Un profil sans `statementHeader` laisse tous ces champs a `null`.
 
 ### ImportDraftLine
 

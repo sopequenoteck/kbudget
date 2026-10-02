@@ -1932,8 +1932,17 @@ releve. Ces cinq champs sont `null` pour un profil sans en-tete exploitable
   Recalcule a chaque lecture (une ligne ignoree le fait varier). `null` sans solde ni
   date, et une fois le brouillon confirme.
 - `proposedOpeningBalance` : **premier import du compte seulement** (aucun
-  historique d'import pour ce compte) : le `soldeInitial` qui rend `projectedBalance`
-  egal au solde bancaire. `null` aux imports suivants.
+  historique d'import pour ce compte) : le `soldeInitial` qui rend le solde de
+  l'application egal au solde bancaire **une fois ecartees les transactions que le
+  releve n'explique pas** (KKS-443), pour qu'elles restent visibles comme ecart et comme
+  `suspects` apres confirmation au lieu d'etre absorbees. Ce sont les memes
+  transactions que les `suspects` de `balanceCheck` : transactions du compte datees de
+  la plus petite date des lignes lisibles au plus tard de la derniere ligne et de la date
+  du solde, hors `AJUSTEMENT`, que ni une ligne `READY` rapprochee ni une ligne `SKIPPED`
+  reconnue comme doublon n'explique. Sans transaction de ce type, il egale
+  `soldeInitial + solde bancaire - projectedBalance` ; sinon il en differe du net signe
+  de celles datees jusqu'a la date du solde (`projectedBalance` les compte toutes).
+  `null` aux imports suivants.
 
 ### Confirmer import `POST /api/v1/imports/drafts/{draftId}/confirm`
 
@@ -1945,7 +1954,7 @@ Corps **optionnel** : une confirmation sans corps fonctionne comme avant.
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `applyOpeningBalance` | boolean (optionnel, defaut `false`) | Si `true` **et** premier import du compte, le `soldeInitial` du compte est fixe a la valeur proposee, recalculee a la confirmation (le solde de l'application egale alors celui de la banque a la date du releve, sans ajustement manuel). Ignore sinon (import suivant, releve sans solde). |
+| `applyOpeningBalance` | boolean (optionnel, defaut `false`) | Si `true` **et** premier import du compte, le `soldeInitial` du compte est fixe a la valeur proposee, recalculee a la confirmation (le solde de l'application egale alors celui de la banque a la date du releve, sans ajustement manuel, a l'ecart pres des transactions que le releve n'explique pas, listees dans `balanceCheck.suspects`). Ignore sinon (import suivant, releve sans solde). |
 
 Response `200` :
 
