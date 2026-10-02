@@ -32,6 +32,8 @@
 #     accountNumberField / balanceField / balanceDateField
 #                        0-based field indexes (at least one is required)
 #     balanceDateFormat  pattern of the balance date, required with balanceDateField
+#     decimalSeparator   decimal separator of the balance, one character (default:
+#                        the decimalSeparator of the profile)
 #   purchaseDate       purchase date carried by the label, year inferred from
 #                      the booking date
 #     pattern            regex with one capturing group
@@ -64,6 +66,7 @@ statementHeader:
   balanceDateField: 4
   balanceDateFormat: "dd/MM/yyyy"
   balanceField: 5
+  decimalSeparator: "."
 purchaseDate:
   pattern: 'CARTE X\d{4} (\d{2}/\d{2})'
   format: "dd/MM"

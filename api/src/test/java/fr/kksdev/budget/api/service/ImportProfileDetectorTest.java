@@ -158,7 +158,7 @@ class ImportProfileDetectorTest {
 
     @Test
     void should_not_recognize_a_file_made_of_the_bank_header_only() {
-        byte[] bankHeaderOnly = ImportTestFiles.bytes("=\"0000000000001596\";15/09/2026\n", StandardCharsets.ISO_8859_1);
+        byte[] bankHeaderOnly = ImportTestFiles.bytes("00000000001596;15/09/2026\n", StandardCharsets.ISO_8859_1);
 
         assertThat(detector.detect(bankHeaderOnly, userId)).isEmpty();
     }

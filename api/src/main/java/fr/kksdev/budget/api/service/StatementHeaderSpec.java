@@ -23,6 +23,8 @@ import java.util.stream.Stream;
  * @param balanceField      0-based index of the balance field, or {@code null}
  * @param balanceDateField  0-based index of the balance date field, or {@code null}
  * @param balanceDateFormat format of the balance date, set when {@code balanceDateField} is
+ * @param decimalSeparator  decimal separator of the balance, or {@code null} to use the one of the
+ *                          profile: some banks write the header balance differently from the operations
  */
 public record StatementHeaderSpec(
         int line,
@@ -30,7 +32,8 @@ public record StatementHeaderSpec(
         Integer accountNumberField,
         Integer balanceField,
         Integer balanceDateField,
-        DateTimeFormatter balanceDateFormat
+        DateTimeFormatter balanceDateFormat,
+        String decimalSeparator
 ) {
 
     private static final int ACCOUNT_SUFFIX_LENGTH = 4;
@@ -38,16 +41,19 @@ public record StatementHeaderSpec(
     /** Builds a spec, rejecting an incoherent one with an {@link IllegalArgumentException}. */
     public static StatementHeaderSpec of(int line, String separator, Integer accountNumberField,
                                          Integer balanceField, Integer balanceDateField,
-                                         String balanceDateFormat) {
+                                         String balanceDateFormat, String decimalSeparator) {
         if (line < 0) {
             throw new IllegalArgumentException("statementHeader.line must not be negative");
         }
         if (separator == null || separator.length() != 1) {
             throw new IllegalArgumentException("statementHeader.separator must be a single character");
         }
+        if (decimalSeparator != null && decimalSeparator.length() != 1) {
+            throw new IllegalArgumentException("statementHeader.decimalSeparator must be a single character");
+        }
         requireValidFields(accountNumberField, balanceField, balanceDateField);
         return new StatementHeaderSpec(line, separator, accountNumberField, balanceField, balanceDateField,
-                balanceDateFormatter(balanceDateField, balanceDateFormat));
+                balanceDateFormatter(balanceDateField, balanceDateFormat), decimalSeparator);
     }
 
     private static void requireValidFields(Integer... fields) {
@@ -84,12 +90,16 @@ public record StatementHeaderSpec(
                 .map(digits -> digits.substring(digits.length() - ACCOUNT_SUFFIX_LENGTH));
     }
 
-    /** Balance, read with the decimal separator of the profile; currency and spaces are dropped. */
-    public Optional<BigDecimal> balance(List<String> skippedLines, String decimalSeparator) {
-        if (decimalSeparator == null || decimalSeparator.length() != 1) {
+    /**
+     * Balance, read with the decimal separator of the header when it declares one, otherwise with the
+     * one of the profile; currency and spaces are dropped.
+     */
+    public Optional<BigDecimal> balance(List<String> skippedLines, String profileDecimalSeparator) {
+        String balanceSeparator = decimalSeparator != null ? decimalSeparator : profileDecimalSeparator;
+        if (balanceSeparator == null || balanceSeparator.length() != 1) {
             return Optional.empty();
         }
-        return field(skippedLines, balanceField).flatMap(raw -> toAmount(raw, decimalSeparator));
+        return field(skippedLines, balanceField).flatMap(raw -> toAmount(raw, balanceSeparator));
     }
 
     public Optional<LocalDate> balanceDate(List<String> skippedLines) {

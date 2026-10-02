@@ -84,6 +84,26 @@ class ImportProfileFileParserTest {
     }
 
     @Test
+    void should_read_the_header_decimal_separator_when_the_file_declares_it() {
+        String yaml = VALID.replace("  balanceDateFormat: \"dd/MM/yyyy\"\n",
+                "  balanceDateFormat: \"dd/MM/yyyy\"\n  decimalSeparator: \".\"\n");
+
+        ImportProfileConfig config = parse(yaml);
+
+        assertThat(config.decimalSeparator()).isEqualTo(",");
+        assertThat(config.statementHeader().decimalSeparator()).isEqualTo(".");
+        assertThat(config.statementHeader().balance(List.of("", "12345|01/10/2026|1842.37 EUR"), ","))
+                .contains(new BigDecimal("1842.37"));
+    }
+
+    @Test
+    void should_leave_the_header_decimal_separator_undeclared_when_the_file_omits_it() {
+        ImportProfileConfig config = parse(VALID);
+
+        assertThat(config.statementHeader().decimalSeparator()).isNull();
+    }
+
+    @Test
     void should_apply_defaults_when_optional_sections_are_absent() {
         String minimal = VALID.substring(0, VALID.indexOf("skipHeaderLines"))
                 + """
@@ -167,6 +187,9 @@ class ImportProfileFileParserTest {
                 Arguments.of("statementHeader line as string", VALID.replace("line: 1", "line: \"1\""), "line must be an integer"),
                 Arguments.of("statementHeader without separator", VALID.replace("  separator: \"|\"\n", ""), "separator"),
                 Arguments.of("statementHeader without fields", VALID.replace("  accountNumberField: 0\n  balanceField: 2\n  balanceDateField: 1\n  balanceDateFormat: \"dd/MM/yyyy\"\n", ""), "at least one field"),
+                Arguments.of("statementHeader decimalSeparator empty", VALID.replace("  balanceDateFormat: \"dd/MM/yyyy\"\n", "  balanceDateFormat: \"dd/MM/yyyy\"\n  decimalSeparator: \"\"\n"), "statementHeader.decimalSeparator must be a single character"),
+                Arguments.of("statementHeader decimalSeparator too long", VALID.replace("  balanceDateFormat: \"dd/MM/yyyy\"\n", "  balanceDateFormat: \"dd/MM/yyyy\"\n  decimalSeparator: \"..\"\n"), "statementHeader.decimalSeparator must be a single character"),
+                Arguments.of("statementHeader decimalSeparator not a string", VALID.replace("  balanceDateFormat: \"dd/MM/yyyy\"\n", "  balanceDateFormat: \"dd/MM/yyyy\"\n  decimalSeparator: 1\n"), "decimalSeparator must be a quoted string"),
                 Arguments.of("purchaseDate not a mapping", VALID.substring(0, VALID.indexOf("purchaseDate:")) + "purchaseDate: 3\n", "purchaseDate must be a mapping"),
                 Arguments.of("purchaseDate without group", VALID.replace("'CARD (\\d{2}/\\d{2})'", "'CARD \\d{2}/\\d{2}'"), "capturing group"),
                 Arguments.of("purchaseDate without format", VALID.replace("  format: \"dd/MM\"\n", ""), "purchaseDate requires"),

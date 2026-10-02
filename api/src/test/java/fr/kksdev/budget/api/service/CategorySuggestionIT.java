@@ -54,7 +54,7 @@ class CategorySuggestionIT {
     private static final LocalDate MARCH_2 = LocalDate.of(2026, Month.MARCH, 2);
 
     private static final String HEADER = """
-            ="0000000000000000";01/03/2026;12/03/2026;0;12/03/2026;0,00 EUR
+            00000000000000;01/03/2026;12/03/2026;0;12/03/2026;0.00 EUR
 
             Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise
             """;
