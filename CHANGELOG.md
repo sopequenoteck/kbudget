@@ -5,6 +5,32 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Mises a jour fiables de l'application web** (KKS-446) : une nouvelle
+  version etait prise seulement au lancement a froid, rare pour une PWA
+  installee. Elle est desormais cherchee au lancement et a chaque retour au
+  premier plan, puis appliquee par rechargement si elle arrive dans les trois
+  premieres secondes ; sinon au retour suivant. Jamais sur un parcours de tache
+  (parametres, import de releve) ni sous une feuille ou une fenetre ouverte ; un
+  etat irrecuperable du service worker recharge aussitot. « Reessayer » de
+  l'ecran d'incompatibilite active la nouvelle version au lieu de recharger
+  celle en cache. Aucune interface ajoutee.
+- **Worker de secours** (KKS-446) : `safety-worker.js` d'Angular est publie
+  avec l'application ; procedure de retrait d'un service worker fautif dans
+  `docs/deployment.md`.
+
+### Changed
+
+- **En-tetes de cache de l'image `app`** (KKS-446) : `index.html` en
+  `no-cache, no-transform` (un proxy qui reecrit le HTML, comme Cloudflare,
+  cassait l'empreinte verifiee par le service worker) ; `ngsw-worker.js`,
+  `ngsw.json`, le manifeste, les icones, le favicon et les catalogues i18n,
+  sans empreinte, en `no-cache` au lieu d'`immutable` pendant un an ; seuls les
+  fichiers a empreinte du build restent `immutable`.
+- Le panneau de notifications est annonce comme dialogue modal aux
+  technologies d'assistance (`role="dialog"`, `aria-modal`).
+
 ## [6.7.2] - 2026-10-02
 
 > Correctif de navigation de l'application web. Aucune migration, aucun

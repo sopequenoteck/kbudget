@@ -309,6 +309,20 @@ describe('NotificationPanel', () => {
     expect(panel).toBeNull();
   });
 
+  it('should_expose_a_labelled_modal_dialog_when_open', () => {
+    // Marqueur lu par AppUpdateService pour ne pas recharger la page sous le panneau.
+    setupTestBed();
+    const fixture = TestBed.createComponent(NotificationPanel);
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+
+    const panel = fixture.nativeElement.querySelector('.notification-panel') as HTMLElement;
+    expect(panel.getAttribute('role')).toBe('dialog');
+    expect(panel.getAttribute('aria-modal')).toBe('true');
+    const labelId = panel.getAttribute('aria-labelledby') as string;
+    expect(fixture.nativeElement.querySelector(`#${labelId}`)?.textContent?.trim()).not.toBe('');
+  });
+
   it('should_emit_closed_when_close_called', () => {
     setupTestBed();
     const fixture = TestBed.createComponent(NotificationPanel);

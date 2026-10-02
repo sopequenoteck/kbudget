@@ -31,6 +31,7 @@
 21. [Angular — Catégories (KKS-231)](#21-angular--catégories-kks-231)
 22. [KKS-235 — Page Mon compte](#22-kks-235--page-mon-compte-angular--flutter)
 23. [KKS-386 — Import de relevé (Angular)](#23-kks-386--import-de-relevé-angular)
+24. [KKS-446 — Mises à jour de la PWA (Angular)](#24-kks-446--mises-à-jour-de-la-pwa-angular)
 
 ---
 
@@ -625,6 +626,27 @@
 | IM-38 | Recaler sur la banque | Un ajustement que le dernier solde bancaire rend inutile | « Recaler sur la banque » | Un ajustement inverse « Annulation de l'ajustement du … » est créé à la date du jour ; l'ajustement d'origine n'est plus proposé | -- |
 | IM-39 | Proposition périmée | Fusionner la même paire depuis deux onglets | Valider dans le second | Toast « Cette proposition n'est plus valable… » et liste rechargée | -- |
 | IM-40 | Rien à rattraper | Historique propre | Ouvrir | État vide « Rien à rattraper » | -- |
+
+## 24. KKS-446 — Mises à jour de la PWA (Angular)
+
+> **Concerne** : application Angular installée (PWA) servie par l'image `app` (nginx), en build de production.
+> **À vérifier sur un vrai appareil / navigateur** (iOS en PWA installée, Android Chrome, desktop) : les tests automatisés ne prouvent pas le comportement du service worker.
+> **Prérequis** : une instance servie par l'image `app`, deux versions déployables à tour de rôle (la version N installée sur l'appareil, la version N+1 prête à être servie). Outils de développement ouverts (Application → Service Workers) sur desktop.
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| PW-1 | Version prise au lancement | N installée, N+1 servie | Fermer complètement la PWA, la rouvrir | N+1 est active dès l'ouverture ou après un seul rechargement automatique dans les premières secondes ; aucun bandeau ni bouton de mise à jour | -- |
+| PW-2 | Version prise au retour au premier plan | N installée et ouverte sur le tableau de bord, N+1 servie ensuite | Passer l'app en arrière-plan quelques secondes, revenir | L'app se recharge une fois et affiche N+1 (`/api/meta` ou version affichée) ; pas de recharge à répétition aux retours suivants | -- |
+| PW-3 | Pas de rechargement pendant l'usage | N ouverte, N+1 déployée pendant l'usage | Naviguer entre écrans, saisir dans un champ sans quitter l'app | Aucun rechargement tant que l'app reste au premier plan ; la version est appliquée au retour au premier plan suivant | -- |
+| PW-4 | Revue d'import | N ouverte, N+1 déployée | Ouvrir `/transactions/import/review/…`, résoudre quelques lignes, passer en arrière-plan puis revenir | Aucun rechargement, la revue et les choix en cours sont intacts ; après être sorti de l'import (Transactions) et un nouveau retour au premier plan, N+1 est prise | -- |
+| PW-5 | Paramètres | N ouverte, N+1 déployée | Ouvrir un écran sous `/settings`, passer en arrière-plan puis revenir | Aucun rechargement tant qu'on reste sous Paramètres | -- |
+| PW-6 | Feuille ou fenêtre ouverte | N ouverte, N+1 déployée | Ouvrir le formulaire de transaction (+), saisir un montant, passer en arrière-plan puis revenir | Aucun rechargement, la saisie est conservée ; même résultat avec une feuille de sélection (compte, catégorie), une confirmation, le panneau de notifications, le report d'une dette et le changement de mot de passe | -- |
+| PW-7 | Application après fermeture de la surface | Suite de PW-6 | Fermer la fenêtre, passer en arrière-plan puis revenir | L'app se recharge et affiche N+1 | -- |
+| PW-8 | Hors ligne au démarrage | Mode avion | Ouvrir la PWA | L'app s'ouvre depuis le cache, sans message d'erreur lié à la mise à jour ; console sans erreur non gérée | -- |
+| PW-9 | Retour en ligne | Suite de PW-8 | Couper le mode avion, passer en arrière-plan puis revenir | La recherche reprend sans erreur, N+1 est prise si elle est disponible | -- |
+| PW-10 | Écran d'incompatibilité | Client trop ancien pour le serveur (version minimale relevée), N+1 compatible servie | Sur l'écran « Application à mettre à jour », toucher « Réessayer » | L'app active la nouvelle version, recharge et l'écran disparaît ; sans nouvelle version disponible, l'app recharge simplement | -- |
+| PW-11 | En-têtes de cache | Instance servie, outils de développement (Réseau) | Charger `/`, `/ngsw.json`, `/ngsw-worker.js`, `/manifest.webmanifest`, un `main-*.js`, une icône | `/` (index.html) : `no-cache, no-transform` ; `ngsw.json`, `ngsw-worker.js`, `manifest.webmanifest`, icônes, favicon, `i18n/*.json` : `no-cache` ; `main-*.js`, `chunk-*.js`, `styles-*.css` : `public, max-age=31536000, immutable` ; à la revalidation, réponses `304` avec le même `Cache-Control` | -- |
+| PW-12 | Worker de secours | Instance de test avec N installée | Suivre « Removing a faulty web app from installed browsers » de `docs/deployment.md`, rouvrir l'app | Le service worker disparaît (Application → Service Workers), les caches `ngsw:` sont supprimés ; après redéploiement d'une image saine, l'app réinstalle le service worker | -- |
 
 ---
 

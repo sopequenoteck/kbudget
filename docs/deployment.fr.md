@@ -160,6 +160,41 @@ lorsque la base le permet.
 3. Revenir a la version d'image precedente
 4. Ouvrir une issue avec le nom de la migration et l'erreur
 
+### Retirer une application web defectueuse des navigateurs
+
+L'application web installe un **service worker** dans chaque navigateur, et il
+survit au conteneur : revenir a une image `app` precedente n'atteint pas, a
+elle seule, un worker deja installe. Si une version casse l'application web sur
+les appareils qui l'ont deja ouverte, utilisez le worker de secours livre avec
+chaque build (`safety-worker.js`, celui d'Angular). Il desinscrit le worker
+installe et vide ses caches.
+
+1. **Arretez tout outil de mise a jour automatique** (Watchtower et
+   equivalents) : recreer le conteneur `app` annulerait l'etape 2 sans signal.
+2. **Servez le worker de secours a la place du vrai**, depuis le conteneur en
+   cours d'execution :
+
+   ```bash
+   docker compose exec app sh -c \
+     'cp /usr/share/nginx/html/safety-worker.js /usr/share/nginx/html/ngsw-worker.js'
+   ```
+
+3. **Laissez les appareils le recuperer.** Le navigateur relit
+   `/ngsw-worker.js` a chaque ouverture de l'application (il est servi
+   `no-cache`), puis le worker de secours se desinscrit. Un appareil qui n'a pas
+   encore ouvert l'application n'est corrige qu'a sa prochaine ouverture. Si un
+   CDN ou un proxy est devant, verifiez qu'il transmet `Cache-Control: no-cache`
+   pour ce fichier.
+4. **Deployez une image saine** (epinglez la version corrigee ou la precedente,
+   puis `docker compose pull && docker compose up -d`). La recreation du
+   conteneur remet le vrai `ngsw-worker.js`, que la prochaine ouverture
+   reinstalle.
+
+L'etape 2 ne survit pas a un redemarrage ou a une recreation du conteneur :
+c'est un palliatif, pas une livraison. Pour un seul appareil, desinscrivez le
+worker dans les outils de developpement du navigateur (Application, Service
+Workers) ou effacez les donnees du site.
+
 ## Sauvegarde et restauration
 
 Deux choses sont a sauvegarder : la **base** et les **avatars**. Restaurer la
