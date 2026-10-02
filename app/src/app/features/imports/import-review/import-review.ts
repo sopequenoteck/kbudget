@@ -155,14 +155,21 @@ export class ImportReview implements OnInit {
   readonly nothingToResolve = computed(
     () => this.blockingCount() === 0 && this.model().uncategorised.length === 0,
   );
+  /**
+   * Aucune transaction a creer (tout deja importe, ignore ou rapproche) : la
+   * confirmation reste possible, l'API accepte zero ligne a creer et pose les
+   * rapprochements, puis ouvre le controle du solde.
+   */
+  readonly onlyBalanceCheck = computed(() => this.model().newCount === 0);
   readonly canConfirm = computed(
-    () =>
-      this.draft() !== null &&
-      this.blockingCount() === 0 &&
-      this.model().newCount + this.model().matched.length > 0 &&
-      !this.busy() &&
-      !this.confirming(),
+    () => this.draft() !== null && this.blockingCount() === 0 && !this.busy() && !this.confirming(),
   );
+  readonly confirmLabelKey = computed(() => {
+    if (this.confirming()) return 'imports.feedback.confirming';
+    return this.onlyBalanceCheck()
+      ? 'imports.action.checkBalanceAndFinish'
+      : 'imports.action.confirmImport';
+  });
 
   /** Compteur de lignes sans categorie, pour l'en-tete de section. */
   readonly uncategorisedLineCount = computed(() =>

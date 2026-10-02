@@ -495,6 +495,7 @@
       "addRule": "Add a rule",
       "analyse": "Analyse the statement",
       "changeFile": "Choose another file",
+      "checkBalanceAndFinish": "Check balance and finish",
       "chooseCategory": "Choose",
       "configureColumns": "Set up the columns",
       "confirmImport": "{count, plural, one {Confirm the import (# transaction)} other {Confirm the import (# transactions)}}",
@@ -571,8 +572,8 @@
       "selectColumnOption": "-- Select --",
       "separator": "Separator",
       "skipHeaderLines": "Header lines to skip",
-      "uploadHint": "Accepted formats: .csv, .txt",
-      "uploadPrompt": "Click to select a CSV file"
+      "uploadHint": ".csv or .txt file exported from your bank",
+      "uploadPrompt": "Choose a statement"
     },
     "list": {
       "accountSuffix": "…{suffix}",
@@ -623,7 +624,7 @@
       "alreadyImported": "{count} already imported",
       "autoCategorised": "{count} categorised automatically",
       "balanceDetail": "Bank balance: {bank} on {date}",
-      "balanceGap": "Gap of {amount} with the bank",
+      "balanceGap": "Gap with the bank",
       "balanceMatch": "Same balance as the bank",
       "bankBalanceAt": "Bank balance on {date}",
       "created": "{count, plural, one {# transaction created} other {# transactions created}}",

@@ -15,7 +15,8 @@ import {
   phosphorCheck,
   phosphorCheckCircle,
   phosphorUploadSimple,
-  phosphorWarningCircle,
+  phosphorWarning,
+  phosphorXCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { AccountService } from '../../../core/services/account';
@@ -47,7 +48,8 @@ interface DraftConflict {
       phosphorCheck,
       phosphorCheckCircle,
       phosphorUploadSimple,
-      phosphorWarningCircle,
+      phosphorWarning,
+      phosphorXCircle,
     }),
   ],
   templateUrl: './import-start.html',

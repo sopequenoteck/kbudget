@@ -45,6 +45,11 @@ export class ImportResult {
   /** L'utilisatrice veut quitter la revue pour ses transactions. */
   readonly done = output<void>();
 
+  /** Signe explicite de l'ecart (+ / -) : le pipe `amount` signe selon le type. */
+  gapType(difference: number): 'RECETTE' | 'DEPENSE' {
+    return difference > 0 ? 'RECETTE' : 'DEPENSE';
+  }
+
   fullDate(isoDate: string): string {
     return formatFullDateLabel(isoDate, this.languageService.displayLocale());
   }

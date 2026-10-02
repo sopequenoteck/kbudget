@@ -126,6 +126,15 @@ describe('ImportStart', () => {
     expect(importServiceMock.detect).not.toHaveBeenCalled();
   });
 
+  it('should_label_the_file_choice_as_a_statement_with_the_accepted_formats', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+
+    const label = el(fixture).querySelector('.start__file')?.textContent ?? '';
+    expect(label).toContain('Choisir un relevé');
+    expect(label).toContain('Fichier .csv ou .txt exporté depuis votre banque');
+  });
+
   it('should_ignore_a_file_selection_without_a_file', async () => {
     const fixture = setup();
     await fixture.componentInstance.onFileSelected(fileEvent());

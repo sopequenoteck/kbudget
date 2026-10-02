@@ -105,8 +105,13 @@ describe('ImportResult', () => {
     );
 
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelector('[data-testid="balance-gap"]')?.textContent).toContain('Écart de');
+    expect(root.querySelector('[data-testid="balance-gap"]')?.textContent).toContain(
+      'Écart avec la banque',
+    );
     expect(root.querySelector('[data-testid="balance-gap"]')?.textContent).toContain('604,30');
+    // Le verdict est neutre ; seul le montant de l'ecart porte la couleur de son signe.
+    expect(root.querySelector('.result__gap-amount--expense')?.textContent).toContain('-604,30');
+    expect(root.querySelector('.result__gap-amount--income')).toBeNull();
     expect(root.querySelector('[data-testid="balance-match"]')).toBeNull();
     expect(text(fixture)).toContain('Opérations de la période absentes du relevé');
     const rows = root.querySelectorAll('.result__row');
@@ -115,6 +120,27 @@ describe('ImportResult', () => {
     expect(rows[0].textContent).toContain('16 septembre');
     expect(rows[0].textContent).toContain('-4,30');
     expect(rows[1].textContent).toContain('+12,00');
+  });
+
+  it('should_show_a_positive_gap_with_a_plus_sign_and_the_income_colour', () => {
+    const fixture = setup(
+      confirmResult({
+        balanceCheck: {
+          bankBalance: 100,
+          balanceDate: '2026-10-01',
+          computedBalance: 110,
+          difference: 10,
+          suspects: [],
+        },
+      }),
+    );
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[data-testid="balance-gap"]')?.textContent).toContain(
+      'Écart avec la banque',
+    );
+    expect(root.querySelector('.result__gap-amount--income')?.textContent).toContain('+10,00');
+    expect(root.querySelector('.result__gap-amount--expense')).toBeNull();
   });
 
   it('should_show_the_gap_without_suspect_list_when_none_is_identified', () => {

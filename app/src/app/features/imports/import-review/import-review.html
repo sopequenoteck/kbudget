@@ -582,10 +582,7 @@
         [disabled]="!canConfirm()"
         (click)="confirm()"
       >
-        {{
-          (confirming() ? 'imports.feedback.confirming' : 'imports.action.confirmImport')
-            | transloco: { count: model().newCount }
-        }}
+        {{ confirmLabelKey() | transloco: { count: model().newCount } }}
       </button>
     </div>
   }

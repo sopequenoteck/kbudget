@@ -495,6 +495,7 @@
       "addRule": "Ajouter une règle",
       "analyse": "Analyser le relevé",
       "changeFile": "Choisir un autre fichier",
+      "checkBalanceAndFinish": "Vérifier le solde et terminer",
       "chooseCategory": "Choisir",
       "configureColumns": "Configurer les colonnes",
       "confirmImport": "{count, plural, one {Confirmer l'import (# transaction)} other {Confirmer l'import (# transactions)}}",
@@ -571,8 +572,8 @@
       "selectColumnOption": "-- Sélectionner --",
       "separator": "Séparateur",
       "skipHeaderLines": "Lignes d'en-tête à ignorer",
-      "uploadHint": "Formats acceptés : .csv, .txt",
-      "uploadPrompt": "Cliquez pour sélectionner un fichier CSV"
+      "uploadHint": "Fichier .csv ou .txt exporté depuis votre banque",
+      "uploadPrompt": "Choisir un relevé"
     },
     "list": {
       "accountSuffix": "…{suffix}",
@@ -623,7 +624,7 @@
       "alreadyImported": "{count, plural, one {# déjà importée} other {# déjà importées}}",
       "autoCategorised": "{count, plural, one {# catégorisée automatiquement} other {# catégorisées automatiquement}}",
       "balanceDetail": "Solde de la banque : {bank} au {date}",
-      "balanceGap": "Écart de {amount} avec la banque",
+      "balanceGap": "Écart avec la banque",
       "balanceMatch": "Solde identique à celui de la banque",
       "bankBalanceAt": "Solde de la banque au {date}",
       "created": "{count, plural, one {# transaction créée} other {# transactions créées}}",

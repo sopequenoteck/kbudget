@@ -27,17 +27,20 @@
 @if (summary.balanceCheck; as check) {
   <section class="result__balance">
     @if (check.difference === 0) {
-      <p class="result__verdict result__verdict--ok" data-testid="balance-match">
+      <p class="result__verdict" data-testid="balance-match">
         <ng-icon name="phosphorCheckCircle" size="20" />
         <span>{{ 'imports.summary.balanceMatch' | transloco }}</span>
       </p>
     } @else {
-      <p class="result__verdict result__verdict--gap" data-testid="balance-gap">
+      <p class="result__verdict" data-testid="balance-gap">
         <ng-icon name="phosphorWarningCircle" size="20" />
-        <span>{{
-          'imports.summary.balanceGap'
-            | transloco: { amount: (check.difference | amount: null : currency()) }
-        }}</span>
+        <span>{{ 'imports.summary.balanceGap' | transloco }}</span>
+        <span
+          class="result__gap-amount"
+          [class.result__gap-amount--income]="check.difference > 0"
+          [class.result__gap-amount--expense]="check.difference < 0"
+          >{{ check.difference | amount: gapType(check.difference) : currency() }}</span
+        >
       </p>
     }
     <p class="result__hint">

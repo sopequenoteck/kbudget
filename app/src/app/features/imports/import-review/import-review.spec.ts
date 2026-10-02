@@ -424,24 +424,65 @@ describe('ImportReview', () => {
     expect(message).toContain('2 erreurs de lecture');
   });
 
-  it('should_not_allow_confirming_when_nothing_would_be_imported', async () => {
+  it('should_offer_to_check_the_balance_and_finish_when_nothing_new_remains', async () => {
+    importServiceMock.confirm.mockReturnValue(of(confirmResult({ importedCount: 0 })));
     const fixture = await setup(
       importDraft([importLine({ status: 'SKIPPED', skipReason: 'ALREADY_IMPORTED' })]),
     );
 
-    expect((q(fixture, '[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(true);
+    const button = q<HTMLButtonElement>(fixture, '[data-testid="confirm-import"]')!;
+    expect(button.disabled).toBe(false);
+    expect(button.textContent).toContain('Vérifier le solde et terminer');
+    expect(button.textContent).not.toContain("Confirmer l'import");
+
+    button.click();
+    await settle(fixture);
+
+    expect(importServiceMock.confirm).toHaveBeenCalledWith('draft-1', false);
+    expect(q(fixture, 'app-import-result')).not.toBeNull();
+    expect(q(fixture, '[data-testid="confirm-import"]')).toBeNull();
   });
 
-  it('should_allow_confirming_when_only_matched_lines_remain', async () => {
+  it('should_keep_the_check_balance_button_blocked_when_a_line_is_left_to_decide', async () => {
+    const fixture = await setup(
+      importDraft([importLine({ status: 'DUPLICATE', matchCandidateIds: ['tx-1'] })]),
+    );
+
+    const button = q<HTMLButtonElement>(fixture, '[data-testid="confirm-import"]')!;
+    expect(button.disabled).toBe(true);
+    await fixture.componentInstance.confirm();
+    expect(importServiceMock.confirm).not.toHaveBeenCalled();
+  });
+
+  it('should_keep_the_confirm_label_with_the_count_when_transactions_are_to_create', async () => {
+    const fixture = await setup(importDraft([superU(), importLine({ status: 'SKIPPED' })]));
+
+    const button = q<HTMLButtonElement>(fixture, '[data-testid="confirm-import"]')!;
+    expect(button.disabled).toBe(false);
+    expect(button.textContent).toContain("Confirmer l'import (1 transaction)");
+    expect(button.textContent).not.toContain('Vérifier le solde');
+  });
+
+  it('should_offer_to_check_the_balance_and_confirm_when_only_matched_lines_remain', async () => {
+    importServiceMock.confirm.mockReturnValue(
+      of(confirmResult({ importedCount: 0, matchedCount: 1 })),
+    );
     const fixture = await setup(
       importDraft([
         importLine({ matchedTransactionId: 'tx-1', matchedTransaction: matchedTransaction() }),
       ]),
     );
 
-    expect((q(fixture, '[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(
-      false,
-    );
+    const button = q<HTMLButtonElement>(fixture, '[data-testid="confirm-import"]')!;
+    expect(button.disabled).toBe(false);
+    expect(button.textContent).toContain('Vérifier le solde et terminer');
+    expect(button.textContent).not.toContain("Confirmer l'import");
+
+    button.click();
+    await settle(fixture);
+
+    expect(importServiceMock.confirm).toHaveBeenCalledWith('draft-1', false);
+    expect(q(fixture, 'app-import-result')).not.toBeNull();
   });
 
   it('should_show_the_result_state_after_the_confirmation_and_hide_the_action_bar', async () => {

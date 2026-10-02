@@ -1,7 +1,5 @@
 :host {
   display: block;
-  max-width: 720px;
-  margin: 0 auto;
   padding: var(--space-4);
 }
 
@@ -67,23 +65,12 @@
   gap: var(--space-2);
   margin: var(--space-4) 0 0;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  // Verdict en texte neutre : l'icone seule distingue l'etat (la couleur reste reservee aux montants et aux actions).
+  color: var(--text-primary);
 
   ng-icon {
     flex-shrink: 0;
     margin-top: 1px;
-  }
-
-  &--ok ng-icon {
-    color: var(--color-income);
-  }
-
-  &--warning ng-icon {
-    color: var(--color-primary);
-  }
-
-  &--error {
-    color: var(--color-expense);
   }
 }
 
