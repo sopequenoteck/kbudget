@@ -6,6 +6,6 @@
  */
 export function isInternalReturnUrl(url: string): boolean {
   const isInternalUrl = url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\');
-  const isNotAbsolute = !url.match(/^https?:/i);
+  const isNotAbsolute = !/^https?:/i.test(url);
   return isInternalUrl && isNotAbsolute;
 }
