@@ -5,6 +5,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.8.0] - 2026-10-02
+
+> Mises a jour de l'application web installee (PWA). Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule
+> l'image `app` change (code et en-tetes de cache nginx). Les versions
+> suivantes arriveront d'elles-memes sur les PWA installees.
+
 ### Added
 
 - **Mises a jour fiables de l'application web** (KKS-446) : une nouvelle
@@ -1486,7 +1493,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...HEAD
+[6.8.0]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...v6.8.0
 [6.7.3]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...v6.7.3
 [6.7.2]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...v6.7.2
 [6.7.1]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...v6.7.1
