@@ -15,9 +15,6 @@ import { Router } from '@angular/router';
 /** Marque l'etat d'historique pose par une couche (jamais d'URL, jamais de route). */
 const LAYER_STATE_KEY = 'kbudgetHistoryLayer';
 
-/** Identifiant opaque d'une couche enregistree. */
-export type HistoryLayerHandle = number;
-
 interface Layer {
   readonly onBack: () => void;
   readonly isBlocked: (() => boolean) | undefined;
@@ -83,15 +80,16 @@ export class HistoryLayerService {
   /**
    * Enregistre une couche et pose une entree d'historique. `onBack` ferme la surface ;
    * `isBlocked` la protege tant qu'elle ne peut pas se fermer (le retour est alors absorbe).
+   * Renvoie l'identifiant opaque de la couche, a passer a `release`.
    */
-  push(onBack: () => void, isBlocked?: () => boolean): HistoryLayerHandle {
+  push(onBack: () => void, isBlocked?: () => boolean): number {
     const id = this.nextId++;
     this.layers.set(id, { onBack, isBlocked, bound: this.pushEntry() });
     return id;
   }
 
   /** La surface s'est fermee d'elle-meme : retire sa couche et son entree d'historique. */
-  release(handle: HistoryLayerHandle): void {
+  release(handle: number): void {
     if (!this.layers.delete(handle)) return;
     if (this.reconcilePending) return;
     this.reconcilePending = true;
@@ -99,7 +97,7 @@ export class HistoryLayerService {
   }
 
   /** Faux apres un retour qui a ferme la couche, ou apres sa liberation. */
-  isActive(handle: HistoryLayerHandle | null): boolean {
+  isActive(handle: number | null): boolean {
     return handle !== null && this.layers.has(handle);
   }
 
@@ -166,7 +164,7 @@ export function bindHistoryLayer(
 ): void {
   const service = inject(HistoryLayerService);
   const open = isOpen ?? signal(true);
-  let handle: HistoryLayerHandle | null = null;
+  let handle: number | null = null;
 
   const releaseHandle = (): void => {
     if (handle !== null) service.release(handle);
