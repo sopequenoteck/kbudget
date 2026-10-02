@@ -20,9 +20,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,11 @@ import java.util.stream.Collectors;
  * <p>The bank balance of an account is the one of its latest statement that gave one (KKS-384),
  * the latest balance date winning, the most recently created draft breaking a tie. An adjustment is
  * {@code probablyUnnecessary} when it is dated up to that balance date and the balance of the
- * application at that date, once the adjustment is left out, equals the bank balance to the cent.
+ * application at that date, once the adjustment is left out, equals the bank balance to the cent,
+ * and no other adjustment already compensates it: an adjustment of the same account, dated the same day
+ * or after, whose amount is exactly the opposite (scale ignored), as the counter-adjustment created
+ * by {@code adjust-balance} to realign on the bank is dated after the balance date and leaves the
+ * balance at that date unchanged. Adjustments are paired in (date, id) order, each at most once.
  * The balance of an account is {@code soldeInitial} plus the signed sum of its transactions, as
  * {@link ImportBalanceService} computes it.
  */
@@ -78,12 +84,45 @@ public class AdjustmentReviewService {
                     adjustments.stream().map(a -> toAdjustment(a, false)).toList());
         }
         LocalDate balanceDate = bankDraft.getStatementBalanceDate();
+        Set<UUID> compensated = compensatedIds(adjustments);
         BigDecimal computed = account.getSoldeInitial()
                 .add(transactionRepository.calculateBalanceByAccountIdUntil(account.getId(), balanceDate));
         return new AccountAdjustments(AccountSummary.from(account), bankDraft.getStatementBalance(), balanceDate, computed,
                 adjustments.stream()
-                        .map(a -> toAdjustment(a, isUnnecessary(a, computed, bankDraft)))
+                        .map(a -> toAdjustment(a, !compensated.contains(a.getId()) && isUnnecessary(a, computed, bankDraft)))
                         .toList());
+    }
+
+    /**
+     * Ids of the adjustments compensated by a later one. {@code adjustments} are of one account, sorted by
+     * (date, id): each adjustment not yet paired takes the first not yet paired one, other than itself, dated
+     * the same day or after, whose amount is the opposite. Pairs never overlap; only the earlier member of a
+     * pair is compensated, the later one is judged on its own, unless both are dated the same day: nothing then
+     * tells which one cancels the other, both are compensated.
+     */
+    private static Set<UUID> compensatedIds(List<Transaction> adjustments) {
+        Set<UUID> compensated = new HashSet<>();
+        Set<UUID> paired = new HashSet<>();
+        for (Transaction adjustment : adjustments) {
+            if (paired.contains(adjustment.getId())) {
+                continue;
+            }
+            adjustments.stream()
+                    .filter(other -> !other.getId().equals(adjustment.getId())
+                            && !paired.contains(other.getId())
+                            && !other.getDate().isBefore(adjustment.getDate())
+                            && other.getMontant().compareTo(adjustment.getMontant().negate()) == 0)
+                    .findFirst()
+                    .ifPresent(other -> {
+                        compensated.add(adjustment.getId());
+                        if (other.getDate().equals(adjustment.getDate())) {
+                            compensated.add(other.getId());
+                        }
+                        paired.add(adjustment.getId());
+                        paired.add(other.getId());
+                    });
+        }
+        return compensated;
     }
 
     private static boolean isUnnecessary(Transaction adjustment, BigDecimal computedBalance, ImportDraft bankDraft) {

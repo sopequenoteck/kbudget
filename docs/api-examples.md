@@ -2305,7 +2305,7 @@ Response `200` :
 }
 ```
 
-Lecture seule : aucune suppression ici (la suppression de transaction existante refuse les ajustements). `bankBalance` et `bankBalanceDate` sont ceux du dernier releve termine qui donne un solde bancaire (KKS-384), la date de solde la plus recente l'emportant ; `computedBalance` est le solde de l'application a cette date, ajustements compris. `probablyUnnecessary` : l'ajustement est date au plus tard a la date du solde bancaire et, sans lui, le solde calcule a cette date egalerait le solde bancaire au centime. Ces trois champs valent `null`, et `probablyUnnecessary` `false`, pour un compte sans solde bancaire connu.
+Lecture seule : aucune suppression ici (la suppression de transaction existante refuse les ajustements). `bankBalance` et `bankBalanceDate` sont ceux du dernier releve termine qui donne un solde bancaire (KKS-384), la date de solde la plus recente l'emportant ; `computedBalance` est le solde de l'application a cette date, ajustements compris. `probablyUnnecessary` : l'ajustement est date au plus tard a la date du solde bancaire et, sans lui, le solde calcule a cette date egalerait le solde bancaire au centime ; un ajustement deja compense par un ajustement de montant oppose du meme compte, date le meme jour ou apres, n'est plus signale (c'est ce que cree « Recaler sur la banque » cote client via `adjust-balance`), chaque ajustement n'entrant que dans une paire ; le plus recent de la paire reste juge seul, sauf le meme jour ou les deux sont compenses. Ces trois champs valent `null`, et `probablyUnnecessary` `false`, pour un compte sans solde bancaire connu.
 
 ## Voir aussi
 

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { HistoryCleanup } from '../imports/history-cleanup/history-cleanup';
 import { SETTINGS_ROUTES } from './settings.routes';
 
 describe('SETTINGS_ROUTES', () => {
@@ -25,5 +26,14 @@ describe('SETTINGS_ROUTES', () => {
 
     expect(paths).toContain('import/mapping');
     expect(paths).toContain('import');
+  });
+
+  it('should_load_the_history_cleanup_under_settings_import', async () => {
+    const route = SETTINGS_ROUTES.find((candidate) => candidate.path === 'import/history-cleanup');
+    expect(route?.loadComponent).toBeDefined();
+
+    const component = await (route?.loadComponent as () => Promise<unknown>)();
+
+    expect(component).toBe(HistoryCleanup);
   });
 });

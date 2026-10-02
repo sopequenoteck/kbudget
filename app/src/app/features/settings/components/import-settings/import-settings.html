@@ -243,6 +243,20 @@
   }
 </section>
 
+<!-- Rattrapage de l'historique : un passage qui propose, sans rien modifier d'office -->
+<section class="import-section">
+  <h3 class="import-section__title">
+    <ng-icon name="phosphorClockCounterClockwise" size="18" />
+    {{ 'imports.page.cleanupTitle' | transloco }}
+  </h3>
+  <p class="import-section__hint">
+    {{ 'imports.page.cleanupHint' | transloco }}
+  </p>
+  <a class="new-import-link" routerLink="/settings/import/history-cleanup">
+    {{ 'imports.action.startCleanup' | transloco }}
+  </a>
+</section>
+
 <!-- Nouvel import : le parcours vit sur l'ecran Transactions -->
 <section class="import-section">
   <a class="new-import-link" routerLink="/transactions/import">

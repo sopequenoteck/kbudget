@@ -292,9 +292,25 @@ describe('ImportSettings', () => {
 
   it('should_link_to_the_import_flow_when_rendered', async () => {
     const fixture = await setup();
-    const link = fixture.nativeElement.querySelector('.new-import-link') as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/transactions/import');
+    const link = fixture.nativeElement.querySelector(
+      'a[href="/transactions/import"]',
+    ) as HTMLAnchorElement;
+    expect(link.classList).toContain('new-import-link');
     expect(link.textContent).toContain('Nouvel import');
+  });
+
+  it('should_link_to_the_history_cleanup_just_before_the_new_import_when_rendered', async () => {
+    const fixture = await setup();
+    const links = Array.from(
+      fixture.nativeElement.querySelectorAll('a.new-import-link'),
+    ) as HTMLAnchorElement[];
+    const section = links[0].closest('section') as HTMLElement;
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/settings/import/history-cleanup',
+      '/transactions/import',
+    ]);
+    expect(section.textContent).toContain("Rattrapage de l'historique");
+    expect(section.textContent).toContain('Passez en revue les doublons');
   });
 
   it('should_format_date_using_display_locale', async () => {

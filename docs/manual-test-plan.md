@@ -611,6 +611,20 @@
 | IM-30 | Reprendre | Un brouillon en cours | « Reprendre » | Ouvre la nouvelle revue | -- |
 | IM-31 | Ancien lien | Favori `/settings/import/review/<id>` | Ouvrir | Redirigé vers `/transactions/import/review/<id>` | -- |
 
+### 23.5 — Rattrapage de l'historique (KKS-387)
+
+| # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
+|---|----------|----------------|--------|-------------------|--------|
+| IM-32 | Entrée | Paramètres → Import | « Lancer le rattrapage » | Ouvre `/settings/import/history-cleanup`, sans bouton flottant (+) ; rien n'est modifié à l'ouverture | -- |
+| IM-33 | Opération déjà saisie | Une transaction importée et sa saisie manuelle (même compte, sens, montant, date proche) | Choisir la saisie, « Fusionner » | Toast ; la saisie garde libellé, catégorie et liens, l'importée disparaît des Transactions ; un réimport du relevé la reconnaît comme déjà importée | -- |
+| IM-34 | Pas un doublon | Idem | « Ce n'est pas un doublon » | La proposition disparaît sans appel ; elle revient à la visite suivante | -- |
+| IM-35 | Abonnement payé deux fois | Deux paiements saisis sur la même échéance | Choisir le paiement à garder, « Garder ce paiement, supprimer les autres » | Un seul paiement reste ; avec un paiement issu du relevé, seul celui-ci est sélectionnable | -- |
+| IM-36 | Sans catégorie | Transactions sans catégorie d'un commerçant déjà catégorisé | « Appliquer » sur le groupe | Toutes ses transactions prennent la catégorie proposée, une règle `AUTO` est créée ; le compteur de l'en-tête compte les transactions | -- |
+| IM-37 | Choisir une catégorie | Groupe sans proposition | « Choisir une catégorie » | Même feuille que la revue d'import ; le groupe disparaît après le choix | -- |
+| IM-38 | Recaler sur la banque | Un ajustement que le dernier solde bancaire rend inutile | « Recaler sur la banque » | Un ajustement inverse « Annulation de l'ajustement du … » est créé à la date du jour ; l'ajustement d'origine n'est plus proposé | -- |
+| IM-39 | Proposition périmée | Fusionner la même paire depuis deux onglets | Valider dans le second | Toast « Cette proposition n'est plus valable… » et liste rechargée | -- |
+| IM-40 | Rien à rattraper | Historique propre | Ouvrir | État vide « Rien à rattraper » | -- |
+
 ---
 
 ## Notes d'execution

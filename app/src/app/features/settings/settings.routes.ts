@@ -32,6 +32,11 @@ export const SETTINGS_ROUTES: Routes = [
       import('./components/csv-mapping/csv-mapping').then((m) => m.CsvMapping),
   },
   {
+    path: 'import/history-cleanup',
+    loadComponent: () =>
+      import('../imports/history-cleanup/history-cleanup').then((m) => m.HistoryCleanup),
+  },
+  {
     path: 'users',
     loadComponent: () => import('./pages/users/users').then((m) => m.Users),
   },

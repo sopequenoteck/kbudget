@@ -38,6 +38,9 @@ const EXPECTED_FRENCH_LABELS: Readonly<Record<string, string>> = {
   CONFLICT: 'Conflit de données',
   LAST_ADMIN_CANNOT_BE_DISABLED: 'Impossible de désactiver le dernier administrateur actif.',
   EMAIL_ALREADY_EXISTS: 'Email déjà utilisé',
+  CLEANUP_PROPOSAL_STALE: "Cette proposition n'est plus valable : la liste a été rechargée.",
+  CLEANUP_DEBT_LINK_MISSING:
+    "Cette transaction rembourse une dette que l'autre ne rembourse pas : elle ne peut pas être supprimée.",
   FILE_TOO_LARGE: 'Fichier trop volumineux. La taille maximale est 2 MB.',
   CSV_PROFILE_NOT_FOUND: 'Profil CSV introuvable',
   TOO_MANY_REQUESTS: 'Trop de tentatives. Réessayez dans quelques instants.',
@@ -54,10 +57,10 @@ function getValue(catalogue: unknown, key: string): unknown {
 }
 
 describe('catalogue errors.api', () => {
-  it('should_cover_the_27_codes_emitted_by_the_api', () => {
-    // Le nombre de codes est verrouille par KKS-357 ; ce test tient le role
+  it('should_cover_the_29_codes_emitted_by_the_api', () => {
+    // Le nombre de codes est verrouille par KKS-357 (27), puis KKS-387 (+2, 409) ; ce test tient le role
     // que jouait l'ancien garde-fou de comptage sur `ERROR_MESSAGES`.
-    expect(ERROR_CODES).toHaveLength(27);
+    expect(ERROR_CODES).toHaveLength(29);
   });
 
   it.each(ERROR_CODES)('should_have_a_french_and_english_key_when_code_is_%s', (code) => {

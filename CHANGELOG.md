@@ -84,7 +84,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
     modifiee.
   - `GET /history-cleanup/adjustments` : ajustements de solde par compte, avec
     `probablyUnnecessary` quand le dernier solde bancaire connu (KKS-384) egalerait le
-    solde calcule sans eux. Lecture seule.
+    solde calcule sans eux. Lecture seule. Un ajustement deja compense par un
+    ajustement de montant oppose, date le meme jour ou apres, n'est plus signale.
+  - **Ecran** (Parametres → Import → « Lancer le rattrapage »,
+    `/settings/import/history-cleanup`) : quatre sections, chacune absente si vide.
+    Operations deja saisies et paiements d'abonnement en double : choisir ce qu'on
+    garde, puis fusionner ; un paiement issu d'un releve est toujours garde. Sans
+    categorie : un groupe par commercant, « Appliquer » la categorie proposee ou en
+    choisir une ; les transactions sans commercant reconnaissable sont seulement
+    comptees. Ajustements a recaler : « Recaler sur la banque » cree l'ajustement
+    inverse par `adjust-balance`, rien n'est supprime. « Ce n'est pas un doublon »
+    et « Ignorer » ne masquent une proposition que pour la session.
   - API (ajouts seuls, aucune migration) : nouveaux endpoints sous `/history-cleanup`
     et deux codes d'erreur `409`, `CLEANUP_PROPOSAL_STALE` et
     `CLEANUP_DEBT_LINK_MISSING`.
