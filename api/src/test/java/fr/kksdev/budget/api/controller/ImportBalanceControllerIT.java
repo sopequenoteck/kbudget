@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ImportBalanceControllerIT {
 
     private static final String BALANCE_DATE = "01/10/2026";
-    private static final String BANK_BALANCE = "1842,37 EUR";
+    private static final String BANK_BALANCE = "1842.37 EUR";
     private static final String BAKERY = "16/09/2026;CARTE X1596 14/09 ;CARTE X1596 14/09 BOULANGERIE DU MARCHE 110600000000101IOPD ;-4,30;EUR";
     private static final String SALARY = "20/09/2026;VIR RECU    123456;VIR RECU    1234567890S DE: EMPLOYEUR TEST REF: SALAIRE ;1500,00;EUR";
     private static final String RENT = "21/09/2026;PRELEVEMENT EUROPE;PRELEVEMENT EUROPEEN 3333333333 DE: BAILLEUR TEST ID: FR00ZZZ000002 REF: ref-0202 ;-600,00;EUR";
@@ -173,7 +173,7 @@ class ImportBalanceControllerIT {
     @Test
     void should_return_a_null_balance_check_when_the_statement_gives_no_balance() throws Exception {
         MockMultipartFile noBalance = new MockMultipartFile("file", "releve.csv", "text/csv",
-                ImportTestFiles.sgStatementOf(ImportTestFiles.sgBankHeader("0000000000001596", BALANCE_DATE, "N/A"), BAKERY));
+                ImportTestFiles.sgStatementOf(ImportTestFiles.sgBankHeader("00000000001596", BALANCE_DATE, "N/A"), BAKERY));
         String draftId = uploadAndReadId(noBalance);
 
         mockMvc.perform(post("/v1/imports/drafts/" + draftId + "/confirm").header("Authorization", bearer(user)))
@@ -247,7 +247,7 @@ class ImportBalanceControllerIT {
 
     private static MockMultipartFile statementFile() {
         return new MockMultipartFile("file", "releve.csv", "text/csv",
-                ImportTestFiles.sgStatementOf(ImportTestFiles.sgBankHeader("0000000000001596", BALANCE_DATE, BANK_BALANCE),
+                ImportTestFiles.sgStatementOf(ImportTestFiles.sgBankHeader("00000000001596", BALANCE_DATE, BANK_BALANCE),
                         BAKERY, SALARY, RENT));
     }
 

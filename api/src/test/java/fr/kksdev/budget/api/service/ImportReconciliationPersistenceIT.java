@@ -158,7 +158,7 @@ class ImportReconciliationPersistenceIT {
         Transaction first = saveManual(account, user, "Cafe 1", PURCHASE.minusDays(1));
         Transaction second = saveManual(account, user, "Cafe 2", PURCHASE);
         MockMultipartFile file = new MockMultipartFile("file", "releve.csv", "text/csv", ImportTestFiles.sgStatementOf(
-                ImportTestFiles.sgBankHeader("0000000000001596", "01/10/2026", "0,00 EUR"),
+                ImportTestFiles.sgBankHeader("00000000001596", "01/10/2026", "0.00 EUR"),
                 "24/08/2026;CARTE X1596 21/08 ;CARTE X1596 21/08 CAFE DE LA PLACE 110600000000101IOPD ;-12,50;EUR"));
 
         ImportDraftResponse draft = importService.upload(file, account.getId(), user.getId());

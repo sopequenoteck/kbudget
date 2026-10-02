@@ -8,7 +8,7 @@ public final class ImportTestFiles {
 
     /** Société Générale statement, ISO-8859-1: bank header line, blank line, column header, two operations. */
     static final String SG_STATEMENT = """
-            ="0000000000001596";15/09/2026;01/10/2026;2;01/10/2026;1842,37 EUR
+            00000000001596;15/09/2026;01/10/2026;2;01/10/2026;1842.37 EUR
 
             Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise
             16/09/2026;CARTE X1596 14/09 ;CARTE X1596 14/09 BOULANGERIE DU MARCHE 110600000000101IOPD ;-4,30;EUR
@@ -29,7 +29,7 @@ public final class ImportTestFiles {
 
     /** Bank header line of an SG statement: account number, period, operation count, balance date and balance. */
     public static String sgBankHeader(String accountNumber, String balanceDate, String balance) {
-        return "=\"" + accountNumber + "\";15/09/2026;01/10/2026;2;" + balanceDate + ";" + balance;
+        return accountNumber + ";15/09/2026;01/10/2026;2;" + balanceDate + ";" + balance;
     }
 
     /** SG statement, ISO-8859-1, with the given bank header line and operation lines. */

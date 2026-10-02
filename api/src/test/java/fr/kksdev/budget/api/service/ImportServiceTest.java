@@ -569,7 +569,7 @@ class ImportServiceTest {
     // -------------------------------------------------------------------------
 
     private static final List<String> SG_HEADER_LINES =
-            List.of("=\"0000000000001596\";15/09/2026;01/10/2026;2;01/10/2026;1842,37 EUR");
+            List.of("00000000001596;15/09/2026;01/10/2026;2;01/10/2026;1842.37 EUR");
 
     private ImportProfileRegistry.ImportProfileConfig sgConfigWithHeader() {
         var config = sgConfig();
@@ -577,7 +577,7 @@ class ImportServiceTest {
                 config.bankCode(), config.name(), config.separator(), config.dateFormat(), config.dateColumn(),
                 config.amountColumn(), null, null, config.labelColumn(), config.encoding(), config.decimalSeparator(),
                 config.skipHeaderLines(), List.of(), List.of(),
-                StatementHeaderSpec.of(0, ";", 0, 5, 4, "dd/MM/yyyy"), null);
+                StatementHeaderSpec.of(0, ";", 0, 5, 4, "dd/MM/yyyy", "."), null);
     }
 
     private void givenDetected(ImportProfileRegistry.ImportProfileConfig config, ImportProfileSource source, UUID customId) {
