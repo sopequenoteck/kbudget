@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { AuthService } from './auth';
 import { ApiService } from './api';
@@ -400,7 +400,7 @@ describe('AuthService', () => {
       expect(localStorage.getItem('budget_token')).toBeNull();
     });
 
-    it('should_auto_refresh_when_expired_token_with_valid_refresh_token', () => {
+    it('should_auto_refresh_when_expired_token_with_valid_refresh_token', async () => {
       // Arrange
       localStorage.setItem('budget_token', expiredToken());
       localStorage.setItem('budget_refresh_token', 'valid-refresh');
@@ -426,6 +426,7 @@ describe('AuthService', () => {
         ],
       });
       const newService = TestBed.inject(AuthService);
+      await Promise.resolve(); // le refresh de demarrage est differe d'un tick (KKS-448)
 
       // Assert — session restored via refresh
       expect(apiService.post).toHaveBeenCalledWith('/auth/refresh', {
@@ -440,7 +441,7 @@ describe('AuthService', () => {
       expect(localStorage.getItem('budget_refresh_token')).toBe('rotated-refresh');
     });
 
-    it('should_clear_auth_when_expired_token_and_refresh_fails', () => {
+    it('should_clear_auth_when_expired_token_and_refresh_fails', async () => {
       // Arrange
       localStorage.setItem('budget_token', expiredToken());
       localStorage.setItem('budget_refresh_token', 'expired-refresh');
@@ -458,8 +459,9 @@ describe('AuthService', () => {
         ],
       });
       const newService = TestBed.inject(AuthService);
+      await Promise.resolve(); // le refresh de demarrage est differe d'un tick (KKS-448)
 
-      // Assert — clearAuth called, no redirect (auth guard handles it)
+      // Assert — refus du serveur : jetons effaces, pas de session optimiste
       expect(newService.currentUser()).toBeNull();
       expect(newService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('budget_token')).toBeNull();
@@ -542,6 +544,93 @@ describe('AuthService', () => {
       expect(newService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('budget_token')).toBeNull();
       expect(localStorage.getItem('budget_user')).toBeNull();
+    });
+  });
+
+  describe('restoreSession — refresh de demarrage (KKS-448, ApiService mocke)', () => {
+    function createRestoredService(): AuthService {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          AuthService,
+          provideTranslocoTesting(),
+          { provide: ApiService, useValue: apiService },
+          { provide: Router, useValue: router },
+        ],
+      });
+      return TestBed.inject(AuthService);
+    }
+
+    function prepareExpiredSession(): void {
+      localStorage.setItem('budget_token', expiredToken());
+      localStorage.setItem('budget_refresh_token', 'valid-refresh');
+      localStorage.setItem(
+        'budget_user',
+        JSON.stringify({ name: 'Stored', email: 'stored@test.com', mustResetCredentials: false }),
+      );
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+    }
+
+    it('should_be_authenticated_while_refresh_is_pending_when_expired_token_and_stored_user', async () => {
+      // Arrange — refresh jamais termine : aucune attente cote guard
+      prepareExpiredSession();
+      apiService.post.mockReturnValue(new Subject<AuthResponse>());
+
+      // Act
+      const newService = createRestoredService();
+      await Promise.resolve();
+
+      // Assert
+      expect(apiService.post).toHaveBeenCalledOnce();
+      expect(newService.isAuthenticated()).toBe(true);
+      expect(newService.currentUser()?.email).toBe('stored@test.com');
+    });
+
+    it('should_keep_session_when_startup_refresh_fails_with_network_error', async () => {
+      // Arrange
+      prepareExpiredSession();
+      apiService.post.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+
+      // Act
+      const newService = createRestoredService();
+      await Promise.resolve();
+
+      // Assert
+      expect(newService.isAuthenticated()).toBe(true);
+      expect(localStorage.getItem('budget_refresh_token')).toBe('valid-refresh');
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should_keep_session_when_startup_refresh_fails_with_503', async () => {
+      // Arrange
+      prepareExpiredSession();
+      apiService.post.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
+
+      // Act
+      const newService = createRestoredService();
+      await Promise.resolve();
+
+      // Assert
+      expect(newService.isAuthenticated()).toBe(true);
+      expect(localStorage.getItem('budget_refresh_token')).toBe('valid-refresh');
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should_share_the_same_request_when_refresh_is_called_during_startup_refresh', async () => {
+      // Arrange
+      prepareExpiredSession();
+      const pending = new Subject<AuthResponse>();
+      apiService.post.mockReturnValue(pending);
+      const newService = createRestoredService();
+      await Promise.resolve();
+
+      // Act
+      newService.refreshAccessToken().subscribe();
+      pending.next(mockAuthResponse);
+      pending.complete();
+
+      // Assert
+      expect(apiService.post).toHaveBeenCalledOnce();
     });
   });
 

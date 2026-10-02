@@ -1,7 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
+import { Subject } from 'rxjs';
 
 import { AuthService } from '../services/auth';
+import { ApiService } from '../services/api';
+import { AuthResponse } from '../models/auth.model';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { authGuard } from './auth.guard';
 
 describe('authGuard', () => {
@@ -111,5 +115,50 @@ describe('authGuard', () => {
     expect(router.createUrlTree).toHaveBeenCalledWith(['/auth'], {
       queryParams: { returnUrl: '/debts' },
     });
+  });
+});
+
+describe('authGuard — session optimiste (KKS-448)', () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('should_allow_access_without_redirect_when_refresh_is_pending_at_launch', async () => {
+    // Arrange — access token expire, refresh token et utilisateur memorises,
+    // refresh de demarrage jamais termine
+    const header = btoa(JSON.stringify({ alg: 'HS256' }));
+    const body = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 3600 }))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    localStorage.setItem('budget_token', `${header}.${body}.sig`);
+    localStorage.setItem('budget_refresh_token', 'valid-refresh');
+    localStorage.setItem(
+      'budget_user',
+      JSON.stringify({ name: 'Stored', email: 'stored@test.com', mustResetCredentials: false }),
+    );
+    vi.spyOn(console, 'error').mockReturnValue(undefined);
+    const router = { navigate: vi.fn(), createUrlTree: vi.fn() };
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslocoTesting(),
+        {
+          provide: ApiService,
+          useValue: { post: vi.fn().mockReturnValue(new Subject<AuthResponse>()) },
+        },
+        { provide: Router, useValue: router },
+      ],
+    });
+    TestBed.inject(AuthService);
+    await Promise.resolve();
+
+    // Act
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as never, { url: '/transactions' } as never),
+    );
+
+    // Assert
+    expect(result).toBe(true);
+    expect(router.createUrlTree).not.toHaveBeenCalled();
   });
 });
