@@ -122,7 +122,7 @@ class SubscriptionPaymentServiceTest {
         var sub = buildActiveMonthlySubscription(account);
         var saved = buildSavedTransaction(sub, account);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
 
@@ -156,7 +156,7 @@ class SubscriptionPaymentServiceTest {
                 .build();
         var saved = buildSavedTransaction(sub, account);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
 
@@ -173,7 +173,7 @@ class SubscriptionPaymentServiceTest {
         LocalDate dateBefore = sub.getDateDebut();
         var saved = buildSavedTransaction(sub, account);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
 
@@ -188,7 +188,7 @@ class SubscriptionPaymentServiceTest {
         var sub = buildActiveMonthlySubscription(account);
         var saved = buildSavedTransaction(sub, account);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
 
@@ -214,7 +214,7 @@ class SubscriptionPaymentServiceTest {
                 .build();
         var saved = buildSavedTransaction(sub, defaultAccount);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(accountRepository.findByUserIdAndIsDefaultTrue(userId)).thenReturn(Optional.of(defaultAccount));
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
@@ -238,7 +238,7 @@ class SubscriptionPaymentServiceTest {
                 .user(user)
                 .build();
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
 
         assertThatThrownBy(() -> subscriptionPaymentService.pay(subscriptionId, userId))
                 .isInstanceOf(IllegalStateException.class)
@@ -249,7 +249,7 @@ class SubscriptionPaymentServiceTest {
 
     @Test
     void should_throwException_when_subscriptionNotFound() {
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> subscriptionPaymentService.pay(subscriptionId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
@@ -263,7 +263,7 @@ class SubscriptionPaymentServiceTest {
         var account = buildAccount();
         var sub = buildActiveMonthlySubscription(account);
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
         when(transactionRepository.save(any(Transaction.class))).thenReturn(buildSavedTransaction(sub, account));
 
@@ -284,7 +284,7 @@ class SubscriptionPaymentServiceTest {
         var existing = buildSavedTransaction(sub, account);
         existing.setDate(LocalDate.of(2026, Month.OCTOBER, 1));
 
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
         when(transactionRepository.findBySubscriptionIdAndUserIdAndDateBetweenOrderByDateAscIdAsc(
                 subscriptionId, userId, LocalDate.of(2026, Month.OCTOBER, 1), LocalDate.of(2026, Month.OCTOBER, 31)))
                 .thenReturn(List.of(existing));

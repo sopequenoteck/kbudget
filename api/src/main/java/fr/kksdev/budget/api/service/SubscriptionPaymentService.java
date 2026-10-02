@@ -43,11 +43,13 @@ public class SubscriptionPaymentService {
      * Records the payment of the current period of a subscription. Idempotent: when a
      * transaction linked to the subscription already exists in that period, whether
      * paid here or imported from a statement, it is returned and nothing is created.
+     * The subscription row is locked for the whole transaction (KKS-444): two simultaneous
+     * requests are serialised, so the second one sees the payment of the first instead of
+     * both finding none and each creating one.
      */
     @Transactional
     public SubscriptionPaymentResponse pay(UUID subscriptionId, UUID userId) {
-        Subscription sub = subscriptionRepository.findById(subscriptionId)
-                .filter(s -> s.getUser().getId().equals(userId))
+        Subscription sub = subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(SUBSCRIPTION_NOT_FOUND));
 
         if (!Boolean.TRUE.equals(sub.getActif())) {
