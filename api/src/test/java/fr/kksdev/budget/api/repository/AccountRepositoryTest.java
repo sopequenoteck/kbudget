@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,33 +137,34 @@ class AccountRepositoryTest {
     @Test
     void should_calculateBalanceUntilDate_when_transactionsAreDatedAroundIt() {
         Account account = accountRepository.findById(defaultAccount.getId()).orElseThrow();
-        saveTransaction(account, TransactionType.RECETTE, "2000.00", LocalDate.of(2026, 2, 1));
-        saveTransaction(account, TransactionType.DEPENSE, "150.00", LocalDate.of(2026, 2, 5));
-        saveTransaction(account, TransactionType.AJUSTEMENT, "-10.00", LocalDate.of(2026, 2, 5));
-        saveTransaction(account, TransactionType.DEPENSE, "40.00", LocalDate.of(2026, 2, 6));
+        saveTransaction(account, TransactionType.RECETTE, "2000.00", LocalDate.of(2026, Month.FEBRUARY, 1));
+        saveTransaction(account, TransactionType.DEPENSE, "150.00", LocalDate.of(2026, Month.FEBRUARY, 5));
+        saveTransaction(account, TransactionType.AJUSTEMENT, "-10.00", LocalDate.of(2026, Month.FEBRUARY, 5));
+        saveTransaction(account, TransactionType.DEPENSE, "40.00", LocalDate.of(2026, Month.FEBRUARY, 6));
         entityManager.flush();
 
         BigDecimal untilBoundary = transactionRepository.calculateBalanceByAccountIdUntil(
-                account.getId(), LocalDate.of(2026, 2, 5));
+                account.getId(), LocalDate.of(2026, Month.FEBRUARY, 5));
         BigDecimal untilBefore = transactionRepository.calculateBalanceByAccountIdUntil(
-                account.getId(), LocalDate.of(2026, 1, 31));
+                account.getId(), LocalDate.of(2026, Month.JANUARY, 31));
         BigDecimal untilAfter = transactionRepository.calculateBalanceByAccountIdUntil(
-                account.getId(), LocalDate.of(2026, 2, 6));
+                account.getId(), LocalDate.of(2026, Month.FEBRUARY, 6));
 
         assertThat(untilBoundary).isEqualByComparingTo("1840.00");
         assertThat(untilBefore).isEqualByComparingTo("0");
-        assertThat(untilAfter).isEqualByComparingTo("1800.00");
-        assertThat(untilAfter).isEqualByComparingTo(transactionRepository.calculateBalanceByAccountId(account.getId()));
+        assertThat(untilAfter)
+                .isEqualByComparingTo("1800.00")
+                .isEqualByComparingTo(transactionRepository.calculateBalanceByAccountId(account.getId()));
     }
 
     @Test
     void should_ignoreOtherAccounts_when_calculatingBalanceUntilDate() {
         Account other = accountRepository.findById(savingsAccount.getId()).orElseThrow();
-        saveTransaction(other, TransactionType.RECETTE, "999.00", LocalDate.of(2026, 2, 1));
+        saveTransaction(other, TransactionType.RECETTE, "999.00", LocalDate.of(2026, Month.FEBRUARY, 1));
         entityManager.flush();
 
         BigDecimal balance = transactionRepository.calculateBalanceByAccountIdUntil(
-                defaultAccount.getId(), LocalDate.of(2026, 12, 31));
+                defaultAccount.getId(), LocalDate.of(2026, Month.DECEMBER, 31));
 
         assertThat(balance).isEqualByComparingTo("0");
     }
