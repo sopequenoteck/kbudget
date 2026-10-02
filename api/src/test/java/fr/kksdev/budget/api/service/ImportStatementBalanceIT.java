@@ -56,6 +56,8 @@ class ImportStatementBalanceIT {
     private static final String BANK_BALANCE = "1842,37 EUR";
     private static final LocalDate BALANCE_LOCAL_DATE = LocalDate.of(2026, Month.OCTOBER, 1);
     private static final LocalDate BAKERY_DATE = LocalDate.of(2026, Month.SEPTEMBER, 16);
+    private static final String GYM_LABEL = "Salle de sport";
+    private static final LocalDate GYM_DATE = LocalDate.of(2026, Month.SEPTEMBER, 20);
     private static final LocalDate RENT_DATE = LocalDate.of(2026, Month.SEPTEMBER, 21);
 
     private static final String BAKERY = "16/09/2026;CARTE X1596 14/09 ;CARTE X1596 14/09 BOULANGERIE DU MARCHE 110600000000101IOPD ;-4,30;EUR";
@@ -183,11 +185,60 @@ class ImportStatementBalanceIT {
     @Test
     void should_fix_the_opening_balance_from_the_current_state_when_a_transaction_is_added_after_the_upload() {
         ImportDraftResponse draft = upload();
-        saveTransaction(accountId, TransactionType.DEPENSE, "Added meanwhile", "10.00", RENT_DATE);
+        // Before the period of the statement: no line can explain it, nor is it a suspect (KKS-443).
+        saveTransaction(accountId, TransactionType.DEPENSE, "Added meanwhile", "10.00", BAKERY_DATE.minusDays(1));
 
         importService.confirm(draft.id(), true, userId);
 
         assertThat(accountService.getAccountById(accountId, userId).solde()).isEqualByComparingTo("1842.37");
+    }
+
+    @Test
+    void should_propose_an_opening_balance_that_leaves_out_an_entry_the_statement_does_not_explain() {
+        saveTransaction(accountId, TransactionType.DEPENSE, GYM_LABEL, "30.00", GYM_DATE);
+
+        ImportDraftResponse draft = upload();
+
+        // The real balance counts the entry; the proposal does not absorb it (KKS-443).
+        assertThat(draft.projectedBalance()).isEqualByComparingTo("865.70");
+        assertThat(draft.proposedOpeningBalance()).isEqualByComparingTo("946.67");
+    }
+
+    @Test
+    void should_report_the_unexplained_entry_as_the_difference_and_a_suspect_when_the_proposed_opening_balance_is_applied() {
+        Transaction gym = saveTransaction(accountId, TransactionType.DEPENSE, GYM_LABEL, "30.00", GYM_DATE);
+
+        ImportBalanceCheckResponse check = confirmedImport(true).balanceCheck();
+
+        assertThat(accountRepository.findById(accountId).orElseThrow().getSoldeInitial()).isEqualByComparingTo("946.67");
+        assertThat(check.computedBalance()).isEqualByComparingTo("1812.37");
+        assertThat(check.difference()).isEqualByComparingTo("-30.00");
+        assertThat(check.suspects()).extracting(SuspectTransaction::id).containsExactly(gym.getId());
+        assertThat(check.suspects().getFirst().libelle()).isEqualTo(GYM_LABEL);
+    }
+
+    @Test
+    void should_match_the_bank_balance_once_the_unexplained_entry_is_deleted() {
+        Transaction gym = saveTransaction(accountId, TransactionType.DEPENSE, GYM_LABEL, "30.00", GYM_DATE);
+        confirmedImport(true);
+        assertThat(accountService.getAccountById(accountId, userId).solde()).isEqualByComparingTo("1812.37");
+
+        transactionRepository.deleteById(gym.getId());
+
+        assertThat(accountService.getAccountById(accountId, userId).solde()).isEqualByComparingTo("1842.37");
+    }
+
+    @Test
+    void should_not_leave_out_of_the_proposed_opening_balance_an_entry_the_statement_matches() {
+        saveTransaction(accountId, TransactionType.DEPENSE, "Pain", "4.30", BAKERY_DATE);
+
+        ImportDraftResponse draft = upload();
+        ImportBalanceCheckResponse check = importService.confirm(draft.id(), true, userId).balanceCheck();
+
+        assertThat(draft.matchedCount()).isEqualTo(1);
+        assertThat(draft.proposedOpeningBalance()).isEqualByComparingTo("946.67");
+        assertThat(check.difference()).isEqualByComparingTo("0");
+        assertThat(check.suspects()).isEmpty();
     }
 
     // -------------------------------------------------------------------------
