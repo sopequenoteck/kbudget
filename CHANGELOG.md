@@ -5,6 +5,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.7.0] - 2026-10-02
+
+> L'import de releves devient utilisable de bout en bout : il part de l'ecran
+> Transactions, reconnait le format et le compte depuis le fichier, verifie le
+> solde avec celui de la banque, rapproche les saisies manuelles et les
+> paiements d'abonnement, et la revue ne montre que les exceptions. Un ecran de
+> rattrapage corrige l'historique deja en base. Les deux clients sont
+> disponibles en anglais et en francais. `MIN_CLIENT_VERSION` reste a 6.0.0,
+> aucune variable d'environnement nouvelle, aucun champ de reponse retire. Le
+> format de l'export CSV change en revanche (en-tetes et types, voir *Changed*) :
+> un script qui le lisait est a adapter.
+>
+> Une instance qui suit `latest` avec un outil de mise a jour automatique
+> appliquerait les migrations ci-dessous sans sauvegarde : epingler la version
+> d'abord ([docs/deployment.md](docs/deployment.md#updating)).
+
 > **Changement de comportement (KKS-380) : l'interface passe en anglais par
 > defaut.** Un utilisateur qui n'a pas choisi de langue voit desormais
 > l'interface dans la langue de son navigateur, et en anglais si celle-ci n'est
@@ -1383,7 +1399,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...HEAD
+[6.7.0]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...v6.7.0
 [6.6.1]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...v6.6.1
 [6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0
 [6.5.2]: https://github.com/sopequenoteck/kbudget/compare/v6.5.1...v6.5.2
