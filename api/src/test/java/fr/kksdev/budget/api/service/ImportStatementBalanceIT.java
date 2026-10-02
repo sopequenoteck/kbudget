@@ -50,10 +50,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 class ImportStatementBalanceIT {
 
-    private static final String ACCOUNT_NUMBER = "0000000000001596";
-    private static final String OTHER_ACCOUNT_NUMBER = "0000000000002222";
+    private static final String ACCOUNT_NUMBER = "00000000001596";
+    private static final String OTHER_ACCOUNT_NUMBER = "00000000002222";
     private static final String BALANCE_DATE = "01/10/2026";
-    private static final String BANK_BALANCE = "1842,37 EUR";
+    private static final String BANK_BALANCE = "1842.37 EUR";
     private static final LocalDate BALANCE_LOCAL_DATE = LocalDate.of(2026, Month.OCTOBER, 1);
     private static final LocalDate BAKERY_DATE = LocalDate.of(2026, Month.SEPTEMBER, 16);
     private static final String GYM_LABEL = "Salle de sport";
@@ -332,7 +332,7 @@ class ImportStatementBalanceIT {
                         "1596", null, BALANCE_LOCAL_DATE),
                 Arguments.of("balance date unreadable", ImportTestFiles.sgBankHeader(ACCOUNT_NUMBER, "32/13/2026", BANK_BALANCE),
                         "1596", new BigDecimal("1842.37"), null),
-                Arguments.of("account number shorter than four digits", ImportTestFiles.sgBankHeader("=\"123", BALANCE_DATE, BANK_BALANCE),
+                Arguments.of("account number shorter than four digits", ImportTestFiles.sgBankHeader("123", BALANCE_DATE, BANK_BALANCE),
                         null, new BigDecimal("1842.37"), BALANCE_LOCAL_DATE));
     }
 

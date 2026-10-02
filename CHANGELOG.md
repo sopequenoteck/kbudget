@@ -5,6 +5,29 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.7.1] - 2026-10-02
+
+> Correctif de l'import de releves Societe Generale. Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule l'API
+> change.
+
+### Fixed
+
+- **Solde de la banque 100 fois trop grand a l'import d'un releve Societe
+  Generale** : l'en-tete SG ecrit le solde avec un point (`1842.37 EUR`) alors que
+  les lignes utilisent la virgule ; le point etait ignore et le solde lu
+  184 237,00 EUR. Le profil declare desormais `statementHeader.decimalSeparator`,
+  champ optionnel du format (defaut : celui des lignes). Un brouillon deja
+  confirme garde le solde mal lu et n'est pas modifie. Reimporter le releve cree
+  un nouveau brouillon au solde correct, qui devient le dernier solde connu du
+  compte (controle de solde, ajustements a recaler) s'il porte la date de solde
+  la plus recente du compte ; un releve plus recent importe en 6.7.0 garde son
+  solde faux et reste prioritaire jusqu'a son propre reimport. Le premier import
+  d'un compte en 6.7.0, avec « Aligner le solde initial » actif, a pose un solde
+  initial calcule a partir du solde mal lu : un reimport ne le change pas (il
+  n'est propose qu'au premier import), a corriger dans les reglages du compte ou
+  par un ajustement.
+
 ## [6.7.0] - 2026-10-02
 
 > L'import de releves devient utilisable de bout en bout : il part de l'ecran
@@ -1399,7 +1422,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...HEAD
+[6.7.1]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...v6.7.1
 [6.7.0]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...v6.7.0
 [6.6.1]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...v6.6.1
 [6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0

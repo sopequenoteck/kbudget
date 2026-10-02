@@ -55,13 +55,23 @@ class ImportProfileRegistryTest {
     @Test
     void should_read_statement_header_and_purchase_date_when_profile_is_societe_generale() {
         ImportProfileConfig sg = registry.findByBankCode("SG").orElseThrow();
-        List<String> skipped = List.of("=\"0000000000001596\";15/09/2026;01/10/2026;24;01/10/2026;1842,37 EUR");
+        List<String> skipped = List.of("00000000001596;15/09/2026;01/10/2026;24;01/10/2026;1842.37 EUR");
 
         assertThat(sg.statementHeader().accountSuffix(skipped)).contains("1596");
         assertThat(sg.statementHeader().balance(skipped, sg.decimalSeparator())).contains(new BigDecimal("1842.37"));
         assertThat(sg.statementHeader().balanceDate(skipped)).contains(LocalDate.of(2026, Month.OCTOBER, 1));
         assertThat(sg.purchaseDate().extract("CARTE X1596 14/09 ", LocalDate.of(2026, Month.SEPTEMBER, 16)))
                 .contains(LocalDate.of(2026, Month.SEPTEMBER, 14));
+    }
+
+    @Test
+    void should_read_the_dot_balance_of_the_header_when_profile_is_societe_generale() {
+        ImportProfileConfig sg = registry.findByBankCode("SG").orElseThrow();
+        List<String> skipped = List.of("00000000001596;15/09/2026;01/10/2026;24;01/10/2026;1842.37 EUR");
+
+        assertThat(sg.decimalSeparator()).isEqualTo(",");
+        assertThat(sg.statementHeader().decimalSeparator()).isEqualTo(".");
+        assertThat(sg.statementHeader().balance(skipped, sg.decimalSeparator())).contains(new BigDecimal("1842.37"));
     }
 
     @Test

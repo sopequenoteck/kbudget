@@ -186,7 +186,7 @@ class ImportReconciliationIT {
         assertThat(manuals.stream().map(Transaction::getMontant).reduce(BigDecimal.ZERO, BigDecimal::add))
                 .isEqualByComparingTo("355.90");
 
-        ImportDraftResponse draft = importService.upload(statement("644,10 EUR",
+        ImportDraftResponse draft = importService.upload(statement("644.10 EUR",
                 // Card payments, 1 to 4 days after the purchase
                 card(date(Month.AUGUST, 21), date(Month.AUGUST, 20), "BAR TABAC TEST", "-4,50"),
                 card(date(Month.AUGUST, 24), date(Month.AUGUST, 21), COFFEE_HOUSE, "-12,00"),
@@ -845,7 +845,7 @@ class ImportReconciliationIT {
 
     private static MockMultipartFile statement(String balance, String... operations) {
         return new MockMultipartFile("file", "releve.csv", "text/csv", ImportTestFiles.sgStatementOf(
-                ImportTestFiles.sgBankHeader("0000000000001596", BALANCE_DATE, balance), operations));
+                ImportTestFiles.sgBankHeader("00000000001596", BALANCE_DATE, balance), operations));
     }
 
     private ImportDraftLineResponse updateMatch(UUID draftId, UUID lineId, UUID matchedTransactionId, Boolean clearMatch) {
@@ -854,7 +854,7 @@ class ImportReconciliationIT {
     }
 
     private ImportDraftResponse upload(String... operations) {
-        return importService.upload(statement("0,00 EUR", operations), accountId, userId);
+        return importService.upload(statement("0.00 EUR", operations), accountId, userId);
     }
 
     private List<Transaction> allTransactions() {

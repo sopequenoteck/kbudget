@@ -148,7 +148,8 @@ final class ImportProfileFileParser {
                 optionalInteger(section, "accountNumberField"),
                 optionalInteger(section, "balanceField"),
                 optionalInteger(section, "balanceDateField"),
-                optionalString(section, "balanceDateFormat"));
+                optionalString(section, "balanceDateFormat"),
+                rawString(section, "decimalSeparator"));
     }
 
     private static PurchaseDateSpec purchaseDate(Object value) {

@@ -35,7 +35,7 @@ class CsvParsingServiceTest {
 
         List<String> lines = service.readSkippedLines(ImportTestFiles.sgStatement(), sg);
 
-        assertThat(lines).containsExactly("=\"0000000000001596\";15/09/2026;01/10/2026;2;01/10/2026;1842,37 EUR");
+        assertThat(lines).containsExactly("00000000001596;15/09/2026;01/10/2026;2;01/10/2026;1842.37 EUR");
     }
 
     @Test
