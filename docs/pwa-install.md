@@ -40,4 +40,4 @@ L'icône k-budget apparaît sur l'écran d'accueil. L'application s'ouvre en ple
 
 ## Mises à jour
 
-L'application se met à jour automatiquement. À chaque ouverture, elle vérifie s'il y a une nouvelle version et la télécharge en arrière-plan. La mise à jour s'applique au prochain lancement.
+L'application se met à jour automatiquement. Elle vérifie s'il y a une nouvelle version à chaque ouverture et à chaque retour au premier plan. Si elle en trouve une dans les premières secondes, elle s'applique tout de suite et l'application se recharge. Sinon, la version est conservée et s'applique au retour au premier plan suivant. Elle n'est jamais appliquée pendant un parcours dédié à une tâche (paramètres, import de relevé) ni lorsqu'une fenêtre ou une feuille est ouverte : l'application ne se recharge pas sous vos doigts, et votre saisie est conservée.

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { TranslocoPipe } from '@jsverse/transloco';
 
 import { AuthShell } from '../auth/components/auth-shell/auth-shell';
+import { AppUpdateService } from '../../core/services/app-update';
 import { CompatibilityService } from '../../core/services/compatibility';
 
 /**
@@ -26,6 +27,7 @@ import { CompatibilityService } from '../../core/services/compatibility';
 })
 export class Incompatible {
   private readonly compatibility = inject(CompatibilityService);
+  private readonly appUpdate = inject(AppUpdateService);
 
   protected readonly status = this.compatibility.status;
 
@@ -52,7 +54,11 @@ export class Incompatible {
       : null;
   });
 
-  protected retry(): void {
-    globalThis.location.reload();
+  /**
+   * Cherche et active une nouvelle version avant de recharger (KKS-446) : recharger seul
+   * relirait la version en cache, justement l'incompatible.
+   */
+  protected retry(): Promise<void> {
+    return this.appUpdate.refreshAndReload();
   }
 }

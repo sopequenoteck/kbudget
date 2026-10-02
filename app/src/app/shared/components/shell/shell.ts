@@ -58,14 +58,7 @@ import { Fab } from '../fab/fab';
 import { Modal } from '../modal/modal';
 import { Toast } from '../toast/toast';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
-
-/**
- * Parcours dedies a une tache (parametres, import de releve) : le FAB n'y a pas d'usage
- * et n'y est pas affiche (constitution 4.1.0, principe IV).
- */
-export function isTaskFlowRoute(url: string): boolean {
-  return url.startsWith('/settings') || url.startsWith('/transactions/import');
-}
+import { isTaskFlowRoute } from '../../utils/task-flow-route.utils';
 
 @Component({
   selector: 'app-shell',

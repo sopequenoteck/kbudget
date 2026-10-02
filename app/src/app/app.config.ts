@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslocoService, provideTransloco } from '@jsverse/transloco';
 import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
 
+import { AppUpdateService } from './core/services/app-update';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import {
@@ -76,5 +77,8 @@ export const appConfig: ApplicationConfig = {
     // l'injecteur, avant tout composant — voir le commentaire de la fonction
     // pour la justification du choix d'`ENVIRONMENT_INITIALIZER`.
     provideLanguageBootstrap(),
+    // KKS-446 : recherche d'une nouvelle version au lancement et au retour au
+    // premier plan. Sans effet quand le service worker est inactif.
+    provideAppInitializer(() => inject(AppUpdateService).start()),
   ],
 };
