@@ -32,6 +32,7 @@ class HistoryCleanupAdjustmentsIT extends AbstractHistoryCleanupIT {
     private static final LocalDate EXPENSE_DAY = LocalDate.of(2026, Month.SEPTEMBER, 10);
     private static final LocalDate ADJUSTMENT_DAY = LocalDate.of(2026, Month.SEPTEMBER, 12);
     private static final LocalDate BALANCE_DAY = LocalDate.of(2026, Month.SEPTEMBER, 30);
+    private static final LocalDate COUNTER_DAY = LocalDate.of(2026, Month.OCTOBER, 2);
 
     private Account account;
     private Transaction adjustment;
@@ -87,6 +88,65 @@ class HistoryCleanupAdjustmentsIT extends AbstractHistoryCleanupIT {
         data.bankBalance(user, account, "80.00", ADJUSTMENT_DAY.plusDays(balanceOffset));
 
         read().andExpect(jsonPath("$.accounts[0].adjustments[0].probablyUnnecessary").value(unnecessary));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"20,80.00,false", "0,75.00,false", "-1,75.00,true"})
+    void should_not_flag_an_adjustment_compensated_by_an_opposite_adjustment_dated_the_same_day_or_after(
+            int counterOffset, String bankBalance, boolean unnecessary) throws Exception {
+        data.adjustment(user, account, "-5.00", ADJUSTMENT_DAY.plusDays(counterOffset));
+        data.bankBalance(user, account, bankBalance, BALANCE_DAY);
+
+        read().andExpect(jsonPath(adjustmentFlag(adjustment)).value(unnecessary));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-5.00,false", "-5.000,false", "-4.99,true", "5.00,true"})
+    void should_compensate_only_an_adjustment_of_exactly_the_opposite_amount_whatever_its_scale(
+            String counterAmount, boolean unnecessary) throws Exception {
+        data.adjustment(user, account, counterAmount, COUNTER_DAY);
+        data.bankBalance(user, account, "80.00", BALANCE_DAY);
+
+        read().andExpect(jsonPath(adjustmentFlag(adjustment)).value(unnecessary));
+    }
+
+    @Test
+    void should_let_one_opposite_adjustment_compensate_only_one_of_two_identical_adjustments() throws Exception {
+        // 100 - 20 + 5 + 5 = 90 and bank balance 85: leaving out either +5 matches the bank.
+        Transaction second = data.adjustment(user, account, "5.00", ADJUSTMENT_DAY.plusDays(1));
+        data.adjustment(user, account, "-5.00", COUNTER_DAY);
+        data.bankBalance(user, account, "85.00", BALANCE_DAY);
+
+        read()
+                .andExpect(jsonPath(adjustmentFlag(adjustment)).value(false))
+                .andExpect(jsonPath(adjustmentFlag(second)).value(true));
+    }
+
+    @Test
+    void should_never_let_an_adjustment_compensate_and_be_compensated_when_opposite_adjustments_alternate()
+            throws Exception {
+        // +5, -5, +5, -5: two disjoint pairs, only the earlier member of each is compensated.
+        // 100 - 20 = 80 and bank balance 85: leaving out either -5 matches the bank.
+        Transaction counter = data.adjustment(user, account, "-5.00", ADJUSTMENT_DAY.plusDays(1));
+        Transaction third = data.adjustment(user, account, "5.00", ADJUSTMENT_DAY.plusDays(2));
+        Transaction last = data.adjustment(user, account, "-5.00", ADJUSTMENT_DAY.plusDays(3));
+        data.bankBalance(user, account, "85.00", BALANCE_DAY);
+
+        read()
+                .andExpect(jsonPath(adjustmentFlag(adjustment)).value(false))
+                .andExpect(jsonPath(adjustmentFlag(counter)).value(true))
+                .andExpect(jsonPath(adjustmentFlag(third)).value(false))
+                .andExpect(jsonPath(adjustmentFlag(last)).value(true));
+    }
+
+    @Test
+    void should_not_compensate_an_adjustment_by_an_opposite_adjustment_of_another_account() throws Exception {
+        Account other = data.account(user, "0");
+        data.adjustment(user, other, "-5.00", COUNTER_DAY);
+        data.bankBalance(user, account, "80.00", BALANCE_DAY);
+
+        read().andExpect(jsonPath("$.accounts[?(@.account.id=='" + account.getId() + "')].adjustments[0].probablyUnnecessary")
+                .value(true));
     }
 
     @Test
@@ -155,6 +215,10 @@ class HistoryCleanupAdjustmentsIT extends AbstractHistoryCleanupIT {
     @Test
     void should_require_authentication() throws Exception {
         mockMvc.perform(get(ADJUSTMENTS)).andExpect(status().isUnauthorized());
+    }
+
+    private static String adjustmentFlag(Transaction target) {
+        return "$.accounts[0].adjustments[?(@.id=='" + target.getId() + "')].probablyUnnecessary";
     }
 
     private ResultActions read() throws Exception {

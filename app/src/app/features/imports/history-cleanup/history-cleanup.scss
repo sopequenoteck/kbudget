@@ -1,0 +1,56 @@
+:host {
+  display: block;
+  padding: var(--space-4);
+}
+
+.cleanup__description {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+// Groupe de radios : le fieldset natif porte la question, sans bordure ni marge propres.
+.cleanup__choices {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  .review__prompt {
+    margin-bottom: var(--space-2);
+    padding: 0;
+  }
+}
+
+.cleanup__option {
+  // Ancre le radio masque (`sr-only`, en absolu) sur sa ligne : pas de saut de defilement au focus clavier.
+  position: relative;
+
+  // Le radio natif est masque : le focus clavier se voit sur la ligne, a l'interieur du groupe qui rogne.
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+  }
+
+  &:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--selected,
+  &--selected:hover:not(:disabled) {
+    background: var(--primary-subtle);
+  }
+}
+
+// Nom du compte, sous-titre d'un groupe d'ajustements.
+.cleanup__account {
+  margin: var(--space-2) var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.cleanup__footnote {
+  margin-top: var(--space-2);
+}
