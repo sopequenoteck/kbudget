@@ -5,6 +5,32 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.7.3] - 2026-10-02
+
+> Correctif de session de l'application web. Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule
+> l'application web change.
+
+### Fixed
+
+- **Deconnexion a la reouverture de l'application web** (KKS-448) : rouverte
+  plus de 15 minutes apres le dernier usage (jeton d'acces expire),
+  l'application effacait la session au lieu de la rafraichir. Le rafraichissement
+  de demarrage partait pendant la construction d'`AuthService` et echouait sur
+  une dependance circulaire avec l'intercepteur, avant tout appel a l'API.
+  L'utilisateur memorise est desormais restaure tout de suite et le jeton
+  rafraichi en arriere-plan ; seul un refus du jeton par l'API deconnecte, en
+  revenant a la connexion avec la page en cours.
+- **Deconnexion au lancement hors ligne** (KKS-448) : une instance injoignable,
+  une erreur 5xx, une erreur 4xx d'un proxy ou un 429 au rafraichissement de
+  demarrage conservent la session au lieu de l'effacer (principe IV). Seul le
+  401 de l'API, qui signale un jeton refuse, deconnecte.
+- **Revocation de toutes les sessions sur rafraichissement simultane**
+  (KKS-448) : l'API fait tourner le jeton de rafraichissement et revoque toutes
+  les sessions de l'utilisateur si un jeton deja consomme est rejoue. Un seul
+  rafraichissement est desormais en vol, partage par le demarrage et
+  l'intercepteur.
+
 ## [6.7.2] - 2026-10-02
 
 > Correctif de navigation de l'application web. Aucune migration, aucun
@@ -1436,7 +1462,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...HEAD
+[6.7.3]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...v6.7.3
 [6.7.2]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...v6.7.2
 [6.7.1]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...v6.7.1
 [6.7.0]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...v6.7.0

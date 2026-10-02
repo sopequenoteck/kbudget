@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
 import { AuthService } from '../services/auth';
+import { isInternalReturnUrl } from '../../shared/utils/return-url.utils';
 
 export const authGuard: CanActivateFn = (_route, state) => {
   const authService = inject(AuthService);
@@ -12,10 +13,8 @@ export const authGuard: CanActivateFn = (_route, state) => {
   }
 
   const url = state.url;
-  const isInternalUrl = url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\');
-  const isNotAbsolute = !url.match(/^https?:/i);
 
-  if (isInternalUrl && isNotAbsolute) {
+  if (isInternalReturnUrl(url)) {
     return router.createUrlTree(['/auth'], { queryParams: { returnUrl: url } });
   }
 
