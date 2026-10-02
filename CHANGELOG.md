@@ -355,6 +355,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Double paiement d'un abonnement sur un double appui (KKS-444)** : payer un
+  abonnement verifie d'abord qu'aucun paiement n'existe sur l'echeance courante
+  (KKS-385), puis en cree un. Deux requetes quasi simultanees (double appui sur
+  mobile) lisaient toutes deux « aucun paiement » et en creaient chacune un.
+  La ligne de l'abonnement est desormais verrouillee pour la duree de la
+  transaction : la seconde requete attend la premiere, voit son paiement et le
+  renvoie. Aucune migration, aucun changement de contrat d'API.
 - **Solde initial propose qui absorbait une saisie que le releve n'explique pas
   (KKS-443)** : au premier import d'un compte, le solde initial propose comptait
   toutes les transactions existantes de la periode. Une saisie absente du releve
