@@ -2133,6 +2133,155 @@ Response `200` : la regle mise a jour.
 
 ### Supprimer profil `DELETE /api/v1/imports/profiles/{profileId}` — `204`
 
+## Rattrapage de l'historique (KKS-387)
+
+> Endpoints proteges par JWT, sur le user authentifie uniquement. Un passage unique, declenche par l'utilisateur : les `GET` **proposent** et ne modifient rien, chaque `POST` applique **une** proposition validee. Une transaction d'un autre utilisateur est toujours `404 NOT_FOUND`, rien n'est modifie. Les ajustements de solde, les jambes de virement et les modeles recurrents ne sont jamais proposes ni fusionnes.
+
+### Doublons probables `GET /api/v1/history-cleanup/duplicates`
+
+Response `200` :
+
+```json
+{
+  "importedDuplicates": [
+    {
+      "imported": {
+        "id": "a1b2c3d4-0000-4000-8000-000000000001",
+        "date": "2026-09-15",
+        "libelle": "CARTE BOULANGERIE TEST",
+        "montant": 3.20,
+        "type": "DEPENSE",
+        "category": null,
+        "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+        "imported": true,
+        "debtId": null,
+        "subscriptionId": null
+      },
+      "candidates": [
+        {
+          "id": "a1b2c3d4-0000-4000-8000-000000000002",
+          "date": "2026-09-16",
+          "libelle": "Pain",
+          "montant": 3.20,
+          "type": "DEPENSE",
+          "category": { "id": "c0000000-0000-4000-8000-000000000001", "nom": "Courses", "icone": "🏷️", "couleur": "#111111", "isSystem": false, "systemKey": null },
+          "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+          "imported": false,
+          "debtId": null,
+          "subscriptionId": null
+        }
+      ]
+    }
+  ],
+  "subscriptionDuplicates": [
+    {
+      "subscriptionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "subscriptionName": "Netflix",
+      "periodStart": "2026-09-10",
+      "periodEnd": "2026-10-09",
+      "suggestedKeepTransactionId": "a1b2c3d4-0000-4000-8000-000000000003",
+      "transactions": [ { "id": "a1b2c3d4-0000-4000-8000-000000000003", "...": "meme forme que ci-dessus" } ]
+    }
+  ]
+}
+```
+
+- **Operation importee deja saisie** : une transaction importee d'un releve (`imported: true`) et une ou plusieurs transactions saisies a la main du meme compte, du meme sens et du meme montant, dont la date entre dans la fenetre du rapprochement de l'import (KKS-385) : 8 jours de part et d'autre pour un paiement d'abonnement, sinon de 5 jours avant a 2 jours apres la date de la transaction importee (une transaction importee ne retient pas si sa date est celle d'achat — 2 jours de part et d'autre — ou la date comptable — de 5 jours avant a 1 jour apres : les deux fenetres sont admises). Le libelle n'est pas un critere. Une transaction n'apparait que dans une proposition ; l'importee est identifiee par `imported.id`, et l'utilisateur choisit parmi `candidates` (la plus proche en date d'abord). Un candidat deja pris par une autre proposition n'est pas repete : une fois la premiere fusionnee, une nouvelle lecture montre la suite.
+- **Paiements d'abonnement multiples** : transactions liees au meme abonnement dans la meme echeance (periode de sa frequence comptee depuis sa date de debut). `suggestedKeepTransactionId` est le paiement importe s'il y en a un, sinon le plus ancien. Une echeance qui compte deux paiements importes n'est pas proposee : ce sont deux operations de la banque.
+
+### Fusionner une operation importee `POST /api/v1/history-cleanup/duplicates/merge`
+
+Request :
+
+```json
+{
+  "importedTransactionId": "a1b2c3d4-0000-4000-8000-000000000001",
+  "keptTransactionId": "a1b2c3d4-0000-4000-8000-000000000002"
+}
+```
+
+Response `200` : `{ "kept": <transaction telle qu'elle est apres fusion>, "removedIds": ["a1b2c3d4-0000-4000-8000-000000000001"] }`.
+
+La transaction **saisie** est conservee (libelle, date, categorie, liens a une dette et a un abonnement) et recoit l'empreinte d'import de la transaction importee, qui est supprimee : un reimport du meme releve reconnait la ligne comme deja importee. Si la saisie n'avait pas d'abonnement et l'importee en avait un, la saisie prend ce lien. Les criteres sont reverifies a l'appel.
+
+Erreurs : `404 NOT_FOUND` (transaction inconnue ou d'un autre utilisateur) ; `400 BAD_REQUEST` (deux fois la meme transaction) ; `400 VALIDATION_ERROR` (champ manquant) ; `409 CLEANUP_PROPOSAL_STALE` (la paire ne satisfait plus les criteres : transaction deja importee ou modifiee depuis, montant, sens, compte ou date hors fenetre, ajustement, virement ou modele recurrent) ; `409 CLEANUP_DEBT_LINK_MISSING` (la transaction a supprimer rembourse une dette que la conservee ne rembourse pas : le restant du est la somme des transactions de la dette). Une dette remboursee par les deux transactions est rouverte si la suppression la laisse sous son montant.
+
+### Ne garder qu'un paiement d'abonnement `POST /api/v1/history-cleanup/subscription-duplicates/merge`
+
+Request :
+
+```json
+{
+  "keptTransactionId": "a1b2c3d4-0000-4000-8000-000000000003",
+  "removedTransactionIds": ["a1b2c3d4-0000-4000-8000-000000000004", "a1b2c3d4-0000-4000-8000-000000000005"]
+}
+```
+
+Response `200` : `{ "kept": <transaction>, "removedIds": [...] }`. Les transactions a supprimer doivent etre liees au meme abonnement et a la meme echeance que la conservee, et ne pas etre importees d'un releve (`409 CLEANUP_PROPOSAL_STALE` sinon). Memes erreurs que ci-dessus, `400 BAD_REQUEST` si la conservee figure aussi parmi les supprimees ; 50 transactions au plus.
+
+### Transactions sans categorie `GET /api/v1/history-cleanup/uncategorized`
+
+Response `200` :
+
+```json
+{
+  "groups": [
+    {
+      "merchantKey": "BOULANGERIE TEST",
+      "type": "DEPENSE",
+      "amount": null,
+      "count": 2,
+      "totalAmount": 7.30,
+      "suggestion": {
+        "category": { "id": "c0000000-0000-4000-8000-000000000001", "nom": "Courses", "icone": "🏷️", "couleur": "#111111", "isSystem": false, "systemKey": null },
+        "source": "HISTORY_AMOUNT"
+      },
+      "transactions": [ { "id": "a1b2c3d4-0000-4000-8000-000000000006", "...": "meme forme que ci-dessus" } ]
+    }
+  ]
+}
+```
+
+Transactions sans categorie, hors ajustements et modeles recurrents, groupees par cle commercant (`MerchantKey`) et par sens. La categorie proposee est, dans l'ordre, celle de la premiere regle de l'utilisateur qui correspond au libelle (`RULE`), la categorie majoritaire de ses transactions passees chez le meme commercant **au meme montant** (`HISTORY_AMOUNT`), puis chez le meme commercant (`HISTORY_MERCHANT`). Un commercant dont les montants recoivent des propositions differentes (plusieurs abonnements sous un meme libelle) est **decoupe par montant** : `amount` est alors renseigne, et le client n'y demande pas de regle (`createRule: false`). Un libelle sans commercant reconnaissable donne la cle vide, sans proposition ni regle possible. `suggestion` vaut `null` sans proposition ; ces groupes sont listes apres les autres, les plus gros d'abord.
+
+### Appliquer une categorie `POST /api/v1/history-cleanup/uncategorized/apply`
+
+Request :
+
+```json
+{
+  "categoryId": "c0000000-0000-4000-8000-000000000001",
+  "transactionIds": ["a1b2c3d4-0000-4000-8000-000000000006", "a1b2c3d4-0000-4000-8000-000000000007"],
+  "createRule": true
+}
+```
+
+Response `200` : `{ "categorizedCount": 2, "skippedCount": 0 }`.
+
+La categorie est celle de l'utilisateur, systeme ou non. Les transactions qui ont deja une categorie au moment de l'appel (ainsi que les ajustements et modeles recurrents) sont ignorees et comptees dans `skippedCount`. `createRule` est optionnel (`true` par defaut) : la categorie est retenue comme regle `AUTO` sur la cle commercant, creee ou reorientee ; une regle `MANUAL` n'est jamais modifiee. Aucune regle si les transactions couvrent plusieurs commercants ou si la cle est vide. `404 NOT_FOUND` si la categorie ou une transaction n'est pas a l'utilisateur (rien n'est modifie) ; `400 VALIDATION_ERROR` si `categoryId` manque ou si `transactionIds` est vide ou depasse 500 elements.
+
+### Ajustements de solde `GET /api/v1/history-cleanup/adjustments`
+
+Response `200` :
+
+```json
+{
+  "accounts": [
+    {
+      "account": { "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890", "nom": "Compte courant", "icone": "🏦", "couleur": "#000000", "currency": "EUR", "bankLogoUrl": null, "bankCustomLogo": null },
+      "bankBalance": 80.00,
+      "bankBalanceDate": "2026-09-30",
+      "computedBalance": 85.00,
+      "adjustments": [
+        { "id": "a1b2c3d4-0000-4000-8000-000000000008", "date": "2026-09-12", "libelle": "Balance adjustment", "montant": 5.00, "probablyUnnecessary": true }
+      ]
+    }
+  ]
+}
+```
+
+Lecture seule : aucune suppression ici (la suppression de transaction existante refuse les ajustements). `bankBalance` et `bankBalanceDate` sont ceux du dernier releve termine qui donne un solde bancaire (KKS-384), la date de solde la plus recente l'emportant ; `computedBalance` est le solde de l'application a cette date, ajustements compris. `probablyUnnecessary` : l'ajustement est date au plus tard a la date du solde bancaire et, sans lui, le solde calcule a cette date egalerait le solde bancaire au centime. Ces trois champs valent `null`, et `probablyUnnecessary` `false`, pour un compte sans solde bancaire connu.
+
 ## Voir aussi
 
 - [`api-errors.md`](api-errors.md) — Contrat d'erreurs HTTP et format des reponses d'erreur

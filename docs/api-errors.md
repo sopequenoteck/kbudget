@@ -99,6 +99,8 @@ Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devi
 | Conflit metier generique | 409 | `CONFLICT` | Message metier, avec fallback public |
 | Desactivation du dernier admin | 409 | `LAST_ADMIN_CANNOT_BE_DISABLED` | `The last active administrator cannot be disabled.` |
 | Email deja utilise | 409 | `EMAIL_ALREADY_EXISTS` | `This email is already used by another user.` |
+| Proposition de rattrapage perimee (KKS-387) | 409 | `CLEANUP_PROPOSAL_STALE` | `The transactions no longer satisfy the conditions of this proposal` |
+| Lien de dette perdu par une fusion (KKS-387) | 409 | `CLEANUP_DEBT_LINK_MISSING` | `The transaction to delete repays a debt that the transaction kept does not repay` |
 | Fichier trop volumineux | 413 | `FILE_TOO_LARGE` | Message specialise existant |
 | Profil CSV absent | 422 | `CSV_PROFILE_NOT_FOUND` | Message metier, avec fallback public |
 | Trop de tentatives d'authentification | 429 | `TOO_MANY_REQUESTS` | `Too many attempts. Please try again shortly.` |

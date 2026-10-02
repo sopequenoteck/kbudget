@@ -220,6 +220,64 @@ RESPONSE GET /v1/exchange-rates 200 [].id: string
 RESPONSE GET /v1/exchange-rates 200 [].rate: number
 RESPONSE GET /v1/exchange-rates 200 [].targetCurrency: string
 RESPONSE GET /v1/exchange-rates 200 [].updatedAt: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.bankCustomLogo: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.bankLogoUrl: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.couleur: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.currency: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.icone: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.id: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].account.nom: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].adjustments[].date: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].adjustments[].id: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].adjustments[].libelle: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].adjustments[].montant: number
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].adjustments[].probablyUnnecessary: boolean
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].bankBalance: number
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].bankBalanceDate: string
+RESPONSE GET /v1/history-cleanup/adjustments 200 accounts[].computedBalance: number
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].date: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].debtId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].id: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].imported: boolean
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].libelle: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].montant: number
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].subscriptionId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].candidates[].type: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.date: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.debtId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.id: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.imported: boolean
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.libelle: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.montant: number
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.subscriptionId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 importedDuplicates[].imported.type: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].periodEnd: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].periodStart: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].subscriptionId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].subscriptionName: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].suggestedKeepTransactionId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].date: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].debtId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].id: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].imported: boolean
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].libelle: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].montant: number
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].subscriptionId: string
+RESPONSE GET /v1/history-cleanup/duplicates 200 subscriptionDuplicates[].transactions[].type: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].amount: number
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].count: integer
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].merchantKey: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].suggestion.source: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].totalAmount: number
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].date: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].debtId: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].id: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].imported: boolean
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].libelle: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].montant: number
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].subscriptionId: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].transactions[].type: string
+RESPONSE GET /v1/history-cleanup/uncategorized 200 groups[].type: string
 RESPONSE GET /v1/imports/drafts 200 [].accountId: string
 RESPONSE GET /v1/imports/drafts 200 [].accountName: string
 RESPONSE GET /v1/imports/drafts 200 [].alreadyImportedCount: integer
@@ -777,6 +835,52 @@ RESPONSE POST /v1/debts/{id}/snooze 200 rembourse: boolean
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderDate: string
 RESPONSE POST /v1/debts/{id}/snooze 200 reminderTime: string
 RESPONSE POST /v1/debts/{id}/snooze 200 sens: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.bankCustomLogo: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.bankLogoUrl: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.couleur: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.currency: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.icone: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.id: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.account.nom: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.couleur: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.icone: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.id: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.isSystem: boolean
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.nom: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.category.systemKey: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.date: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.debtId: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.id: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.imported: boolean
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.libelle: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.montant: number
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.subscriptionId: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 kept.type: string
+RESPONSE POST /v1/history-cleanup/duplicates/merge 200 removedIds[]: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.bankCustomLogo: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.bankLogoUrl: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.couleur: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.currency: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.icone: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.id: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.account.nom: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.couleur: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.icone: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.id: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.isSystem: boolean
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.nom: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.category.systemKey: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.date: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.debtId: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.id: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.imported: boolean
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.libelle: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.montant: number
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.subscriptionId: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 kept.type: string
+RESPONSE POST /v1/history-cleanup/subscription-duplicates/merge 200 removedIds[]: string
+RESPONSE POST /v1/history-cleanup/uncategorized/apply 200 categorizedCount: integer
+RESPONSE POST /v1/history-cleanup/uncategorized/apply 200 skippedCount: integer
 RESPONSE POST /v1/imports/detect 200 accountSuffix: string
 RESPONSE POST /v1/imports/detect 200 bankCode: string
 RESPONSE POST /v1/imports/detect 200 profileName: string
@@ -1259,6 +1363,12 @@ REQUEST POST /v1/debts sens
 REQUEST POST /v1/debts/{id}/repay accountId
 REQUEST POST /v1/debts/{id}/snooze reminderDate
 REQUEST POST /v1/debts/{id}/snooze reminderTime
+REQUEST POST /v1/history-cleanup/duplicates/merge importedTransactionId
+REQUEST POST /v1/history-cleanup/duplicates/merge keptTransactionId
+REQUEST POST /v1/history-cleanup/subscription-duplicates/merge keptTransactionId
+REQUEST POST /v1/history-cleanup/subscription-duplicates/merge removedTransactionIds
+REQUEST POST /v1/history-cleanup/uncategorized/apply categoryId
+REQUEST POST /v1/history-cleanup/uncategorized/apply transactionIds
 REQUEST POST /v1/imports/preview file
 REQUEST POST /v1/imports/rules categoryId
 REQUEST POST /v1/imports/rules pattern
