@@ -27,6 +27,7 @@ import {
   phosphorCamera,
   phosphorChartPie,
   phosphorUsers,
+  phosphorUploadSimple,
 } from '@ng-icons/phosphor-icons/regular';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -102,6 +103,7 @@ const NOTIFICATION_TYPES: NotificationTypeConfig[] = [
       phosphorCamera,
       phosphorChartPie,
       phosphorUsers,
+      phosphorUploadSimple,
     }),
   ],
   templateUrl: './settings.html',

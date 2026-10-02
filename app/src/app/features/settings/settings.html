@@ -39,13 +39,23 @@
       </div>
       <span class="settings-row__chevron">›</span>
     </a>
-    <a class="settings-row settings-row--link settings-row--last" routerLink="categories">
+    <a class="settings-row settings-row--link" routerLink="categories">
       <span class="settings-row__icon" style="background: #f9731626; color: #f97316">
         <ng-icon name="phosphorTag" size="20" />
       </span>
       <div class="settings-row__content">
         <span class="settings-row__title">{{ 'settings.list.categories' | transloco }}</span>
         <span class="settings-row__description">{{ 'settings.list.categoriesHint' | transloco }}</span>
+      </div>
+      <span class="settings-row__chevron">›</span>
+    </a>
+    <a class="settings-row settings-row--link settings-row--last" routerLink="import">
+      <span class="settings-row__icon" style="background: var(--icon-circle-bg); color: var(--text-tertiary)">
+        <ng-icon name="phosphorUploadSimple" size="20" />
+      </span>
+      <div class="settings-row__content">
+        <span class="settings-row__title">{{ 'settings.list.imports' | transloco }}</span>
+        <span class="settings-row__description">{{ 'settings.list.importsHint' | transloco }}</span>
       </div>
       <span class="settings-row__chevron">›</span>
     </a>
