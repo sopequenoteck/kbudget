@@ -4,10 +4,11 @@
   "description": "K-Budget — Gestion de budget personnel",
   "display": "standalone",
   "orientation": "portrait",
+  "id": "/",
   "scope": "./",
   "start_url": "./",
-  "theme_color": "#f59e0b",
-  "background_color": "#ffffff",
+  "theme_color": "#1e1e1e",
+  "background_color": "#0a0a0a",
   "categories": ["finance"],
   "icons": [
     {

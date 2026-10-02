@@ -17,6 +17,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { type NotificationModel, type NotificationType } from '../../../core/models/notification.model';
 import { DebtService } from '../../../core/services/debt';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
@@ -236,6 +237,7 @@ export class NotificationPanel {
   private scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    bindHistoryLayer(() => this.closed.emit(), this.isOpen);
     this.destroyRef.onDestroy(() => {
       if (this.scrollDebounceTimer) clearTimeout(this.scrollDebounceTimer);
     });

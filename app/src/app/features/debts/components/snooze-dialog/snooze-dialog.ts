@@ -17,6 +17,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { DebtService } from '../../../../core/services/debt';
+import { bindHistoryLayer } from '../../../../core/services/history-layer.service';
 import { Debt, DebtSnoozeRequest } from '../../../../core/models/debt.model';
 import { FormField } from '../../../../shared/components/form-field/form-field';
 import { isFieldInvalid, validateForm } from '../../../../shared/utils/form.utils';
@@ -57,6 +58,11 @@ export class SnoozeDialog implements OnInit {
     reminderDate: ['', [Validators.required, futureDateValidator]],
     reminderTime: ['', [Validators.required]],
   });
+
+  constructor() {
+    // Le dialogue n'existe que ouvert : sa couche vit autant que lui.
+    bindHistoryLayer(() => this.onCancel());
+  }
 
   ngOnInit(): void {
     const d = this.debt();

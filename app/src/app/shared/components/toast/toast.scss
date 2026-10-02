@@ -1,7 +1,7 @@
 .toast-container {
   position: fixed;
   bottom: calc(var(--bottom-nav-height, 64px) + var(--space-4, 16px));
-  right: var(--space-4, 16px);
+  right: calc(var(--space-4, 16px) + var(--safe-right, 0px));
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -85,6 +85,6 @@
     left: 0;
     width: 100%;
     bottom: calc(var(--bottom-nav-height, 64px) + var(--space-2, 8px));
-    padding: 0 var(--space-3, 12px);
+    padding: 0 calc(var(--space-3, 12px) + var(--safe-right, 0px)) 0 calc(var(--space-3, 12px) + var(--safe-left, 0px));
   }
 }

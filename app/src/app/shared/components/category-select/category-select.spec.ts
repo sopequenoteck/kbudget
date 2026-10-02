@@ -6,6 +6,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { CategorySelect } from './category-select';
 import { Category } from '../../../core/models/category.model';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../testing/history-testing';
 
 // ---------------------------------------------------------------------------
 // Données de test
@@ -415,5 +416,46 @@ describe('CategorySelect', () => {
     expect(component.mode()).toBe('list');
     // searchTerm préservé (FR-009)
     expect(component.searchTerm()).toBe('nouvelle');
+  });
+
+  // =========================================================================
+  // Retour arrière (KKS-447)
+  // =========================================================================
+
+  describe('retour arriere', () => {
+    beforeEach(resetHistory);
+
+    it('should_return_to_the_list_when_back_is_pressed_in_create_mode', async () => {
+      const { fixture, component } = setup();
+      component.pushToCreate();
+      fixture.detectChanges();
+
+      await goBack();
+
+      expect(component.mode()).toBe('list');
+    });
+
+    it('should_keep_the_search_term_when_back_leaves_create_mode', async () => {
+      const { fixture, component } = setup();
+      component.searchTerm.set('nouvelle');
+      component.pushToCreate();
+      fixture.detectChanges();
+
+      await goBack();
+
+      expect(component.searchTerm()).toBe('nouvelle');
+    });
+
+    it('should_not_push_an_entry_when_staying_in_list_mode', async () => {
+      const pushState = vi.spyOn(globalThis.history, 'pushState');
+      const { fixture, component } = setup();
+      fixture.detectChanges();
+
+      await goBack();
+
+      expect(pushState).not.toHaveBeenCalled();
+      expect(component.mode()).toBe('list');
+      pushState.mockRestore();
+    });
   });
 });

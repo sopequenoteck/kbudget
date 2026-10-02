@@ -8,7 +8,8 @@
   background-color: var(--surface-raised);
   border-top: 1px solid var(--border-default);
   z-index: var(--z-sticky);
-  padding-bottom: env(safe-area-inset-bottom);
+  // `--bottom-nav-height` inclut `--safe-bottom` : les 72px utiles restent entiers.
+  padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 .bottom-nav {

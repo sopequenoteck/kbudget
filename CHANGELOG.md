@@ -5,6 +5,34 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.9.0] - 2026-10-02
+
+> Shell mobile de l'application web installee (PWA). Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule
+> l'application web change. Premiere version a atteindre les PWA installees
+> par le mecanisme de mise a jour de la 6.8.0.
+
+### Added
+
+- **Retour arriere dans l'application web** (KKS-447) : le geste de retour
+  d'Android ou le bouton precedent du navigateur quittait la page au lieu de
+  fermer la feuille ouverte. Il ferme desormais la surface du dessus (feuille,
+  dialogue, confirmation, panneau de notifications, selecteur) sans changer de
+  page ; dans une feuille, il replie d'abord la section depliee (categorie,
+  date, compte, creation de categorie), saisie conservee.
+
+### Changed
+
+- **Zones sures et barre d'etat de la PWA** (KKS-447) : `viewport-fit=cover` ;
+  en-tete, barre du bas, bouton flottant, feuilles, toasts, panneaux et ecrans
+  d'authentification tiennent compte de l'encoche et de la barre de gestes.
+  Barre d'etat iOS en `black-translucent` : l'en-tete passe dessous (texte de
+  la barre blanc, peu lisible en theme clair). `theme-color` suit la couleur de
+  l'en-tete du theme applique au lieu de l'ambre fixe.
+- **Manifeste** (KKS-447) : `id` explicite (`/`), identique a l'identite
+  implicite, sans seconde installation ; couleurs sombres au lieu de l'ambre et
+  du blanc.
+
 ## [6.8.0] - 2026-10-02
 
 > Mises a jour de l'application web installee (PWA). Aucune migration, aucun
@@ -1493,7 +1521,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...HEAD
+[6.9.0]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...v6.9.0
 [6.8.0]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...v6.8.0
 [6.7.3]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...v6.7.3
 [6.7.2]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...v6.7.2

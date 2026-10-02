@@ -15,6 +15,7 @@ import {
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { bindHistoryLayer } from '../../../core/services/history-layer.service';
 import { SelectPickerItem } from './select-picker.model';
 
 const DROPDOWN_MIN_SPACE = 224;
@@ -65,6 +66,7 @@ export class SelectPicker implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
+    bindHistoryLayer(() => this.close(), this.isOpen);
     effect(() => {
       const currentItems = this.items();
       const currentId = this.selectedId();

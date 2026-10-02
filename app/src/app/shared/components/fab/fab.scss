@@ -8,7 +8,7 @@
 .speed-dial-menu {
   position: fixed;
   bottom: calc(var(--space-6) + 48px + var(--space-3));
-  right: var(--space-6);
+  right: calc(var(--space-6) + var(--safe-right));
   z-index: calc(var(--z-overlay) + 1);
   display: flex;
   flex-direction: column;
@@ -67,7 +67,7 @@
 .fab-button {
   position: fixed;
   bottom: var(--space-6);
-  right: var(--space-6);
+  right: calc(var(--space-6) + var(--safe-right));
   z-index: calc(var(--z-overlay) + 2);
   display: flex;
   align-items: center;
@@ -118,11 +118,11 @@
 // -- Desktop: restore original positions --
 @media (min-width: 768px) {
   .fab-button {
-    bottom: var(--space-6);
+    bottom: calc(var(--space-6) + var(--safe-bottom));
   }
 
   .speed-dial-menu {
-    bottom: calc(var(--space-6) + 48px + var(--space-3));
+    bottom: calc(var(--space-6) + var(--safe-bottom) + 48px + var(--space-3));
   }
 }
 
