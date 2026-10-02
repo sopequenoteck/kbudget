@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.controller;
 
 import fr.kksdev.budget.api.dto.request.CategoryRuleRequest;
 import fr.kksdev.budget.api.dto.request.CsvMappingRequest;
+import fr.kksdev.budget.api.dto.request.ImportConfirmRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineBatchUpdateRequest;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
 import fr.kksdev.budget.api.dto.response.CategoryRuleResponse;
@@ -96,9 +97,11 @@ public class ImportController {
     @PostMapping("/drafts/{draftId}/confirm")
     public ResponseEntity<ImportConfirmResponse> confirm(
             @PathVariable UUID draftId,
+            @RequestBody(required = false) ImportConfirmRequest request,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        return ResponseEntity.ok(importService.confirm(draftId, userId));
+        boolean applyOpeningBalance = request != null && request.applyOpeningBalanceRequested();
+        return ResponseEntity.ok(importService.confirm(draftId, applyOpeningBalance, userId));
     }
 
     @Operation(summary = "Lister les drafts d'import en attente")

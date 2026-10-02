@@ -22,7 +22,21 @@ public final class ImportTestFiles {
             2026-09-17,Subscription,-2.99
             """;
 
+    private static final String SG_COLUMN_HEADER =
+            "Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise";
+
     private ImportTestFiles() {}
+
+    /** Bank header line of an SG statement: account number, period, operation count, balance date and balance. */
+    public static String sgBankHeader(String accountNumber, String balanceDate, String balance) {
+        return "=\"" + accountNumber + "\";15/09/2026;01/10/2026;2;" + balanceDate + ";" + balance;
+    }
+
+    /** SG statement, ISO-8859-1, with the given bank header line and operation lines. */
+    public static byte[] sgStatementOf(String bankHeader, String... operations) {
+        String content = bankHeader + "\n\n" + SG_COLUMN_HEADER + "\n" + String.join("\n", operations) + "\n";
+        return content.getBytes(StandardCharsets.ISO_8859_1);
+    }
 
     public static byte[] sgStatement() {
         return SG_STATEMENT.getBytes(StandardCharsets.ISO_8859_1);

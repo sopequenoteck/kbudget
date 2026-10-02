@@ -13,4 +13,6 @@ public interface ImportHistoryRepository extends JpaRepository<ImportHistory, UU
     Page<ImportHistory> findByUserIdOrderByImportedAtDesc(UUID userId, Pageable pageable);
 
     List<ImportHistory> findByUserId(UUID userId);
+
+    boolean existsByUserIdAndAccountId(UUID userId, UUID accountId);
 }

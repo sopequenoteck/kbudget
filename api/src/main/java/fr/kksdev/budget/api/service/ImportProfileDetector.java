@@ -29,7 +29,21 @@ import java.util.stream.Stream;
 public class ImportProfileDetector {
 
     /** @param customProfileId id of the matched custom profile, {@code null} for a bundled one */
-    public record Detection(ImportProfileConfig config, ImportProfileSource source, UUID customProfileId) {}
+    public record Detection(ImportProfileConfig config, ImportProfileSource source, UUID customProfileId) {
+
+        /**
+         * Key under which an account is recognized from this profile (KKS-384):
+         * {@code REGISTRY:<bankCode>} for a bundled profile, {@code CUSTOM:<profile id>} for a
+         * custom one. {@code null} when the profile has no stable identity (custom mapping not saved).
+         */
+        public String profileKey() {
+            Object identity = switch (source) {
+                case REGISTRY -> config.bankCode();
+                case CUSTOM -> customProfileId;
+            };
+            return identity == null ? null : source.name() + ":" + identity;
+        }
+    }
 
     private final ImportProfileRegistry registry;
     private final ImportProfileRepository importProfileRepository;

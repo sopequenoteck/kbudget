@@ -36,6 +36,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
             "FROM transactions t WHERE t.account_id = :accountId", nativeQuery = true)
     BigDecimal calculateBalanceByAccountId(@Param("accountId") UUID accountId);
 
+    /** Same sum as {@link #calculateBalanceByAccountId}, limited to transactions dated up to {@code date} (KKS-384). */
+    @Query(value = "SELECT COALESCE(SUM(CASE WHEN t.type = 'RECETTE' THEN t.montant " +
+            "WHEN t.type = 'AJUSTEMENT' THEN t.montant ELSE -t.montant END), 0) " +
+            "FROM transactions t WHERE t.account_id = :accountId AND t.date <= :date", nativeQuery = true)
+    BigDecimal calculateBalanceByAccountIdUntil(@Param("accountId") UUID accountId, @Param("date") LocalDate date);
+
     List<Transaction> findByTransferId(UUID transferId);
 
     boolean existsByAccountId(UUID accountId);

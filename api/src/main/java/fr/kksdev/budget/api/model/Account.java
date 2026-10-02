@@ -65,6 +65,18 @@ public class Account {
     @Column(name = "bank_custom_logo", columnDefinition = "TEXT")
     private String bankCustomLogo;
 
+    /**
+     * Profil du dernier releve importe sur ce compte (KKS-384) : {@code REGISTRY:<bankCode>}
+     * ou {@code CUSTOM:<id du profil>}. Avec {@link #statementAccountSuffix}, il sert a
+     * reconnaitre le compte au prochain releve. Nulle tant qu'aucun releve exploitable n'a ete importe.
+     */
+    @Column(name = "statement_profile_key", length = 64)
+    private String statementProfileKey;
+
+    /** 4 derniers chiffres du numero de compte lu dans l'en-tete du releve (KKS-384), jamais le numero complet. */
+    @Column(name = "statement_account_suffix", length = 4)
+    private String statementAccountSuffix;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

@@ -196,7 +196,7 @@ class CategorySuggestionIT {
                 "02/03/2026;CARTE X0000 01/03 ;CARTE X0000 01/03 BOULANGERIE TEST 110600000000001IOPD ;-3,20;EUR");
         importService.updateLine(draft.id(), draft.lines().getFirst().id(),
                 new ImportLineUpdateRequest(groceries.getId(), null), user.getId());
-        importService.confirm(draft.id(), user.getId());
+        importService.confirm(draft.id(), false, user.getId());
 
         ImportDraftResponse next = upload(
                 "09/03/2026;CARTE X0000 08/03 ;CARTE X0000 08/03 BOULANGERIE TEST 110600000000004IOPD ;-2,60;EUR");

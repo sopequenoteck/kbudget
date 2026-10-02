@@ -11,6 +11,7 @@ import fr.kksdev.budget.api.dto.response.ImportDraftSummaryResponse;
 import fr.kksdev.budget.api.dto.response.ImportHistoryResponse;
 import fr.kksdev.budget.api.dto.response.ImportProfileResponse;
 import fr.kksdev.budget.api.dto.request.ImportLineUpdateRequest;
+import fr.kksdev.budget.api.dto.response.ImportBalanceCheckResponse;
 import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportDraftStatus;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
@@ -46,6 +47,7 @@ import org.springframework.data.domain.PageRequest;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +77,7 @@ public class ImportService {
     private final ImportProfileRepository importProfileRepository;
     private final ImportProfileRegistry importProfileRegistry;
     private final ImportProfileDetector importProfileDetector;
+    private final ImportBalanceService importBalanceService;
 
     @Transactional
     public ImportDraftResponse upload(MultipartFile file, UUID accountId, UUID userId) {
@@ -96,24 +99,25 @@ public class ImportService {
 
         log.info("CSV import uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
 
+        StatementInfo statement = readStatementInfo(content, detection);
         ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
-                detection.customProfileId(), detection.source());
-        return buildResponseWithProfileName(savedDraft, profile.name());
+                detection.customProfileId(), detection.source(), statement);
+        return buildResponseWithProfileName(savedDraft, profile.name(), userId);
     }
 
     /** Recognizes the profile of a file without creating anything (KKS-440). */
     public ImportDetectionResponse detect(MultipartFile file, UUID userId) {
         validateFile(file);
-        ImportDetectionResponse response = importProfileDetector.detect(readContent(file), userId)
-                .map(detection -> new ImportDetectionResponse(true, detection.source().name(),
-                        detection.config().bankCode(), detection.config().name()))
+        byte[] content = readContent(file);
+        ImportDetectionResponse response = importProfileDetector.detect(content, userId)
+                .map(detection -> toDetectionResponse(detection, content, userId))
                 .orElseGet(ImportDetectionResponse::notRecognized);
         log.info("Import file profile detection: recognized={}, source={}", response.recognized(), response.profileSource());
         return response;
     }
 
     @Transactional
-    public ImportConfirmResponse confirm(UUID draftId, UUID userId) {
+    public ImportConfirmResponse confirm(UUID draftId, boolean applyOpeningBalance, UUID userId) {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
 
         if (draft.getStatus() != ImportDraftStatus.PENDING) {
@@ -142,9 +146,15 @@ public class ImportService {
                 .filter(ImportService::isAlreadyImported)
                 .toList();
 
+        // Computed before the transactions exist: the proposal accounts for the lines still to be created.
+        BigDecimal openingBalance = applyOpeningBalance
+                ? importBalanceService.draftBalances(draft, allLines, userId).proposedOpeningBalance()
+                : null;
+
         List<Transaction> transactions = buildTransactionsFromLines(draft, readyLines);
         transactionRepository.saveAll(transactions);
         backfillFingerprints(draft, alreadyImportedLines, userId);
+        updateAccountFromStatement(draft, openingBalance);
 
         // Create import history
         ImportHistory history = ImportHistory.builder()
@@ -162,7 +172,11 @@ public class ImportService {
         log.info("Import confirmé: {} transactions créées, {} ignorées dont {} déjà importées pour le draft {}",
                 readyLines.size(), skippedCount, alreadyImportedLines.size(), draftId);
 
-        return new ImportConfirmResponse(readyLines.size(), skippedCount, history.getId(), alreadyImportedLines.size());
+        ImportBalanceCheckResponse balanceCheck = importBalanceService.check(
+                draft, allLines, transactions.stream().map(Transaction::getId).toList(), userId);
+
+        return new ImportConfirmResponse(readyLines.size(), skippedCount, history.getId(),
+                alreadyImportedLines.size(), balanceCheck);
     }
 
     public ImportDraftResponse getDraft(UUID draftId, UUID userId) {
@@ -170,7 +184,8 @@ public class ImportService {
         List<ImportDraftLine> lines = importDraftLineRepository.findByDraftIdOrderByLineNumberAsc(draftId);
         draft.getLines().clear();
         draft.getLines().addAll(lines);
-        return ImportDraftResponse.from(draft);
+        ImportBalanceService.DraftBalances balances = importBalanceService.draftBalances(draft, lines, userId);
+        return ImportDraftResponse.from(draft, balances.projectedBalance(), balances.proposedOpeningBalance());
     }
 
     @Transactional
@@ -370,8 +385,9 @@ public class ImportService {
 
         log.info("CSV import (mapping custom) uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
 
-        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(), savedProfileId, ImportProfileSource.CUSTOM);
-        return buildResponseWithProfileName(savedDraft, profile.name());
+        ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
+                savedProfileId, ImportProfileSource.CUSTOM, StatementInfo.NONE);
+        return buildResponseWithProfileName(savedDraft, profile.name(), userId);
     }
 
     public List<ImportProfileResponse> listProfiles(UUID userId) {
@@ -402,7 +418,8 @@ public class ImportService {
     }
 
     private ImportDraft createDraftFromLines(List<ImportDraftLine> lines, Account account, UUID userId,
-                                              String fileName, UUID profileId, ImportProfileSource profileSource) {
+                                              String fileName, UUID profileId, ImportProfileSource profileSource,
+                                              StatementInfo statement) {
         int readyCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.READY).count();
         int reviewCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.NEEDS_REVIEW).count();
         int duplicateCount = (int) lines.stream().filter(l -> l.getStatus() == ImportLineStatus.DUPLICATE).count();
@@ -420,6 +437,10 @@ public class ImportService {
                 .alreadyImportedCount((int) lines.stream().filter(ImportService::isAlreadyImported).count())
                 .profileId(profileId)
                 .profileSource(profileSource)
+                .statementProfileKey(statement.profileKey())
+                .statementAccountSuffix(statement.accountSuffix())
+                .statementBalance(statement.balance())
+                .statementBalanceDate(statement.balanceDate())
                 .expiresAt(LocalDateTime.now().plusDays(DRAFT_EXPIRY_DAYS))
                 .build();
 
@@ -431,6 +452,58 @@ public class ImportService {
         savedDraft.getLines().addAll(lines);
 
         return savedDraft;
+    }
+
+    /** What the bank header of the file gives; {@link StatementInfo#NONE} for a profile without a header. */
+    private StatementInfo readStatementInfo(byte[] content, ImportProfileDetector.Detection detection) {
+        ImportProfileRegistry.ImportProfileConfig profile = detection.config();
+        StatementHeaderSpec header = profile.statementHeader();
+        if (header == null) {
+            return StatementInfo.NONE;
+        }
+        List<String> skippedLines = csvParsingService.readSkippedLines(content, profile);
+        return new StatementInfo(
+                detection.profileKey(),
+                header.accountSuffix(skippedLines).orElse(null),
+                header.balance(skippedLines, profile.decimalSeparator()).orElse(null),
+                header.balanceDate(skippedLines).orElse(null));
+    }
+
+    private ImportDetectionResponse toDetectionResponse(ImportProfileDetector.Detection detection, byte[] content,
+                                                        UUID userId) {
+        StatementInfo statement = readStatementInfo(content, detection);
+        return new ImportDetectionResponse(true, detection.source().name(),
+                detection.config().bankCode(), detection.config().name(),
+                statement.accountSuffix(), suggestAccountId(statement, userId));
+    }
+
+    /** The one active account of the user already imported with this profile and suffix; none when ambiguous. */
+    private UUID suggestAccountId(StatementInfo statement, UUID userId) {
+        if (statement.profileKey() == null || statement.accountSuffix() == null) {
+            return null;
+        }
+        List<Account> matches = accountRepository
+                .findByUserIdAndActifTrueAndStatementProfileKeyAndStatementAccountSuffix(
+                        userId, statement.profileKey(), statement.accountSuffix());
+        return matches.size() == 1 ? matches.getFirst().getId() : null;
+    }
+
+    /**
+     * Applies what the statement taught about the account: its opening balance when the
+     * caller asked for it on a first import, and the profile and suffix that recognize it
+     * next time (replacing any previous ones: the account chosen at each import wins).
+     */
+    private void updateAccountFromStatement(ImportDraft draft, BigDecimal openingBalance) {
+        Account account = draft.getAccount();
+        if (openingBalance != null) {
+            log.info("Opening balance of account {} set from the statement balance", account.getId());
+            account.setSoldeInitial(openingBalance);
+        }
+        if (draft.getStatementProfileKey() != null && draft.getStatementAccountSuffix() != null) {
+            account.setStatementProfileKey(draft.getStatementProfileKey());
+            account.setStatementAccountSuffix(draft.getStatementAccountSuffix());
+        }
+        accountRepository.save(account);
     }
 
     private ImportDraft findDraftByIdAndUser(UUID draftId, UUID userId) {
@@ -592,10 +665,11 @@ public class ImportService {
                 && line.getSkipReason() == ImportSkipReason.ALREADY_IMPORTED;
     }
 
-    private ImportDraftResponse buildResponseWithProfileName(ImportDraft draft, String profileName) {
+    private ImportDraftResponse buildResponseWithProfileName(ImportDraft draft, String profileName, UUID userId) {
         List<ImportDraftLineResponse> lineResponses = draft.getLines().stream()
                 .map(ImportDraftLineResponse::from)
                 .toList();
+        ImportBalanceService.DraftBalances balances = importBalanceService.draftBalances(draft, draft.getLines(), userId);
         return new ImportDraftResponse(
                 draft.getId(),
                 draft.getAccount().getId(),
@@ -612,7 +686,12 @@ public class ImportService {
                 draft.getProfileSource() != null ? draft.getProfileSource().name() : null,
                 draft.getCreatedAt(),
                 draft.getExpiresAt(),
-                lineResponses
+                lineResponses,
+                draft.getStatementAccountSuffix(),
+                draft.getStatementBalance(),
+                draft.getStatementBalanceDate(),
+                balances.projectedBalance(),
+                balances.proposedOpeningBalance()
         );
     }
 }

@@ -95,7 +95,7 @@ class ImportReimportIT {
                     assertThat(l.duplicateTransactionId()).isNotNull();
                 });
 
-        ImportConfirmResponse confirmed = importService.confirm(draft.id(), userId);
+        ImportConfirmResponse confirmed = importService.confirm(draft.id(), false, userId);
 
         assertThat(confirmed.importedCount()).isEqualTo(2);
         assertThat(confirmed.alreadyImportedCount()).isEqualTo(4);
@@ -111,7 +111,7 @@ class ImportReimportIT {
         assertThat(draft.alreadyImportedCount()).isEqualTo(2);
         assertThat(draft.readyCount()).isEqualTo(1);
 
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
         assertThat(accountTransactions()).hasSize(3);
 
         ImportDraftResponse again = upload(List.of(FEE, FEE, FEE));
@@ -140,7 +140,7 @@ class ImportReimportIT {
         ImportDraftResponse draft = upload(List.of(BAKERY));
         assertThat(draft.alreadyImportedCount()).isEqualTo(1);
 
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
         Transaction backfilled = transactionRepository.findById(legacy.getId()).orElseThrow();
         assertThat(backfilled.getImportFingerprint()).isNotNull();
 
@@ -159,7 +159,7 @@ class ImportReimportIT {
         assertThat(draft.alreadyImportedCount()).isZero();
         assertThat(draft.duplicateCount()).isEqualTo(1);
         UUID draftId = draft.id();
-        assertThatThrownBy(() -> importService.confirm(draftId, userId))
+        assertThatThrownBy(() -> importService.confirm(draftId, false, userId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -198,7 +198,7 @@ class ImportReimportIT {
 
     private void importAndConfirm(List<String> lines) {
         ImportDraftResponse draft = upload(lines);
-        importService.confirm(draft.id(), userId);
+        importService.confirm(draft.id(), false, userId);
     }
 
     private ImportDraftResponse upload(List<String> lines) {

@@ -12,13 +12,34 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 > francais. Le choix se fait dans Reglages > Apparence > Langue. L'application
 > Flutter suit la meme regle avec la langue du telephone (KKS-405).
 
-> **Trois migrations de base (V38, V39, V40) : sauvegarder avant de mettre a
+> **Quatre migrations de base (V38, V39, V40, V41) : sauvegarder avant de mettre a
 > jour.** V38 ajoute une colonne nullable, sans valeur par defaut, et ne modifie
 > aucune donnee existante. V39 ajoute une colonne et la renseigne pour les
 > categories systeme existantes, sans modifier d'autre donnee. V40 ajoute une
-> colonne nullable aux notifications, sans modifier de donnee.
+> colonne nullable aux notifications, sans modifier de donnee. V41 ajoute deux
+> colonnes nullables aux comptes et quatre aux brouillons d'import, sans modifier
+> de donnee.
 
 ### Added
+
+- **Solde du releve : solde d'ouverture, controle apres import, compte reconnu
+  (KKS-384)** : la banque donne le solde reel dans l'en-tete de chaque releve ;
+  l'import s'en sert au lieu de l'ajustement manuel. Sans en-tete exploitable
+  (profil personnalise, valeur illisible), tous les nouveaux champs valent `null`
+  et le comportement est inchange.
+  - API (ajouts seuls) : le brouillon expose `statementAccountSuffix`,
+    `statementBalance`, `statementBalanceDate`, `projectedBalance` et, au premier
+    import du compte, `proposedOpeningBalance`. `POST /imports/drafts/{id}/confirm`
+    accepte un corps **optionnel** `{"applyOpeningBalance": true}` (une confirmation
+    sans corps fonctionne comme avant) et renvoie `balanceCheck` (solde bancaire,
+    solde calcule, difference, transactions suspectes : celles de la periode du
+    releve qu'aucune ligne n'explique, ajustements exceptes). `POST /imports/detect`
+    renvoie `accountSuffix` et `suggestedAccountId` ; `GET /accounts` expose
+    `statementAccountSuffix`.
+  - Le compte est reconnu par profil + 4 derniers chiffres du numero : le numero
+    complet n'est jamais stocke. Deux comptes actifs de l'utilisateur avec la meme
+    association : aucune suggestion. Jamais lue ni ecrite d'un utilisateur a l'autre.
+  - Migration V41, additive (colonnes nullables).
 
 - **Profils d'import en fichiers et reconnaissance du format (KKS-440)** :
   Le profil Societe Generale n'est plus code en dur :

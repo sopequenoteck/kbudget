@@ -802,7 +802,8 @@ Response `200` :
     "bankBrandColor": "#6b7280",
     "bankLogoUrl": "/api/bank-logos/other.svg",
     "bankCustomName": null,
-    "bankCustomLogo": null
+    "bankCustomLogo": null,
+    "statementAccountSuffix": "1596"
   },
   {
     "id": "a1b2c3d4-e5f6-7890-abcd-000000000001",
@@ -821,10 +822,15 @@ Response `200` :
     "bankBrandColor": "#6b7280",
     "bankLogoUrl": "/api/bank-logos/other.svg",
     "bankCustomName": null,
-    "bankCustomLogo": null
+    "bankCustomLogo": null,
+    "statementAccountSuffix": null
   }
 ]
 ```
+
+`statementAccountSuffix` (KKS-384) : 4 derniers chiffres du numero de compte lu dans
+le dernier releve importe sur ce compte, pour afficher « …1596 ». `null` tant qu'aucun
+releve exploitable n'a ete importe. Le numero complet n'est jamais stocke.
 
 ### Virement `POST /api/v1/accounts/transfer`
 
@@ -1686,7 +1692,9 @@ Response `200`, fichier reconnu :
   "recognized": true,
   "profileSource": "REGISTRY",
   "bankCode": "SG",
-  "profileName": "Société Générale"
+  "profileName": "Société Générale",
+  "accountSuffix": "1596",
+  "suggestedAccountId": "36eace5f-..."
 }
 ```
 
@@ -1697,9 +1705,22 @@ Response `200`, fichier non reconnu :
   "recognized": false,
   "profileSource": null,
   "bankCode": null,
-  "profileName": null
+  "profileName": null,
+  "accountSuffix": null,
+  "suggestedAccountId": null
 }
 ```
+
+- `accountSuffix` (KKS-384) : 4 derniers chiffres du numero de compte lu dans l'en-tete
+  bancaire du releve ; `null` quand le profil n'a pas d'en-tete (profil personnalise)
+  ou que le numero est illisible ou a moins de 4 chiffres.
+- `suggestedAccountId` (KKS-384) : l'unique compte **actif de l'utilisateur
+  authentifie** deja importe avec le meme profil et le meme suffixe ; `null` s'il y
+  en a zero ou plusieurs (ambigu : pas de preselection). Le choix du compte reste
+  explicite au premier import et modifiable a chaque import ; a la confirmation, le
+  compte choisi recoit l'association (profil + suffixe) et remplace la precedente.
+  Cle de profil : `REGISTRY:<bankCode>` (profil embarque) ou `CUSTOM:<id>` (profil
+  personnalise). Le numero complet n'est jamais stocke, ni en clair ni en empreinte.
 
 - `profileSource` : `REGISTRY` (profil embarque) ou `CUSTOM` (profil personnalise
   de l'utilisateur authentifie). `bankCode` vaut `null` pour `CUSTOM`.
@@ -1744,6 +1765,11 @@ Response `201` :
   "profileSource": "REGISTRY",
   "createdAt": "2026-03-20T14:30:00",
   "expiresAt": "2026-03-27T14:30:00",
+  "statementAccountSuffix": "1596",
+  "statementBalance": 1842.37,
+  "statementBalanceDate": "2026-10-01",
+  "projectedBalance": 895.70,
+  "proposedOpeningBalance": 946.67,
   "lines": [
     {
       "id": "uuid",
@@ -1814,7 +1840,33 @@ Erreur `422` : format CSV non reconnu (utiliser `/imports/upload-with-mapping`).
 sert plus que de repli. Un profil personnalise sauvegarde au mapping manuel est
 donc reutilise au reimport.
 
+**Solde du releve (KKS-384)** : la banque donne le solde reel dans l'en-tete du
+releve. Ces cinq champs sont `null` pour un profil sans en-tete exploitable
+(profil personnalise), et le comportement est alors strictement inchange.
+
+- `statementAccountSuffix` : 4 derniers chiffres du numero de compte (jamais le
+  numero complet) ; `statementBalance` et `statementBalanceDate` : solde donne par la
+  banque et sa date. Une valeur illisible vaut `null`, jamais une erreur.
+- `projectedBalance` : solde que l'application aura **a la date du solde** si le
+  brouillon est confirme tel quel = `soldeInitial` du compte + transactions du compte
+  datees jusqu'a cette date + lignes `READY` du brouillon datees jusqu'a cette date.
+  Recalcule a chaque lecture (une ligne ignoree le fait varier). `null` sans solde ni
+  date, et une fois le brouillon confirme.
+- `proposedOpeningBalance` : **premier import du compte seulement** (aucun
+  historique d'import pour ce compte) : le `soldeInitial` qui rend `projectedBalance`
+  egal au solde bancaire. `null` aux imports suivants.
+
 ### Confirmer import `POST /api/v1/imports/drafts/{draftId}/confirm`
+
+Corps **optionnel** : une confirmation sans corps fonctionne comme avant.
+
+```json
+{ "applyOpeningBalance": true }
+```
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `applyOpeningBalance` | boolean (optionnel, defaut `false`) | Si `true` **et** premier import du compte, le `soldeInitial` du compte est fixe a la valeur proposee, recalculee a la confirmation (le solde de l'application egale alors celui de la banque a la date du releve, sans ajustement manuel). Ignore sinon (import suivant, releve sans solde). |
 
 Response `200` :
 
@@ -1823,9 +1875,43 @@ Response `200` :
   "importedCount": 151,
   "skippedCount": 9,
   "historyId": "uuid",
-  "alreadyImportedCount": 7
+  "alreadyImportedCount": 7,
+  "balanceCheck": {
+    "bankBalance": 1842.37,
+    "balanceDate": "2026-10-01",
+    "computedBalance": 1238.07,
+    "difference": -604.30,
+    "suspects": [
+      {
+        "id": "uuid",
+        "date": "2026-09-16",
+        "libelle": "Pain",
+        "montant": 4.30,
+        "type": "DEPENSE"
+      }
+    ]
+  }
 }
 ```
+
+**Controle de solde (KKS-384)** : `balanceCheck` vaut `null` quand le releve ne donne
+pas de solde et sa date.
+
+- `computedBalance` : solde reel de l'application a `balanceDate`, **apres** la
+  creation des transactions (et apres `applyOpeningBalance` le cas echeant) ;
+  `difference` = `computedBalance` − `bankBalance`, `0` quand les deux concordent.
+- `suspects` : transactions du compte dont la date est dans la periode du releve (de
+  la plus petite date de ses lignes a la plus tardive de ses lignes et de la date du
+  solde, puisque le solde bancaire couvre toutes les operations jusqu'a cette date)
+  et qui ne correspondent a
+  **aucune** ligne du releve — ni creees par cet import, ni reconnues comme deja
+  importees ou ecartees comme doublon (`duplicateTransactionId` d'une ligne
+  `SKIPPED`). Les transactions de type `AJUSTEMENT` n'y figurent jamais (elles restent
+  dans le solde). Triees par date puis libelle. Quand l'application contient des
+  doublons de lignes bancaires, `difference` est egale a la somme signee de leurs
+  montants et `suspects` les designe. Une transaction datee avant la periode du
+  releve compte dans `difference` sans etre listee ; une transaction datee apres la
+  date du solde n'est ni comptee ni listee.
 
 Erreur `400` : lignes NEEDS_REVIEW ou DUPLICATE non resolues. Les lignes deja
 importees ne bloquent jamais.

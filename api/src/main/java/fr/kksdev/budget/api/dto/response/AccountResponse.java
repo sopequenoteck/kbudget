@@ -22,5 +22,7 @@ public record AccountResponse(
         String bankBrandColor,
         String bankLogoUrl,
         String bankCustomName,
-        String bankCustomLogo
+        String bankCustomLogo,
+        /** 4 derniers chiffres du numero de compte lu dans les releves importes (KKS-384) ; nul sinon. */
+        String statementAccountSuffix
 ) {}

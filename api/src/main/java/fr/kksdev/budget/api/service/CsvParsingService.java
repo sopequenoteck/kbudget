@@ -183,6 +183,28 @@ public class CsvParsingService {
         }
     }
 
+    /**
+     * Raw lines skipped before the column header, read with the encoding of the profile
+     * (KKS-384). Fewer lines when the file is shorter; empty when it cannot be read.
+     */
+    public List<String> readSkippedLines(byte[] content, ImportProfileRegistry.ImportProfileConfig profile) {
+        List<String> skipped = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new ByteArrayInputStream(content), Charset.forName(profile.encoding())))) {
+            for (int i = 0; i < profile.skipHeaderLines(); i++) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                skipped.add(line);
+            }
+        } catch (IOException | RuntimeException e) {
+            log.debug("Header lines not readable with import profile '{}': {}", profile.name(), e.getMessage());
+            return List.of();
+        }
+        return skipped;
+    }
+
     private static CSVFormat columnHeaderFormat(char delimiter) {
         return CSVFormat.Builder.create()
                 .setDelimiter(delimiter)
