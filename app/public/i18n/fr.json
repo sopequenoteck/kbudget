@@ -785,6 +785,8 @@
       "categoriesHint": "Gérer les catégories",
       "debtReminders": "Rappels dettes",
       "debtRemindersHint": "Notification la veille d'une échéance de dette",
+      "imports": "Import et catégorisation",
+      "importsHint": "Brouillons, historique, règles, profils, rattrapage",
       "subscriptionReminders": "Rappels abonnements",
       "subscriptionRemindersHint": "Notification la veille d'une échéance d'abonnement",
       "textScalePreview": "Voici un aperçu de la taille du texte choisie.",

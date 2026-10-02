@@ -785,6 +785,8 @@
       "categoriesHint": "Manage categories",
       "debtReminders": "Debt reminders",
       "debtRemindersHint": "Notification the day before a debt is due",
+      "imports": "Import and categorisation",
+      "importsHint": "Drafts, history, rules, profiles, clean-up",
       "subscriptionReminders": "Subscription reminders",
       "subscriptionRemindersHint": "Notification the day before a subscription is due",
       "textScalePreview": "Here is a preview of the chosen text size.",
