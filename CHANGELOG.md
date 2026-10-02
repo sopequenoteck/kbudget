@@ -28,8 +28,6 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   `ngsw.json`, le manifeste, les icones, le favicon et les catalogues i18n,
   sans empreinte, en `no-cache` au lieu d'`immutable` pendant un an ; seuls les
   fichiers a empreinte du build restent `immutable`.
-- Le panneau de notifications est annonce comme dialogue modal aux
-  technologies d'assistance (`role="dialog"`, `aria-modal`).
 
 ## [6.7.3] - 2026-10-02
 
