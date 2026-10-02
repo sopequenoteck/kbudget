@@ -5,6 +5,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.7.1] - 2026-10-02
+
+> Correctif de l'import de releves Societe Generale. Aucune migration, aucun
+> changement de contrat d'API, `MIN_CLIENT_VERSION` reste a 6.0.0. Seule l'API
+> change.
+
 ### Fixed
 
 - **Solde de la banque 100 fois trop grand a l'import d'un releve Societe
@@ -1416,7 +1422,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.7.1...HEAD
+[6.7.1]: https://github.com/sopequenoteck/kbudget/compare/v6.7.0...v6.7.1
 [6.7.0]: https://github.com/sopequenoteck/kbudget/compare/v6.6.1...v6.7.0
 [6.6.1]: https://github.com/sopequenoteck/kbudget/compare/v6.6.0...v6.6.1
 [6.6.0]: https://github.com/sopequenoteck/kbudget/compare/v6.5.2...v6.6.0
