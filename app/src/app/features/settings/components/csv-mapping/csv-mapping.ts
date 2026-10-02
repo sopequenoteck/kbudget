@@ -87,14 +87,16 @@ export class CsvMapping implements OnInit {
       this.file = state.file;
       this.accountId.set(state.accountId);
       this.fileName.set(state.file.name);
-    } else {
-      // Rechargement de la page : le fichier n'a pas survecu a la navigation.
-      this.router.navigate(['/transactions/import'], { replaceUrl: true });
     }
   }
 
   ngOnInit(): void {
-    if (this.file) void this.loadPreview();
+    if (this.file) {
+      void this.loadPreview();
+    } else {
+      // Rechargement de la page : le fichier n'a pas survecu a la navigation.
+      void this.router.navigate(['/transactions/import'], { replaceUrl: true });
+    }
   }
 
   async loadPreview(): Promise<void> {
