@@ -11,11 +11,12 @@ export const UPDATE_APPLY_WINDOW_MS = 3000;
 
 /**
  * Toute surface modale ouverte : `modal`, `confirm-dialog` (`alertdialog`), `select-picker`
- * (feuille mobile), `notification-panel`, `snooze-dialog` et les dialogues de `settings/account`
- * portent ce role et ne sont dans le DOM que ouverts. Une nouvelle surface modale doit le porter
- * aussi, sans quoi une mise a jour pourrait recharger la page sous elle.
+ * (feuille mobile), `snooze-dialog` et les dialogues de `settings/account` portent l'un de ces
+ * roles ; `notification-panel`, un `<aside>`, porte `data-modal-surface`. Toutes ne sont dans le
+ * DOM qu'ouvertes. Une nouvelle surface modale doit porter l'un de ces marqueurs, sans quoi une
+ * mise a jour pourrait recharger la page sous elle.
  */
-const MODAL_SURFACE_SELECTOR = '[role="dialog"], [role="alertdialog"]';
+const MODAL_SURFACE_SELECTOR = '[role="dialog"], [role="alertdialog"], [data-modal-surface]';
 
 /**
  * Politique de mise a jour de la PWA (KKS-446).

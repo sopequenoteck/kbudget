@@ -335,6 +335,7 @@ describe('AppUpdateService', () => {
         name: 'nested dialog',
         html: '<div><section><aside role="dialog" aria-modal="true"></aside></section></div>',
       },
+      { name: 'marked', html: '<aside data-modal-surface></aside>' },
     ])('should_retain_update_when_a_$name_surface_is_open', async ({ html }) => {
       fakeDoc.surfaces.body.innerHTML = html;
       checkForUpdate.mockResolvedValue(true);
