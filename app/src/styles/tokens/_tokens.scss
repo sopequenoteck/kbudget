@@ -59,10 +59,20 @@
   --space-11: #{p.$space-11};
   --space-12: #{p.$space-12};
 
+  // -- Safe areas (PWA installee, `viewport-fit=cover`, KKS-447) --
+  // 0 hors encoche / barre de gestes : sans effet sur desktop et navigateur classique.
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
   // -- Layout --
+  // Hauteurs TOTALES, zone sure comprise : les `top: var(--header-height)` des sticky et
+  // `calc(100dvh - var(--header-height))` restent justes sans rien changer. Les composants
+  // posent le padding de zone sure a l'interieur de cette hauteur (`box-sizing: border-box`).
   --sidebar-width: #{p.$sidebar-width};
-  --header-height: #{p.$header-height};
-  --bottom-nav-height: 72px;
+  --header-height: calc(#{p.$header-height} + var(--safe-top));
+  --bottom-nav-height: calc(72px + var(--safe-bottom));
 
   // -- Border radius --
   --radius-sm: #{p.$radius-sm};

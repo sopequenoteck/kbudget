@@ -15,6 +15,7 @@ import { phosphorArrowCircleDown, phosphorWallet } from '@ng-icons/phosphor-icon
 import { firstValueFrom } from 'rxjs';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 
+import { bindExpandedSectionLayer } from '../../../../core/services/history-layer.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { DebtService } from '../../../../core/services/debt';
 import { AccountService } from '../../../../core/services/account';
@@ -106,6 +107,8 @@ export class RepayDialog {
 
   constructor() {
     this.amountWidth = createAmountWidth(this.form.get('amount')!, 22);
+    // Retour arriere : replie la section depliee avant de fermer la feuille.
+    bindExpandedSectionLayer(this.expandedSection);
 
     effect(() => {
       const d = this.debt();

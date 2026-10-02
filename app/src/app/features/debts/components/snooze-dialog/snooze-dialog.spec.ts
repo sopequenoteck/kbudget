@@ -5,6 +5,7 @@ import { SnoozeDialog } from './snooze-dialog';
 import { DebtService } from '../../../../core/services/debt';
 import { Debt, DebtType } from '../../../../core/models/debt.model';
 import { provideTranslocoTesting } from '../../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../../testing/history-testing';
 
 const mockDebt: Debt = {
   id: 'debt-1',
@@ -210,5 +211,21 @@ describe('SnoozeDialog', () => {
     component.onCancel();
 
     expect(closedEmitted).toBe(true);
+  });
+
+  describe('retour arriere (KKS-447)', () => {
+    beforeEach(resetHistory);
+
+    it('should_emit_closed_when_back_is_pressed_while_the_dialog_is_displayed', async () => {
+      const fixture = TestBed.createComponent(SnoozeDialog);
+      fixture.componentRef.setInput('debt', mockDebt);
+      fixture.detectChanges();
+      const closed = vi.fn();
+      fixture.componentInstance.closed.subscribe(closed);
+
+      await goBack();
+
+      expect(closed).toHaveBeenCalledTimes(1);
+    });
   });
 });

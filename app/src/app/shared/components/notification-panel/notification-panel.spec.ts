@@ -12,6 +12,7 @@ import { Debt, DebtType } from '../../../core/models/debt.model';
 import { RecurringTransactionService } from '../../../core/services/recurring-transaction';
 import { SubscriptionService } from '../../../core/services/subscription';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../testing/history-testing';
 
 const makeNotification = (overrides: Partial<NotificationModel> = {}): NotificationModel => ({
   id: 'notif-1',
@@ -628,5 +629,23 @@ describe('NotificationPanel', () => {
     await fixture.componentInstance.onPaySubscription(subscriptionNotification);
 
     expect(toastServiceMock.error).toHaveBeenCalledWith("Impossible d'enregistrer le paiement");
+  });
+
+  describe('retour arriere (KKS-447)', () => {
+    beforeEach(resetHistory);
+
+    it('should_emit_closed_when_back_is_pressed_while_the_panel_is_open', async () => {
+      notificationServiceMock = createNotificationServiceMock([]);
+      setupTestBed();
+      const fixture = TestBed.createComponent(NotificationPanel);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      const closed = vi.fn();
+      fixture.componentInstance.closed.subscribe(closed);
+
+      await goBack();
+
+      expect(closed).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -87,7 +87,8 @@
 }
 
 .modal-body {
-  padding: var(--space-3) var(--space-5) var(--space-5);
+  // Bas de feuille au-dessus de la barre de gestes (les formulaires `.bsheet` y vivent).
+  padding: var(--space-3) var(--space-5) calc(var(--space-5) + var(--safe-bottom));
   overflow-y: auto;
   flex: 1;
 

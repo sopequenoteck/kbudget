@@ -153,6 +153,7 @@
     max-height: 70vh;
     display: flex;
     flex-direction: column;
+    padding-bottom: var(--safe-bottom);
     background: var(--surface-default);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     box-shadow: var(--shadow-lg);

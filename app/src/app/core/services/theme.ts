@@ -4,6 +4,7 @@ import { DevLogger } from './dev-logger';
 export type Theme = 'light' | 'dark' | 'auto';
 
 const STORAGE_KEY = 'budget_theme';
+const THEME_COLOR_TOKEN = '--surface-raised';
 const VALID_THEMES: Theme[] = ['light', 'dark', 'auto'];
 
 @Injectable({
@@ -34,6 +35,7 @@ export class ThemeService {
       document.documentElement.classList.remove('theme-light', 'theme-dark');
       document.documentElement.classList.add(`theme-${effective}`);
       document.documentElement.style.colorScheme = effective;
+      this.syncThemeColor();
     });
   }
 
@@ -43,6 +45,17 @@ export class ThemeService {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {
       this.logger.error('localStorage indisponible');
+    }
+  }
+
+  /**
+   * `<meta name="theme-color">` (barre systeme Android, Safari hors PWA) suit la couleur de
+   * l'en-tete : `--surface-raised` du theme applique, lu apres la pose de la classe de theme.
+   */
+  private syncThemeColor(): void {
+    const color = getComputedStyle(document.documentElement).getPropertyValue(THEME_COLOR_TOKEN).trim();
+    if (color) {
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
     }
   }
 

@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 import { UserService } from '../../../core/services/user';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../testing/history-testing';
 
 describe('ChangePasswordDialogComponent', () => {
   let userServiceMock: { changePassword: ReturnType<typeof vi.fn> };
@@ -190,6 +191,38 @@ describe('ChangePasswordDialogComponent', () => {
       fixture.componentInstance.onEscape();
 
       expect(await promise).toBeNull();
+    });
+  });
+
+  describe('retour arriere (KKS-447)', () => {
+    beforeEach(resetHistory);
+
+    it('should_close_the_dialog_when_back_is_pressed', async () => {
+      const fixture = render();
+
+      await goBack();
+
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+    });
+
+    it('should_stay_open_when_back_is_pressed_while_submitting', async () => {
+      const fixture = render();
+      fixture.componentInstance.isSubmitting.set(true);
+
+      await goBack();
+
+      expect(fixture.componentInstance.isOpen()).toBe(true);
+    });
+
+    it('should_close_on_the_next_back_when_the_submission_is_over', async () => {
+      const fixture = render();
+      fixture.componentInstance.isSubmitting.set(true);
+      await goBack();
+      fixture.componentInstance.isSubmitting.set(false);
+
+      await goBack();
+
+      expect(fixture.componentInstance.isOpen()).toBe(false);
     });
   });
 });

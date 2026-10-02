@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { SelectPicker } from './select-picker';
 import { SelectPickerItem } from './select-picker.model';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
+import { goBack, resetHistory } from '../../../../testing/history-testing';
 
 const mockItems: SelectPickerItem[] = [
   { id: 'acc-1', label: 'Compte courant', icon: '🏦', secondaryText: '150.00 €', color: '#3b82f6' },
@@ -292,5 +293,20 @@ describe('SelectPicker', () => {
 
     expect(component.selectedId()).toBe('');
     expect(emittedValue).toBe('');
+  });
+
+  describe('retour arriere (KKS-447)', () => {
+    beforeEach(resetHistory);
+
+    it('should_close_the_picker_when_back_is_pressed_while_open', async () => {
+      const fixture = TestBed.createComponent(SelectPicker);
+      fixture.detectChanges();
+      fixture.componentInstance.open();
+      fixture.detectChanges();
+
+      await goBack();
+
+      expect(fixture.componentInstance.isOpen()).toBe(false);
+    });
   });
 });
