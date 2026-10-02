@@ -83,6 +83,9 @@
       }
     </button>
     <span class="section-header__separator"></span>
+    <a class="section-header__action-btn" routerLink="/transactions/import" [attr.aria-label]="'imports.action.importStatement' | transloco">
+      <ng-icon name="phosphorUploadSimple" size="20" />
+    </a>
     <a class="section-header__action-btn" routerLink="/transactions/recurring" [attr.aria-label]="'recurring.page.title' | transloco">
       <ng-icon name="phosphorArrowsClockwise" size="20" />
     </a>

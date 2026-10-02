@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.result__balance {
+  margin-bottom: var(--space-4);
+}
+
+.result__verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+
+  ng-icon {
+    flex-shrink: 0;
+  }
+
+  &--ok {
+    color: var(--color-income);
+  }
+
+  &--gap {
+    color: var(--color-expense);
+  }
+}
+
+.result__hint {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.result__row {
+  cursor: default;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.result__amount--income {
+  color: var(--color-income);
+}
+
+.result__amount--expense {
+  color: var(--color-expense);
+}
+
+.result__actions {
+  margin-top: var(--space-6);
+}
+
+.result__done {
+  width: 100%;
+}

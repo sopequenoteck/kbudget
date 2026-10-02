@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.start__description {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.start__file-input {
+  display: none;
+}
+
+// Zone de choix du fichier : un bouton, pas une zone de depot decorative.
+.start__file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--surface-default);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--hover-bg);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.start__file-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.start__file-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start__file-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.start__message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+
+  ng-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &--ok ng-icon {
+    color: var(--color-income);
+  }
+
+  &--warning ng-icon {
+    color: var(--color-primary);
+  }
+
+  &--error {
+    color: var(--color-expense);
+  }
+}
+
+.start__skeleton {
+  margin-top: var(--space-4);
+}
+
+.start__section-title {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.start__hint {
+  margin: var(--space-2) var(--space-1) 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.start__account--selected {
+  background: var(--primary-subtle);
+}
+
+.start__account-check {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.start__link {
+  margin-left: var(--space-1);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+}
+
+.start__actions {
+  margin-top: var(--space-6);
+}
+
+.start__submit {
+  width: 100%;
+}

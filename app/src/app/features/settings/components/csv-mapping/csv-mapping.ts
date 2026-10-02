@@ -7,7 +7,6 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   phosphorUploadSimple,
   phosphorArrowCounterClockwise,
-  phosphorWarningCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { ImportService } from '../../../../core/services/import';
@@ -23,7 +22,6 @@ import { CsvPreview, CsvMapping as CsvMappingModel } from '../../../../core/mode
     provideIcons({
       phosphorUploadSimple,
       phosphorArrowCounterClockwise,
-      phosphorWarningCircle,
     }),
   ],
   templateUrl: './csv-mapping.html',
@@ -90,6 +88,9 @@ export class CsvMapping {
       this.accountId.set(state.accountId);
       this.fileName.set(state.file.name);
       this.loadPreview();
+    } else {
+      // Rechargement de la page : le fichier n'a pas survecu a la navigation.
+      this.router.navigate(['/transactions/import'], { replaceUrl: true });
     }
   }
 
@@ -190,7 +191,7 @@ export class CsvMapping {
       const draft = await firstValueFrom(
         this.importService.uploadWithMapping(this.file, this.accountId(), mapping),
       );
-      this.router.navigate(['/settings/import/review', draft.id]);
+      this.router.navigate(['/transactions/import/review', draft.id]);
     } catch (err: unknown) {
       this.logger.error('Failed to import with mapping', err);
       const httpErr = err as { error?: { message?: string } };

@@ -32,6 +32,8 @@ export interface Account {
   bankLogoUrl: string | null;
   bankCustomName: string | null;
   bankCustomLogo: string | null;
+  /** KKS-384 : 4 derniers chiffres du compte lus sur le dernier releve importe, `null` sinon. */
+  statementAccountSuffix?: string | null;
 }
 
 export interface AccountSummary {

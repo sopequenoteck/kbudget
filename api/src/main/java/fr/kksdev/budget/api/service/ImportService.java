@@ -301,6 +301,7 @@ public class ImportService {
                 .filter(l -> request.lineIds().contains(l.getId()))
                 .filter(l -> !isAlreadyImported(l))
                 .filter(l -> !(newStatus == ImportLineStatus.READY && !l.getMatchCandidateIds().isEmpty()))
+                .filter(l -> !(newStatus == ImportLineStatus.READY && isUnreadableSkipped(l)))
                 .toList();
 
         for (ImportDraftLine line : updatedLines) {
@@ -600,7 +601,7 @@ public class ImportService {
      * candidates, it becomes the creation of a new transaction, the user's explicit decision.
      */
     private void changeStatus(ImportDraftLine line, ImportLineStatus next) {
-        validateStatusTransition(line.getStatus(), next);
+        validateStatusTransition(line, next);
         if (line.getStatus() != next) {
             line.setMatchedTransactionId(null);
             line.setMatchCandidateIds(List.of());
@@ -637,14 +638,19 @@ public class ImportService {
         }
     }
 
-    private void validateStatusTransition(ImportLineStatus current, ImportLineStatus next) {
+    private void validateStatusTransition(ImportDraftLine line, ImportLineStatus next) {
+        ImportLineStatus current = line.getStatus();
         // Redemander le statut courant ne change rien : l'ecran de revue envoie READY
         // avec chaque categorie, y compris pour une ligne deja READY (KKS-383).
         if (current == next) {
             return;
         }
+        // Une ligne ignoree par l'utilisateur (sans skipReason) se restaure ; celle que l'import a
+        // ecartee lui-meme (deja importee) ne revient pas : la reactiver creerait un doublon (KKS-386).
+        boolean restorable = current == ImportLineStatus.SKIPPED && line.getSkipReason() == null
+                && line.getStatusMessage() == null;
         boolean valid = switch (next) {
-            case READY -> current == ImportLineStatus.NEEDS_REVIEW || current == ImportLineStatus.DUPLICATE;
+            case READY -> current == ImportLineStatus.NEEDS_REVIEW || current == ImportLineStatus.DUPLICATE || restorable;
             case SKIPPED -> true;
             default -> false;
         };
@@ -746,6 +752,11 @@ public class ImportService {
     static boolean isAlreadyImported(ImportDraftLine line) {
         return line.getStatus() == ImportLineStatus.SKIPPED
                 && line.getSkipReason() == ImportSkipReason.ALREADY_IMPORTED;
+    }
+
+    /** A line the user skipped although it could not be read: its amount and date are not reliable. */
+    private static boolean isUnreadableSkipped(ImportDraftLine line) {
+        return line.getStatus() == ImportLineStatus.SKIPPED && line.getStatusMessage() != null;
     }
 
     /** A line matched with an existing transaction (KKS-385): it creates nothing at confirmation. */

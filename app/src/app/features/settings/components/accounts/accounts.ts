@@ -158,7 +158,7 @@ export class Accounts {
   }
 
   triggerImport(accountId: string): void {
-    this.router.navigate(['/settings/import'], { queryParams: { accountId } });
+    this.router.navigate(['/transactions/import'], { queryParams: { accountId } });
   }
 
   onCurrenciesChange(currencies: string[]): void {

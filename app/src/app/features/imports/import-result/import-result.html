@@ -1,0 +1,88 @@
+@let summary = result();
+
+<div class="hero">
+  <span class="hero__amount-label">{{ 'imports.summary.doneTitle' | transloco }}</span>
+  <div class="hero__meta">
+    <div class="hero__meta-line">
+      <ng-icon name="phosphorReceipt" size="14" />
+      <span>{{ 'imports.summary.created' | transloco: { count: summary.importedCount } }}</span>
+    </div>
+    @if (summary.matchedCount > 0) {
+      <div class="hero__meta-line">
+        <ng-icon name="phosphorLinkSimple" size="14" />
+        <span>{{ 'imports.summary.matched' | transloco: { count: summary.matchedCount } }}</span>
+      </div>
+    }
+    @if (summary.alreadyImportedCount > 0) {
+      <div class="hero__meta-line">
+        <ng-icon name="phosphorCheckCircle" size="14" />
+        <span>{{
+          'imports.summary.alreadyImported' | transloco: { count: summary.alreadyImportedCount }
+        }}</span>
+      </div>
+    }
+  </div>
+</div>
+
+@if (summary.balanceCheck; as check) {
+  <section class="result__balance">
+    @if (check.difference === 0) {
+      <p class="result__verdict result__verdict--ok" data-testid="balance-match">
+        <ng-icon name="phosphorCheckCircle" size="20" />
+        <span>{{ 'imports.summary.balanceMatch' | transloco }}</span>
+      </p>
+    } @else {
+      <p class="result__verdict result__verdict--gap" data-testid="balance-gap">
+        <ng-icon name="phosphorWarningCircle" size="20" />
+        <span>{{
+          'imports.summary.balanceGap'
+            | transloco: { amount: (check.difference | amount: null : currency()) }
+        }}</span>
+      </p>
+    }
+    <p class="result__hint">
+      {{
+        'imports.summary.balanceDetail'
+          | transloco
+            : {
+                bank: (check.bankBalance | amount: null : currency()),
+                date: fullDate(check.balanceDate),
+              }
+      }}
+    </p>
+  </section>
+
+  @if (check.suspects.length > 0) {
+    <section>
+      <div class="section-header">
+        <h2 class="section-header__title">{{ 'imports.list.suspectsTitle' | transloco }}</h2>
+        <span class="section-header__count">{{ check.suspects.length }}</span>
+      </div>
+      <p class="result__hint">{{ 'imports.list.suspectsHint' | transloco }}</p>
+      <div class="list-group">
+        @for (suspect of check.suspects; track suspect.id) {
+          <div class="list-row result__row">
+            <span class="list-row__content">
+              <span class="list-row__title">{{ suspect.libelle }}</span>
+              <span class="list-row__subtitle">{{ shortDate(suspect.date) }}</span>
+            </span>
+            <span class="list-row__right">
+              <span
+                class="list-row__amount"
+                [class.result__amount--income]="suspect.type === 'RECETTE'"
+                [class.result__amount--expense]="suspect.type === 'DEPENSE'"
+                >{{ suspect.montant | amount: suspect.type : currency() }}</span
+              >
+            </span>
+          </div>
+        }
+      </div>
+    </section>
+  }
+}
+
+<div class="result__actions">
+  <button type="button" class="btn-primary result__done" (click)="done.emit()">
+    {{ 'imports.action.viewTransactions' | transloco }}
+  </button>
+</div>

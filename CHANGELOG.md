@@ -23,6 +23,43 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- **Nouvelle revue d'import : les exceptions seules (KKS-386)** : l'import de releve
+  quitte Parametres et passe par l'ecran Transactions. La revue ne montre plus toutes
+  les lignes a plat avec un menu par ligne, mais ce qui demande une decision.
+  - **Entree** : icone « Importer un releve » dans l'en-tete de l'ecran Transactions
+    (`/transactions/import`). L'icone d'import d'un compte mene au meme parcours
+    (`?accountId=`). Parametres → Import ne garde que la gestion (brouillons,
+    historique, regles, profils) et un lien vers le nouveau parcours ; l'ancienne
+    URL `/settings/import/review/:draftId` redirige vers la nouvelle revue.
+  - **Depart** : choix du fichier, reconnaissance du format (`/imports/detect`), puis
+    choix **explicite** du compte. Le compte n'est coche que si l'API en reconnait un
+    (`suggestedAccountId`) ou si l'URL en porte un : jamais le compte par defaut — un
+    reimport partait sinon, sans bruit, sur le mauvais compte. Format inconnu : passage
+    au mappage existant, dont la navigation suit le nouveau parcours (un rechargement
+    de la page renvoie au depart au lieu d'un ecran vide). Brouillon deja ouvert pour
+    le compte : lien « Reprendre le brouillon en cours ».
+  - **Revue** : solde de la banque a la date du releve, compteurs (nouvelles, deja
+    importees, rapprochees, categorisees automatiquement) et, au premier import,
+    interrupteur « Aligner le solde initial sur la banque » (actif par defaut). Le
+    corps ne liste que les exceptions : lignes a trancher (choisir un candidat, creer
+    une transaction, ignorer ; doublon probable : importer quand meme ou ignorer),
+    erreurs de lecture, et lignes sans categorie **regroupees par commercant** (un seul
+    choix par groupe, l'API propage et cree la regle). Les lignes sans categorie ne
+    bloquent jamais la confirmation. Les decisions deja prises restent dans des groupes
+    repliables, chacun corrigible : rapprochees (« Defaire »), categorisees
+    automatiquement ou par l'utilisateur, deja importees (lecture seule), ignorees
+    (« Restaurer »).
+  - **Resultat** : transactions creees, rapprochees, deja importees, puis le controle
+    du solde — « Solde identique a celui de la banque », ou l'ecart et la liste des
+    operations de la periode absentes du releve (doublons probables).
+  - API (ajout seul) : `merchantKey` sur les lignes de brouillon, la cle sur laquelle
+    l'API propage une correction de categorie. **Correction** : une ligne ignoree par
+    l'utilisateur (`skipReason` nul) peut repasser `READY` ; une ligne ecartee par
+    l'import (`ALREADY_IMPORTED`) reste non restaurable. L'action groupee « valider »
+    n'echoue plus en 400 des qu'une ligne ignoree figure dans la selection.
+  - Les cles i18n de l'ancienne revue sont retirees ; les nouvelles sont en anglais et
+    en francais (domaine `imports`).
+
 - **Rattrapage de l'historique deja en base (KKS-387)** : les imports futurs sont
   corriges par KKS-382 a KKS-386, pas les donnees existantes. Sur un compte reel :
   681,09 EUR de transactions en double (11 saisies retrouvees dans le releve,

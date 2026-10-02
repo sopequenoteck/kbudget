@@ -181,6 +181,15 @@ describe('Transactions', () => {
     expect(metaLines).toEqual(['0 recettes', '0 dépenses']);
   });
 
+  it('should_link_to_the_statement_import_from_the_section_header', async () => {
+    const fixture = await createFixture([]);
+    const link = (fixture.nativeElement as HTMLElement).querySelector(
+      'a[aria-label="Importer un relevé"]',
+    );
+
+    expect(link?.getAttribute('href')).toBe('/transactions/import');
+  });
+
   it('should_render_french_search_labels_when_search_open', async () => {
     const fixture = await createFixture([]);
     fixture.componentInstance.toggleSearch();

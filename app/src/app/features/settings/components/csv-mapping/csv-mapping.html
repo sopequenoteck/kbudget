@@ -1,4 +1,4 @@
-<a class="section-back" routerLink="/settings/import">
+<a class="section-back" routerLink="/transactions/import">
   <span class="section-back__arrow">&#9664;</span>
   <span>{{ 'imports.page.title' | transloco }}</span>
 </a>
@@ -15,12 +15,7 @@
   </div>
 }
 
-@if (!file && !fileName()) {
-  <div class="mapping-warning">
-    <ng-icon name="phosphorWarningCircle" size="18" />
-    <span>{{ 'imports.empty.file' | transloco }}</span>
-  </div>
-} @else {
+@if (file) {
 
   <!-- Preview table -->
   <section class="mapping-section">

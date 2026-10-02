@@ -1807,7 +1807,8 @@ Response `201` :
         "montant": 17.32,
         "type": "DEPENSE"
       },
-      "matchCandidates": []
+      "matchCandidates": [],
+      "merchantKey": "SUPER U"
     },
     {
       "id": "uuid",
@@ -1831,7 +1832,8 @@ Response `201` :
       "matchCandidateIds": [],
       "subscriptionId": null,
       "matchedTransaction": null,
-      "matchCandidates": []
+      "matchCandidates": [],
+      "merchantKey": "FRAIS BANCAIRES TEST"
     }
   ]
 }
@@ -1897,6 +1899,12 @@ date d'achat si elle est connue, sinon la date comptable :
   abonnements de meme libelle (cinq abonnements d'un meme editeur) se distinguent par
   le montant ; s'il ne suffit pas, aucun lien. La cle d'un abonnement est apprise a la
   confirmation d'une ligne rapprochee d'un de ses paiements.
+
+- `merchantKey` (KKS-386) : cle commercant du libelle nettoye (`MerchantKey`), vide si le
+  libelle ne contient aucune lettre. C'est la cle sur laquelle l'API propage une
+  correction de categorie : un client regroupe les lignes par `merchantKey` et par
+  `transactionType` pour proposer un seul choix de categorie par commercant. Ajout
+  seulement, rien n'est retire.
 
 **Categorie pre-remplie (KKS-383)** : `categorySource` indique d'ou vient la
 categorie — `RULE` (une regle), `HISTORY` (categorie majoritaire des transactions
@@ -2009,6 +2017,14 @@ Request :
 
 Redemander le statut courant d'une ligne est sans effet : `READY` sur une ligne
 deja `READY` n'est plus une erreur (KKS-383).
+
+**Restaurer une ligne ignoree (KKS-386)** : `READY` est accepte depuis `NEEDS_REVIEW`,
+`DUPLICATE` et `SKIPPED` **quand l'utilisateur a lui-meme ignore la ligne**
+(`skipReason: null`) : la transaction sera creee a la confirmation. Une ligne que
+l'import a ecartee (`skipReason: "ALREADY_IMPORTED"`) ne peut pas revenir, pas plus
+qu'une ligne illisible ignoree (`statusMessage` non nul : montant et date ne sont
+pas fiables) : `400` sur `PUT .../lines/{lineId}`, ignoree sans erreur par l'action
+groupee.
 
 **Rapprochement (KKS-385)** : deux champs **optionnels** tranchent ou defont le
 rapprochement d'une ligne `READY` ou `DUPLICATE` :

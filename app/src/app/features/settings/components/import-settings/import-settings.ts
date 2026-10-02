@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -18,14 +17,11 @@ import {
   phosphorLockSimple,
 } from '@ng-icons/phosphor-icons/regular';
 
-import { AccountService } from '../../../../core/services/account';
 import { ImportService } from '../../../../core/services/import';
 import { CategoryService } from '../../../../core/services/category';
 import { CategoryRuleService } from '../../../../core/services/category-rule';
 import { DevLogger } from '../../../../core/services/dev-logger';
-import { ApiErrorService } from '../../../../core/services/api-error';
 import { LanguageService } from '../../../../core/services/language';
-import { Account } from '../../../../core/models/account.model';
 import { Category } from '../../../../core/models/category.model';
 import { CategoryNamePipe } from '../../../../shared/pipes/category-name.pipe';
 import {
@@ -59,25 +55,15 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImportSettings {
-  private readonly accountService = inject(AccountService);
   private readonly importService = inject(ImportService);
   private readonly categoryService = inject(CategoryService);
   private readonly categoryRuleService = inject(CategoryRuleService);
-  private readonly apiError = inject(ApiErrorService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly logger = inject(DevLogger);
   private readonly languageService = inject(LanguageService);
   private readonly transloco = inject(TranslocoService);
 
   readonly IMPORT_PROFILE_SOURCE_LABEL_KEYS = IMPORT_PROFILE_SOURCE_LABEL_KEYS;
-
-  private readonly queryParams = toSignal(this.route.queryParamMap);
-
-  readonly accounts = signal<Account[]>([]);
-  readonly selectedAccountId = signal<string>('');
-  readonly uploading = signal(false);
-  readonly uploadError = signal<string | null>(null);
 
   readonly drafts = signal<ImportDraftSummary[]>([]);
   readonly draftsLoading = signal(false);
@@ -103,11 +89,6 @@ export class ImportSettings {
 
   constructor() {
     effect(() => {
-      this.accountService.refreshTrigger();
-      this.loadAccounts();
-    });
-
-    effect(() => {
       this.importService.refreshTrigger();
       this.loadDrafts();
       this.loadHistory();
@@ -120,27 +101,6 @@ export class ImportSettings {
     });
 
     this.loadCategories();
-
-    effect(() => {
-      const params = this.queryParams();
-      if (params) {
-        const accountId = params.get('accountId');
-        if (accountId) this.selectedAccountId.set(accountId);
-      }
-    });
-  }
-
-  private async loadAccounts(): Promise<void> {
-    try {
-      const data = await firstValueFrom(this.accountService.getAll(false));
-      this.accounts.set(data);
-      if (data.length > 0 && !this.selectedAccountId()) {
-        const defaultAcc = data.find((a) => a.isDefault) ?? data[0];
-        this.selectedAccountId.set(defaultAcc.id);
-      }
-    } catch (err) {
-      this.logger.error('Failed to load accounts', err);
-    }
   }
 
   private async loadDrafts(): Promise<void> {
@@ -169,26 +129,8 @@ export class ImportSettings {
     }
   }
 
-  onAccountChange(accountId: string): void {
-    this.selectedAccountId.set(accountId);
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      this.uploadFile(file);
-    }
-    input.value = '';
-  }
-
-  triggerFileInput(): void {
-    const input = document.getElementById('csv-file-input') as HTMLInputElement;
-    input?.click();
-  }
-
   resumeDraft(draftId: string): void {
-    this.router.navigate(['/settings/import/review', draftId]);
+    this.router.navigate(['/transactions/import/review', draftId]);
   }
 
   async deleteDraft(draftId: string): Promise<void> {
@@ -285,40 +227,6 @@ export class ImportSettings {
       await firstValueFrom(this.categoryRuleService.delete(ruleId));
     } catch (err) {
       this.logger.error('Failed to delete rule', err);
-    }
-  }
-
-  private async uploadFile(file: File): Promise<void> {
-    const accountId = this.selectedAccountId();
-    if (!accountId) {
-      this.uploadError.set(this.transloco.translate('imports.form.accountRequired'));
-      return;
-    }
-
-    this.uploading.set(true);
-    this.uploadError.set(null);
-
-    try {
-      const draft = await firstValueFrom(this.importService.upload(file, accountId));
-      this.router.navigate(['/settings/import/review', draft.id]);
-    } catch (err: unknown) {
-      this.logger.error('Failed to upload CSV', err);
-      const httpErr = err as { status?: number; error?: { message?: string } };
-      if (httpErr?.status === 409) {
-        this.uploadError.set(this.transloco.translate('imports.feedback.draftExists'));
-        this.uploading.set(false);
-      } else if (httpErr?.status === 422) {
-        // Format not recognized — navigate to manual mapping
-        this.router.navigate(['/settings/import/mapping'], {
-          state: { file, accountId },
-        });
-        // don't reset uploading — navigation is in progress
-      } else {
-        this.uploadError.set(
-          this.apiError.label(httpErr, this.transloco.translate('imports.feedback.uploadError')),
-        );
-        this.uploading.set(false);
-      }
     }
   }
 
