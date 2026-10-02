@@ -402,6 +402,41 @@ describe('Settings', () => {
     });
   });
 
+  describe('section Gestion', () => {
+    const managementRows = (fixture: ReturnType<typeof setup>): HTMLAnchorElement[] => {
+      const container = (fixture.nativeElement as HTMLElement).querySelector(
+        '.settings-section__container',
+      ) as HTMLElement;
+      return Array.from(container.querySelectorAll<HTMLAnchorElement>('a.settings-row--link'));
+    };
+
+    it('should_list_the_import_row_below_categories_with_its_translated_title', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      const rows = managementRows(fixture);
+      const hrefs = rows.map((row) => row.getAttribute('href'));
+      expect(hrefs).toEqual(['/account', '/accounts', '/categories', '/import']);
+
+      const importRow = rows[3];
+      expect(importRow.querySelector('.settings-row__title')?.textContent?.trim()).toBe(
+        'Import et catégorisation',
+      );
+      expect(importRow.querySelector('.settings-row__description')?.textContent?.trim()).toBe(
+        'Brouillons, historique, règles, profils, rattrapage',
+      );
+    });
+
+    it('should_flag_only_the_import_row_as_last_in_the_management_section', () => {
+      const fixture = setup();
+      fixture.detectChanges();
+
+      const rows = managementRows(fixture);
+      const last = rows.filter((row) => row.classList.contains('settings-row--last'));
+      expect(last).toEqual([rows[3]]);
+    });
+  });
+
   describe('enabledNavItems() / disabledNavItems()', () => {
     it('should_expose_only_the_enabled_features_matching_nav_order', () => {
       const fixture = setup();

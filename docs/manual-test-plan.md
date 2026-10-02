@@ -607,9 +607,10 @@
 
 | # | Scénario | Pré-conditions | Étapes | Résultat attendu | Statut |
 |---|----------|----------------|--------|-------------------|--------|
-| IM-29 | Gestion seule | Paramètres → Import | Observer | Brouillons en cours, historique, règles, profils, et un lien « Nouvel import » vers `/transactions/import` (plus de formulaire d'envoi) | -- |
+| IM-29 | Gestion seule | Paramètres → « Import et catégorisation » (section Gestion, sous Catégories) | Observer la page | Brouillons en cours, historique, règles, profils, et un lien « Nouvel import » vers `/transactions/import` (plus de formulaire d'envoi) | -- |
 | IM-30 | Reprendre | Un brouillon en cours | « Reprendre » | Ouvre la nouvelle revue | -- |
 | IM-31 | Ancien lien | Favori `/settings/import/review/<id>` | Ouvrir | Redirigé vers `/transactions/import/review/<id>` | -- |
+| IM-41 | Accès depuis la PWA | PWA installée | Depuis le hub Paramètres, toucher « Import et catégorisation » | La page s'ouvre sans saisir d'adresse | -- |
 
 ### 23.5 — Rattrapage de l'historique (KKS-387)
 

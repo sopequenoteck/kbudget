@@ -5,6 +5,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Page Import et categorisation introuvable** : depuis la 6.7.0 (KKS-386),
+  l'icone d'import d'un compte mene au nouveau parcours et plus rien ne menait
+  a `/settings/import` (brouillons, historique, regles, profils, rattrapage de
+  l'historique) ; sur la PWA, la page etait inaccessible. Une ligne « Import et
+  categorisation » s'ajoute a la section Gestion des Parametres.
+
 ## [6.7.1] - 2026-10-02
 
 > Correctif de l'import de releves Societe Generale. Aucune migration, aucun
