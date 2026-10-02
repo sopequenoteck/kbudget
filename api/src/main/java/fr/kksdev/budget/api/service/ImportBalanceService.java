@@ -34,6 +34,12 @@ import java.util.UUID;
  * <p>The balance of an account is always {@code soldeInitial + sum of its
  * transactions}, signed as in {@code TransactionRepository#calculateBalanceByAccountId};
  * it is limited here to the transactions dated up to the balance date of the statement.
+ *
+ * <p>The transactions of the period that no line of the statement accounts for are the
+ * suspects of {@link #check}. The opening balance proposed before confirmation leaves them
+ * out (KKS-443): it must not absorb an entry the statement does not explain, or the
+ * difference would read zero and the entry would never be flagged. Both use the same
+ * definition, {@link #unaccountedTransactions}.
  */
 @Service
 @RequiredArgsConstructor
@@ -42,9 +48,13 @@ public class ImportBalanceService {
 
     /**
      * @param projectedBalance      balance of the application at the date of the statement balance
-     *                              if the draft is confirmed as it stands
-     * @param proposedOpeningBalance opening balance that makes {@code projectedBalance} equal the
-     *                              bank balance; only for the first import of the account
+     *                              if the draft is confirmed as it stands, every existing
+     *                              transaction counted
+     * @param proposedOpeningBalance opening balance that makes the balance of the application equal
+     *                              the bank balance once the transactions the statement does not
+     *                              explain (the suspects of {@code check}) are left out of it,
+     *                              so that they still show up as a difference; only for the first
+     *                              import of the account
      */
     public record DraftBalances(BigDecimal projectedBalance, BigDecimal proposedOpeningBalance) {
 
@@ -71,6 +81,7 @@ public class ImportBalanceService {
         boolean firstImport = !importHistoryRepository.existsByUserIdAndAccountId(userId, account.getId());
         BigDecimal proposed = firstImport
                 ? draft.getStatementBalance().subtract(projected).add(openingBalance)
+                        .add(signedSumUntil(unaccountedTransactions(account.getId(), lines, List.of(), balanceDate, userId), balanceDate))
                 : null;
         return new DraftBalances(projected, proposed);
     }
@@ -96,7 +107,10 @@ public class ImportBalanceService {
                 draft.getStatementBalanceDate(),
                 computed,
                 computed.subtract(draft.getStatementBalance()),
-                suspects(account.getId(), lines, createdIds, draft.getStatementBalanceDate(), userId));
+                unaccountedTransactions(account.getId(), lines, createdIds, draft.getStatementBalanceDate(), userId)
+                        .stream()
+                        .map(t -> new SuspectTransaction(t.getId(), t.getDate(), t.getLibelle(), t.getMontant(), t.getType()))
+                        .toList());
     }
 
     /**
@@ -105,8 +119,12 @@ public class ImportBalanceService {
      * every operation up to that date) that no line accounts for: neither created by this import nor
      * recognized as an existing transaction. Adjustments are left out, they are deliberate.
      * A line whose date could not be read has no date and does not stretch the period.
+     * Ordered by date, label, then id.
+     *
+     * @param createdIds ids of the transactions the import has created; empty before confirmation,
+     *                   when only matched lines and recognized duplicates account for a transaction
      */
-    private List<SuspectTransaction> suspects(UUID accountId, List<ImportDraftLine> lines,
+    private List<Transaction> unaccountedTransactions(UUID accountId, List<ImportDraftLine> lines,
                                               Collection<UUID> createdIds, LocalDate balanceDate,
                                               UUID userId) {
         List<LocalDate> dates = lines.stream()
@@ -138,8 +156,19 @@ public class ImportBalanceService {
                 .sorted(Comparator.comparing(Transaction::getDate)
                         .thenComparing(Transaction::getLibelle)
                         .thenComparing(Transaction::getId))
-                .map(t -> new SuspectTransaction(t.getId(), t.getDate(), t.getLibelle(), t.getMontant(), t.getType()))
                 .toList();
+    }
+
+    /**
+     * Net effect on the balance of the transactions dated up to {@code balanceDate}, signed as in
+     * {@code TransactionRepository#calculateBalanceByAccountIdUntil}. The period of the statement can
+     * run past that date; a later transaction is not in the balance and so is not subtracted from it.
+     */
+    private static BigDecimal signedSumUntil(List<Transaction> transactions, LocalDate balanceDate) {
+        return transactions.stream()
+                .filter(t -> !t.getDate().isAfter(balanceDate))
+                .map(t -> t.getType() == TransactionType.DEPENSE ? t.getMontant().negate() : t.getMontant())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static LocalDate latest(LocalDate first, LocalDate second) {
