@@ -1,5 +1,12 @@
 import { importLine } from '../../../../testing/import-fixtures';
-import { classifyLines, isAlreadyImported, isRestorable } from './import-review.utils';
+import en from '../../../../../public/i18n/en.json';
+import fr from '../../../../../public/i18n/fr.json';
+import {
+  classifyLines,
+  isAlreadyImported,
+  isRestorable,
+  readErrorText,
+} from './import-review.utils';
 
 describe('classifyLines', () => {
   it('should_return_empty_groups_when_there_is_no_line', () => {
@@ -133,5 +140,75 @@ describe('isRestorable', () => {
 
   it('should_refuse_restoring_a_line_that_is_not_skipped', () => {
     expect(isRestorable(importLine({ status: 'READY' }))).toBe(false);
+  });
+});
+
+describe('readErrorText', () => {
+  it('should_return_the_date_key_with_the_raw_value_when_the_code_is_invalid_date', () => {
+    const line = importLine({ readError: 'INVALID_DATE', readErrorValue: '2026-08-24' });
+
+    expect(readErrorText(line)).toEqual({
+      key: 'imports.value.readErrorInvalidDate',
+      params: { value: '2026-08-24' },
+    });
+  });
+
+  it('should_return_the_amount_key_with_the_raw_value_when_the_code_is_invalid_amount', () => {
+    const line = importLine({ readError: 'INVALID_AMOUNT', readErrorValue: 'abc' });
+
+    expect(readErrorText(line)).toEqual({
+      key: 'imports.value.readErrorInvalidAmount',
+      params: { value: 'abc' },
+    });
+  });
+
+  it('should_return_the_unreadable_line_key_without_parameter_when_the_code_is_unreadable_line', () => {
+    const line = importLine({ readError: 'UNREADABLE_LINE', readErrorValue: 'ignored' });
+
+    expect(readErrorText(line)).toEqual({
+      key: 'imports.value.readErrorUnreadableLine',
+      params: {},
+    });
+  });
+
+  it.each([
+    ['INVALID_DATE', 'imports.value.readErrorInvalidDateNoValue'],
+    ['INVALID_AMOUNT', 'imports.value.readErrorInvalidAmountNoValue'],
+  ])('should_use_the_key_without_value_when_%s_has_a_null_empty_or_blank_value', (code, key) => {
+    for (const value of [null, '', '   ', undefined as unknown as null]) {
+      expect(readErrorText(importLine({ readError: code, readErrorValue: value }))).toEqual({
+        key,
+        params: {},
+      });
+    }
+  });
+
+  it('should_return_null_when_the_line_has_no_read_error_code', () => {
+    expect(readErrorText(importLine({ statusMessage: 'Montant invalide: abc' }))).toBeNull();
+    expect(
+      readErrorText(importLine({ readError: undefined as unknown as null, statusMessage: 'x' })),
+    ).toBeNull();
+  });
+
+  it('should_return_null_when_the_code_is_unknown_to_this_client', () => {
+    expect(
+      readErrorText(importLine({ readError: 'DUPLICATE_COLUMN', readErrorValue: 'x' })),
+    ).toBeNull();
+  });
+
+  it('should_find_every_key_in_the_english_and_french_catalogues_when_read_errors_are_translated', () => {
+    const lines = [
+      importLine({ readError: 'INVALID_DATE', readErrorValue: 'x' }),
+      importLine({ readError: 'INVALID_DATE' }),
+      importLine({ readError: 'INVALID_AMOUNT', readErrorValue: 'x' }),
+      importLine({ readError: 'INVALID_AMOUNT' }),
+      importLine({ readError: 'UNREADABLE_LINE' }),
+    ];
+
+    for (const line of lines) {
+      const element = readErrorText(line)!.key.split('.')[2];
+      expect((en.imports.value as Record<string, string>)[element]).toBeTruthy();
+      expect((fr.imports.value as Record<string, string>)[element]).toBeTruthy();
+    }
   });
 });

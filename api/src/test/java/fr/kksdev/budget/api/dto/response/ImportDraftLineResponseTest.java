@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.dto.response;
 
 import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportReadError;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.ImportDraftLine;
@@ -131,5 +132,29 @@ class ImportDraftLineResponseTest {
     private static ImportMatchedTransactionResponse detail(String libelle) {
         return new ImportMatchedTransactionResponse(UUID.randomUUID(), LocalDate.of(2026, Month.AUGUST, 21), libelle,
                 new BigDecimal("12.50"), TransactionType.DEPENSE);
+    }
+
+    @Test
+    void should_expose_the_read_error_code_and_value_when_the_line_is_unreadable() {
+        ImportDraftLine line = lineBuilder()
+                .status(ImportLineStatus.NEEDS_REVIEW)
+                .statusMessage("Invalid date: Text '2026-08-24' could not be parsed at index 2")
+                .readError(ImportReadError.INVALID_DATE)
+                .readErrorValue("2026-08-24")
+                .build();
+
+        ImportDraftLineResponse response = ImportDraftLineResponse.from(line);
+
+        assertThat(response.readError()).isEqualTo("INVALID_DATE");
+        assertThat(response.readErrorValue()).isEqualTo("2026-08-24");
+        assertThat(response.statusMessage()).startsWith("Invalid date: ");
+    }
+
+    @Test
+    void should_leave_the_read_error_empty_when_the_line_was_read() {
+        ImportDraftLineResponse response = ImportDraftLineResponse.from(lineBuilder().build());
+
+        assertThat(response.readError()).isNull();
+        assertThat(response.readErrorValue()).isNull();
     }
 }

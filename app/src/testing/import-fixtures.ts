@@ -35,6 +35,8 @@ export function importLine(overrides: Partial<ImportDraftLine> = {}): ImportDraf
     matchedTransaction: null,
     matchCandidates: [],
     merchantKey: 'SUPER U',
+    readError: null,
+    readErrorValue: null,
     ...overrides,
   };
 }

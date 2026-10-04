@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.model;
 
 import fr.kksdev.budget.api.enums.CategorySource;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportReadError;
 import fr.kksdev.budget.api.enums.ImportSkipReason;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.converter.UuidListConverter;
@@ -66,6 +67,15 @@ public class ImportDraftLine {
     @Enumerated(EnumType.STRING)
     @Column(name = "skip_reason", length = 30)
     private ImportSkipReason skipReason;
+
+    /** Code de l'erreur de lecture d'une ligne illisible (KKS-441), nul sinon ou pour un brouillon anterieur. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "read_error", length = 30)
+    private ImportReadError readError;
+
+    /** Valeur brute de la cellule fautive (date ou montant), tronquee a 500 ; nulle si rien de pertinent (KKS-441). */
+    @Column(name = "read_error_value", length = 500)
+    private String readErrorValue;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
