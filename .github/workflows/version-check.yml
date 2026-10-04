@@ -61,6 +61,13 @@ jobs:
 
           PKG=$(jq -r .version app/package.json)
 
+          # Le lock recopie la version de package.json a deux endroits. npm la
+          # reecrit a chaque install : restee en retard, elle ressort dans le diff
+          # de la premiere PR qui touche une dependance (KKS-373 l'a fait passer
+          # en 6.5.2, aucune release ne la suivait).
+          LOCK=$(jq -r .version app/package-lock.json)
+          LOCK_ROOT=$(jq -r '.packages[""].version' app/package-lock.json)
+
           # pubspec porte un build number pour les stores (6.1.0+2) : seule la
           # partie semver doit correspondre, le +N suit le rythme des depots.
           PUBSPEC=$(grep -E '^version:' flutter/pubspec.yaml \
@@ -71,14 +78,15 @@ jobs:
           printf '%-24s %s\n' 'VERSION' "${VERSION}"
           printf '%-24s %s\n' 'api/pom.xml' "${POM}"
           printf '%-24s %s\n' 'app/package.json' "${PKG}"
+          printf '%-24s %s\n' 'app/package-lock.json' "${LOCK} / ${LOCK_ROOT}"
           printf '%-24s %s\n' 'flutter/pubspec.yaml' "${PUBSPEC}"
           echo ""
 
           STATUS=0
-          for pair in "api/pom.xml:${POM}" "app/package.json:${PKG}" "flutter/pubspec.yaml:${PUBSPEC}"; do
+          for pair in "api/pom.xml:${POM}" "app/package.json:${PKG}" "app/package-lock.json:${LOCK}" "app/package-lock.json (packages[\"\"]):${LOCK_ROOT}" "flutter/pubspec.yaml:${PUBSPEC}"; do
             FILE="${pair%%:*}"
             FOUND="${pair##*:}"
-            if [ -z "${FOUND}" ]; then
+            if [ -z "${FOUND}" ] || [ "${FOUND}" = "null" ]; then
               echo "ERREUR: version introuvable dans ${FILE}."
               STATUS=1
             elif [ "${FOUND}" != "${VERSION}" ]; then
@@ -89,11 +97,12 @@ jobs:
 
           if [ "${STATUS}" -ne 0 ]; then
             echo ""
-            echo "Les quatre fichiers de version doivent porter le meme numero."
+            echo "Les fichiers de version doivent porter le meme numero."
+            echo "app/package.json et son lock : npm version X.Y.Z --no-git-tag-version, depuis app/."
             exit 1
           fi
 
-          echo "OK: les quatre fichiers de version concordent sur ${VERSION}"
+          echo "OK: les fichiers de version concordent sur ${VERSION}"
 
       - name: Check tag does not already exist
         run: |
