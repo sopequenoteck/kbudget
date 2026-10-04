@@ -649,6 +649,79 @@ describe('ImportReview', () => {
     });
   });
 
+  it('should_show_the_translated_read_error_with_the_raw_value_when_lines_are_unreadable', async () => {
+    const fixture = await setup(
+      importDraft([
+        importLine({
+          status: 'NEEDS_REVIEW',
+          rawLabel: 'LIGNE DATE',
+          statusMessage: 'Invalid date: Text could not be parsed',
+          readError: 'INVALID_DATE',
+          readErrorValue: '99/99/2026',
+        }),
+        importLine({
+          status: 'NEEDS_REVIEW',
+          rawLabel: 'LIGNE MONTANT',
+          statusMessage: 'Invalid amount: Character a is neither a decimal digit number',
+          readError: 'INVALID_AMOUNT',
+          readErrorValue: 'abc',
+        }),
+        importLine({
+          status: 'NEEDS_REVIEW',
+          rawLabel: 'LIGNE ILLISIBLE',
+          statusMessage: 'Unreadable line: Mapping for Date not found',
+          readError: 'UNREADABLE_LINE',
+        }),
+      ]),
+    );
+
+    const rows = qa(fixture, '[data-testid="unreadable-line"]').map((row) => row.textContent);
+    expect(rows[0]).toContain('Date invalide : 99/99/2026');
+    expect(rows[1]).toContain('Montant invalide : abc');
+    expect(rows[2]).toContain('Ligne illisible');
+    for (const text of rows) {
+      expect(text).not.toContain('Invalid');
+      expect(text).not.toContain('Unreadable');
+      expect(text).not.toContain('null');
+    }
+  });
+
+  it('should_not_show_null_when_the_faulty_value_of_an_unreadable_line_is_missing', async () => {
+    const fixture = await setup(
+      importDraft([
+        importLine({
+          status: 'NEEDS_REVIEW',
+          statusMessage: 'Invalid amount: Empty',
+          readError: 'INVALID_AMOUNT',
+          readErrorValue: null,
+        }),
+      ]),
+    );
+
+    const text = q(fixture, '[data-testid="unreadable-line"]')?.textContent ?? '';
+    expect(text).toContain('Montant invalide');
+    expect(text).not.toContain('null');
+    expect(text).not.toContain('Invalid');
+  });
+
+  it('should_fall_back_to_the_status_message_when_the_read_error_code_is_null_or_unknown', async () => {
+    const fixture = await setup(
+      importDraft([
+        importLine({ status: 'NEEDS_REVIEW', statusMessage: 'Date invalide: ancien brouillon' }),
+        importLine({
+          status: 'NEEDS_REVIEW',
+          statusMessage: 'Message du serveur récent',
+          readError: 'FUTURE_CODE',
+          readErrorValue: 'x',
+        }),
+      ]),
+    );
+
+    const rows = qa(fixture, '[data-testid="unreadable-line"]').map((row) => row.textContent);
+    expect(rows[0]).toContain('Date invalide: ancien brouillon');
+    expect(rows[1]).toContain('Message du serveur récent');
+  });
+
   it('should_show_unreadable_lines_with_their_message_and_let_the_user_skip_them', async () => {
     const line = importLine({
       status: 'NEEDS_REVIEW',
@@ -838,6 +911,22 @@ describe('ImportReview', () => {
     expect(importServiceMock.updateLine).toHaveBeenCalledWith('draft-1', line.id, {
       status: 'READY',
     });
+  });
+
+  it('should_show_the_translated_read_error_when_an_unreadable_line_is_skipped', async () => {
+    const line = superU({
+      status: 'SKIPPED',
+      statusMessage: 'Invalid amount: abc',
+      readError: 'INVALID_AMOUNT',
+      readErrorValue: 'abc',
+    });
+    const fixture = await setup(importDraft([line]));
+    click(fixture, '[data-testid="group-skipped"] .group-label');
+    fixture.detectChanges();
+
+    const text = q(fixture, '[data-testid="skipped-line"]')?.textContent ?? '';
+    expect(text).toContain('Montant invalide : abc');
+    expect(text).not.toContain('Invalid amount');
   });
 
   it('should_not_offer_to_restore_an_unreadable_skipped_line', async () => {

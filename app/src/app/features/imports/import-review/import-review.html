@@ -263,7 +263,13 @@
               <div class="review__line">
                 <span class="list-row__content">
                   <span class="list-row__title">{{ line.rawLabel }}</span>
-                  <span class="list-row__subtitle">{{ line.statusMessage }}</span>
+                  <span class="list-row__subtitle">
+                    @if (readErrorOf(line); as readError) {
+                      {{ readError.key | transloco: readError.params }}
+                    } @else {
+                      {{ line.statusMessage }}
+                    }
+                  </span>
                 </span>
               </div>
               <div class="review__actions">
@@ -537,9 +543,13 @@
               <div class="list-row review__row" data-testid="skipped-line">
                 <span class="list-row__content">
                   <span class="list-row__title">{{ line.cleanLabel }}</span>
-                  <span class="list-row__subtitle">{{
-                    line.statusMessage ?? shortDate(line.date)
-                  }}</span>
+                  <span class="list-row__subtitle">
+                    @if (readErrorOf(line); as readError) {
+                      {{ readError.key | transloco: readError.params }}
+                    } @else {
+                      {{ line.statusMessage ?? shortDate(line.date) }}
+                    }
+                  </span>
                 </span>
                 <span class="list-row__right">
                   @if (canRestore(line)) {

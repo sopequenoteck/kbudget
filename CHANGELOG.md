@@ -5,6 +5,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Erreurs de lecture de l'import dans la langue affichee** (KKS-441) : une
+  ligne de releve illisible affichait « Date invalide », « Montant invalide »
+  ou « Erreur de parsing » en francais quelle que soit la langue. L'API sert
+  desormais un code (`readError`) et la valeur fautive (`readErrorValue`), que
+  l'application web traduit. API (ajout seul) : migration V43, deux colonnes
+  nullables ; `statusMessage` reste servi, en anglais. Les brouillons anterieurs
+  gardent leur message d'origine.
+- **Suppression d'une dette** (KKS-427) : l'API n'ajoute plus « (dette
+  supprimee - …) » au libelle des remboursements lies ; ils perdent seulement
+  leur lien a la dette. Les libelles deja modifies ne sont pas repris.
+
 ## [6.9.0] - 2026-10-02
 
 > Shell mobile de l'application web installee (PWA). Aucune migration, aucun

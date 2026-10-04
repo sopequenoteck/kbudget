@@ -260,11 +260,10 @@ public class DebtService {
         List<Transaction> payments = transactionRepository.findByDebtIdOrderByDateDesc(id);
         for (Transaction tx : payments) {
             tx.setDebt(null);
-            tx.setLibelle(tx.getLibelle() + " (dette supprimée - " + debt.getPersonne() + ")");
             transactionRepository.save(tx);
         }
         debtRepository.delete(debt);
-        log.info("Dette supprimée: {}", id);
+        log.info("Debt deleted: {}", id);
     }
 
     private void validateReminderFields(DebtRequest request) {

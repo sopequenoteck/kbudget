@@ -48,7 +48,13 @@ import {
   insertSortedByNom,
 } from '../../../shared/utils/locale-format.utils';
 import { ImportResult } from '../import-result/import-result';
-import { classifyLines, isRestorable, UncategorisedGroup } from './import-review.utils';
+import {
+  classifyLines,
+  isRestorable,
+  ReadErrorText,
+  readErrorText,
+  UncategorisedGroup,
+} from './import-review.utils';
 
 /** Groupes repliables de la revue, tous replies a l'ouverture. */
 export type ReviewGroupId = 'matched' | 'auto' | 'user' | 'imported' | 'skipped';
@@ -242,6 +248,11 @@ export class ImportReview implements OnInit {
 
   canRestore(line: ImportDraftLine): boolean {
     return isRestorable(line);
+  }
+
+  /** Texte de l'erreur de lecture de la ligne, `null` : afficher `statusMessage` (KKS-441). */
+  readErrorOf(line: ImportDraftLine): ReadErrorText | null {
+    return readErrorText(line);
   }
 
   // --- Actions sur les lignes ---
