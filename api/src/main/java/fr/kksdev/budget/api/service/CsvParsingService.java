@@ -149,10 +149,10 @@ public class CsvParsingService {
     }
 
     /** A line that could not be read: it goes to review with its error code, the faulty raw value and an English message (KKS-441). */
-    private ImportDraftLine unreadableLine(CSVRecord record, int lineNumber,
+    private ImportDraftLine unreadableLine(CSVRecord csvRecord, int lineNumber,
                                            ImportProfileRegistry.ImportProfileConfig profile,
                                            ImportReadError readError, String rawValue, String message) {
-        String rawLabel = safeGet(record, profile.labelColumn());
+        String rawLabel = safeGet(csvRecord, profile.labelColumn());
         return ImportDraftLine.builder()
                 .lineNumber(lineNumber)
                 .rawLabel(rawLabel)
