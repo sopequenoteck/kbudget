@@ -362,7 +362,9 @@ Contrainte UNIQUE(user_id, base_currency, target_currency). Inversion automatiqu
 | date | LocalDate | Date de la ligne |
 | transactionType | Enum | DEPENSE / RECETTE / AJUSTEMENT |
 | status | Enum | READY / NEEDS_REVIEW / DUPLICATE / SKIPPED |
-| statusMessage | String | Message de statut (nullable) |
+| statusMessage | String | Message technique en anglais d'une ligne illisible, repli d'affichage (nullable) |
+| readError | Enum | ImportReadError (INVALID_DATE, INVALID_AMOUNT, UNREADABLE_LINE) — code traduit par le client, nullable (KKS-441) |
+| readErrorValue | String(500) | Valeur brute de la cellule fautive, nullable (KKS-441) |
 | skipReason | Enum | ImportSkipReason (ALREADY_IMPORTED) — SKIPPED decide par l'import, nullable si ignoree par l'utilisateur (KKS-382) |
 | duplicateTransactionId | UUID | ID de la transaction doublon ou deja importee (nullable) |
 | purchaseDate | LocalDate | Date d'achat lue dans le libelle brut (paiement carte) quand le profil la declare, nullable ; `date` reste la date comptable — KKS-385 |

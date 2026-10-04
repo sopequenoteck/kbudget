@@ -48,6 +48,35 @@ export function isRestorable(line: ImportDraftLine): boolean {
   return line.status === 'SKIPPED' && !line.skipReason && !line.statusMessage;
 }
 
+/** Texte d'une erreur de lecture : une cle de catalogue et ses parametres, que le template traduit. */
+export interface ReadErrorText {
+  key: string;
+  params: { value: string } | Record<string, never>;
+}
+
+/**
+ * Texte traduit du code d'erreur de lecture d'une ligne (KKS-441), `null` pour un code absent ou
+ * inconnu : le template se replie alors sur `statusMessage` (ancien brouillon, serveur plus recent).
+ */
+export function readErrorText(line: ImportDraftLine): ReadErrorText | null {
+  switch (line.readError) {
+    case 'INVALID_DATE':
+      return valuedReadError('imports.value.readErrorInvalidDate', line.readErrorValue);
+    case 'INVALID_AMOUNT':
+      return valuedReadError('imports.value.readErrorInvalidAmount', line.readErrorValue);
+    case 'UNREADABLE_LINE':
+      return { key: 'imports.value.readErrorUnreadableLine', params: {} };
+    default:
+      return null;
+  }
+}
+
+/** Avec la valeur lue quand il y en a une (cellule vide ou absente : cle `...NoValue`, jamais « null »). */
+function valuedReadError(key: string, rawValue: string | null | undefined): ReadErrorText {
+  const value = rawValue?.trim();
+  return value ? { key, params: { value } } : { key: `${key}NoValue`, params: {} };
+}
+
 function groupKeyOf(line: ImportDraftLine): string {
   return line.merchantKey ? `${line.merchantKey}|${line.transactionType}` : `line:${line.id}`;
 }

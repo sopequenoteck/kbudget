@@ -1,5 +1,7 @@
 package fr.kksdev.budget.api.service;
 
+import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportReadError;
 import fr.kksdev.budget.api.model.ImportDraftLine;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +17,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-/** Reading of the bank header lines skipped before the column header (KKS-384), purchase date of the lines (KKS-385). */
+/** Reading of the bank header lines skipped before the column header (KKS-384), purchase date of the lines (KKS-385), read errors of the lines (KKS-441). */
 class CsvParsingServiceTest {
 
     private final CsvParsingService service = new CsvParsingService(
@@ -99,4 +101,94 @@ class CsvParsingServiceTest {
         assertThat(line.transactionDate()).isEqualTo(LocalDate.of(2026, Month.AUGUST, 24));
     }
 
+    private ImportProfileRegistry.ImportProfileConfig debitCreditProfile() {
+        return new ImportProfileRegistry.ImportProfileConfig(
+                "XX", "Test", ";", "dd/MM/yyyy", "Date", null, "Debit", "Credit", "Label", "UTF-8", ",",
+                0, List.of(), List.of(), null, null);
+    }
+
+    private ImportDraftLine parseOne(ImportProfileRegistry.ImportProfileConfig profile, String content) {
+        return service.parse(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), profile,
+                UUID.randomUUID()).getFirst();
+    }
+
+    @Test
+    void should_carry_no_read_error_when_the_line_is_read() {
+        ImportDraftLine line = parse("BOUTIQUE TEST", null).getFirst();
+
+        assertThat(line.getStatus()).isEqualTo(ImportLineStatus.READY);
+        assertThat(line.getReadError()).isNull();
+        assertThat(line.getReadErrorValue()).isNull();
+        assertThat(line.getStatusMessage()).isNull();
+    }
+
+    @Test
+    void should_report_an_invalid_date_with_its_raw_value_and_an_english_message_when_the_date_cannot_be_parsed() {
+        ImportDraftLine line = parseOne(profile("UTF-8", 0), "Date;Amount;Label\n2026-08-24;-12,50;BOUTIQUE TEST\n");
+
+        assertThat(line.getStatus()).isEqualTo(ImportLineStatus.NEEDS_REVIEW);
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_DATE);
+        assertThat(line.getReadErrorValue()).isEqualTo("2026-08-24");
+        assertThat(line.getStatusMessage()).startsWith("Invalid date: ");
+        assertThat(line.getRawLabel()).isEqualTo("BOUTIQUE TEST");
+    }
+
+    @Test
+    void should_report_an_invalid_amount_with_the_raw_cell_when_the_profile_has_one_amount_column() {
+        ImportDraftLine line = parseOne(profile("UTF-8", 0), "Date;Amount;Label\n24/08/2026;abc;BOUTIQUE TEST\n");
+
+        assertThat(line.getStatus()).isEqualTo(ImportLineStatus.NEEDS_REVIEW);
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_AMOUNT);
+        assertThat(line.getReadErrorValue()).isEqualTo("abc");
+        assertThat(line.getStatusMessage()).startsWith("Invalid amount: ");
+    }
+
+    @ParameterizedTest(name = "debit \"{0}\", credit \"{1}\" -> value \"{2}\"")
+    @CsvSource({"x1,'',x1", "'',y2,y2", "x1,y2,x1"})
+    void should_report_the_faulty_amount_cell_when_the_profile_has_debit_and_credit_columns(
+            String debit, String credit, String expectedValue) {
+        ImportDraftLine line = parseOne(debitCreditProfile(),
+                "Date;Debit;Credit;Label\n24/08/2026;" + debit + ";" + credit + ";BOUTIQUE TEST\n");
+
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_AMOUNT);
+        assertThat(line.getReadErrorValue()).isEqualTo(expectedValue);
+        assertThat(line.getStatusMessage()).startsWith("Invalid amount: ");
+    }
+
+    @Test
+    void should_report_an_unreadable_line_without_value_when_no_debit_nor_credit_is_found() {
+        ImportDraftLine line = parseOne(debitCreditProfile(), "Date;Debit;Credit;Label\n24/08/2026;;;BOUTIQUE TEST\n");
+
+        assertThat(line.getStatus()).isEqualTo(ImportLineStatus.NEEDS_REVIEW);
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.UNREADABLE_LINE);
+        assertThat(line.getReadErrorValue()).isNull();
+        assertThat(line.getStatusMessage()).isEqualTo("Unreadable line: No amount found in the debit/credit columns");
+    }
+
+    @Test
+    void should_report_an_unreadable_line_when_a_column_of_the_profile_is_missing_from_the_record() {
+        ImportDraftLine line = parseOne(profile("UTF-8", 0), "Date;Label\n24/08/2026;BOUTIQUE TEST\n");
+
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.UNREADABLE_LINE);
+        assertThat(line.getReadErrorValue()).isNull();
+        assertThat(line.getStatusMessage()).startsWith("Unreadable line: ");
+    }
+
+    @Test
+    void should_keep_an_empty_raw_value_when_the_faulty_cell_is_empty() {
+        ImportDraftLine line = parseOne(profile("UTF-8", 0), "Date;Amount;Label\n24/08/2026;;BOUTIQUE TEST\n");
+
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_AMOUNT);
+        assertThat(line.getReadErrorValue()).isEmpty();
+    }
+
+    @ParameterizedTest(name = "raw value of {0} characters -> {1} kept")
+    @CsvSource({"499,499", "500,500", "501,500", "800,500"})
+    void should_truncate_the_raw_value_to_500_characters_when_the_cell_is_longer(int length, int expectedLength) {
+        ImportDraftLine line = parseOne(profile("UTF-8", 0),
+                "Date;Amount;Label\n24/08/2026;" + "a".repeat(length) + ";BOUTIQUE TEST\n");
+
+        assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_AMOUNT);
+        assertThat(line.getReadErrorValue()).hasSize(expectedLength);
+    }
 }

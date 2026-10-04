@@ -2,6 +2,7 @@ package fr.kksdev.budget.api.service;
 
 import fr.kksdev.budget.api.dto.response.CsvPreviewResponse;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
+import fr.kksdev.budget.api.enums.ImportReadError;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.ImportDraftLine;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CsvParsingService {
+
+    /** Length of the {@code read_error_value} column. */
+    private static final int READ_ERROR_VALUE_MAX = 500;
 
     private final LabelCleaningService labelCleaningService;
     private final CategorySuggestionService categorySuggestionService;
@@ -69,9 +73,12 @@ public class CsvParsingService {
     private ImportDraftLine parseLine(CSVRecord record, int lineNumber,
                                       ImportProfileRegistry.ImportProfileConfig profile,
                                       DateTimeFormatter dateFormatter) {
+        // Raw cells read so far, kept for the read error of the line (KKS-441)
+        String rawDate = null;
+        String rawAmountCell = null;
         try {
             // Parse date
-            String rawDate = record.get(profile.dateColumn());
+            rawDate = record.get(profile.dateColumn());
             LocalDate date = LocalDate.parse(rawDate.trim(), dateFormatter);
 
             // Parse amount and determine type
@@ -81,6 +88,7 @@ public class CsvParsingService {
             if (profile.amountColumn() != null) {
                 // Single column strategy
                 String rawAmount = record.get(profile.amountColumn()).trim();
+                rawAmountCell = rawAmount;
                 rawAmount = rawAmount.replace(profile.decimalSeparator(), ".");
                 // Remove any thousand separators (space or non-breaking space)
                 rawAmount = rawAmount.replaceAll("[\\s\u00A0]", "");
@@ -95,6 +103,7 @@ public class CsvParsingService {
                 // Debit/Credit columns strategy
                 String rawDebit = record.get(profile.debitColumn()).trim();
                 String rawCredit = record.get(profile.creditColumn()).trim();
+                rawAmountCell = rawDebit.isEmpty() ? rawCredit : rawDebit;
 
                 rawDebit = rawDebit.replace(profile.decimalSeparator(), ".")
                         .replaceAll("[\\s\u00A0]", "");
@@ -128,42 +137,38 @@ public class CsvParsingService {
                     .build();
 
         } catch (DateTimeParseException e) {
-            String rawLabel = safeGet(record, profile.labelColumn());
-            return ImportDraftLine.builder()
-                    .lineNumber(lineNumber)
-                    .rawLabel(rawLabel)
-                    .cleanLabel(rawLabel)
-                    .amount(BigDecimal.ZERO)
-                    .date(LocalDate.now())
-                    .transactionType(TransactionType.DEPENSE)
-                    .status(ImportLineStatus.NEEDS_REVIEW)
-                    .statusMessage("Date invalide: " + e.getMessage())
-                    .build();
+            return unreadableLine(record, lineNumber, profile, ImportReadError.INVALID_DATE, rawDate,
+                    "Invalid date: " + e.getMessage());
         } catch (NumberFormatException e) {
-            String rawLabel = safeGet(record, profile.labelColumn());
-            return ImportDraftLine.builder()
-                    .lineNumber(lineNumber)
-                    .rawLabel(rawLabel)
-                    .cleanLabel(rawLabel)
-                    .amount(BigDecimal.ZERO)
-                    .date(LocalDate.now())
-                    .transactionType(TransactionType.DEPENSE)
-                    .status(ImportLineStatus.NEEDS_REVIEW)
-                    .statusMessage("Montant invalide: " + e.getMessage())
-                    .build();
+            return unreadableLine(record, lineNumber, profile, ImportReadError.INVALID_AMOUNT, rawAmountCell,
+                    "Invalid amount: " + e.getMessage());
         } catch (Exception e) {
-            String rawLabel = safeGet(record, profile.labelColumn());
-            return ImportDraftLine.builder()
-                    .lineNumber(lineNumber)
-                    .rawLabel(rawLabel != null ? rawLabel : "")
-                    .cleanLabel(rawLabel != null ? rawLabel : "")
-                    .amount(BigDecimal.ZERO)
-                    .date(LocalDate.now())
-                    .transactionType(TransactionType.DEPENSE)
-                    .status(ImportLineStatus.NEEDS_REVIEW)
-                    .statusMessage("Erreur de parsing: " + e.getMessage())
-                    .build();
+            return unreadableLine(record, lineNumber, profile, ImportReadError.UNREADABLE_LINE, null,
+                    "Unreadable line: " + e.getMessage());
         }
+    }
+
+    /** A line that could not be read: it goes to review with its error code, the faulty raw value and an English message (KKS-441). */
+    private ImportDraftLine unreadableLine(CSVRecord csvRecord, int lineNumber,
+                                           ImportProfileRegistry.ImportProfileConfig profile,
+                                           ImportReadError readError, String rawValue, String message) {
+        String rawLabel = safeGet(csvRecord, profile.labelColumn());
+        return ImportDraftLine.builder()
+                .lineNumber(lineNumber)
+                .rawLabel(rawLabel)
+                .cleanLabel(rawLabel)
+                .amount(BigDecimal.ZERO)
+                .date(LocalDate.now())
+                .transactionType(TransactionType.DEPENSE)
+                .status(ImportLineStatus.NEEDS_REVIEW)
+                .statusMessage(message)
+                .readError(readError)
+                .readErrorValue(truncate(rawValue))
+                .build();
+    }
+
+    private static String truncate(String value) {
+        return value != null && value.length() > READ_ERROR_VALUE_MAX ? value.substring(0, READ_ERROR_VALUE_MAX) : value;
     }
 
     /** Purchase date carried by the raw label when the profile declares one (KKS-385), {@code null} otherwise. */

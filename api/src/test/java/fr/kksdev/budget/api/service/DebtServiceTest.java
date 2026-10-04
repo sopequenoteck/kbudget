@@ -651,7 +651,7 @@ class DebtServiceTest {
     }
 
     @Test
-    void should_detachAndAnnotatePayments_when_deleteDebt() {
+    void should_detachPaymentsAndKeepTheirLabel_when_deleteDebt() {
         var user = buildUser();
         var debt = buildDebt(user);
         var payment = Transaction.builder()
@@ -671,7 +671,7 @@ class DebtServiceTest {
         debtService.delete(debtId, userId);
 
         assertThat(payment.getDebt()).isNull();
-        assertThat(payment.getLibelle()).contains("dette supprimée").contains("Alice");
+        assertThat(payment.getLibelle()).isEqualTo("Remboursement - Alice");
         verify(transactionRepository).save(payment);
         verify(debtRepository).delete(debt);
     }

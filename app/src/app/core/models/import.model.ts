@@ -51,6 +51,14 @@ export interface ImportDraftLine {
   matchCandidates: ImportMatchedTransaction[];
   /** KKS-386 : cle commercant sur laquelle l'API propage une correction de categorie. */
   merchantKey: string;
+  /**
+   * KKS-441 : code de l'erreur de lecture d'une ligne illisible (`INVALID_DATE`, `INVALID_AMOUNT`,
+   * `UNREADABLE_LINE`), `null` pour une ligne lue ou un brouillon anterieur. Une valeur inconnue
+   * (serveur plus recent) se replie sur `statusMessage`.
+   */
+  readError: string | null;
+  /** KKS-441 : valeur brute de la cellule fautive (date ou montant), `null` si rien de pertinent. */
+  readErrorValue: string | null;
 }
 
 export interface CategoryRule {

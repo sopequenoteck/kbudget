@@ -727,7 +727,8 @@ Response `200` : meme format qu'un element de la liste.
 
 ### Supprimer `DELETE /api/v1/debts/{id}`
 
-Response `204` (corps vide).
+Response `204` (corps vide). Les remboursements lies sont conserves : ils perdent leur
+lien a la dette, leur libelle est inchange (KKS-427).
 
 ### Solde total `GET /api/v1/accounts/total-balance`
 
@@ -1808,7 +1809,9 @@ Response `201` :
         "type": "DEPENSE"
       },
       "matchCandidates": [],
-      "merchantKey": "SUPER U"
+      "merchantKey": "SUPER U",
+      "readError": null,
+      "readErrorValue": null
     },
     {
       "id": "uuid",
@@ -1833,7 +1836,9 @@ Response `201` :
       "subscriptionId": null,
       "matchedTransaction": null,
       "matchCandidates": [],
-      "merchantKey": "FRAIS BANCAIRES TEST"
+      "merchantKey": "FRAIS BANCAIRES TEST",
+      "readError": null,
+      "readErrorValue": null
     }
   ]
 }
@@ -1905,6 +1910,12 @@ date d'achat si elle est connue, sinon la date comptable :
   correction de categorie : un client regroupe les lignes par `merchantKey` et par
   `transactionType` pour proposer un seul choix de categorie par commercant. Ajout
   seulement, rien n'est retire.
+
+- `readError` / `readErrorValue` (KKS-441) : pour une ligne illisible (`NEEDS_REVIEW`), le
+  code de l'erreur de lecture (`INVALID_DATE`, `INVALID_AMOUNT`, `UNREADABLE_LINE`) et la
+  valeur brute de la cellule fautive (null pour `UNREADABLE_LINE`). Le client traduit le
+  code. `statusMessage` reste servi, en anglais, comme repli pour un code inconnu ou un
+  brouillon anterieur. Ajout seulement, rien n'est retire.
 
 **Categorie pre-remplie (KKS-383)** : `categorySource` indique d'ou vient la
 categorie — `RULE` (une regle), `HISTORY` (categorie majoritaire des transactions

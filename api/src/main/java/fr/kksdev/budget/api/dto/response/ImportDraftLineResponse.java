@@ -44,7 +44,11 @@ public record ImportDraftLineResponse(
         /** Detail des candidats de {@code matchCandidateIds}, dans le meme ordre ; un candidat disparu en est absent (KKS-386). */
         List<ImportMatchedTransactionResponse> matchCandidates,
         /** Cle commercant du libelle nettoye : les lignes de meme cle (et de meme sens) recoivent ensemble la categorie corrigee (KKS-386). */
-        String merchantKey
+        String merchantKey,
+        /** Code de l'erreur de lecture : INVALID_DATE, INVALID_AMOUNT ou UNREADABLE_LINE ; null pour une ligne lue (KKS-441). */
+        String readError,
+        /** Valeur brute de la cellule fautive pour INVALID_DATE / INVALID_AMOUNT, null sinon (KKS-441). */
+        String readErrorValue
 ) {
     public static ImportDraftLineResponse from(ImportDraftLine line) {
         return from(line, false, Map.of());
@@ -79,7 +83,9 @@ public record ImportDraftLineResponse(
                 line.getSubscriptionId(),
                 line.getMatchedTransactionId() == null ? null : transactions.get(line.getMatchedTransactionId()),
                 line.getMatchCandidateIds().stream().map(transactions::get).filter(Objects::nonNull).toList(),
-                MerchantKey.of(line.getCleanLabel())
+                MerchantKey.of(line.getCleanLabel()),
+                line.getReadError() != null ? line.getReadError().name() : null,
+                line.getReadErrorValue()
         );
     }
 }
