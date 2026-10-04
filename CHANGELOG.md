@@ -5,6 +5,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.10.0] - 2026-10-04
+
+> Fin du volet API de l'internationalisation : l'API n'ecrit plus de texte
+> francais dans les donnees qu'elle sert. Migration V43 (deux colonnes
+> nullables sur les lignes de brouillon d'import), ajout seul au contrat d'API,
+> `MIN_CLIENT_VERSION` reste a 6.0.0. Seuls l'API et l'application web
+> changent. Constitution passee en 4.2.0 (documentation).
+
 ### Fixed
 
 - **Erreurs de lecture de l'import dans la langue affichee** (KKS-441) : une
@@ -1534,7 +1542,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...HEAD
+[6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
 [6.9.0]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...v6.9.0
 [6.8.0]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...v6.8.0
 [6.7.3]: https://github.com/sopequenoteck/kbudget/compare/v6.7.2...v6.7.3
