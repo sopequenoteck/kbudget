@@ -178,11 +178,11 @@ La version vit dans **quatre** fichiers, tous a incrementer ensemble :
 |---------|--------|
 | `VERSION` | `6.1.0` |
 | `api/pom.xml` | `<version>` du projet, pas celle du parent Spring Boot |
-| `app/package.json` | champ `version` |
+| `app/package.json` | champ `version`. Le changer avec `npm version X.Y.Z --no-git-tag-version` depuis `app/` : la commande met aussi a jour les deux champs de version de `app/package-lock.json`, controles avec les autres |
 | `flutter/pubspec.yaml` | `6.1.0+2` — le `+N` suit le rythme des depots sur les stores, pas celui des releases |
 
-Le workflow `version-check` compare les quatre sur toute PR vers `main` et nomme
-le fichier fautif. Avant KKS-314, `flutter/pubspec.yaml` etait fige a `1.0.0+1`
+Le workflow `version-check` compare les quatre, plus le lock, sur toute PR vers
+`main` et nomme le fichier fautif. Avant KKS-314, `flutter/pubspec.yaml` etait fige a `1.0.0+1`
 et hors du controle : l'incoherence n'apparaissait qu'apres publication, dans le
 champ `serverVersion` de `/api/meta`.
 
