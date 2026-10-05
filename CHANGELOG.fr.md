@@ -1,5 +1,7 @@
 # Changelog
 
+> 🇬🇧 [English version](CHANGELOG.md)
+
 Basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
