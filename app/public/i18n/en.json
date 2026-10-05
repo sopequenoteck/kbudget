@@ -969,7 +969,7 @@
       "revoke": "Revoke"
     },
     "dialog": {
-      "deleteAccountMessage": "This action is <strong>irreversible</strong>. Your account and all your data will be permanently deleted."
+      "deleteAccountMessage": "You will no longer be able to sign in. Your data is <strong>not erased</strong>: it stays on this instance, and an administrator can reactivate your access. Export your data first if you want to keep a copy."
     },
     "empty": {
       "invitations": "No invitations yet",
@@ -1008,7 +1008,7 @@
     "form": {
       "confirmNewPassword": "Confirm the new password",
       "currentPassword": "Current password",
-      "deleteAccountConfirm": "I understand that this action is permanent",
+      "deleteAccountConfirm": "I understand that I will no longer be able to sign in",
       "editNameAria": "Edit name",
       "emailManagedHint": "Managed by the admin",
       "emailPlaceholder": "new@example.com",
@@ -1020,7 +1020,7 @@
     "list": {
       "changePassword": "Change password",
       "changePasswordHint": "Update your password",
-      "deleteAccountHint": "Permanent deletion of the account and its data",
+      "deleteAccountHint": "Deactivates your access, your data is kept",
       "exportCsv": "Export my transactions (CSV)",
       "exportCsvHint": "My transactions in spreadsheet format",
       "exportJson": "Export my data (JSON)",

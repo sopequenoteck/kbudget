@@ -7,6 +7,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **La suppression du compte ne promet plus un effacement** (KKS-417) :
+  l'application web annoncait une suppression irreversible du compte et de
+  toutes ses donnees, alors que l'API se contente de le desactiver, conserve
+  les donnees, et qu'un administrateur peut le reactiver. Le dialogue, sa case
+  de confirmation et la ligne des parametres le disent desormais, et invitent
+  a exporter ses donnees avant. Meme correction pour la case de confirmation
+  de l'application mobile.
+
 ## [6.10.0] - 2026-10-04
 
 > Fin du volet API de l'internationalisation : l'API n'ecrit plus de texte

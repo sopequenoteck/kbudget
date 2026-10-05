@@ -787,7 +787,7 @@
   "usersFormNewPassword": "New password",
   "usersFormConfirmNewPassword": "Confirm the new password",
   "usersFormPasswordMismatch": "Passwords do not match.",
-  "usersFormDeleteAccountConfirm": "I understand that this action is permanent",
+  "usersFormDeleteAccountConfirm": "I understand that I will no longer be able to sign in",
   "usersValueNameNotSet": "Not set",
   "usersActionDeleteAccount": "Delete my account",
   "usersActionChangePhoto": "Change photo",

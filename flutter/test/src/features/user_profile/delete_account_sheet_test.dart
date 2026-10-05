@@ -56,7 +56,7 @@ void main() {
       expect(find.text('Supprimer mon compte'), findsAtLeast(1));
       expect(find.text('Mot de passe actuel'), findsOneWidget);
       expect(
-        find.text('Je comprends que cette action est définitive'),
+        find.text('Je comprends que je ne pourrai plus me connecter'),
         findsOneWidget,
       );
     });

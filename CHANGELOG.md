@@ -7,6 +7,15 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Deleting your profile no longer promises an erasure** (KKS-417): the web
+  app announced an irreversible deletion of the account and all its data,
+  while the API only deactivates it and keeps the data, and an administrator
+  can reactivate it. The dialog, its confirmation box and the settings row now
+  say so, and suggest exporting your data first. Same fix for the confirmation
+  box of the mobile app.
+
 ## [6.10.0] - 2026-10-04
 
 > Completes the API side of internationalisation: the API no longer writes
