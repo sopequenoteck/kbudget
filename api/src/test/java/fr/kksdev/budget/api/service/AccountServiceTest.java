@@ -779,6 +779,94 @@ class AccountServiceTest {
                 .hasMessage("Cannot adjust the balance of an inactive account");
     }
 
+    @Test
+    void should_storeUpperCasedBankCode_when_createAccountWithKnownBank() {
+        var user = buildUser();
+        var request = new AccountRequest("Compte SG", AccountType.COURANT, null, null, null, null, null, "sg", null, null);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.save(any(Account.class))).thenAnswer(i -> i.getArgument(0));
+        when(transactionRepository.calculateBalanceByAccountId(any())).thenReturn(BigDecimal.ZERO);
+
+        accountService.createAccount(request, userId);
+
+        verify(accountRepository).save(argThat(account -> "SG".equals(account.getBankCode())));
+    }
+
+    @Test
+    void should_throw_when_createAccountWithUnknownBankCode() {
+        var user = buildUser();
+        var request = new AccountRequest("Compte inconnu", AccountType.COURANT, null, null, null, null, null, "NOPE", null, null);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+
+        assertThatThrownBy(() -> accountService.createAccount(request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid bank code: NOPE");
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    void should_changeBankCode_when_updateAccountWithDifferentBank() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setBankCode("SG");
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, null, null, "bnp", null, null);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(accountRepository.save(account)).thenReturn(account);
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+
+        accountService.updateAccount(accountId, request, userId);
+
+        assertThat(account.getBankCode()).isEqualTo("BNP");
+    }
+
+    @Test
+    void should_updateAccountFields_when_requestIsValid() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var request = new AccountRequest("Compte Renomme", AccountType.EPARGNE, null, null, "#112233", null, null, null, null, null);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(accountRepository.save(account)).thenReturn(account);
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(BigDecimal.ZERO);
+
+        AccountResponse response = accountService.updateAccount(accountId, request, userId);
+
+        assertThat(response.nom()).isEqualTo("Compte Renomme");
+        assertThat(response.type()).isEqualTo(AccountType.EPARGNE);
+        assertThat(response.couleur()).isEqualTo("#112233");
+        verify(accountRepository).save(account);
+    }
+
+    @Test
+    void should_notCreateAdjustment_when_adjustBalanceEqualsCurrentBalance() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        account.setSoldeInitial(new BigDecimal("100.00"));
+        var newBalance = new BigDecimal("150.00");
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.calculateBalanceByAccountId(accountId)).thenReturn(new BigDecimal("50.00"));
+
+        AccountResponse response = accountService.adjustBalance(accountId, newBalance, null, userId);
+
+        assertThat(response.solde()).isEqualByComparingTo("150.00");
+        verify(transactionRepository, never()).save(any());
+        verifyNoInteractions(categoryService);
+    }
+
+    @Test
+    void should_rethrowException_when_defaultAccountCreationFails() {
+        var user = buildUser();
+        when(accountRepository.save(any(Account.class))).thenThrow(new IllegalStateException("database unavailable"));
+
+        assertThatThrownBy(() -> accountService.createDefaultAccount(user, Currency.EUR, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("database unavailable");
+    }
+
     // -------------------------------------------------------------------------
     // KKS-396 — libelle fourni par le client pour le virement et l'ajustement,
     // sinon defaut anglais

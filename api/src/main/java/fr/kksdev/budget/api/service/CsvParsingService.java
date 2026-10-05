@@ -47,12 +47,12 @@ public class CsvParsingService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(profile.dateFormat());
 
         CSVFormat format = columnHeaderFormat(profile.separator().charAt(0));
+        int lineNumber = 1;
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             skipBankHeader(bufferedReader, profile.skipHeaderLines());
 
             CSVParser parser = new CSVParser(bufferedReader, format);
-            int lineNumber = 1;
             for (CSVRecord record : parser) {
                 ImportDraftLine line = parseLine(record, lineNumber, profile, dateFormatter);
                 lines.add(line);
@@ -60,8 +60,8 @@ public class CsvParsingService {
             }
             parser.close();
         } catch (IOException e) {
-            log.error("Erreur lecture CSV: {}", e.getMessage());
-            throw new IllegalArgumentException("Unable to read the CSV file: " + e.getMessage());
+            log.error("CSV read error ({}) at line {}", e.getClass().getSimpleName(), lineNumber);
+            throw new IllegalArgumentException("Unable to read the CSV file (" + e.getClass().getSimpleName() + ")");
         }
 
         // Pre-fill categories: user rules, then the user's own history (KKS-383)
@@ -191,7 +191,7 @@ public class CsvParsingService {
                 return List.copyOf(parser.getHeaderNames());
             }
         } catch (IOException | RuntimeException e) {
-            log.debug("File not readable with import profile '{}': {}", profile.name(), e.getMessage());
+            log.debug("File not readable with the import profile ({})", e.getClass().getSimpleName());
             return List.of();
         }
     }
@@ -202,9 +202,10 @@ public class CsvParsingService {
      */
     public List<String> readSkippedLines(byte[] content, ImportProfileRegistry.ImportProfileConfig profile) {
         List<String> skipped = new ArrayList<>();
+        int lineIndex = 0;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new ByteArrayInputStream(content), Charset.forName(profile.encoding())))) {
-            for (int i = 0; i < profile.skipHeaderLines(); i++) {
+            for (; lineIndex < profile.skipHeaderLines(); lineIndex++) {
                 String line = reader.readLine();
                 if (line == null) {
                     break;
@@ -212,7 +213,7 @@ public class CsvParsingService {
                 skipped.add(line);
             }
         } catch (IOException | RuntimeException e) {
-            log.debug("Header lines not readable with import profile '{}': {}", profile.name(), e.getMessage());
+            log.debug("Header lines not readable with the import profile ({}) at line {}", e.getClass().getSimpleName(), lineIndex + 1);
             return List.of();
         }
         return skipped;
@@ -285,7 +286,7 @@ public class CsvParsingService {
                 }
             }
             if (effectiveSkip > 0) {
-                log.info("Auto-détection skipHeaderLines={} (lignes d'info bancaire détectées)", effectiveSkip);
+                log.info("skipHeaderLines auto-detected: {} (bank information lines found)", effectiveSkip);
             }
         }
 

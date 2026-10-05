@@ -64,12 +64,12 @@ public class TransactionService {
                 .build();
 
         transaction = transactionRepository.save(transaction);
-        log.info("Transaction créée: {} pour userId {}", transaction.getId(), userId);
+        log.info("Transaction created (transactionId={}, userId={})", transaction.getId(), userId);
         if (transaction.getType() == TransactionType.DEPENSE && transaction.getCategory() != null) {
             try {
                 budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+                log.warn("Budget threshold check failed: {}", e.getMessage());
             }
         }
         return toResponse(transaction);
@@ -98,7 +98,7 @@ public class TransactionService {
         Transaction transaction = findByIdAndUser(id, userId);
 
         if (transaction.getType() == TransactionType.AJUSTEMENT) {
-            log.warn("Tentative de modification d'une transaction d'ajustement: id={}, userId={}", id, userId);
+            log.warn("Attempt to modify an adjustment transaction (id={}, userId={})", id, userId);
             throw new AccessDeniedException("Adjustment transactions cannot be updated");
         }
 
@@ -120,7 +120,7 @@ public class TransactionService {
         transaction.setNote(request.note());
 
         transaction = transactionRepository.save(transaction);
-        log.info("Transaction mise à jour: {}", transaction.getId());
+        log.info("Transaction updated (transactionId={})", transaction.getId());
         if (transaction.getDebt() != null) {
             Debt debt = transaction.getDebt();
             BigDecimal paid = transactionRepository.sumByDebtId(debt.getId());
@@ -132,7 +132,7 @@ public class TransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+                log.warn("Budget threshold check failed: {}", e.getMessage());
             }
         }
         return toResponse(transaction);
@@ -143,7 +143,7 @@ public class TransactionService {
         Transaction transaction = findByIdAndUser(id, userId);
 
         if (transaction.getType() == TransactionType.AJUSTEMENT) {
-            log.warn("Tentative de suppression d'une transaction d'ajustement: id={}, userId={}", id, userId);
+            log.warn("Attempt to delete an adjustment transaction (id={}, userId={})", id, userId);
             throw new AccessDeniedException("Adjustment transactions cannot be deleted");
         }
 
@@ -157,12 +157,12 @@ public class TransactionService {
                     .filter(t -> !t.getId().equals(id))
                     .forEach(t -> {
                         transactionRepository.delete(t);
-                        log.info("Transaction liée supprimée (cascade virement): {}", t.getId());
+                        log.info("Linked transaction deleted (transfer cascade): {}", t.getId());
                     });
         }
 
         transactionRepository.delete(transaction);
-        log.info("Transaction supprimée: {}", id);
+        log.info("Transaction deleted: {}", id);
 
         // Recalculer rembourse si transaction liée à une dette (FR-023)
         if (transaction.getDebt() != null) {
@@ -172,7 +172,7 @@ public class TransactionService {
             if (newRemaining.compareTo(BigDecimal.ZERO) > 0 && Boolean.TRUE.equals(debt.getRembourse())) {
                 debt.setRembourse(false);
                 debtRepository.save(debt);
-                log.info("Dette réouverte après suppression remboursement: debtId={}", debt.getId());
+                log.info("Debt reopened after repayment deletion (debtId={})", debt.getId());
             }
         }
 
@@ -180,7 +180,7 @@ public class TransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, deletedCategoryId);
             } catch (Exception e) {
-                log.warn("Erreur vérification seuil budget après suppression: {}", e.getMessage());
+                log.warn("Budget threshold check failed after deletion: {}", e.getMessage());
             }
         }
     }
@@ -221,7 +221,7 @@ public class TransactionService {
             if (txCurrency != primaryCurrency) {
                 Optional<BigDecimal> rate = exchangeRateService.getRate(userId, txCurrency, primaryCurrency);
                 if (rate.isEmpty()) {
-                    log.warn("Taux de change manquant pour {} → {} (userId={}), transaction exclue du bilan", txCurrency, primaryCurrency, userId);
+                    log.warn("Missing exchange rate {} -> {} (userId={}), transaction excluded from the summary", txCurrency, primaryCurrency, userId);
                     continue;
                 }
                 montant = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
@@ -237,7 +237,7 @@ public class TransactionService {
         }
 
         BigDecimal solde = totalRecettes.subtract(totalDepenses).add(totalAjustements);
-        log.info("Bilan mensuel {}/{} pour userId={}: agrégé en {}", month, year, userId, primaryCurrency);
+        log.info("Monthly summary computed (month={}/{}, userId={}, currency={})", month, year, userId, primaryCurrency);
         return List.of(new MonthlySummaryResponse(month, year, totalRecettes, totalDepenses, solde, primaryCurrency.name()));
     }
 
@@ -248,7 +248,7 @@ public class TransactionService {
                 .forEach(t -> {
                     t.setMontant(newMontant);
                     transactionRepository.save(t);
-                    log.info("Montant propagé à la transaction liée: {} -> {}", t.getId(), newMontant);
+                    log.info("Amount propagated to the linked transaction (transactionId={})", t.getId());
                 });
     }
 
@@ -261,7 +261,7 @@ public class TransactionService {
                 .filter(a -> a.getUser().getId().equals(userId))
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    log.error("Account not found or inactive (id={}, userId={})", accountId, userId);
                     return new EntityNotFoundException("Account not found or inactive");
                 });
     }
@@ -270,7 +270,7 @@ public class TransactionService {
         return transactionRepository.findById(id)
                 .filter(t -> t.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Transaction non trouvée: id={}, userId={}", id, userId);
+                    log.error("Transaction not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Transaction not found");
                 });
     }
@@ -282,7 +282,7 @@ public class TransactionService {
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
     }

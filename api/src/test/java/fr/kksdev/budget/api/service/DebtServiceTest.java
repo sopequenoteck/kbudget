@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -134,6 +136,40 @@ class DebtServiceTest {
         assertThat(response.personne()).isEqualTo("Alice");
         assertThat(response.rembourse()).isFalse();
         verify(debtRepository).save(any(Debt.class));
+    }
+
+    @Test
+    void should_throw_when_create_with_unknown_account() {
+        var user = buildUser();
+        UUID accountId = UUID.randomUUID();
+        var request = new DebtRequest("Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.of(2026, Month.FEBRUARY, 1), null, null, null, null,
+                accountId, null, null, null);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> debtService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Account not found");
+        verify(debtRepository, never()).save(any(Debt.class));
+    }
+
+    @Test
+    void should_throw_when_create_with_unknown_category() {
+        var user = buildUser();
+        UUID categoryId = UUID.randomUUID();
+        var request = new DebtRequest("Alice", new BigDecimal("100.00"),
+                DebtType.EMPRUNT, LocalDate.of(2026, Month.FEBRUARY, 1), null, null, categoryId, Currency.EUR,
+                null, null, null, null);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> debtService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Category not found");
+        verify(debtRepository, never()).save(any(Debt.class));
     }
 
     @Test

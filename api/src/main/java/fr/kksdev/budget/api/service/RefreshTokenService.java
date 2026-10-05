@@ -46,7 +46,7 @@ public class RefreshTokenService {
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-        log.info("Refresh token issued for user: {}", user.getEmail());
+        log.info("Refresh token issued (userId={})", user.getId());
 
         return tokenValue;
     }
@@ -56,8 +56,8 @@ public class RefreshTokenService {
                 .orElseThrow(TokenInvalidException::new);
 
         if (refreshToken.getStatus() == TokenStatus.CONSUMED) {
-            log.error("Refresh token reuse detected for user: {}. Revoking all active tokens.",
-                    refreshToken.getUser().getEmail());
+            log.error("Refresh token reuse detected (userId={}), revoking all active tokens",
+                    refreshToken.getUser().getId());
             revokeAllUserTokens(refreshToken.getUser());
             throw new TokenReusedException();
         }
@@ -84,7 +84,7 @@ public class RefreshTokenService {
                 : java.util.Map.of();
         String newAccessToken = jwtUtil.generateToken(user.getEmail(), extraClaims);
 
-        log.info("Token refreshed for user: {}", user.getEmail());
+        log.info("Token refreshed (userId={})", user.getId());
 
         return new AuthResponse(newAccessToken, newRefreshTokenValue, user.getEmail(), user.getName(),
                 user.isPasswordResetRequired());
@@ -94,8 +94,8 @@ public class RefreshTokenService {
         List<RefreshToken> activeTokens = refreshTokenRepository.findByUserAndStatus(user, TokenStatus.ACTIVE);
         activeTokens.forEach(token -> token.setStatus(TokenStatus.REVOKED));
         refreshTokenRepository.saveAll(activeTokens);
-        log.warn("All active refresh tokens revoked for user: {} (count: {})",
-                user.getEmail(), activeTokens.size());
+        log.warn("All active refresh tokens revoked (userId={}, count={})",
+                user.getId(), activeTokens.size());
     }
 
     public void revokeRefreshToken(String refreshTokenValue) {
@@ -108,7 +108,7 @@ public class RefreshTokenService {
 
         refreshToken.setStatus(TokenStatus.REVOKED);
         refreshTokenRepository.save(refreshToken);
-        log.info("Refresh token revoked for user: {}", refreshToken.getUser().getEmail());
+        log.info("Refresh token revoked (userId={})", refreshToken.getUser().getId());
     }
 
     private String generateOpaqueToken() {

@@ -203,7 +203,7 @@ class ImportServiceTest {
 
         assertThatThrownBy(() -> importService.upload(file, accountId, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unable to read the file: stream closed");
+                .hasMessage("Unable to read the file (IOException)");
     }
 
     @Test
@@ -225,7 +225,7 @@ class ImportServiceTest {
 
         assertThatThrownBy(() -> importService.uploadWithMapping(file, accountId, mapping, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unable to read the file: stream closed");
+                .hasMessage("Unable to read the file (IOException)");
     }
 
     @Test
@@ -238,7 +238,7 @@ class ImportServiceTest {
 
         assertThatThrownBy(() -> importService.preview(file, ";", "UTF-8", 1))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unable to read the file: stream closed");
+                .hasMessage("Unable to read the file (IOException)");
     }
 
     @Test
@@ -520,7 +520,7 @@ class ImportServiceTest {
 
         assertThatThrownBy(() -> importService.detect(file, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unable to read the file: stream closed");
+                .hasMessage("Unable to read the file (IOException)");
     }
 
     // -------------------------------------------------------------------------

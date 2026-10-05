@@ -1,6 +1,10 @@
 package fr.kksdev.budget.api.config;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -8,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +58,29 @@ class RateLimitIT {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.error").value("TOO_MANY_REQUESTS"))
                 .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void should_log_the_ip_and_mask_the_invitation_token_when_an_invitation_request_is_rate_limited()
+            throws Exception {
+        String ip = "203.0.113.90";
+        String token = "7f3c9a2e-5b1d-4e8a-9c6f-0d2b8a4e1f37";
+        Logger filterLogger = (Logger) LoggerFactory.getLogger(RateLimitFilter.class);
+        ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
+        logAppender.start();
+        filterLogger.addAppender(logAppender);
+        try {
+            for (int i = 0; i < 4; i++) {
+                mockMvc.perform(get("/v1/auth/invitations/" + token).with(r -> { r.setRemoteAddr(ip); return r; }));
+            }
+        } finally {
+            filterLogger.detachAppender(logAppender);
+        }
+
+        List<String> messages = logAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(messages)
+                .containsExactly("Rate limit exceeded: ip=" + ip + " path=/v1/auth/invitations/***")
+                .noneMatch(message -> message.contains(token));
     }
 
     @Test

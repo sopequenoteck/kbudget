@@ -78,7 +78,7 @@ public class BudgetService {
             budget.setSeuilNotification(request.seuilNotification());
         }
         Budget saved = budgetRepository.save(budget);
-        log.info("Budget créé: id={}, categoryId={}, userId={}", saved.getId(), request.categoryId(), userId);
+        log.info("Budget created (budgetId={}, categoryId={}, userId={})", saved.getId(), request.categoryId(), userId);
         return toResponse(saved);
     }
 
@@ -127,7 +127,7 @@ public class BudgetService {
             budget.setCategory(newCategory);
         }
         Budget saved = budgetRepository.save(budget);
-        log.info("Budget mis à jour: id={}, userId={}", id, userId);
+        log.info("Budget updated (budgetId={}, userId={})", id, userId);
         return toResponseWithSpent(saved, userId);
     }
 
@@ -136,7 +136,7 @@ public class BudgetService {
         checkFeatureEnabled(userId);
         Budget budget = findByIdAndUser(id, userId);
         budgetRepository.delete(budget);
-        log.info("Budget supprimé: id={}, userId={}", id, userId);
+        log.info("Budget deleted (budgetId={}, userId={})", id, userId);
     }
 
     public BudgetOverviewResponse getOverview(UUID userId) {
@@ -292,7 +292,7 @@ public class BudgetService {
                 if (rate.isPresent()) {
                     montantConverti = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
                 } else {
-                    log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", rowCurrency, primaryCurrency, userId);
+                    log.warn("Missing exchange rate {} -> {} (userId={}), amount used without conversion", rowCurrency, primaryCurrency, userId);
                 }
             }
             if (merged.containsKey(catId)) {
@@ -348,7 +348,7 @@ public class BudgetService {
                 String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
                 NotificationContent content = NotificationContentFactory.budgetThreshold(categoryName, categorySystemKey, percentage.intValue());
                 notificationService.createNotification(userId, NotificationType.BUDGET_THRESHOLD, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
-                log.info("Notification BUDGET_THRESHOLD envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
+                log.info("BUDGET_THRESHOLD notification sent (budgetId={})", budget.getId());
             }
         }
 
@@ -360,7 +360,7 @@ public class BudgetService {
                 String categorySystemKey = SystemCategoryKey.nameOf(budget.getCategory().getSystemKey());
                 NotificationContent content = NotificationContentFactory.budgetExceeded(categoryName, categorySystemKey, percentage.intValue());
                 notificationService.createNotification(userId, NotificationType.BUDGET_EXCEEDED, content.title(), content.message(), EntityType.BUDGET, budget.getId(), content.params());
-                log.info("Notification BUDGET_EXCEEDED envoyée: category={}, percentage={}%, budgetId={}", categoryName, percentage, budget.getId());
+                log.info("BUDGET_EXCEEDED notification sent (budgetId={})", budget.getId());
             }
         }
     }
@@ -374,7 +374,7 @@ public class BudgetService {
     private Budget findByIdAndUser(UUID id, UUID userId) {
         return budgetRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> {
-                    log.error("Budget non trouvé: id={}, userId={}", id, userId);
+                    log.error("Budget not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Budget not found");
                 });
     }
@@ -422,7 +422,7 @@ public class BudgetService {
                 if (rate.isPresent()) {
                     montantConverti = montant.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
                 } else {
-                    log.warn("Taux de change manquant pour {} → {} (userId={}), montant utilisé sans conversion", rowCurrency, primaryCurrency, userId);
+                    log.warn("Missing exchange rate {} -> {} (userId={}), amount used without conversion", rowCurrency, primaryCurrency, userId);
                 }
             }
             map.merge(catId, montantConverti, BigDecimal::add);
@@ -497,7 +497,7 @@ public class BudgetService {
         }
         List<BudgetSnapshot> snapshots = budgetSnapshotRepository.saveAll(unsaved);
 
-        log.info("Snapshots créés: mois={}, count={}, userId={}", month, snapshots.size(), userId);
+        log.info("Budget snapshots created (month={}, count={}, userId={})", month, snapshots.size(), userId);
         return snapshots;
     }
 }

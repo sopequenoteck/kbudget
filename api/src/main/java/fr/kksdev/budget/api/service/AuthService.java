@@ -32,16 +32,19 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmailAndDisabledAtIsNull(request.email())
                 .orElseThrow(() -> {
-                    log.error("Login failed for email: {}", request.email());
+                    // A disabled account is still identified by its userId; an unknown email leaves no identifier.
+                    userRepository.findByEmail(request.email()).ifPresentOrElse(
+                            existing -> log.error("Login failed: account disabled (userId={})", existing.getId()),
+                            () -> log.error("Login failed: no matching account"));
                     return new IllegalArgumentException("Invalid email or password");
                 });
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            log.error("Login failed for email: {}", request.email());
+            log.error("Login failed: wrong password (userId={})", user.getId());
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        log.info("User logged in: {}", user.getEmail());
+        log.info("User logged in: userId={}", user.getId());
         Map<String, Object> extraClaims = user.isPasswordResetRequired()
                 ? Map.of("mustResetCredentials", true)
                 : Map.of();
@@ -64,7 +67,7 @@ public class AuthService {
         // Vérifier unicité email si changement
         if (!request.email().equalsIgnoreCase(user.getEmail())
                 && userRepository.existsByEmail(request.email())) {
-            log.warn("First-login-reset refused: email already used: {}", request.email());
+            log.warn("First-login-reset refused: email already used (userId={})", userId);
             throw new ConflictException("EMAIL_ALREADY_EXISTS");
         }
 
@@ -79,7 +82,7 @@ public class AuthService {
         user.setPasswordResetRequired(false);
         userRepository.save(user);
 
-        log.info("User reset credentials: userId={} newEmail={}", userId, request.email());
+        log.info("User reset credentials: userId={}", userId);
 
         String token = jwtUtil.generateToken(user.getEmail());
         String refreshToken = refreshTokenService.generateRefreshToken(user);

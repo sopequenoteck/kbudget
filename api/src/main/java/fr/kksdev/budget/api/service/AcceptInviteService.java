@@ -29,7 +29,7 @@ public class AcceptInviteService {
                 .orElseThrow(() -> new EntityNotFoundException("Invalid invitation."));
 
         if (userRepository.existsByEmail(invitation.getEmail())) {
-            log.warn("Invite acceptance failed: email already exists: {}", invitation.getEmail());
+            log.warn("Invite acceptance failed: email already exists (invitationId={})", invitation.getId());
             throw new IllegalArgumentException("Email already used");
         }
 
@@ -45,7 +45,7 @@ public class AcceptInviteService {
         ));
 
         invitationService.markUsed(invitation);
-        log.info("User onboarded via invitation: {}", user.getEmail());
+        log.info("User onboarded via invitation: userId={}", user.getId());
 
         String token = jwtUtil.generateToken(user.getEmail());
         String refreshToken = refreshTokenService.generateRefreshToken(user);

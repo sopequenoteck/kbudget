@@ -7,6 +7,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **API logs in English** (KKS-462): every log message is now in English. If
+  you filter or alert on log messages, check your patterns.
+
 ### Fixed
 
 - **Deleting your profile no longer promises an erasure** (KKS-417): the web
@@ -15,6 +20,17 @@ This project follows [Semantic Versioning](https://semver.org/).
   can reactivate it. The dialog, its confirmation box and the settings row now
   say so, and suggest exporting your data first. Same fix for the confirmation
   box of the mobile app.
+
+### Security
+
+- **Logs no longer contain personal data** (KKS-463): e-mail addresses,
+  user-entered text (labels, notes, names), third parties' names, imported file
+  names, amounts and balances are no longer written to the API logs; users are
+  identified by their id, and invitation tokens are no longer logged. Read
+  errors of an imported file log only the exception type and the line number.
+  The only exceptions are the IP address of a request refused by the rate
+  limiter of the authentication endpoints and the first-start banner. Rules for
+  contributors in `CONTRIBUTING.md`.
 
 ## [6.10.0] - 2026-10-04
 

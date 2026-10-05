@@ -60,7 +60,7 @@ public class AvatarStorageService {
                     .outputQuality(0.85)
                     .toFile(avatarPath.toFile());
         } catch (IOException e) {
-            log.error("Erreur lors du stockage de l'avatar pour userId={}", user.getId(), e);
+            log.error("Avatar storage failed (userId={})", user.getId(), e);
             throw new RuntimeException("Failed to store the avatar", e);
         }
 
@@ -82,7 +82,7 @@ public class AvatarStorageService {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            log.error("Erreur lors de la lecture de l'avatar pour userId={}", user.getId(), e);
+            log.error("Avatar read failed (userId={})", user.getId(), e);
             throw new RuntimeException("Failed to read the avatar", e);
         }
     }
@@ -109,7 +109,7 @@ public class AvatarStorageService {
         try {
             Files.deleteIfExists(Path.of(user.getAvatarPath()));
         } catch (IOException e) {
-            log.error("Erreur lors de la suppression de l'avatar pour userId={}", user.getId(), e);
+            log.error("Avatar deletion failed (userId={})", user.getId(), e);
             throw new RuntimeException("Failed to delete the avatar", e);
         }
         user.setAvatarPath(null);

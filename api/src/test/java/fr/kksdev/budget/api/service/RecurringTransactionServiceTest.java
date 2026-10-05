@@ -8,6 +8,7 @@ import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.AccountRepository;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,6 +120,74 @@ class RecurringTransactionServiceTest {
         assertThat(response.nextOccurrence()).isEqualTo(nextOccurrence);
         assertThat(response.recurringActive()).isTrue();
         verify(transactionRepository).save(any(Transaction.class));
+    }
+
+    private RecurringTransactionRequest buildRequest(UUID categoryId, UUID requestedAccountId) {
+        return new RecurringTransactionRequest(
+                new BigDecimal("50.00"), "Loyer", TransactionType.DEPENSE,
+                Frequency.MENSUEL, LocalDate.of(2026, Month.MARCH, 15), categoryId, requestedAccountId, null);
+    }
+
+    @Test
+    void should_throwException_when_createWithUnknownOrInactiveAccount() {
+        var request = buildRequest(null, accountId);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> recurringTransactionService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Account not found or inactive");
+    }
+
+    @Test
+    void should_throwException_when_createWithUnknownCategory() {
+        var user = buildUser();
+        var categoryId = UUID.randomUUID();
+        var request = buildRequest(categoryId, accountId);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(buildAccount(user)));
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> recurringTransactionService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Category not found");
+    }
+
+    @Test
+    void should_throwException_when_validateUnknownRecurrence() {
+        when(transactionRepository.findById(recurringId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> recurringTransactionService.validate(recurringId, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Recurring transaction not found");
+    }
+
+    @Test
+    void should_stillValidate_when_budgetThresholdCheckFails() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var category = Category.builder().id(UUID.randomUUID()).nom("Logement").user(user).build();
+        var recurring = buildRecurringTransaction(user, account, Frequency.MENSUEL, LocalDate.of(2026, Month.MARCH, 15));
+        var newTransaction = Transaction.builder()
+                .id(UUID.randomUUID())
+                .montant(new BigDecimal("50.00"))
+                .libelle("Loyer")
+                .type(TransactionType.DEPENSE)
+                .date(LocalDate.of(2026, Month.MARCH, 15))
+                .category(category)
+                .account(account)
+                .user(user)
+                .build();
+
+        when(transactionRepository.findById(recurringId)).thenReturn(Optional.of(recurring));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(newTransaction);
+        doThrow(new IllegalStateException("budget unavailable"))
+                .when(budgetService).checkThresholdsForCategory(userId, category.getId());
+
+        TransactionResponse response = recurringTransactionService.validate(recurringId, userId);
+
+        assertThat(response.id()).isEqualTo(newTransaction.getId());
     }
 
     @Test

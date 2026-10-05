@@ -1,13 +1,22 @@
 package fr.kksdev.budget.api.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import fr.kksdev.budget.api.enums.ImportLineStatus;
 import fr.kksdev.budget.api.enums.ImportReadError;
 import fr.kksdev.budget.api.model.ImportDraftLine;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Month;
@@ -15,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 /** Reading of the bank header lines skipped before the column header (KKS-384), purchase date of the lines (KKS-385), read errors of the lines (KKS-441). */
@@ -24,6 +34,22 @@ class CsvParsingServiceTest {
             mock(LabelCleaningService.class), mock(CategorySuggestionService.class));
 
     private final ImportProfileRegistry registry = new ImportProfileRegistry();
+
+    private ListAppender<ILoggingEvent> logAppender;
+    private Logger serviceLogger;
+
+    @BeforeEach
+    void setUpLogCapture() {
+        serviceLogger = (Logger) LoggerFactory.getLogger(CsvParsingService.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        serviceLogger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDownLogCapture() {
+        serviceLogger.detachAppender(logAppender);
+    }
 
     private ImportProfileRegistry.ImportProfileConfig profile(String encoding, int skipHeaderLines) {
         return new ImportProfileRegistry.ImportProfileConfig(
@@ -190,5 +216,30 @@ class CsvParsingServiceTest {
 
         assertThat(line.getReadError()).isEqualTo(ImportReadError.INVALID_AMOUNT);
         assertThat(line.getReadErrorValue()).hasSize(expectedLength);
+    }
+
+    @Test
+    void should_log_only_exception_type_and_line_number_when_the_csv_cannot_be_read() {
+        InputStream failing = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException("unreadable: 24/08/2026;-12,50;SECRET-LABEL-OF-THE-STATEMENT");
+            }
+        };
+
+        ImportProfileRegistry.ImportProfileConfig profile = profile("UTF-8", 0);
+        UUID userId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.parse(failing, profile, userId))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        List<ILoggingEvent> errors = logAppender.list.stream()
+                .filter(e -> e.getLevel() == Level.ERROR)
+                .toList();
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0).getFormattedMessage()).isEqualTo("CSV read error (IOException) at line 1");
+        assertThat(errors.get(0).getThrowableProxy()).isNull();
+        assertThat(logAppender.list)
+                .noneMatch(e -> e.getFormattedMessage().contains("SECRET-LABEL-OF-THE-STATEMENT"));
     }
 }

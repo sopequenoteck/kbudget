@@ -90,7 +90,7 @@ public class DebtService {
                 .build();
 
         debt = debtRepository.save(debt);
-        log.info("Dette créée: {} pour userId {}", debt.getId(), userId);
+        log.info("Debt created (debtId={}, userId={})", debt.getId(), userId);
         return toResponse(debt);
     }
 
@@ -168,7 +168,7 @@ public class DebtService {
         debt.setReminderTime(request.reminderTime());
 
         debt = debtRepository.save(debt);
-        log.info("Dette mise à jour: {}", debt.getId());
+        log.info("Debt updated (debtId={})", debt.getId());
         return toResponse(debt);
     }
 
@@ -223,7 +223,7 @@ public class DebtService {
             debtRepository.save(debt);
         }
 
-        log.info("Remboursement effectué: debtId={}, montant={}, userId={}", debtId, amount, userId);
+        log.info("Debt repayment recorded (debtId={}, userId={})", debtId, userId);
         return toResponse(debt, newPaid);
     }
 
@@ -250,7 +250,7 @@ public class DebtService {
         debt.setReminderDate(request.reminderDate());
         debt.setReminderTime(request.reminderTime());
         debt = debtRepository.save(debt);
-        log.info("Rappel reporté: debtId={}, nouvelleDate={}, userId={}", debtId, request.reminderDate(), userId);
+        log.info("Debt reminder postponed (debtId={}, newDate={}, userId={})", debtId, request.reminderDate(), userId);
         return toResponse(debt);
     }
 
@@ -281,7 +281,7 @@ public class DebtService {
         return accountRepository.findById(accountId)
                 .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé: id={}, userId={}", accountId, userId);
+                    log.error("Account not found (id={}, userId={})", accountId, userId);
                     return new EntityNotFoundException("Account not found");
                 });
     }
@@ -290,7 +290,7 @@ public class DebtService {
         return debtRepository.findById(id)
                 .filter(d -> d.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Dette non trouvée: id={}, userId={}", id, userId);
+                    log.error("Debt not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Debt not found");
                 });
     }
@@ -302,7 +302,7 @@ public class DebtService {
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
     }

@@ -112,7 +112,7 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
         String email = userSeed.email();
         Optional<User> seedUser = userRepository.findByEmail(email);
         if (seedUser.isEmpty()) {
-            log.info("Dev user {} not found, skipping current-month seed", email);
+            log.info("Dev seed user not found, skipping current-month seed");
             return;
         }
 
@@ -122,13 +122,13 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
 
         // Garde d'idempotence : deux demarrages successifs ne doivent rien creer de plus.
         if (transactionRepository.existsByUserIdAndDateBetween(user.getId(), firstDayOfMonth, today)) {
-            log.info("Current month already has transactions for {}, skipping current-month seed", email);
+            log.info("Current month already has transactions, skipping current-month seed (userId={})", user.getId());
             return;
         }
 
         Optional<Account> defaultAccount = accountRepository.findByUserIdAndIsDefaultTrue(user.getId());
         if (defaultAccount.isEmpty()) {
-            log.info("No default account found for {}, skipping current-month seed", email);
+            log.info("No default account found, skipping current-month seed (userId={})", user.getId());
             return;
         }
 
@@ -138,12 +138,12 @@ public class DevCurrentMonthSeedRunner implements ApplicationRunner {
         List<Transaction> transactions = buildTransactions(
                 user, defaultAccount.get(), categoriesByName, userSeed.entries(), firstDayOfMonth, today);
         if (transactions.isEmpty()) {
-            log.info("No matching category found for {}, skipping current-month seed", email);
+            log.info("No matching category found, skipping current-month seed (userId={})", user.getId());
             return;
         }
 
         transactionRepository.saveAll(transactions);
-        log.info("Seeded {} current-month transactions for {}", transactions.size(), email);
+        log.info("Seeded {} current-month transactions (userId={})", transactions.size(), user.getId());
     }
 
     private List<Transaction> buildTransactions(User user, Account account, Map<String, Category> categoriesByName,

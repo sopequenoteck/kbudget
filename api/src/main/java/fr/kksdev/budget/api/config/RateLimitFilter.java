@@ -82,7 +82,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.warn("Rate limit exceeded: ip={} path={}", ip, path(request));
+        log.warn("Rate limit exceeded: ip={} path={}", ip, loggablePath(path(request)));
         errorWriter.write(response, HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS",
                 "Too many attempts. Please try again shortly.");
     }
@@ -95,6 +95,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private boolean isProtected(String path) {
         return PROTECTED_PATHS.contains(path) || path.startsWith(INVITATIONS_PREFIX);
+    }
+
+    /** Chemin a journaliser : le jeton d'invitation est un secret, il est masque. */
+    private static String loggablePath(String path) {
+        return path.startsWith(INVITATIONS_PREFIX) ? INVITATIONS_PREFIX + "***" : path;
     }
 
     /**

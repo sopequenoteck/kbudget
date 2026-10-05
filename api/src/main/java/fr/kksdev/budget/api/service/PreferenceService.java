@@ -61,7 +61,7 @@ public class PreferenceService {
             Currency newPrimary = request.currencies().get(0);
             if (oldPrimary != null && oldPrimary != newPrimary) {
                 exchangeRateService.rebaseRates(userId, oldPrimary, newPrimary);
-                log.info("Devise principale changée: {} -> {} pour userId={}", oldPrimary, newPrimary, userId);
+                log.info("Primary currency changed: {} -> {} (userId={})", oldPrimary, newPrimary, userId);
                 messagingTemplate.convertAndSendToUser(
                         userId.toString(),
                         "/queue/exchange-rates",
@@ -88,7 +88,7 @@ public class PreferenceService {
         }
         userPreferenceRepository.save(preference);
 
-        log.info("Préférences mises à jour pour l'utilisateur {}: features={}, navOrder={}", userId, enabledFeatures, navOrder);
+        log.info("Preferences updated (userId={}, features={}, navOrder={})", userId, enabledFeatures, navOrder);
         return toResponse(preference);
     }
 
@@ -125,7 +125,7 @@ public class PreferenceService {
     private UserPreference getOrCreate(UUID userId) {
         return userPreferenceRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    log.info("Création des préférences par défaut pour l'utilisateur {}", userId);
+                    log.info("Creating default preferences (userId={})", userId);
                     UserPreference newPreference = UserPreference.builder()
                             .user(userRepository.getReferenceById(userId))
                             .enabledFeatures(new ArrayList<>(DEFAULT_FEATURES))
@@ -176,7 +176,7 @@ public class PreferenceService {
                 ZoneId.of(timezone);
                 validTimezone = timezone;
             } catch (DateTimeException e) {
-                log.warn("Timezone invalide à l'inscription: '{}', utilisation du fallback Europe/Paris", timezone);
+                log.warn("Invalid timezone at sign-up, falling back to Europe/Paris");
             }
         }
         UserPreference preference = UserPreference.builder()
@@ -187,7 +187,7 @@ public class PreferenceService {
                 .build();
         preference.setTimezone(validTimezone);
         userPreferenceRepository.save(preference);
-        log.info("Préférences initiales créées pour userId={}, currency={}, timezone={}", user.getId(), currency, validTimezone);
+        log.info("Initial preferences created (userId={}, currency={}, timezone={})", user.getId(), currency, validTimezone);
     }
 
     @Transactional
