@@ -7,6 +7,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Logs de l'API en anglais** (KKS-462) : tous les messages de log sont
+  desormais en anglais. Si vous filtrez ou declenchez des alertes sur le texte
+  des logs, verifiez vos motifs.
+
+### Fixed
+
+- **La suppression du compte ne promet plus un effacement** (KKS-417) :
+  l'application web annoncait une suppression irreversible du compte et de
+  toutes ses donnees, alors que l'API se contente de le desactiver, conserve
+  les donnees, et qu'un administrateur peut le reactiver. Le dialogue, sa case
+  de confirmation et la ligne des parametres le disent desormais, et invitent
+  a exporter ses donnees avant. Meme correction pour la case de confirmation
+  de l'application mobile.
+
 ### Security
 
 - **Les logs ne contiennent plus de donnees personnelles** (KKS-463) : adresses
@@ -18,12 +34,6 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   Seules exceptions : l'adresse IP d'une requete refusee par le limiteur des
   points d'authentification et la banniere de premier demarrage. Regles pour
   les contributeurs dans `CONTRIBUTING.md`.
-
-### Changed
-
-- **Logs de l'API en anglais** (KKS-462) : tous les messages de log sont
-  desormais en anglais. Si vous filtrez ou declenchez des alertes sur le texte
-  des logs, verifiez vos motifs.
 
 ## [6.10.0] - 2026-10-04
 

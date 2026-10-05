@@ -1630,7 +1630,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usersFormDeleteAccountConfirm =>
-      'I understand that this action is permanent';
+      'I understand that I will no longer be able to sign in';
 
   @override
   String get usersValueNameNotSet => 'Not set';
