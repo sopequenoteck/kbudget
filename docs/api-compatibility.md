@@ -170,7 +170,7 @@ Une entree `CHANGELOG.md` sous `### Changed`, prefixee **BREAKING**, indiquant
 ce qui change, qui est affecte, et ce qu'un self-hoster doit faire. La release
 prend un numero **majeur** (semver).
 
-Precedent a suivre : la [6.0.0](../CHANGELOG.md), qui a prefixe les endpoints en
+Precedent a suivre : la [6.0.0](../CHANGELOG.fr.md), qui a prefixe les endpoints en
 `/api/v1`.
 
 ### 4. Verifier ce que voit l'utilisateur

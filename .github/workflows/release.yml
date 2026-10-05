@@ -12,6 +12,9 @@ name: Release
 # Ordre garanti : tests D'ABORD, build+push des images ENSUITE, tag git ENFIN.
 # Le job `tag` dépend de `build-and-push` (needs) -> si le push échoue,
 # aucun tag n'est créé. Un tag vX.Y.Z implique donc qu'une image :X.Y.Z existe.
+#
+# La GitHub Release (KKS-492) vient en dernier : le job `github-release` dépend
+# de `tag` et publie le bloc de la version extrait de CHANGELOG.md (anglais).
 
 on:
   push:
@@ -180,3 +183,33 @@ jobs:
           git tag -a "${TAG}" -m "Release ${TAG}"
           git push origin "${TAG}"
           echo "Tag ${TAG} créé et pushé."
+
+  # KKS-492 : la GitHub Release porte le bloc de la version du CHANGELOG
+  # anglais, sans fichier joint. Pas de rattrapage des versions anterieures.
+  # version-check refuse en amont une PR vers main sans bloc de version.
+  github-release:
+    needs: [build-and-push, tag]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # nécessaire pour créer la release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Create GitHub Release from CHANGELOG
+        env:
+          VERSION: ${{ needs.build-and-push.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${VERSION}"
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} existe déjà, skip."
+            exit 0
+          fi
+          .github/scripts/release-notes.sh "${VERSION}" > "${RUNNER_TEMP}/release-notes.md"
+          gh release create "${TAG}" \
+            --verify-tag \
+            --title "${TAG}" \
+            --notes-file "${RUNNER_TEMP}/release-notes.md"
+          echo "Release ${TAG} créée."

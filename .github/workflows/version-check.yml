@@ -112,3 +112,26 @@ jobs:
             exit 1
           fi
           echo "OK: tag v${PR_VERSION} disponible"
+
+      # KKS-492 : le job github-release de release.yml tourne apres la
+      # publication des images. Sans bloc de version dans le CHANGELOG, il
+      # echouerait trop tard : on le refuse ici, avant le merge. Le CHANGELOG
+      # francais doit rester a parite avec l'anglais.
+      - name: Check release notes exist
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+
+          if ! .github/scripts/release-notes.sh "${VERSION}" CHANGELOG.md > /dev/null; then
+            echo ""
+            echo "ERREUR: CHANGELOG.md n'a pas de bloc exploitable pour ${VERSION}."
+            echo "Ajoute un bloc '## [${VERSION}]' non vide (en anglais) dans CHANGELOG.md."
+            exit 1
+          fi
+
+          if ! grep -qF -- "## [${VERSION}]" CHANGELOG.fr.md; then
+            echo "ERREUR: CHANGELOG.fr.md n'a pas de titre '## [${VERSION}]'."
+            echo "Les deux changelogs doivent porter la version (CHANGELOG.fr.md en francais)."
+            exit 1
+          fi
+
+          echo "OK: notes de release trouvees pour ${VERSION} (CHANGELOG.md et CHANGELOG.fr.md)"
