@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -101,7 +102,7 @@ class JwtFilterTest {
 
         when(userRepository.findByEmailAndDisabledAtIsNull(EMAIL)).thenReturn(Optional.empty());
         when(userRepository.findByEmail(EMAIL))
-                .thenReturn(Optional.of(User.builder().id(userId).email(EMAIL).disabledAt(LocalDateTime.now()).build()));
+                .thenReturn(Optional.of(User.builder().id(userId).email(EMAIL).disabledAt(LocalDateTime.of(2026, Month.AUGUST, 24, 10, 0)).build()));
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);

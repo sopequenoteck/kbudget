@@ -227,6 +227,24 @@ class NotificationServiceTest {
     }
 
     @Test
+    void should_mark_all_notifications_as_read_when_user_requests_it() {
+        ArgumentCaptor<LocalDateTime> readAtCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
+        when(notificationRepository.markAllAsReadByUserId(eq(userId), any(LocalDateTime.class))).thenReturn(3);
+
+        notificationService.markAllAsRead(userId);
+
+        verify(notificationRepository).markAllAsReadByUserId(eq(userId), readAtCaptor.capture());
+        assertThat(readAtCaptor.getValue()).isNotNull();
+    }
+
+    @Test
+    void should_delete_all_notifications_of_the_user_when_user_requests_it() {
+        notificationService.deleteAllNotifications(userId);
+
+        verify(notificationRepository).deleteByUserId(userId);
+    }
+
+    @Test
     void should_purge_old_notifications_when_older_than_90_days() {
         ArgumentCaptor<LocalDateTime> cutoffCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
 

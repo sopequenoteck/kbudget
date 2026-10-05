@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.model.ExchangeRate;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.ExchangeRateRepository;
 import fr.kksdev.budget.api.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -158,5 +160,46 @@ class ExchangeRateServiceTest {
         // No new entity created — save called once on the existing object
         verify(exchangeRateRepository).save(existing);
         verify(userRepository, never()).getReferenceById(any());
+    }
+
+    @Test
+    void should_createRate_when_upsertNewPair() {
+        var user = User.builder().id(userId).build();
+        var request = new ExchangeRateRequest(Currency.EUR, Currency.USD, new BigDecimal("1.080000"));
+
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.USD))
+                .thenReturn(Optional.empty());
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(exchangeRateRepository.save(any(ExchangeRate.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = exchangeRateService.upsert(request, userId);
+
+        assertThat(response.baseCurrency()).isEqualTo("EUR");
+        assertThat(response.targetCurrency()).isEqualTo("USD");
+        assertThat(response.rate()).isEqualByComparingTo("1.080000");
+        verify(exchangeRateRepository).save(argThat(saved -> saved.getUser() == user));
+    }
+
+    @Test
+    void should_deleteRate_when_pairExists() {
+        var existing = buildRate(Currency.EUR, Currency.XOF, "655.957000");
+
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.XOF))
+                .thenReturn(Optional.of(existing));
+
+        exchangeRateService.delete(userId, Currency.EUR, Currency.XOF);
+
+        verify(exchangeRateRepository).delete(existing);
+    }
+
+    @Test
+    void should_throwNotFound_when_deleteUnknownPair() {
+        when(exchangeRateRepository.findByUserIdAndBaseCurrencyAndTargetCurrency(userId, Currency.EUR, Currency.XOF))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> exchangeRateService.delete(userId, Currency.EUR, Currency.XOF))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Exchange rate not found");
+        verify(exchangeRateRepository, never()).delete(any(ExchangeRate.class));
     }
 }

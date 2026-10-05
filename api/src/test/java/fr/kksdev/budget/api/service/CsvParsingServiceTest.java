@@ -227,7 +227,10 @@ class CsvParsingServiceTest {
             }
         };
 
-        assertThatThrownBy(() -> service.parse(failing, profile("UTF-8", 0), UUID.randomUUID()))
+        ImportProfileRegistry.ImportProfileConfig profile = profile("UTF-8", 0);
+        UUID userId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.parse(failing, profile, userId))
                 .isInstanceOf(IllegalArgumentException.class);
 
         List<ILoggingEvent> errors = logAppender.list.stream()

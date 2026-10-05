@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -136,6 +137,37 @@ class CategoryRuleServiceTest {
         assertThatThrownBy(() -> categoryRuleService.delete(ruleId, userId))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Category rule not found");
+    }
+
+    @Test
+    void should_update_pattern_and_category_when_rule_and_category_are_owned() {
+        var user = buildUser();
+        var rule = buildRule(user, buildCategory(user));
+        UUID newCategoryId = UUID.randomUUID();
+        var newCategory = Category.builder().id(newCategoryId).nom("Loisirs").user(user).build();
+
+        when(categoryRuleRepository.findByIdAndUserId(ruleId, userId)).thenReturn(Optional.of(rule));
+        when(categoryRepository.findById(newCategoryId)).thenReturn(Optional.of(newCategory));
+        when(categoryRuleRepository.save(rule)).thenReturn(rule);
+
+        var response = categoryRuleService.update(ruleId, "monoprix", newCategoryId, userId);
+
+        assertThat(response.pattern()).isEqualTo("monoprix");
+        assertThat(response.categoryId()).isEqualTo(newCategoryId);
+        assertThat(rule.getCategory()).isSameAs(newCategory);
+        verify(categoryRuleRepository).save(rule);
+    }
+
+    @Test
+    void should_delete_rule_when_rule_is_owned() {
+        var user = buildUser();
+        var rule = buildRule(user, buildCategory(user));
+
+        when(categoryRuleRepository.findByIdAndUserId(ruleId, userId)).thenReturn(Optional.of(rule));
+
+        categoryRuleService.delete(ruleId, userId);
+
+        verify(categoryRuleRepository).delete(rule);
     }
 
     // -------------------------------------------------------------------------
