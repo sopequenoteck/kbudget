@@ -7,6 +7,8 @@ import { UserService } from '../../../core/services/user';
 import { AuthService } from '../../../core/services/auth';
 import { provideTranslocoTesting } from '../../../../testing/transloco-testing';
 import { goBack, resetHistory } from '../../../../testing/history-testing';
+import en from '../../../../../public/i18n/en.json';
+import fr from '../../../../../public/i18n/fr.json';
 
 describe('DeleteAccountConfirmDialogComponent', () => {
   let userServiceMock: { deleteAccount: ReturnType<typeof vi.fn> };
@@ -225,6 +227,51 @@ describe('DeleteAccountConfirmDialogComponent', () => {
       const result = await promise;
       expect(result).toBe(false);
       expect(component.isOpen()).toBe(false);
+    });
+  });
+
+  describe('textes (KKS-417)', () => {
+    it('should_state_that_data_is_kept_and_not_announce_an_erasure_when_dialog_is_open', () => {
+      setup();
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      void fixture.componentInstance.open();
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).toContain('Vous ne pourrez plus vous connecter.');
+      expect(text).toContain('pas effacées');
+      expect(text).toContain('elles restent sur cette instance');
+      expect(text).toContain('un administrateur peut réactiver votre accès');
+      expect(text).toContain('Je comprends que je ne pourrai plus me connecter');
+      expect(text).not.toMatch(/irréversible|définitiv|supprimés/i);
+    });
+
+    it('should_not_announce_an_erasure_when_reading_the_deletion_keys_of_both_catalogues', () => {
+      const keys = [
+        (c: typeof en) => c.users.dialog.deleteAccountMessage,
+        (c: typeof en) => c.users.form.deleteAccountConfirm,
+        (c: typeof en) => c.users.list.deleteAccountHint,
+      ];
+
+      for (const catalogue of [en, fr]) {
+        for (const read of keys) {
+          expect(read(catalogue)).not.toMatch(/irreversible|irréversible|permanent|définitiv/i);
+        }
+      }
+      expect(en.users.dialog.deleteAccountMessage).toContain('<strong>not erased</strong>');
+      expect(fr.users.dialog.deleteAccountMessage).toContain('<strong>pas effacées</strong>');
+    });
+
+    it('should_render_the_not_erased_emphasis_when_dialog_is_open', () => {
+      setup();
+      const fixture = TestBed.createComponent(DeleteAccountConfirmDialogComponent);
+      void fixture.componentInstance.open();
+      fixture.detectChanges();
+
+      const strong = (fixture.nativeElement as HTMLElement).querySelector('.dacd-warning strong');
+
+      expect(strong?.textContent).toBe('pas effacées');
     });
   });
 

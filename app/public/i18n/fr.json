@@ -969,7 +969,7 @@
       "revoke": "Révoquer"
     },
     "dialog": {
-      "deleteAccountMessage": "Cette action est <strong>irréversible</strong>. Votre compte et toutes vos données seront supprimés définitivement."
+      "deleteAccountMessage": "Vous ne pourrez plus vous connecter. Vos données ne sont <strong>pas effacées</strong> : elles restent sur cette instance, et un administrateur peut réactiver votre accès. Exportez vos données avant si vous voulez en garder une copie."
     },
     "empty": {
       "invitations": "Aucune invitation pour le moment",
@@ -1008,7 +1008,7 @@
     "form": {
       "confirmNewPassword": "Confirmer le nouveau mot de passe",
       "currentPassword": "Mot de passe actuel",
-      "deleteAccountConfirm": "Je comprends que cette action est définitive",
+      "deleteAccountConfirm": "Je comprends que je ne pourrai plus me connecter",
       "editNameAria": "Modifier le nom",
       "emailManagedHint": "Géré par l'admin",
       "emailPlaceholder": "nouveau@exemple.com",
@@ -1020,7 +1020,7 @@
     "list": {
       "changePassword": "Changer le mot de passe",
       "changePasswordHint": "Modifiez votre mot de passe",
-      "deleteAccountHint": "Suppression définitive du compte et des données",
+      "deleteAccountHint": "Désactive votre accès, vos données sont conservées",
       "exportCsv": "Exporter mes transactions (CSV)",
       "exportCsvHint": "Mes transactions au format tableur",
       "exportJson": "Exporter mes données (JSON)",

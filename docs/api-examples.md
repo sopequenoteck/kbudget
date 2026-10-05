@@ -1624,7 +1624,7 @@ Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parame
 
 ### Supprimer son compte `DELETE /api/v1/users/me`
 
-Soft-delete : le compte est desactive (`disabled_at = now`), les budgets/snapshots/refresh_tokens sont supprimes en cascade en DB. Les transactions/comptes/abonnements/dettes sont conserves (anonymisation differee).
+Soft-delete : le compte est desactive (`disabled_at = now`) et ses refresh tokens actifs passent en `REVOKED`. Aucune donnee n'est effacee ni anonymisee : un administrateur peut reactiver le compte (`PATCH /api/v1/admin/users/{id}/enable`).
 
 Request (`DeleteAccountRequest`, header `Authorization: Bearer <token>`) :
 

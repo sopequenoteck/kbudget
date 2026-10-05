@@ -573,7 +573,7 @@
   "usersFormNewPassword": "Nouveau mot de passe",
   "usersFormConfirmNewPassword": "Confirmer le nouveau mot de passe",
   "usersFormPasswordMismatch": "Les mots de passe ne correspondent pas.",
-  "usersFormDeleteAccountConfirm": "Je comprends que cette action est définitive",
+  "usersFormDeleteAccountConfirm": "Je comprends que je ne pourrai plus me connecter",
   "usersValueNameNotSet": "Non renseigné",
   "usersActionDeleteAccount": "Supprimer mon compte",
   "usersActionChangePhoto": "Changer la photo",
