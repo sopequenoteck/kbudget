@@ -46,13 +46,13 @@ public class ExchangeRateService {
                 .findByUserIdAndBaseCurrencyAndTargetCurrency(userId, request.baseCurrency(), request.targetCurrency())
                 .map(existing -> {
                     existing.setRate(request.rate());
-                    log.info("Taux mis à jour: {}/{} = {} pour userId={}",
-                            request.baseCurrency(), request.targetCurrency(), request.rate(), userId);
+                    log.info("Exchange rate updated ({}/{}, userId={})",
+                            request.baseCurrency(), request.targetCurrency(), userId);
                     return existing;
                 })
                 .orElseGet(() -> {
-                    log.info("Taux créé: {}/{} = {} pour userId={}",
-                            request.baseCurrency(), request.targetCurrency(), request.rate(), userId);
+                    log.info("Exchange rate created ({}/{}, userId={})",
+                            request.baseCurrency(), request.targetCurrency(), userId);
                     return ExchangeRate.builder()
                             .user(userRepository.getReferenceById(userId))
                             .baseCurrency(request.baseCurrency())
@@ -71,7 +71,7 @@ public class ExchangeRateService {
                 .findByUserIdAndBaseCurrencyAndTargetCurrency(userId, baseCurrency, targetCurrency)
                 .orElseThrow(() -> new EntityNotFoundException("Exchange rate not found"));
         exchangeRateRepository.delete(rate);
-        log.info("Taux supprimé: {}/{} pour userId={}", baseCurrency, targetCurrency, userId);
+        log.info("Exchange rate deleted ({}/{}, userId={})", baseCurrency, targetCurrency, userId);
     }
 
     @Transactional
@@ -80,7 +80,7 @@ public class ExchangeRateService {
 
         BigDecimal pivotRate = findPivotRate(rates, oldBaseCurrency, newBaseCurrency);
         if (pivotRate == null) {
-            log.warn("Taux pivot manquant {} → {} — rebase ignoré pour userId={}", oldBaseCurrency, newBaseCurrency, userId);
+            log.warn("Pivot exchange rate missing {} -> {}, rebase skipped (userId={})", oldBaseCurrency, newBaseCurrency, userId);
             return;
         }
 
@@ -98,7 +98,7 @@ public class ExchangeRateService {
                 rate.setRate(crossRate);
             }
             exchangeRateRepository.save(rate);
-            log.info("Taux rebasé: {}/{} = {} pour userId={}", rate.getBaseCurrency(), rate.getTargetCurrency(), rate.getRate(), userId);
+            log.info("Exchange rate rebased ({}/{}, userId={})", rate.getBaseCurrency(), rate.getTargetCurrency(), userId);
         }
     }
 

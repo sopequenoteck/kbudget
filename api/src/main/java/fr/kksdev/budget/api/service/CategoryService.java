@@ -49,7 +49,7 @@ public class CategoryService {
                 .build();
 
         category = categoryRepository.save(category);
-        log.info("Catégorie créée: {} pour userId {}", category.getId(), userId);
+        log.info("Category created (categoryId={}, userId={})", category.getId(), userId);
         return toResponse(category);
     }
 
@@ -70,7 +70,7 @@ public class CategoryService {
         Category category = findByIdAndUser(id, userId);
 
         if (Boolean.TRUE.equals(category.getIsSystem())) {
-            log.warn("Tentative de modification d'une catégorie système: id={}, userId={}", id, userId);
+            log.warn("Attempt to modify a system category (id={}, userId={})", id, userId);
             throw new IllegalArgumentException("System categories cannot be updated");
         }
 
@@ -83,7 +83,7 @@ public class CategoryService {
         category.setCouleur(request.couleur());
 
         category = categoryRepository.save(category);
-        log.info("Catégorie mise à jour: {}", category.getId());
+        log.info("Category updated (categoryId={})", category.getId());
         return toResponse(category);
     }
 
@@ -92,12 +92,12 @@ public class CategoryService {
         Category category = findByIdAndUser(id, userId);
 
         if (Boolean.TRUE.equals(category.getIsSystem())) {
-            log.warn("Tentative de suppression d'une catégorie système: id={}, userId={}", id, userId);
+            log.warn("Attempt to delete a system category (id={}, userId={})", id, userId);
             throw new IllegalArgumentException("System categories cannot be deleted");
         }
 
         categoryRepository.delete(category);
-        log.info("Catégorie supprimée: {}", id);
+        log.info("Category deleted (categoryId={})", id);
     }
 
     @Transactional
@@ -133,9 +133,9 @@ public class CategoryService {
                     .build();
             categoryRepository.save(virement);
 
-            log.info("Catégories système créées pour userId {}", user.getId());
+            log.info("System categories created (userId={})", user.getId());
         } catch (Exception e) {
-            log.error("Échec du seeding des catégories système pour userId {}: {}", user.getId(), e.getMessage());
+            log.error("System categories seeding failed (userId={}): {}", user.getId(), e.getMessage());
             throw e;
         }
     }
@@ -156,7 +156,7 @@ public class CategoryService {
                 .user(userRepository.getReferenceById(userId))
                 .build();
         ajustement = categoryRepository.save(ajustement);
-        log.info("Catégorie système 'Ajustement' créée pour userId {}", userId);
+        log.info("Adjustment system category created (userId={})", userId);
         return ajustement;
     }
 
@@ -184,7 +184,7 @@ public class CategoryService {
         return categoryRepository.findById(id)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", id, userId);
+                    log.error("Category not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Category not found");
                 });
     }

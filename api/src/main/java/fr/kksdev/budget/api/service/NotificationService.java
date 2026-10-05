@@ -41,7 +41,7 @@ public class NotificationService {
                 .params(params)
                 .build();
         notification = notificationRepository.save(notification);
-        log.info("Notification créée: type={}, userId={}", type, userId);
+        log.info("Notification created (type={}, userId={})", type, userId);
         NotificationResponse response = toResponse(notification);
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
@@ -72,14 +72,14 @@ public class NotificationService {
         notification.setRead(true);
         notification.setReadAt(LocalDateTime.now());
         notification = notificationRepository.save(notification);
-        log.info("Notification lue: id={}, userId={}", notificationId, userId);
+        log.info("Notification read (id={}, userId={})", notificationId, userId);
         return toResponse(notification);
     }
 
     @Transactional
     public void markAllAsRead(UUID userId) {
         int count = notificationRepository.markAllAsReadByUserId(userId, LocalDateTime.now());
-        log.info("Toutes les notifications marquées lues: userId={}, count={}", userId, count);
+        log.info("All notifications marked as read (userId={}, count={})", userId, count);
     }
 
     @Transactional
@@ -87,20 +87,20 @@ public class NotificationService {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
         notificationRepository.delete(notification);
-        log.info("Notification supprimée: id={}, userId={}", notificationId, userId);
+        log.info("Notification deleted (id={}, userId={})", notificationId, userId);
     }
 
     @Transactional
     public void deleteAllNotifications(UUID userId) {
         notificationRepository.deleteByUserId(userId);
-        log.info("Toutes les notifications supprimées: userId={}", userId);
+        log.info("All notifications deleted (userId={})", userId);
     }
 
     @Transactional
     public void purgeOldNotifications(UUID userId) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(90);
         notificationRepository.deleteByUserIdAndCreatedAtBefore(userId, cutoff);
-        log.info("Purge des notifications > 90 jours: userId={}", userId);
+        log.info("Notifications older than 90 days purged (userId={})", userId);
     }
 
     private NotificationResponse toResponse(Notification notification) {

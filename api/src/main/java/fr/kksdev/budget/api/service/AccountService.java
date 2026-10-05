@@ -107,9 +107,9 @@ public class AccountService {
 
         account = accountRepository.save(account);
         if (!"OTHER".equals(bankCode)) {
-            log.info("Compte créé: {} pour userId {}, bankCode={}", account.getId(), userId, bankCode);
+            log.info("Account created (accountId={}, userId={}, bankCode={})", account.getId(), userId, bankCode);
         } else {
-            log.info("Compte créé: {} pour userId {}", account.getId(), userId);
+            log.info("Account created (accountId={}, userId={})", account.getId(), userId);
         }
         return toResponse(account);
     }
@@ -138,7 +138,7 @@ public class AccountService {
             }
             String oldBankCode = account.getBankCode();
             if (!newBankCode.equals(oldBankCode)) {
-                log.info("Banque modifiée sur compte {}: {} -> {}", account.getId(), oldBankCode, newBankCode);
+                log.info("Account bank changed (accountId={}, from={}, to={})", account.getId(), oldBankCode, newBankCode);
             }
             account.setBankCode(newBankCode);
         }
@@ -155,7 +155,7 @@ public class AccountService {
         }
 
         account = accountRepository.save(account);
-        log.info("Compte mis à jour: {}", account.getId());
+        log.info("Account updated (accountId={})", account.getId());
         return toResponse(account);
     }
 
@@ -176,7 +176,7 @@ public class AccountService {
         }
 
         accountRepository.delete(account);
-        log.info("Compte supprimé: {}", id);
+        log.info("Account deleted (accountId={})", id);
     }
 
     @Transactional
@@ -197,7 +197,7 @@ public class AccountService {
         // Définir le nouveau défaut
         account.setIsDefault(true);
         account = accountRepository.save(account);
-        log.info("Compte par défaut défini: {} pour userId {}", id, userId);
+        log.info("Default account set (accountId={}, userId={})", id, userId);
         return toResponse(account);
     }
 
@@ -260,7 +260,7 @@ public class AccountService {
 
         debit = transactionRepository.save(debit);
         credit = transactionRepository.save(credit);
-        log.info("Virement effectué: {} -> {}, montant={}, transferId={}", fromAccount.getId(), toAccount.getId(), request.montant(), transferId);
+        log.info("Transfer completed (fromAccountId={}, toAccountId={}, transferId={})", fromAccount.getId(), toAccount.getId(), transferId);
 
         return new TransferResponse(
                 transferId,
@@ -286,7 +286,7 @@ public class AccountService {
         BigDecimal diff = newBalance.subtract(currentBalance);
 
         if (diff.compareTo(BigDecimal.ZERO) == 0) {
-            log.info("Ajustement ignoré (solde identique): accountId={}, userId={}", accountId, userId);
+            log.info("Adjustment skipped, balance unchanged (accountId={}, userId={})", accountId, userId);
             return toResponse(account);
         }
 
@@ -303,7 +303,7 @@ public class AccountService {
                 .build();
 
         transactionRepository.save(adjustment);
-        log.info("Solde ajusté: accountId={}, diff={}, userId={}", accountId, diff, userId);
+        log.info("Balance adjusted (accountId={}, userId={})", accountId, userId);
         return toResponse(account);
     }
 
@@ -381,9 +381,9 @@ public class AccountService {
                     .user(user)
                     .build();
             accountRepository.save(defaultAccount);
-            log.info("Compte par défaut créé pour userId {}", user.getId());
+            log.info("Default account created (userId={})", user.getId());
         } catch (Exception e) {
-            log.error("Échec de la création du compte par défaut pour userId {}: {}", user.getId(), e.getMessage());
+            log.error("Default account creation failed (userId={}): {}", user.getId(), e.getMessage());
             throw e;
         }
     }
@@ -392,7 +392,7 @@ public class AccountService {
         return accountRepository.findById(id)
                 .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé: id={}, userId={}", id, userId);
+                    log.error("Account not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Account not found");
                 });
     }

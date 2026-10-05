@@ -32,14 +32,14 @@ public class UserService {
             user.setName(request.name());
         }
         user = userRepository.save(user);
-        log.info("Profil mis à jour: userId={}", userId);
+        log.info("Profile updated (userId={})", userId);
         return toResponse(user);
     }
 
     public User findById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.error("Utilisateur non trouvé: userId={}", userId);
+                    log.error("User not found (userId={})", userId);
                     return new EntityNotFoundException("User not found");
                 });
     }

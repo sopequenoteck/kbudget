@@ -106,7 +106,7 @@ public class ImportService {
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
 
-        log.info("CSV import uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
+        log.info("CSV import uploaded: {} lines for account {}", parsedLines.size(), accountId);
 
         StatementInfo statement = readStatementInfo(content, detection);
         ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
@@ -212,7 +212,7 @@ public class ImportService {
     public void deleteDraft(UUID draftId, UUID userId) {
         ImportDraft draft = findDraftByIdAndUser(draftId, userId);
         importDraftRepository.delete(draft);
-        log.info("Draft d'import supprimé: {}", draftId);
+        log.info("Import draft deleted: {}", draftId);
     }
 
     @Transactional
@@ -226,7 +226,7 @@ public class ImportService {
         ImportDraftLine line = importDraftLineRepository.findById(lineId)
                 .filter(l -> l.getDraft().getId().equals(draftId))
                 .orElseThrow(() -> {
-                    log.error("Ligne d'import non trouvée: id={}, draftId={}", lineId, draftId);
+                    log.error("Import line not found (id={}, draftId={})", lineId, draftId);
                     return new EntityNotFoundException("Import line not found");
                 });
 
@@ -236,7 +236,7 @@ public class ImportService {
             fr.kksdev.budget.api.model.Category category = categoryRepository.findById(request.categoryId())
                     .filter(c -> c.getUser().getId().equals(userId))
                     .orElseThrow(() -> {
-                        log.error("Catégorie non trouvée: id={}, userId={}", request.categoryId(), userId);
+                        log.error("Category not found (id={}, userId={})", request.categoryId(), userId);
                         return new EntityNotFoundException("Category not found");
                     });
             boolean changed = line.getCategory() == null || !line.getCategory().getId().equals(category.getId());
@@ -344,7 +344,7 @@ public class ImportService {
         try {
             return csvParsingService.preview(file.getInputStream(), separator, encoding, skipHeaderLines);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file (" + e.getClass().getSimpleName() + ")");
         }
     }
 
@@ -377,7 +377,7 @@ public class ImportService {
         try {
             parsedLines = csvParsingService.parse(file.getInputStream(), profile, userId);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file (" + e.getClass().getSimpleName() + ")");
         }
 
         deduplicationService.detectDuplicates(parsedLines, accountId, userId);
@@ -401,10 +401,10 @@ public class ImportService {
                     .build();
             customProfile = importProfileRepository.save(customProfile);
             savedProfileId = customProfile.getId();
-            log.info("Profil d'import sauvegardé: id={}, name={}", savedProfileId, mapping.profileName());
+            log.info("Import profile saved (profileId={})", savedProfileId);
         }
 
-        log.info("CSV import (mapping custom) uploaded: {} lines from file '{}' for account {}", parsedLines.size(), file.getOriginalFilename(), accountId);
+        log.info("CSV import (custom mapping) uploaded: {} lines for account {}", parsedLines.size(), accountId);
 
         ImportDraft savedDraft = createDraftFromLines(parsedLines, account, userId, file.getOriginalFilename(),
                 savedProfileId, ImportProfileSource.CUSTOM, StatementInfo.NONE);
@@ -431,11 +431,11 @@ public class ImportService {
     public void deleteProfile(UUID profileId, UUID userId) {
         ImportProfile profile = importProfileRepository.findByIdAndUserId(profileId, userId)
                 .orElseThrow(() -> {
-                    log.error("Profil d'import non trouvé: id={}, userId={}", profileId, userId);
+                    log.error("Import profile not found (id={}, userId={})", profileId, userId);
                     return new EntityNotFoundException("Import profile not found");
                 });
         importProfileRepository.delete(profile);
-        log.info("Profil d'import supprimé: {}", profileId);
+        log.info("Import profile deleted: {}", profileId);
     }
 
     private ImportDraft createDraftFromLines(List<ImportDraftLine> lines, Account account, UUID userId,
@@ -533,7 +533,7 @@ public class ImportService {
         return importDraftRepository.findById(draftId)
                 .filter(d -> d.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Draft d'import non trouvé: id={}, userId={}", draftId, userId);
+                    log.error("Import draft not found (id={}, userId={})", draftId, userId);
                     return new EntityNotFoundException("Import draft not found");
                 });
     }
@@ -542,7 +542,7 @@ public class ImportService {
         try (InputStream in = file.getInputStream()) {
             return in.readAllBytes();
         } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to read the file: " + e.getMessage());
+            throw new IllegalArgumentException("Unable to read the file (" + e.getClass().getSimpleName() + ")");
         }
     }
 
@@ -678,7 +678,7 @@ public class ImportService {
         Account account = accountRepository.findByIdAndUserId(accountId, userId)
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    log.error("Account not found or inactive (id={}, userId={})", accountId, userId);
                     return new IllegalArgumentException("Account not found or inactive");
                 });
         importDraftRepository.findByUserIdAndAccountIdAndStatus(userId, accountId, ImportDraftStatus.PENDING)

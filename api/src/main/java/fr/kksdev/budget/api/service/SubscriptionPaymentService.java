@@ -88,13 +88,13 @@ public class SubscriptionPaymentService {
                 .build();
 
         payment = transactionRepository.save(payment);
-        log.info("Paiement abonnement créé: transactionId={}, subscriptionId={}, userId={}", payment.getId(), subscriptionId, userId);
+        log.info("Subscription payment created (transactionId={}, subscriptionId={}, userId={})", payment.getId(), subscriptionId, userId);
 
         if (payment.getCategory() != null) {
             try {
                 budgetService.checkThresholdsForCategory(userId, payment.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+                log.warn("Budget threshold check failed: {}", e.getMessage());
             }
         }
 

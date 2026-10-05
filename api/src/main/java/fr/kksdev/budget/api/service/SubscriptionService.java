@@ -55,7 +55,7 @@ public class SubscriptionService {
                 .build();
 
         subscription = subscriptionRepository.save(subscription);
-        log.info("Abonnement créé: {} pour userId {}", subscription.getId(), userId);
+        log.info("Subscription created (subscriptionId={}, userId={})", subscription.getId(), userId);
         return toResponse(subscription);
     }
 
@@ -97,7 +97,7 @@ public class SubscriptionService {
         subscription.setCurrency(currency);
 
         subscription = subscriptionRepository.save(subscription);
-        log.info("Abonnement mis à jour: {}", subscription.getId());
+        log.info("Subscription updated (subscriptionId={})", subscription.getId());
         return toResponse(subscription);
     }
 
@@ -105,7 +105,7 @@ public class SubscriptionService {
     public void delete(UUID id, UUID userId) {
         Subscription subscription = findByIdAndUser(id, userId);
         subscriptionRepository.delete(subscription);
-        log.info("Abonnement supprimé: {}", id);
+        log.info("Subscription deleted (subscriptionId={})", id);
     }
 
     private Currency resolveCurrency(Currency requestCurrency, Account account, User user) {
@@ -126,7 +126,7 @@ public class SubscriptionService {
                 .filter(a -> a.getUser().getId().equals(userId))
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    log.error("Account not found or inactive (id={}, userId={})", accountId, userId);
                     return new EntityNotFoundException("Account not found or inactive");
                 });
     }
@@ -135,7 +135,7 @@ public class SubscriptionService {
         return subscriptionRepository.findById(id)
                 .filter(s -> s.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Abonnement non trouvé: id={}, userId={}", id, userId);
+                    log.error("Subscription not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Subscription not found");
                 });
     }
@@ -147,7 +147,7 @@ public class SubscriptionService {
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
     }

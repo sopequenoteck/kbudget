@@ -51,7 +51,7 @@ public class TransactionController {
             @RequestParam(required = false, defaultValue = "20") Integer limit,
             Authentication authentication) {
         UUID userId = (UUID) authentication.getPrincipal();
-        log.info("GET /transactions/libelles user={} q={} limit={}", userId, q, limit);
+        log.info("GET /transactions/libelles user={} limit={}", userId, limit);
         return ResponseEntity.ok(transactionService.getLibelleSuggestions(userId, q, limit));
     }
 

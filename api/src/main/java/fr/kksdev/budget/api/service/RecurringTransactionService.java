@@ -57,7 +57,7 @@ public class RecurringTransactionService {
                 .build();
 
         recurring = transactionRepository.save(recurring);
-        log.info("Transaction récurrente créée: {} pour userId={}", recurring.getId(), userId);
+        log.info("Recurring transaction created (recurringId={}, userId={})", recurring.getId(), userId);
         return toResponse(recurring);
     }
 
@@ -98,13 +98,13 @@ public class RecurringTransactionService {
         recurring.setNextOccurrence(advanceDate(recurring.getNextOccurrence(), recurring.getFrequency()));
         transactionRepository.save(recurring);
 
-        log.info("Transaction récurrente validée: recurring={}, newTransaction={}, userId={}", id, newTransaction.getId(), userId);
+        log.info("Recurring transaction validated (recurringId={}, newTransactionId={}, userId={})", id, newTransaction.getId(), userId);
 
         if (newTransaction.getType() == TransactionType.DEPENSE && newTransaction.getCategory() != null) {
             try {
                 budgetService.checkThresholdsForCategory(userId, newTransaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Erreur vérification seuil budget: {}", e.getMessage());
+                log.warn("Budget threshold check failed: {}", e.getMessage());
             }
         }
 
@@ -121,7 +121,7 @@ public class RecurringTransactionService {
 
         recurring.setNextOccurrence(advanceDate(recurring.getNextOccurrence(), recurring.getFrequency()));
         recurring = transactionRepository.save(recurring);
-        log.info("Transaction récurrente passée (skip): id={}, userId={}", id, userId);
+        log.info("Recurring transaction skipped (id={}, userId={})", id, userId);
         return toResponse(recurring);
     }
 
@@ -135,7 +135,7 @@ public class RecurringTransactionService {
 
         recurring.setRecurringActive(false);
         recurring = transactionRepository.save(recurring);
-        log.info("Transaction récurrente désactivée: id={}, userId={}", id, userId);
+        log.info("Recurring transaction deactivated (id={}, userId={})", id, userId);
         return toResponse(recurring);
     }
 
@@ -152,7 +152,7 @@ public class RecurringTransactionService {
                 .filter(t -> t.getUser().getId().equals(userId))
                 .filter(t -> Boolean.TRUE.equals(t.getIsRecurring()))
                 .orElseThrow(() -> {
-                    log.error("Transaction récurrente non trouvée: id={}, userId={}", id, userId);
+                    log.error("Recurring transaction not found (id={}, userId={})", id, userId);
                     return new EntityNotFoundException("Recurring transaction not found");
                 });
     }
@@ -166,7 +166,7 @@ public class RecurringTransactionService {
                 .filter(a -> a.getUser().getId().equals(userId))
                 .filter(a -> Boolean.TRUE.equals(a.getActif()))
                 .orElseThrow(() -> {
-                    log.error("Compte non trouvé ou inactif: id={}, userId={}", accountId, userId);
+                    log.error("Account not found or inactive (id={}, userId={})", accountId, userId);
                     return new EntityNotFoundException("Account not found or inactive");
                 });
     }
@@ -176,7 +176,7 @@ public class RecurringTransactionService {
         return categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
     }

@@ -137,6 +137,46 @@ constraint would silently rename them. `ExceptionHandlerInventoryTest` keeps a
 versioned inventory of the declared handlers, so a new error code cannot reach
 clients without showing up in a diff.
 
+### Logging
+
+API logs are written **in English**, with SLF4J `{}` placeholders only: never
+string concatenation. Keep the message free of accents and of a trailing
+period.
+
+Logs reach whoever runs an instance, and they outlive the request, so they must
+not carry personal data:
+
+| Allowed | Never logged |
+|---------|--------------|
+| Technical identifiers (`userId`, entity ids) | Any text typed by a user: labels, notes, names of subscriptions, accounts, categories or import profiles |
+| Enum codes and statuses | The name of a third party (a debt's counterparty) |
+| Counters and durations | The name of an imported file |
+| Dates | Amounts and balances |
+| Technical URL paths, never a path carrying a token or user data (mask it) | E-mail addresses: log the `userId` instead, for the actor and the target of an admin action alike |
+
+A failed login logs no identifier when the e-mail matches no account, and the
+`userId` when it does.
+
+One exception: the only IP address ever logged is that of a request refused by
+the rate limiter of the authentication endpoints (HTTP 429), so an attack can
+be spotted.
+
+```java
+log.info("Debt deleted (debtId={}, userId={})", debtId, userId);            // good
+log.info("Debt deleted: {} owed by {}", debt.getLibelle(), debt.getPersonne()); // bad
+```
+
+Do not log an entity or a DTO either: its `toString()` prints every field. Log
+its id.
+
+Exception messages are logged, so **never put user-entered data in an exception
+message**. The read errors of an imported file log only the exception type and
+the line number, never its message.
+
+The first-start banner, which prints the administrator e-mail and the generated
+password once, is the only other exception; it is documented in
+[`docs/deployment.md`](docs/deployment.md).
+
 ### Interface text
 
 Translation keys, string-writing rules and the English–French glossary are in
