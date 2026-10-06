@@ -7,6 +7,21 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.11.0] - 2026-10-06
+
+> Les logs de l'API sont desormais en anglais et sans donnees personnelles, et
+> le dialogue de suppression du compte dit ce qui se passe vraiment. Pas de
+> migration ni de changement du contrat d'API, `MIN_CLIENT_VERSION` reste a
+> 6.0.0. L'API, l'application web et l'application mobile changent. Premiere
+> version publiee en GitHub Release.
+
+### Added
+
+- **Une GitHub Release pour chaque version** (KKS-492) : chaque tag `vX.Y.Z`
+  s'accompagne desormais d'une GitHub Release dont les notes sont le bloc de la
+  version du changelog anglais, avec les tags des images Docker. Rien a faire
+  de votre cote : les images sont publiees avant la creation de la release.
+
 ### Changed
 
 - **Logs de l'API en anglais** (KKS-462) : tous les messages de log sont
@@ -1572,7 +1587,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...HEAD
+[6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
 [6.9.0]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...v6.9.0
 [6.8.0]: https://github.com/sopequenoteck/kbudget/compare/v6.7.3...v6.8.0
