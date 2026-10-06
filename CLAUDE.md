@@ -186,6 +186,10 @@ Le workflow `version-check` compare les quatre, plus le lock, sur toute PR vers
 et hors du controle : l'incoherence n'apparaissait qu'apres publication, dans le
 champ `serverVersion` de `/api/meta`.
 
+`docker-compose.yml` fixe aussi les deux tags d'image (`k-budget-api:X.Y.Z`,
+`k-budget-app:X.Y.Z`) : a incrementer dans le meme commit de release.
+`version-check` ne les controle pas.
+
 Le reste du processus :
 
 1. Mettre a jour **`CHANGELOG.md` (anglais) et `CHANGELOG.fr.md` (francais)**, a

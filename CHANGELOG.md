@@ -7,6 +7,20 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.11.0] - 2026-10-06
+
+> The API logs are now in English and free of personal data, and the account
+> deletion dialog says what really happens. No migration, no API contract
+> change, `MIN_CLIENT_VERSION` stays at 6.0.0. API, web app and mobile app
+> change. First version published as a GitHub Release.
+
+### Added
+
+- **A GitHub Release for every version** (KKS-492): each `vX.Y.Z` tag now
+  comes with a GitHub Release whose notes are the version's block of this
+  changelog, with the Docker image tags. Nothing to do on your side: the images
+  are published before the release is created.
+
 ### Changed
 
 - **API logs in English** (KKS-462): every log message is now in English. If
@@ -58,5 +72,6 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...HEAD
+[6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
