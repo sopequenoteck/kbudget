@@ -16,6 +16,15 @@ This project follows [Semantic Versioning](https://semver.org/).
   line, remaining amount of a debt. An unreadable request body or import
   mapping logs only the exception type of the parser. Error codes are
   unchanged; the clients never displayed `message`.
+- **Caught exceptions are logged by type, not by message** (KKS-503): when a
+  budget threshold check fails after a transaction, a recurring transaction or
+  a subscription payment, the API logs the exception type and the category id,
+  no longer the message, which a database error can fill with a whole row; same
+  for a failed creation of a user's default account or system categories before
+  it is reported as a `500`. An unexpected error (`500`) is still logged with
+  its full stack trace. An invalid identifier in a URL
+  (`/v1/accounts/not-a-uuid`) now returns `400 BAD_REQUEST` instead of `500`,
+  and the logs record the parameter name, not the value.
 
 ## [6.11.0] - 2026-10-06
 

@@ -78,6 +78,7 @@ Les codes de contrainte sont normalises en majuscules snake case (`NotNull` devi
 | Categorie | HTTP | `error` | `message` servi (diagnostic) |
 |---|---:|---|---|
 | Argument ou etat invalide | 400 | `BAD_REQUEST` | Message metier, avec fallback public |
+| Parametre d'URL ou de requete mal type, UUID invalide par exemple (KKS-503) | 400 | `BAD_REQUEST` | `Invalid value for parameter 'x'`, `x` etant le nom du parametre, jamais sa valeur |
 | Validation Bean Validation | 400 | `VALIDATION_ERROR` | Message agrege et `details` structures par champ |
 | Corps JSON illisible | 400 | `MALFORMED_REQUEST` | `Invalid request` |
 | Format d'image | 400 | `INVALID_IMAGE_FORMAT` | Message specialise existant |

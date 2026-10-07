@@ -17,6 +17,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   ligne d'import, montant restant d'une dette. Un corps de requete ou un
   mapping d'import illisible ne journalise que le type d'exception du parseur.
   Codes d'erreur inchanges ; les clients n'affichaient jamais `message`.
+- **Les exceptions interceptees sont journalisees par leur type, pas leur
+  message** (KKS-503) : quand une verification de seuil de budget echoue apres
+  une transaction, une recurrence ou un paiement d'abonnement, l'API journalise
+  le type de l'exception et l'identifiant de la categorie, plus son message,
+  qu'une erreur de base de donnees peut remplir d'une ligne entiere ; idem pour
+  un echec de creation du compte par defaut ou des categories systeme d'un
+  utilisateur, avant qu'il soit rapporte en `500`. Une erreur inattendue
+  (`500`) reste journalisee avec sa trace complete. Un identifiant invalide
+  dans une URL (`/v1/accounts/not-a-uuid`) repond desormais `400 BAD_REQUEST`
+  au lieu de `500`, et les logs retiennent le nom du parametre, pas la valeur.
 
 ## [6.11.0] - 2026-10-06
 

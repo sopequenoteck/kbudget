@@ -104,7 +104,7 @@ public class RecurringTransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, newTransaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Budget threshold check failed: {}", e.getMessage());
+                log.warn("Budget threshold check failed (categoryId={}, cause={})", newTransaction.getCategory().getId(), e.getClass().getSimpleName());
             }
         }
 

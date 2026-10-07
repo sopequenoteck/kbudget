@@ -28,6 +28,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
@@ -39,18 +40,20 @@ public class GlobalExceptionHandler {
 
     private static final String INVALID_REQUEST_MESSAGE = "Invalid request";
 
+    private static final String BAD_REQUEST_CODE = "BAD_REQUEST";
+
     private static final String RESOURCE_NOT_FOUND_MESSAGE = "Resource not found";
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
-        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), INVALID_REQUEST_MESSAGE);
+        return error(HttpStatus.BAD_REQUEST, BAD_REQUEST_CODE, ex.getMessage(), INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
         log.warn("Bad request (illegal state): {}", ex.getMessage());
-        return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), INVALID_REQUEST_MESSAGE);
+        return error(HttpStatus.BAD_REQUEST, BAD_REQUEST_CODE, ex.getMessage(), INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -111,6 +114,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         log.warn("Malformed request ({})", ex.getMostSpecificCause().getClass().getSimpleName());
         return error(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", INVALID_REQUEST_MESSAGE, INVALID_REQUEST_MESSAGE);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String expected = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+        log.warn("Bad request (parameter {} expects {})", ex.getName(), expected);
+        return error(HttpStatus.BAD_REQUEST, BAD_REQUEST_CODE,
+                "Invalid value for parameter '" + ex.getName() + "'", INVALID_REQUEST_MESSAGE);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

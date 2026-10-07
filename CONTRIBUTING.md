@@ -175,6 +175,13 @@ the line number, never its message. Likewise, a parsing error of a request body
 or of an import mapping logs only the exception type, never the parser
 message, which quotes the input.
 
+When catching an exception you did not raise, log its type
+(`e.getClass().getSimpleName()`) and the ids involved, never `e.getMessage()`:
+a database error message can quote a whole row. A full stack trace
+(`log.error("…", e)`) prints that message too: reserve it for a failure that is
+a bug to fix, an unexpected error reported as HTTP 500 or a background job that
+cannot proceed, never for a routine log.
+
 The first-start banner, which prints the administrator e-mail and the generated
 password once, is the only other exception; it is documented in
 [`docs/deployment.md`](docs/deployment.md).

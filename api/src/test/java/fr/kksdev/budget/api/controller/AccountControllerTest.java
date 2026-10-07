@@ -210,6 +210,15 @@ class AccountControllerTest {
     }
 
     @Test
+    void should_return400_when_accountIdIsNotAUuid() throws Exception {
+        mockMvc.perform(get("/v1/accounts/not-a-uuid")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Invalid value for parameter 'id'"));
+    }
+
+    @Test
     void should_return401_when_notAuthenticated() throws Exception {
         mockMvc.perform(get("/v1/accounts"))
                 .andExpect(status().isUnauthorized());
