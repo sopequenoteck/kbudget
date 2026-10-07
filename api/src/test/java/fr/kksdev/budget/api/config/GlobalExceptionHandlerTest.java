@@ -23,9 +23,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,6 +83,28 @@ class GlobalExceptionHandlerTest {
                 .singleElement().asString()
                 .contains("JsonParseException")
                 .doesNotContain("montant", "detail");
+    }
+
+    @Test
+    void should_return400WithoutValue_when_parameterTypeMismatches() {
+        var exception = new MethodArgumentTypeMismatchException("not-a-uuid", UUID.class, "id", null, null);
+
+        assertResponse(handler.handleTypeMismatch(exception), 400, "BAD_REQUEST", "Invalid value for parameter 'id'");
+        assertThat(logAppender.list).extracting(ILoggingEvent::getFormattedMessage)
+                .singleElement().asString()
+                .contains("id", "UUID")
+                .doesNotContain("not-a-uuid");
+    }
+
+    @Test
+    void should_logUnknownType_when_mismatchedParameterHasNoRequiredType() {
+        var exception = new MethodArgumentTypeMismatchException("not-a-uuid", null, "id", null, null);
+
+        assertResponse(handler.handleTypeMismatch(exception), 400, "BAD_REQUEST", "Invalid value for parameter 'id'");
+        assertThat(logAppender.list).extracting(ILoggingEvent::getFormattedMessage)
+                .singleElement().asString()
+                .contains("id", "unknown")
+                .doesNotContain("not-a-uuid");
     }
 
     @Test

@@ -383,7 +383,7 @@ public class AccountService {
             accountRepository.save(defaultAccount);
             log.info("Default account created (userId={})", user.getId());
         } catch (Exception e) {
-            log.error("Default account creation failed (userId={}): {}", user.getId(), e.getMessage());
+            log.error("Default account creation failed (userId={}, cause={})", user.getId(), e.getClass().getSimpleName());
             throw e;
         }
     }

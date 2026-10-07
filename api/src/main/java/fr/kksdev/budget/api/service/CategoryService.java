@@ -135,7 +135,7 @@ public class CategoryService {
 
             log.info("System categories created (userId={})", user.getId());
         } catch (Exception e) {
-            log.error("System categories seeding failed (userId={}): {}", user.getId(), e.getMessage());
+            log.error("System categories seeding failed (userId={}, cause={})", user.getId(), e.getClass().getSimpleName());
             throw e;
         }
     }

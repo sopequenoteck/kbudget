@@ -69,7 +69,7 @@ public class TransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Budget threshold check failed: {}", e.getMessage());
+                log.warn("Budget threshold check failed (categoryId={}, cause={})", transaction.getCategory().getId(), e.getClass().getSimpleName());
             }
         }
         return toResponse(transaction);
@@ -132,7 +132,7 @@ public class TransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, transaction.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Budget threshold check failed: {}", e.getMessage());
+                log.warn("Budget threshold check failed (categoryId={}, cause={})", transaction.getCategory().getId(), e.getClass().getSimpleName());
             }
         }
         return toResponse(transaction);
@@ -180,7 +180,7 @@ public class TransactionService {
             try {
                 budgetService.checkThresholdsForCategory(userId, deletedCategoryId);
             } catch (Exception e) {
-                log.warn("Budget threshold check failed after deletion: {}", e.getMessage());
+                log.warn("Budget threshold check failed after deletion (categoryId={}, cause={})", deletedCategoryId, e.getClass().getSimpleName());
             }
         }
     }

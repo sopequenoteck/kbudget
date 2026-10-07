@@ -94,7 +94,7 @@ public class SubscriptionPaymentService {
             try {
                 budgetService.checkThresholdsForCategory(userId, payment.getCategory().getId());
             } catch (Exception e) {
-                log.warn("Budget threshold check failed: {}", e.getMessage());
+                log.warn("Budget threshold check failed (categoryId={}, cause={})", payment.getCategory().getId(), e.getClass().getSimpleName());
             }
         }
 
