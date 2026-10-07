@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
@@ -33,7 +32,7 @@ void main() {
     });
     final repo = MockAppConfigRepository();
     when(repo.getConfig()).thenAnswer(
-      (_) async => const AppConfig(dataMode: DataMode.local),
+      (_) async => const AppConfig(),
     );
     container = ProviderContainer(
       overrides: [

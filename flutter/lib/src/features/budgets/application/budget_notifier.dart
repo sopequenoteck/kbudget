@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';

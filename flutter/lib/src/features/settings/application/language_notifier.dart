@@ -7,10 +7,8 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -58,11 +56,9 @@ final languageNotifierProvider =
 /// Resolves the displayed language, with the same priorities as Angular's
 /// `LanguageService` (KKS-380): a non-null preference wins; until the
 /// preference is loaded, the language last applied on this device; once it
-/// is loaded and null, or in local mode, the system language.
+/// is loaded and null, the system language.
 ///
-/// In server mode, every applied language is stored on the device for the
-/// next start. In local mode, the stored language is the preference itself:
-/// only an explicit choice writes it, automatic clears it.
+/// Every applied language is stored on the device for the next start.
 ///
 /// The preference is only written by [selectLanguage], never on its own.
 class LanguageNotifier extends Notifier<LanguageState> {
@@ -83,17 +79,9 @@ class LanguageNotifier extends Notifier<LanguageState> {
 
   Future<void> _load() async {
     try {
-      final mode = await ref.read(dataModeProvider.future);
       final stored = supportedLanguageOf(
         await ref.read(appConfigRepositoryProvider).getLanguage(),
       );
-      if (mode == DataMode.local) {
-        state = LanguageState(
-          language: stored ?? _systemLanguage,
-          preference: stored,
-        );
-        return;
-      }
       if (stored != null && !_preferenceLoaded) {
         state = state.copyWith(language: stored);
       }
@@ -107,9 +95,6 @@ class LanguageNotifier extends Notifier<LanguageState> {
 
   Future<void> _loadServerPreference() async {
     try {
-      if (await ref.read(dataModeProvider.future) != DataMode.server) {
-        return;
-      }
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
       final prefs = await dataSource.getPreferences();
@@ -127,9 +112,9 @@ class LanguageNotifier extends Notifier<LanguageState> {
 
   /// Applies [language] chosen in the settings, `null` for automatic.
   ///
-  /// In server mode the choice is written to the server — `DELETE` for
-  /// automatic — and a failed write restores the previous choice without a
-  /// message, as Angular does. In local mode it is stored on the device.
+  /// The choice is written to the server — `DELETE` for automatic — and a
+  /// failed write restores the previous choice without a message, as Angular
+  /// does.
   Future<void> selectLanguage(String? language) async {
     final previous = state;
     if (previous.preference == language) {
@@ -140,14 +125,9 @@ class LanguageNotifier extends Notifier<LanguageState> {
       preference: language,
     );
     try {
-      final mode = await ref.read(dataModeProvider.future);
-      if (mode == DataMode.server) {
-        await _writeServerPreference(language);
-        _preferenceLoaded = true;
-        await _remember(state.language);
-      } else {
-        await ref.read(appConfigRepositoryProvider).setLanguage(language);
-      }
+      await _writeServerPreference(language);
+      _preferenceLoaded = true;
+      await _remember(state.language);
     } on Exception catch (_) {
       state = previous;
     }

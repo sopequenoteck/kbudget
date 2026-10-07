@@ -8,22 +8,53 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
+import 'package:k_budget/src/features/onboarding/data/legacy_local_database.dart';
 
 class AppConfigRepositoryImpl implements AppConfigRepository {
+  /// Crée le repository. [storage] et [deleteLegacyDatabase] sont
+  /// remplaçables pour les tests.
+  AppConfigRepositoryImpl({
+    FlutterSecureStorage? storage,
+    Future<void> Function()? deleteLegacyDatabase,
+  })  : _storage = storage ?? const FlutterSecureStorage(),
+        _deleteLegacyDatabase =
+            deleteLegacyDatabase ?? deleteLegacyLocalDatabase;
+
   final FlutterSecureStorage _storage;
+  final Future<void> Function() _deleteLegacyDatabase;
 
   static const _configKey = 'app_config';
 
-  AppConfigRepositoryImpl({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+  // Champ des configurations enregistrees avant KKS-335, quand l'application
+  // pouvait tourner sans serveur (valeurs `local` / `server`).
+  static const _legacyDataModeKey = 'dataMode';
+  static const _legacyLocalMode = 'local';
 
+  /// Lit la configuration. Une configuration sans serveur, ou enregistree en
+  /// ancien mode local, est renvoyee comme non configuree
+  /// (`onboardingCompleted == false`) : l'application repart sur la
+  /// configuration du serveur. Une ancienne configuration est reecrite sans
+  /// `dataMode` et la base locale devenue orpheline est effacee, une seule
+  /// fois.
   @override
   Future<AppConfig> getConfig() async {
-    final json = await _storage.read(key: _configKey);
-    if (json == null) {
-      return const AppConfig(dataMode: DataMode.local);
+    final raw = await _storage.read(key: _configKey);
+    if (raw == null) {
+      return const AppConfig();
     }
-    return AppConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    final stored = AppConfig.fromJson(json);
+    final hasServer = stored.serverUrl?.trim().isNotEmpty ?? false;
+    final isLegacyLocal = json[_legacyDataModeKey] == _legacyLocalMode;
+    final config = hasServer && !isLegacyLocal
+        ? stored
+        : stored.copyWith(onboardingCompleted: false);
+
+    if (json.containsKey(_legacyDataModeKey)) {
+      await saveConfig(config);
+      await _deleteLegacyDatabase();
+    }
+    return config;
   }
 
   @override
@@ -41,18 +72,6 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
   Future<void> setOnboardingCompleted(bool completed) async {
     final config = await getConfig();
     await saveConfig(config.copyWith(onboardingCompleted: completed));
-  }
-
-  @override
-  Future<DataMode> getDataMode() async {
-    final config = await getConfig();
-    return config.dataMode;
-  }
-
-  @override
-  Future<void> setDataMode(DataMode mode) async {
-    final config = await getConfig();
-    await saveConfig(config.copyWith(dataMode: mode));
   }
 
   @override

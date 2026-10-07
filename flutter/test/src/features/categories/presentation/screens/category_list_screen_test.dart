@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/presentation/screens/category_list_screen.dart';
 import 'package:k_budget/src/features/categories/presentation/widgets/category_list_skeleton.dart';

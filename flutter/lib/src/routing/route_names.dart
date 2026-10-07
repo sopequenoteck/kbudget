@@ -7,7 +7,6 @@ class RouteNames {
 
   // Paths
   static const String onboarding = '/onboarding';
-  static const String serverSetup = 'server-setup';
   static const String dashboard = '/dashboard';
   static const String transactions = '/transactions';
   static const String subscriptions = '/subscriptions';
@@ -36,7 +35,6 @@ class RouteNames {
 
   // Names
   static const String onboardingName = 'onboarding';
-  static const String serverSetupName = 'server-setup';
   static const String dashboardName = 'dashboard';
   static const String transactionsName = 'transactions';
   static const String subscriptionsName = 'subscriptions';

@@ -162,10 +162,12 @@ fonctionnant serveur injoignable, widget d'écran d'accueil.
 Flutter cesse d'être une application autonome pour devenir un client de l'API. Périmètre
 mesuré : environ 700 lignes et 20 points de couplage.
 
-**Distinction à ne pas manquer** : le mode autonome disparaît, **le cache hors ligne
-reste**. L'instance de l'utilisateur est chez lui, derrière un VPN ou un reverse proxy
+**Distinction à ne pas manquer** : le mode autonome disparaît, pas la tolérance au réseau
+absent. L'instance de l'utilisateur est chez lui, derrière un VPN ou un reverse proxy
 fragile : elle sera injoignable régulièrement. Supprimer toute tolérance au réseau absent
-reviendrait à livrer une app qui affiche une erreur une fois sur cinq.
+reviendrait à livrer une app qui affiche une erreur une fois sur cinq. Livré en 2026-10
+(KKS-335) : Drift est retiré sans être reconverti ; hors ligne, l'app affiche un message
+et « Réessayer ». Le cache de lecture, commun à Angular et Flutter, relève de KKS-507.
 
 ### 4.6 Contrat d'API — une seule version, plus la détection
 
@@ -282,8 +284,9 @@ notoriété. Le pari est la niche francophone, pas la comparaison frontale.
 
 ## 7. Ce qui n'est pas décidé
 
-- Le devenir du cache hors ligne Flutter une fois Drift retiré — à trancher **avant** de
-  commencer la suppression, pas après.
+- ~~Le devenir du cache hors ligne Flutter une fois Drift retiré~~ — tranché le 2026-10-07
+  (KKS-335) : Drift retiré sans reconversion, cache de lecture commun à Angular et Flutter
+  dans KKS-507.
 - Le prix de l'application sur les stores.
 - La politique d'acceptation des langues communautaires (seuil minimal de complétude avant
   activation).

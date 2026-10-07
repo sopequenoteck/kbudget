@@ -63,31 +63,29 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 
 ---
 
-### DT-004 — Icone recurrence non desactivee en mode local-first (KKS-241 / W-001)
+### DT-004 — Icone recurrence non desactivee en mode local-first (KKS-241 / W-001) — RESOLU 2026-10-07
 
 **Identifie** : 2026-05-12
+**Resolu** : 2026-10-07 (KKS-335)
 
-**Description** : Dans `TransactionForm`, l'icone de recurrence (bouton PhRepeat) est toujours active meme quand `dataModeProvider = DataMode.local`. R-004 (masquer ou desactiver l'icone en mode local) n'a pas ete implemente. Un SnackBar d'erreur est declenche si la creation echoue cote reseau, mais l'icone reste accessible et induira une erreur silencieuse pour l'utilisateur offline.
+**Description initiale** : Dans `TransactionForm`, l'icone de recurrence (bouton PhRepeat) etait toujours active meme quand `dataModeProvider = DataMode.local`. R-004 (masquer ou desactiver l'icone en mode local) n'avait pas ete implemente.
 
 **Impact** : Faible — fallback SnackBar present. Pas de crash, pas de perte de donnees.
 
-**Fichier concerne** : `flutter/lib/src/features/transactions/presentation/widgets/transaction_form.dart`
-
-**Correction proposee** : Lire `ref.watch(dataModeProvider)` dans `TransactionForm` et passer `isActive: dataModeProvider == DataMode.remote` sur le bouton repeat (ou masquer le widget entierement).
+**Correction appliquee** : le mode local est supprime de Flutter (KKS-335) : l'application est un client de l'API comme Angular, donc la recurrence est toujours disponible. Plus aucune condition de mode dans `TransactionForm`, rien a desactiver.
 
 ---
 
-### DT-005 — RecurringListNotifier.create() utilise isLoading global (KKS-241 / W-002)
+### DT-005 — RecurringListNotifier.create() utilise isLoading global (KKS-241 / W-002) — RESOLU 2026-10-07
 
 **Identifie** : 2026-05-12
+**Resolu** : 2026-10-07 (KKS-335)
 
-**Description** : La methode `create()` ajoutee dans `RecurringListNotifier` (KKS-241) utilise `state = state.copyWith(isLoading: true)` au lieu du pattern `mutatingIds` etabli par `deactivate()`, `validate()`, `skip()`. A la creation, il n'y a pas encore d'identifiant a tracker, mais cela cree une incoherence de pattern dans le notifier.
+**Description initiale** : La methode `create()` ajoutee dans `RecurringListNotifier` (KKS-241) utilise `state = state.copyWith(isLoading: true)` au lieu du pattern `mutatingIds` etabli par `deactivate()`, `validate()`, `skip()`. A la creation, il n'y a pas encore d'identifiant a tracker.
 
 **Impact** : Cosmétique — aucun impact fonctionnel. L'indicateur de chargement global masque toute la liste au lieu d'un seul item.
 
-**Fichier concerne** : `flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`
-
-**Correction proposee** : Revenir a `isLoading` global pour `create()` (pas d'id a tracker) et documenter cette exception dans le notifier, OU introduire un `isCreating: bool` separe dans `ListState<T>` si le besoin se generalise.
+**Correction appliquee** : `create()` garde `isLoading` global (pas d'id a tracker) ; l'exception au pattern `mutatingIds` est documentee dans le notifier (`flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`).
 
 ---
 

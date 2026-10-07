@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_response.dart';
@@ -99,14 +98,12 @@ class FakeAuthNotifier extends AuthNotifier {
 List<Override> languageOverrides({
   required AppConfigRepository config,
   required FakePreferenceDataSource remote,
-  DataMode mode = DataMode.server,
   AuthState auth = const AuthState.authenticated(),
   List<Locale> system = const [Locale('en', 'US')],
 }) =>
     [
       systemLocalesProvider.overrideWithValue(system),
       appConfigRepositoryProvider.overrideWithValue(config),
-      dataModeProvider.overrideWith((ref) async => mode),
       preferenceRemoteDataSourceProvider.overrideWith((ref) async => remote),
       authNotifierProvider.overrideWith(() => FakeAuthNotifier(auth)),
     ];
@@ -153,15 +150,13 @@ void main() {
     late ProviderContainer container;
 
     Future<void> start({
-      DataMode mode = DataMode.server,
-      AuthState auth = const AuthState.authenticated(),
+          AuthState auth = const AuthState.authenticated(),
       List<Locale> system = const [Locale('en', 'US')],
     }) async {
       container = ProviderContainer(
         overrides: languageOverrides(
           config: config,
           remote: remote,
-          mode: mode,
           auth: auth,
           system: system,
         ),
@@ -317,38 +312,6 @@ void main() {
 
       expect(language(), 'fr');
       expect(preference(), 'fr');
-    });
-
-    test('should_useStoredPreference_when_localMode', () async {
-      config.language = 'fr';
-
-      await start(mode: DataMode.local);
-
-      expect(language(), 'fr');
-      expect(preference(), 'fr');
-      expect(remote.reads, 0);
-    });
-
-    test('should_useSystemLanguage_when_localModeWithoutPreference',
-        () async {
-      await start(mode: DataMode.local, system: const [Locale('fr')]);
-
-      expect(language(), 'fr');
-      expect(preference(), isNull);
-      expect(config.writes, isEmpty);
-    });
-
-    test('should_storeChoiceWithoutNetwork_when_localMode', () async {
-      await start(mode: DataMode.local);
-
-      await notifier().selectLanguage('fr');
-      await notifier().selectLanguage(null);
-
-      expect(config.writes, ['fr', null]);
-      expect(language(), 'en');
-      expect(remote.reads, 0);
-      expect(remote.updates, isEmpty);
-      expect(remote.clears, 0);
     });
   });
 }

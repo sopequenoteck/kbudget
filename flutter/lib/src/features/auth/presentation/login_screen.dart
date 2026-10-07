@@ -5,14 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/data/remote/api_error.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/presentation/widgets/auth_form_fields.dart';
-import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -35,36 +32,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _handleSwitchToLocal() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.onboardingDialogSwitchToLocalTitle),
-        content: Text(l10n.onboardingDialogSwitchToLocalMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.commonActionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.commonActionConfirm),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    await ref
-        .read(dataSettingsNotifierProvider.notifier)
-        .switchDataMode(DataMode.local);
-    if (mounted) {
-      RestartWidget.restartApp(context);
-    }
   }
 
   Future<void> _handleLogin() async {
@@ -196,18 +163,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             )
                           : Text(l10n.authActionSignIn),
-                    ),
-                    const SizedBox(height: AppSpacing.space4),
-                    TextButton(
-                      onPressed:
-                          isLoading ? null : () => _handleSwitchToLocal(),
-                      child: Text(
-                        l10n.onboardingActionUseLocalMode,
-                        style: TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
                     ),
                   ],
                 ),

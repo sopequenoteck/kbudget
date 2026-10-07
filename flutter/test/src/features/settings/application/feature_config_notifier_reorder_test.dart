@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
@@ -9,6 +8,7 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
 import '../../../../helpers/display_locale.dart';
+import 'language_notifier_test.dart' show FakePreferenceDataSource;
 
 class MockAppConfigRepository implements AppConfigRepository {
   List<Feature> enabledFeatures = [Feature.subscriptions, Feature.debts];
@@ -34,7 +34,6 @@ class MockAppConfigRepository implements AppConfigRepository {
 
   @override
   Future<AppConfig> getConfig() async => AppConfig(
-        dataMode: DataMode.local,
         enabledFeatures: enabledFeatures,
         navOrder: navOrder,
       );
@@ -47,12 +46,6 @@ class MockAppConfigRepository implements AppConfigRepository {
 
   @override
   Future<void> setOnboardingCompleted(bool completed) async {}
-
-  @override
-  Future<DataMode> getDataMode() async => DataMode.local;
-
-  @override
-  Future<void> setDataMode(DataMode mode) async {}
 
   @override
   Future<void> setServerUrl(String url) async {}
@@ -97,17 +90,19 @@ void main() {
 
   FeatureConfigState state() => container.read(featureConfigNotifierProvider);
 
-  setUp(() {
+  setUp(() async {
     mockRepo = MockAppConfigRepository();
     container = ProviderContainer(
       overrides: [
         displayLocaleOverride(),
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
-        dataModeProvider.overrideWith((ref) async => DataMode.local),
+        preferenceRemoteDataSourceProvider
+            .overrideWith((ref) async => FakePreferenceDataSource()),
       ],
     );
     // Let _loadFeatures() complete
     state();
+    await pumpEventQueue();
   });
 
   tearDown(() {
@@ -153,14 +148,12 @@ void main() {
         overrides: [
           displayLocaleOverride(),
           appConfigRepositoryProvider.overrideWithValue(mockRepo),
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           preferenceRemoteDataSourceProvider.overrideWith(
             (ref) => Future.error(Exception('offline')),
           ),
         ],
       );
       addTearDown(serverContainer.dispose);
-      await serverContainer.read(dataModeProvider.future);
       serverContainer.read(featureConfigNotifierProvider);
       await pumpEventQueue();
     }

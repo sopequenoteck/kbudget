@@ -12,7 +12,7 @@ import 'package:k_budget/src/common_widgets/empty_state_widget.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/currency.dart';
 import 'package:k_budget/src/domain/enums/modal_type.dart';
 import 'package:k_budget/src/domain/enums/transaction_type.dart';

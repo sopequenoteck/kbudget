@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
@@ -117,11 +117,6 @@ class _SubscriptionDetailScreenState
       _subscription = updated;
     }
 
-    final isServerMode = ref.watch(dataModeProvider).whenOrNull(
-          data: (mode) => mode == DataMode.server,
-        ) ??
-        false;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(_subscription?.nom ?? ''),
@@ -144,9 +139,8 @@ class _SubscriptionDetailScreenState
           ? _buildSkeleton(colorScheme)
           : _subscription == null
               ? Center(child: Text(l10n.errorsClientGeneric))
-              : _buildContent(
-                  context, _subscription!, colorScheme, l10n, isServerMode),
-      floatingActionButton: _subscription != null && isServerMode
+              : _buildContent(context, _subscription!, colorScheme),
+      floatingActionButton: _subscription != null
           ? FloatingActionButton.extended(
               onPressed: _pay,
               icon: const PhosphorIcon(
@@ -162,8 +156,6 @@ class _SubscriptionDetailScreenState
     BuildContext context,
     Subscription sub,
     ColorScheme colorScheme,
-    AppLocalizations l10n,
-    bool isServerMode,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(
@@ -183,12 +175,11 @@ class _SubscriptionDetailScreenState
           _InfoSection(subscription: sub, colorScheme: colorScheme),
           const SizedBox(height: AppSpacing.space4),
 
-          // Historique des paiements (server-only)
-          if (isServerMode)
-            PaymentHistorySection(
-              subscriptionId: widget.subscriptionId,
-              currency: sub.currency,
-            ),
+          // Historique des paiements
+          PaymentHistorySection(
+            subscriptionId: widget.subscriptionId,
+            currency: sub.currency,
+          ),
         ],
       ),
     );
