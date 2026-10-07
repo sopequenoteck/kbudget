@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
@@ -147,8 +149,8 @@ void main() {
 
   // --- Setup helpers ---
 
-  /// Crée un container avec tous les repositories mockés en mode local
-  /// (DataMode.local pour éviter les appels réseau dans les tests).
+  /// Crée un container avec tous les repositories mockés et le Dio
+  /// authentifié remplacé, pour éviter les appels réseau dans les tests.
   ProviderContainer buildContainer({
     List<Override> extraOverrides = const [],
   }) {
@@ -162,7 +164,10 @@ void main() {
         exchangeRateRepositoryProvider.overrideWith(
           (ref) async => mockExchangeRateRepo,
         ),
-        dataModeProvider.overrideWith((ref) async => DataMode.local),
+        authenticatedDioProvider.overrideWith((ref) async => Dio()),
+        preferenceRemoteDataSourceProvider.overrideWith(
+          (ref) => Future.error(Exception('Preferences unavailable')),
+        ),
         budgetNotifierProvider.overrideWith(() => _FakeBudgetNotifier()),
         recurringTransactionRepositoryProvider.overrideWith(
           (_) async => mockRecurringRepo,
@@ -188,8 +193,6 @@ void main() {
         .thenAnswer((_) async => []);
     when(mockCategoryRepo.getAll()).thenAnswer((_) async => []);
     when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => []);
-    when(mockAppConfigRepo.getDataMode())
-        .thenAnswer((_) async => DataMode.local);
     when(mockRecurringRepo.listActive()).thenAnswer((_) async => []);
 
     container = buildContainer();
@@ -410,7 +413,7 @@ void main() {
 
     test('should_setError_when_loadDashboardFails', () async {
       // Le bloc catch du DashboardNotifier est atteint quand un provider
-      // intermédiaire lance une exception non-gérée (ex: dataModeProvider).
+      // intermédiaire lance une exception non-gérée (ex: le Dio authentifié).
       // Les CrudNotifiers (account, transaction, category) catchent eux-mêmes
       // leurs exceptions. Pour tester l'erreur du DashboardNotifier, on simule
       // une exception sur currentUserNameProvider.
@@ -447,9 +450,10 @@ void main() {
       expect(state().isLoading, false);
     });
 
-    test('should_setCurrenciesWithDefaultEur_when_localMode', () async {
-      // En mode local, les currencies ne sont pas chargées depuis les prefs
-      // Le fallback est [Currency.eur]
+    test('should_setCurrenciesWithDefaultEur_when_preferencesUnavailable',
+        () async {
+      // Si les préférences serveur sont indisponibles, le fallback est
+      // [Currency.eur]
       await notifier().loadDashboard();
 
       expect(state().currencies, isNotEmpty);

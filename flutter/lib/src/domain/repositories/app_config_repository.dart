@@ -10,8 +10,6 @@ abstract class AppConfigRepository {
   Future<void> saveConfig(AppConfig config);
   Future<bool> isOnboardingCompleted();
   Future<void> setOnboardingCompleted(bool completed);
-  Future<DataMode> getDataMode();
-  Future<void> setDataMode(DataMode mode);
   Future<void> setServerUrl(String url);
   Future<String?> getServerUrl();
   Future<void> setTheme(AppTheme theme);

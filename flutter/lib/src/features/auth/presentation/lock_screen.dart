@@ -123,67 +123,26 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
   Future<void> _handleForgotPin() async {
     final l10n = AppLocalizations.of(context)!;
-    final config = await ref
-        .read(onboardingNotifierProvider.notifier)
-        .getConfig();
-
-    if (!mounted) return;
-
-    if (config.dataMode == DataMode.server) {
-      // Server mode: logout and re-login
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l10n.authDialogForgotPinTitle),
-          content: Text(l10n.authDialogForgotPinServerMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.commonActionCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.commonActionLogout),
-            ),
-          ],
-        ),
-      );
-      if (confirmed == true && mounted) {
-        await ref.read(authNotifierProvider.notifier).logout();
-        if (mounted) context.go(RouteNames.login);
-      }
-    } else {
-      // Local mode: reset data
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l10n.authDialogForgotPinTitle),
-          content: Text(l10n.authDialogForgotPinLocalMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.commonActionCancel),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.commonActionReset),
-            ),
-          ],
-        ),
-      );
-      if (confirmed == true && mounted) {
-        // Reset lock settings
-        final notifier = ref.read(onboardingNotifierProvider.notifier);
-        await notifier.updateLockSettings(
-          enabled: false,
-          method: null,
-          pin: null,
-        );
-        if (mounted) context.go(RouteNames.dashboard);
-      }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.authDialogForgotPinTitle),
+        content: Text(l10n.authDialogForgotPinServerMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.commonActionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.commonActionLogout),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(authNotifierProvider.notifier).logout();
+      if (mounted) context.go(RouteNames.login);
     }
   }
 

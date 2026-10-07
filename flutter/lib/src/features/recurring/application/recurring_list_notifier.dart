@@ -40,6 +40,7 @@ class RecurringListNotifier
     }
   }
 
+  // isLoading global et non mutatingIds : l'element n'a pas encore d'id a suivre.
   Future<void> create(RecurringTransactionCreateRequest req) async {
     state = state.copyWith(isLoading: true);
     try {

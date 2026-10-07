@@ -3,13 +3,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 
 /// Provider Riverpod qui retourne les suggestions de libellés pour l'autocomplete.
 ///
 /// Paramètre : la query saisie par l'utilisateur.
-/// Garde : si [query.length < 2], retourne une liste vide sans appel réseau/local.
-/// Délègue au repository actif (local ou remote selon [dataModeProvider]).
+/// Garde : si [query.length < 2], retourne une liste vide sans appel réseau.
+/// Délègue au repository des transactions.
 final libelleSuggestionsProvider =
     FutureProvider.family<List<String>, String>((ref, query) async {
   if (query.length < 2) return const [];

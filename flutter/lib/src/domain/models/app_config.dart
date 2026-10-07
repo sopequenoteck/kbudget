@@ -37,7 +37,6 @@ List<Feature> _safeParseEnabledFeatures(dynamic json) {
 @freezed
 class AppConfig with _$AppConfig {
   const factory AppConfig({
-    required DataMode dataMode,
     String? serverUrl,
     @Default(AppTheme.light) AppTheme theme,
     @Default(TextScale.medium) TextScale textScale,

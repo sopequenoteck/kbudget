@@ -27,6 +27,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // The app should redirect to onboarding since it's not completed
-    expect(find.text('Bienvenue sur K-Budget'), findsOneWidget);
+    expect(find.text('Configuration serveur'), findsOneWidget);
   });
 }

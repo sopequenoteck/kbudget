@@ -672,10 +672,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous serez déconnecté et devrez vous reconnecter avec vos identifiants.';
 
   @override
-  String get authDialogForgotPinLocalMessage =>
-      'En mode local, la réinitialisation du PIN effacera toutes vos données. Cette action est irréversible.';
-
-  @override
   String get authPagePinTagline => 'Saisissez votre PIN pour continuer';
 
   @override
@@ -725,9 +721,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commonActionLogout => 'Déconnexion';
-
-  @override
-  String get commonActionReset => 'Réinitialiser';
 
   @override
   String get commonFormSearchPlaceholder => 'Rechercher...';
@@ -794,36 +787,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commonFeedbackLoadError => 'Erreur de chargement';
-
-  @override
-  String get onboardingDialogSwitchToLocalTitle => 'Passer en mode local ?';
-
-  @override
-  String get onboardingDialogSwitchToLocalMessage =>
-      'Vos données seront stockées uniquement sur cet appareil. Vous pourrez revenir en mode serveur depuis les paramètres.';
-
-  @override
-  String get onboardingActionUseLocalMode => 'Utiliser en mode local';
-
-  @override
-  String get onboardingPageTitle => 'Bienvenue sur K-Budget';
-
-  @override
-  String get onboardingPageTagline => 'Choisissez votre mode de données';
-
-  @override
-  String get onboardingValueLocalMode => 'Mode local';
-
-  @override
-  String get onboardingValueLocalModeHint =>
-      'Vos données restent sur cet appareil';
-
-  @override
-  String get onboardingValueServerMode => 'Mode serveur';
-
-  @override
-  String get onboardingValueServerModeHint =>
-      'Synchronisez avec votre serveur K-Budget';
 
   @override
   String get onboardingPageServerSetupTitle => 'Configuration serveur';
@@ -1529,15 +1492,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsPageDataTitle => 'Données';
 
   @override
-  String get settingsFormDataSource => 'Source de données';
-
-  @override
-  String get settingsValueDataSourceLocal => 'Local';
-
-  @override
-  String get settingsValueDataSourceServer => 'Serveur';
-
-  @override
   String get settingsFormServerUrl => 'URL du serveur';
 
   @override
@@ -1563,13 +1517,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsFeedbackServerNotFound =>
       'Endpoint introuvable — vérifiez l\'URL';
-
-  @override
-  String get settingsDialogChangeDataSourceTitle => 'Changer de source ?';
-
-  @override
-  String get settingsDialogChangeDataSourceMessage =>
-      'Les sources de données sont indépendantes. Les données de la source actuelle ne seront pas visibles après le changement.\n\nL\'application va redémarrer pour appliquer la nouvelle source.';
 
   @override
   String get notificationsValueSubscriptionDue => 'Échéance abonnement';

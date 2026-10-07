@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/user.dart';
@@ -30,7 +29,7 @@ class _FakeDataSettings extends DataSettingsNotifier {
 
   @override
   DataSettingsState build() =>
-      DataSettingsState(dataMode: DataMode.server, serverUrl: serverUrl);
+      DataSettingsState(serverUrl: serverUrl);
 }
 
 class _FakeFeatureConfig extends FeatureConfigNotifier {
@@ -203,25 +202,11 @@ void main() {
       expect(find.text('Invitations et gestion des accès'), findsOneWidget);
     });
 
-    testWidgets('should_showLocalModeFooter_when_dataModeLocal',
-        (tester) async {
-      await pumpTall(
-        tester,
-        buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.local),
-        ]),
-      );
-
-      expect(find.textContaining('K-Budget v'), findsOneWidget);
-      expect(find.textContaining(' · Mode local'), findsOneWidget);
-    });
-
     testWidgets('should_showOfflineFooter_when_serverUrlMissing',
         (tester) async {
       await pumpTall(
         tester,
         buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           dataSettingsNotifierProvider
               .overrideWith(() => _FakeDataSettings(null)),
         ]),
@@ -236,7 +221,6 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       await tester.pumpWidget(
         buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           dataSettingsNotifierProvider
               .overrideWith(() => _FakeDataSettings('https://k.test/api')),
         ]),

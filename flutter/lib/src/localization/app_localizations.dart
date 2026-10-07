@@ -1290,12 +1290,6 @@ abstract class AppLocalizations {
   /// **'You will be signed out and will need to sign in again with your credentials.'**
   String get authDialogForgotPinServerMessage;
 
-  /// No description provided for @authDialogForgotPinLocalMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'In local mode, resetting the PIN will erase all your data. This action is irreversible.'**
-  String get authDialogForgotPinLocalMessage;
-
   /// No description provided for @authPagePinTagline.
   ///
   /// In en, this message translates to:
@@ -1397,12 +1391,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get commonActionLogout;
-
-  /// No description provided for @commonActionReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get commonActionReset;
 
   /// No description provided for @commonFormSearchPlaceholder.
   ///
@@ -1529,60 +1517,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading error'**
   String get commonFeedbackLoadError;
-
-  /// No description provided for @onboardingDialogSwitchToLocalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to local mode?'**
-  String get onboardingDialogSwitchToLocalTitle;
-
-  /// No description provided for @onboardingDialogSwitchToLocalMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Your data will be stored only on this device. You can switch back to server mode from settings.'**
-  String get onboardingDialogSwitchToLocalMessage;
-
-  /// No description provided for @onboardingActionUseLocalMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Use in local mode'**
-  String get onboardingActionUseLocalMode;
-
-  /// No description provided for @onboardingPageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to K-Budget'**
-  String get onboardingPageTitle;
-
-  /// No description provided for @onboardingPageTagline.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your data mode'**
-  String get onboardingPageTagline;
-
-  /// No description provided for @onboardingValueLocalMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Local mode'**
-  String get onboardingValueLocalMode;
-
-  /// No description provided for @onboardingValueLocalModeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your data stays on this device'**
-  String get onboardingValueLocalModeHint;
-
-  /// No description provided for @onboardingValueServerMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Server mode'**
-  String get onboardingValueServerMode;
-
-  /// No description provided for @onboardingValueServerModeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync with your K-Budget server'**
-  String get onboardingValueServerModeHint;
 
   /// No description provided for @onboardingPageServerSetupTitle.
   ///
@@ -2664,24 +2598,6 @@ abstract class AppLocalizations {
   /// **'Data'**
   String get settingsPageDataTitle;
 
-  /// No description provided for @settingsFormDataSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Data source'**
-  String get settingsFormDataSource;
-
-  /// No description provided for @settingsValueDataSourceLocal.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get settingsValueDataSourceLocal;
-
-  /// No description provided for @settingsValueDataSourceServer.
-  ///
-  /// In en, this message translates to:
-  /// **'Server'**
-  String get settingsValueDataSourceServer;
-
   /// No description provided for @settingsFormServerUrl.
   ///
   /// In en, this message translates to:
@@ -2729,18 +2645,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Endpoint not found — check the URL'**
   String get settingsFeedbackServerNotFound;
-
-  /// No description provided for @settingsDialogChangeDataSourceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Change data source?'**
-  String get settingsDialogChangeDataSourceTitle;
-
-  /// No description provided for @settingsDialogChangeDataSourceMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.'**
-  String get settingsDialogChangeDataSourceMessage;
 
   /// No description provided for @notificationsValueSubscriptionDue.
   ///

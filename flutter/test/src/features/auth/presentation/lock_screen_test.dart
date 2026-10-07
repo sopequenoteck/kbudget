@@ -83,7 +83,6 @@ void main() {
       await pumpLockScreen(
         tester,
         config: AppConfig(
-          dataMode: DataMode.local,
           lockMethod: LockMethod.pin,
           hashedPin: _hash('1234'),
         ),
@@ -98,7 +97,6 @@ void main() {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.local,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),
@@ -122,7 +120,6 @@ void main() {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.local,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),
@@ -143,7 +140,6 @@ void main() {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.local,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),
@@ -164,7 +160,6 @@ void main() {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.local,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),
@@ -176,19 +171,19 @@ void main() {
 
         expect(find.text('PIN oublié ?'), findsWidgets);
         expect(
-          find.textContaining('la réinitialisation du PIN effacera'),
+          find.textContaining('Vous serez déconnecté'),
           findsOneWidget,
         );
+        expect(find.text('Réinitialiser'), findsNothing);
       },
     );
 
     testWidgets(
-      'should_logoutAndNavigateToLogin_when_serverModeAndLogoutConfirmed',
+      'should_logoutAndNavigateToLogin_when_logoutConfirmed',
       (tester) async {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.server,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),
@@ -212,36 +207,11 @@ void main() {
     );
 
     testWidgets(
-      'should_resetLockAndNavigateToDashboard_when_localModeAndResetConfirmed',
-      (tester) async {
-        await pumpLockScreen(
-          tester,
-          config: AppConfig(
-            dataMode: DataMode.local,
-            lockMethod: LockMethod.pin,
-            hashedPin: _hash('1234'),
-          ),
-        );
-
-        await tester.tap(find.text('PIN oublié ?').first);
-        await tester.pumpAndSettle();
-        tester.takeException();
-
-        await tester.tap(find.text('Réinitialiser'));
-        await tester.pumpAndSettle();
-        tester.takeException();
-
-        expect(find.text('Dashboard'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
       'should_dismissForgotPinDialog_when_cancelTapped',
       (tester) async {
         await pumpLockScreen(
           tester,
           config: AppConfig(
-            dataMode: DataMode.local,
             lockMethod: LockMethod.pin,
             hashedPin: _hash('1234'),
           ),

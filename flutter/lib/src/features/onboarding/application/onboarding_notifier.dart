@@ -35,10 +35,6 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     return _repository.isOnboardingCompleted();
   }
 
-  void selectMode(DataMode mode) {
-    state = state.copyWith(selectedMode: mode, error: null);
-  }
-
   void setServerUrl(String url) {
     state = state.copyWith(serverUrl: url, error: null);
   }
@@ -85,15 +81,12 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   Future<void> completeOnboarding() async {
-    final mode = state.selectedMode;
-    if (mode == null) return;
+    final serverUrl = state.serverUrl;
+    if (serverUrl == null) return;
 
     state = state.copyWith(isSaving: true, error: null);
     try {
-      await _repository.setDataMode(mode);
-      if (mode == DataMode.server && state.serverUrl != null) {
-        await _repository.setServerUrl(state.serverUrl!);
-      }
+      await _repository.setServerUrl(serverUrl);
       await _repository.setOnboardingCompleted(true);
       state = state.copyWith(isSaving: false, isCompleted: true);
     } on Exception catch (_) {

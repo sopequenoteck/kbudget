@@ -4,12 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/common_widgets/page_header.dart';
-import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -60,48 +57,6 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
               onBack: () => context.pop(),
               icon: const PhosphorIcon(PhosphorIconsRegular.database, size: 16),
             ),
-
-            // Source active
-            Text(
-              l10n.settingsFormDataSource.toUpperCase(),
-              style: TextStyle(
-                fontSize: AppTypography.sizeXs,
-                fontWeight: AppTypography.medium,
-                letterSpacing: AppTypography.labelLetterSpacingForSize12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.space3),
-            SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<DataMode>(
-                segments: [
-                  ButtonSegment(
-                    value: DataMode.local,
-                    label: Text(l10n.settingsValueDataSourceLocal),
-                    icon: const PhosphorIcon(
-                      PhosphorIconsRegular.deviceMobile,
-                      size: 20,
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: DataMode.server,
-                    label: Text(l10n.settingsValueDataSourceServer),
-                    icon: const PhosphorIcon(
-                      PhosphorIconsRegular.cloud,
-                      size: 20,
-                    ),
-                  ),
-                ],
-                selected: {state.dataMode},
-                onSelectionChanged: (selection) {
-                  final newMode = selection.first;
-                  if (newMode == state.dataMode) return;
-                  _onModeChanged(newMode, state);
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.space6),
 
             // URL serveur
             Text(
@@ -165,49 +120,5 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _onModeChanged(
-    DataMode newMode,
-    DataSettingsState state,
-  ) async {
-    // Validate URL if switching to server
-    if (newMode == DataMode.server) {
-      final url = _urlController.text.trim();
-      final notifier = ref.read(dataSettingsNotifierProvider.notifier);
-      final validationError = notifier.validateUrl(url);
-      if (validationError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(validationError)),
-        );
-        return;
-      }
-    }
-
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await ConfirmDialogCustom.show(
-      context: context,
-      icon: PhosphorIconsRegular.arrowsLeftRight,
-      title: l10n.settingsDialogChangeDataSourceTitle,
-      message: l10n.settingsDialogChangeDataSourceMessage,
-      confirmLabel: l10n.commonActionConfirm,
-      variant: ConfirmVariant.primary,
-    ) ?? false;
-
-    if (!confirmed || !mounted) return;
-
-    // If switching to server, check connectivity
-    if (newMode == DataMode.server) {
-      final url = _urlController.text.trim();
-      final n = ref.read(dataSettingsNotifierProvider.notifier);
-      await n.saveServerUrl(url);
-      final isReachable = await n.checkConnectivity(url);
-      if (!isReachable || !mounted) return;
-    }
-
-    await ref.read(dataSettingsNotifierProvider.notifier).switchDataMode(newMode);
-    if (mounted) {
-      RestartWidget.restartApp(context);
-    }
   }
 }

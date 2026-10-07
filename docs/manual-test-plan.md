@@ -1,7 +1,7 @@
 # Plan de Test Manuel — Migration Angular → Flutter
 
 > **Date** : 2026-02-26
-> **Objectif** : Valider que l'application Flutter reproduit fidèlement toutes les fonctionnalités de l'application Angular, et fonctionne correctement en mode local et serveur.
+> **Objectif** : Valider que l'application Flutter reproduit fidèlement toutes les fonctionnalités de l'application Angular.
 > **Prérequis** : API Spring Boot lancée (profil dev), compte utilisateur existant, au moins 2 comptes bancaires, quelques transactions/abonnements/dettes de test.
 
 ---
@@ -42,22 +42,20 @@
 |---------|---------------|
 | OK | Test passe |
 | KO | Test echoue |
-| N/A | Non applicable (mode local, etc.) |
+| N/A | Non applicable (exclusivite d'un client, etc.) |
 | -- | Non teste |
 
 ---
 
 ## 1. Onboarding & Configuration
 
-> **Concerne** : Premier lancement, choix mode local/serveur.
+> **Concerne** : Premier lancement, configuration du serveur.
 > **Exclusif Flutter** (pas d'equivalent Angular).
 
 | # | Scenario | Etapes | Resultat attendu | Statut |
 |---|----------|--------|-------------------|--------|
-| O-1 | Premier lancement | Installer et lancer l'app | Ecran Onboarding affiche (jamais dashboard) | -- |
-| O-2 | Selection mode local | Tap "Mode local" | Card mise en evidence (bordure primary + check) | -- |
-| O-3 | Confirmer mode local | Mode local selectionne → Confirmer | Redirect `/dashboard` direct | -- |
-| O-4 | Selection mode serveur | Tap "Mode serveur" → Confirmer | Affichage ecran ServerSetup | -- |
+| O-1 | Premier lancement | Installer et lancer l'app | Ecran ServerSetup affiche directement (jamais dashboard, pas de choix de mode) | -- |
+| O-2 | Ancienne installation en mode local | Mettre a jour une app configuree en mode local, la relancer | Ecran ServerSetup affiche, ancienne base locale effacee (KKS-335) | -- |
 | O-5 | URL vide | ServerSetup : champ vide → Verifier | Erreur "L'URL est requise" | -- |
 | O-6 | URL invalide | ServerSetup : "abc123" → Verifier | Erreur "URL invalide" | -- |
 | O-7 | URL valide accessible | ServerSetup : URL API correcte → Verifier | Banner vert "Connexion reussie" + bouton Confirmer actif | -- |
@@ -114,7 +112,6 @@
 | FR-4 | Confirmation differente | Confirmation ≠ mot de passe | "Les mots de passe ne correspondent pas" | -- |
 | FR-5 | Reinitialisation reussie | Donnees valides → Valider | Nouveaux jetons stockes, acces au dashboard | -- |
 | FR-6 | Reprise apres redemarrage | Fermer et rouvrir l'app avec des jetons encore valides, puis toucher un ecran metier | Le 403 est intercepte et l'ecran de reinitialisation s'affiche — le flag n'est ni dans le JWT ni persiste (Flutter) | -- |
-| FR-7 | Mode local non concerne | Basculer en mode local (Drift) | L'ecran ne se declenche jamais : pas de serveur, donc pas de reinitialisation (Flutter) | -- |
 
 ---
 
@@ -431,8 +428,8 @@
 | # | Sujet | Angular | Flutter | Impact |
 |---|-------|---------|---------|--------|
 | D1 | Taille texte | Non disponible | 3 options (Petit/Normal/Grand) | Flutter > Angular |
-| D2 | Mode local/serveur | Serveur uniquement | Choix local (Drift) ou serveur (Dio) | Exclusif Flutter |
-| D3 | Onboarding | Absent | Ecran choix local/serveur | Exclusif Flutter |
+| D2 | Source de donnees | Serveur uniquement | Serveur uniquement (KKS-335) | Identique |
+| D3 | Onboarding | Absent | Configuration du serveur au premier lancement | Exclusif Flutter |
 | D4 | Lock Screen | Absent | PIN + biometrie | Exclusif Flutter |
 | D5 | Pagination | Tout charge d'un coup | Pagination client-side (20/page) | Comportement different |
 | D6 | Filtres abos | Appel API par filtre | Filtrage client-side | Meme resultat, implementation differente |
@@ -499,7 +496,6 @@
 ## 22. KKS-235 — Page Mon compte (Angular + Flutter)
 
 > **Concerne** : Page `Settings > Mon compte` + bouton de deconnexion fixe.
-> **Mode serveur uniquement** (les endpoints `/api/v1/users/me/*` ne sont pas dispo en mode local Drift).
 > **Prerequis** : compte de test, mot de passe connu, au moins 1 admin secondaire en DB pour le test "dernier admin".
 
 ### 22.1 — US-001 : Navigation et deconnexion
@@ -673,9 +669,8 @@
 ## Notes d'execution
 
 1. **Ordre suggere** : Executer les sections 1 → 18 dans l'ordre, puis les edge cases (section 19), puis les sections feature-specifiques (21, 22)
-2. **Modes a tester** : Chaque section (sauf exclusives) doit etre testee en **mode local** ET **mode serveur**
-3. **Devices** : Tester sur iOS + Android si possible (comportements natifs differents : back button, date picker, clavier)
-4. **Orientation** : Verifier au moins 1 ecran en mode paysage
-5. **Theme** : Tester au moins le dashboard + 1 formulaire en mode sombre
-6. **Multi-devises** : Creer au moins 1 compte en EUR et 1 en USD pour les tests de formatage
-7. **KKS-235** : Section 22 a executer en mode serveur uniquement, prevoir un compte admin secondaire pour pouvoir tester MC-26 et MC-30 distinctement
+2. **Devices** : Tester sur iOS + Android si possible (comportements natifs differents : back button, date picker, clavier)
+3. **Orientation** : Verifier au moins 1 ecran en mode paysage
+4. **Theme** : Tester au moins le dashboard + 1 formulaire en mode sombre
+5. **Multi-devises** : Creer au moins 1 compte en EUR et 1 en USD pour les tests de formatage
+6. **KKS-235** : Section 22 : prevoir un compte admin secondaire pour pouvoir tester MC-26 et MC-30 distinctement

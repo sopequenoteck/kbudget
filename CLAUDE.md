@@ -45,7 +45,7 @@ cd app && ng lint                 # ESLint
 ```bash
 cd flutter && flutter test             # Tests unitaires + widget
 cd flutter && flutter test test/src/features/  # Tests par feature
-cd flutter && dart run build_runner build --delete-conflicting-outputs  # Code generation (Drift, Freezed, JSON)
+cd flutter && dart run build_runner build --delete-conflicting-outputs  # Code generation (Freezed, JSON, Mockito)
 cd flutter && flutter run              # Lancer sur device/simulateur
 cd flutter && flutter analyze          # Analyse statique
 ```
@@ -128,8 +128,8 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 - **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`
 - **ListState\<T\>** : Freezed model generique (`items`, `isLoading`, `error`, `currentPage`, `hasMore`, `mutatingIds`)
-- **Repository abstrait** : Interface dans `domain/repositories/`, implementations dans `features/[feature]/data/` (local + remote)
-- **Data mode provider** : Strategy pattern — `dataModeProvider` bascule entre `RepositoryLocal` (Drift) et `RepositoryRemote` (Dio)
+- **Repository abstrait** : Interface dans `domain/repositories/`, implementation remote (Dio) dans `features/[feature]/data/`
+- **Repositories** : providers dans `data/repository_providers.dart`, implementation remote unique (Dio). Plus de mode autonome ni de Drift depuis KKS-335 ; aucun stockage local n'est une source de verite (cache de lecture : KKS-507)
 - **Widgets** : `ConsumerWidget` (lecture state), `ConsumerStatefulWidget` (stateful + Riverpod), `StatelessWidget` (UI pure)
 - **Design tokens** : Constantes dans `flutter/lib/src/constants/` (AppColors, AppSpacing, AppTypography, AppRadius, AppShadows, AppDurations) — jamais de valeurs hardcodees
 - **Locale d'affichage** : `displayLocaleProvider` / `intlLocaleProvider` (`features/settings/application/display_locale_provider.dart`), jamais une locale en dur dans `NumberFormat` ou `DateFormat`. `displayLocaleProvider` derive de `languageNotifierProvider` (preference serveur, langue memorisee, langue du systeme, anglais par defaut) ; changer de langue passe par `LanguageNotifier.selectLanguage`. Cles ARB selon [`docs/i18n.md`](docs/i18n.md) (KKS-398, KKS-405)
@@ -139,7 +139,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 - **Texte de notification** : `buildNotificationText(notification, l10n, intlLocale)` (`utils/notification_text.dart`) pour le panneau comme pour la notification système, jamais `title` / `message` bruts ; repli sur le texte stocké sans `params`, pour un type inconnu (`type` nullable, jamais de valeur `unknown` dans l'enum) ou un paramètre requis manquant. Un service sans `BuildContext` lit `appLocalizationsProvider` / `intlLocaleProvider` à l'appel, via son fournisseur (KKS-425)
 - **Navigation** : `context.push()` / `context.go()` via go_router
 - **Skeleton loading** : Package `shimmer` avec widgets `_XxxSkeleton` prives
-- **Code generation** : `build_runner` pour Drift, Freezed, json_serializable — fichiers `.g.dart` et `.freezed.dart` gitignores (generes localement)
+- **Code generation** : `build_runner` pour Freezed, json_serializable et les mocks Mockito — fichiers `.g.dart` et `.freezed.dart` gitignores (generes localement)
 
 ### Tests Flutter
 
