@@ -61,8 +61,8 @@ import 'package:k_budget/src/features/transactions/presentation/transaction_list
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/data/remote/compatibility_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/compatibility/presentation/incompatible_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';

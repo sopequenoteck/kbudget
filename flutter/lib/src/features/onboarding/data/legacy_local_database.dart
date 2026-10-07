@@ -20,14 +20,16 @@ const _legacyDatabaseSuffixes = ['', '-wal', '-shm', '-journal'];
 Future<void> deleteLegacyLocalDatabase({
   Future<Directory> Function()? directory,
 }) async {
-  if (kIsWeb) return;
+  if (kIsWeb) {
+    return;
+  }
   try {
     final dir = await (directory ?? getApplicationDocumentsDirectory)();
     for (final suffix in _legacyDatabaseSuffixes) {
       final file = File(
         '${dir.path}${Platform.pathSeparator}$_legacyDatabaseName$suffix',
       );
-      if (await file.exists()) {
+      if (file.existsSync()) {
         await file.delete();
       }
     }

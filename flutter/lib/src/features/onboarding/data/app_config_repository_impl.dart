@@ -11,6 +11,15 @@ import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/onboarding/data/legacy_local_database.dart';
 
 class AppConfigRepositoryImpl implements AppConfigRepository {
+  /// Crée le repository. [storage] et [deleteLegacyDatabase] sont
+  /// remplaçables pour les tests.
+  AppConfigRepositoryImpl({
+    FlutterSecureStorage? storage,
+    Future<void> Function()? deleteLegacyDatabase,
+  })  : _storage = storage ?? const FlutterSecureStorage(),
+        _deleteLegacyDatabase =
+            deleteLegacyDatabase ?? deleteLegacyLocalDatabase;
+
   final FlutterSecureStorage _storage;
   final Future<void> Function() _deleteLegacyDatabase;
 
@@ -21,18 +30,12 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
   static const _legacyDataModeKey = 'dataMode';
   static const _legacyLocalMode = 'local';
 
-  AppConfigRepositoryImpl({
-    FlutterSecureStorage? storage,
-    Future<void> Function()? deleteLegacyDatabase,
-  })  : _storage = storage ?? const FlutterSecureStorage(),
-        _deleteLegacyDatabase =
-            deleteLegacyDatabase ?? deleteLegacyLocalDatabase;
-
   /// Lit la configuration. Une configuration sans serveur, ou enregistree en
   /// ancien mode local, est renvoyee comme non configuree
   /// (`onboardingCompleted == false`) : l'application repart sur la
   /// configuration du serveur. Une ancienne configuration est reecrite sans
-  /// `dataMode` et la base locale devenue orpheline est effacee, une seule fois.
+  /// `dataMode` et la base locale devenue orpheline est effacee, une seule
+  /// fois.
   @override
   Future<AppConfig> getConfig() async {
     final raw = await _storage.read(key: _configKey);

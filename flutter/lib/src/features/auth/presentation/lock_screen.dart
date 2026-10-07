@@ -140,9 +140,11 @@ class _LockScreenState extends ConsumerState<LockScreen> {
         ],
       ),
     );
-    if (confirmed == true && mounted) {
+    if ((confirmed ?? false) && mounted) {
       await ref.read(authNotifierProvider.notifier).logout();
-      if (mounted) context.go(RouteNames.login);
+      if (mounted) {
+        context.go(RouteNames.login);
+      }
     }
   }
 

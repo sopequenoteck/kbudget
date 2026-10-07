@@ -4,8 +4,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
@@ -74,7 +74,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
         currencies = prefs.currencies
             .map((s) => Currency.values.byName(s.toLowerCase()))
             .toList();
-      } catch (_) {
+      } on Object catch (_) {
         // Fallback si erreur serveur
       }
 

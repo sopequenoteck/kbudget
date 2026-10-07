@@ -76,7 +76,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _packageInfo = info);
     });
-    _runHealthCheck();
+    unawaited(_runHealthCheck());
   }
 
   Future<void> _runHealthCheck() async {

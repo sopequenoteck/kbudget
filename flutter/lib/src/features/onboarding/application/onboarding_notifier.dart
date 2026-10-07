@@ -82,7 +82,9 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
 
   Future<void> completeOnboarding() async {
     final serverUrl = state.serverUrl;
-    if (serverUrl == null) return;
+    if (serverUrl == null) {
+      return;
+    }
 
     state = state.copyWith(isSaving: true, error: null);
     try {
