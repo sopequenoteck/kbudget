@@ -190,7 +190,7 @@ public class DebtService {
             throw new IllegalArgumentException("The repayment amount must be positive");
         }
         if (amount.compareTo(montantRestant) > 0) {
-            throw new IllegalArgumentException("The amount exceeds the remaining amount (" + montantRestant + ")");
+            throw new IllegalArgumentException("The amount exceeds the remaining amount");
         }
 
         Account account = accountRepository.findById(request.accountId())

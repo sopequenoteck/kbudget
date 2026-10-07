@@ -581,7 +581,7 @@ class AccountControllerTest {
     @Test
     void should_return400_when_invalidBankCode() throws Exception {
         when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Invalid bank code: INEXISTANT"));
+                .thenThrow(new IllegalArgumentException("Invalid bank code"));
 
         mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
@@ -594,7 +594,7 @@ class AccountControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Invalid bank code: INEXISTANT"));
+                .andExpect(jsonPath("$.message").value("Invalid bank code"));
     }
 
     @Test

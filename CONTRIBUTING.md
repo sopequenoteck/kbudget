@@ -171,7 +171,9 @@ its id.
 
 Exception messages are logged, so **never put user-entered data in an exception
 message**. The read errors of an imported file log only the exception type and
-the line number, never its message.
+the line number, never its message. Likewise, a parsing error of a request body
+or of an import mapping logs only the exception type, never the parser
+message, which quotes the input.
 
 The first-start banner, which prints the administrator e-mail and the generated
 password once, is the only other exception; it is documented in

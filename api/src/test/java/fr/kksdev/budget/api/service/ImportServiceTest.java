@@ -397,7 +397,7 @@ class ImportServiceTest {
 
         assertThatThrownBy(() -> importService.updateLine(draftId, lineId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid line status: BOGUS");
+                .hasMessage("Invalid line status");
     }
 
     // -------------------------------------------------------------------------
