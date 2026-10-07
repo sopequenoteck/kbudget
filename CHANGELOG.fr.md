@@ -7,6 +7,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Security
+
+- **Les messages d'exception ne reprennent plus les donnees saisies**
+  (KKS-500) : le `message` d'une reponse `400 BAD_REQUEST` ou `409 CONFLICT`,
+  que l'API ecrit aussi dans ses logs, ne repete plus la valeur soumise ou
+  financiere : code
+  banque, fuseau horaire, motif d'une regle de categorisation, statut d'une
+  ligne d'import, montant restant d'une dette. Un corps de requete ou un
+  mapping d'import illisible ne journalise que le type d'exception du parseur.
+  Codes d'erreur inchanges ; les clients n'affichaient jamais `message`.
+
 ## [6.11.0] - 2026-10-06
 
 > Les logs de l'API sont desormais en anglais et sans donnees personnelles, et

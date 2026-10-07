@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        log.warn("Malformed request: {}", ex.getMessage());
+        log.warn("Malformed request ({})", ex.getMostSpecificCause().getClass().getSimpleName());
         return error(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", INVALID_REQUEST_MESSAGE, INVALID_REQUEST_MESSAGE);
     }
 

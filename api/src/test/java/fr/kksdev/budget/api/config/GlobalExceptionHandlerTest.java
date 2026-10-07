@@ -1,12 +1,19 @@
 package fr.kksdev.budget.api.config;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.kksdev.budget.api.dto.response.ErrorResponse;
 import fr.kksdev.budget.api.exception.*;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpInputMessage;
@@ -27,6 +34,22 @@ class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private ListAppender<ILoggingEvent> logAppender;
+    private Logger handlerLogger;
+
+    @BeforeEach
+    void setUpLogCapture() {
+        handlerLogger = (Logger) LoggerFactory.getLogger(GlobalExceptionHandler.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        handlerLogger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void detachLogCapture() {
+        handlerLogger.detachAppender(logAppender);
+    }
+
     @Test
     void should_return_stable_codes_for_generic_handlers() {
         assertResponse(handler.handleIllegalArgument(new IllegalArgumentException("Argument invalide")), 400,
@@ -44,6 +67,20 @@ class GlobalExceptionHandlerTest {
         assertResponse(handler.handleHttpMessageNotReadable(
                         new HttpMessageNotReadableException("technical parser detail", (HttpInputMessage) null)), 400,
                 "MALFORMED_REQUEST", "Invalid request");
+    }
+
+    @Test
+    void should_logOnlyCauseType_when_requestBodyIsUnreadable() {
+        var cause = new JsonParseException(null, "detail");
+        var exception = new HttpMessageNotReadableException("JSON parse error: {\"montant\": 12", cause,
+                (HttpInputMessage) null);
+
+        handler.handleHttpMessageNotReadable(exception);
+
+        assertThat(logAppender.list).extracting(ILoggingEvent::getFormattedMessage)
+                .singleElement().asString()
+                .contains("JsonParseException")
+                .doesNotContain("montant", "detail");
     }
 
     @Test

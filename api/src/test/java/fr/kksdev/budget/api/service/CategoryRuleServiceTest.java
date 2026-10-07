@@ -104,7 +104,7 @@ class CategoryRuleServiceTest {
 
         assertThatThrownBy(() -> categoryRuleService.create("carrefour", categoryId, userId))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("A rule with this pattern already exists: carrefour");
+                .hasMessage("A rule with this pattern already exists");
     }
 
     @Test

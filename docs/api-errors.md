@@ -31,14 +31,16 @@ interface ValidationErrorDetail {
 client doit brancher quoi que ce soit, sa logique comme son affichage.
 
 **`message` est un champ de diagnostic** (KKS-324). Il est destine aux journaux
-et au debogage, jamais a l'ecran. Il est redige en anglais technique, sa
-formulation n'est couverte par aucune garantie de compatibilite, et il peut
-changer sans preavis. Tout client derive donc le texte qu'il presente a
-l'utilisateur du code porte par `error`, via son propre catalogue de libelles —
-c'est ce que font le client Angular (`ApiErrorService`) et le client Flutter
-(`errorLabel`). Un code absent du catalogue tombe sur un libelle generique : la
-politique de compatibilite interdit de retirer un champ de reponse, pas
-d'ajouter un code.
+et au debogage, jamais a l'ecran. Il ne reprend jamais une valeur soumise par
+le client ni un montant (code banque, fuseau, motif, statut, montant restant) :
+le code d'erreur et le champ suffisent, et le message est journalise (KKS-500).
+Il est redige en anglais technique, sa formulation n'est couverte par aucune
+garantie de compatibilite, et il peut changer sans preavis. Tout client derive
+donc le texte qu'il presente a l'utilisateur du code porte par `error`, via son
+propre catalogue de libelles — c'est ce que font le client Angular
+(`ApiErrorService`) et le client Flutter (`errorLabel`). Un code absent du
+catalogue tombe sur un libelle generique : la politique de compatibilite
+interdit de retirer un champ de reponse, pas d'ajouter un code.
 
 `message` n'est pas non plus un identifiant : deux erreurs distinctes peuvent
 partager le meme texte, et le meme code peut porter des textes differents selon

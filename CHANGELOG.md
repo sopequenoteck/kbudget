@@ -7,6 +7,16 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- **Exception messages no longer carry submitted data** (KKS-500): the
+  `message` of a `400 BAD_REQUEST` or `409 CONFLICT` response, which the API
+  also writes to its logs, no longer repeats the submitted or financial value:
+  bank code, timezone, pattern of a categorisation rule, status of an import
+  line, remaining amount of a debt. An unreadable request body or import
+  mapping logs only the exception type of the parser. Error codes are
+  unchanged; the clients never displayed `message`.
+
 ## [6.11.0] - 2026-10-06
 
 > The API logs are now in English and free of personal data, and the account
