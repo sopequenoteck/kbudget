@@ -42,14 +42,14 @@ public class NotificationScheduler {
 
     @Scheduled(cron = "0 0 6 * * *")
     public void runDailyJob() {
-        log.info("Démarrage du job quotidien de notifications");
+        log.info("Daily notification job started");
         int count = 0;
 
         List<User> users = userRepository.findAll();
         for (User user : users) {
             UUID userId = user.getId();
             try {
-                log.info("Traitement des notifications pour userId={}", userId);
+                log.info("Processing notifications (userId={})", userId);
                 String timezone = preferenceService.getUserTimezone(userId);
                 ZoneId zoneId = ZoneId.of(timezone);
                 LocalDate tomorrow = LocalDate.now(zoneId).plusDays(1);
@@ -57,14 +57,14 @@ public class NotificationScheduler {
                 count += processSubscriptions(userId, tomorrow, zoneId);
                 count += processDebts(userId, tomorrow, zoneId);
 
-                log.info("Purge des anciennes notifications pour userId={}", userId);
+                log.info("Purging old notifications (userId={})", userId);
                 notificationService.purgeOldNotifications(userId);
             } catch (Exception e) {
-                log.error("Erreur lors du traitement des notifications pour userId={}", userId, e);
+                log.error("Notification processing failed (userId={})", userId, e);
             }
         }
 
-        log.info("Job quotidien terminé: {} notifications générées", count);
+        log.info("Daily job finished: {} notifications generated", count);
     }
 
     private int processSubscriptions(UUID userId, LocalDate tomorrow, ZoneId zoneId) {
@@ -91,7 +91,7 @@ public class NotificationScheduler {
                         sub.getId(),
                         content.params()
                 );
-                log.info("Notification abonnement créée: {} pour userId={}", sub.getNom(), userId);
+                log.info("Subscription notification created (subscriptionId={}, userId={})", sub.getId(), userId);
                 count++;
             }
         }
@@ -121,7 +121,7 @@ public class NotificationScheduler {
                         debt.getId(),
                         content.params()
                 );
-                log.info("Notification dette créée: {} pour userId={}", debt.getPersonne(), userId);
+                log.info("Debt notification created (debtId={}, userId={})", debt.getId(), userId);
                 count++;
             }
         }
@@ -166,20 +166,20 @@ public class NotificationScheduler {
                             content.params()
                     );
                     count++;
-                    log.info("Notification rappel dette créée: {} pour userId={}", debt.getPersonne(), userId);
+                    log.info("Debt reminder notification created (debtId={}, userId={})", debt.getId(), userId);
                 }
             } catch (Exception e) {
-                log.error("Erreur traitement rappels dette pour userId={}", userId, e);
+                log.error("Debt reminder processing failed (userId={})", userId, e);
             }
         }
         if (count > 0) {
-            log.info("Rappels dette traités: {} notifications générées", count);
+            log.info("Debt reminders processed: {} notifications generated", count);
         }
     }
 
     @Scheduled(cron = "0 0 8 * * *")
     public void checkRecurringTransactions() {
-        log.info("Démarrage du job récurrences");
+        log.info("Recurring transactions job started");
         int count = 0;
 
         List<User> users = userRepository.findAll();
@@ -188,11 +188,11 @@ public class NotificationScheduler {
             try {
                 count += processRecurringTransactions(userId);
             } catch (Exception e) {
-                log.error("Erreur traitement récurrences pour userId={}", userId, e);
+                log.error("Recurring transactions processing failed (userId={})", userId, e);
             }
         }
 
-        log.info("Job récurrences terminé: {} notifications générées", count);
+        log.info("Recurring transactions job finished: {} notifications generated", count);
     }
 
     private int processRecurringTransactions(UUID userId) {
@@ -227,7 +227,7 @@ public class NotificationScheduler {
                     recurring.getId(),
                     content.params()
             );
-            log.info("Notification récurrence créée: {} pour userId={}", recurring.getLibelle(), userId);
+            log.info("Recurring transaction notification created (recurringId={}, userId={})", recurring.getId(), userId);
             count++;
         }
         return count;

@@ -101,8 +101,14 @@ the frontend from a different domain than the API.
 
 **Back up first.** Always. See [Backup and restore](#backup-and-restore).
 
-Then read the [release notes](../CHANGELOG.md) — a major version means a
-deliberate break, and the entry says what it requires of you.
+Then read the release notes, on the
+[Releases page](https://github.com/sopequenoteck/kbudget/releases) or in the
+[changelog](../CHANGELOG.md) — a major version means a deliberate break, and the
+entry says what it requires of you.
+
+**Following new versions.** On GitHub, use Watch → Custom → Releases to be
+notified of each release, or subscribe to the feed
+`https://github.com/sopequenoteck/kbudget/releases.atom`.
 
 ```bash
 # 1. Back up
@@ -125,7 +131,8 @@ Images are published to **GHCR**, `ghcr.io/sopequenoteck/k-budget-*`. Docker Hub
 applies download quotas to anonymous users, which is exactly how a self-hoster
 pulls.
 
-Taking `6.4.0` as an example — check the [changelog](../CHANGELOG.md) for the
+Taking `6.4.0` as an example — check the
+[Releases page](https://github.com/sopequenoteck/kbudget/releases) for the
 current version:
 
 | Tag | Moves when | Use it |

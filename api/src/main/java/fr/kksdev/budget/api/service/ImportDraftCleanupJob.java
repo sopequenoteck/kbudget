@@ -21,7 +21,7 @@ public class ImportDraftCleanupJob {
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanupExpiredDrafts() {
-        log.info("Démarrage du job de nettoyage des drafts d'import expirés");
+        log.info("Expired import draft cleanup job started");
 
         List<?> expiredDrafts = importDraftRepository
                 .findByStatusAndExpiresAtBefore(ImportDraftStatus.PENDING, LocalDateTime.now());
@@ -30,6 +30,6 @@ public class ImportDraftCleanupJob {
 
         importDraftRepository.deleteByStatusAndExpiresAtBefore(ImportDraftStatus.PENDING, LocalDateTime.now());
 
-        log.info("Nettoyage des drafts expirés terminé: {} drafts supprimés", count);
+        log.info("Expired import draft cleanup finished: {} drafts deleted", count);
     }
 }

@@ -1643,7 +1643,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get usersFormDeleteAccountConfirm =>
-      'Je comprends que cette action est définitive';
+      'Je comprends que je ne pourrai plus me connecter';
 
   @override
   String get usersValueNameNotSet => 'Non renseigné';

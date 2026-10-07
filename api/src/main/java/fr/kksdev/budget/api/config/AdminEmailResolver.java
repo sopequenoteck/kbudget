@@ -27,7 +27,7 @@ public class AdminEmailResolver {
                 .collect(Collectors.toUnmodifiableSet());
 
         if (adminEmails.isEmpty()) {
-            log.warn("ADMIN_EMAILS not configured — invitations cannot be issued until an admin is configured.");
+            log.warn("ADMIN_EMAILS not configured, invitations cannot be issued until an admin is configured");
         }
     }
 

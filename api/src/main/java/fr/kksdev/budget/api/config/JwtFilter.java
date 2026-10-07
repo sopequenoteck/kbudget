@@ -44,14 +44,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
             var userOpt = userRepository.findByEmailAndDisabledAtIsNull(email);
             if (userOpt.isEmpty()) {
-                log.info("User authentication blocked (disabled or not found): {}", email);
+                // A disabled account is still identified by its userId; an unknown email leaves no identifier.
+                userRepository.findByEmail(email).ifPresentOrElse(
+                        existing -> log.info("User authentication blocked (account disabled): userId={}", existing.getId()),
+                        () -> log.info("User authentication blocked (no matching account)"));
             } else {
                 var user = userOpt.get();
                 var auth = new UsernamePasswordAuthenticationToken(
                         user.getId(), null, List.of());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                log.debug("User authenticated via JWT: {}", email);
+                log.debug("User authenticated via JWT: userId={}", user.getId());
             }
         } else {
             log.warn("Invalid JWT token on request: {} {}", request.getMethod(), request.getRequestURI());

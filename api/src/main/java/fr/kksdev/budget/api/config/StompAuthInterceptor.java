@@ -47,7 +47,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
             var auth = new UsernamePasswordAuthenticationToken(user.getId(), null, List.of());
             accessor.setUser(auth);
-            log.info("STOMP client connecté: userId={}", user.getId());
+            log.info("STOMP client connected: userId={}", user.getId());
         } else if (accessor != null && AUTH_REQUIRED_COMMANDS.contains(accessor.getCommand()) && accessor.getUser() == null) {
             throw new MessagingException("Authentification STOMP requise");
         }

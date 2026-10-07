@@ -85,6 +85,27 @@ class AdminSyncRunnerTest {
     }
 
     @Test
+    void should_log_user_id_and_not_email_when_admin_is_promoted() {
+        User user = userRepository.save(User.builder()
+                .email("sync-admin@example.com")
+                .password("encoded")
+                .name("Sync Admin")
+                .isAdmin(false)
+                .passwordResetRequired(false)
+                .build());
+
+        adminSyncRunner.run(new DefaultApplicationArguments());
+
+        List<String> messages = logAppender.list.stream()
+                .map(ILoggingEvent::getFormattedMessage)
+                .toList();
+        assertThat(messages)
+                .anyMatch(message -> message.contains("Admin promoted via ADMIN_EMAILS sync")
+                        && message.contains("userId=" + user.getId()))
+                .noneMatch(message -> message.contains("sync-admin@example.com"));
+    }
+
+    @Test
     void should_not_downgrade_user_when_isAdmin_true_and_email_absent_from_ADMIN_EMAILS() throws Exception {
         // Critical test — FR-012b: runner never downgrades
         User adminUser = userRepository.save(User.builder()

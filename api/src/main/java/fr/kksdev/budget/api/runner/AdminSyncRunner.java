@@ -37,7 +37,7 @@ public class AdminSyncRunner implements ApplicationRunner {
                 }
                 user.get().setAdmin(true);
                 userRepository.save(user.get());
-                log.info("Admin promoted via ADMIN_EMAILS sync: {}", email);
+                log.info("Admin promoted via ADMIN_EMAILS sync: userId={}", user.get().getId());
             }
         }
     }

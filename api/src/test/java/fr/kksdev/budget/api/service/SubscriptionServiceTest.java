@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +31,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -136,6 +138,34 @@ class SubscriptionServiceTest {
         assertThat(response.category()).isNotNull();
         assertThat(response.category().nom()).isEqualTo("Abonnement");
         assertThat(response.category().isSystem()).isTrue();
+    }
+
+    @Test
+    void should_throw_when_create_with_unknown_or_inactive_account() {
+        UUID accountId = UUID.randomUUID();
+        var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, Month.JANUARY, 1), null, null, accountId, Currency.EUR);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subscriptionService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Account not found or inactive");
+        verify(subscriptionRepository, never()).save(any(Subscription.class));
+    }
+
+    @Test
+    void should_throw_when_create_with_unknown_category() {
+        UUID categoryId = UUID.randomUUID();
+        var request = new SubscriptionRequest("Netflix", new BigDecimal("13.99"),
+                Frequency.MENSUEL, LocalDate.of(2026, Month.JANUARY, 1), null, categoryId, null, Currency.EUR);
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subscriptionService.create(request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Category not found");
+        verify(subscriptionRepository, never()).save(any(Subscription.class));
     }
 
     @Test

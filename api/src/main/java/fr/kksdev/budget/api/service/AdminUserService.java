@@ -46,7 +46,7 @@ public class AdminUserService {
         guardLastActiveAdmin(target);
         target.setDisabledAt(LocalDateTime.now());
         userRepository.save(target);
-        log.info("Admin action: user.disable by {} target=user:{}", admin.getEmail(), userId);
+        log.info("Admin action: user.disable by user:{} target=user:{}", admin.getId(), userId);
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class AdminUserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         target.setDisabledAt(null);
         userRepository.save(target);
-        log.info("Admin action: user.enable by {} target=user:{}", admin.getEmail(), userId);
+        log.info("Admin action: user.enable by user:{} target=user:{}", admin.getId(), userId);
     }
 
     private void guardLastActiveAdmin(User target) {

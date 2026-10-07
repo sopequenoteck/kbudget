@@ -48,7 +48,7 @@ public class CategoryRuleService {
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
 
@@ -63,7 +63,7 @@ public class CategoryRuleService {
                 .build();
 
         rule = categoryRuleRepository.save(rule);
-        log.info("Règle de catégorisation créée: id={}, pattern='{}', userId={}", rule.getId(), pattern, userId);
+        log.info("Categorization rule created (ruleId={}, userId={})", rule.getId(), userId);
 
         return CategoryRuleResponse.from(rule);
     }
@@ -72,14 +72,14 @@ public class CategoryRuleService {
     public CategoryRuleResponse update(UUID ruleId, String pattern, UUID categoryId, UUID userId) {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
-                    log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
+                    log.error("Categorization rule not found (id={}, userId={})", ruleId, userId);
                     return new EntityNotFoundException("Category rule not found");
                 });
 
         Category category = categoryRepository.findById(categoryId)
                 .filter(c -> c.getUser().getId().equals(userId))
                 .orElseThrow(() -> {
-                    log.error("Catégorie non trouvée: id={}, userId={}", categoryId, userId);
+                    log.error("Category not found (id={}, userId={})", categoryId, userId);
                     return new EntityNotFoundException("Category not found");
                 });
 
@@ -87,7 +87,7 @@ public class CategoryRuleService {
         rule.setCategory(category);
 
         rule = categoryRuleRepository.save(rule);
-        log.info("Règle de catégorisation mise à jour: id={}, userId={}", ruleId, userId);
+        log.info("Categorization rule updated (ruleId={}, userId={})", ruleId, userId);
 
         return CategoryRuleResponse.from(rule);
     }
@@ -96,12 +96,12 @@ public class CategoryRuleService {
     public void delete(UUID ruleId, UUID userId) {
         CategoryRule rule = categoryRuleRepository.findByIdAndUserId(ruleId, userId)
                 .orElseThrow(() -> {
-                    log.error("Règle de catégorisation non trouvée: id={}, userId={}", ruleId, userId);
+                    log.error("Categorization rule not found (id={}, userId={})", ruleId, userId);
                     return new EntityNotFoundException("Category rule not found");
                 });
 
         categoryRuleRepository.delete(rule);
-        log.info("Règle de catégorisation supprimée: id={}, userId={}", ruleId, userId);
+        log.info("Categorization rule deleted (ruleId={}, userId={})", ruleId, userId);
     }
 
     public void applyRules(List<ImportDraftLine> lines, UUID userId) {

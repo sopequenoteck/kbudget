@@ -1624,23 +1624,23 @@ Erreurs (sur les deux variantes export) : `400 INVALID_EXPORT_FORMAT` — parame
 
 ### Supprimer son compte `DELETE /api/v1/users/me`
 
-Soft-delete : le compte est desactive (`disabled_at = now`), les budgets/snapshots/refresh_tokens sont supprimes en cascade en DB. Les transactions/comptes/abonnements/dettes sont conserves (anonymisation differee).
+Soft-delete : le compte est desactive (`disabled_at = now`) et ses refresh tokens actifs passent en `REVOKED`. Aucune donnee n'est effacee ni anonymisee : un administrateur peut reactiver le compte (`PATCH /api/v1/admin/users/{id}/enable`).
 
 Request (`DeleteAccountRequest`, header `Authorization: Bearer <token>`) :
 
 ```json
 {
-  "password": "MotDePasseActuel123",
-  "confirmation": "SUPPRIMER"
+  "currentPassword": "MotDePasseActuel123",
+  "confirmed": true
 }
 ```
 
-> Le `password` est verifie via BCrypt. Le `confirmation` doit valoir exactement la chaine `SUPPRIMER` (case-sensitive).
+> `currentPassword` (obligatoire) est verifie via BCrypt. `confirmed` doit valoir `true` : c'est la case « Je comprends que je ne pourrai plus me connecter » des clients.
 
 Response `204` (corps vide). Tous les refresh tokens du user sont revoques.
 
 Erreurs :
-- `400 CONFIRMATION_REQUIRED` — `confirmation` differente de `SUPPRIMER`
+- `400 VALIDATION_ERROR` — `currentPassword` absent ou vide, ou `confirmed` different de `true` (Bean Validation, avant tout traitement)
 - `401 PASSWORD_INCORRECT` — mot de passe incorrect
 - `403 LAST_ADMIN_DELETION_FORBIDDEN` — le user est le dernier admin actif
 

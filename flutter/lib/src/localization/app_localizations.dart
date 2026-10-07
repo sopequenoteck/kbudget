@@ -2883,7 +2883,7 @@ abstract class AppLocalizations {
   /// No description provided for @usersFormDeleteAccountConfirm.
   ///
   /// In en, this message translates to:
-  /// **'I understand that this action is permanent'**
+  /// **'I understand that I will no longer be able to sign in'**
   String get usersFormDeleteAccountConfirm;
 
   /// No description provided for @usersValueNameNotSet.

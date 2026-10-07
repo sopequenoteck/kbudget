@@ -36,7 +36,7 @@ public class InvitationService {
                 .build();
 
         Invitation saved = invitationRepository.save(invitation);
-        log.info("Admin action: invitation.create by {} target=invitation:{}", invitedBy.getEmail(), saved.getId());
+        log.info("Admin action: invitation.create by user:{} target=invitation:{}", invitedBy.getId(), saved.getId());
         return saved;
     }
 
@@ -45,7 +45,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Invitation not found"));
         invitation.setRevokedAt(Instant.now());
-        log.info("Admin action: invitation.revoke by {} target=invitation:{}", admin.getEmail(), id);
+        log.info("Admin action: invitation.revoke by user:{} target=invitation:{}", admin.getId(), id);
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public class InvitationService {
     public void markUsed(Invitation invitation) {
         invitation.setUsedAt(Instant.now());
         invitationRepository.save(invitation);
-        log.info("Invitation used: id={}, email={}", invitation.getId(), invitation.getEmail());
+        log.info("Invitation used (invitationId={})", invitation.getId());
     }
 
     public InvitationStatus deriveStatus(Invitation inv) {

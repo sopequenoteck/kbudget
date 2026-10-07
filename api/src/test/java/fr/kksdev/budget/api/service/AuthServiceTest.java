@@ -1,5 +1,9 @@
 package fr.kksdev.budget.api.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import fr.kksdev.budget.api.config.JwtUtil;
 import fr.kksdev.budget.api.dto.request.FirstLoginResetRequest;
 import fr.kksdev.budget.api.dto.request.LoginRequest;
@@ -10,13 +14,17 @@ import fr.kksdev.budget.api.exception.PasswordUnchangedException;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +55,22 @@ class AuthServiceTest {
 
     @InjectMocks
     private AuthService authService;
+
+    private ListAppender<ILoggingEvent> logAppender;
+    private Logger serviceLogger;
+
+    @BeforeEach
+    void setUpLogCapture() {
+        serviceLogger = (Logger) LoggerFactory.getLogger(AuthService.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        serviceLogger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDownLogCapture() {
+        serviceLogger.detachAppender(logAppender);
+    }
 
     // ---- Login ----
 
@@ -109,6 +133,57 @@ class AuthServiceTest {
                 .hasMessage("Invalid email or password");
 
         verify(passwordEncoder, never()).matches(anyString(), anyString());
+    }
+
+    @Test
+    void should_log_no_identifier_when_login_fails_for_unknown_email() {
+        var request = new LoginRequest("unknown@mail.com", "password123");
+
+        when(userRepository.findByEmailAndDisabledAtIsNull("unknown@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("unknown@mail.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(IllegalArgumentException.class);
+
+        List<ILoggingEvent> errors = logAppender.list.stream()
+                .filter(e -> e.getLevel() == Level.ERROR)
+                .toList();
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0).getFormattedMessage()).isEqualTo("Login failed: no matching account");
+        assertThat(errors.get(0).getArgumentArray()).isNull();
+    }
+
+    @Test
+    void should_log_user_id_and_not_email_when_login_fails_for_disabled_account() {
+        UUID userId = UUID.randomUUID();
+        var request = new LoginRequest("disabled@mail.com", "password123");
+        var user = User.builder().id(userId).email("disabled@mail.com").password("encoded").build();
+
+        when(userRepository.findByEmailAndDisabledAtIsNull("disabled@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("disabled@mail.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(IllegalArgumentException.class);
+
+        List<String> messages = logAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(messages)
+                .containsExactly("Login failed: account disabled (userId=" + userId + ")")
+                .noneMatch(message -> message.contains("disabled@mail.com"));
+    }
+
+    @Test
+    void should_log_user_id_and_not_email_when_login_fails_for_wrong_password() {
+        UUID userId = UUID.randomUUID();
+        var request = new LoginRequest("test@mail.com", "wrongpassword");
+        var user = User.builder().id(userId).email("test@mail.com").password("encoded").build();
+
+        when(userRepository.findByEmailAndDisabledAtIsNull("test@mail.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongpassword", "encoded")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(IllegalArgumentException.class);
+
+        List<String> messages = logAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(messages)
+                .containsExactly("Login failed: wrong password (userId=" + userId + ")")
+                .noneMatch(message -> message.contains("test@mail.com"));
     }
 
     @Test

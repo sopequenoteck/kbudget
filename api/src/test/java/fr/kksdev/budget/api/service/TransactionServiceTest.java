@@ -6,6 +6,7 @@ import fr.kksdev.budget.api.dto.response.TransactionResponse;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.enums.Currency;
 import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
 import fr.kksdev.budget.api.model.UserPreference;
@@ -23,9 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -293,6 +298,195 @@ class TransactionServiceTest {
         var transaction = buildTransaction(user, account);
 
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+
+        transactionService.delete(transactionId, userId);
+
+        verify(transactionRepository).delete(transaction);
+    }
+
+    private Transaction buildAdjustment(User user, Account account) {
+        return Transaction.builder()
+                .id(transactionId)
+                .montant(new BigDecimal("20.00"))
+                .libelle("Balance adjustment")
+                .type(TransactionType.AJUSTEMENT)
+                .date(LocalDate.of(2026, Month.FEBRUARY, 7))
+                .account(account)
+                .user(user)
+                .build();
+    }
+
+    private Category buildCategory(User user) {
+        return Category.builder().id(UUID.randomUUID()).nom("Alimentation").user(user).build();
+    }
+
+    @Test
+    void should_throw_accessDenied_when_updating_an_adjustment_transaction() {
+        var user = buildUser();
+        var adjustment = buildAdjustment(user, buildDefaultAccount(user));
+        var request = new TransactionRequest(
+                new BigDecimal("30.00"), "Edited", TransactionType.DEPENSE,
+                LocalDate.of(2026, Month.FEBRUARY, 8), null, null, null);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(adjustment));
+
+        assertThatThrownBy(() -> transactionService.update(transactionId, request, userId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Adjustment transactions cannot be updated");
+        verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    void should_throw_accessDenied_when_deleting_an_adjustment_transaction() {
+        var user = buildUser();
+        var adjustment = buildAdjustment(user, buildDefaultAccount(user));
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(adjustment));
+
+        assertThatThrownBy(() -> transactionService.delete(transactionId, userId))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Adjustment transactions cannot be deleted");
+        verify(transactionRepository, never()).delete(any(Transaction.class));
+    }
+
+    @Test
+    void should_delete_linked_transaction_when_deleting_a_transfer() {
+        var user = buildUser();
+        var account = buildDefaultAccount(user);
+        UUID transferId = UUID.randomUUID();
+        var transaction = buildTransaction(user, account);
+        transaction.setTransferId(transferId);
+        var linked = buildTransaction(user, account);
+        linked.setId(UUID.randomUUID());
+        linked.setTransferId(transferId);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.findByTransferId(transferId)).thenReturn(List.of(transaction, linked));
+
+        transactionService.delete(transactionId, userId);
+
+        verify(transactionRepository).delete(linked);
+        verify(transactionRepository).delete(transaction);
+    }
+
+    @Test
+    void should_reopen_debt_when_deleting_a_repayment_leaves_a_remaining_amount() {
+        var user = buildUser();
+        var debt = Debt.builder()
+                .id(UUID.randomUUID())
+                .personne("Alice")
+                .montant(new BigDecimal("100.00"))
+                .sens(DebtType.EMPRUNT)
+                .date(LocalDate.of(2026, Month.FEBRUARY, 1))
+                .rembourse(true)
+                .user(user)
+                .build();
+        var repayment = buildTransaction(user, buildDefaultAccount(user));
+        repayment.setDebt(debt);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(repayment));
+        when(transactionRepository.sumByDebtId(debt.getId())).thenReturn(new BigDecimal("40.00"));
+
+        transactionService.delete(transactionId, userId);
+
+        assertThat(debt.getRembourse()).isFalse();
+        verify(debtRepository).save(debt);
+    }
+
+    @Test
+    void should_propagate_new_amount_to_linked_transaction_when_updating_a_transfer() {
+        var user = buildUser();
+        var account = buildDefaultAccount(user);
+        UUID transferId = UUID.randomUUID();
+        var transaction = buildTransaction(user, account);
+        transaction.setTransferId(transferId);
+        var linked = buildTransaction(user, account);
+        linked.setId(UUID.randomUUID());
+        linked.setTransferId(transferId);
+        var request = new TransactionRequest(
+                new BigDecimal("75.00"), "Transfer", TransactionType.DEPENSE,
+                LocalDate.of(2026, Month.FEBRUARY, 8), null, null, null);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.findByTransferId(transferId)).thenReturn(List.of(transaction, linked));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
+
+        transactionService.update(transactionId, request, userId);
+
+        assertThat(linked.getMontant()).isEqualByComparingTo("75.00");
+        verify(transactionRepository).save(linked);
+    }
+
+    @Test
+    void should_throw_when_category_not_found_on_update() {
+        var user = buildUser();
+        var existing = buildTransaction(user, buildDefaultAccount(user));
+        UUID categoryId = UUID.randomUUID();
+        var request = new TransactionRequest(
+                new BigDecimal("75.00"), "Courses", TransactionType.DEPENSE,
+                LocalDate.of(2026, Month.FEBRUARY, 8), categoryId, null, null);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> transactionService.update(transactionId, request, userId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Category not found");
+    }
+
+    @Test
+    void should_still_create_transaction_when_budget_threshold_check_fails() {
+        var user = buildUser();
+        var account = buildDefaultAccount(user);
+        var category = buildCategory(user);
+        var request = new TransactionRequest(
+                new BigDecimal("50.00"), "Courses", TransactionType.DEPENSE,
+                LocalDate.of(2026, Month.FEBRUARY, 7), category.getId(), null, null);
+        var saved = buildTransaction(user, account);
+        saved.setCategory(category);
+
+        when(accountRepository.findByUserIdAndIsDefaultTrue(userId)).thenReturn(Optional.of(account));
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
+        doThrow(new IllegalStateException("budget unavailable"))
+                .when(budgetService).checkThresholdsForCategory(userId, category.getId());
+
+        TransactionResponse response = transactionService.create(request, userId);
+
+        assertThat(response.id()).isEqualTo(transactionId);
+    }
+
+    @Test
+    void should_still_update_transaction_when_budget_threshold_check_fails() {
+        var user = buildUser();
+        var category = buildCategory(user);
+        var existing = buildTransaction(user, buildDefaultAccount(user));
+        var request = new TransactionRequest(
+                new BigDecimal("75.00"), "Courses", TransactionType.DEPENSE,
+                LocalDate.of(2026, Month.FEBRUARY, 8), category.getId(), null, null);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(transactionRepository.save(existing)).thenReturn(existing);
+        doThrow(new IllegalStateException("budget unavailable"))
+                .when(budgetService).checkThresholdsForCategory(userId, category.getId());
+
+        TransactionResponse response = transactionService.update(transactionId, request, userId);
+
+        assertThat(response.montant()).isEqualByComparingTo("75.00");
+    }
+
+    @Test
+    void should_still_delete_transaction_when_budget_threshold_check_fails() {
+        var user = buildUser();
+        var category = buildCategory(user);
+        var transaction = buildTransaction(user, buildDefaultAccount(user));
+        transaction.setCategory(category);
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        doThrow(new IllegalStateException("budget unavailable"))
+                .when(budgetService).checkThresholdsForCategory(userId, category.getId());
 
         transactionService.delete(transactionId, userId);
 

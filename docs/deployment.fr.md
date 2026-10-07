@@ -107,8 +107,14 @@ renseigner uniquement si le frontend est servi depuis un autre domaine.
 **Sauvegardez d'abord.** Toujours. Voir
 [Sauvegarde et restauration](#sauvegarde-et-restauration).
 
-Lisez ensuite les [notes de version](../CHANGELOG.md) — une version majeure
-signale une rupture assumee, et l'entree dit ce qu'elle exige de vous.
+Lisez ensuite les notes de version, sur la
+[page Releases](https://github.com/sopequenoteck/kbudget/releases) ou dans le
+[changelog](../CHANGELOG.fr.md) — une version majeure signale une rupture
+assumee, et l'entree dit ce qu'elle exige de vous.
+
+**Suivre les nouvelles versions.** Sur GitHub, Watch → Custom → Releases
+notifie chaque release ; sinon, abonnez-vous au flux
+`https://github.com/sopequenoteck/kbudget/releases.atom`.
 
 ```bash
 # 1. Sauvegarder
@@ -131,8 +137,8 @@ Docker Hub (`sopequenotech/k-budget-*`) est conserve en miroir. Preferez GHCR :
 Docker Hub applique des quotas de telechargement aux utilisateurs anonymes,
 ce qui est exactement le mode d'acces d'un self-hoster.
 
-En prenant `6.4.0` pour exemple — la version courante figure dans le
-[changelog](../CHANGELOG.md) :
+En prenant `6.4.0` pour exemple — la version courante figure sur la
+[page Releases](https://github.com/sopequenoteck/kbudget/releases) :
 
 | Tag | Bouge quand | A utiliser |
 |-----|-------------|------------|
