@@ -295,7 +295,7 @@
 | SH-3 | Navigation Apparence | Tap "Apparence" | → `/settings/appearance` | -- |
 | SH-4 | Navigation Comptes | Tap "Comptes" | → `/settings/accounts` | -- |
 | SH-5 | Navigation Categories | Tap "Categories" | → `/settings/categories` | -- |
-| SH-6 | Navigation Donnees | Tap "Donnees" | → `/settings/data` | -- |
+| SH-6 | Navigation Serveur | Bas du hub, section "Serveur" → tap "Serveur" | → `/settings/data` | -- |
 | SH-7 | Placeholders | Tap "Securite" ou "A propos" | Aucune navigation (grises) | -- |
 
 ---
@@ -318,6 +318,7 @@
 | AC-12 | Compte inactif | Liste avec compte inactif | Opacite 0.5 + badge "Inactif" | -- |
 | AC-13 | Pull-to-refresh | Tirer vers le bas | Rechargement | -- |
 | AC-14 | Nom duplique | Creer avec un nom existant | Erreur "Nom deja utilise" | -- |
+| AC-15 | Devises & Taux | Sous la liste (ou sous l'etat vide) → tap "Devises & Taux" | → `/settings/currencies` | -- |
 
 ---
 
@@ -366,20 +367,20 @@
 
 ---
 
-## 18. Settings — Donnees
+## 18. Settings — Serveur
 
-> **Exclusif Flutter.**
+> **Exclusif Flutter.** Acces : Parametres → section "Serveur".
 
 | # | Scenario | Etapes | Resultat attendu | Statut |
 |---|----------|--------|-------------------|--------|
-| DD-1 | Affichage | Ouvrir Donnees | Source actuelle selectionnee, URL pre-remplie | -- |
+| DD-1 | Affichage | Ouvrir Serveur | URL actuelle pre-remplie | -- |
 | DD-2 | URL vide | Enregistrer sans URL | Snackbar erreur validation | -- |
-| DD-3 | URL invalide | URL incorrecte → Enregistrer | Snackbar erreur | -- |
-| DD-4 | URL valide | URL correcte → Enregistrer | Snackbar "URL enregistree" | -- |
-| DD-5 | Local → Serveur (KO) | Changer sans URL valide | Snackbar erreur, pas de changement | -- |
-| DD-6 | Local → Serveur (OK) | URL valide → Confirmer | Dialog → accept → app restart | -- |
-| DD-7 | Annuler changement | Changer mode → Annuler dialog | Mode inchange | -- |
-| DD-8 | Serveur injoignable | URL fausse → Changer mode | Snackbar erreur, pas de restart | -- |
+| DD-3 | URL invalide | URL sans `https://` → Enregistrer | Snackbar erreur | -- |
+| DD-4 | URL inchangee | Enregistrer sans modifier (ou avec un `/` final en plus) | Snackbar "URL enregistree", pas de dialogue | -- |
+| DD-5 | Annuler le changement | Nouvelle URL → Enregistrer → Annuler | Rien ne change, session conservee | -- |
+| DD-6 | Changement (OK) | Nouvelle URL valide → Confirmer | Ecran de connexion, reconnexion sur le nouveau serveur | -- |
+| DD-7 | Serveur injoignable ou incompatible | URL fausse → Confirmer | Erreur sous le champ, URL et session inchangees | -- |
+| DD-8 | Erreur effacee | Apres DD-7, quitter puis rouvrir l'ecran | Plus d'erreur, URL enregistree pre-remplie | -- |
 
 ---
 

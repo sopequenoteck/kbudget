@@ -17,6 +17,18 @@ This project follows [Semantic Versioning](https://semver.org/).
   the app shows a message and a retry button; a read cache shared with the web
   app is planned (KKS-507).
 
+### Fixed
+
+- **Mobile app: server URL and currencies reachable again** (KKS-418): since
+  the settings rewrite, no screen led to the server URL or to the currencies
+  and exchange rates. The settings now end with a "Server" section, and the
+  accounts screen links to "Currencies & Rates". Saving a new server URL now
+  takes effect at once: the app checks that the address is a compatible
+  K-Budget server, asks for confirmation, signs you out and returns to the
+  sign-in screen. The session tokens of the previous server are erased before
+  the switch and are never sent to the new one; previously the new URL only
+  applied after a restart, which then sent the old tokens to the new server.
+
 ### Security
 
 - **Exception messages no longer carry submitted data** (KKS-500): the

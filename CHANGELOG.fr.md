@@ -18,6 +18,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   injoignable, l'application affiche un message et un bouton pour reessayer ;
   un cache de lecture commun a l'application web est prevu (KKS-507).
 
+### Fixed
+
+- **Application mobile : URL du serveur et devises de nouveau accessibles**
+  (KKS-418) : depuis la reecriture des reglages, aucun ecran ne menait plus a
+  l'URL du serveur ni aux devises et taux de change. Les reglages se terminent
+  maintenant par une section « Serveur », et l'ecran des comptes mene a
+  « Devises & Taux ». Enregistrer une nouvelle URL prend effet aussitot :
+  l'application verifie que l'adresse est un serveur K-Budget compatible,
+  demande confirmation, deconnecte et revient a l'ecran de connexion. Les
+  jetons de session de l'ancien serveur sont effaces avant la bascule et ne
+  partent jamais vers le nouveau ; auparavant la nouvelle URL ne s'appliquait
+  qu'au redemarrage, qui envoyait alors les anciens jetons au nouveau serveur.
+
 ### Security
 
 - **Les messages d'exception ne reprennent plus les donnees saisies**

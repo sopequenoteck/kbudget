@@ -136,13 +136,22 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: EmptyStateWidget(
-            icon: PhosphorIconsRegular.bank,
-            message: l10n.accountsEmptyTitle,
-            ctaLabel: l10n.accountsActionCreate,
-            onCtaTap: () => context.push(
-              '${RouteNames.settings}/${RouteNames.settingsAccounts}/${RouteNames.settingsAccountsNew}',
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateWidget(
+                icon: PhosphorIconsRegular.bank,
+                message: l10n.accountsEmptyTitle,
+                ctaLabel: l10n.accountsActionCreate,
+                onCtaTap: () => context.push(
+                  '${RouteNames.settings}/${RouteNames.settingsAccounts}/${RouteNames.settingsAccountsNew}',
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(AppSpacing.space4),
+                child: _CurrenciesEntry(),
+              ),
+            ],
           ),
         ),
       ];
@@ -225,6 +234,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
                   }),
                 ),
               ),
+              const SizedBox(height: AppSpacing.space4),
+              const _CurrenciesEntry(),
               const SizedBox(height: AppSpacing.space12 * 2),
             ],
           ),
@@ -260,6 +271,52 @@ class _AddButton extends StatelessWidget {
           PhosphorIconsRegular.plus,
           size: 16,
           color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _CurrenciesEntry extends StatelessWidget {
+  const _CurrenciesEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Material(
+      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(
+          '${RouteNames.settings}/${RouteNames.settingsCurrencies}',
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.space4),
+          child: Row(
+            children: [
+              PhosphorIcon(
+                PhosphorIconsRegular.coins,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppSpacing.space3),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context)!.exchangeRatesPageTitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: AppTypography.medium,
+                  ),
+                ),
+              ),
+              PhosphorIcon(
+                PhosphorIconsRegular.caretRight,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ),
     );

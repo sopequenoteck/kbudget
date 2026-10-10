@@ -491,6 +491,36 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
           ),
 
           // ----------------------------------------------------------------
+          // Section Serveur
+          // ----------------------------------------------------------------
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.space4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.space6),
+                  _SettingsSectionLabel(l10n.settingsPageServerTitle),
+                  const SizedBox(height: AppSpacing.space2),
+                  _SettingsRow(
+                    icon: PhosphorIconsRegular.hardDrives,
+                    iconBgColor: ext?.iconCircleBg ??
+                        theme.colorScheme.surfaceContainerHighest,
+                    iconColor: theme.colorScheme.onSurfaceVariant,
+                    title: l10n.settingsPageServerTitle,
+                    description: l10n.settingsListServerHint,
+                    onTap: () => context.push(
+                      '${RouteNames.settings}/${RouteNames.settingsData}',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ----------------------------------------------------------------
           // Footer
           // ----------------------------------------------------------------
           SliverToBoxAdapter(

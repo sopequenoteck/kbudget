@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/common_widgets/page_header.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
@@ -28,6 +29,8 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     _urlController = TextEditingController();
     // Pre-fill URL from state after first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // The notifier outlives the screen: drop the error of a previous visit.
+      ref.read(dataSettingsNotifierProvider.notifier).clearError();
       final serverUrl = ref.read(dataSettingsNotifierProvider).serverUrl;
       if (serverUrl != null) {
         _urlController.text = serverUrl;
@@ -53,9 +56,12 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
           padding: const EdgeInsets.all(AppSpacing.space4),
           children: [
             PageHeader(
-              title: l10n.settingsPageDataTitle,
+              title: l10n.settingsPageServerTitle,
               onBack: () => context.pop(),
-              icon: const PhosphorIcon(PhosphorIconsRegular.database, size: 16),
+              icon: const PhosphorIcon(
+                PhosphorIconsRegular.hardDrives,
+                size: 16,
+              ),
             ),
 
             // URL serveur
@@ -72,9 +78,10 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             TextField(
               controller: _urlController,
               decoration: InputDecoration(
-                hintText: 'https://budget.kksdev.fr/api',
+                hintText: 'https://budget.example.com/api',
                 prefixIcon: const PhosphorIcon(PhosphorIconsRegular.link, size: 20),
                 errorText: state.error,
+                errorMaxLines: 3,
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.url,
@@ -99,26 +106,40 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     );
   }
 
-  void _onSaveUrl() {
+  Future<void> _onSaveUrl() async {
     final notifier = ref.read(dataSettingsNotifierProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     final url = _urlController.text.trim();
     final validationError = notifier.validateUrl(url);
     if (validationError != null) {
-      // Set error manually via state update
-      ref.read(dataSettingsNotifierProvider.notifier).clearError();
-      // Force rebuild with error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validationError)),
+      messenger.showSnackBar(SnackBar(content: Text(validationError)));
+      return;
+    }
+    final currentUrl = ref.read(dataSettingsNotifierProvider).serverUrl;
+    // A trailing slash is not another server: no need to sign out.
+    if (currentUrl != null &&
+        _withoutTrailingSlash(url) == _withoutTrailingSlash(currentUrl)) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsFeedbackServerUrlSaved)),
       );
       return;
     }
-    notifier.saveServerUrl(url);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.of(context)!.settingsFeedbackServerUrlSaved,
-        ),
-      ),
+    final confirmed = await ConfirmDialogCustom.show(
+      context: context,
+      icon: PhosphorIconsRegular.warning,
+      title: l10n.settingsDialogChangeServerTitle,
+      message: l10n.settingsDialogChangeServerMessage,
+      confirmLabel: l10n.commonActionConfirm,
     );
+    if (confirmed != true) {
+      return;
+    }
+    // On success the router redirects to sign-in; on failure the error shows
+    // under the field.
+    await notifier.changeServerUrl(url);
   }
 }
+
+String _withoutTrailingSlash(String url) =>
+    url.endsWith('/') ? url.substring(0, url.length - 1) : url;
