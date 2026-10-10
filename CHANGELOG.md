@@ -7,6 +7,16 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Removed
+
+- **Mobile app: local mode removed** (KKS-335): the mobile app no longer works
+  without a server. It is now a client of the API, like the web app, and its
+  first launch opens the server setup directly. An app that was set up in local
+  mode is sent back to the server setup at its next launch, and its local
+  database is erased: there is no migration. When the server cannot be reached,
+  the app shows a message and a retry button; a read cache shared with the web
+  app is planned (KKS-507).
+
 ### Security
 
 - **Exception messages no longer carry submitted data** (KKS-500): the

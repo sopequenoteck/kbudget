@@ -7,6 +7,17 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Removed
+
+- **Application mobile : mode local supprime** (KKS-335) : l'application
+  mobile ne fonctionne plus sans serveur. Elle devient un client de l'API,
+  comme l'application web, et son premier lancement ouvre directement la
+  configuration du serveur. Une application configuree en mode local est
+  renvoyee vers la configuration du serveur a son prochain lancement, et sa
+  base locale est effacee : il n'y a pas de migration. Quand le serveur est
+  injoignable, l'application affiche un message et un bouton pour reessayer ;
+  un cache de lecture commun a l'application web est prevu (KKS-507).
+
 ### Security
 
 - **Les messages d'exception ne reprennent plus les donnees saisies**
