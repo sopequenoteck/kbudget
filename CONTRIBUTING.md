@@ -91,20 +91,32 @@ makes a two-client project unsustainable for one maintainer.
 
 Each surface carries one of three states:
 
-| State | Meaning |
-|-------|---------|
-| **Tracked** | Parity is maintained |
-| **Frozen** | Exists on Flutter, no longer evolves |
-| **Never** | Angular only |
+| State | Meaning | Surfaces |
+|-------|---------|----------|
+| **Tracked** | Parity is maintained: a change on Angular is ported to Flutter | Transactions (recurring, transfers), budgets, subscriptions, debts, accounts, categories, dashboard, notifications, profile, settings, sign-in, invitation, first-login reset, version incompatibility screen |
+| **Frozen** | Exists on Flutter, works and is maintained (translations, tests, bug fixes), but takes no new feature | Administration, currencies and exchange rates |
+| **Never** | Angular only | Statement import, CSV mapping, import profiles and settings, history clean-up, categorisation rules |
 
-**The full classification is still being written down** — the surfaces settled
-so far are in the boundary table of
-[`docs/architecture.md`](docs/architecture.md).
+Flutter also carries what the web cannot offer or does not need: server setup,
+PIN and biometric lock (planned), system notifications. The full table, with
+routes and the gaps known today, is in
+[`docs/architecture.md`](docs/architecture.md#frontiere-angular--flutter).
 
-So: **before porting anything to Flutter, open an issue and ask.** A pull
-request that ports a surface intended to stay Angular-only will be declined
-however good the code, and neither of us wants that to be discovered after the
-work is done.
+What it means for a pull request:
+
+- A feature starts on Angular. On a **Tracked** surface, the Flutter port is
+  welcome, in the same pull request or a later one.
+- A new feature on a **Frozen** surface is declined on the Flutter side. A bug
+  fix is welcome: frozen means it keeps working.
+- A pull request that ports a **Never** surface to Flutter will be declined
+  however good the code. The same goes for a feature that would exist on
+  Flutter only, outside the list above.
+
+A new surface is classified with one question: *will it keep changing?* If it
+will and it is complex, it stays on Angular; a stable CRUD screen on one entity
+can live on both. For a surface that is not in the table, **open an issue and
+ask before writing code**: neither of us wants this to be discovered after the work is
+done.
 
 ### The constitution comes first
 

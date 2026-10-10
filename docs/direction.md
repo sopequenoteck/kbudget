@@ -119,6 +119,11 @@ notifications locales fonctionnant serveur éteint, et à la présence sur les s
 réel mais mince. Le revenu attendu est symbolique — il finance du temps, pas de
 l'infrastructure, ce qui est cohérent puisqu'il n'y a pas d'infrastructure à financer.
 
+> État au 2026-10-10 (KKS-333) : aucune des deux premières justifications n'est livrée.
+> Le verrouillage a son écran mais rien ne permet de l'activer (KKS-247), et les
+> notifications qui sonneraient serveur éteint ne sont pas construites (KKS-520, non
+> engagé). Voir §4.4.
+
 À noter : le compte développeur Apple coûte 99 $/an même pour publier gratuitement.
 
 ### 4.4 Frontière Angular / Flutter
@@ -134,9 +139,16 @@ Trois états, et non deux :
 
 | État | Signification | Surfaces |
 |---|---|---|
-| **Suivi** | Parité maintenue | Transactions, budgets, abonnements, dettes, comptes, catégories, dashboard, notifications |
-| **Gelé** | Existe, fonctionne, n'évolue plus — mais reste maintenu | Administration (880 l.), taux de change (1 042 l.) |
-| **Jamais** | N'existe pas et n'existera pas | Import CSV (1 777 l. côté Angular, 0 côté Flutter), graphiques avancés, préférences avancées, banques |
+| **Suivi** | Parité maintenue | Transactions (récurrences, virement), budgets, abonnements, dettes, comptes, catégories, dashboard, notifications, profil, réglages, connexion, invitation, réinitialisation au premier login, écran d'incompatibilité |
+| **Gelé** | Existe, fonctionne, n'évolue plus — mais reste maintenu | Administration, devises et taux de change |
+| **Jamais** | N'existe pas et n'existera pas | Import de relevé, mapping CSV, profils et réglages d'import, rattrapage de l'historique, règles de catégorisation |
+
+> Classement révisé le 2026-10-10 (KKS-333), après inventaire des deux clients. La version
+> d'août rangeait en « Jamais » des surfaces qui n'existent dans aucun client (graphiques
+> avancés, gestion des banques) et les préférences, que Flutter offre à parité ; elle
+> laissait sans état les récurrences, le virement, le profil, les réglages et les parcours
+> d'accès (connexion, invitation, premier login, incompatibilité, configuration du
+> serveur). Le détail est dans `docs/architecture.md`.
 
 Le troisième état est ce qui manquait. Supprimer du code qui fonctionne est rarement
 rentable ; ce qui coûte, c'est de le **suivre**. Le gel arrête de payer sans rien détruire.
@@ -151,11 +163,19 @@ qu'elle est complexe, Angular seul. Si c'est un CRUD stable, les deux.
 La démonstration que le dispositif fonctionne existe déjà : l'import CSV, 1 777 lignes qui
 n'existent que côté web, en production, sans que personne ne s'en plaigne.
 
-**Exclusivités Flutter** : verrouillage biométrique, notifications locales planifiées
-fonctionnant serveur injoignable, widget d'écran d'accueil.
+**Exclusivités Flutter** : configuration du serveur de l'utilisateur, verrouillage par
+PIN et biométrie (écran présent, pas encore activable : KKS-247), notification système à
+la réception d'un message du serveur. Les notifications planifiées sur l'appareil, qui
+sonneraient serveur injoignable, et le widget d'écran d'accueil ne sont pas construits
+(KKS-520, non engagé).
 
-**Un alignement unique** est accordé sur le périmètre *Suivi* — le delta mesuré se réduit
-à l'écran de détail transaction. Après quoi la frontière s'applique sans exception.
+**Un alignement unique** est accordé sur le périmètre *Suivi*. L'inventaire du 2026-10-10
+a montré que l'écart ne se réduit pas à un écran de détail transaction, qui n'existe dans
+aucun client : il porte sur la recherche et les filtres de transactions, le sélecteur de
+devise des en-têtes, l'entrée vers les récurrences et les actions des écrans de détail
+(KKS-334, découpé en KKS-511 à KKS-514). Après quoi la frontière s'applique sans
+exception. Dans l'autre sens, là où Flutter est en avance, Angular rattrape (KKS-515 à
+KKS-518) : il reste la surface fonctionnelle complète.
 
 ### 4.5 Mode autonome Flutter — supprimé
 
