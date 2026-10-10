@@ -94,6 +94,19 @@ Hebergee en self-hosted sur serveur personnel.
 | Hebergement | Serveur personnel (self-hosted) |
 | URL | `https://budget.exemple.fr` |
 
+## Deux clients, une reference
+
+L'application web Angular est le client de reference : elle porte tous les
+modules ci-dessus, et toute fonctionnalite y nait. L'application mobile Flutter
+est un second client de la meme API, sans obligation de parite : elle suit les
+modules du quotidien (transactions, budgets, abonnements, dettes, comptes,
+categories, tableau de bord, notifications, profil et reglages), garde
+l'administration et les taux de change en l'etat, et ne porte pas l'import de
+releves. Elle ajoute ce que le web ne peut pas offrir : la configuration du
+serveur de l'utilisateur, le verrouillage de l'application (prevu), les
+notifications du systeme. Le classement complet, surface par surface, est dans
+[`architecture.md`](architecture.md#frontiere-angular--flutter).
+
 ## Hors scope (pour plus tard)
 
 - Bilans avances (graphiques, comparaisons mois par mois)

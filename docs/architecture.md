@@ -482,16 +482,86 @@ app/src/app/
 - *si feature activee | **si ≥ 2 comptes actifs
 - Saisie en 2-3 taps
 
-## Classement des surfaces Flutter
+## Frontiere Angular / Flutter
 
-La constitution (principe VIII) impose de classer toute surface Flutter en
-**Suivi / Gele / Jamais** et de verifier ce classement avant tout portage. Le
-classement complet reste a etablir (KKS-333) ; les surfaces classees a ce jour :
+Angular est le client de reference : toute fonctionnalite y nait, et il porte
+la surface fonctionnelle complete. Flutter n'a jamais d'obligation de parite
+(constitution, principe VIII). Chaque surface porte un etat, a verifier avant
+tout portage :
 
-| Surface | Etat | Motif |
-|---------|------|-------|
-| Onboarding et configuration serveur | **Suivi** | C'est le client Flutter qui subit le scenario que KKS-314 supprime : mis a jour par les stores face a un serveur reste en arriere. L'exclure de la detection d'incompatibilite viderait le mecanisme de son objet |
-| Reinitialisation a la premiere connexion | **Suivi** | Portee par KKS-309. Le tout premier compte de chaque installation self-hostee est dans cet etat : l'exclure laisserait un utilisateur enferme dans une application qui s'ouvre et ne fonctionne pas |
+| Etat | Signification |
+|------|---------------|
+| **Suivi** | Parite maintenue : toute evolution cote Angular est portee sur Flutter |
+| **Gele** | Existe cote Flutter, fonctionne et reste maintenu (traductions, montees de version, tests, corrections), mais n'accueille aucune evolution fonctionnelle |
+| **Jamais** | Angular seul : n'existe pas cote Flutter et n'y sera pas porte |
+| **Propre a Flutter** | Ce que le web ne peut pas offrir, ou dont il n'a pas besoin |
+| **Propre au web** | L'inverse : sans objet sur une application installee depuis un store |
+
+Critere unique pour une nouvelle surface : *va-t-elle continuer a bouger ?* Si
+oui et qu'elle est complexe, Angular seul. Si c'est un CRUD stable sur une
+entite, elle peut vivre des deux cotes.
+
+### Classement (KKS-333, etabli le 2026-10-10)
+
+| Surface | Etat | Angular | Flutter |
+|---------|------|---------|---------|
+| Transactions (liste, formulaire, recherche et filtres) | **Suivi** | `/transactions` | `/transactions` |
+| Recurrences | **Suivi** | `/transactions/recurring` | `/transactions/recurring` |
+| Virement entre comptes | **Suivi** | formulaire `transfer` | formulaire `transfer` |
+| Budgets (dont depenses non budgetees) | **Suivi** | `/budgets` | `/budgets` |
+| Abonnements (dont paiement et historique) | **Suivi** | `/subscriptions` | `/subscriptions` |
+| Dettes (dont remboursement et rappels) | **Suivi** | `/debts` | `/debts` |
+| Comptes (dont ajustement de solde, choix de la banque) | **Suivi** | `/settings/accounts` | `/settings/accounts` |
+| Categories | **Suivi** | `/settings/categories` | `/settings/categories` |
+| Tableau de bord | **Suivi** | `/dashboard` | `/dashboard` |
+| Notifications (panneau, actions, reglages par type) | **Suivi** | panneau | panneau |
+| Profil « Mon compte » (avatar, mot de passe, export, suppression) | **Suivi** | `/settings/account` | `/settings/profile` |
+| Reglages (theme, taille du texte, langue, fuseau, fonctionnalites, ordre de navigation) | **Suivi** | `/settings` | `/settings` |
+| Connexion | **Suivi** | `/auth` | `/login` |
+| Acceptation d'invitation | **Suivi** | `/auth/accept-invite/:token` | `/accept-invite/:token` |
+| Reinitialisation a la premiere connexion | **Suivi** | `/first-login-reset` | `/first-login-reset` |
+| Ecran d'incompatibilite de version | **Suivi** | `/incompatible` | `/incompatible` |
+| Administration (utilisateurs, invitations) | **Gele** | `/settings/users` | `/settings/users` |
+| Devises et taux de change | **Gele** | dans `/settings/accounts` | `/settings/currencies` |
+| Import de releve (depart, revue, resultat) | **Jamais** | `/transactions/import` | — |
+| Mapping CSV | **Jamais** | `/settings/import/mapping` | — |
+| Profils et reglages d'import | **Jamais** | `/settings/import` | — |
+| Rattrapage de l'historique | **Jamais** | `/settings/import/history-cleanup` | — |
+| Regles de categorisation | **Jamais** | dans `/settings/import` | — |
+| Configuration du serveur (premier lancement, puis ecran « Donnees ») | **Propre a Flutter** | — | `/onboarding`, `/settings/data` |
+| Verrouillage par PIN et biometrie | **Propre a Flutter** | — | `/lock` |
+| Notification systeme a la reception | **Propre a Flutter** | — | `LocalNotificationService` |
+| Mise a jour de la PWA | **Propre au web** | `AppUpdateService` | — |
+
+Deux surfaces sont classees Suivi parce que l'application mobile est
+inutilisable sans elles. La detection d'incompatibilite : c'est le client
+Flutter qui subit le scenario que KKS-314 supprime, mis a jour par les stores
+face a un serveur reste en arriere. La reinitialisation a la premiere connexion
+(KKS-309) : le tout premier compte de chaque installation self-hostee est dans
+cet etat.
+
+### Ecarts connus a la date du classement
+
+Le classement decrit la cible. A la date ou il est etabli, le code s'en ecarte
+sur les points suivants, chacun porte par un ticket :
+
+- **Alignement unique du perimetre Suivi** (KKS-334) : Flutter n'a ni recherche
+  ni filtres de transactions, ni selecteur de devise sur les en-tetes des
+  transactions, abonnements et dettes, ni actions completes sur les ecrans de
+  detail ; les recurrences n'y sont atteignables que depuis une notification. Decoupe en
+  KKS-511 a KKS-514. Apres cet alignement, la frontiere s'applique sans
+  exception.
+- **Angular en retard sur Flutter** : echeance d'une dette (KKS-515), frequence
+  hebdomadaire d'un abonnement (KKS-516), choix de la devise sans compte
+  (KKS-517), types de notification reglables (KKS-518). Angular rattrape : il
+  reste la surface fonctionnelle complete.
+- **Ecrans Flutter sans entree de navigation** (KKS-418) : « Devises & taux »
+  et « Donnees ». A rebrancher : une surface gelee continue de fonctionner.
+- **Verrouillage** (KKS-247) : l'ecran existe mais rien ne permet de l'activer
+  ni n'y mene. Prevu, pas en place.
+- **Notifications planifiees sur l'appareil**, qui sonneraient serveur
+  injoignable : non construites, non engagees (KKS-520). Flutter affiche une
+  notification systeme seulement a la reception d'un message du serveur.
 
 ## Flux d'authentification
 

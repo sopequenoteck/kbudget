@@ -65,6 +65,22 @@ Le fichier `.specify/memory/constitution.md` (v4.2.0) est le document de referen
 7. **Self-Hosted & Distribution ouverte** : PostgreSQL seule dependance infra. AGPL-3.0 (`api/`, `app/`), MPL-2.0 (`flutter/`). Aucun bridage selon l'origine du build. Anglais par defaut, francais a parite.
 8. **Angular, client de reference** : toute feature nait cote Angular. Flutter n'a jamais d'obligation de parite — frontiere a 3 etats **Suivi / Gele / Jamais**. Verifier l'etat d'une surface avant tout portage.
 
+## Frontiere Angular / Flutter
+
+Classement complet, motifs et ecarts connus : [`docs/architecture.md`](docs/architecture.md#frontiere-angular--flutter) (KKS-333). **Verifier l'etat d'une surface avant tout travail Flutter.**
+
+| Etat | Regle | Surfaces |
+|------|-------|----------|
+| **Suivi** | Toute evolution cote Angular est portee sur Flutter | Transactions (recurrences, virement), budgets, abonnements, dettes, comptes, categories, tableau de bord, notifications, profil « Mon compte », reglages, connexion, invitation, reinitialisation a la premiere connexion, ecran d'incompatibilite |
+| **Gele** | Fonctionne et reste maintenu (traductions, tests, corrections), aucune evolution fonctionnelle | Administration, devises et taux de change |
+| **Jamais** | Angular seul, ne pas porter | Import de releve, mapping CSV, profils et reglages d'import, rattrapage de l'historique, regles de categorisation |
+| **Propre a Flutter** | Sans equivalent web | Configuration du serveur, verrouillage PIN/biometrie (prevu, KKS-247), notification systeme a la reception |
+
+- Une feature nait cote Angular. Sur une surface **Suivi**, son ticket prevoit le portage Flutter ; sur une surface **Gele** ou **Jamais**, il ne le prevoit pas
+- Nouvelle surface : *va-t-elle continuer a bouger ?* Si oui et qu'elle est complexe, Angular seul. CRUD stable sur une entite : les deux
+- Une fonction que Flutter aurait en avance se porte sur Angular, qui reste la surface fonctionnelle complete
+- Un bug sur une surface gelee se corrige : le gel porte sur les evolutions, pas sur le fonctionnement
+
 ## Conventions backend
 
 - DTOs separent TOUJOURS la couche API de la couche persistance
