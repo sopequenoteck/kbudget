@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
@@ -42,17 +43,37 @@ void main() {
     mockRepo = MockAccountRepository();
   });
 
+  late String pushedLocation;
+
   Widget buildApp() {
+    pushedLocation = '';
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const AccountListScreen(),
+          routes: [
+            GoRoute(
+              path: 'settings/currencies',
+              builder: (context, state) {
+                pushedLocation = '/settings/currencies';
+                return const Scaffold(body: Text('Currencies screen'));
+              },
+            ),
+          ],
+        ),
+      ],
+    );
     return ProviderScope(
       overrides: [
         accountRepositoryProvider.overrideWithValue(mockRepo),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         theme: theme.AppTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('fr'),
-        home: const AccountListScreen(),
+        routerConfig: router,
       ),
     );
   }
@@ -112,6 +133,74 @@ void main() {
         find.byIcon(PhosphorIconsRegular.plus),
         findsOneWidget,
       );
+    });
+
+    testWidgets('should_showCurrenciesEntry_when_accountsLoaded',
+        (tester) async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1, acc2]);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Devises & Taux'), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.caretRight), findsOneWidget);
+    });
+
+    testWidgets('should_showCurrenciesEntry_when_noAccounts', (tester) async {
+      when(mockRepo.getAll()).thenAnswer((_) async => []);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aucun compte'), findsOneWidget);
+      expect(find.text('Devises & Taux'), findsOneWidget);
+    });
+
+    testWidgets('should_hideCurrenciesEntry_when_loadFails', (tester) async {
+      when(mockRepo.getAll()).thenThrow(Exception('Network error'));
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Devises & Taux'), findsNothing);
+    });
+
+    testWidgets('should_hideCurrenciesEntry_when_loading', (tester) async {
+      final completer = Completer<List<Account>>();
+      when(mockRepo.getAll()).thenAnswer((_) => completer.future);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Devises & Taux'), findsNothing);
+
+      completer.complete([acc1]);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('should_navigateToCurrencies_when_entryTappedWithAccounts',
+        (tester) async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Devises & Taux'));
+      await tester.pumpAndSettle();
+
+      expect(pushedLocation, '/settings/currencies');
+    });
+
+    testWidgets('should_navigateToCurrencies_when_entryTappedWithoutAccounts',
+        (tester) async {
+      when(mockRepo.getAll()).thenAnswer((_) async => []);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Devises & Taux'));
+      await tester.pumpAndSettle();
+
+      expect(pushedLocation, '/settings/currencies');
     });
 
     testWidgets('should_retryLoad_when_retryTapped', (tester) async {

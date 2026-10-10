@@ -202,6 +202,25 @@ void main() {
       expect(find.text('Invitations et gestion des accès'), findsOneWidget);
     });
 
+    testWidgets('should_showServerSection_when_rendered', (tester) async {
+      await pumpTall(tester, buildApp());
+
+      expect(find.text('SERVEUR'), findsOneWidget);
+      expect(find.text('Serveur'), findsOneWidget);
+      expect(find.text('URL de votre instance'), findsOneWidget);
+      expect(find.text('Comptes & Devises'), findsOneWidget);
+    });
+
+    testWidgets('should_navigate_to_settings_data_when_serverRowTapped',
+        (tester) async {
+      await pumpTall(tester, buildApp());
+
+      await tester.tap(find.text('Serveur'));
+      await tester.pumpAndSettle();
+
+      expect(lastPushedLocation, '/settings/data');
+    });
+
     testWidgets('should_showOfflineFooter_when_serverUrlMissing',
         (tester) async {
       await pumpTall(

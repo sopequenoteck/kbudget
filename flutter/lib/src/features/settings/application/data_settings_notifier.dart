@@ -2,12 +2,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/remote/api_client.dart';
+import 'package:k_budget/src/data/remote/compatibility_provider.dart';
+import 'package:k_budget/src/data/remote/compatibility_service.dart';
+import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
+import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/utils/env_config.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class DataSettingsState {
   final String? serverUrl;
@@ -110,12 +120,84 @@ class DataSettingsNotifier extends Notifier<DataSettingsState> {
     }
   }
 
-  Future<void> saveServerUrl(String url) async {
-    await _repository.setServerUrl(url);
-    state = state.copyWith(serverUrl: url);
-  }
-
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  /// Switches the app to the server at [url] and signs the user out.
+  ///
+  /// The server is checked first, like on first launch. If it is offline or
+  /// incompatible, nothing changes (URL and tokens untouched), the error is
+  /// set on the state and `false` is returned. Otherwise the tokens of the
+  /// previous instance are cleared before the URL changes, so they never
+  /// reach the new host, and the router is sent back to the sign-in screen.
+  Future<bool> changeServerUrl(String url) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    final l10n = ref.read(appLocalizationsProvider);
+    try {
+      return await _switchServer(url, l10n);
+    } finally {
+      // An unexpected failure must not leave the save button disabled.
+      if (state.isLoading) {
+        state = state.copyWith(
+          isLoading: false,
+          error: l10n.commonFeedbackSaveError,
+        );
+      }
+    }
+  }
+
+  Future<bool> _switchServer(String url, AppLocalizations l10n) async {
+    final info = await PackageInfo.fromPlatform();
+    final status = await ref
+        .read(compatibilityServiceProvider)
+        .check(baseUrl: url, clientVersion: info.version);
+    final message = status.userMessage(l10n);
+    if (message != null) {
+      state = state.copyWith(isLoading: false, error: message);
+      return false;
+    }
+
+    var tokensCleared = false;
+    try {
+      final authRepository = await ref.read(authRepositoryProvider.future);
+      final refreshToken = await authRepository.getRefreshToken();
+      // Taken before the invalidation below: it holds the old instance's Dio.
+      final dataSource = await ref.read(authRemoteDataSourceProvider.future);
+      await authRepository.clearTokens();
+      tokensCleared = true;
+      if (refreshToken != null) {
+        unawaited(_revokeOnPreviousServer(dataSource, refreshToken));
+      }
+      await _repository.setServerUrl(url);
+    } on Exception {
+      state = state.copyWith(
+        isLoading: false,
+        error: l10n.commonFeedbackSaveError,
+      );
+      if (tokensCleared) {
+        // The tokens are already gone: keep the auth state consistent.
+        ref.read(authNotifierProvider.notifier).forceUnauthenticated();
+      }
+      return false;
+    }
+
+    ref.read(compatibilityNotifierProvider.notifier).reset();
+    ref.invalidate(apiClientProvider);
+    state = DataSettingsState(serverUrl: url);
+    // Last: the router redirects to sign-in and must see the new URL.
+    ref.read(authNotifierProvider.notifier).forceUnauthenticated();
+    return true;
+  }
+
+  Future<void> _revokeOnPreviousServer(
+    AuthRemoteDataSource dataSource,
+    String refreshToken,
+  ) async {
+    try {
+      await dataSource.logout(refreshToken);
+    } on Exception {
+      // Best effort: the previous instance may be unreachable.
+    }
   }
 }

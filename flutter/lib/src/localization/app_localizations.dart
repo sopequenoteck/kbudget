@@ -2472,6 +2472,12 @@ abstract class AppLocalizations {
   /// **'Manage categories'**
   String get settingsListCategoriesHint;
 
+  /// No description provided for @settingsListServerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'URL of your instance'**
+  String get settingsListServerHint;
+
   /// No description provided for @settingsListTextScalePreview.
   ///
   /// In en, this message translates to:
@@ -2580,6 +2586,18 @@ abstract class AppLocalizations {
   /// **'Your data will be hidden, not deleted.'**
   String get settingsDialogDisableFeatureMessage;
 
+  /// No description provided for @settingsDialogChangeServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change server?'**
+  String get settingsDialogChangeServerTitle;
+
+  /// No description provided for @settingsDialogChangeServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out and will need to sign in again on the new server. Your data stays on the current server.'**
+  String get settingsDialogChangeServerMessage;
+
   /// No description provided for @settingsFeedbackLoadError.
   ///
   /// In en, this message translates to:
@@ -2592,11 +2610,11 @@ abstract class AppLocalizations {
   /// **'Unable to save preferences'**
   String get settingsFeedbackSaveError;
 
-  /// No description provided for @settingsPageDataTitle.
+  /// No description provided for @settingsPageServerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Data'**
-  String get settingsPageDataTitle;
+  /// **'Server'**
+  String get settingsPageServerTitle;
 
   /// No description provided for @settingsFormServerUrl.
   ///

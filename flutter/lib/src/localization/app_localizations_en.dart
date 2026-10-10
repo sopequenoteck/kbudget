@@ -1412,6 +1412,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsListCategoriesHint => 'Manage categories';
 
   @override
+  String get settingsListServerHint => 'URL of your instance';
+
+  @override
   String get settingsListTextScalePreview =>
       'Here is a preview of the chosen text size.';
 
@@ -1472,13 +1475,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your data will be hidden, not deleted.';
 
   @override
+  String get settingsDialogChangeServerTitle => 'Change server?';
+
+  @override
+  String get settingsDialogChangeServerMessage =>
+      'You will be signed out and will need to sign in again on the new server. Your data stays on the current server.';
+
+  @override
   String get settingsFeedbackLoadError => 'Unable to load preferences';
 
   @override
   String get settingsFeedbackSaveError => 'Unable to save preferences';
 
   @override
-  String get settingsPageDataTitle => 'Data';
+  String get settingsPageServerTitle => 'Server';
 
   @override
   String get settingsFormServerUrl => 'Server URL';

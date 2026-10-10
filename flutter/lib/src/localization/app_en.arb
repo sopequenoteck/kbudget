@@ -705,6 +705,7 @@
   "settingsListAccountsHint": "Manage accounts and currencies",
   "settingsListCategories": "Categories",
   "settingsListCategoriesHint": "Manage categories",
+  "settingsListServerHint": "URL of your instance",
   "settingsListTextScalePreview": "Here is a preview of the chosen text size.",
   "settingsListVersion": "K-Budget v{version}",
   "@settingsListVersion": {
@@ -737,9 +738,11 @@
     }
   },
   "settingsDialogDisableFeatureMessage": "Your data will be hidden, not deleted.",
+  "settingsDialogChangeServerTitle": "Change server?",
+  "settingsDialogChangeServerMessage": "You will be signed out and will need to sign in again on the new server. Your data stays on the current server.",
   "settingsFeedbackLoadError": "Unable to load preferences",
   "settingsFeedbackSaveError": "Unable to save preferences",
-  "settingsPageDataTitle": "Data",
+  "settingsPageServerTitle": "Server",
   "settingsFormServerUrl": "Server URL",
   "settingsFormServerUrlRequired": "The server URL is required",
   "settingsFormServerUrlHttpsRequired": "The URL must start with https://",

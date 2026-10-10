@@ -1421,6 +1421,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsListCategoriesHint => 'Gérer les catégories';
 
   @override
+  String get settingsListServerHint => 'URL de votre instance';
+
+  @override
   String get settingsListTextScalePreview =>
       'Voici un aperçu de la taille du texte choisie.';
 
@@ -1481,6 +1484,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vos données seront masquées mais pas supprimées.';
 
   @override
+  String get settingsDialogChangeServerTitle => 'Changer de serveur ?';
+
+  @override
+  String get settingsDialogChangeServerMessage =>
+      'Vous serez déconnecté et devrez vous reconnecter sur le nouveau serveur. Vos données restent sur le serveur actuel.';
+
+  @override
   String get settingsFeedbackLoadError =>
       'Impossible de charger les préférences';
 
@@ -1489,7 +1499,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de sauvegarder les préférences';
 
   @override
-  String get settingsPageDataTitle => 'Données';
+  String get settingsPageServerTitle => 'Serveur';
 
   @override
   String get settingsFormServerUrl => 'URL du serveur';
