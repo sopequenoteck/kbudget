@@ -51,8 +51,25 @@ class AppConfig with _$AppConfig {
     @JsonKey(fromJson: _safeParseNavOrder)
     List<Feature> navOrder,
     String? language,
+
+    /// Random salt of the PIN hash, generated each time the PIN is set.
+    String? pinSalt,
+
+    /// Consecutive wrong PIN entries, reset by a right PIN only.
+    @Default(0) int failedPinAttempts,
   }) = _AppConfig;
+
+  const AppConfig._();
 
   factory AppConfig.fromJson(Map<String, dynamic> json) =>
       _$AppConfigFromJson(json);
+
+  /// A readable form for logs and test failures, without the PIN hash and its
+  /// salt, which must never be printed.
+  @override
+  String toString() => 'AppConfig(serverUrl: $serverUrl, theme: $theme, '
+      'textScale: $textScale, lockEnabled: $lockEnabled, '
+      'lockMethod: $lockMethod, onboardingCompleted: $onboardingCompleted, '
+      'enabledFeatures: $enabledFeatures, navOrder: $navOrder, '
+      'language: $language, failedPinAttempts: $failedPinAttempts)';
 }

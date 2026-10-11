@@ -7,6 +7,18 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Mobile app: app lock with PIN and biometrics** (KKS-247): the mobile app
+  can now be locked. Turn it on in Settings, under "This device": choose a
+  4-digit PIN, and optionally unlock with Face ID or fingerprint, the PIN
+  remaining the fallback. The app asks for it at launch and after one minute
+  away. Five wrong PINs in a row sign you out; "Forgot PIN?" does the same, and
+  signing in again with your password is the way back. The lock is turned off
+  and the PIN erased whenever the session tokens are erased (sign-out, server
+  change), and only then. The PIN is stored salted and hashed in the secure
+  storage of the device, never on the server.
+
 ### Removed
 
 - **Mobile app: local mode removed** (KKS-335): the mobile app no longer works

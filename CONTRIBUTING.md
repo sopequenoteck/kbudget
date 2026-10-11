@@ -98,7 +98,7 @@ Each surface carries one of three states:
 | **Never** | Angular only | Statement import, CSV mapping, import profiles and settings, history clean-up, categorisation rules |
 
 Flutter also carries what the web cannot offer or does not need: server setup,
-PIN and biometric lock (planned), system notifications. The full table, with
+PIN and biometric lock, system notifications. The full table, with
 routes and the gaps known today, is in
 [`docs/architecture.md`](docs/architecture.md#frontiere-angular--flutter).
 

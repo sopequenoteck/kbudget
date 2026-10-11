@@ -228,14 +228,28 @@
     }
   },
   "authActionUnlockBiometricReason": "Déverrouillez K-Budget",
-  "authFeedbackBiometricError": "Erreur biométrique. Utilisez votre PIN.",
-  "authFormPinMinLength": "Le PIN doit contenir au moins 4 chiffres",
-  "authFeedbackPinIncorrect": "PIN incorrect",
+  "authFeedbackBiometricError": "Échec de la biométrie. Utilisez votre PIN.",
+  "authFeedbackPinIncorrect": "PIN incorrect. {count, plural, one {{count} essai restant} other {{count} essais restants}}",
+  "@authFeedbackPinIncorrect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "authDialogForgotPinTitle": "PIN oublié ?",
-  "authDialogForgotPinServerMessage": "Vous serez déconnecté et devrez vous reconnecter avec vos identifiants.",
-  "authPagePinTagline": "Saisissez votre PIN pour continuer",
-  "authActionUnlock": "Déverrouiller",
-  "authActionBiometric": "Biométrie",
+  "authDialogForgotPinMessage": "Vous serez déconnecté et le verrouillage sera désactivé. Reconnectez-vous avec votre mot de passe.",
+  "authPageLockSubtitle": "Saisissez votre PIN",
+  "authActionPinDeleteAria": "Effacer",
+  "authActionBiometricAria": "Déverrouillage biométrique",
+  "authFormPinProgressAria": "{count, plural, one {{count} chiffre saisi sur 4} other {{count} chiffres saisis sur 4}}",
+  "@authFormPinProgressAria": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "commonActionConfirm": "Confirmer",
   "commonActionClose": "Fermer",
   "commonActionChooseEmoji": "Choisir un emoji",
@@ -537,6 +551,20 @@
   "settingsFeedbackServerTimeout": "Délai de connexion dépassé",
   "settingsFeedbackServerAccessDenied": "Accès refusé par le serveur",
   "settingsFeedbackServerNotFound": "Endpoint introuvable — vérifiez l'URL",
+  "settingsPageDeviceTitle": "Cet appareil",
+  "settingsPageLockTitle": "Verrouillage",
+  "settingsValueLockOn": "Activé",
+  "settingsValueLockOff": "Désactivé",
+  "settingsFormLockEnabled": "Verrouiller l'application",
+  "settingsFormLockEnabledHint": "PIN demandé au lancement et après 1 minute d'absence",
+  "settingsFormLockBiometric": "Déverrouillage biométrique",
+  "settingsFormLockBiometricHint": "Le PIN reste le recours",
+  "settingsActionChangePin": "Changer le PIN",
+  "settingsFormPinChoose": "Choisissez un PIN",
+  "settingsFormPinConfirm": "Confirmez le PIN",
+  "settingsFormPinCurrent": "Saisissez votre PIN actuel",
+  "settingsFeedbackPinMismatch": "Les deux PIN ne correspondent pas",
+  "settingsFormLockForgotHint": "PIN oublié : la déconnexion le réinitialise.",
   "notificationsValueSubscriptionDue": "Échéance abonnement",
   "notificationsValueDebtDue": "Échéance dette",
   "notificationsValueDebtReminder": "Rappel dette",

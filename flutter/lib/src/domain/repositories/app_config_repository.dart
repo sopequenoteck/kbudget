@@ -16,9 +16,6 @@ abstract class AppConfigRepository {
   Future<AppTheme> getTheme();
   Future<void> setTextScale(TextScale textScale);
   Future<TextScale> getTextScale();
-  Future<void> setLockEnabled(bool enabled);
-  Future<void> setLockMethod(LockMethod? method);
-  Future<void> setHashedPin(String? pin);
   Future<List<Feature>> getEnabledFeatures();
   Future<void> setEnabledFeatures(List<Feature> features);
   Future<List<Feature>> getNavOrder();

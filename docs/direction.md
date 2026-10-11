@@ -124,6 +124,10 @@ l'infrastructure, ce qui est cohérent puisqu'il n'y a pas d'infrastructure à f
 > notifications qui sonneraient serveur éteint ne sont pas construites (KKS-520, non
 > engagé). Voir §4.4.
 
+> État au 2026-10-11 (KKS-247) : le verrouillage par PIN et biométrie est livré et
+> activable depuis les réglages. Les notifications qui sonneraient serveur éteint
+> restent non construites (KKS-520).
+
 À noter : le compte développeur Apple coûte 99 $/an même pour publier gratuitement.
 
 ### 4.4 Frontière Angular / Flutter
@@ -164,7 +168,7 @@ La démonstration que le dispositif fonctionne existe déjà : l'import CSV, 1 7
 n'existent que côté web, en production, sans que personne ne s'en plaigne.
 
 **Exclusivités Flutter** : configuration du serveur de l'utilisateur, verrouillage par
-PIN et biométrie (écran présent, pas encore activable : KKS-247), notification système à
+PIN et biométrie, notification système à
 la réception d'un message du serveur. Les notifications planifiées sur l'appareil, qui
 sonneraient serveur injoignable, et le widget d'écran d'accueil ne sont pas construits
 (KKS-520, non engagé).

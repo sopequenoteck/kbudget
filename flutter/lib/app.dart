@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/app_lock_barrier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/application/text_scale_notifier.dart';
 import 'package:k_budget/src/features/settings/application/theme_notifier.dart';
@@ -36,7 +37,7 @@ class KBudgetApp extends ConsumerWidget {
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(textScale.scaleFactor),
           ),
-          child: child!,
+          child: AppLockBarrier(router: router, child: child!),
         );
       },
     );

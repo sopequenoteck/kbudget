@@ -7,6 +7,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- **Application mobile : verrouillage par PIN et biometrie** (KKS-247) :
+  l'application mobile peut maintenant etre verrouillee. Le reglage est dans
+  Parametres, section « Cet appareil » : un PIN a 4 chiffres, et en option le
+  deverrouillage par Face ID ou empreinte, le PIN restant le recours. Le PIN
+  est demande au lancement et apres une minute d'absence. Cinq PIN faux
+  d'affilee deconnectent ; « PIN oublie ? » aussi, et l'on revient en se
+  reconnectant avec son mot de passe. Le verrouillage est desactive et le PIN
+  efface chaque fois que les jetons de session sont effaces (deconnexion,
+  changement de serveur), et seulement dans ce cas. Le PIN est stocke sale et
+  hache dans le stockage securise de l'appareil, jamais sur le serveur.
+
 ### Removed
 
 - **Application mobile : mode local supprime** (KKS-335) : l'application

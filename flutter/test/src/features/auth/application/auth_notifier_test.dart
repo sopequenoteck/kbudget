@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/fake_app_config_repository.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 DioException _dioError(int statusCode, Object? data) => DioException(
@@ -26,6 +28,8 @@ void main() {
     container = ProviderContainer(
       overrides: [
         authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
+        appConfigRepositoryProvider
+            .overrideWithValue(FakeAppConfigRepository()),
       ],
     );
   });

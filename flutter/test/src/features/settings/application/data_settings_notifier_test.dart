@@ -10,6 +10,8 @@ import 'package:k_budget/src/data/remote/compatibility_service.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_state.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
@@ -19,6 +21,7 @@ import 'package:mockito/mockito.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../helpers/display_locale.dart';
+import '../../../../helpers/lock_test_helpers.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 class _FakeCompatibilityService implements CompatibilityService {
@@ -405,6 +408,87 @@ void main() {
       expect(state.error, 'Erreur lors de la sauvegarde');
       verifyNever(authRepo.clearTokens());
       verifyNever(configRepo.setServerUrl(any));
+    });
+
+    group('app lock', () {
+      AppConfig savedConfig() =>
+          verify(configRepo.saveConfig(captureAny)).captured.single
+              as AppConfig;
+
+      setUp(() {
+        when(configRepo.getConfig()).thenAnswer((_) async => lockedConfig());
+      });
+
+      test('should_resetLockAfterTokensAreErased_when_serverChanged',
+          () async {
+        final steps = <String>[];
+        when(authRepo.clearTokens()).thenAnswer((_) async => steps.add('tokens'));
+        when(configRepo.saveConfig(any))
+            .thenAnswer((_) async => steps.add('lock'));
+        when(configRepo.setServerUrl(any))
+            .thenAnswer((_) async => steps.add('url'));
+
+        final changed = await changeNotifier().changeServerUrl(newUrl);
+
+        expect(changed, true);
+        expect(steps, ['tokens', 'lock', 'url']);
+        final saved = savedConfig();
+        expect(saved.lockEnabled, false);
+        expect(saved.lockMethod, isNull);
+        expect(saved.hashedPin, isNull);
+        expect(saved.pinSalt, isNull);
+        expect(saved.failedPinAttempts, 0);
+        final lock = changeContainer.read(appLockNotifierProvider);
+        expect(lock.status, LockStatus.unlocked);
+        expect(lock.enabled, false);
+      });
+
+      test('should_resetLock_when_saveFailsAfterTokensAreErased', () async {
+        when(configRepo.setServerUrl(any))
+            .thenThrow(Exception('Storage error'));
+
+        final changed = await changeNotifier().changeServerUrl(newUrl);
+
+        expect(changed, false);
+        verify(authRepo.clearTokens()).called(1);
+        expect(savedConfig().lockEnabled, false);
+        expect(
+          changeContainer.read(appLockNotifierProvider).enabled,
+          false,
+        );
+        expect(
+          changeContainer.read(authNotifierProvider),
+          const AuthState.unauthenticated(),
+        );
+      });
+
+      test('should_keepLock_when_serverOffline', () async {
+        compatibility.result = const CompatibilityOffline();
+
+        await changeNotifier().changeServerUrl(newUrl);
+
+        verifyNever(configRepo.saveConfig(any));
+        verifyNever(authRepo.clearTokens());
+      });
+
+      test('should_keepLock_when_tokensCannotBeRead', () async {
+        when(authRepo.getRefreshToken()).thenThrow(Exception('Storage error'));
+
+        await changeNotifier().changeServerUrl(newUrl);
+
+        verifyNever(configRepo.saveConfig(any));
+        verifyNever(authRepo.clearTokens());
+      });
+
+      test('should_keepLock_when_tokensCannotBeErased', () async {
+        when(authRepo.clearTokens()).thenThrow(Exception('Storage error'));
+
+        final changed = await changeNotifier().changeServerUrl(newUrl);
+
+        expect(changed, false);
+        verifyNever(configRepo.saveConfig(any));
+        verifyNever(configRepo.setServerUrl(any));
+      });
     });
 
     test('should_pointAuthenticatedClientAtNewUrl_when_serverChanged',
