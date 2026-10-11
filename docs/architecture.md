@@ -529,7 +529,7 @@ entite, elle peut vivre des deux cotes.
 | Rattrapage de l'historique | **Jamais** | `/settings/import/history-cleanup` | — |
 | Regles de categorisation | **Jamais** | dans `/settings/import` | — |
 | Configuration du serveur (premier lancement, puis ecran « Serveur ») | **Propre a Flutter** | — | `/onboarding`, `/settings/data` |
-| Verrouillage par PIN et biometrie | **Propre a Flutter** | — | `/lock` |
+| Verrouillage par PIN et biometrie | **Propre a Flutter** | — | barriere applicative (pas de route), reglage `/settings/lock` |
 | Notification systeme a la reception | **Propre a Flutter** | — | `LocalNotificationService` |
 | Mise a jour de la PWA | **Propre au web** | `AppUpdateService` | — |
 
@@ -555,8 +555,6 @@ sur les points suivants, chacun porte par un ticket :
   hebdomadaire d'un abonnement (KKS-516), choix de la devise sans compte
   (KKS-517), types de notification reglables (KKS-518). Angular rattrape : il
   reste la surface fonctionnelle complete.
-- **Verrouillage** (KKS-247) : l'ecran existe mais rien ne permet de l'activer
-  ni n'y mene. Prevu, pas en place.
 - **Notifications planifiees sur l'appareil**, qui sonneraient serveur
   injoignable : non construites, non engagees (KKS-520). Flutter affiche une
   notification systeme seulement a la reception d'un message du serveur.

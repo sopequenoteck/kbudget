@@ -117,16 +117,25 @@
 
 ## 3. Lock Screen
 
-> **Exclusif Flutter.** PIN + biometrie.
+> **Exclusif Flutter.** Barriere par-dessus l'application (pas de route). Reglage : Parametres → "Cet appareil" → "Verrouillage".
 
 | # | Scenario | Etapes | Resultat attendu | Statut |
 |---|----------|--------|-------------------|--------|
-| L-1 | PIN correct | Saisir PIN correct → Deverrouiller | Redirect `/dashboard` | -- |
-| L-2 | PIN incorrect | Saisir PIN faux | "PIN incorrect" + champ vide | -- |
-| L-3 | PIN trop court | PIN < 4 chiffres → Deverrouiller | "Le PIN doit contenir au moins 4 chiffres" | -- |
-| L-4 | PIN oublie (serveur) | "PIN oublie" → Confirmer | Logout + redirect `/login` | -- |
-| L-5 | PIN oublie (local) | "PIN oublie" → Confirmer | Reset verrou + acces dashboard | -- |
-| L-6 | Biometrie | Biometrie configuree, ouvrir app | Tentative biometrie automatique | -- |
+| L-1 | Activation | Activer → choisir un PIN (4 chiffres) → confirmer | Interrupteur actif, ligne du hub "Active" | -- |
+| L-2 | Confirmation differente | Saisir deux PIN differents | "Les deux PIN ne correspondent pas", retour a la premiere saisie, rien d'enregistre | -- |
+| L-3 | Lancement | Fermer puis rouvrir l'app | Ecran de verrouillage, aucun contenu visible | -- |
+| L-4 | PIN correct | Saisir les 4 chiffres | Deverrouillage sans bouton, retour a l'ecran laisse | -- |
+| L-5 | PIN incorrect | Saisir un PIN faux | "PIN incorrect. N essais restants", points vides | -- |
+| L-6 | 5 echecs | 5 PIN faux d'affilee | Deconnexion, ecran de connexion ; verrou desactive apres reconnexion | -- |
+| L-7 | PIN oublie | "PIN oublie ?" → Confirmer | Deconnexion, verrou desactive | -- |
+| L-8 | Activer la biometrie | Visage ou empreinte enregistre → activer l'option | Demande du systeme ; activee seulement si elle reussit | -- |
+| L-9 | Deverrouillage biometrique | Ouvrir l'app verrouillee | Demande automatique ; echec ou annulation → PIN | -- |
+| L-10 | Minute d'absence | Arriere-plan moins d'1 min, puis plus d'1 min | Pas de verrou, puis verrou | -- |
+| L-11 | Changer le PIN | PIN actuel → nouveau → confirmation | Ancien PIN refuse, nouveau accepte | -- |
+| L-12 | Desactiver | Interrupteur → PIN actuel | Verrou desactive | -- |
+| L-13 | Deconnexion | Se deconnecter puis se reconnecter | Verrou desactive | -- |
+| L-14 | Changement de serveur | Changer l'URL du serveur | Verrou desactive | -- |
+| L-15 | Android | Lancement, lien d'invitation, photo d'un logo, notification, biometrie | Aucune regression apres le passage a `FlutterFragmentActivity` | -- |
 
 ---
 
@@ -295,7 +304,7 @@
 | SH-3 | Navigation Apparence | Tap "Apparence" | → `/settings/appearance` | -- |
 | SH-4 | Navigation Comptes | Tap "Comptes" | → `/settings/accounts` | -- |
 | SH-5 | Navigation Categories | Tap "Categories" | → `/settings/categories` | -- |
-| SH-6 | Navigation Serveur | Bas du hub, section "Serveur" → tap "Serveur" | → `/settings/data` | -- |
+| SH-6 | Section "Cet appareil" | Bas du hub | Lignes "Verrouillage" (Active / Desactive) → `/settings/lock` et "Serveur" → `/settings/data` | -- |
 | SH-7 | Placeholders | Tap "Securite" ou "A propos" | Aucune navigation (grises) | -- |
 
 ---

@@ -4,7 +4,6 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/compatibility_service.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
@@ -68,16 +67,6 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
 
   Future<AppConfig> getConfig() async {
     return _repository.getConfig();
-  }
-
-  Future<void> updateLockSettings({
-    required bool enabled,
-    LockMethod? method,
-    String? pin,
-  }) async {
-    await _repository.setLockEnabled(enabled);
-    await _repository.setLockMethod(method);
-    await _repository.setHashedPin(pin);
   }
 
   Future<void> completeOnboarding() async {

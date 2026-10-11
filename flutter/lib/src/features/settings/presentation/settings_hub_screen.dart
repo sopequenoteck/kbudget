@@ -15,6 +15,7 @@ import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
@@ -181,6 +182,9 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     final featureState = ref.watch(featureConfigNotifierProvider);
     final userAsync = ref.watch(userProfileNotifierProvider);
     final isAdmin = userAsync.valueOrNull?.isAdmin ?? false;
+    final lockEnabled = ref.watch(
+      appLockNotifierProvider.select((state) => state.enabled),
+    );
     final l10n = AppLocalizations.of(context)!;
 
     ref.listen(featureConfigNotifierProvider, (previous, next) {
@@ -491,7 +495,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
           ),
 
           // ----------------------------------------------------------------
-          // Section Serveur
+          // Section Cet appareil (verrouillage, serveur)
           // ----------------------------------------------------------------
           SliverToBoxAdapter(
             child: Padding(
@@ -502,8 +506,21 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppSpacing.space6),
-                  _SettingsSectionLabel(l10n.settingsPageServerTitle),
+                  _SettingsSectionLabel(l10n.settingsPageDeviceTitle),
                   const SizedBox(height: AppSpacing.space2),
+                  _SettingsRow(
+                    icon: PhosphorIconsRegular.lock,
+                    iconBgColor: ext?.iconCircleBg ??
+                        theme.colorScheme.surfaceContainerHighest,
+                    iconColor: theme.colorScheme.onSurfaceVariant,
+                    title: l10n.settingsPageLockTitle,
+                    description: lockEnabled
+                        ? l10n.settingsValueLockOn
+                        : l10n.settingsValueLockOff,
+                    onTap: () => context.push(
+                      '${RouteNames.settings}/${RouteNames.settingsLock}',
+                    ),
+                  ),
                   _SettingsRow(
                     icon: PhosphorIconsRegular.hardDrives,
                     iconBgColor: ext?.iconCircleBg ??

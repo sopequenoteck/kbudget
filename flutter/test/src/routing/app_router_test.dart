@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -15,10 +16,13 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_pin_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_settings_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
@@ -318,6 +322,70 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Premier accès'), findsOneWidget);
+    });
+  });
+
+  group('AppRouter — verrouillage (KKS-247)', () {
+    const lockedServerConfig = AppConfig(
+      serverUrl: 'https://budget.example.com/api',
+      onboardingCompleted: true,
+      lockEnabled: true,
+      lockMethod: LockMethod.pin,
+      hashedPin: 'hash',
+      pinSalt: 'salt',
+    );
+
+    Future<GoRouter> pumpAt(WidgetTester tester, String location) async {
+      when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
+      when(mockRepo.getConfig()).thenAnswer((_) async => lockedServerConfig);
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      ).read(appRouterProvider);
+      router.go(location);
+      await tester.pumpAndSettle();
+      return router;
+    }
+
+    testWidgets('should_showLockSettings_when_navigatingToSettingsLock',
+        (tester) async {
+      await pumpAt(tester, '/settings/lock');
+
+      expect(find.byType(LockSettingsScreen), findsOneWidget);
+      expect(find.text('Verrouiller l\'application'), findsOneWidget);
+    });
+
+    testWidgets('should_notRouteToLockScreen_when_navigatingToLock',
+        (tester) async {
+      await pumpAt(tester, '/lock');
+
+      expect(find.byType(LockScreen), findsNothing);
+    });
+
+    testWidgets('should_notRedirectToLock_when_lockEnabled', (tester) async {
+      await pumpAt(tester, '/dashboard');
+
+      expect(find.byType(LockScreen), findsNothing);
+      expect(find.text('Accueil'), findsWidgets);
+    });
+
+    testWidgets('should_openPinScreenForFlow_when_flowInPath', (tester) async {
+      await pumpAt(tester, '/settings/lock/pin/disable');
+
+      expect(find.byType(LockPinScreen), findsOneWidget);
+      expect(find.text('Saisissez votre PIN actuel'), findsOneWidget);
+    });
+
+    testWidgets('should_fallBackToEnableFlow_when_flowUnknown',
+        (tester) async {
+      await pumpAt(tester, '/settings/lock/pin/whatever');
+
+      expect(find.text('Choisissez un PIN'), findsOneWidget);
     });
   });
 }

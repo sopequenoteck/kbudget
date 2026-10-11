@@ -111,24 +111,6 @@ class AppConfigRepositoryImpl implements AppConfigRepository {
   }
 
   @override
-  Future<void> setLockEnabled(bool enabled) async {
-    final config = await getConfig();
-    await saveConfig(config.copyWith(lockEnabled: enabled));
-  }
-
-  @override
-  Future<void> setLockMethod(LockMethod? method) async {
-    final config = await getConfig();
-    await saveConfig(config.copyWith(lockMethod: method));
-  }
-
-  @override
-  Future<void> setHashedPin(String? pin) async {
-    final config = await getConfig();
-    await saveConfig(config.copyWith(hashedPin: pin));
-  }
-
-  @override
   Future<List<Feature>> getEnabledFeatures() async {
     final config = await getConfig();
     return config.enabledFeatures;

@@ -2,23 +2,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import 'dart:convert';
+import 'dart:async';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/constants/pin_pad_sizes.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
-import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/features/auth/application/biometric_authenticator.dart';
+import 'package:k_budget/src/features/auth/presentation/widgets/pin_pad.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
-import 'package:k_budget/src/routing/route_names.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+/// The screen that covers the app while it is locked (see `AppLockBarrier`).
+///
+/// A 4-digit PIN on a numeric pad, checked at the last digit. Biometric
+/// unlock, when turned on, is offered when the screen shows and on the key at
+/// the bottom left of the pad.
 class LockScreen extends ConsumerStatefulWidget {
+  /// Creates the lock screen.
   const LockScreen({super.key});
 
   @override
@@ -26,124 +31,77 @@ class LockScreen extends ConsumerStatefulWidget {
 }
 
 class _LockScreenState extends ConsumerState<LockScreen> {
-  final _pinController = TextEditingController();
-  final _localAuth = LocalAuthentication();
-  bool _isAuthenticating = false;
-  String? _error;
+  String Function(AppLocalizations l10n)? _message;
+  var _biometricRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _attemptBiometric();
-  }
-
-  @override
-  void dispose() {
-    _pinController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _attemptBiometric() async {
-    final config = await ref
-        .read(onboardingNotifierProvider.notifier)
-        .getConfig();
-
-    if (config.lockMethod != LockMethod.biometric) return;
-    if (!mounted) {
-      return;
-    }
-
-    // Recupere apres le premier await : lu depuis initState(), l'appeler
-    // plus tot leverait "dependOnInheritedWidgetOfExactType() ... called
-    // before initState() completed" (le widget n'est pas encore monte).
-    final l10n = AppLocalizations.of(context)!;
-
-    setState(() {
-      _isAuthenticating = true;
-      _error = null;
-    });
-
-    try {
-      final authenticated = await _localAuth.authenticate(
-        localizedReason: l10n.authActionUnlockBiometricReason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+    if (ref.read(appLockNotifierProvider).biometricEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(_unlockWithBiometrics()),
       );
-      if (authenticated && mounted) {
-        context.go(RouteNames.dashboard);
-      }
-    } on PlatformException {
-      if (mounted) {
-        setState(() {
-          _error = l10n.authFeedbackBiometricError;
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isAuthenticating = false);
-      }
     }
   }
 
-  Future<void> _validatePin() async {
-    final l10n = AppLocalizations.of(context)!;
-    if (_pinController.text.length < 4) {
-      setState(() => _error = l10n.authFormPinMinLength);
+  Future<void> _unlockWithBiometrics() async {
+    if (_biometricRunning || !mounted) {
       return;
     }
+    _biometricRunning = true;
+    var unlocked = false;
+    try {
+      unlocked = await ref
+          .read(appLockNotifierProvider.notifier)
+          .unlockWithBiometrics();
+    } finally {
+      _biometricRunning = false;
+    }
+    if (!unlocked && mounted) {
+      setState(() => _message = (l10n) => l10n.authFeedbackBiometricError);
+    }
+  }
 
-    setState(() {
-      _isAuthenticating = true;
-      _error = null;
-    });
-
-    final config = await ref
-        .read(onboardingNotifierProvider.notifier)
-        .getConfig();
-
-    final hashedInput =
-        sha256.convert(utf8.encode(_pinController.text)).toString();
-
-    if (hashedInput == config.hashedPin) {
-      if (mounted) {
-        context.go(RouteNames.dashboard);
+  Future<void> _unlockWithPin(String pin) async {
+    try {
+      final result =
+          await ref.read(appLockNotifierProvider.notifier).unlockWithPin(pin);
+      if (result.isValid || !mounted) {
+        return;
       }
-    } else {
+      unawaited(HapticFeedback.heavyImpact());
+      setState(
+        () => _message =
+            (l10n) => l10n.authFeedbackPinIncorrect(result.attemptsLeft),
+      );
+    } on Exception {
+      // The attempt could not be recorded: the app stays locked.
       if (mounted) {
-        setState(() {
-          _error = l10n.authFeedbackPinIncorrect;
-          _isAuthenticating = false;
-        });
-        _pinController.clear();
+        setState(() => _message = (l10n) => l10n.commonFeedbackSaveError);
       }
     }
   }
 
-  Future<void> _handleForgotPin() async {
+  Future<void> _confirmForgotPin() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialogCustom.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.authDialogForgotPinTitle),
-        content: Text(l10n.authDialogForgotPinServerMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.commonActionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.commonActionLogout),
-          ),
-        ],
-      ),
+      icon: PhosphorIconsRegular.signOut,
+      title: l10n.authDialogForgotPinTitle,
+      message: l10n.authDialogForgotPinMessage,
+      confirmLabel: l10n.commonActionLogout,
+      cancelLabel: l10n.commonActionCancel,
+      variant: ConfirmVariant.danger,
     );
-    if ((confirmed ?? false) && mounted) {
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    try {
+      // Resets the lock too, once the tokens are erased.
       await ref.read(authNotifierProvider.notifier).logout();
+    } on Exception {
       if (mounted) {
-        context.go(RouteNames.login);
+        setState(() => _message = (l10n) => l10n.errorsClientGeneric);
       }
     }
   }
@@ -151,89 +109,54 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final biometricEnabled = ref.watch(
+      appLockNotifierProvider.select((state) => state.biometricEnabled),
+    );
+    final biometricKind = ref.watch(biometricKindProvider).valueOrNull ??
+        BiometricKind.fingerprint;
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.space6),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 320),
+              constraints: const BoxConstraints(maxWidth: lockContentMaxWidth),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   PhosphorIcon(
                     PhosphorIconsRegular.lock,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
+                    size: lockIconSize,
+                    color: theme.colorScheme.primary,
                   ),
-                  const SizedBox(height: AppSpacing.space4),
+                  const SizedBox(height: AppSpacing.space3),
+                  Text('K-Budget', style: theme.textTheme.headlineMedium),
+                  const SizedBox(height: AppSpacing.space1),
                   Text(
-                    'K-Budget',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    l10n.authPageLockSubtitle,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.space6),
+                  PinEntry(
+                    onCompleted: _unlockWithPin,
+                    message: _message?.call(l10n),
+                    onBiometric: biometricEnabled
+                        ? () => unawaited(_unlockWithBiometrics())
+                        : null,
+                    biometricKind: biometricKind,
                   ),
                   const SizedBox(height: AppSpacing.space2),
-                  Text(
-                    l10n.authPagePinTagline,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.space8),
-                  TextField(
-                    controller: _pinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    textAlign: TextAlign.center,
-                    maxLength: 6,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      hintText: '****',
-                      counterText: '',
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      minimumSize:
+                          const Size(minTouchTarget, minTouchTarget),
                     ),
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    onSubmitted: (_) => _validatePin(),
-                  ),
-                  const SizedBox(height: AppSpacing.space4),
-                  if (_error != null)
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: AppSpacing.space4),
-                      child: Text(
-                        _error!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  FilledButton(
-                    onPressed: _isAuthenticating ? null : _validatePin,
-                    child: _isAuthenticating
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.authActionUnlock),
-                  ),
-                  const SizedBox(height: AppSpacing.space4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed:
-                            _isAuthenticating ? null : _handleForgotPin,
-                        child: Text(l10n.authDialogForgotPinTitle),
-                      ),
-                      TextButton.icon(
-                        onPressed:
-                            _isAuthenticating ? null : _attemptBiometric,
-                        icon: const PhosphorIcon(PhosphorIconsRegular.fingerprint, size: 20),
-                        label: Text(l10n.authActionBiometric),
-                      ),
-                    ],
+                    onPressed: () => unawaited(_confirmForgotPin()),
+                    child: Text(l10n.authDialogForgotPinTitle),
                   ),
                 ],
               ),

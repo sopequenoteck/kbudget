@@ -656,29 +656,45 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authFeedbackBiometricError =>
-      'Erreur biométrique. Utilisez votre PIN.';
+      'Échec de la biométrie. Utilisez votre PIN.';
 
   @override
-  String get authFormPinMinLength => 'Le PIN doit contenir au moins 4 chiffres';
-
-  @override
-  String get authFeedbackPinIncorrect => 'PIN incorrect';
+  String authFeedbackPinIncorrect(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count essais restants',
+      one: '$count essai restant',
+    );
+    return 'PIN incorrect. $_temp0';
+  }
 
   @override
   String get authDialogForgotPinTitle => 'PIN oublié ?';
 
   @override
-  String get authDialogForgotPinServerMessage =>
-      'Vous serez déconnecté et devrez vous reconnecter avec vos identifiants.';
+  String get authDialogForgotPinMessage =>
+      'Vous serez déconnecté et le verrouillage sera désactivé. Reconnectez-vous avec votre mot de passe.';
 
   @override
-  String get authPagePinTagline => 'Saisissez votre PIN pour continuer';
+  String get authPageLockSubtitle => 'Saisissez votre PIN';
 
   @override
-  String get authActionUnlock => 'Déverrouiller';
+  String get authActionPinDeleteAria => 'Effacer';
 
   @override
-  String get authActionBiometric => 'Biométrie';
+  String get authActionBiometricAria => 'Déverrouillage biométrique';
+
+  @override
+  String authFormPinProgressAria(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chiffres saisis sur 4',
+      one: '$count chiffre saisi sur 4',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get commonActionConfirm => 'Confirmer';
@@ -1527,6 +1543,50 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsFeedbackServerNotFound =>
       'Endpoint introuvable — vérifiez l\'URL';
+
+  @override
+  String get settingsPageDeviceTitle => 'Cet appareil';
+
+  @override
+  String get settingsPageLockTitle => 'Verrouillage';
+
+  @override
+  String get settingsValueLockOn => 'Activé';
+
+  @override
+  String get settingsValueLockOff => 'Désactivé';
+
+  @override
+  String get settingsFormLockEnabled => 'Verrouiller l\'application';
+
+  @override
+  String get settingsFormLockEnabledHint =>
+      'PIN demandé au lancement et après 1 minute d\'absence';
+
+  @override
+  String get settingsFormLockBiometric => 'Déverrouillage biométrique';
+
+  @override
+  String get settingsFormLockBiometricHint => 'Le PIN reste le recours';
+
+  @override
+  String get settingsActionChangePin => 'Changer le PIN';
+
+  @override
+  String get settingsFormPinChoose => 'Choisissez un PIN';
+
+  @override
+  String get settingsFormPinConfirm => 'Confirmez le PIN';
+
+  @override
+  String get settingsFormPinCurrent => 'Saisissez votre PIN actuel';
+
+  @override
+  String get settingsFeedbackPinMismatch => 'Les deux PIN ne correspondent pas';
+
+  @override
+  String get settingsFormLockForgotHint =>
+      'PIN oublié : la déconnexion le réinitialise.';
 
   @override
   String get notificationsValueSubscriptionDue => 'Échéance abonnement';

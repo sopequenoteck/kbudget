@@ -1263,50 +1263,50 @@ abstract class AppLocalizations {
   /// No description provided for @authFeedbackBiometricError.
   ///
   /// In en, this message translates to:
-  /// **'Biometric error. Use your PIN.'**
+  /// **'Biometrics failed. Use your PIN.'**
   String get authFeedbackBiometricError;
-
-  /// No description provided for @authFormPinMinLength.
-  ///
-  /// In en, this message translates to:
-  /// **'The PIN must contain at least 4 digits'**
-  String get authFormPinMinLength;
 
   /// No description provided for @authFeedbackPinIncorrect.
   ///
   /// In en, this message translates to:
-  /// **'Incorrect PIN'**
-  String get authFeedbackPinIncorrect;
+  /// **'Incorrect PIN. {count, plural, one {{count} attempt left} other {{count} attempts left}}'**
+  String authFeedbackPinIncorrect(int count);
 
   /// No description provided for @authDialogForgotPinTitle.
   ///
   /// In en, this message translates to:
-  /// **'Forgot your PIN?'**
+  /// **'Forgot PIN?'**
   String get authDialogForgotPinTitle;
 
-  /// No description provided for @authDialogForgotPinServerMessage.
+  /// No description provided for @authDialogForgotPinMessage.
   ///
   /// In en, this message translates to:
-  /// **'You will be signed out and will need to sign in again with your credentials.'**
-  String get authDialogForgotPinServerMessage;
+  /// **'You will be signed out and the lock will be turned off. Sign in again with your password.'**
+  String get authDialogForgotPinMessage;
 
-  /// No description provided for @authPagePinTagline.
+  /// No description provided for @authPageLockSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your PIN to continue'**
-  String get authPagePinTagline;
+  /// **'Enter your PIN'**
+  String get authPageLockSubtitle;
 
-  /// No description provided for @authActionUnlock.
+  /// No description provided for @authActionPinDeleteAria.
   ///
   /// In en, this message translates to:
-  /// **'Unlock'**
-  String get authActionUnlock;
+  /// **'Delete'**
+  String get authActionPinDeleteAria;
 
-  /// No description provided for @authActionBiometric.
+  /// No description provided for @authActionBiometricAria.
   ///
   /// In en, this message translates to:
-  /// **'Biometrics'**
-  String get authActionBiometric;
+  /// **'Biometric unlock'**
+  String get authActionBiometricAria;
+
+  /// No description provided for @authFormPinProgressAria.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of 4 digits entered'**
+  String authFormPinProgressAria(int count);
 
   /// No description provided for @commonActionConfirm.
   ///
@@ -2663,6 +2663,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Endpoint not found — check the URL'**
   String get settingsFeedbackServerNotFound;
+
+  /// No description provided for @settingsPageDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get settingsPageDeviceTitle;
+
+  /// No description provided for @settingsPageLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get settingsPageLockTitle;
+
+  /// No description provided for @settingsValueLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get settingsValueLockOn;
+
+  /// No description provided for @settingsValueLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsValueLockOff;
+
+  /// No description provided for @settingsFormLockEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the app'**
+  String get settingsFormLockEnabled;
+
+  /// No description provided for @settingsFormLockEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN required at launch and after 1 minute away'**
+  String get settingsFormLockEnabledHint;
+
+  /// No description provided for @settingsFormLockBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock'**
+  String get settingsFormLockBiometric;
+
+  /// No description provided for @settingsFormLockBiometricHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your PIN remains the fallback'**
+  String get settingsFormLockBiometricHint;
+
+  /// No description provided for @settingsActionChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get settingsActionChangePin;
+
+  /// No description provided for @settingsFormPinChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PIN'**
+  String get settingsFormPinChoose;
+
+  /// No description provided for @settingsFormPinConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your PIN'**
+  String get settingsFormPinConfirm;
+
+  /// No description provided for @settingsFormPinCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current PIN'**
+  String get settingsFormPinCurrent;
+
+  /// No description provided for @settingsFeedbackPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The PINs don\'t match'**
+  String get settingsFeedbackPinMismatch;
+
+  /// No description provided for @settingsFormLockForgotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your PIN? Signing out resets it.'**
+  String get settingsFormLockForgotHint;
 
   /// No description provided for @notificationsValueSubscriptionDue.
   ///

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
 
 void main() {
@@ -43,6 +44,57 @@ void main() {
 
       expect(await repo.getServerUrl(), 'https://budget.example.com/api');
       expect((await repo.getConfig()).language, 'en');
+    });
+  });
+
+  group('AppConfigRepositoryImpl lock settings', () {
+    late AppConfigRepositoryImpl repo;
+
+    setUp(() {
+      FlutterSecureStorage.setMockInitialValues({});
+      repo = AppConfigRepositoryImpl();
+    });
+
+    test('should_keepLockFields_when_otherSettingChanges', () async {
+      await repo.saveConfig(
+        const AppConfig(
+          lockEnabled: true,
+          lockMethod: LockMethod.pin,
+          hashedPin: 'hash',
+          pinSalt: 'salt',
+          failedPinAttempts: 3,
+        ),
+      );
+
+      await repo.setLanguage('en');
+      await repo.setTheme(AppTheme.dark);
+
+      final config = await repo.getConfig();
+      expect(config.lockEnabled, isTrue);
+      expect(config.hashedPin, 'hash');
+      expect(config.pinSalt, 'salt');
+      expect(config.failedPinAttempts, 3);
+    });
+
+    test('should_readZeroFailuresAndNoSalt_when_storedBeforeTheLock',
+        () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'app_config': jsonEncode({'lockEnabled': false}),
+      });
+
+      final config = await AppConfigRepositoryImpl().getConfig();
+
+      expect(config.pinSalt, isNull);
+      expect(config.failedPinAttempts, 0);
+    });
+
+    test('should_throw_when_storedConfigIsUnreadable', () async {
+      FlutterSecureStorage.setMockInitialValues({'app_config': '{not json'});
+
+      await expectLater(
+        AppConfigRepositoryImpl().getConfig(),
+        throwsA(isA<FormatException>()),
+      );
     });
   });
 

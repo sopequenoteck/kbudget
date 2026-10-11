@@ -66,15 +66,6 @@ class MockAppConfigRepository implements AppConfigRepository {
   Future<TextScale> getTextScale() async => TextScale.medium;
 
   @override
-  Future<void> setLockEnabled(bool enabled) async {}
-
-  @override
-  Future<void> setLockMethod(LockMethod? method) async {}
-
-  @override
-  Future<void> setHashedPin(String? pin) async {}
-
-  @override
   Future<String?> getLanguage() async => null;
 
   @override

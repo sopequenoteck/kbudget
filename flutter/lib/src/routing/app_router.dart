@@ -18,7 +18,6 @@ import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_state.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
-import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
 import 'package:k_budget/src/features/admin/presentation/users_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/accept_invite_screen.dart';
@@ -30,6 +29,8 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_pin_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_settings_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
@@ -89,7 +90,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final matchedLocation = state.matchedLocation;
       final isOnboarding = matchedLocation.startsWith(RouteNames.onboarding);
       final isLoginRoute = matchedLocation == RouteNames.login;
-      final isLockRoute = matchedLocation == RouteNames.lock;
       final isAuthRoute = isLoginRoute;
       final isInviteRoute = matchedLocation.startsWith('/invite') ||
           matchedLocation.startsWith('/accept-invite');
@@ -103,10 +103,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return RouteNames.dashboard;
       }
 
-      // Only apply auth/lock checks after onboarding
+      // Only apply auth checks after onboarding
       if (isCompleted) {
-        final config = await onboardingNotifier.getConfig();
-
         // Les providers de repositories lisent ce Dio de facon synchrone :
         // le resoudre avant toute route authentifiee.
         await ref.read(authenticatedDioProvider.future);
@@ -160,11 +158,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (!mustResetCredentials && isFirstLoginResetRoute) {
           return RouteNames.dashboard;
         }
-
-        // Lock screen check
-        if (config.lockEnabled && isLockRoute) {
-          return null; // Stay on lock screen
-        }
       }
 
       return null;
@@ -209,12 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => AcceptInviteScreen(
           token: state.pathParameters['token']!,
         ),
-      ),
-      GoRoute(
-        path: RouteNames.lock,
-        name: RouteNames.lockName,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LockScreen(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -361,6 +348,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: RouteNames.settingsDataName,
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const DataSettingsScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.settingsLock,
+            name: RouteNames.settingsLockName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const LockSettingsScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.settingsLockPin,
+                name: RouteNames.settingsLockPinName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => LockPinScreen(
+                  flow: LockPinFlow.values
+                          .where((f) => f.name == state.pathParameters['flow'])
+                          .firstOrNull ??
+                      LockPinFlow.enable,
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: RouteNames.settingsCurrencies,

@@ -11,6 +11,7 @@ import 'package:k_budget/src/data/remote/compatibility_provider.dart';
 import 'package:k_budget/src/data/remote/compatibility_service.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
@@ -166,6 +167,9 @@ class DataSettingsNotifier extends Notifier<DataSettingsState> {
       final dataSource = await ref.read(authRemoteDataSourceProvider.future);
       await authRepository.clearTokens();
       tokensCleared = true;
+      // The tokens are gone, so the lock goes too: on success and when the
+      // URL write below fails alike. Awaited, never run in parallel with it.
+      await ref.read(appLockNotifierProvider.notifier).reset();
       if (refreshToken != null) {
         unawaited(_revokeOnPreviousServer(dataSource, refreshToken));
       }

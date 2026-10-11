@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/api_client.dart';
 import 'package:k_budget/src/data/remote/api_error.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/auth/data/auth_remote_data_source.dart';
 import 'package:k_budget/src/features/auth/data/auth_repository_impl.dart';
@@ -74,6 +75,9 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
     try {
       final repo = await _repo;
       final result = await repo.login(email, password);
+      // Before the state changes: a locked app must not flash its lock screen
+      // over a session that was just opened with the password.
+      await _unlockApp();
       state = result.mustResetCredentials
           ? const AuthState.passwordResetRequired()
           : const AuthState.authenticated();
@@ -102,6 +106,7 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
       password: password,
       displayName: displayName,
     );
+    await _unlockApp();
     state = const AuthState.authenticated();
     _notifyListeners();
   }
@@ -109,9 +114,17 @@ class AuthNotifier extends Notifier<AuthState> implements Listenable {
   Future<void> logout() async {
     final repo = await _repo;
     await repo.logout();
+    // The tokens are erased, so the lock goes too, and only now: if the
+    // logout throws, the lock stays. Awaited before the state changes; only
+    // microtasks separate the two, so no frame shows the app unlocked with a
+    // session still open.
+    await ref.read(appLockNotifierProvider.notifier).reset();
     state = const AuthState.unauthenticated();
     _notifyListeners();
   }
+
+  Future<void> _unlockApp() =>
+      ref.read(appLockNotifierProvider.notifier).unlockAfterLogin();
 
   // Listenable implementation for GoRouter refreshListenable
   @override

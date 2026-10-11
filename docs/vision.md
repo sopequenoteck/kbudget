@@ -103,7 +103,7 @@ modules du quotidien (transactions, budgets, abonnements, dettes, comptes,
 categories, tableau de bord, notifications, profil et reglages), garde
 l'administration et les taux de change en l'etat, et ne porte pas l'import de
 releves. Elle ajoute ce que le web ne peut pas offrir : la configuration du
-serveur de l'utilisateur, le verrouillage de l'application (prevu), les
+serveur de l'utilisateur, le verrouillage de l'application, les
 notifications du systeme. Le classement complet, surface par surface, est dans
 [`architecture.md`](architecture.md#frontiere-angular--flutter).
 

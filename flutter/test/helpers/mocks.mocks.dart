@@ -273,33 +273,6 @@ class MockAppConfigRepository extends _i1.Mock
           as _i21.Future<_i22.TextScale>);
 
   @override
-  _i21.Future<void> setLockEnabled(bool? enabled) =>
-      (super.noSuchMethod(
-            Invocation.method(#setLockEnabled, [enabled]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
-  _i21.Future<void> setLockMethod(_i22.LockMethod? method) =>
-      (super.noSuchMethod(
-            Invocation.method(#setLockMethod, [method]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
-  _i21.Future<void> setHashedPin(String? pin) =>
-      (super.noSuchMethod(
-            Invocation.method(#setHashedPin, [pin]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
   _i21.Future<List<_i22.Feature>> getEnabledFeatures() =>
       (super.noSuchMethod(
             Invocation.method(#getEnabledFeatures, []),

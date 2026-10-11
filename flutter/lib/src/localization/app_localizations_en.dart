@@ -651,29 +651,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authActionUnlockBiometricReason => 'Unlock K-Budget';
 
   @override
-  String get authFeedbackBiometricError => 'Biometric error. Use your PIN.';
+  String get authFeedbackBiometricError => 'Biometrics failed. Use your PIN.';
 
   @override
-  String get authFormPinMinLength => 'The PIN must contain at least 4 digits';
+  String authFeedbackPinIncorrect(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts left',
+      one: '$count attempt left',
+    );
+    return 'Incorrect PIN. $_temp0';
+  }
 
   @override
-  String get authFeedbackPinIncorrect => 'Incorrect PIN';
+  String get authDialogForgotPinTitle => 'Forgot PIN?';
 
   @override
-  String get authDialogForgotPinTitle => 'Forgot your PIN?';
+  String get authDialogForgotPinMessage =>
+      'You will be signed out and the lock will be turned off. Sign in again with your password.';
 
   @override
-  String get authDialogForgotPinServerMessage =>
-      'You will be signed out and will need to sign in again with your credentials.';
+  String get authPageLockSubtitle => 'Enter your PIN';
 
   @override
-  String get authPagePinTagline => 'Enter your PIN to continue';
+  String get authActionPinDeleteAria => 'Delete';
 
   @override
-  String get authActionUnlock => 'Unlock';
+  String get authActionBiometricAria => 'Biometric unlock';
 
   @override
-  String get authActionBiometric => 'Biometrics';
+  String authFormPinProgressAria(int count) {
+    return '$count of 4 digits entered';
+  }
 
   @override
   String get commonActionConfirm => 'Confirm';
@@ -1516,6 +1526,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsFeedbackServerNotFound =>
       'Endpoint not found — check the URL';
+
+  @override
+  String get settingsPageDeviceTitle => 'This device';
+
+  @override
+  String get settingsPageLockTitle => 'App lock';
+
+  @override
+  String get settingsValueLockOn => 'On';
+
+  @override
+  String get settingsValueLockOff => 'Off';
+
+  @override
+  String get settingsFormLockEnabled => 'Lock the app';
+
+  @override
+  String get settingsFormLockEnabledHint =>
+      'PIN required at launch and after 1 minute away';
+
+  @override
+  String get settingsFormLockBiometric => 'Biometric unlock';
+
+  @override
+  String get settingsFormLockBiometricHint => 'Your PIN remains the fallback';
+
+  @override
+  String get settingsActionChangePin => 'Change PIN';
+
+  @override
+  String get settingsFormPinChoose => 'Choose a PIN';
+
+  @override
+  String get settingsFormPinConfirm => 'Confirm your PIN';
+
+  @override
+  String get settingsFormPinCurrent => 'Enter your current PIN';
+
+  @override
+  String get settingsFeedbackPinMismatch => 'The PINs don\'t match';
+
+  @override
+  String get settingsFormLockForgotHint =>
+      'Forgot your PIN? Signing out resets it.';
 
   @override
   String get notificationsValueSubscriptionDue => 'Subscription due';
