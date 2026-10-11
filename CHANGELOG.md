@@ -19,6 +19,12 @@ This project follows [Semantic Versioning](https://semver.org/).
   change), and only then. The PIN is stored salted and hashed in the secure
   storage of the device, never on the server.
 
+### Changed
+
+- **Mobile app (iOS): iOS 15 is now the minimum version** (KKS-536): Xcode 27
+  no longer builds apps that target an earlier version. iPhones and iPads
+  limited to iOS 13 or 14 can no longer install the app.
+
 ### Removed
 
 - **Mobile app: local mode removed** (KKS-335): the mobile app no longer works

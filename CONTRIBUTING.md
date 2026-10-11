@@ -24,7 +24,7 @@ real bank statement**, not even your own.
 ## Running the project
 
 You need PostgreSQL 15+, Java 21, Node 22 and — for the mobile app — Flutter
-3.27+.
+3.41 (the version CI pins; later versions do not build the app yet).
 
 ```bash
 cp .env.example .env    # set DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET
@@ -35,6 +35,9 @@ cd flutter && flutter run
 ```
 
 The `prod` profile is the default; `dev` must be activated explicitly.
+
+With Xcode 27, `flutter build ios --simulator` fails on Flutter 3.41: run on a
+simulator with `flutter run -d <device>` instead.
 
 **Maven must run under Java 21**, the version CI uses. `java -version` can
 report 21 while Maven uses another JDK — `JAVA_HOME` decides, so check with

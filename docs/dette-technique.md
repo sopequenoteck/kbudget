@@ -145,3 +145,20 @@ exposer Sonar.
 pull request de fork touchant `api/` ne declenchait aucun test. La correction
 ci-dessus ne portait que sur APP.
 
+
+---
+
+### DT-007 — Flutter bloque en 3.41 (KKS-536)
+
+**Identifie** : 2026-10-12
+
+**Description** : `phosphor_flutter` 2.1.0, derniere version publiee, etend `IconData`, devenue une classe finale dans les SDK suivants : l'application ne compile plus au-dela de Flutter 3.41. L'image CI `ghcr.io/cirruslabs/flutter`, epinglee dans `ci-flutter.yml`, n'existe pas au-dela de 3.44.0.
+
+**Impact** : sous Xcode 27, `flutter build ios --simulator` echoue : l'outil Flutter 3.41 appelle `lipo -verify_arch` avec deux architectures, ce que Xcode 27 n'accepte plus (corrige en Flutter 3.47.0). Contournement : `flutter run -d <simulateur>`, qui ne construit qu'une architecture ; la construction pour appareil reel n'est pas touchee. Plus largement, les correctifs de Flutter posterieurs a 3.41 sont hors d'atteinte.
+
+**Correction proposee** :
+
+1. Remplacer ou corriger la bibliotheque d'icones (`phosphor_flutter`, utilisee dans toute l'application).
+2. Monter ensemble le SDK de developpement et l'image CI, en verifiant qu'une image existe pour la version visee.
+
+**Fichiers concernes** : `flutter/pubspec.yaml`, tous les ecrans qui importent `phosphor_flutter`, `.github/workflows/ci-flutter.yml`.
