@@ -36,8 +36,6 @@ List<Feature> _safeParseEnabledFeatures(dynamic json) {
 
 @freezed
 class AppConfig with _$AppConfig {
-  const AppConfig._();
-
   const factory AppConfig({
     String? serverUrl,
     @Default(AppTheme.light) AppTheme theme,
@@ -60,6 +58,8 @@ class AppConfig with _$AppConfig {
     /// Consecutive wrong PIN entries, reset by a right PIN only.
     @Default(0) int failedPinAttempts,
   }) = _AppConfig;
+
+  const AppConfig._();
 
   factory AppConfig.fromJson(Map<String, dynamic> json) =>
       _$AppConfigFromJson(json);
