@@ -62,6 +62,7 @@
 | O-8 | URL injoignable | ServerSetup : URL fausse → Verifier | Banner rouge avec message d'erreur | -- |
 | O-9 | Confirmer serveur | Serveur accessible → Confirmer | Redirect `/login` | -- |
 | O-10 | Persistence | Relancer l'app apres onboarding | Plus d'ecran Onboarding | -- |
+| O-11 | Premiere connexion sans redemarrage (KKS-537) | Premier lancement, URL d'un serveur autre que celui par defaut → Confirmer → se connecter | Connexion reussie et donnees chargees, sans relancer l'application | -- |
 
 ---
 
