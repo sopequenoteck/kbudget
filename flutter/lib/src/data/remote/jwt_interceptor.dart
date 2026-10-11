@@ -2,20 +2,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:k_budget/src/data/remote/api_error.dart';
-import 'package:k_budget/src/data/remote/dtos/auth_dtos.dart';
 
 /// Dio interceptor that manages JWT authentication.
 ///
 /// - Adds `Authorization: Bearer <accessToken>` header on every request.
-/// - On 401 response, attempts a token refresh via `/auth/refresh`.
-/// - Replays the original request with the new access token.
-/// - If the refresh fails, calls [onAuthFailure] and forwards the error.
+/// - On 401 response, renews the session through [refreshSession], unless
+///   another call already did: the stored access token then differs from the
+///   one the request was sent with and is used as is.
+/// - Replays the original request with the new access token, on a client
+///   without interceptors. The result of the replay, success or error, is the
+///   result of the call: a business 401 (e.g. `PASSWORD_INCORRECT`) reaches
+///   the screen untouched.
+/// - If the session cannot be renewed, calls [onAuthFailure] and forwards the
+///   original error.
 /// - On 403 `PASSWORD_RESET_REQUIRED`, calls [onPasswordResetRequired]
 ///   (KKS-309) — a provisioned account (or the admin seed) that reached the
 ///   dashboard before completing its first-login reset gets rejected on every
@@ -25,12 +28,18 @@ class JwtInterceptor extends Interceptor {
   JwtInterceptor({
     required this.dio,
     required this.secureStorage,
+    required this.refreshSession,
     this.onAuthFailure,
     this.onPasswordResetRequired,
   });
 
   final Dio dio;
   final FlutterSecureStorage secureStorage;
+
+  /// Renews the session and returns the new access token.
+  ///
+  /// Throws when the session cannot be renewed.
+  final Future<String> Function() refreshSession;
   final VoidCallback? onAuthFailure;
   /// Appelé quand le serveur exige une réinitialisation des identifiants.
   ///
@@ -39,9 +48,10 @@ class JwtInterceptor extends Interceptor {
   final VoidCallback? onPasswordResetRequired;
 
   static const _accessTokenKey = 'access_token';
-  static const _refreshTokenKey = 'refresh_token';
 
-  Completer<String?>? _refreshCompleter;
+  // Same adapter as [dio], no interceptor: a replay must not loop back here.
+  late final _replayDio = Dio(dio.options.copyWith())
+    ..httpClientAdapter = dio.httpClientAdapter;
 
   @override
   void onRequest(
@@ -70,85 +80,32 @@ class JwtInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    // Si un refresh est déjà en cours, attendre son résultat
-    if (_refreshCompleter != null) {
-      final newToken = await _refreshCompleter!.future;
-      if (newToken != null) {
-        err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-        final refreshDio = Dio(BaseOptions(
-          baseUrl: dio.options.baseUrl,
-          contentType: 'application/json',
-          connectTimeout: dio.options.connectTimeout,
-          receiveTimeout: dio.options.receiveTimeout,
-        ));
-        try {
-          final retryResponse = await refreshDio.fetch(err.requestOptions);
-          return handler.resolve(retryResponse);
-        } on DioException {
-          return handler.next(err);
-        }
-      }
-      return handler.next(err);
+    final String accessToken;
+    try {
+      final stored = await secureStorage.read(key: _accessTokenKey);
+      final sent = err.requestOptions.headers['Authorization'];
+      accessToken = stored != null && 'Bearer $stored' != sent
+          ? stored
+          : await refreshSession();
+    } on Object {
+      // The request ends first: a failing callback must not leave it pending.
+      handler.next(err);
+      onAuthFailure?.call();
+      return;
     }
 
-    _refreshCompleter = Completer<String?>();
-
     try {
-      final refreshToken = await secureStorage.read(key: _refreshTokenKey);
-      if (refreshToken == null) {
-        _refreshCompleter!.complete(null);
-        _refreshCompleter = null;
-        onAuthFailure?.call();
-        return handler.next(err);
-      }
-
-      // Use a separate Dio instance to avoid interceptor loop
-      final refreshDio = Dio(BaseOptions(
-        baseUrl: dio.options.baseUrl,
-        contentType: 'application/json',
-        connectTimeout: dio.options.connectTimeout,
-        receiveTimeout: dio.options.receiveTimeout,
-      ));
-
-      final refreshRequest = RefreshRequest(refreshToken: refreshToken);
-      final response = await refreshDio.post(
-        '/auth/refresh',
-        data: refreshRequest.toJson(),
-      );
-
-      final authResponse = AuthResponse.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-
-      // Store new tokens
-      await secureStorage.write(
-        key: _accessTokenKey,
-        value: authResponse.accessToken,
-      );
-      await secureStorage.write(
-        key: _refreshTokenKey,
-        value: authResponse.refreshToken,
-      );
-
-      _refreshCompleter!.complete(authResponse.accessToken);
-      _refreshCompleter = null;
-
-      // Replay original request with new token
-      final originalRequest = err.requestOptions;
-      originalRequest.headers['Authorization'] =
-          'Bearer ${authResponse.accessToken}';
-
-      final retryResponse = await refreshDio.fetch(originalRequest);
-      return handler.resolve(retryResponse);
-    } on DioException {
-      _refreshCompleter!.complete(null);
-      _refreshCompleter = null;
-      onAuthFailure?.call();
-      return handler.next(err);
-    } catch (_) {
-      _refreshCompleter!.complete(null);
-      _refreshCompleter = null;
-      onAuthFailure?.call();
+      final original = err.requestOptions;
+      final headers = {
+        ...original.headers,
+        'Authorization': 'Bearer $accessToken',
+      };
+      final response = await _replayDio
+          .fetch<dynamic>(original.copyWith(headers: headers));
+      return handler.resolve(response);
+    } on DioException catch (replayError) {
+      return handler.next(replayError);
+    } on Object {
       return handler.next(err);
     }
   }

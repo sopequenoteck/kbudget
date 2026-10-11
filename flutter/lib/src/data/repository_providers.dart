@@ -40,7 +40,10 @@ import 'package:k_budget/src/features/transactions/data/transaction_repository_r
 /// The router resolves it before any authenticated route, which is what lets
 /// the repository providers below read it synchronously with `requireValue`.
 final authenticatedDioProvider = FutureProvider<Dio>((ref) async {
-  final dio = await ref.watch(apiClientProvider.future);
+  final base = await ref.watch(apiClientProvider.future);
+  // Its own instance: the public client serves `/auth/*` and must stay free
+  // of interceptors, or a 401 on `/auth/refresh` would trigger a refresh.
+  final dio = Dio(base.options.copyWith());
   const secureStorage = FlutterSecureStorage();
 
   dio.interceptors.addAll([
@@ -48,6 +51,10 @@ final authenticatedDioProvider = FutureProvider<Dio>((ref) async {
     JwtInterceptor(
       dio: dio,
       secureStorage: secureStorage,
+      refreshSession: () async {
+        final repository = await ref.read(authRepositoryProvider.future);
+        return (await repository.refresh()).accessToken;
+      },
       onAuthFailure: () {
         ref.read(authNotifierProvider.notifier).forceUnauthenticated();
       },

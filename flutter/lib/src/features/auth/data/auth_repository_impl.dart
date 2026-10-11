@@ -62,8 +62,19 @@ class AuthRepositoryImpl implements AuthRepository {
     return result;
   }
 
+  Future<AuthResult>? _refreshInFlight;
+
+  /// Renews the session, one server call at a time.
+  ///
+  /// Every caller that arrives while a refresh is running receives the same
+  /// [Future]: the server rotates refresh tokens and revokes the whole session
+  /// when a consumed one is replayed, so two concurrent calls would log the
+  /// user out.
   @override
-  Future<AuthResult> refresh() async {
+  Future<AuthResult> refresh() => _refreshInFlight ??=
+      _refresh().whenComplete(() => _refreshInFlight = null);
+
+  Future<AuthResult> _refresh() async {
     final refreshToken = await getRefreshToken();
     if (refreshToken == null) {
       throw Exception('No refresh token available');

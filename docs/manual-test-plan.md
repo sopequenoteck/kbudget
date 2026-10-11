@@ -422,6 +422,7 @@
 | ADV-4 | App background > 15 min | Mettre en arriere-plan 20min → revenir → action | Refresh token transparent, aucun ecran de connexion | -- |
 | ADV-16 | Relance a froid > 15 min (KKS-448) | Fermer la PWA installee, attendre 20 min → la rouvrir | Page d'accueil affichee, aucun ecran de connexion, session conservee | -- |
 | ADV-17 | Relance hors ligne > 15 min (KKS-448) | Fermer la PWA, attendre 20 min, mode avion → la rouvrir → retablir le reseau → action | Application ouverte (erreurs de chargement explicites), pas de deconnexion ; l'action aboutit une fois le reseau retabli | -- |
+| ADV-18 | Relance a froid > 15 min, application mobile (KKS-532) | Fermer l'application, attendre 20 min → la rouvrir | Tableau de bord affiche sans passage par l'ecran de connexion ; session toujours valide 20 min plus tard | -- |
 | ADV-14 | Back Android pendant submit | Soumettre + appuyer back immediatement | Transaction creee malgre retour (pas de crash) | -- |
 | ADV-13 | Virgule comme separateur | Taper "12,50" dans un champ montant | Message clair si rejete, ou accepte correctement | -- |
 | ADV-15 | Emojis dans les champs | Libelle avec 200 emojis | API accepte ou erreur claire (pas de 500) | -- |
