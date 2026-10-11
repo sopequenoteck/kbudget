@@ -31,6 +31,13 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Mobile app: session lost or black screen when reopening after 15 minutes**
+  (KKS-532): when opened with an expired access token, the app could send two
+  session renewals at once. The server treats a refresh token used twice as
+  stolen and revokes every session of the user, including on the web: sign-in
+  screen for an instant, sign-out fifteen minutes later, or a black screen
+  until restart. The session is now renewed only once. A wrong current password
+  in "Change password" no longer leaves the sheet loading forever.
 - **Mobile app: server URL and currencies reachable again** (KKS-418): since
   the settings rewrite, no screen led to the server URL or to the currencies
   and exchange rates. The settings now end with a "Server" section, and the

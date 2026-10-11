@@ -33,6 +33,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Application mobile : session perdue ou ecran noir a la reouverture apres
+  15 minutes** (KKS-532) : a l'ouverture avec un jeton d'acces expire,
+  l'application pouvait envoyer deux renouvellements de session en meme temps.
+  Le serveur traite un jeton utilise deux fois comme vole et revoque toutes les
+  sessions de l'utilisateur, y compris sur le web : ecran de connexion pendant
+  un instant, deconnexion un quart d'heure plus tard, ou ecran noir jusqu'au
+  redemarrage. La session est desormais renouvelee une seule fois. Un ancien
+  mot de passe errone dans « Changer le mot de passe » ne bloque plus la
+  feuille.
 - **Application mobile : URL du serveur et devises de nouveau accessibles**
   (KKS-418) : depuis la reecriture des reglages, aucun ecran ne menait plus a
   l'URL du serveur ni aux devises et taux de change. Les reglages se terminent
