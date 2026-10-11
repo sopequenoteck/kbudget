@@ -20,6 +20,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   changement de serveur), et seulement dans ce cas. Le PIN est stocke sale et
   hache dans le stockage securise de l'appareil, jamais sur le serveur.
 
+### Changed
+
+- **Application mobile (iOS) : iOS 15 devient la version minimale** (KKS-536) :
+  Xcode 27 ne construit plus d'application visant une version anterieure. Les
+  iPhone et iPad limites a iOS 13 ou 14 ne peuvent plus installer
+  l'application.
+
 ### Removed
 
 - **Application mobile : mode local supprime** (KKS-335) : l'application
