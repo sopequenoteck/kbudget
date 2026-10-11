@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/remote/api_client.dart';
 import 'package:k_budget/src/data/remote/compatibility_service.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
@@ -79,6 +80,9 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     try {
       await _repository.setServerUrl(serverUrl);
       await _repository.setOnboardingCompleted(true);
+      // The API clients were built at startup, before any URL was saved:
+      // rebuild them, or they keep the default URL until the app restarts.
+      ref.invalidate(apiClientProvider);
       state = state.copyWith(isSaving: false, isCompleted: true);
     } on Exception catch (_) {
       state = state.copyWith(

@@ -37,6 +37,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Mobile app: first sign-in impossible after the server setup** (KKS-537):
+  at first launch, the app kept calling its default address instead of the URL
+  that was entered, until it was restarted. Signing in therefore failed for any
+  server other than the default one. The entered URL is now used as soon as it
+  is confirmed.
 - **Mobile app: session lost or black screen when reopening after 15 minutes**
   (KKS-532): when opened with an expired access token, the app could send two
   session renewals at once. The server treats a refresh token used twice as

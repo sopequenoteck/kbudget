@@ -40,6 +40,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Application mobile : premiere connexion impossible apres la configuration
+  du serveur** (KKS-537) : au premier lancement, l'application continuait
+  d'appeler son adresse par defaut au lieu de l'URL saisie, jusqu'a son
+  redemarrage. La connexion echouait donc pour tout serveur autre que celui par
+  defaut. L'URL saisie est desormais utilisee des la confirmation.
 - **Application mobile : session perdue ou ecran noir a la reouverture apres
   15 minutes** (KKS-532) : a l'ouverture avec un jeton d'acces expire,
   l'application pouvait envoyer deux renouvellements de session en meme temps.
