@@ -40,6 +40,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Application mobile : taille de texte choisie sur le serveur ignoree
+  jusqu'au redemarrage** (KKS-538) : la preference serveur n'etait lue qu'une
+  fois, au lancement, avant toute connexion. Apres la premiere connexion, ou
+  apres un changement de compte, l'appareil gardait sa propre taille de texte
+  jusqu'au redemarrage. La preference est desormais appliquee a chaque
+  connexion.
 - **Application mobile : premiere connexion impossible apres la configuration
   du serveur** (KKS-537) : au premier lancement, l'application continuait
   d'appeler son adresse par defaut au lieu de l'URL saisie, jusqu'a son
