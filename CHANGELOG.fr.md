@@ -22,6 +22,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- **Application mobile : une seule requete de preferences a la connexion**
+  (KKS-539) : langue, taille de texte et fonctionnalites demandaient chacune
+  les preferences au serveur a l'ouverture de la session, trois requetes
+  identiques en meme temps. Les appelants partagent desormais la requete en
+  cours ; rien n'est mis en cache.
 - **Application mobile (iOS) : iOS 15 devient la version minimale** (KKS-536) :
   Xcode 27 ne construit plus d'application visant une version anterieure. Les
   iPhone et iPad limites a iOS 13 ou 14 ne peuvent plus installer

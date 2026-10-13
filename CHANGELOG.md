@@ -21,6 +21,10 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **Mobile app: one preferences request at sign-in** (KKS-539): language,
+  text size and features each asked the server for the user's preferences
+  the moment the session opened, three identical requests at once. Callers
+  now share the request in flight; nothing is cached.
 - **Mobile app (iOS): iOS 15 is now the minimum version** (KKS-536): Xcode 27
   no longer builds apps that target an earlier version. iPhones and iPads
   limited to iOS 13 or 14 can no longer install the app.
