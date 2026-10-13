@@ -41,6 +41,12 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Mobile app: features of the previous account kept after switching accounts**
+  (KKS-542): enabled features, tab order, notification types and time zone
+  were read from the server once, when the app first opened a session, and
+  never again. After signing out and signing in with another account, the
+  previous account's settings stayed until the app was restarted. They are
+  now reloaded at each sign-in.
 - **Mobile app: text size chosen on the server ignored until restart** (KKS-538):
   the server preference was read once, at launch, before any sign-in. After
   the first sign-in, or after switching accounts, the device kept its own text

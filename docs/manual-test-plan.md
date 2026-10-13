@@ -306,6 +306,7 @@
 | SH-4 | Navigation Comptes | Tap "Comptes" | → `/settings/accounts` | -- |
 | SH-5 | Navigation Categories | Tap "Categories" | → `/settings/categories` | -- |
 | SH-6 | Section "Cet appareil" | Bas du hub | Lignes "Verrouillage" (Active / Desactive) → `/settings/lock` et "Serveur" → `/settings/data` | -- |
+| SH-7 | Reglages du compte a la connexion | Compte A sans "Dettes", se deconnecter, se connecter avec un compte B qui l'a | Onglet Dettes present, langue et taille de texte de B, sans redemarrage (KKS-542) | -- |
 | SH-7 | Placeholders | Tap "Securite" ou "A propos" | Aucune navigation (grises) | -- |
 
 ---
