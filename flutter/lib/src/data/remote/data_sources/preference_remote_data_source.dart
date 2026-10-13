@@ -13,7 +13,13 @@ class PreferenceRemoteDataSource {
 
   PreferenceRemoteDataSource(this._dio);
 
-  Future<UserPreferenceResponse> getPreferences() async {
+  Future<UserPreferenceResponse>? _readInFlight;
+
+  /// Concurrent callers share one request; nothing is kept once it completes.
+  Future<UserPreferenceResponse> getPreferences() => _readInFlight ??=
+      _getPreferences().whenComplete(() => _readInFlight = null);
+
+  Future<UserPreferenceResponse> _getPreferences() async {
     final response =
         await _dio.get<Map<String, dynamic>>('/users/me/preferences');
     return UserPreferenceResponse.fromJson(response.data!);
