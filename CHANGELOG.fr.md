@@ -45,6 +45,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Application mobile : fonctionnalites de l'ancien compte conservees apres
+  un changement de compte** (KKS-542) : fonctionnalites actives, ordre des
+  onglets, types de notification et fuseau horaire n'etaient lus sur le
+  serveur qu'a la premiere ouverture de session, jamais ensuite. Apres une
+  deconnexion puis une connexion avec un autre compte, les reglages de
+  l'ancien compte restaient jusqu'au redemarrage. Ils sont desormais
+  recharges a chaque connexion.
 - **Application mobile : taille de texte choisie sur le serveur ignoree
   jusqu'au redemarrage** (KKS-538) : la preference serveur n'etait lue qu'une
   fois, au lancement, avant toute connexion. Apres la premiere connexion, ou
