@@ -37,6 +37,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Mobile app: text size chosen on the server ignored until restart** (KKS-538):
+  the server preference was read once, at launch, before any sign-in. After
+  the first sign-in, or after switching accounts, the device kept its own text
+  size until the app was restarted. The preference is now applied at each
+  sign-in.
 - **Mobile app: first sign-in impossible after the server setup** (KKS-537):
   at first launch, the app kept calling its default address instead of the URL
   that was entered, until it was restarted. Signing in therefore failed for any

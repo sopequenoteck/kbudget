@@ -374,6 +374,7 @@
 | AP-4 | Persistence theme | Fermer + rouvrir app | Theme persiste | -- |
 | AP-5 | Taille texte | Tap "Grand" | Preview mise a jour + taille changee | -- |
 | AP-6 | Deja selectionne | Tap theme deja actif | Aucun changement | -- |
+| AP-7 | Taille texte du serveur a la connexion | Regler "Grand", se deconnecter, repasser en "Moyen", se reconnecter | Taille "Grand" appliquee sans redemarrage (KKS-538) | -- |
 
 ---
 
