@@ -12,6 +12,7 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
@@ -23,6 +24,9 @@ import 'package:k_budget/src/features/transactions/application/transaction_notif
 /// Provider qui lit le nom utilisateur depuis FlutterSecureStorage.
 /// Fallback null si cle absente (jamais connecte).
 final currentUserNameProvider = FutureProvider<String?>((ref) async {
+  // Le nom stocke appartient a la session : reconstruit a chaque connexion
+  // et deconnexion, sinon le nom de l'ancien compte survit au changement
+  ref.watch(authNotifierProvider);
   const storage = FlutterSecureStorage();
   return storage.read(key: 'user_name');
 });

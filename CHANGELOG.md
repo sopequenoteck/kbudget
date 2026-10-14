@@ -41,6 +41,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Mobile app: previous account's name shown on the home screen after
+  switching accounts** (KKS-544): the greeting read the stored name once
+  and kept it; after signing out and signing in with another account, the
+  previous name stayed until a pull-to-refresh or a restart. The name now
+  follows the session.
 - **Mobile app: features of the previous account kept after switching accounts**
   (KKS-542): enabled features, tab order, notification types and time zone
   were read from the server once, when the app first opened a session, and
