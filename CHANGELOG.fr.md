@@ -45,6 +45,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Fixed
 
+- **Application mobile : nom de l'ancien compte affiche sur l'accueil apres
+  un changement de compte** (KKS-544) : la salutation lisait le nom
+  memorise une fois et le gardait ; apres une deconnexion puis une connexion
+  avec un autre compte, l'ancien nom restait jusqu'a un tirer-pour-rafraichir
+  ou un redemarrage. Le nom suit desormais la session.
 - **Application mobile : fonctionnalites de l'ancien compte conservees apres
   un changement de compte** (KKS-542) : fonctionnalites actives, ordre des
   onglets, types de notification et fuseau horaire n'etaient lus sur le
