@@ -5,9 +5,13 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/domain/repositories/notification_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/notifications/application/notification_notifier.dart';
 
 import '../../../../helpers/display_locale.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 // Mock manuel — NotificationRepository n'est pas encore dans mocks.mocks.dart
 class MockNotificationRepository implements NotificationRepository {
@@ -371,6 +375,39 @@ void main() {
 
       expect(state().items, hasLength(1));
       expect(state().error, 'Erreur lors de la suppression');
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          notificationRepositoryProvider
+              .overrideWith((ref) async => mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      mockRepo.setItems([makeNotification(id: '1')]);
+      await sessionContainer
+          .read(notificationNotifierProvider.notifier)
+          .loadItems();
+      expect(
+        sessionContainer.read(notificationNotifierProvider).items,
+        isNotEmpty,
+      );
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(
+        sessionContainer.read(notificationNotifierProvider).items,
+        isEmpty,
+      );
     });
   });
 }

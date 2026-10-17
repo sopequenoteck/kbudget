@@ -8,6 +8,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
@@ -21,7 +22,14 @@ class DebtNotifier extends Notifier<DebtListState> {
   List<Debt> _allItems = [];
 
   @override
-  DebtListState build() => const DebtListState();
+  DebtListState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
+    // survit a la reconstruction : le cache local doit etre vide avec l'etat.
+    ref.watch(authNotifierProvider);
+    _allItems = [];
+    return const DebtListState();
+  }
 
   DebtRepository get _repo => ref.read(debtRepositoryProvider);
 
@@ -229,6 +237,9 @@ class DebtNotifier extends Notifier<DebtListState> {
 
 final debtPaymentsProvider =
     FutureProvider.family<List<DebtPayment>, String>((ref, debtId) async {
+  // La session fait partie de la cle de cache : sans cela, le resultat de A
+  // survit a la connexion de B (KKS-546).
+  ref.watch(authNotifierProvider);
   final repo = ref.watch(debtRepositoryProvider);
   return repo.getPayments(debtId);
 });

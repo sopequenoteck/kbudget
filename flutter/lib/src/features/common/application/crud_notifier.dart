@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 /// Classe de base pour les notifiers CRUD avec pagination client-side.
@@ -34,7 +35,14 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
   String? validateDelete(String id) => null;
 
   @override
-  ListState<T> build() => ListState<T>();
+  ListState<T> build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
+    // survit a la reconstruction : le cache local doit etre vide avec l'etat.
+    ref.watch(authNotifierProvider);
+    allItems = [];
+    return ListState<T>();
+  }
 
   Future<void> loadItems() async {
     state = state.copyWith(isLoading: true, error: null);

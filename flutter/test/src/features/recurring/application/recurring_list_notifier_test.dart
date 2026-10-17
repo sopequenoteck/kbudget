@@ -3,12 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockRecurringTransactionRepository mockRepo;
@@ -261,6 +265,39 @@ void main() {
 
       expect(validated, isTrue);
       expect(state().mutatingIds, isEmpty);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          recurringTransactionRepositoryProvider
+              .overrideWith((_) async => mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
+      await sessionContainer
+          .read(recurringListNotifierProvider.notifier)
+          .loadItems();
+      expect(
+        sessionContainer.read(recurringListNotifierProvider).items,
+        isNotEmpty,
+      );
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(
+        sessionContainer.read(recurringListNotifierProvider).items,
+        isEmpty,
+      );
     });
   });
 }

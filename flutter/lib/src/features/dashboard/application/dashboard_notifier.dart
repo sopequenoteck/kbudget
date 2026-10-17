@@ -40,6 +40,9 @@ final dashboardNotifierProvider =
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
     return const DashboardState();
   }
 

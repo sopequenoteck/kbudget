@@ -77,6 +77,9 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
 final monthlySummaryProvider =
     FutureProvider.family<List<MonthlySummary>, ({int month, int year})>(
         (ref, params) {
+  // La session fait partie de la cle de cache : sans cela, le resultat de A
+  // survit a la connexion de B (KKS-546).
+  ref.watch(authNotifierProvider);
   final repo = ref.watch(transactionRepositoryProvider);
   return repo.getMonthlySummary(params.month, params.year);
 });

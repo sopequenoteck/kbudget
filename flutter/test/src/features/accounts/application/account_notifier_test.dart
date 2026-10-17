@@ -5,10 +5,14 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockAccountRepository mockRepo;
@@ -269,6 +273,65 @@ void main() {
 
       await future;
       expect(state().mutatingIds, isEmpty);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          accountRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await sessionContainer
+          .read(accountNotifierProvider.notifier)
+          .loadItems();
+      expect(sessionContainer.read(accountNotifierProvider).items, isNotEmpty);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(sessionContainer.read(accountNotifierProvider).items, isEmpty);
+    });
+
+    test('should_notExposePreviousItems_when_createdAfterSessionEnds',
+        () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          accountRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1, acc2]);
+      await sessionContainer.read(accountNotifierProvider.notifier).loadItems();
+      expect(
+        sessionContainer.read(accountNotifierProvider).items,
+        hasLength(2),
+      );
+
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+
+      final itemB = acc1.copyWith(id: 'b1', nom: 'Compte B');
+      when(mockRepo.create(any)).thenAnswer((_) async => itemB);
+      await sessionContainer
+          .read(accountNotifierProvider.notifier)
+          .create(itemB);
+
+      expect(sessionContainer.read(accountNotifierProvider).items, [itemB]);
     });
   });
 }

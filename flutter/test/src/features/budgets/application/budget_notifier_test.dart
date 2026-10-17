@@ -5,12 +5,16 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/domain/models/budget_history.dart';
 import 'package:k_budget/src/domain/models/budget_overview.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockBudgetRepository mockRepo;
@@ -339,6 +343,63 @@ void main() {
       expect(state().overview, isNotNull);
       verify(mockRepo.getAll()).called(1);
       verify(mockRepo.getOverview()).called(1);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          budgetRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [budget1]);
+      await sessionContainer
+          .read(budgetNotifierProvider.notifier)
+          .loadItems();
+      expect(sessionContainer.read(budgetNotifierProvider).items, isNotEmpty);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(sessionContainer.read(budgetNotifierProvider).items, isEmpty);
+    });
+
+    test('should_notExposePreviousItems_when_createdAfterSessionEnds',
+        () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          budgetRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [budget1, budget2]);
+      await sessionContainer.read(budgetNotifierProvider.notifier).loadItems();
+      expect(sessionContainer.read(budgetNotifierProvider).items, hasLength(2));
+
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+
+      final itemB = budget1.copyWith(id: 'b1');
+      when(mockRepo.create(any)).thenAnswer((_) async => itemB);
+      when(mockRepo.getOverview()).thenAnswer((_) async => sampleOverview);
+      await sessionContainer
+          .read(budgetNotifierProvider.notifier)
+          .create(itemB);
+
+      expect(sessionContainer.read(budgetNotifierProvider).items, [itemB]);
     });
   });
 }

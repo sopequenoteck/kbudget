@@ -81,6 +81,13 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+- **Mobile app: another account's data shown after switching accounts on
+  the same device** (KKS-546): after signing out and signing in with
+  another account without restarting the app, the home screen kept the
+  previous account's monthly totals, label suggestions and budget
+  transactions came from its cache, and every list showed the previous
+  account's items while reloading. All account-scoped state is now reset
+  whenever the session changes.
 - **Exception messages no longer carry submitted data** (KKS-500): the
   `message` of a `400 BAD_REQUEST` or `409 CONFLICT` response, which the API
   also writes to its logs, no longer repeats the submitted or financial value:
