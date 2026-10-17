@@ -7,6 +7,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.12.0] - 2026-10-17
+
 ### Added
 
 - **Mobile app: app lock with PIN and biometrics** (KKS-247): the mobile app
@@ -170,6 +172,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...HEAD
+[6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
