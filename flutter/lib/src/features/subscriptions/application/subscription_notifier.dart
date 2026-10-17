@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/subscription_payment.dart';
 import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 
@@ -22,7 +23,14 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
   List<Subscription> _allItems = [];
 
   @override
-  SubscriptionListState build() => const SubscriptionListState();
+  SubscriptionListState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
+    // survit a la reconstruction : le cache local doit etre vide avec l'etat.
+    ref.watch(authNotifierProvider);
+    _allItems = [];
+    return const SubscriptionListState();
+  }
 
   SubscriptionRepository get _repo =>
       ref.read(subscriptionRepositoryProvider);
@@ -192,6 +200,9 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
 final subscriptionPaymentsProvider =
     FutureProvider.family<List<SubscriptionPayment>, String>(
         (ref, subscriptionId) async {
+  // La session fait partie de la cle de cache : sans cela, le resultat de A
+  // survit a la connexion de B (KKS-546).
+  ref.watch(authNotifierProvider);
   final repo = ref.watch(subscriptionRepositoryProvider);
   return repo.getPayments(subscriptionId);
 });
@@ -199,6 +210,9 @@ final subscriptionPaymentsProvider =
 final subscriptionTotalPaidProvider =
     FutureProvider.family<SubscriptionTotalPaid, String>(
         (ref, subscriptionId) async {
+  // La session fait partie de la cle de cache : sans cela, le resultat de A
+  // survit a la connexion de B (KKS-546).
+  ref.watch(authNotifierProvider);
   final repo = ref.watch(subscriptionRepositoryProvider);
   return repo.getTotalPaid(subscriptionId);
 });

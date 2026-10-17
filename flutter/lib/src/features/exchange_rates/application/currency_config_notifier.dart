@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
@@ -17,6 +18,9 @@ final currencyConfigNotifierProvider =
 class CurrencyConfigNotifier extends Notifier<List<Currency>> {
   @override
   List<Currency> build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
     return [Currency.eur];
   }
 

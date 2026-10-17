@@ -8,6 +8,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
@@ -19,8 +20,12 @@ final recurringListNotifierProvider =
 class RecurringListNotifier
     extends Notifier<ListState<RecurringTransaction>> {
   @override
-  ListState<RecurringTransaction> build() =>
-      const ListState<RecurringTransaction>();
+  ListState<RecurringTransaction> build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
+    return const ListState<RecurringTransaction>();
+  }
 
   Future<RecurringTransactionRepository> get _repo async =>
       ref.read(recurringTransactionRepositoryProvider.future);

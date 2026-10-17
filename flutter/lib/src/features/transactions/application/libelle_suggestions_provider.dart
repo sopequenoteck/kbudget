@@ -4,6 +4,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 
 /// Provider Riverpod qui retourne les suggestions de libellés pour l'autocomplete.
 ///
@@ -12,6 +13,9 @@ import 'package:k_budget/src/data/repository_providers.dart';
 /// Délègue au repository des transactions.
 final libelleSuggestionsProvider =
     FutureProvider.family<List<String>, String>((ref, query) async {
+  // La session fait partie de la cle de cache : sans cela, le resultat de A
+  // survit a la connexion de B (KKS-546).
+  ref.watch(authNotifierProvider);
   if (query.length < 2) return const [];
   final repo = ref.watch(transactionRepositoryProvider);
   return repo.getLibelleSuggestions(query, limit: 20);

@@ -90,6 +90,14 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Security
 
+- **Application mobile : donnees d'un autre compte affichees apres un
+  changement de compte sur le meme appareil** (KKS-546) : apres une
+  deconnexion puis une connexion avec un autre compte sans redemarrer
+  l'application, l'accueil gardait les totaux mensuels du compte precedent,
+  les suggestions de libelle et les transactions d'un budget venaient de son
+  cache, et chaque liste affichait ses elements pendant le rechargement.
+  Tout etat lie au compte est desormais remis a zero a chaque changement de
+  session.
 - **Les messages d'exception ne reprennent plus les donnees saisies**
   (KKS-500) : le `message` d'une reponse `400 BAD_REQUEST` ou `409 CONFLICT`,
   que l'API ecrit aussi dans ses logs, ne repete plus la valeur soumise ou

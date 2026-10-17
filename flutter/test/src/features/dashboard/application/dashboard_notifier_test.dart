@@ -8,6 +8,8 @@ import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
@@ -18,6 +20,8 @@ import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockAccountRepository mockAccountRepo;
@@ -630,6 +634,35 @@ void main() {
       notifier().updateExchangeRates([]);
 
       expect(state().exchangeRates, isEmpty);
+    });
+  });
+
+  group('DashboardNotifier - session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = buildContainer(
+        extraOverrides: [
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockAccountRepo.getAll()).thenAnswer((_) async => [activeAccount1]);
+      await sessionContainer
+          .read(dashboardNotifierProvider.notifier)
+          .loadDashboard();
+      final loaded = sessionContainer.read(dashboardNotifierProvider);
+      expect(loaded.accounts, isNotEmpty);
+      expect(loaded.isLoading, false);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(
+        sessionContainer.read(dashboardNotifierProvider),
+        const DashboardState(),
+      );
     });
   });
 }
