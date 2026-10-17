@@ -53,7 +53,7 @@ public class CategoryRuleService {
                 });
 
         if (categoryRuleRepository.existsByUserIdAndPatternIgnoreCase(userId, pattern)) {
-            throw new ConflictException("A rule with this pattern already exists: " + pattern);
+            throw new ConflictException("A rule with this pattern already exists");
         }
 
         CategoryRule rule = CategoryRule.builder()

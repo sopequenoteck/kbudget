@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/domain/repositories/user_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/user_profile/application/user_profile_providers.dart';
 
 final userProfileNotifierProvider =
@@ -18,6 +19,9 @@ class UserProfileNotifier extends AsyncNotifier<User> {
 
   @override
   Future<User> build() async {
+    // Le profil appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
     final repo = await ref.watch(userRepositoryProvider.future);
     return repo.getProfile();
   }

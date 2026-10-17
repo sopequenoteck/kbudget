@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/common_widgets/confirm_dialog_custom.dart';
 import 'package:k_budget/src/common_widgets/page_header.dart';
-import 'package:k_budget/src/common_widgets/restart_widget.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +29,8 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     _urlController = TextEditingController();
     // Pre-fill URL from state after first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // The notifier outlives the screen: drop the error of a previous visit.
+      ref.read(dataSettingsNotifierProvider.notifier).clearError();
       final serverUrl = ref.read(dataSettingsNotifierProvider).serverUrl;
       if (serverUrl != null) {
         _urlController.text = serverUrl;
@@ -56,52 +56,13 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
           padding: const EdgeInsets.all(AppSpacing.space4),
           children: [
             PageHeader(
-              title: l10n.settingsPageDataTitle,
+              title: l10n.settingsPageServerTitle,
               onBack: () => context.pop(),
-              icon: const PhosphorIcon(PhosphorIconsRegular.database, size: 16),
-            ),
-
-            // Source active
-            Text(
-              l10n.settingsFormDataSource.toUpperCase(),
-              style: TextStyle(
-                fontSize: AppTypography.sizeXs,
-                fontWeight: AppTypography.medium,
-                letterSpacing: AppTypography.labelLetterSpacingForSize12,
-                color: colorScheme.onSurfaceVariant,
+              icon: const PhosphorIcon(
+                PhosphorIconsRegular.hardDrives,
+                size: 16,
               ),
             ),
-            const SizedBox(height: AppSpacing.space3),
-            SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<DataMode>(
-                segments: [
-                  ButtonSegment(
-                    value: DataMode.local,
-                    label: Text(l10n.settingsValueDataSourceLocal),
-                    icon: const PhosphorIcon(
-                      PhosphorIconsRegular.deviceMobile,
-                      size: 20,
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: DataMode.server,
-                    label: Text(l10n.settingsValueDataSourceServer),
-                    icon: const PhosphorIcon(
-                      PhosphorIconsRegular.cloud,
-                      size: 20,
-                    ),
-                  ),
-                ],
-                selected: {state.dataMode},
-                onSelectionChanged: (selection) {
-                  final newMode = selection.first;
-                  if (newMode == state.dataMode) return;
-                  _onModeChanged(newMode, state);
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.space6),
 
             // URL serveur
             Text(
@@ -117,9 +78,10 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
             TextField(
               controller: _urlController,
               decoration: InputDecoration(
-                hintText: 'https://budget.kksdev.fr/api',
+                hintText: 'https://budget.example.com/api',
                 prefixIcon: const PhosphorIcon(PhosphorIconsRegular.link, size: 20),
                 errorText: state.error,
+                errorMaxLines: 3,
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.url,
@@ -144,70 +106,40 @@ class _DataSettingsScreenState extends ConsumerState<DataSettingsScreen> {
     );
   }
 
-  void _onSaveUrl() {
+  Future<void> _onSaveUrl() async {
     final notifier = ref.read(dataSettingsNotifierProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     final url = _urlController.text.trim();
     final validationError = notifier.validateUrl(url);
     if (validationError != null) {
-      // Set error manually via state update
-      ref.read(dataSettingsNotifierProvider.notifier).clearError();
-      // Force rebuild with error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validationError)),
+      messenger.showSnackBar(SnackBar(content: Text(validationError)));
+      return;
+    }
+    final currentUrl = ref.read(dataSettingsNotifierProvider).serverUrl;
+    // A trailing slash is not another server: no need to sign out.
+    if (currentUrl != null &&
+        _withoutTrailingSlash(url) == _withoutTrailingSlash(currentUrl)) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.settingsFeedbackServerUrlSaved)),
       );
       return;
     }
-    notifier.saveServerUrl(url);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.of(context)!.settingsFeedbackServerUrlSaved,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _onModeChanged(
-    DataMode newMode,
-    DataSettingsState state,
-  ) async {
-    // Validate URL if switching to server
-    if (newMode == DataMode.server) {
-      final url = _urlController.text.trim();
-      final notifier = ref.read(dataSettingsNotifierProvider.notifier);
-      final validationError = notifier.validateUrl(url);
-      if (validationError != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(validationError)),
-        );
-        return;
-      }
-    }
-
-    final l10n = AppLocalizations.of(context)!;
     final confirmed = await ConfirmDialogCustom.show(
       context: context,
-      icon: PhosphorIconsRegular.arrowsLeftRight,
-      title: l10n.settingsDialogChangeDataSourceTitle,
-      message: l10n.settingsDialogChangeDataSourceMessage,
+      icon: PhosphorIconsRegular.warning,
+      title: l10n.settingsDialogChangeServerTitle,
+      message: l10n.settingsDialogChangeServerMessage,
       confirmLabel: l10n.commonActionConfirm,
-      variant: ConfirmVariant.primary,
-    ) ?? false;
-
-    if (!confirmed || !mounted) return;
-
-    // If switching to server, check connectivity
-    if (newMode == DataMode.server) {
-      final url = _urlController.text.trim();
-      final n = ref.read(dataSettingsNotifierProvider.notifier);
-      await n.saveServerUrl(url);
-      final isReachable = await n.checkConnectivity(url);
-      if (!isReachable || !mounted) return;
+    );
+    if (confirmed != true) {
+      return;
     }
-
-    await ref.read(dataSettingsNotifierProvider.notifier).switchDataMode(newMode);
-    if (mounted) {
-      RestartWidget.restartApp(context);
-    }
+    // On success the router redirects to sign-in; on failure the error shows
+    // under the field.
+    await notifier.changeServerUrl(url);
   }
 }
+
+String _withoutTrailingSlash(String url) =>
+    url.endsWith('/') ? url.substring(0, url.length - 1) : url;

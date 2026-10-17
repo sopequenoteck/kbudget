@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/features/categories/presentation/widgets/category_form_widget.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';

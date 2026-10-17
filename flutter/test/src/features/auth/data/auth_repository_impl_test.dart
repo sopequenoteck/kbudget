@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -163,6 +164,64 @@ void main() {
 
       verify(mockStorage.delete(key: 'access_token')).called(1);
       verify(mockStorage.delete(key: 'refresh_token')).called(1);
+    });
+  });
+
+  group('refresh (single-flight)', () {
+    setUp(() {
+      when(mockStorage.read(key: 'refresh_token'))
+          .thenAnswer((_) async => 'old-refresh');
+      when(mockStorage.write(
+              key: anyNamed('key'), value: anyNamed('value')))
+          .thenAnswer((_) async {});
+    });
+
+    test('should_callServerOnce_when_refreshCalledConcurrently', () async {
+      final gate = Completer<AuthResponse>();
+      when(mockDataSource.refresh(any)).thenAnswer((_) => gate.future);
+
+      final first = repository.refresh();
+      final second = repository.refresh();
+      gate.complete(testAuthResponse);
+      final results = await Future.wait([first, second]);
+
+      verify(mockDataSource.refresh(any)).called(1);
+      expect(results[0], same(results[1]));
+      expect(results[0].accessToken, 'test-access-token');
+    });
+
+    test('should_callServerAgain_when_previousRefreshCompleted', () async {
+      when(mockDataSource.refresh(any))
+          .thenAnswer((_) async => testAuthResponse);
+
+      await repository.refresh();
+      await repository.refresh();
+
+      verify(mockDataSource.refresh(any)).called(2);
+    });
+
+    test('should_failAllCallers_when_sharedRefreshFails', () async {
+      final gate = Completer<AuthResponse>();
+      when(mockDataSource.refresh(any)).thenAnswer((_) => gate.future);
+
+      final first = expectLater(repository.refresh(), throwsException);
+      final second = expectLater(repository.refresh(), throwsException);
+      gate.completeError(Exception('Refresh rejected'));
+      await Future.wait([first, second]);
+
+      verify(mockDataSource.refresh(any)).called(1);
+    });
+
+    test('should_callServerAgain_when_previousRefreshFailed', () async {
+      when(mockDataSource.refresh(any)).thenThrow(Exception('Rejected'));
+      await expectLater(repository.refresh(), throwsException);
+
+      when(mockDataSource.refresh(any))
+          .thenAnswer((_) async => testAuthResponse);
+      final result = await repository.refresh();
+
+      expect(result.accessToken, 'test-access-token');
+      verify(mockDataSource.refresh(any)).called(2);
     });
   });
 

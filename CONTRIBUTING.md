@@ -24,7 +24,7 @@ real bank statement**, not even your own.
 ## Running the project
 
 You need PostgreSQL 15+, Java 21, Node 22 and — for the mobile app — Flutter
-3.27+.
+3.41 (the version CI pins; later versions do not build the app yet).
 
 ```bash
 cp .env.example .env    # set DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET
@@ -35,6 +35,9 @@ cd flutter && flutter run
 ```
 
 The `prod` profile is the default; `dev` must be activated explicitly.
+
+With Xcode 27, `flutter build ios --simulator` fails on Flutter 3.41: run on a
+simulator with `flutter run -d <device>` instead.
 
 **Maven must run under Java 21**, the version CI uses. `java -version` can
 report 21 while Maven uses another JDK — `JAVA_HOME` decides, so check with
@@ -91,20 +94,32 @@ makes a two-client project unsustainable for one maintainer.
 
 Each surface carries one of three states:
 
-| State | Meaning |
-|-------|---------|
-| **Tracked** | Parity is maintained |
-| **Frozen** | Exists on Flutter, no longer evolves |
-| **Never** | Angular only |
+| State | Meaning | Surfaces |
+|-------|---------|----------|
+| **Tracked** | Parity is maintained: a change on Angular is ported to Flutter | Transactions (recurring, transfers), budgets, subscriptions, debts, accounts, categories, dashboard, notifications, profile, settings, sign-in, invitation, first-login reset, version incompatibility screen |
+| **Frozen** | Exists on Flutter, works and is maintained (translations, tests, bug fixes), but takes no new feature | Administration, currencies and exchange rates |
+| **Never** | Angular only | Statement import, CSV mapping, import profiles and settings, history clean-up, categorisation rules |
 
-**The full classification is still being written down** — the surfaces settled
-so far are in the boundary table of
-[`docs/architecture.md`](docs/architecture.md).
+Flutter also carries what the web cannot offer or does not need: server setup,
+PIN and biometric lock, system notifications. The full table, with
+routes and the gaps known today, is in
+[`docs/architecture.md`](docs/architecture.md#frontiere-angular--flutter).
 
-So: **before porting anything to Flutter, open an issue and ask.** A pull
-request that ports a surface intended to stay Angular-only will be declined
-however good the code, and neither of us wants that to be discovered after the
-work is done.
+What it means for a pull request:
+
+- A feature starts on Angular. On a **Tracked** surface, the Flutter port is
+  welcome, in the same pull request or a later one.
+- A new feature on a **Frozen** surface is declined on the Flutter side. A bug
+  fix is welcome: frozen means it keeps working.
+- A pull request that ports a **Never** surface to Flutter will be declined
+  however good the code. The same goes for a feature that would exist on
+  Flutter only, outside the list above.
+
+A new surface is classified with one question: *will it keep changing?* If it
+will and it is complex, it stays on Angular; a stable CRUD screen on one entity
+can live on both. For a surface that is not in the table, **open an issue and
+ask before writing code**: neither of us wants this to be discovered after the work is
+done.
 
 ### The constitution comes first
 
@@ -171,7 +186,16 @@ its id.
 
 Exception messages are logged, so **never put user-entered data in an exception
 message**. The read errors of an imported file log only the exception type and
-the line number, never its message.
+the line number, never its message. Likewise, a parsing error of a request body
+or of an import mapping logs only the exception type, never the parser
+message, which quotes the input.
+
+When catching an exception you did not raise, log its type
+(`e.getClass().getSimpleName()`) and the ids involved, never `e.getMessage()`:
+a database error message can quote a whole row. A full stack trace
+(`log.error("…", e)`) prints that message too: reserve it for a failure that is
+a bug to fix, an unexpected error reported as HTTP 500 or a background job that
+cannot proceed, never for a routine log.
 
 The first-start banner, which prints the administrator e-mail and the generated
 password once, is the only other exception; it is documented in

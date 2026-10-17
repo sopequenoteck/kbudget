@@ -63,31 +63,29 @@ Chaque entree suit : description, impact, correction proposee, date d'identifica
 
 ---
 
-### DT-004 — Icone recurrence non desactivee en mode local-first (KKS-241 / W-001)
+### DT-004 — Icone recurrence non desactivee en mode local-first (KKS-241 / W-001) — RESOLU 2026-10-07
 
 **Identifie** : 2026-05-12
+**Resolu** : 2026-10-07 (KKS-335)
 
-**Description** : Dans `TransactionForm`, l'icone de recurrence (bouton PhRepeat) est toujours active meme quand `dataModeProvider = DataMode.local`. R-004 (masquer ou desactiver l'icone en mode local) n'a pas ete implemente. Un SnackBar d'erreur est declenche si la creation echoue cote reseau, mais l'icone reste accessible et induira une erreur silencieuse pour l'utilisateur offline.
+**Description initiale** : Dans `TransactionForm`, l'icone de recurrence (bouton PhRepeat) etait toujours active meme quand `dataModeProvider = DataMode.local`. R-004 (masquer ou desactiver l'icone en mode local) n'avait pas ete implemente.
 
 **Impact** : Faible — fallback SnackBar present. Pas de crash, pas de perte de donnees.
 
-**Fichier concerne** : `flutter/lib/src/features/transactions/presentation/widgets/transaction_form.dart`
-
-**Correction proposee** : Lire `ref.watch(dataModeProvider)` dans `TransactionForm` et passer `isActive: dataModeProvider == DataMode.remote` sur le bouton repeat (ou masquer le widget entierement).
+**Correction appliquee** : le mode local est supprime de Flutter (KKS-335) : l'application est un client de l'API comme Angular, donc la recurrence est toujours disponible. Plus aucune condition de mode dans `TransactionForm`, rien a desactiver.
 
 ---
 
-### DT-005 — RecurringListNotifier.create() utilise isLoading global (KKS-241 / W-002)
+### DT-005 — RecurringListNotifier.create() utilise isLoading global (KKS-241 / W-002) — RESOLU 2026-10-07
 
 **Identifie** : 2026-05-12
+**Resolu** : 2026-10-07 (KKS-335)
 
-**Description** : La methode `create()` ajoutee dans `RecurringListNotifier` (KKS-241) utilise `state = state.copyWith(isLoading: true)` au lieu du pattern `mutatingIds` etabli par `deactivate()`, `validate()`, `skip()`. A la creation, il n'y a pas encore d'identifiant a tracker, mais cela cree une incoherence de pattern dans le notifier.
+**Description initiale** : La methode `create()` ajoutee dans `RecurringListNotifier` (KKS-241) utilise `state = state.copyWith(isLoading: true)` au lieu du pattern `mutatingIds` etabli par `deactivate()`, `validate()`, `skip()`. A la creation, il n'y a pas encore d'identifiant a tracker.
 
 **Impact** : Cosmétique — aucun impact fonctionnel. L'indicateur de chargement global masque toute la liste au lieu d'un seul item.
 
-**Fichier concerne** : `flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`
-
-**Correction proposee** : Revenir a `isLoading` global pour `create()` (pas d'id a tracker) et documenter cette exception dans le notifier, OU introduire un `isCreating: bool` separe dans `ListState<T>` si le besoin se generalise.
+**Correction appliquee** : `create()` garde `isLoading` global (pas d'id a tracker) ; l'exception au pattern `mutatingIds` est documentee dans le notifier (`flutter/lib/src/features/recurring/application/recurring_list_notifier.dart`).
 
 ---
 
@@ -147,3 +145,20 @@ exposer Sonar.
 pull request de fork touchant `api/` ne declenchait aucun test. La correction
 ci-dessus ne portait que sur APP.
 
+
+---
+
+### DT-007 — Flutter bloque en 3.41 (KKS-536)
+
+**Identifie** : 2026-10-12
+
+**Description** : `phosphor_flutter` 2.1.0, derniere version publiee, etend `IconData`, devenue une classe finale dans les SDK suivants : l'application ne compile plus au-dela de Flutter 3.41. L'image CI `ghcr.io/cirruslabs/flutter`, epinglee dans `ci-flutter.yml`, n'existe pas au-dela de 3.44.0.
+
+**Impact** : sous Xcode 27, `flutter build ios --simulator` echoue : l'outil Flutter 3.41 appelle `lipo -verify_arch` avec deux architectures, ce que Xcode 27 n'accepte plus (corrige en Flutter 3.47.0). Contournement : `flutter run -d <simulateur>`, qui ne construit qu'une architecture ; la construction pour appareil reel n'est pas touchee. Plus largement, les correctifs de Flutter posterieurs a 3.41 sont hors d'atteinte.
+
+**Correction proposee** :
+
+1. Remplacer ou corriger la bibliotheque d'icones (`phosphor_flutter`, utilisee dans toute l'application).
+2. Monter ensemble le SDK de developpement et l'image CI, en verifiant qu'une image existe pour la version visee.
+
+**Fichiers concernes** : `flutter/pubspec.yaml`, tous les ecrans qui importent `phosphor_flutter`, `.github/workflows/ci-flutter.yml`.

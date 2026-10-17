@@ -568,7 +568,7 @@ public class ImportService {
         try {
             return ImportLineStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid line status: " + status);
+            throw new IllegalArgumentException("Invalid line status");
         }
     }
 

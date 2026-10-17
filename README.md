@@ -61,7 +61,7 @@ sign-up, by design.
 |-----------|------------------------------------------------|
 | Backend   | Java 21, Spring Boot 4.0.2, Maven, Flyway      |
 | Web       | Angular 21, TypeScript 5.9, SCSS               |
-| Mobile    | Flutter ≥ 3.27, Dart ≥ 3.6, Riverpod, Drift    |
+| Mobile    | Flutter ≥ 3.27, Dart ≥ 3.6, Riverpod, Dio      |
 | Database  | PostgreSQL 15+                                 |
 | Auth      | Spring Security + JWT                          |
 | Infra     | Docker + Caddy (automatic HTTPS)               |

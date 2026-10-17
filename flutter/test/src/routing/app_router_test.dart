@@ -1,9 +1,14 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/data/remote/compatibility_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
@@ -11,9 +16,13 @@ import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_notifier.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/features/onboarding/data/app_config_repository_impl.dart';
 import 'package:k_budget/src/features/recurring/data/recurring_transaction_repository_remote.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_pin_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_settings_screen.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/routing/app_router.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
@@ -61,8 +70,8 @@ void main() {
   late MockBudgetRepository mockBudgetRepo;
   late MockRecurringTransactionRepository mockRecurringRepo;
 
-  const localConfig = AppConfig(
-    dataMode: DataMode.local,
+  const configuredConfig = AppConfig(
+    serverUrl: 'https://budget.example.com/api',
     onboardingCompleted: true,
   );
 
@@ -102,6 +111,12 @@ void main() {
       overrides: [
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
         authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
+        authenticatedDioProvider.overrideWith((_) async => Dio()),
+        compatibilityNotifierProvider
+            .overrideWith(() => _FixedCompatibilityNotifier()),
+        authNotifierProvider.overrideWith(
+          () => _FixedAuthNotifier(const AuthState.authenticated()),
+        ),
         accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         transactionRepositoryProvider.overrideWithValue(mockTransactionRepo),
         subscriptionRepositoryProvider.overrideWithValue(mockSubscriptionRepo),
@@ -131,20 +146,59 @@ void main() {
   }
 
   group('AppRouter', () {
-    testWidgets('should_redirect_to_onboarding_when_not_completed',
+    testWidgets('should_redirect_to_server_setup_when_not_completed',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => false);
 
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Bienvenue sur K-Budget'), findsOneWidget);
+      expect(find.text('Configuration serveur'), findsOneWidget);
+      expect(find.text('Entrez l\'URL de votre serveur K-Budget'),
+          findsOneWidget);
+    });
+
+    testWidgets(
+        'should_redirect_to_server_setup_when_legacy_local_config_stored',
+        (WidgetTester tester) async {
+      FlutterSecureStorage.setMockInitialValues({
+        'app_config': jsonEncode({
+          'dataMode': 'local',
+          'onboardingCompleted': true,
+        }),
+      });
+
+      await tester.pumpWidget(buildApp(overrides: [
+        appConfigRepositoryProvider.overrideWithValue(
+          AppConfigRepositoryImpl(deleteLegacyDatabase: () async {}),
+        ),
+      ]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Configuration serveur'), findsOneWidget);
+      expect(find.text('Accueil'), findsNothing);
+    });
+
+    testWidgets('should_redirect_to_server_setup_when_no_server_configured',
+        (WidgetTester tester) async {
+      FlutterSecureStorage.setMockInitialValues({
+        'app_config': jsonEncode({'onboardingCompleted': true}),
+      });
+
+      await tester.pumpWidget(buildApp(overrides: [
+        appConfigRepositoryProvider.overrideWithValue(
+          AppConfigRepositoryImpl(deleteLegacyDatabase: () async {}),
+        ),
+      ]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Configuration serveur'), findsOneWidget);
     });
 
     testWidgets('should_show_dashboard_when_onboarding_completed',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
 
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -159,7 +213,7 @@ void main() {
     testWidgets('should_display_bottom_nav_with_4_items_when_onboarding_done',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
 
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -177,7 +231,7 @@ void main() {
     testWidgets('should_show_budgets_tab_when_budgets_enabled',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
       when(mockRepo.getEnabledFeatures())
           .thenAnswer((_) async => Feature.values.toList());
 
@@ -194,7 +248,7 @@ void main() {
     testWidgets('should_navigate_to_transactions_when_tab_tapped',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
 
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -212,7 +266,7 @@ void main() {
     testWidgets('should_show_fab_when_onboarding_done',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
 
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -231,7 +285,7 @@ void main() {
     testWidgets('should_show_navigation_rail_when_wide_screen',
         (WidgetTester tester) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
+      when(mockRepo.getConfig()).thenAnswer((_) async => configuredConfig);
 
       tester.view.physicalSize = const Size(1024, 768);
       tester.view.devicePixelRatio = 1.0;
@@ -248,7 +302,7 @@ void main() {
 
   group('AppRouter — first-login-reset (KKS-309)', () {
     const serverConfig = AppConfig(
-      dataMode: DataMode.server,
+      serverUrl: 'https://budget.example.com/api',
       onboardingCompleted: true,
     );
 
@@ -269,26 +323,69 @@ void main() {
 
       expect(find.text('Premier accès'), findsOneWidget);
     });
+  });
 
-    testWidgets(
-        'should_not_redirect_to_first_login_reset_when_dataMode_local',
-        (WidgetTester tester) async {
+  group('AppRouter — verrouillage (KKS-247)', () {
+    const lockedServerConfig = AppConfig(
+      serverUrl: 'https://budget.example.com/api',
+      onboardingCompleted: true,
+      lockEnabled: true,
+      lockMethod: LockMethod.pin,
+      hashedPin: 'hash',
+      pinSalt: 'salt',
+    );
+
+    Future<GoRouter> pumpAt(WidgetTester tester, String location) async {
       when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => true);
-      when(mockRepo.getConfig()).thenAnswer((_) async => localConfig);
-
+      when(mockRepo.getConfig()).thenAnswer((_) async => lockedServerConfig);
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildApp(overrides: [
-        authNotifierProvider.overrideWith(
-          () => _FixedAuthNotifier(const AuthState.passwordResetRequired()),
-        ),
-      ]));
+      await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      ).read(appRouterProvider);
+      router.go(location);
+      await tester.pumpAndSettle();
+      return router;
+    }
 
-      expect(find.text('Premier accès'), findsNothing);
+    testWidgets('should_showLockSettings_when_navigatingToSettingsLock',
+        (tester) async {
+      await pumpAt(tester, '/settings/lock');
+
+      expect(find.byType(LockSettingsScreen), findsOneWidget);
+      expect(find.text('Verrouiller l\'application'), findsOneWidget);
+    });
+
+    testWidgets('should_notRouteToLockScreen_when_navigatingToLock',
+        (tester) async {
+      await pumpAt(tester, '/lock');
+
+      expect(find.byType(LockScreen), findsNothing);
+    });
+
+    testWidgets('should_notRedirectToLock_when_lockEnabled', (tester) async {
+      await pumpAt(tester, '/dashboard');
+
+      expect(find.byType(LockScreen), findsNothing);
       expect(find.text('Accueil'), findsWidgets);
+    });
+
+    testWidgets('should_openPinScreenForFlow_when_flowInPath', (tester) async {
+      await pumpAt(tester, '/settings/lock/pin/disable');
+
+      expect(find.byType(LockPinScreen), findsOneWidget);
+      expect(find.text('Saisissez votre PIN actuel'), findsOneWidget);
+    });
+
+    testWidgets('should_fallBackToEnableFlow_when_flowUnknown',
+        (tester) async {
+      await pumpAt(tester, '/settings/lock/pin/whatever');
+
+      expect(find.text('Choisissez un PIN'), findsOneWidget);
     });
   });
 }

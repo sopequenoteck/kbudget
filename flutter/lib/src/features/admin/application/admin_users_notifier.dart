@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_list_state.dart';
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final adminUsersNotifierProvider =
@@ -15,7 +16,12 @@ final adminUsersNotifierProvider =
 
 class AdminUsersNotifier extends Notifier<AdminUsersListState> {
   @override
-  AdminUsersListState build() => const AdminUsersListState();
+  AdminUsersListState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
+    return const AdminUsersListState();
+  }
 
   AdminRepository get _repo =>
       ref.read(adminRepositoryProvider).requireValue;

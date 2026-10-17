@@ -10,7 +10,7 @@ import 'package:k_budget/src/utils/env_config.dart';
 /// Dio brut sans intercepteurs d'auth.
 /// Utilisé pour les appels publics (health check, etc.).
 /// Pour les appels authentifiés, utiliser [authenticatedDioProvider]
-/// dans data_mode_provider.dart.
+/// dans repository_providers.dart.
 final apiClientProvider = FutureProvider<Dio>((ref) async {
   final configRepo = ref.watch(appConfigRepositoryProvider);
   final serverUrl = await configRepo.getServerUrl();

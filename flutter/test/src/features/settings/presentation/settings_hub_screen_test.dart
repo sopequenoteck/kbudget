@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/user.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_state.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
@@ -30,7 +31,16 @@ class _FakeDataSettings extends DataSettingsNotifier {
 
   @override
   DataSettingsState build() =>
-      DataSettingsState(dataMode: DataMode.server, serverUrl: serverUrl);
+      DataSettingsState(serverUrl: serverUrl);
+}
+
+class _FakeLock extends AppLockNotifier {
+  _FakeLock({required this.enabled});
+  final bool enabled;
+
+  @override
+  AppLockState build() =>
+      AppLockState(status: LockStatus.unlocked, enabled: enabled);
 }
 
 class _FakeFeatureConfig extends FeatureConfigNotifier {
@@ -61,8 +71,10 @@ class _FakeSubscriptions extends SubscriptionNotifier {
 void main() {
   late GoRouter router;
   late String lastPushedLocation;
+  var lockEnabled = false;
 
   setUp(() {
+    lockEnabled = false;
     lastPushedLocation = '';
     router = GoRouter(
       initialLocation: '/settings',
@@ -93,6 +105,13 @@ void main() {
               },
             ),
             GoRoute(
+              path: 'lock',
+              builder: (context, state) {
+                lastPushedLocation = '/settings/lock';
+                return const Scaffold(body: Text('Lock'));
+              },
+            ),
+            GoRoute(
               path: 'data',
               builder: (context, state) {
                 lastPushedLocation = '/settings/data';
@@ -107,7 +126,12 @@ void main() {
 
   Widget buildApp({List<Override> overrides = const []}) {
     return ProviderScope(
-      overrides: overrides,
+      overrides: [
+        appLockNotifierProvider.overrideWith(
+          () => _FakeLock(enabled: lockEnabled),
+        ),
+        ...overrides,
+      ],
       child: MaterialApp.router(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -203,17 +227,58 @@ void main() {
       expect(find.text('Invitations et gestion des accès'), findsOneWidget);
     });
 
-    testWidgets('should_showLocalModeFooter_when_dataModeLocal',
+    testWidgets('should_showDeviceSectionWithTwoRows_when_rendered',
         (tester) async {
-      await pumpTall(
-        tester,
-        buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.local),
-        ]),
-      );
+      await pumpTall(tester, buildApp());
 
-      expect(find.textContaining('K-Budget v'), findsOneWidget);
-      expect(find.textContaining(' · Mode local'), findsOneWidget);
+      expect(find.text('CET APPAREIL'), findsOneWidget);
+      expect(find.text('SERVEUR'), findsNothing);
+      expect(find.text('Verrouillage'), findsOneWidget);
+      expect(find.text('Serveur'), findsOneWidget);
+      expect(find.text('URL de votre instance'), findsOneWidget);
+      expect(find.text('Comptes & Devises'), findsOneWidget);
+      // Lock first, then server.
+      expect(
+        tester.getTopLeft(find.text('Verrouillage')).dy,
+        lessThan(tester.getTopLeft(find.text('Serveur')).dy),
+      );
+    });
+
+    testWidgets('should_showLockOff_when_lockDisabled', (tester) async {
+      await pumpTall(tester, buildApp());
+
+      expect(find.text('Désactivé'), findsOneWidget);
+      expect(find.text('Activé'), findsNothing);
+    });
+
+    testWidgets('should_showLockOn_when_lockEnabled', (tester) async {
+      lockEnabled = true;
+
+      await pumpTall(tester, buildApp());
+
+      expect(find.text('Activé'), findsOneWidget);
+      expect(find.text('Désactivé'), findsNothing);
+    });
+
+    testWidgets('should_navigate_to_settings_lock_when_lockRowTapped',
+        (tester) async {
+      await pumpTall(tester, buildApp());
+
+      await tester.tap(find.text('Verrouillage'));
+      await tester.pumpAndSettle();
+
+      expect(lastPushedLocation, '/settings/lock');
+      expect(find.text('Lock'), findsOneWidget);
+    });
+
+    testWidgets('should_navigate_to_settings_data_when_serverRowTapped',
+        (tester) async {
+      await pumpTall(tester, buildApp());
+
+      await tester.tap(find.text('Serveur'));
+      await tester.pumpAndSettle();
+
+      expect(lastPushedLocation, '/settings/data');
     });
 
     testWidgets('should_showOfflineFooter_when_serverUrlMissing',
@@ -221,7 +286,6 @@ void main() {
       await pumpTall(
         tester,
         buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           dataSettingsNotifierProvider
               .overrideWith(() => _FakeDataSettings(null)),
         ]),
@@ -236,7 +300,6 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       await tester.pumpWidget(
         buildApp(overrides: [
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           dataSettingsNotifierProvider
               .overrideWith(() => _FakeDataSettings('https://k.test/api')),
         ]),

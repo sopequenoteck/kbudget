@@ -13,21 +13,12 @@ class TestFixtures {
   static const testUserId = 'test-user-id-001';
 
   static AppConfig get defaultAppConfig => const AppConfig(
-        dataMode: DataMode.local,
         theme: AppTheme.light,
         lockEnabled: false,
         onboardingCompleted: false,
       );
 
   static AppConfig get completedOnboardingConfig => const AppConfig(
-        dataMode: DataMode.local,
-        theme: AppTheme.light,
-        lockEnabled: false,
-        onboardingCompleted: true,
-      );
-
-  static AppConfig get serverModeConfig => const AppConfig(
-        dataMode: DataMode.server,
         serverUrl: 'https://budget.example.com/api',
         theme: AppTheme.light,
         lockEnabled: false,

@@ -1,15 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/debt_payment.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockDebtRepository mockRepo;
@@ -518,6 +522,60 @@ void main() {
       final future = container.read(debtPaymentsProvider('debt-1').future);
 
       await expectLater(future, throwsA(isA<Exception>()));
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          debtRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1]);
+      await sessionContainer
+          .read(debtNotifierProvider.notifier)
+          .loadItems();
+      expect(sessionContainer.read(debtNotifierProvider).items, isNotEmpty);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(sessionContainer.read(debtNotifierProvider).items, isEmpty);
+    });
+
+    test('should_notExposePreviousItems_when_createdAfterSessionEnds',
+        () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          debtRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [debt1, debt2]);
+      await sessionContainer.read(debtNotifierProvider.notifier).loadItems();
+      expect(sessionContainer.read(debtNotifierProvider).items, hasLength(2));
+
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+
+      final itemB = debt1.copyWith(id: 'b1', personne: 'Zoe');
+      when(mockRepo.create(any)).thenAnswer((_) async => itemB);
+      await sessionContainer.read(debtNotifierProvider.notifier).create(itemB);
+
+      expect(sessionContainer.read(debtNotifierProvider).items, [itemB]);
     });
   });
 }

@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/notification.dart';
 import 'package:k_budget/src/domain/repositories/notification_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
 
@@ -25,7 +26,12 @@ class NotificationNotifier extends Notifier<ListState<NotificationModel>> {
   static const _pageSize = 20;
 
   @override
-  ListState<NotificationModel> build() => const ListState<NotificationModel>();
+  ListState<NotificationModel> build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
+    return const ListState<NotificationModel>();
+  }
 
   Future<NotificationRepository> get _repo => ref.read(notificationRepositoryProvider.future);
 

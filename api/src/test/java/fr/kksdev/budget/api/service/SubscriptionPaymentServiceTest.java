@@ -5,6 +5,7 @@ import fr.kksdev.budget.api.enums.AccountType;
 import fr.kksdev.budget.api.enums.Frequency;
 import fr.kksdev.budget.api.enums.TransactionType;
 import fr.kksdev.budget.api.model.Account;
+import fr.kksdev.budget.api.model.Category;
 import fr.kksdev.budget.api.model.Subscription;
 import fr.kksdev.budget.api.model.Transaction;
 import fr.kksdev.budget.api.model.User;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -298,6 +300,25 @@ class SubscriptionPaymentServiceTest {
         assertThat(response.accountName()).isEqualTo("Compte Principal");
         verify(transactionRepository, never()).save(any());
         verify(budgetService, never()).checkThresholdsForCategory(any(), any());
+    }
+
+    @Test
+    void should_stillPay_when_budgetThresholdCheckFails() {
+        var account = buildAccount();
+        var sub = buildActiveMonthlySubscription(account);
+        var category = Category.builder().id(UUID.randomUUID()).nom("Loisirs").user(buildUser()).build();
+        var saved = buildSavedTransaction(sub, account);
+        saved.setCategory(category);
+
+        when(subscriptionRepository.findByIdAndUserIdForUpdate(subscriptionId, userId)).thenReturn(Optional.of(sub));
+        when(userRepository.getReferenceById(userId)).thenReturn(buildUser());
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(saved);
+        doThrow(new IllegalStateException("budget unavailable"))
+                .when(budgetService).checkThresholdsForCategory(userId, category.getId());
+
+        SubscriptionPaymentResponse response = subscriptionPaymentService.pay(subscriptionId, userId);
+
+        assertThat(response.id()).isEqualTo(transactionId);
     }
 
     @Test

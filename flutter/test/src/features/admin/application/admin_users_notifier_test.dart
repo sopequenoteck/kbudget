@@ -1,10 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_notifier.dart';
+import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/localization/app_localizations_fr.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 import '../admin_test_helpers.dart';
 
 void main() {
@@ -89,6 +95,36 @@ void main() {
       expect(state.error, l10n.usersFeedbackUserEnableError);
       expect(state.error, isNot(contains('secret detail')));
       expect(state.mutatingIds, isEmpty);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          adminRepoOverride(repo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      await sessionContainer.read(adminRepositoryProvider.future);
+      when(repo.listUsers()).thenAnswer((_) async => [adminUser()]);
+      await sessionContainer
+          .read(adminUsersNotifierProvider.notifier)
+          .loadItems();
+      expect(
+        sessionContainer.read(adminUsersNotifierProvider).items,
+        isNotEmpty,
+      );
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(sessionContainer.read(adminUsersNotifierProvider).items, isEmpty);
     });
   });
 }

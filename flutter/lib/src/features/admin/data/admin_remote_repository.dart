@@ -4,7 +4,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_user_model.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';

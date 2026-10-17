@@ -10,7 +10,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Onboarding Flow', () {
-    testWidgets('should_complete_local_mode_onboarding',
+    testWidgets('should_open_server_setup_when_app_not_configured',
         (WidgetTester tester) async {
       // Use a fresh AppConfigRepository for each test
       final freshRepo = AppConfigRepositoryImpl();
@@ -25,23 +25,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Should show onboarding screen
-      expect(find.text('Bienvenue sur K-Budget'), findsOneWidget);
+      // No data mode choice: the server setup is the only way in
+      expect(find.text('Configuration serveur'), findsOneWidget);
+      expect(find.text('Mode local'), findsNothing);
 
-      // Select local mode
-      await tester.tap(find.text('Mode local'));
-      await tester.pumpAndSettle();
-
-      // Confirm button should be enabled
-      final confirmButton = find.widgetWithText(FilledButton, 'Confirmer');
+      // Confirm stays disabled until the server has been checked
+      final confirmButton = find.widgetWithText(ElevatedButton, 'Confirmer');
       expect(confirmButton, findsOneWidget);
-
-      // Tap confirm
-      await tester.tap(confirmButton);
-      await tester.pumpAndSettle();
-
-      // Should navigate to dashboard
-      expect(find.text('Accueil'), findsWidgets);
+      expect(tester.widget<ElevatedButton>(confirmButton).onPressed, isNull);
     });
   });
 }

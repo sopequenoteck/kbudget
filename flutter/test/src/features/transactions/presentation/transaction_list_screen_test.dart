@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:k_budget/src/common_widgets/section_header_sticky.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
@@ -26,6 +26,7 @@ void main() {
   late MockTransactionRepository mockRepo;
   late MockCategoryRepository mockCatRepo;
   late MockExchangeRateRepository mockExchangeRateRepo;
+  late MockAccountRepository mockAccountRepo;
 
   final tx1 = Transaction(
     id: '1',
@@ -70,6 +71,8 @@ void main() {
     mockRepo = MockTransactionRepository();
     mockCatRepo = MockCategoryRepository();
     mockExchangeRateRepo = MockExchangeRateRepository();
+    mockAccountRepo = MockAccountRepository();
+    when(mockAccountRepo.getAll()).thenAnswer((_) async => []);
     when(mockExchangeRateRepo.getAll()).thenAnswer((_) async => <ExchangeRate>[]);
   });
 
@@ -79,6 +82,7 @@ void main() {
         displayLocaleOverride(),
         transactionRepositoryProvider.overrideWithValue(mockRepo),
         categoryRepositoryProvider.overrideWithValue(mockCatRepo),
+        accountRepositoryProvider.overrideWithValue(mockAccountRepo),
         exchangeRateRepositoryProvider.overrideWith((_) async => mockExchangeRateRepo),
       ],
       child: MaterialApp(

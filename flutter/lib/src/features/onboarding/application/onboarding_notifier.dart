@@ -3,8 +3,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:k_budget/src/data/remote/api_client.dart';
 import 'package:k_budget/src/data/remote/compatibility_service.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
@@ -33,10 +33,6 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
 
   Future<bool> isOnboardingCompleted() async {
     return _repository.isOnboardingCompleted();
-  }
-
-  void selectMode(DataMode mode) {
-    state = state.copyWith(selectedMode: mode, error: null);
   }
 
   void setServerUrl(String url) {
@@ -74,27 +70,19 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     return _repository.getConfig();
   }
 
-  Future<void> updateLockSettings({
-    required bool enabled,
-    LockMethod? method,
-    String? pin,
-  }) async {
-    await _repository.setLockEnabled(enabled);
-    await _repository.setLockMethod(method);
-    await _repository.setHashedPin(pin);
-  }
-
   Future<void> completeOnboarding() async {
-    final mode = state.selectedMode;
-    if (mode == null) return;
+    final serverUrl = state.serverUrl;
+    if (serverUrl == null) {
+      return;
+    }
 
     state = state.copyWith(isSaving: true, error: null);
     try {
-      await _repository.setDataMode(mode);
-      if (mode == DataMode.server && state.serverUrl != null) {
-        await _repository.setServerUrl(state.serverUrl!);
-      }
+      await _repository.setServerUrl(serverUrl);
       await _repository.setOnboardingCompleted(true);
+      // The API clients were built at startup, before any URL was saved:
+      // rebuild them, or they keep the default URL until the app restarts.
+      ref.invalidate(apiClientProvider);
       state = state.copyWith(isSaving: false, isCompleted: true);
     } on Exception catch (_) {
       state = state.copyWith(

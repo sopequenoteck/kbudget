@@ -47,6 +47,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock K-Budget with Face ID</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Prendre une photo du produit</string>
 	<key>NSPhotoLibraryUsageDescription</key>

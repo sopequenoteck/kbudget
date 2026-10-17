@@ -6,7 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:k_budget/src/common_widgets/app_form_field.dart';
 import 'package:k_budget/src/common_widgets/bank_select_picker.dart';
 import 'package:k_budget/src/common_widgets/select_picker.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/bank.dart';

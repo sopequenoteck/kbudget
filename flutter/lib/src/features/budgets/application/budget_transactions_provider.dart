@@ -3,12 +3,16 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 
 final budgetTransactionsProvider =
     FutureProvider.family<List<Transaction>, ({int month, int year})>(
   (ref, params) async {
+    // La session fait partie de la cle de cache : sans cela, le resultat de A
+    // survit a la connexion de B (KKS-546).
+    ref.watch(authNotifierProvider);
     final repo = ref.watch(transactionRepositoryProvider);
     return repo.getByMonth(params.month, params.year);
   },

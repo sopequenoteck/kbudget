@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/app.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:mockito/mockito.dart';
 
@@ -14,6 +15,7 @@ void main() {
     final mockRepo = MockAppConfigRepository();
     when(mockRepo.isOnboardingCompleted()).thenAnswer((_) async => false);
     when(mockRepo.getTheme()).thenAnswer((_) async => AppTheme.light);
+    when(mockRepo.getConfig()).thenAnswer((_) async => const AppConfig());
 
     await tester.pumpWidget(
       ProviderScope(
@@ -27,6 +29,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // The app should redirect to onboarding since it's not completed
-    expect(find.text('Bienvenue sur K-Budget'), findsOneWidget);
+    expect(find.text('Configuration serveur'), findsOneWidget);
   });
 }

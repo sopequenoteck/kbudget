@@ -7,6 +7,7 @@ import 'package:k_budget/src/features/admin/application/invitation_list_state.da
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final invitationsNotifierProvider =
@@ -16,7 +17,12 @@ final invitationsNotifierProvider =
 
 class InvitationsNotifier extends Notifier<InvitationListState> {
   @override
-  InvitationListState build() => const InvitationListState();
+  InvitationListState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
+    return const InvitationListState();
+  }
 
   AdminRepository get _repo =>
       ref.read(adminRepositoryProvider).requireValue;

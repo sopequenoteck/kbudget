@@ -18,7 +18,6 @@ import 'package:k_budget/src/features/modal/application/modal_notifier.dart';
 import 'package:k_budget/src/features/modal/application/modal_state.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
-import 'package:k_budget/src/features/auth/presentation/lock_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/login_screen.dart';
 import 'package:k_budget/src/features/admin/presentation/users_screen.dart';
 import 'package:k_budget/src/features/auth/presentation/accept_invite_screen.dart';
@@ -27,10 +26,11 @@ import 'package:k_budget/src/features/dashboard/presentation/dashboard_screen.da
 import 'package:k_budget/src/features/debts/presentation/debt_list_screen.dart';
 import 'package:k_budget/src/features/debts/presentation/debt_detail_screen.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
-import 'package:k_budget/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:k_budget/src/features/onboarding/presentation/server_setup_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
 import 'package:k_budget/src/features/settings/presentation/data_settings_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_pin_screen.dart';
+import 'package:k_budget/src/features/settings/presentation/lock_settings_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/presentation/currency_settings_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_list_screen.dart';
 import 'package:k_budget/src/features/accounts/presentation/screens/account_form_screen.dart';
@@ -62,8 +62,8 @@ import 'package:k_budget/src/features/transactions/presentation/transaction_list
 import 'package:k_budget/src/features/transactions/presentation/widgets/transaction_form.dart';
 import 'package:k_budget/src/features/transactions/presentation/widgets/transfer_form.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/compatibility_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/server_meta.dart';
 import 'package:k_budget/src/features/compatibility/presentation/incompatible_screen.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
@@ -90,7 +90,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final matchedLocation = state.matchedLocation;
       final isOnboarding = matchedLocation.startsWith(RouteNames.onboarding);
       final isLoginRoute = matchedLocation == RouteNames.login;
-      final isLockRoute = matchedLocation == RouteNames.lock;
       final isAuthRoute = isLoginRoute;
       final isInviteRoute = matchedLocation.startsWith('/invite') ||
           matchedLocation.startsWith('/accept-invite');
@@ -104,66 +103,60 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return RouteNames.dashboard;
       }
 
-      // Only apply auth/lock checks after onboarding
+      // Only apply auth checks after onboarding
       if (isCompleted) {
-        final config = await onboardingNotifier.getConfig();
+        // Les providers de repositories lisent ce Dio de facon synchrone :
+        // le resoudre avant toute route authentifiee.
+        await ref.read(authenticatedDioProvider.future);
 
-        // Server mode: check authentication
-        if (config.dataMode == DataMode.server) {
-          // Compatibilite du serveur (KKS-314), verifiee une fois par session.
-          // Un serveur injoignable ne redirige pas : hors ligne n'est pas une
-          // incompatibilite, le cache prend le relais (constitution,
-          // principe IV).
-          final compatibility =
-              await ref
-                  .read(compatibilityNotifierProvider.notifier)
-                  .ensureChecked();
-          final isIncompatible = compatibility is CompatibilityServerTooOld ||
-              compatibility is CompatibilityClientTooOld;
-          final isIncompatibleRoute =
-              matchedLocation == RouteNames.incompatible;
+        // Compatibilite du serveur (KKS-314), verifiee une fois par session.
+        // Un serveur injoignable ne redirige pas : hors ligne n'est pas une
+        // incompatibilite, le cache prend le relais (constitution,
+        // principe IV).
+        final compatibility =
+            await ref
+                .read(compatibilityNotifierProvider.notifier)
+                .ensureChecked();
+        final isIncompatible = compatibility is CompatibilityServerTooOld ||
+            compatibility is CompatibilityClientTooOld;
+        final isIncompatibleRoute =
+            matchedLocation == RouteNames.incompatible;
 
-          if (isIncompatible && !isIncompatibleRoute) {
-            return RouteNames.incompatible;
-          }
-          if (!isIncompatible && isIncompatibleRoute) {
-            return RouteNames.dashboard;
-          }
-
-          final authState = ref.read(authNotifierProvider);
-
-          // Premier lancement : valider les tokens stockés
-          if (authState is AuthInitial) {
-            await ref.read(authNotifierProvider.notifier).checkAuth();
-          }
-
-          final currentAuthState = ref.read(authNotifierProvider);
-          final isAuthenticated = currentAuthState is AuthAuthenticated;
-          final mustResetCredentials =
-              currentAuthState is AuthPasswordResetRequired;
-          final isFirstLoginResetRoute =
-              matchedLocation == RouteNames.firstLoginReset;
-
-          if (!isAuthenticated &&
-              !mustResetCredentials &&
-              !isAuthRoute &&
-              !isInviteRoute) {
-            return RouteNames.login;
-          }
-          if (isAuthenticated && isAuthRoute) {
-            return RouteNames.dashboard;
-          }
-          if (mustResetCredentials && !isFirstLoginResetRoute) {
-            return RouteNames.firstLoginReset;
-          }
-          if (!mustResetCredentials && isFirstLoginResetRoute) {
-            return RouteNames.dashboard;
-          }
+        if (isIncompatible && !isIncompatibleRoute) {
+          return RouteNames.incompatible;
+        }
+        if (!isIncompatible && isIncompatibleRoute) {
+          return RouteNames.dashboard;
         }
 
-        // Lock screen check (both modes)
-        if (config.lockEnabled && isLockRoute) {
-          return null; // Stay on lock screen
+        final authState = ref.read(authNotifierProvider);
+
+        // Premier lancement : valider les tokens stockés
+        if (authState is AuthInitial) {
+          await ref.read(authNotifierProvider.notifier).checkAuth();
+        }
+
+        final currentAuthState = ref.read(authNotifierProvider);
+        final isAuthenticated = currentAuthState is AuthAuthenticated;
+        final mustResetCredentials =
+            currentAuthState is AuthPasswordResetRequired;
+        final isFirstLoginResetRoute =
+            matchedLocation == RouteNames.firstLoginReset;
+
+        if (!isAuthenticated &&
+            !mustResetCredentials &&
+            !isAuthRoute &&
+            !isInviteRoute) {
+          return RouteNames.login;
+        }
+        if (isAuthenticated && isAuthRoute) {
+          return RouteNames.dashboard;
+        }
+        if (mustResetCredentials && !isFirstLoginResetRoute) {
+          return RouteNames.firstLoginReset;
+        }
+        if (!mustResetCredentials && isFirstLoginResetRoute) {
+          return RouteNames.dashboard;
         }
       }
 
@@ -174,15 +167,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.onboarding,
         name: RouteNames.onboardingName,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const OnboardingScreen(),
-        routes: [
-          GoRoute(
-            path: RouteNames.serverSetup,
-            name: RouteNames.serverSetupName,
-            parentNavigatorKey: _rootNavigatorKey,
-            builder: (context, state) => const ServerSetupScreen(),
-          ),
-        ],
+        builder: (context, state) => const ServerSetupScreen(),
       ),
       GoRoute(
         path: RouteNames.login,
@@ -217,12 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => AcceptInviteScreen(
           token: state.pathParameters['token']!,
         ),
-      ),
-      GoRoute(
-        path: RouteNames.lock,
-        name: RouteNames.lockName,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LockScreen(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -371,6 +350,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const DataSettingsScreen(),
           ),
           GoRoute(
+            path: RouteNames.settingsLock,
+            name: RouteNames.settingsLockName,
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const LockSettingsScreen(),
+            routes: [
+              GoRoute(
+                path: RouteNames.settingsLockPin,
+                name: RouteNames.settingsLockPinName,
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => LockPinScreen(
+                  flow: LockPinFlow.values
+                          .where((f) => f.name == state.pathParameters['flow'])
+                          .firstOrNull ??
+                      LockPinFlow.enable,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
             path: RouteNames.settingsCurrencies,
             name: RouteNames.settingsCurrenciesName,
             parentNavigatorKey: _rootNavigatorKey,
@@ -419,9 +417,6 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
   Future<void> _connectStomp() async {
     try {
       final configRepo = ref.read(appConfigRepositoryProvider);
-      final dataMode = await configRepo.getDataMode();
-      if (dataMode != DataMode.server) return;
-
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'access_token');
       if (token == null) return;
@@ -447,7 +442,7 @@ class _ShellScaffoldState extends ConsumerState<_ShellScaffold> {
       );
 
     } catch (_) {
-      // Ignore: plugin not available in test or local mode
+      // Ignore: plugin not available in test
     }
   }
 

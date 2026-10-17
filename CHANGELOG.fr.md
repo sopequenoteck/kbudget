@@ -7,6 +7,118 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.12.0] - 2026-10-17
+
+### Added
+
+- **Application mobile : verrouillage par PIN et biometrie** (KKS-247) :
+  l'application mobile peut maintenant etre verrouillee. Le reglage est dans
+  Parametres, section « Cet appareil » : un PIN a 4 chiffres, et en option le
+  deverrouillage par Face ID ou empreinte, le PIN restant le recours. Le PIN
+  est demande au lancement et apres une minute d'absence. Cinq PIN faux
+  d'affilee deconnectent ; « PIN oublie ? » aussi, et l'on revient en se
+  reconnectant avec son mot de passe. Le verrouillage est desactive et le PIN
+  efface chaque fois que les jetons de session sont effaces (deconnexion,
+  changement de serveur), et seulement dans ce cas. Le PIN est stocke sale et
+  hache dans le stockage securise de l'appareil, jamais sur le serveur.
+
+### Changed
+
+- **Application mobile : une seule requete de preferences a la connexion**
+  (KKS-539) : langue, taille de texte et fonctionnalites demandaient chacune
+  les preferences au serveur a l'ouverture de la session, trois requetes
+  identiques en meme temps. Les appelants partagent desormais la requete en
+  cours ; rien n'est mis en cache.
+- **Application mobile (iOS) : iOS 15 devient la version minimale** (KKS-536) :
+  Xcode 27 ne construit plus d'application visant une version anterieure. Les
+  iPhone et iPad limites a iOS 13 ou 14 ne peuvent plus installer
+  l'application.
+
+### Removed
+
+- **Application mobile : mode local supprime** (KKS-335) : l'application
+  mobile ne fonctionne plus sans serveur. Elle devient un client de l'API,
+  comme l'application web, et son premier lancement ouvre directement la
+  configuration du serveur. Une application configuree en mode local est
+  renvoyee vers la configuration du serveur a son prochain lancement, et sa
+  base locale est effacee : il n'y a pas de migration. Quand le serveur est
+  injoignable, l'application affiche un message et un bouton pour reessayer ;
+  un cache de lecture commun a l'application web est prevu (KKS-507).
+
+### Fixed
+
+- **Application mobile : nom de l'ancien compte affiche sur l'accueil apres
+  un changement de compte** (KKS-544) : la salutation lisait le nom
+  memorise une fois et le gardait ; apres une deconnexion puis une connexion
+  avec un autre compte, l'ancien nom restait jusqu'a un tirer-pour-rafraichir
+  ou un redemarrage. Le nom suit desormais la session.
+- **Application mobile : fonctionnalites de l'ancien compte conservees apres
+  un changement de compte** (KKS-542) : fonctionnalites actives, ordre des
+  onglets, types de notification et fuseau horaire n'etaient lus sur le
+  serveur qu'a la premiere ouverture de session, jamais ensuite. Apres une
+  deconnexion puis une connexion avec un autre compte, les reglages de
+  l'ancien compte restaient jusqu'au redemarrage. Ils sont desormais
+  recharges a chaque connexion.
+- **Application mobile : taille de texte choisie sur le serveur ignoree
+  jusqu'au redemarrage** (KKS-538) : la preference serveur n'etait lue qu'une
+  fois, au lancement, avant toute connexion. Apres la premiere connexion, ou
+  apres un changement de compte, l'appareil gardait sa propre taille de texte
+  jusqu'au redemarrage. La preference est desormais appliquee a chaque
+  connexion.
+- **Application mobile : premiere connexion impossible apres la configuration
+  du serveur** (KKS-537) : au premier lancement, l'application continuait
+  d'appeler son adresse par defaut au lieu de l'URL saisie, jusqu'a son
+  redemarrage. La connexion echouait donc pour tout serveur autre que celui par
+  defaut. L'URL saisie est desormais utilisee des la confirmation.
+- **Application mobile : session perdue ou ecran noir a la reouverture apres
+  15 minutes** (KKS-532) : a l'ouverture avec un jeton d'acces expire,
+  l'application pouvait envoyer deux renouvellements de session en meme temps.
+  Le serveur traite un jeton utilise deux fois comme vole et revoque toutes les
+  sessions de l'utilisateur, y compris sur le web : ecran de connexion pendant
+  un instant, deconnexion un quart d'heure plus tard, ou ecran noir jusqu'au
+  redemarrage. La session est desormais renouvelee une seule fois. Un ancien
+  mot de passe errone dans « Changer le mot de passe » ne bloque plus la
+  feuille.
+- **Application mobile : URL du serveur et devises de nouveau accessibles**
+  (KKS-418) : depuis la reecriture des reglages, aucun ecran ne menait plus a
+  l'URL du serveur ni aux devises et taux de change. Les reglages se terminent
+  maintenant par une section « Serveur », et l'ecran des comptes mene a
+  « Devises & Taux ». Enregistrer une nouvelle URL prend effet aussitot :
+  l'application verifie que l'adresse est un serveur K-Budget compatible,
+  demande confirmation, deconnecte et revient a l'ecran de connexion. Les
+  jetons de session de l'ancien serveur sont effaces avant la bascule et ne
+  partent jamais vers le nouveau ; auparavant la nouvelle URL ne s'appliquait
+  qu'au redemarrage, qui envoyait alors les anciens jetons au nouveau serveur.
+
+### Security
+
+- **Application mobile : donnees d'un autre compte affichees apres un
+  changement de compte sur le meme appareil** (KKS-546) : apres une
+  deconnexion puis une connexion avec un autre compte sans redemarrer
+  l'application, l'accueil gardait les totaux mensuels du compte precedent,
+  les suggestions de libelle et les transactions d'un budget venaient de son
+  cache, et chaque liste affichait ses elements pendant le rechargement.
+  Tout etat lie au compte est desormais remis a zero a chaque changement de
+  session.
+- **Les messages d'exception ne reprennent plus les donnees saisies**
+  (KKS-500) : le `message` d'une reponse `400 BAD_REQUEST` ou `409 CONFLICT`,
+  que l'API ecrit aussi dans ses logs, ne repete plus la valeur soumise ou
+  financiere : code
+  banque, fuseau horaire, motif d'une regle de categorisation, statut d'une
+  ligne d'import, montant restant d'une dette. Un corps de requete ou un
+  mapping d'import illisible ne journalise que le type d'exception du parseur.
+  Codes d'erreur inchanges ; les clients n'affichaient jamais `message`.
+- **Les exceptions interceptees sont journalisees par leur type, pas leur
+  message** (KKS-503) : quand une verification de seuil de budget echoue apres
+  une transaction, une recurrence ou un paiement d'abonnement, l'API journalise
+  le type de l'exception et l'identifiant de la categorie, plus son message,
+  qu'une erreur de base de donnees peut remplir d'une ligne entiere ; idem pour
+  un echec de creation du compte par defaut ou des categories systeme d'un
+  utilisateur, avant qu'il soit rapporte en `500`. Une erreur inattendue
+  (`500`) reste journalisee avec sa trace complete. Un identifiant invalide
+  dans une URL (`/v1/accounts/not-a-uuid`) repond desormais `400 BAD_REQUEST`
+  au lieu de `500`, et les logs retiennent le nom du parametre, pas la valeur.
+
 ## [6.11.0] - 2026-10-06
 
 > Les logs de l'API sont desormais en anglais et sans donnees personnelles, et
@@ -1587,7 +1699,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...HEAD
+[6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
 [6.9.0]: https://github.com/sopequenoteck/kbudget/compare/v6.8.0...v6.9.0

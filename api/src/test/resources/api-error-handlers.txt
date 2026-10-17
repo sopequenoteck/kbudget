@@ -16,6 +16,7 @@ InvalidExportFormatException -> handleInvalidExportFormat
 InvalidImageFormatException -> handleInvalidImageFormat
 LastAdminDeletionForbiddenException -> handleLastAdminDeletionForbidden
 MethodArgumentNotValidException -> handleValidation
+MethodArgumentTypeMismatchException -> handleTypeMismatch
 NoResourceFoundException -> handleNoResourceFound
 PasswordIncorrectException -> handlePasswordIncorrect
 PasswordResetNotRequiredException -> handlePasswordResetNotRequired

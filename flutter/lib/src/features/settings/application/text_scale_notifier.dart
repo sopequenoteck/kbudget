@@ -5,10 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 
 final textScaleNotifierProvider =
@@ -17,6 +18,13 @@ final textScaleNotifierProvider =
 class TextScaleNotifier extends Notifier<TextScale> {
   @override
   TextScale build() {
+    // The server preference needs a session: read it at each login, not
+    // only at start, when no token may exist yet or the account may change
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      if (next is AuthAuthenticated && previous is! AuthAuthenticated) {
+        unawaited(_loadServerTextScale());
+      }
+    });
     _loadTextScale();
     return TextScale.medium;
   }
@@ -26,22 +34,25 @@ class TextScaleNotifier extends Notifier<TextScale> {
     final textScale = await repo.getTextScale();
     state = textScale;
 
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      try {
-        final dataSource =
-            await ref.read(preferenceRemoteDataSourceProvider.future);
-        final prefs = await dataSource.getPreferences();
-        if (prefs.textScale != null) {
-          final serverScale =
-              TextScale.values.byName(prefs.textScale!.toLowerCase());
-          state = serverScale;
-          await repo.setTextScale(serverScale);
-        }
-      } on Exception catch (_) {
-        // Silently fail — local value already loaded
+    if (ref.read(authNotifierProvider) is AuthAuthenticated) {
+      await _loadServerTextScale();
+    }
+  }
+
+  Future<void> _loadServerTextScale() async {
+    final repo = ref.read(appConfigRepositoryProvider);
+    try {
+      final dataSource =
+          await ref.read(preferenceRemoteDataSourceProvider.future);
+      final prefs = await dataSource.getPreferences();
+      if (prefs.textScale != null) {
+        final serverScale =
+            TextScale.values.byName(prefs.textScale!.toLowerCase());
+        state = serverScale;
+        await repo.setTextScale(serverScale);
       }
+    } on Exception catch (_) {
+      // Silently fail — local value already loaded
     }
   }
 
@@ -50,11 +61,7 @@ class TextScaleNotifier extends Notifier<TextScale> {
     final repo = ref.read(appConfigRepositoryProvider);
     await repo.setTextScale(textScale);
 
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      unawaited(_syncToServer(textScale));
-    }
+    unawaited(_syncToServer(textScale));
   }
 
   Future<void> _syncToServer(TextScale textScale) async {

@@ -4,9 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
+import 'package:k_budget/src/routing/route_names.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ServerSetupScreen extends ConsumerStatefulWidget {
@@ -137,10 +139,16 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: state.isServerReachable
-                    ? () => Navigator.of(context).pop(true)
+                onPressed: state.isServerReachable && !state.isSaving
+                    ? _onConfirm
                     : null,
-                child: Text(l10n.commonActionConfirm),
+                child: state.isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.commonActionConfirm),
               ),
               const SizedBox(height: AppSpacing.space4),
             ],
@@ -148,6 +156,14 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onConfirm() async {
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
+    await notifier.completeOnboarding();
+    if (mounted && ref.read(onboardingNotifierProvider).isCompleted) {
+      context.go(RouteNames.dashboard);
+    }
   }
 
   Future<void> _checkConnection() async {

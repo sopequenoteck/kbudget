@@ -6,10 +6,11 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
@@ -35,6 +36,13 @@ final featureConfigNotifierProvider =
 class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   @override
   FeatureConfigState build() {
+    // The server preference needs a session: read it at each login, not
+    // only at start, when no token may exist yet or the account may change
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      if (next is AuthAuthenticated && previous is! AuthAuthenticated) {
+        unawaited(_loadFromServer());
+      }
+    });
     _loadFeatures();
     return const FeatureConfigState();
   }
@@ -45,10 +53,8 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final navOrder = await repo.getNavOrder();
     state = state.copyWith(enabledFeatures: features, navOrder: navOrder);
 
-    // In server mode, load from API and overwrite local
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
+    // Load from API and overwrite local, once a session exists
+    if (ref.read(authNotifierProvider) is AuthAuthenticated) {
       await _loadFromServer();
     }
   }
@@ -98,17 +104,13 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final repo = ref.read(appConfigRepositoryProvider);
     await repo.setEnabledFeatures(current);
 
-    // If server mode, sync in background (fire-and-forget, optimistic)
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      unawaited(_syncToServer(
-        current,
-        navOrder: state.navOrder,
-        enabledNotificationTypes: state.enabledNotificationTypes,
-        timezone: state.timezone,
-      ));
-    }
+    // Sync in background (fire-and-forget, optimistic)
+    unawaited(_syncToServer(
+      current,
+      navOrder: state.navOrder,
+      enabledNotificationTypes: state.enabledNotificationTypes,
+      timezone: state.timezone,
+    ));
   }
 
   Future<void> reorderNavigation(List<Feature> newOrder) async {
@@ -118,47 +120,35 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     final repo = ref.read(appConfigRepositoryProvider);
     await repo.setNavOrder(newOrder);
 
-    // If server mode, sync in background
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      unawaited(_syncToServer(
-        state.enabledFeatures,
-        navOrder: newOrder,
-        enabledNotificationTypes: state.enabledNotificationTypes,
-        timezone: state.timezone,
-      ));
-    }
+    // Sync in background
+    unawaited(_syncToServer(
+      state.enabledFeatures,
+      navOrder: newOrder,
+      enabledNotificationTypes: state.enabledNotificationTypes,
+      timezone: state.timezone,
+    ));
   }
 
   Future<void> updateNotificationTypes(List<NotificationType> types) async {
     state = state.copyWith(enabledNotificationTypes: types, error: null);
 
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      unawaited(_syncToServer(
-        state.enabledFeatures,
-        navOrder: state.navOrder,
-        enabledNotificationTypes: types,
-        timezone: state.timezone,
-      ));
-    }
+    unawaited(_syncToServer(
+      state.enabledFeatures,
+      navOrder: state.navOrder,
+      enabledNotificationTypes: types,
+      timezone: state.timezone,
+    ));
   }
 
   Future<void> updateTimezone(String timezone) async {
     state = state.copyWith(timezone: timezone, error: null);
 
-    final modeAsync = ref.read(dataModeProvider);
-    final mode = modeAsync.valueOrNull;
-    if (mode == DataMode.server) {
-      unawaited(_syncToServer(
-        state.enabledFeatures,
-        navOrder: state.navOrder,
-        enabledNotificationTypes: state.enabledNotificationTypes,
-        timezone: timezone,
-      ));
-    }
+    unawaited(_syncToServer(
+      state.enabledFeatures,
+      navOrder: state.navOrder,
+      enabledNotificationTypes: state.enabledNotificationTypes,
+      timezone: timezone,
+    ));
   }
 
   Future<void> _syncToServer(

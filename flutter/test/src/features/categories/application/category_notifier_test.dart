@@ -1,13 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/category.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockCategoryRepository mockRepo;
@@ -170,6 +174,32 @@ void main() {
       notifier().loadMore();
       expect(state().items, hasLength(25));
       expect(state().hasMore, false);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          categoryRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [cat1]);
+      await sessionContainer
+          .read(categoryNotifierProvider.notifier)
+          .loadItems();
+      expect(sessionContainer.read(categoryNotifierProvider).items, isNotEmpty);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(sessionContainer.read(categoryNotifierProvider).items, isEmpty);
     });
   });
 }

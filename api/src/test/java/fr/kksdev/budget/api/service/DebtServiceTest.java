@@ -375,7 +375,7 @@ class DebtServiceTest {
 
         assertThatThrownBy(() -> debtService.repay(debtId, request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("amount exceeds");
+                .hasMessage("The amount exceeds the remaining amount");
     }
 
     @Test

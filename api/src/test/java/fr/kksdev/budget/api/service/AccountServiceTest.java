@@ -802,7 +802,21 @@ class AccountServiceTest {
 
         assertThatThrownBy(() -> accountService.createAccount(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid bank code: NOPE");
+                .hasMessage("Invalid bank code");
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    void should_throw_when_updateAccountWithUnknownBankCode() {
+        var user = buildUser();
+        var account = buildAccount(user);
+        var request = new AccountRequest("Compte Principal", AccountType.COURANT, null, null, null, null, null, "NOPE", null, null);
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> accountService.updateAccount(accountId, request, userId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid bank code");
         verify(accountRepository, never()).save(any(Account.class));
     }
 

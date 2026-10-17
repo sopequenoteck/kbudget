@@ -4,14 +4,15 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/features/accounts/application/account_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
@@ -21,8 +22,11 @@ import 'package:k_budget/src/features/settings/application/display_locale_provid
 import 'package:k_budget/src/features/transactions/application/transaction_notifier.dart';
 
 /// Provider qui lit le nom utilisateur depuis FlutterSecureStorage.
-/// Fallback null si cle absente (mode local ou jamais connecte).
+/// Fallback null si cle absente (jamais connecte).
 final currentUserNameProvider = FutureProvider<String?>((ref) async {
+  // Le nom stocke appartient a la session : reconstruit a chaque connexion
+  // et deconnexion, sinon le nom de l'ancien compte survit au changement
+  ref.watch(authNotifierProvider);
   const storage = FlutterSecureStorage();
   return storage.read(key: 'user_name');
 });
@@ -36,6 +40,9 @@ final dashboardNotifierProvider =
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546).
+    ref.watch(authNotifierProvider);
     return const DashboardState();
   }
 
@@ -43,12 +50,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // S'assurer que les providers async sont resolus
-      // avant de lire les repositories (evite fallback local)
-      final mode = await ref.read(dataModeProvider.future);
-      if (mode == DataMode.server) {
-        await ref.read(authenticatedDioProvider.future);
-      }
+      // S'assurer que le Dio authentifie est resolu avant de lire
+      // les repositories
+      await ref.read(authenticatedDioProvider.future);
 
       // Charger le nom utilisateur
       final userName = await ref.read(currentUserNameProvider.future);
@@ -68,19 +72,17 @@ class DashboardNotifier extends Notifier<DashboardState> {
       final transactionState = ref.read(transactionNotifierProvider);
       final exchangeRateState = ref.read(exchangeRateListProvider);
 
-      // Charger les devises depuis les preferences (mode server uniquement)
+      // Charger les devises depuis les preferences
       List<Currency> currencies = [Currency.eur];
-      if (mode == DataMode.server) {
-        try {
-          final prefDataSource =
-              await ref.read(preferenceRemoteDataSourceProvider.future);
-          final prefs = await prefDataSource.getPreferences();
-          currencies = prefs.currencies
-              .map((s) => Currency.values.byName(s.toLowerCase()))
-              .toList();
-        } catch (_) {
-          // Fallback si erreur serveur
-        }
+      try {
+        final prefDataSource =
+            await ref.read(preferenceRemoteDataSourceProvider.future);
+        final prefs = await prefDataSource.getPreferences();
+        currencies = prefs.currencies
+            .map((s) => Currency.values.byName(s.toLowerCase()))
+            .toList();
+      } on Object catch (_) {
+        // Fallback si erreur serveur
       }
 
       // Comptes actifs

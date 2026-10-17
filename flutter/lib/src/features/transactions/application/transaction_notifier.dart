@@ -3,10 +3,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final transactionNotifierProvider =
@@ -19,7 +20,14 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
   List<Transaction> _allItems = [];
 
   @override
-  ListState<Transaction> build() => const ListState<Transaction>();
+  ListState<Transaction> build() {
+    // L'etat appartient a la session : reconstruit a chaque connexion et
+    // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
+    // survit a la reconstruction : le cache local doit etre vide avec l'etat.
+    ref.watch(authNotifierProvider);
+    _allItems = [];
+    return const ListState<Transaction>();
+  }
 
   TransactionRepository get _repo =>
       ref.read(transactionRepositoryProvider);

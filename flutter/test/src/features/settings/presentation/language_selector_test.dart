@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
@@ -45,10 +44,7 @@ void main() {
 
   /// The settings screen inside an app whose locale follows
   /// [displayLocaleProvider], as `KBudgetApp` does.
-  Future<void> pumpSettings(
-    WidgetTester tester, {
-    DataMode mode = DataMode.server,
-  }) async {
+  Future<void> pumpSettings(WidgetTester tester) async {
     tester.view.physicalSize = const Size(2400, 12000);
     addTearDown(tester.view.resetPhysicalSize);
     final router = GoRouter(
@@ -63,7 +59,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          ...languageOverrides(config: _Config(), remote: remote, mode: mode),
+          ...languageOverrides(config: _Config(), remote: remote),
           userProfileNotifierProvider.overrideWith(_FakeUserProfile.new),
         ],
         child: Consumer(

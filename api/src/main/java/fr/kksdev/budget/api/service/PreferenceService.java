@@ -76,7 +76,7 @@ public class PreferenceService {
             try {
                 ZoneId.of(request.timezone());
             } catch (DateTimeException e) {
-                throw new IllegalArgumentException("Invalid timezone: " + request.timezone());
+                throw new IllegalArgumentException("Invalid timezone");
             }
             preference.setTimezone(request.timezone());
         }

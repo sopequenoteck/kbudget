@@ -1,15 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_notifier.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockTransactionRepository mockRepo;
@@ -217,6 +221,42 @@ void main() {
       expect(s.allMonthTransactions, isEmpty);
       expect(s.filteredTransactions, isEmpty);
       expect(s.isLoading, false);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          transactionRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getByMonth(2, 2020))
+          .thenAnswer((_) async => [txDepense1]);
+      when(mockRepo.getMonthlySummary(2, 2020))
+          .thenAnswer((_) async => [summary]);
+      await sessionContainer
+          .read(transactionListNotifierProvider.notifier)
+          .loadMonth(2, 2020);
+      final loaded = sessionContainer.read(transactionListNotifierProvider);
+      expect(loaded.allMonthTransactions, isNotEmpty);
+      expect(loaded.summary, isNotNull);
+      expect(loaded.selectedYear, 2020);
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      final reset = sessionContainer.read(transactionListNotifierProvider);
+      expect(reset.allMonthTransactions, isEmpty);
+      expect(reset.filteredTransactions, isEmpty);
+      expect(reset.summary, isNull);
+      expect(reset.selectedYear, DateTime.now().year);
     });
   });
 }

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/common_widgets/fab_menu.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
@@ -40,7 +40,6 @@ Future<void> pumpFabMenu(
         featureConfigNotifierProvider.overrideWith(
           () => _FixedFeatureConfigNotifier(enabledFeatures),
         ),
-        dataModeProvider.overrideWith((ref) async => DataMode.local),
       ],
       child: MaterialApp(
         theme: app_theme.AppTheme.light,

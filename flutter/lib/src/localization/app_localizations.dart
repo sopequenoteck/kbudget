@@ -1263,56 +1263,50 @@ abstract class AppLocalizations {
   /// No description provided for @authFeedbackBiometricError.
   ///
   /// In en, this message translates to:
-  /// **'Biometric error. Use your PIN.'**
+  /// **'Biometrics failed. Use your PIN.'**
   String get authFeedbackBiometricError;
-
-  /// No description provided for @authFormPinMinLength.
-  ///
-  /// In en, this message translates to:
-  /// **'The PIN must contain at least 4 digits'**
-  String get authFormPinMinLength;
 
   /// No description provided for @authFeedbackPinIncorrect.
   ///
   /// In en, this message translates to:
-  /// **'Incorrect PIN'**
-  String get authFeedbackPinIncorrect;
+  /// **'Incorrect PIN. {count, plural, one {{count} attempt left} other {{count} attempts left}}'**
+  String authFeedbackPinIncorrect(int count);
 
   /// No description provided for @authDialogForgotPinTitle.
   ///
   /// In en, this message translates to:
-  /// **'Forgot your PIN?'**
+  /// **'Forgot PIN?'**
   String get authDialogForgotPinTitle;
 
-  /// No description provided for @authDialogForgotPinServerMessage.
+  /// No description provided for @authDialogForgotPinMessage.
   ///
   /// In en, this message translates to:
-  /// **'You will be signed out and will need to sign in again with your credentials.'**
-  String get authDialogForgotPinServerMessage;
+  /// **'You will be signed out and the lock will be turned off. Sign in again with your password.'**
+  String get authDialogForgotPinMessage;
 
-  /// No description provided for @authDialogForgotPinLocalMessage.
+  /// No description provided for @authPageLockSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'In local mode, resetting the PIN will erase all your data. This action is irreversible.'**
-  String get authDialogForgotPinLocalMessage;
+  /// **'Enter your PIN'**
+  String get authPageLockSubtitle;
 
-  /// No description provided for @authPagePinTagline.
+  /// No description provided for @authActionPinDeleteAria.
   ///
   /// In en, this message translates to:
-  /// **'Enter your PIN to continue'**
-  String get authPagePinTagline;
+  /// **'Delete'**
+  String get authActionPinDeleteAria;
 
-  /// No description provided for @authActionUnlock.
+  /// No description provided for @authActionBiometricAria.
   ///
   /// In en, this message translates to:
-  /// **'Unlock'**
-  String get authActionUnlock;
+  /// **'Biometric unlock'**
+  String get authActionBiometricAria;
 
-  /// No description provided for @authActionBiometric.
+  /// No description provided for @authFormPinProgressAria.
   ///
   /// In en, this message translates to:
-  /// **'Biometrics'**
-  String get authActionBiometric;
+  /// **'{count} of 4 digits entered'**
+  String authFormPinProgressAria(int count);
 
   /// No description provided for @commonActionConfirm.
   ///
@@ -1397,12 +1391,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get commonActionLogout;
-
-  /// No description provided for @commonActionReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get commonActionReset;
 
   /// No description provided for @commonFormSearchPlaceholder.
   ///
@@ -1529,60 +1517,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading error'**
   String get commonFeedbackLoadError;
-
-  /// No description provided for @onboardingDialogSwitchToLocalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to local mode?'**
-  String get onboardingDialogSwitchToLocalTitle;
-
-  /// No description provided for @onboardingDialogSwitchToLocalMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Your data will be stored only on this device. You can switch back to server mode from settings.'**
-  String get onboardingDialogSwitchToLocalMessage;
-
-  /// No description provided for @onboardingActionUseLocalMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Use in local mode'**
-  String get onboardingActionUseLocalMode;
-
-  /// No description provided for @onboardingPageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to K-Budget'**
-  String get onboardingPageTitle;
-
-  /// No description provided for @onboardingPageTagline.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your data mode'**
-  String get onboardingPageTagline;
-
-  /// No description provided for @onboardingValueLocalMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Local mode'**
-  String get onboardingValueLocalMode;
-
-  /// No description provided for @onboardingValueLocalModeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your data stays on this device'**
-  String get onboardingValueLocalModeHint;
-
-  /// No description provided for @onboardingValueServerMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Server mode'**
-  String get onboardingValueServerMode;
-
-  /// No description provided for @onboardingValueServerModeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync with your K-Budget server'**
-  String get onboardingValueServerModeHint;
 
   /// No description provided for @onboardingPageServerSetupTitle.
   ///
@@ -2538,6 +2472,12 @@ abstract class AppLocalizations {
   /// **'Manage categories'**
   String get settingsListCategoriesHint;
 
+  /// No description provided for @settingsListServerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'URL of your instance'**
+  String get settingsListServerHint;
+
   /// No description provided for @settingsListTextScalePreview.
   ///
   /// In en, this message translates to:
@@ -2646,6 +2586,18 @@ abstract class AppLocalizations {
   /// **'Your data will be hidden, not deleted.'**
   String get settingsDialogDisableFeatureMessage;
 
+  /// No description provided for @settingsDialogChangeServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change server?'**
+  String get settingsDialogChangeServerTitle;
+
+  /// No description provided for @settingsDialogChangeServerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out and will need to sign in again on the new server. Your data stays on the current server.'**
+  String get settingsDialogChangeServerMessage;
+
   /// No description provided for @settingsFeedbackLoadError.
   ///
   /// In en, this message translates to:
@@ -2658,29 +2610,11 @@ abstract class AppLocalizations {
   /// **'Unable to save preferences'**
   String get settingsFeedbackSaveError;
 
-  /// No description provided for @settingsPageDataTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Data'**
-  String get settingsPageDataTitle;
-
-  /// No description provided for @settingsFormDataSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Data source'**
-  String get settingsFormDataSource;
-
-  /// No description provided for @settingsValueDataSourceLocal.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get settingsValueDataSourceLocal;
-
-  /// No description provided for @settingsValueDataSourceServer.
+  /// No description provided for @settingsPageServerTitle.
   ///
   /// In en, this message translates to:
   /// **'Server'**
-  String get settingsValueDataSourceServer;
+  String get settingsPageServerTitle;
 
   /// No description provided for @settingsFormServerUrl.
   ///
@@ -2730,17 +2664,89 @@ abstract class AppLocalizations {
   /// **'Endpoint not found — check the URL'**
   String get settingsFeedbackServerNotFound;
 
-  /// No description provided for @settingsDialogChangeDataSourceTitle.
+  /// No description provided for @settingsPageDeviceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Change data source?'**
-  String get settingsDialogChangeDataSourceTitle;
+  /// **'This device'**
+  String get settingsPageDeviceTitle;
 
-  /// No description provided for @settingsDialogChangeDataSourceMessage.
+  /// No description provided for @settingsPageLockTitle.
   ///
   /// In en, this message translates to:
-  /// **'Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.'**
-  String get settingsDialogChangeDataSourceMessage;
+  /// **'App lock'**
+  String get settingsPageLockTitle;
+
+  /// No description provided for @settingsValueLockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get settingsValueLockOn;
+
+  /// No description provided for @settingsValueLockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsValueLockOff;
+
+  /// No description provided for @settingsFormLockEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the app'**
+  String get settingsFormLockEnabled;
+
+  /// No description provided for @settingsFormLockEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN required at launch and after 1 minute away'**
+  String get settingsFormLockEnabledHint;
+
+  /// No description provided for @settingsFormLockBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock'**
+  String get settingsFormLockBiometric;
+
+  /// No description provided for @settingsFormLockBiometricHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your PIN remains the fallback'**
+  String get settingsFormLockBiometricHint;
+
+  /// No description provided for @settingsActionChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get settingsActionChangePin;
+
+  /// No description provided for @settingsFormPinChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a PIN'**
+  String get settingsFormPinChoose;
+
+  /// No description provided for @settingsFormPinConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your PIN'**
+  String get settingsFormPinConfirm;
+
+  /// No description provided for @settingsFormPinCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current PIN'**
+  String get settingsFormPinCurrent;
+
+  /// No description provided for @settingsFeedbackPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The PINs don\'t match'**
+  String get settingsFeedbackPinMismatch;
+
+  /// No description provided for @settingsFormLockForgotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your PIN? Signing out resets it.'**
+  String get settingsFormLockForgotHint;
 
   /// No description provided for @notificationsValueSubscriptionDue.
   ///

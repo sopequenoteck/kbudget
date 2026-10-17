@@ -1,16 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/subscription_payment.dart';
 import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_notifier.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/display_locale.dart';
 import '../../../../helpers/mocks.mocks.dart';
+import '../../settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier;
 
 void main() {
   late MockSubscriptionRepository mockRepo;
@@ -392,6 +396,76 @@ void main() {
       notifier().setFilter(SubscriptionStatusFilter.inactif);
 
       expect(state().monthlyTotals, totalsBeforeFilter);
+    });
+  });
+
+  group('session', () {
+    test('should_resetState_when_sessionEnds', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          subscriptionRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [sub1]);
+      await sessionContainer
+          .read(subscriptionNotifierProvider.notifier)
+          .loadItems();
+      expect(
+        sessionContainer.read(subscriptionNotifierProvider).items,
+        isNotEmpty,
+      );
+
+      (sessionContainer.read(authNotifierProvider.notifier)
+              as FakeAuthNotifier)
+          .emit(const AuthState.unauthenticated());
+
+      expect(
+        sessionContainer.read(subscriptionNotifierProvider).items,
+        isEmpty,
+      );
+    });
+
+    test('should_notExposePreviousItems_when_createdAfterSessionEnds',
+        () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          subscriptionRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [sub1, sub2]);
+      await sessionContainer
+          .read(subscriptionNotifierProvider.notifier)
+          .loadItems();
+      expect(
+        sessionContainer.read(subscriptionNotifierProvider).items,
+        hasLength(2),
+      );
+
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+
+      final itemB = sub1.copyWith(id: 'b1', nom: 'Abonnement B');
+      when(mockRepo.create(any)).thenAnswer((_) async => itemB);
+      await sessionContainer
+          .read(subscriptionNotifierProvider.notifier)
+          .create(itemB);
+
+      expect(
+        sessionContainer.read(subscriptionNotifierProvider).items,
+        [itemB],
+      );
     });
   });
 }

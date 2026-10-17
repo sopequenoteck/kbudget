@@ -89,7 +89,7 @@ public class AccountService {
 
         String bankCode = request.bankCode() != null ? request.bankCode().toUpperCase() : "OTHER";
         if (BankRegistry.findByCode(bankCode).isEmpty()) {
-            throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+            throw new IllegalArgumentException("Invalid bank code");
         }
 
         Account account = Account.builder()
@@ -134,7 +134,7 @@ public class AccountService {
         if (request.bankCode() != null) {
             String newBankCode = request.bankCode().toUpperCase();
             if (BankRegistry.findByCode(newBankCode).isEmpty()) {
-                throw new IllegalArgumentException("Invalid bank code: " + request.bankCode());
+                throw new IllegalArgumentException("Invalid bank code");
             }
             String oldBankCode = account.getBankCode();
             if (!newBankCode.equals(oldBankCode)) {
@@ -383,7 +383,7 @@ public class AccountService {
             accountRepository.save(defaultAccount);
             log.info("Default account created (userId={})", user.getId());
         } catch (Exception e) {
-            log.error("Default account creation failed (userId={}): {}", user.getId(), e.getMessage());
+            log.error("Default account creation failed (userId={}, cause={})", user.getId(), e.getClass().getSimpleName());
             throw e;
         }
     }

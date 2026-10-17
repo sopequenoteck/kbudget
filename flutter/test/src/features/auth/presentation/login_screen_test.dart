@@ -145,35 +145,13 @@ void main() {
     );
 
     testWidgets(
-      'should_showSwitchToLocalDialog_when_useLocalModeTapped',
+      'should_notOfferLocalMode_when_loginDisplayed',
       (tester) async {
         await tester.pumpWidget(buildApp());
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Utiliser en mode local'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Passer en mode local ?'), findsOneWidget);
-        expect(
-          find.textContaining('Vos données seront stockées uniquement'),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets(
-      'should_closeSwitchToLocalDialog_when_cancelTapped',
-      (tester) async {
-        await tester.pumpWidget(buildApp());
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.text('Utiliser en mode local'));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.text('Annuler'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Passer en mode local ?'), findsNothing);
+        expect(find.text('Se connecter'), findsWidgets);
+        expect(find.text('Utiliser en mode local'), findsNothing);
       },
     );
   });

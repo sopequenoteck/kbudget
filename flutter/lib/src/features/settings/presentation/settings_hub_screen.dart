@@ -13,9 +13,9 @@ import 'package:k_budget/src/constants/app_colors.dart';
 import 'package:k_budget/src/constants/app_radius.dart';
 import 'package:k_budget/src/constants/app_spacing.dart';
 import 'package:k_budget/src/constants/app_typography.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/user.dart';
+import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/debts/application/debt_notifier.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
@@ -77,14 +77,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _packageInfo = info);
     });
-    _checkServerModeAndRunHealthCheck();
-  }
-
-  Future<void> _checkServerModeAndRunHealthCheck() async {
-    final dataMode = await ref.read(dataModeProvider.future);
-    if (dataMode == DataMode.server) {
-      await _runHealthCheck();
-    }
+    unawaited(_runHealthCheck());
   }
 
   Future<void> _runHealthCheck() async {
@@ -188,8 +181,10 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     final textScale = ref.watch(textScaleNotifierProvider);
     final featureState = ref.watch(featureConfigNotifierProvider);
     final userAsync = ref.watch(userProfileNotifierProvider);
-    final dataModeAsync = ref.watch(dataModeProvider);
     final isAdmin = userAsync.valueOrNull?.isAdmin ?? false;
+    final lockEnabled = ref.watch(
+      appLockNotifierProvider.select((state) => state.enabled),
+    );
     final l10n = AppLocalizations.of(context)!;
 
     ref.listen(featureConfigNotifierProvider, (previous, next) {
@@ -500,6 +495,49 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
           ),
 
           // ----------------------------------------------------------------
+          // Section Cet appareil (verrouillage, serveur)
+          // ----------------------------------------------------------------
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.space4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.space6),
+                  _SettingsSectionLabel(l10n.settingsPageDeviceTitle),
+                  const SizedBox(height: AppSpacing.space2),
+                  _SettingsRow(
+                    icon: PhosphorIconsRegular.lock,
+                    iconBgColor: ext?.iconCircleBg ??
+                        theme.colorScheme.surfaceContainerHighest,
+                    iconColor: theme.colorScheme.onSurfaceVariant,
+                    title: l10n.settingsPageLockTitle,
+                    description: lockEnabled
+                        ? l10n.settingsValueLockOn
+                        : l10n.settingsValueLockOff,
+                    onTap: () => context.push(
+                      '${RouteNames.settings}/${RouteNames.settingsLock}',
+                    ),
+                  ),
+                  _SettingsRow(
+                    icon: PhosphorIconsRegular.hardDrives,
+                    iconBgColor: ext?.iconCircleBg ??
+                        theme.colorScheme.surfaceContainerHighest,
+                    iconColor: theme.colorScheme.onSurfaceVariant,
+                    title: l10n.settingsPageServerTitle,
+                    description: l10n.settingsListServerHint,
+                    onTap: () => context.push(
+                      '${RouteNames.settings}/${RouteNames.settingsData}',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ----------------------------------------------------------------
           // Footer
           // ----------------------------------------------------------------
           SliverToBoxAdapter(
@@ -508,11 +546,7 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
                 horizontal: AppSpacing.space4,
                 vertical: AppSpacing.space8,
               ),
-              child: dataModeAsync.when(
-                data: (mode) => _buildFooter(context, mode),
-                loading: () => const SizedBox.shrink(),
-                error: (e, _) => const SizedBox.shrink(),
-              ),
+              child: _buildFooter(context),
             ),
           ),
         ],
@@ -626,27 +660,14 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     );
   }
 
-  Widget _buildFooter(BuildContext context, DataMode mode) {
+  Widget _buildFooter(BuildContext context) {
     final theme = Theme.of(context);
     final ext = Theme.of(context).extension<AppThemeExtension>();
     final version = _packageInfo?.version ?? '...';
     final l10n = AppLocalizations.of(context)!;
     final versionLabel = l10n.settingsListVersion(version);
 
-    if (mode == DataMode.local) {
-      return Center(
-        child: Text(
-          '$versionLabel · ${l10n.onboardingValueLocalMode}',
-          style: TextStyle(
-            fontSize: AppTypography.sizeXs,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
-    // Mode server — afficher statut health check
+    // Afficher le statut du health check
     final statusText = switch (_healthResult) {
       _Checking() => l10n.settingsValueChecking,
       _Online(responseTimeMs: final ms) =>

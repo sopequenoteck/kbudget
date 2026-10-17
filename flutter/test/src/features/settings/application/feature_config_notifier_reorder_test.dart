@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
 import '../../../../helpers/display_locale.dart';
+import 'language_notifier_test.dart' show FakePreferenceDataSource, FakeAuthNotifier;
 
 class MockAppConfigRepository implements AppConfigRepository {
   List<Feature> enabledFeatures = [Feature.subscriptions, Feature.debts];
@@ -34,7 +36,6 @@ class MockAppConfigRepository implements AppConfigRepository {
 
   @override
   Future<AppConfig> getConfig() async => AppConfig(
-        dataMode: DataMode.local,
         enabledFeatures: enabledFeatures,
         navOrder: navOrder,
       );
@@ -47,12 +48,6 @@ class MockAppConfigRepository implements AppConfigRepository {
 
   @override
   Future<void> setOnboardingCompleted(bool completed) async {}
-
-  @override
-  Future<DataMode> getDataMode() async => DataMode.local;
-
-  @override
-  Future<void> setDataMode(DataMode mode) async {}
 
   @override
   Future<void> setServerUrl(String url) async {}
@@ -73,15 +68,6 @@ class MockAppConfigRepository implements AppConfigRepository {
   Future<TextScale> getTextScale() async => TextScale.medium;
 
   @override
-  Future<void> setLockEnabled(bool enabled) async {}
-
-  @override
-  Future<void> setLockMethod(LockMethod? method) async {}
-
-  @override
-  Future<void> setHashedPin(String? pin) async {}
-
-  @override
   Future<String?> getLanguage() async => null;
 
   @override
@@ -97,17 +83,22 @@ void main() {
 
   FeatureConfigState state() => container.read(featureConfigNotifierProvider);
 
-  setUp(() {
+  setUp(() async {
     mockRepo = MockAppConfigRepository();
     container = ProviderContainer(
       overrides: [
         displayLocaleOverride(),
         appConfigRepositoryProvider.overrideWithValue(mockRepo),
-        dataModeProvider.overrideWith((ref) async => DataMode.local),
+        preferenceRemoteDataSourceProvider
+            .overrideWith((ref) async => FakePreferenceDataSource()),
+        authNotifierProvider.overrideWith(
+          () => FakeAuthNotifier(const AuthState.authenticated()),
+        ),
       ],
     );
     // Let _loadFeatures() complete
     state();
+    await pumpEventQueue();
   });
 
   tearDown(() {
@@ -153,14 +144,15 @@ void main() {
         overrides: [
           displayLocaleOverride(),
           appConfigRepositoryProvider.overrideWithValue(mockRepo),
-          dataModeProvider.overrideWith((ref) async => DataMode.server),
           preferenceRemoteDataSourceProvider.overrideWith(
             (ref) => Future.error(Exception('offline')),
+          ),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
           ),
         ],
       );
       addTearDown(serverContainer.dispose);
-      await serverContainer.read(dataModeProvider.future);
       serverContainer.read(featureConfigNotifierProvider);
       await pumpEventQueue();
     }
@@ -186,6 +178,94 @@ void main() {
         serverContainer.read(featureConfigNotifierProvider).error,
         'Impossible de sauvegarder les préférences',
       );
+    });
+  });
+
+  group('reload at login', () {
+    late FakePreferenceDataSource remote;
+    late FakeAuthNotifier auth;
+    late ProviderContainer loginContainer;
+
+    FeatureConfigState loginState() =>
+        loginContainer.read(featureConfigNotifierProvider);
+
+    Future<void> start(AuthState initial) async {
+      remote = FakePreferenceDataSource();
+      auth = FakeAuthNotifier(initial);
+      loginContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          appConfigRepositoryProvider.overrideWithValue(mockRepo),
+          preferenceRemoteDataSourceProvider
+              .overrideWith((ref) async => remote),
+          authNotifierProvider.overrideWith(() => auth),
+        ],
+      );
+      addTearDown(loginContainer.dispose);
+      loginContainer.read(authNotifierProvider);
+      loginContainer.read(featureConfigNotifierProvider);
+      await pumpEventQueue();
+    }
+
+    test('should_keepLocalFeatures_when_notAuthenticated', () async {
+      mockRepo.enabledFeatures = [Feature.debts];
+
+      await start(const AuthState.unauthenticated());
+
+      expect(loginState().enabledFeatures, [Feature.debts]);
+      expect(remote.reads, 0);
+    });
+
+    test('should_loadServerFeatures_when_userLogsIn', () async {
+      mockRepo.enabledFeatures = [Feature.debts];
+      await start(const AuthState.unauthenticated());
+      expect(remote.reads, 0);
+
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+
+      expect(loginState().enabledFeatures, [Feature.budgets]);
+      expect(remote.reads, 1);
+      expect(mockRepo.enabledFeatures, [Feature.budgets]);
+    });
+
+    test('should_reloadServerFeatures_when_userLogsInAgain', () async {
+      await start(const AuthState.authenticated());
+      expect(remote.reads, 1);
+
+      auth.emit(const AuthState.unauthenticated());
+      await pumpEventQueue();
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+
+      expect(remote.reads, 2);
+    });
+
+    test('should_notReload_when_authStateChangesWithoutLogin', () async {
+      await start(const AuthState.authenticated());
+
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      auth.emit(const AuthState.authenticating());
+      await pumpEventQueue();
+      auth.emit(const AuthState.unauthenticated());
+      await pumpEventQueue();
+
+      expect(remote.reads, 1);
+    });
+
+    test('should_keepFeatures_when_reloadFails', () async {
+      mockRepo.enabledFeatures = [Feature.debts];
+      await start(const AuthState.unauthenticated());
+      remote.failReads = true;
+
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+
+      final s = loginState();
+      expect(s.enabledFeatures, [Feature.debts]);
+      expect(s.error, 'Impossible de charger les préférences');
+      expect(s.isLoading, false);
     });
   });
 }

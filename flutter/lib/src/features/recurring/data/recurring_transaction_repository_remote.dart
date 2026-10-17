@@ -3,10 +3,10 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
 import 'package:k_budget/src/data/remote/data_sources/recurring_transaction_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart';
 import 'package:k_budget/src/data/remote/dtos/recurring_transaction_dtos.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
 import 'package:k_budget/src/domain/repositories/recurring_transaction_repository.dart';
 
@@ -44,7 +44,7 @@ class RecurringTransactionRepositoryRemote
   }
 }
 
-// Provider server-only (pas de dataModeProvider — recurring transactions = server uniquement)
+// Provider du repository des transactions recurrentes
 final recurringTransactionRepositoryProvider =
     FutureProvider<RecurringTransactionRepository>((ref) async {
   final dio = await ref.watch(authenticatedDioProvider.future);

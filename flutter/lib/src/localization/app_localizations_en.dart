@@ -651,33 +651,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authActionUnlockBiometricReason => 'Unlock K-Budget';
 
   @override
-  String get authFeedbackBiometricError => 'Biometric error. Use your PIN.';
+  String get authFeedbackBiometricError => 'Biometrics failed. Use your PIN.';
 
   @override
-  String get authFormPinMinLength => 'The PIN must contain at least 4 digits';
+  String authFeedbackPinIncorrect(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts left',
+      one: '$count attempt left',
+    );
+    return 'Incorrect PIN. $_temp0';
+  }
 
   @override
-  String get authFeedbackPinIncorrect => 'Incorrect PIN';
+  String get authDialogForgotPinTitle => 'Forgot PIN?';
 
   @override
-  String get authDialogForgotPinTitle => 'Forgot your PIN?';
+  String get authDialogForgotPinMessage =>
+      'You will be signed out and the lock will be turned off. Sign in again with your password.';
 
   @override
-  String get authDialogForgotPinServerMessage =>
-      'You will be signed out and will need to sign in again with your credentials.';
+  String get authPageLockSubtitle => 'Enter your PIN';
 
   @override
-  String get authDialogForgotPinLocalMessage =>
-      'In local mode, resetting the PIN will erase all your data. This action is irreversible.';
+  String get authActionPinDeleteAria => 'Delete';
 
   @override
-  String get authPagePinTagline => 'Enter your PIN to continue';
+  String get authActionBiometricAria => 'Biometric unlock';
 
   @override
-  String get authActionUnlock => 'Unlock';
-
-  @override
-  String get authActionBiometric => 'Biometrics';
+  String authFormPinProgressAria(int count) {
+    return '$count of 4 digits entered';
+  }
 
   @override
   String get commonActionConfirm => 'Confirm';
@@ -720,9 +726,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonActionLogout => 'Sign out';
-
-  @override
-  String get commonActionReset => 'Reset';
 
   @override
   String get commonFormSearchPlaceholder => 'Search...';
@@ -788,34 +791,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonFeedbackLoadError => 'Loading error';
-
-  @override
-  String get onboardingDialogSwitchToLocalTitle => 'Switch to local mode?';
-
-  @override
-  String get onboardingDialogSwitchToLocalMessage =>
-      'Your data will be stored only on this device. You can switch back to server mode from settings.';
-
-  @override
-  String get onboardingActionUseLocalMode => 'Use in local mode';
-
-  @override
-  String get onboardingPageTitle => 'Welcome to K-Budget';
-
-  @override
-  String get onboardingPageTagline => 'Choose your data mode';
-
-  @override
-  String get onboardingValueLocalMode => 'Local mode';
-
-  @override
-  String get onboardingValueLocalModeHint => 'Your data stays on this device';
-
-  @override
-  String get onboardingValueServerMode => 'Server mode';
-
-  @override
-  String get onboardingValueServerModeHint => 'Sync with your K-Budget server';
 
   @override
   String get onboardingPageServerSetupTitle => 'Server setup';
@@ -1447,6 +1422,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsListCategoriesHint => 'Manage categories';
 
   @override
+  String get settingsListServerHint => 'URL of your instance';
+
+  @override
   String get settingsListTextScalePreview =>
       'Here is a preview of the chosen text size.';
 
@@ -1507,22 +1485,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your data will be hidden, not deleted.';
 
   @override
+  String get settingsDialogChangeServerTitle => 'Change server?';
+
+  @override
+  String get settingsDialogChangeServerMessage =>
+      'You will be signed out and will need to sign in again on the new server. Your data stays on the current server.';
+
+  @override
   String get settingsFeedbackLoadError => 'Unable to load preferences';
 
   @override
   String get settingsFeedbackSaveError => 'Unable to save preferences';
 
   @override
-  String get settingsPageDataTitle => 'Data';
-
-  @override
-  String get settingsFormDataSource => 'Data source';
-
-  @override
-  String get settingsValueDataSourceLocal => 'Local';
-
-  @override
-  String get settingsValueDataSourceServer => 'Server';
+  String get settingsPageServerTitle => 'Server';
 
   @override
   String get settingsFormServerUrl => 'Server URL';
@@ -1552,11 +1528,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Endpoint not found — check the URL';
 
   @override
-  String get settingsDialogChangeDataSourceTitle => 'Change data source?';
+  String get settingsPageDeviceTitle => 'This device';
 
   @override
-  String get settingsDialogChangeDataSourceMessage =>
-      'Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.';
+  String get settingsPageLockTitle => 'App lock';
+
+  @override
+  String get settingsValueLockOn => 'On';
+
+  @override
+  String get settingsValueLockOff => 'Off';
+
+  @override
+  String get settingsFormLockEnabled => 'Lock the app';
+
+  @override
+  String get settingsFormLockEnabledHint =>
+      'PIN required at launch and after 1 minute away';
+
+  @override
+  String get settingsFormLockBiometric => 'Biometric unlock';
+
+  @override
+  String get settingsFormLockBiometricHint => 'Your PIN remains the fallback';
+
+  @override
+  String get settingsActionChangePin => 'Change PIN';
+
+  @override
+  String get settingsFormPinChoose => 'Choose a PIN';
+
+  @override
+  String get settingsFormPinConfirm => 'Confirm your PIN';
+
+  @override
+  String get settingsFormPinCurrent => 'Enter your current PIN';
+
+  @override
+  String get settingsFeedbackPinMismatch => 'The PINs don\'t match';
+
+  @override
+  String get settingsFormLockForgotHint =>
+      'Forgot your PIN? Signing out resets it.';
 
   @override
   String get notificationsValueSubscriptionDue => 'Subscription due';

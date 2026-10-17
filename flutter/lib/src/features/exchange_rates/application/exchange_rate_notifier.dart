@@ -5,11 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
 
@@ -24,7 +25,11 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
 
   @override
   ListState<ExchangeRate> build() {
-    ref.watch(exchangeRateRepositoryProvider);
+    // The state belongs to the session: rebuilt on every login and logout,
+    // otherwise user B would inherit user A's data (KKS-546).
+    ref
+      ..watch(authNotifierProvider)
+      ..watch(exchangeRateRepositoryProvider);
     return const ListState();
   }
 

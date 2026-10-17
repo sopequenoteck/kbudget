@@ -338,7 +338,7 @@ class PreferenceServiceTest {
 
         assertThatThrownBy(() -> preferenceService.updatePreferences(request, userId))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Invalid timezone");
+                .hasMessage("Invalid timezone");
     }
 
     @Test

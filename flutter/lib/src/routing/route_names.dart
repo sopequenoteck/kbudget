@@ -7,7 +7,6 @@ class RouteNames {
 
   // Paths
   static const String onboarding = '/onboarding';
-  static const String serverSetup = 'server-setup';
   static const String dashboard = '/dashboard';
   static const String transactions = '/transactions';
   static const String subscriptions = '/subscriptions';
@@ -23,7 +22,6 @@ class RouteNames {
   /// Ecran de premiere connexion : reset email/mot de passe/nom obligatoire
   /// pour un compte provisionne par un admin (KKS-309).
   static const String firstLoginReset = '/first-login-reset';
-  static const String lock = '/lock';
   static const String acceptInvite = '/accept-invite/:token';
   static const String adminUsers = '/settings/users';
 
@@ -33,10 +31,13 @@ class RouteNames {
   static const String settingsCategories = 'categories';
   static const String settingsData = 'data';
   static const String settingsCurrencies = 'currencies';
+  /// App lock settings (KKS-247).
+  static const settingsLock = 'lock';
+  /// PIN entry of the lock settings, under [settingsLock] (KKS-247).
+  static const settingsLockPin = 'pin/:flow';
 
   // Names
   static const String onboardingName = 'onboarding';
-  static const String serverSetupName = 'server-setup';
   static const String dashboardName = 'dashboard';
   static const String transactionsName = 'transactions';
   static const String subscriptionsName = 'subscriptions';
@@ -47,7 +48,6 @@ class RouteNames {
   static const String incompatibleName = 'incompatible';
   /// Nom de la route de l'ecran de premiere connexion (KKS-309).
   static const String firstLoginResetName = 'first-login-reset';
-  static const String lockName = 'lock';
   static const String acceptInviteName = 'acceptInvite';
   static const String adminUsersName = 'adminUsers';
   static const String settingsProfileName = 'settings-profile';
@@ -55,6 +55,10 @@ class RouteNames {
   static const String settingsCategoriesName = 'settings-categories';
   static const String settingsDataName = 'settings-data';
   static const String settingsCurrenciesName = 'settings-currencies';
+  /// Name of the app lock settings route (KKS-247).
+  static const settingsLockName = 'settings-lock';
+  /// Name of the PIN entry route of the lock settings (KKS-247).
+  static const settingsLockPinName = 'settings-lock-pin';
   static const String budgetsName = 'budgets';
   static const String budgetDetailsName = 'budget-details';
   static const String debtDetailName = 'debt-detail';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_budget/src/data/data_mode_provider.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/monthly_summary.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';

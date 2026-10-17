@@ -249,15 +249,28 @@
     }
   },
   "authActionUnlockBiometricReason": "Unlock K-Budget",
-  "authFeedbackBiometricError": "Biometric error. Use your PIN.",
-  "authFormPinMinLength": "The PIN must contain at least 4 digits",
-  "authFeedbackPinIncorrect": "Incorrect PIN",
-  "authDialogForgotPinTitle": "Forgot your PIN?",
-  "authDialogForgotPinServerMessage": "You will be signed out and will need to sign in again with your credentials.",
-  "authDialogForgotPinLocalMessage": "In local mode, resetting the PIN will erase all your data. This action is irreversible.",
-  "authPagePinTagline": "Enter your PIN to continue",
-  "authActionUnlock": "Unlock",
-  "authActionBiometric": "Biometrics",
+  "authFeedbackBiometricError": "Biometrics failed. Use your PIN.",
+  "authFeedbackPinIncorrect": "Incorrect PIN. {count, plural, one {{count} attempt left} other {{count} attempts left}}",
+  "@authFeedbackPinIncorrect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "authDialogForgotPinTitle": "Forgot PIN?",
+  "authDialogForgotPinMessage": "You will be signed out and the lock will be turned off. Sign in again with your password.",
+  "authPageLockSubtitle": "Enter your PIN",
+  "authActionPinDeleteAria": "Delete",
+  "authActionBiometricAria": "Biometric unlock",
+  "authFormPinProgressAria": "{count} of 4 digits entered",
+  "@authFormPinProgressAria": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "commonActionConfirm": "Confirm",
   "commonActionClose": "Close",
   "commonActionChooseEmoji": "Choose an emoji",
@@ -272,7 +285,6 @@
   "commonActionNextMonthAria": "Next month",
   "commonNavSettings": "Settings",
   "commonActionLogout": "Sign out",
-  "commonActionReset": "Reset",
   "commonFormSearchPlaceholder": "Search...",
   "commonFormSelectPlaceholder": "Select...",
   "commonEmptyNoResults": "No results",
@@ -301,15 +313,6 @@
   "commonFeedbackSaveError": "Save failed",
   "commonFeedbackDeleteError": "Delete failed",
   "commonFeedbackLoadError": "Loading error",
-  "onboardingDialogSwitchToLocalTitle": "Switch to local mode?",
-  "onboardingDialogSwitchToLocalMessage": "Your data will be stored only on this device. You can switch back to server mode from settings.",
-  "onboardingActionUseLocalMode": "Use in local mode",
-  "onboardingPageTitle": "Welcome to K-Budget",
-  "onboardingPageTagline": "Choose your data mode",
-  "onboardingValueLocalMode": "Local mode",
-  "onboardingValueLocalModeHint": "Your data stays on this device",
-  "onboardingValueServerMode": "Server mode",
-  "onboardingValueServerModeHint": "Sync with your K-Budget server",
   "onboardingPageServerSetupTitle": "Server setup",
   "onboardingFormServerUrlHint": "Enter your K-Budget server URL",
   "onboardingFormServerUrl": "Server URL",
@@ -716,6 +719,7 @@
   "settingsListAccountsHint": "Manage accounts and currencies",
   "settingsListCategories": "Categories",
   "settingsListCategoriesHint": "Manage categories",
+  "settingsListServerHint": "URL of your instance",
   "settingsListTextScalePreview": "Here is a preview of the chosen text size.",
   "settingsListVersion": "K-Budget v{version}",
   "@settingsListVersion": {
@@ -748,12 +752,11 @@
     }
   },
   "settingsDialogDisableFeatureMessage": "Your data will be hidden, not deleted.",
+  "settingsDialogChangeServerTitle": "Change server?",
+  "settingsDialogChangeServerMessage": "You will be signed out and will need to sign in again on the new server. Your data stays on the current server.",
   "settingsFeedbackLoadError": "Unable to load preferences",
   "settingsFeedbackSaveError": "Unable to save preferences",
-  "settingsPageDataTitle": "Data",
-  "settingsFormDataSource": "Data source",
-  "settingsValueDataSourceLocal": "Local",
-  "settingsValueDataSourceServer": "Server",
+  "settingsPageServerTitle": "Server",
   "settingsFormServerUrl": "Server URL",
   "settingsFormServerUrlRequired": "The server URL is required",
   "settingsFormServerUrlHttpsRequired": "The URL must start with https://",
@@ -762,8 +765,20 @@
   "settingsFeedbackServerTimeout": "Connection timed out",
   "settingsFeedbackServerAccessDenied": "Access denied by the server",
   "settingsFeedbackServerNotFound": "Endpoint not found — check the URL",
-  "settingsDialogChangeDataSourceTitle": "Change data source?",
-  "settingsDialogChangeDataSourceMessage": "Data sources are independent. The data of the current source will not be visible after the change.\n\nThe app will restart to apply the new source.",
+  "settingsPageDeviceTitle": "This device",
+  "settingsPageLockTitle": "App lock",
+  "settingsValueLockOn": "On",
+  "settingsValueLockOff": "Off",
+  "settingsFormLockEnabled": "Lock the app",
+  "settingsFormLockEnabledHint": "PIN required at launch and after 1 minute away",
+  "settingsFormLockBiometric": "Biometric unlock",
+  "settingsFormLockBiometricHint": "Your PIN remains the fallback",
+  "settingsActionChangePin": "Change PIN",
+  "settingsFormPinChoose": "Choose a PIN",
+  "settingsFormPinConfirm": "Confirm your PIN",
+  "settingsFormPinCurrent": "Enter your current PIN",
+  "settingsFeedbackPinMismatch": "The PINs don't match",
+  "settingsFormLockForgotHint": "Forgot your PIN? Signing out resets it.",
   "notificationsValueSubscriptionDue": "Subscription due",
   "notificationsValueDebtDue": "Debt due",
   "notificationsValueDebtReminder": "Debt reminder",

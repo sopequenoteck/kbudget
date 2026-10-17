@@ -210,6 +210,15 @@ class AccountControllerTest {
     }
 
     @Test
+    void should_return400_when_accountIdIsNotAUuid() throws Exception {
+        mockMvc.perform(get("/v1/accounts/not-a-uuid")
+                        .header("Authorization", BEARER_TOKEN))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Invalid value for parameter 'id'"));
+    }
+
+    @Test
     void should_return401_when_notAuthenticated() throws Exception {
         mockMvc.perform(get("/v1/accounts"))
                 .andExpect(status().isUnauthorized());
@@ -581,7 +590,7 @@ class AccountControllerTest {
     @Test
     void should_return400_when_invalidBankCode() throws Exception {
         when(accountService.createAccount(any(AccountRequest.class), eq(userId)))
-                .thenThrow(new IllegalArgumentException("Invalid bank code: INEXISTANT"));
+                .thenThrow(new IllegalArgumentException("Invalid bank code"));
 
         mockMvc.perform(post("/v1/accounts")
                         .header("Authorization", BEARER_TOKEN)
@@ -594,7 +603,7 @@ class AccountControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Invalid bank code: INEXISTANT"));
+                .andExpect(jsonPath("$.message").value("Invalid bank code"));
     }
 
     @Test

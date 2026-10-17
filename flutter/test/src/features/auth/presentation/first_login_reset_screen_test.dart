@@ -7,10 +7,12 @@ import 'package:k_budget/src/constants/password_policy.dart';
 import 'package:k_budget/src/domain/repositories/auth_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/presentation/first_login_reset_screen.dart';
+import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 import 'package:mockito/mockito.dart';
 
+import '../../../../helpers/fake_app_config_repository.dart';
 import '../../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -39,6 +41,8 @@ void main() {
     return ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWith((_) async => mockAuthRepo),
+        appConfigRepositoryProvider
+            .overrideWithValue(FakeAppConfigRepository()),
       ],
       child: MaterialApp.router(
         routerConfig: router,

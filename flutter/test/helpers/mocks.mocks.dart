@@ -213,26 +213,6 @@ class MockAppConfigRepository extends _i1.Mock
           as _i21.Future<void>);
 
   @override
-  _i21.Future<_i22.DataMode> getDataMode() =>
-      (super.noSuchMethod(
-            Invocation.method(#getDataMode, []),
-            returnValue: _i21.Future<_i22.DataMode>.value(_i22.DataMode.local),
-            returnValueForMissingStub: _i21.Future<_i22.DataMode>.value(
-              _i22.DataMode.local,
-            ),
-          )
-          as _i21.Future<_i22.DataMode>);
-
-  @override
-  _i21.Future<void> setDataMode(_i22.DataMode? mode) =>
-      (super.noSuchMethod(
-            Invocation.method(#setDataMode, [mode]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
   _i21.Future<void> setServerUrl(String? url) =>
       (super.noSuchMethod(
             Invocation.method(#setServerUrl, [url]),
@@ -291,33 +271,6 @@ class MockAppConfigRepository extends _i1.Mock
             ),
           )
           as _i21.Future<_i22.TextScale>);
-
-  @override
-  _i21.Future<void> setLockEnabled(bool? enabled) =>
-      (super.noSuchMethod(
-            Invocation.method(#setLockEnabled, [enabled]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
-  _i21.Future<void> setLockMethod(_i22.LockMethod? method) =>
-      (super.noSuchMethod(
-            Invocation.method(#setLockMethod, [method]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
-
-  @override
-  _i21.Future<void> setHashedPin(String? pin) =>
-      (super.noSuchMethod(
-            Invocation.method(#setHashedPin, [pin]),
-            returnValue: _i21.Future<void>.value(),
-            returnValueForMissingStub: _i21.Future<void>.value(),
-          )
-          as _i21.Future<void>);
 
   @override
   _i21.Future<List<_i22.Feature>> getEnabledFeatures() =>

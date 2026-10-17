@@ -282,6 +282,16 @@ class CategoryServiceTest {
     }
 
     @Test
+    void should_rethrowException_when_systemCategoriesSeedingFails() {
+        var user = buildUser();
+        when(categoryRepository.save(any(Category.class))).thenThrow(new IllegalStateException("database unavailable"));
+
+        assertThatThrownBy(() -> categoryService.seedSystemCategories(user))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("database unavailable");
+    }
+
+    @Test
     void should_findSystemCategory_when_keyAndUserExist() {
         var user = buildUser();
         var systemCat = buildSystemCategory(user, "Abonnement", "🔄", SystemCategoryKey.SUBSCRIPTION);
