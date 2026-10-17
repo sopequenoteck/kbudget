@@ -27,8 +27,9 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
   ListState<ExchangeRate> build() {
     // The state belongs to the session: rebuilt on every login and logout,
     // otherwise user B would inherit user A's data (KKS-546).
-    ref.watch(authNotifierProvider);
-    ref.watch(exchangeRateRepositoryProvider);
+    ref
+      ..watch(authNotifierProvider)
+      ..watch(exchangeRateRepositoryProvider);
     return const ListState();
   }
 
