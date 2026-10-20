@@ -7,6 +7,15 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mobile app: "Administration" entry of the settings following the previous
+  account for one request** (KKS-559): after signing out of an administrator
+  account and signing in with another account, the settings kept showing, or
+  hiding, the "Administration" entry until the new profile was loaded. The
+  entry now follows the loaded profile only. Nothing was exposed: the
+  administration routes are protected by the API.
+
 ## [6.12.0] - 2026-10-17
 
 ### Added

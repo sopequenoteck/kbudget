@@ -7,6 +7,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **App mobile : entrée « Administration » des réglages suivant l'ancien
+  compte le temps d'une requête** (KKS-559) : après la déconnexion d'un compte
+  administrateur et la connexion d'un autre compte, les réglages gardaient, ou
+  masquaient, l'entrée « Administration » jusqu'au chargement du nouveau
+  profil. L'entrée ne suit plus que le profil chargé. Aucune donnée exposée :
+  les routes d'administration sont protégées par l'API.
+
 ## [6.12.0] - 2026-10-17
 
 ### Added
