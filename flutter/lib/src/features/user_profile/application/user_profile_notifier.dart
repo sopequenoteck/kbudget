@@ -14,6 +14,7 @@ final userProfileNotifierProvider =
   UserProfileNotifier.new,
 );
 
+/// Profil du compte connecte.
 class UserProfileNotifier extends AsyncNotifier<User>
     with SessionGuard {
   UserRepository get _repo => ref.read(userRepositoryProvider).requireValue;

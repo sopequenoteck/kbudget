@@ -14,6 +14,7 @@ final adminUsersNotifierProvider =
   AdminUsersNotifier.new,
 );
 
+/// Liste des utilisateurs pour l'administration, activation et desactivation.
 class AdminUsersNotifier extends Notifier<AdminUsersListState>
     with SessionGuard {
   @override

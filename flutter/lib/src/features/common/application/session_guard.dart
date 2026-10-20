@@ -20,9 +20,9 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 /// la reconstruction jusqu'a la prochaine lecture, ferme entre-temps les
 /// abonnements poses dans `build()`, et fusionne deconnexion puis connexion en
 /// un seul `build()` qui revoit l'etat « authentifie » : comparer l'etat
-/// d'authentification ne suffirait pas, il faut un jeton. Le notifier d'authentification est garde
-/// plutot que `ref`, dont Riverpod refuse l'usage tant que la reconstruction
-/// differee n'a pas eu lieu.
+/// d'authentification ne suffirait pas, il faut un jeton. Le notifier
+/// d'authentification est garde plutot que `ref`, dont Riverpod refuse l'usage
+/// tant que la reconstruction differee n'a pas eu lieu.
 mixin SessionGuard {
   late AuthNotifier _auth;
 

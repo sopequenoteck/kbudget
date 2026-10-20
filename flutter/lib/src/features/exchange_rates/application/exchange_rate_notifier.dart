@@ -19,6 +19,7 @@ final exchangeRateListProvider =
   ExchangeRateNotifier.new,
 );
 
+/// Taux de change du compte.
 class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>>
     with SessionGuard {
   Future<ExchangeRateRepository> get _repository =>

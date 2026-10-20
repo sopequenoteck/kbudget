@@ -15,6 +15,7 @@ final currencyConfigNotifierProvider =
   CurrencyConfigNotifier.new,
 );
 
+/// Devises actives du compte, la premiere est la devise principale.
 class CurrencyConfigNotifier extends Notifier<List<Currency>>
     with SessionGuard {
   @override

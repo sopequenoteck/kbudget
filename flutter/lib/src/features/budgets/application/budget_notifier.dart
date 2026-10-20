@@ -15,6 +15,7 @@ final budgetNotifierProvider =
   BudgetNotifier.new,
 );
 
+/// Budgets du compte, avec vue d'ensemble et historique mensuel.
 class BudgetNotifier extends Notifier<BudgetListState>
     with SessionGuard {
   static const _pageSize = 20;

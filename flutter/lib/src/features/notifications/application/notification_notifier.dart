@@ -22,6 +22,7 @@ final unreadCountProvider = Provider<int>((ref) {
   return state.items.where((n) => !n.read).length;
 });
 
+/// Notifications du compte, paginees cote serveur.
 class NotificationNotifier extends Notifier<ListState<NotificationModel>>
     with SessionGuard {
   static const _pageSize = 20;

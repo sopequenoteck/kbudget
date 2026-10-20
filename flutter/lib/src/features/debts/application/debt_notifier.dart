@@ -18,6 +18,7 @@ final debtNotifierProvider =
   DebtNotifier.new,
 );
 
+/// Liste des dettes, avec remboursement et report de rappel.
 class DebtNotifier extends Notifier<DebtListState>
     with SessionGuard {
   static const _pageSize = 20;

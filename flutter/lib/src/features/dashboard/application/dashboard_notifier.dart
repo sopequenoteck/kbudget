@@ -38,6 +38,7 @@ final dashboardNotifierProvider =
   DashboardNotifier.new,
 );
 
+/// Etat du tableau de bord : nom, comptes, totaux du mois et taux.
 class DashboardNotifier extends Notifier<DashboardState>
     with SessionGuard {
   @override

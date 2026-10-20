@@ -15,6 +15,7 @@ final invitationsNotifierProvider =
   InvitationsNotifier.new,
 );
 
+/// Invitations emises par l'administrateur, creation et revocation.
 class InvitationsNotifier extends Notifier<InvitationListState>
     with SessionGuard {
   @override

@@ -16,6 +16,7 @@ final transactionListNotifierProvider =
   TransactionListNotifier.new,
 );
 
+/// Transactions et totaux du mois selectionne.
 class TransactionListNotifier extends Notifier<TransactionListState>
     with SessionGuard {
   TransactionRepository get _repo =>

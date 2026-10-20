@@ -19,6 +19,7 @@ final subscriptionNotifierProvider =
   SubscriptionNotifier.new,
 );
 
+/// Liste des abonnements, avec paiement de l'echeance.
 class SubscriptionNotifier extends Notifier<SubscriptionListState>
     with SessionGuard {
   static const _pageSize = 20;

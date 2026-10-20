@@ -15,6 +15,7 @@ final transactionNotifierProvider =
   TransactionNotifier.new,
 );
 
+/// Transactions du compte, paginees cote client.
 class TransactionNotifier extends Notifier<ListState<Transaction>>
     with SessionGuard {
   static const _pageSize = 20;
