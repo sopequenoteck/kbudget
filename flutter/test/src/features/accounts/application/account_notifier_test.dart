@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
@@ -97,6 +99,18 @@ void main() {
       await notifier().create(acc2);
 
       expect(state().items, hasLength(2));
+    });
+
+    test('should_setError_when_createFails', () async {
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1]);
+      await notifier().loadItems();
+
+      when(mockRepo.create(any)).thenThrow(Exception('Server error'));
+      await notifier().create(acc2);
+
+      expect(state().error, 'Erreur lors de la sauvegarde');
+      expect(state().isLoading, false);
+      expect(state().items, [acc1]);
     });
 
     test('should_updateItem_when_updateSucceeds', () async {
@@ -299,6 +313,70 @@ void main() {
           .emit(const AuthState.unauthenticated());
 
       expect(sessionContainer.read(accountNotifierProvider).items, isEmpty);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          accountRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final pending = Completer<List<Account>>();
+      when(mockRepo.getAll()).thenAnswer((_) => pending.future);
+      final loading =
+          sessionContainer.read(accountNotifierProvider.notifier).loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([acc1]);
+      await loading;
+
+      final state = sessionContainer.read(accountNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringSetDefault',
+        () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          accountRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      when(mockRepo.getAll()).thenAnswer((_) async => [acc1, acc2]);
+      final notifier = sessionContainer.read(accountNotifierProvider.notifier);
+      await notifier.loadItems();
+      final pending = Completer<Account>();
+      when(mockRepo.setDefault('2')).thenAnswer((_) => pending.future);
+      final settingDefault = notifier.setDefault('2');
+
+      // A se deconnecte et B se connecte, puis charge ses comptes, avant la
+      // reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      await notifier.loadItems();
+      pending.complete(acc2.copyWith(isDefault: true));
+      await settingDefault;
+
+      final state = sessionContainer.read(accountNotifierProvider);
+      expect(state.items.firstWhere((e) => e.id == '1').isDefault, isTrue);
+      expect(state.items.firstWhere((e) => e.id == '2').isDefault, isFalse);
+      expect(state.mutatingIds, isEmpty);
     });
 
     test('should_notExposePreviousItems_when_createdAfterSessionEnds',

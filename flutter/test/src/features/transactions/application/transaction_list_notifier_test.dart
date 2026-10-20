@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
@@ -225,6 +227,40 @@ void main() {
   });
 
   group('session', () {
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          transactionRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final pending = Completer<List<Transaction>>();
+      when(mockRepo.getByMonth(2, 2020))
+          .thenAnswer((_) => pending.future);
+      when(mockRepo.getMonthlySummary(2, 2020))
+          .thenAnswer((_) async => [summary]);
+      final loading = sessionContainer
+          .read(transactionListNotifierProvider.notifier)
+          .loadMonth(2, 2020);
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([txDepense1]);
+      await loading;
+
+      final state = sessionContainer.read(transactionListNotifierProvider);
+      expect(state.allMonthTransactions, isEmpty);
+      expect(state.summary, isNull);
+      expect(state.isLoading, isFalse);
+    });
+
     test('should_resetState_when_sessionEnds', () async {
       final sessionContainer = ProviderContainer(
         overrides: [

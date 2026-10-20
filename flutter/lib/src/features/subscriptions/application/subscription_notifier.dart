@@ -10,6 +10,7 @@ import 'package:k_budget/src/domain/models/subscription_payment.dart';
 import 'package:k_budget/src/domain/models/subscription_total_paid.dart';
 import 'package:k_budget/src/domain/repositories/subscription_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/subscriptions/application/subscription_list_state.dart';
 
@@ -18,7 +19,9 @@ final subscriptionNotifierProvider =
   SubscriptionNotifier.new,
 );
 
-class SubscriptionNotifier extends Notifier<SubscriptionListState> {
+/// Liste des abonnements, avec paiement de l'echeance.
+class SubscriptionNotifier extends Notifier<SubscriptionListState>
+    with SessionGuard {
   static const _pageSize = 20;
   List<Subscription> _allItems = [];
 
@@ -27,7 +30,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
     // survit a la reconstruction : le cache local doit etre vide avec l'etat.
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     _allItems = [];
     return const SubscriptionListState();
   }
@@ -36,12 +39,20 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
       ref.read(subscriptionRepositoryProvider);
 
   Future<void> loadItems() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll();
+      final items = await _repo.getAll();
+      if (isStale(token)) {
+        return;
+      }
+      _allItems = items;
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
       _refreshPage(resetPage: true);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -70,13 +81,20 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
   }
 
   Future<void> create(Subscription item) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await _repo.create(item);
+      if (isStale(token)) {
+        return;
+      }
       _allItems.add(created);
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
       _refreshPage();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -85,12 +103,16 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
   }
 
   Future<void> update(Subscription item) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, item.id},
       error: null,
     );
     try {
       final updated = await _repo.update(item);
+      if (isStale(token)) {
+        return;
+      }
       final index = _allItems.indexWhere((e) => e.id == item.id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
@@ -99,6 +121,9 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -110,6 +135,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
     final index = _allItems.indexWhere((e) => e.id == id);
     if (index == -1) return;
     final saved = _allItems[index];
+    final token = session;
 
     _allItems.removeAt(index);
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
@@ -117,10 +143,16 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
 
     try {
       await _repo.delete(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       _allItems.insert(index, saved);
       _allItems.sort((a, b) => a.nom.compareTo(b.nom));
       _refreshPage();
@@ -138,13 +170,20 @@ class SubscriptionNotifier extends Notifier<SubscriptionListState> {
   }
 
   Future<void> pay(String id) async {
+    final token = session;
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
     try {
       await _repo.pay(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,

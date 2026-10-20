@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/admin/application/invitations_notifier.dart';
@@ -129,6 +131,37 @@ void main() {
           .emit(const AuthState.unauthenticated());
 
       expect(sessionContainer.read(invitationsNotifierProvider).items, isEmpty);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          adminRepoOverride(repo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      await sessionContainer.read(adminRepositoryProvider.future);
+      final pending = Completer<List<Invitation>>();
+      when(repo.listInvitations()).thenAnswer((_) => pending.future);
+      final loading = sessionContainer
+          .read(invitationsNotifierProvider.notifier)
+          .loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([invitation()]);
+      await loading;
+
+      final state = sessionContainer.read(invitationsNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
     });
   });
 }

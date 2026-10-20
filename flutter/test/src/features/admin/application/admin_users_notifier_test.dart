@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/admin/application/admin_users_notifier.dart';
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
+import 'package:k_budget/src/features/admin/data/admin_user_model.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/localization/app_localizations_fr.dart';
@@ -125,6 +128,37 @@ void main() {
           .emit(const AuthState.unauthenticated());
 
       expect(sessionContainer.read(adminUsersNotifierProvider).items, isEmpty);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          adminRepoOverride(repo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      await sessionContainer.read(adminRepositoryProvider.future);
+      final pending = Completer<List<AdminUser>>();
+      when(repo.listUsers()).thenAnswer((_) => pending.future);
+      final loading = sessionContainer
+          .read(adminUsersNotifierProvider.notifier)
+          .loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([adminUser()]);
+      await loading;
+
+      final state = sessionContainer.read(adminUsersNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
     });
   });
 }

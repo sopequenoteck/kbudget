@@ -7,7 +7,7 @@ import 'package:k_budget/src/features/admin/application/invitation_list_state.da
 import 'package:k_budget/src/features/admin/data/admin_remote_repository.dart';
 import 'package:k_budget/src/features/admin/data/admin_repository.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final invitationsNotifierProvider =
@@ -15,12 +15,14 @@ final invitationsNotifierProvider =
   InvitationsNotifier.new,
 );
 
-class InvitationsNotifier extends Notifier<InvitationListState> {
+/// Invitations emises par l'administrateur, creation et revocation.
+class InvitationsNotifier extends Notifier<InvitationListState>
+    with SessionGuard {
   @override
   InvitationListState build() {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546).
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     return const InvitationListState();
   }
 
@@ -28,11 +30,18 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
       ref.read(adminRepositoryProvider).requireValue;
 
   Future<void> loadItems() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final items = await _repo.listInvitations();
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(items: items, isLoading: false);
     } on Exception {
+      if (isStale(token)) {
+        return;
+      }
       final l10n = ref.read(appLocalizationsProvider);
       state = state.copyWith(
         isLoading: false,
@@ -42,12 +51,19 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
   }
 
   Future<InvitationCreated> createInvitation(String email) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await _repo.createInvitation(email);
+      if (isStale(token)) {
+        return created;
+      }
       await loadItems();
       return created;
     } on Exception {
+      if (isStale(token)) {
+        rethrow;
+      }
       state = state.copyWith(
         isLoading: false,
         error:
@@ -58,14 +74,24 @@ class InvitationsNotifier extends Notifier<InvitationListState> {
   }
 
   Future<void> revoke(int id) async {
+    final token = session;
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
     try {
       await _repo.revokeInvitation(id);
+      if (isStale(token)) {
+        return;
+      }
       await loadItems();
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
         error:

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
@@ -19,6 +21,9 @@ class MockNotificationRepository implements NotificationRepository {
   int _unreadCount = 0;
   bool shouldThrow = false;
 
+  /// Si renseigne, `getNotifications` attend sa completion avant de repondre.
+  Completer<void>? gate;
+
   void setItems(List<NotificationModel> items) {
     _items = List.of(items);
     _unreadCount = items.where((n) => !n.read).length;
@@ -30,6 +35,7 @@ class MockNotificationRepository implements NotificationRepository {
     int size = 20,
     bool? unreadOnly,
   }) async {
+    await gate?.future;
     if (shouldThrow) throw Exception('Network error');
     final start = page * size;
     if (start >= _items.length) return [];
@@ -379,6 +385,39 @@ void main() {
   });
 
   group('session', () {
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          notificationRepositoryProvider
+              .overrideWith((ref) async => mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final gate = Completer<void>();
+      mockRepo
+        ..setItems([makeNotification(id: '1')])
+        ..gate = gate;
+      final loading = sessionContainer
+          .read(notificationNotifierProvider.notifier)
+          .loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      gate.complete();
+      await loading;
+
+      final state = sessionContainer.read(notificationNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
+    });
+
     test('should_resetState_when_sessionEnds', () async {
       final sessionContainer = ProviderContainer(
         overrides: [
