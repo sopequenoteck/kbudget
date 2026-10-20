@@ -16,6 +16,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   profil. L'entrée ne suit plus que le profil chargé. Aucune donnée exposée :
   les routes d'administration sont protégées par l'API.
 
+### Security
+
+- **App mobile : une requête encore en vol à la déconnexion pouvait remplir
+  l'écran du compte suivant** (KKS-558) : après la déconnexion de A et la
+  connexion de B avant l'arrivée d'une réponse de A, cette réponse était écrite
+  dans les listes, les totaux de l'accueil ou les devises de B, et les
+  fonctionnalités de B pouvaient partir au serveur avec le jeton de A. Chaque
+  notifier par compte ignore désormais toute réponse d'une session précédente.
+
 ## [6.12.0] - 2026-10-17
 
 ### Added

@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/budget.dart';
 import 'package:k_budget/src/domain/repositories/budget_repository.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_list_state.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final budgetNotifierProvider =
@@ -15,7 +15,8 @@ final budgetNotifierProvider =
   BudgetNotifier.new,
 );
 
-class BudgetNotifier extends Notifier<BudgetListState> {
+class BudgetNotifier extends Notifier<BudgetListState>
+    with SessionGuard {
   static const _pageSize = 20;
   List<Budget> _allItems = [];
 
@@ -24,7 +25,7 @@ class BudgetNotifier extends Notifier<BudgetListState> {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
     // survit a la reconstruction : le cache local doit etre vide avec l'etat.
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     _allItems = [];
     return const BudgetListState();
   }
@@ -32,12 +33,20 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   BudgetRepository get _repo => ref.read(budgetRepositoryProvider);
 
   Future<void> loadItems({bool includeInactive = false}) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll(includeInactive: includeInactive);
+      final items = await _repo.getAll(includeInactive: includeInactive);
+      if (isStale(token)) {
+        return;
+      }
+      _allItems = items;
       _allItems.sort((a, b) => (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
       _refreshPage(resetPage: true);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -46,11 +55,18 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   }
 
   Future<void> loadOverview() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final overview = await _repo.getOverview();
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(overview: overview, isLoading: false);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -59,11 +75,18 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   }
 
   Future<void> loadHistory(String month) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final history = await _repo.getHistory(month);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(history: history, isLoading: false);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -89,13 +112,20 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   }
 
   Future<void> create(Budget item) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await _repo.create(item);
+      if (isStale(token)) {
+        return;
+      }
       _allItems.add(created);
       _refreshPage();
       await loadOverview();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -104,12 +134,16 @@ class BudgetNotifier extends Notifier<BudgetListState> {
   }
 
   Future<void> update(Budget item) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, item.id},
       error: null,
     );
     try {
       final updated = await _repo.update(item);
+      if (isStale(token)) {
+        return;
+      }
       final index = _allItems.indexWhere((e) => e.id == item.id);
       if (index != -1) _allItems[index] = updated;
       _refreshPage();
@@ -118,6 +152,9 @@ class BudgetNotifier extends Notifier<BudgetListState> {
       );
       await loadOverview();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -129,6 +166,7 @@ class BudgetNotifier extends Notifier<BudgetListState> {
     final index = _allItems.indexWhere((e) => e.id == id);
     if (index == -1) return;
     final saved = _allItems[index];
+    final token = session;
 
     _allItems.removeAt(index);
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
@@ -136,11 +174,17 @@ class BudgetNotifier extends Notifier<BudgetListState> {
 
     try {
       await _repo.delete(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
       await loadOverview();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       _allItems.insert(index, saved);
       _refreshPage();
       state = state.copyWith(

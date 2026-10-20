@@ -10,7 +10,7 @@ import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/exchange_rate.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/exchange_rate_repository.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/services/stomp_service.dart';
 
@@ -19,7 +19,8 @@ final exchangeRateListProvider =
   ExchangeRateNotifier.new,
 );
 
-class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
+class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>>
+    with SessionGuard {
   Future<ExchangeRateRepository> get _repository =>
       ref.read(exchangeRateRepositoryProvider.future);
 
@@ -27,19 +28,26 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
   ListState<ExchangeRate> build() {
     // The state belongs to the session: rebuilt on every login and logout,
     // otherwise user B would inherit user A's data (KKS-546).
-    ref
-      ..watch(authNotifierProvider)
-      ..watch(exchangeRateRepositoryProvider);
+    ref.watch(exchangeRateRepositoryProvider);
+    watchSession(ref);
     return const ListState();
   }
 
   Future<void> loadItems() async {
     final l10n = ref.read(appLocalizationsProvider);
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final rates = await (await _repository).getAll();
+      final repository = await _repository;
+      final rates = await repository.getAll();
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(items: rates, isLoading: false);
     } on Exception {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: l10n.exchangeRatesFeedbackLoadError,
@@ -50,9 +58,14 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
   Future<void> upsert(
       Currency baseCurrency, Currency targetCurrency, double rate) async {
     final l10n = ref.read(appLocalizationsProvider);
+    final token = session;
     try {
+      final repository = await _repository;
       final result =
-          await (await _repository).upsert(baseCurrency, targetCurrency, rate);
+          await repository.upsert(baseCurrency, targetCurrency, rate);
+      if (isStale(token)) {
+        return;
+      }
       final items = [...state.items];
       final index = items.indexWhere(
         (r) =>
@@ -65,6 +78,9 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
       }
       state = state.copyWith(items: items);
     } on Exception {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         error: l10n.exchangeRatesFeedbackSaveError,
       );
@@ -73,8 +89,13 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
 
   Future<void> delete(Currency baseCurrency, Currency targetCurrency) async {
     final l10n = ref.read(appLocalizationsProvider);
+    final token = session;
     try {
-      await (await _repository).delete(baseCurrency, targetCurrency);
+      final repository = await _repository;
+      await repository.delete(baseCurrency, targetCurrency);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         items: state.items
             .where((r) => !(r.baseCurrency == baseCurrency &&
@@ -82,6 +103,9 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>> {
             .toList(),
       );
     } on Exception {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         error: l10n.commonFeedbackDeleteError,
       );

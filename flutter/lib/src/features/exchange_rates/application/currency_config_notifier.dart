@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
@@ -15,20 +15,25 @@ final currencyConfigNotifierProvider =
   CurrencyConfigNotifier.new,
 );
 
-class CurrencyConfigNotifier extends Notifier<List<Currency>> {
+class CurrencyConfigNotifier extends Notifier<List<Currency>>
+    with SessionGuard {
   @override
   List<Currency> build() {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546).
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     return [Currency.eur];
   }
 
   Future<void> loadCurrencies() async {
+    final token = session;
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
       final prefs = await dataSource.getPreferences();
+      if (isStale(token)) {
+        return;
+      }
       state = prefs.currencies
           .map((s) => Currency.values.byName(s.toLowerCase()))
           .toList();
@@ -55,7 +60,11 @@ class CurrencyConfigNotifier extends Notifier<List<Currency>> {
   Future<void> reorderCurrencies(List<Currency> newOrder) async {
     final oldPrimary = state.isNotEmpty ? state.first : null;
     state = newOrder;
+    final token = session;
     await _persist(newOrder);
+    if (isStale(token)) {
+      return;
+    }
     final newPrimary = newOrder.isNotEmpty ? newOrder.first : null;
     if (oldPrimary != null && newPrimary != null && oldPrimary != newPrimary) {
       try {
@@ -67,9 +76,14 @@ class CurrencyConfigNotifier extends Notifier<List<Currency>> {
   }
 
   Future<void> _persist(List<Currency> currencies) async {
+    final token = session;
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
+      // Sinon les fonctionnalites de B partiraient avec le jeton de A.
+      if (isStale(token)) {
+        return;
+      }
       final featureState = ref.read(featureConfigNotifierProvider);
       await dataSource.updatePreferences(
         UserPreferenceRequest(

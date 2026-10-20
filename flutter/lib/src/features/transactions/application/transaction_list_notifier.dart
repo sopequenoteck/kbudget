@@ -7,7 +7,7 @@ import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 import 'package:k_budget/src/features/transactions/application/transaction_list_state.dart';
 
@@ -16,7 +16,8 @@ final transactionListNotifierProvider =
   TransactionListNotifier.new,
 );
 
-class TransactionListNotifier extends Notifier<TransactionListState> {
+class TransactionListNotifier extends Notifier<TransactionListState>
+    with SessionGuard {
   TransactionRepository get _repo =>
       ref.read(transactionRepositoryProvider);
 
@@ -24,7 +25,7 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
   TransactionListState build() {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546).
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     final now = DateTime.now();
     return TransactionListState(
       selectedMonth: now.month,
@@ -33,6 +34,7 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
   }
 
   Future<void> loadMonth(int month, int year) async {
+    final token = session;
     state = state.copyWith(
       selectedMonth: month,
       selectedYear: year,
@@ -41,7 +43,13 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
     );
     try {
       final transactions = await _repo.getByMonth(month, year);
+      if (isStale(token)) {
+        return;
+      }
       final summaries = await _repo.getMonthlySummary(month, year);
+      if (isStale(token)) {
+        return;
+      }
 
       // FR-016 : ignorer la réponse si le mois a changé entre-temps
       if (state.selectedMonth != month || state.selectedYear != year) return;
@@ -54,6 +62,9 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
         isLoading: false,
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       if (state.selectedMonth != month || state.selectedYear != year) return;
       state = state.copyWith(
         isLoading: false,
@@ -78,9 +89,16 @@ class TransactionListNotifier extends Notifier<TransactionListState> {
       return loadMonth(month, year);
     }
 
+    final token = session;
     try {
       final transactions = await _repo.getByMonth(month, year);
+      if (isStale(token)) {
+        return;
+      }
       final summaries = await _repo.getMonthlySummary(month, year);
+      if (isStale(token)) {
+        return;
+      }
 
       if (state.selectedMonth != month || state.selectedYear != year) return;
 

@@ -16,6 +16,15 @@ This project follows [Semantic Versioning](https://semver.org/).
   entry now follows the loaded profile only. Nothing was exposed: the
   administration routes are protected by the API.
 
+### Security
+
+- **Mobile app: a request still in flight at sign-out could fill the next
+  account's screen** (KKS-558): after signing out of A and signing in with B
+  before a response for A had arrived, that response was written into B's
+  lists, home totals or currencies, and B's enabled features could be sent to
+  the server with A's token. Every account-scoped notifier now drops any
+  response that belongs to a previous session.
+
 ## [6.12.0] - 2026-10-17
 
 ### Added

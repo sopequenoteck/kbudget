@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_budget/src/data/remote/dtos/recurring_transaction_create_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/recurring_transaction.dart';
@@ -58,6 +61,14 @@ void main() {
     frequency: Frequency.mensuel,
     nextOccurrence: DateTime(2026, 3, 20), // future
     recurringActive: true,
+  );
+
+  const createRequest = RecurringTransactionCreateRequest(
+    montant: 200.0,
+    libelle: 'Assurance',
+    type: 'DEPENSE',
+    frequency: 'MENSUEL',
+    nextOccurrence: '2026-03-20',
   );
 
   setUp(() {
@@ -245,6 +256,30 @@ void main() {
       expect(state().isLoading, false);
     });
 
+    test('should_reloadList_when_createSucceeds', () async {
+      when(mockRepo.create(any)).thenAnswer((_) async => upcomingItem);
+      when(mockRepo.listActive())
+          .thenAnswer((_) async => [upcomingItem, todayItem]);
+
+      await notifier().create(createRequest);
+
+      verify(mockRepo.create(createRequest)).called(1);
+      expect(state().items.map((i) => i.id), ['today-1', 'upcoming-1']);
+      expect(state().isLoading, false);
+      expect(state().error, isNull);
+    });
+
+    test('should_setError_when_createFails', () async {
+      when(mockRepo.create(any)).thenThrow(Exception('Server error'));
+
+      await notifier().create(createRequest);
+
+      expect(state().error, contains('Server error'));
+      expect(state().isLoading, false);
+      expect(state().items, isEmpty);
+      verifyNever(mockRepo.listActive());
+    });
+
     test('should_track_mutating_ids', () async {
       when(mockRepo.listActive()).thenAnswer((_) async => [overdueItem]);
       await notifier().loadItems();
@@ -269,6 +304,37 @@ void main() {
   });
 
   group('session', () {
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          recurringTransactionRepositoryProvider
+              .overrideWith((_) async => mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final pending = Completer<List<RecurringTransaction>>();
+      when(mockRepo.listActive()).thenAnswer((_) => pending.future);
+      final loading = sessionContainer
+          .read(recurringListNotifierProvider.notifier)
+          .loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([overdueItem]);
+      await loading;
+
+      final state = sessionContainer.read(recurringListNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
+    });
+
     test('should_resetState_when_sessionEnds', () async {
       final sessionContainer = ProviderContainer(
         overrides: [

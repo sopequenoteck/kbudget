@@ -15,6 +15,7 @@ import 'package:k_budget/src/features/accounts/application/account_notifier.dart
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/budgets/application/budget_notifier.dart';
 import 'package:k_budget/src/features/categories/application/category_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/dashboard/application/dashboard_state.dart';
 import 'package:k_budget/src/features/exchange_rates/application/exchange_rate_notifier.dart';
 import 'package:k_budget/src/features/recurring/application/recurring_list_notifier.dart';
@@ -37,25 +38,33 @@ final dashboardNotifierProvider =
   DashboardNotifier.new,
 );
 
-class DashboardNotifier extends Notifier<DashboardState> {
+class DashboardNotifier extends Notifier<DashboardState>
+    with SessionGuard {
   @override
   DashboardState build() {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546).
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     return const DashboardState();
   }
 
   Future<void> loadDashboard() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       // S'assurer que le Dio authentifie est resolu avant de lire
       // les repositories
       await ref.read(authenticatedDioProvider.future);
+      if (isStale(token)) {
+        return;
+      }
 
       // Charger le nom utilisateur
       final userName = await ref.read(currentUserNameProvider.future);
+      if (isStale(token)) {
+        return;
+      }
 
       // Charger les donnees des notifiers sous-jacents
       await Future.wait([
@@ -66,6 +75,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
         ref.read(budgetNotifierProvider.notifier).loadOverview(),
         ref.read(recurringListNotifierProvider.notifier).loadItems(),
       ]);
+      if (isStale(token)) {
+        return;
+      }
 
       // Lire les donnees chargees
       final accountState = ref.read(accountNotifierProvider);
@@ -78,6 +90,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
         final prefDataSource =
             await ref.read(preferenceRemoteDataSourceProvider.future);
         final prefs = await prefDataSource.getPreferences();
+        if (isStale(token)) {
+          return;
+        }
         currencies = prefs.currencies
             .map((s) => Currency.values.byName(s.toLowerCase()))
             .toList();
@@ -111,6 +126,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
             (month: now.month, year: now.year),
           ).future,
         );
+        if (isStale(token)) {
+          return;
+        }
         if (currentSummaries.isNotEmpty) {
           currentSummary = currentSummaries.first;
         }
@@ -124,6 +142,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
             (month: prevMonth, year: prevYear),
           ).future,
         );
+        if (isStale(token)) {
+          return;
+        }
         if (previousSummaries.isNotEmpty) {
           previousSummary = previousSummaries.first;
         }
@@ -152,6 +173,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
         error: null,
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,

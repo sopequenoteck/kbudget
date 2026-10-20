@@ -48,6 +48,17 @@ void main() {
       expect(state(), isA<AuthInitial>());
     });
 
+    test('should_advanceSessionId_when_stateChanges', () {
+      final before = notifier().sessionId;
+
+      notifier().forceUnauthenticated();
+      notifier().forceUnauthenticated();
+      expect(notifier().sessionId, before + 1);
+
+      notifier().requirePasswordReset();
+      expect(notifier().sessionId, before + 2);
+    });
+
     test('should_beAuthenticated_when_tokenExists', () async {
       when(mockAuthRepo.hasValidToken()).thenAnswer((_) async => true);
 

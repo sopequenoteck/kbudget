@@ -29,10 +29,24 @@ final authNotifierProvider =
 
 class AuthNotifier extends Notifier<AuthState> implements Listenable {
   final List<VoidCallback> _listeners = [];
+  int _sessionId = 0;
+
+  /// Avance a chaque changement d'etat de session, des qu'il survient. Les
+  /// notifiers par compte s'en servent pour ignorer la reponse d'une requete
+  /// lancee sous une session precedente (`SessionGuard`, KKS-558).
+  int get sessionId => _sessionId;
 
   @override
   AuthState build() {
     return const AuthState.initial();
+  }
+
+  @override
+  set state(AuthState value) {
+    if (value != state) {
+      _sessionId++;
+    }
+    super.state = value;
   }
 
   Future<AuthRepository> get _repo => ref.read(authRepositoryProvider.future);
