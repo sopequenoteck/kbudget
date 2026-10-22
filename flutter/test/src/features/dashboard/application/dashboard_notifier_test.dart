@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/remote/dtos/user_preference_response.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/account.dart';
@@ -464,6 +467,43 @@ void main() {
       expect(state().activeCurrency, Currency.eur);
     });
 
+    test('should_loadCurrenciesFromPreferences_when_serverReturnsThem',
+        () async {
+      final localContainer = buildContainer(extraOverrides: [
+        preferenceRemoteDataSourceProvider.overrideWith(
+          (ref) async => _FakePreferenceDataSource(['USD', 'EUR']),
+        ),
+      ]);
+      addTearDown(localContainer.dispose);
+
+      await localContainer
+          .read(dashboardNotifierProvider.notifier)
+          .loadDashboard();
+
+      final loaded = localContainer.read(dashboardNotifierProvider);
+      expect(loaded.currencies, [Currency.usd, Currency.eur]);
+      expect(loaded.activeCurrency, Currency.usd);
+      expect(loaded.error, isNull);
+      expect(loaded.isLoading, false);
+    });
+
+    test('should_fallbackToEur_when_preferencesHaveNoCurrency', () async {
+      final localContainer = buildContainer(extraOverrides: [
+        preferenceRemoteDataSourceProvider.overrideWith(
+          (ref) async => _FakePreferenceDataSource([]),
+        ),
+      ]);
+      addTearDown(localContainer.dispose);
+
+      await localContainer
+          .read(dashboardNotifierProvider.notifier)
+          .loadDashboard();
+
+      final loaded = localContainer.read(dashboardNotifierProvider);
+      expect(loaded.currencies, isEmpty);
+      expect(loaded.activeCurrency, Currency.eur);
+    });
+
     test('should_loadUserName_when_nameProvidedByStorage', () async {
       final localContainer = buildContainer(extraOverrides: [
         currentUserNameProvider.overrideWith((ref) async => 'Alice'),
@@ -664,6 +704,36 @@ void main() {
         const DashboardState(),
       );
     });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final pendingName = Completer<String?>();
+      final sessionContainer = buildContainer(
+        extraOverrides: [
+          currentUserNameProvider.overrideWith((ref) => pendingName.future),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final loading = sessionContainer
+          .read(dashboardNotifierProvider.notifier)
+          .loadDashboard();
+      await pumpEventQueue();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pendingName.complete('Alice');
+      await loading;
+
+      expect(
+        sessionContainer.read(dashboardNotifierProvider),
+        const DashboardState(),
+      );
+    });
   });
 }
 
@@ -675,4 +745,18 @@ class _FakeBudgetNotifier extends BudgetNotifier {
   Future<void> loadOverview() async {
     // No-op pour les tests du dashboard
   }
+}
+
+class _FakePreferenceDataSource extends PreferenceRemoteDataSource {
+  _FakePreferenceDataSource(this._currencies) : super(Dio());
+
+  final List<String> _currencies;
+
+  @override
+  Future<UserPreferenceResponse> getPreferences() async =>
+      UserPreferenceResponse(
+        enabledFeatures: const [],
+        navOrder: const [],
+        currencies: _currencies,
+      );
 }

@@ -181,7 +181,9 @@ class _SettingsHubScreenState extends ConsumerState<SettingsHubScreen> {
     final textScale = ref.watch(textScaleNotifierProvider);
     final featureState = ref.watch(featureConfigNotifierProvider);
     final userAsync = ref.watch(userProfileNotifierProvider);
-    final isAdmin = userAsync.valueOrNull?.isAdmin ?? false;
+    // Pendant le rechargement qui suit un changement de session, valueOrNull
+    // garde encore le profil de l'ancien compte (KKS-559).
+    final isAdmin = userAsync.whenOrNull(data: (user) => user.isAdmin) ?? false;
     final lockEnabled = ref.watch(
       appLockNotifierProvider.select((state) => state.enabled),
     );

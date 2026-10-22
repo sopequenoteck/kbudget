@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/repositories/crud_repository.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 /// Classe de base pour les notifiers CRUD avec pagination client-side.
@@ -14,7 +14,8 @@ import 'package:k_budget/src/features/settings/application/display_locale_provid
 /// Les sous-classes doivent implémenter [repo], [itemId] et [sortItems].
 /// Elles peuvent optionnellement surcharger
 /// [validateUpdate] et [validateDelete] pour ajouter des gardes.
-abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
+abstract class CrudNotifier<T> extends Notifier<ListState<T>>
+    with SessionGuard {
   static const _pageSize = 20;
   @protected
   List<T> allItems = [];
@@ -39,18 +40,26 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
     // survit a la reconstruction : le cache local doit etre vide avec l'etat.
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     allItems = [];
     return ListState<T>();
   }
 
   Future<void> loadItems() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      allItems = await repo.getAll();
+      final items = await repo.getAll();
+      if (isStale(token)) {
+        return;
+      }
+      allItems = items;
       sortItems(allItems);
       refreshPage(resetPage: true);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -73,13 +82,20 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
   }
 
   Future<void> create(T item) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await repo.create(item);
+      if (isStale(token)) {
+        return;
+      }
       allItems.add(created);
       sortItems(allItems);
       refreshPage();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -94,12 +110,16 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
       return;
     }
     final id = itemId(item);
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},
       error: null,
     );
     try {
       final updated = await repo.update(item);
+      if (isStale(token)) {
+        return;
+      }
       final index = allItems.indexWhere((e) => itemId(e) == id);
       if (index != -1) allItems[index] = updated;
       sortItems(allItems);
@@ -108,6 +128,9 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -124,6 +147,7 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
     final index = allItems.indexWhere((e) => itemId(e) == id);
     if (index == -1) return;
     final saved = allItems[index];
+    final token = session;
 
     allItems.removeAt(index);
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
@@ -131,10 +155,16 @@ abstract class CrudNotifier<T> extends Notifier<ListState<T>> {
 
     try {
       await repo.delete(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       allItems.insert(index, saved);
       sortItems(allItems);
       refreshPage();

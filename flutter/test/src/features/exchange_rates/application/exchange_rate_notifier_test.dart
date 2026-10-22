@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
@@ -142,6 +144,37 @@ void main() {
           .emit(const AuthState.unauthenticated());
 
       expect(sessionContainer.read(exchangeRateListProvider).items, isEmpty);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          exchangeRateRepositoryProvider.overrideWith((ref) async => repo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final pending = Completer<List<ExchangeRate>>();
+      when(repo.getAll()).thenAnswer((_) => pending.future);
+      final loading = sessionContainer
+          .read(exchangeRateListProvider.notifier)
+          .loadItems();
+      await pumpEventQueue();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([rateOf(Currency.usd, 1.1)]);
+      await loading;
+
+      final state = sessionContainer.read(exchangeRateListProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
     });
   });
 }

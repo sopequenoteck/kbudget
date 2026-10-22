@@ -30,12 +30,16 @@ class AccountNotifier extends CrudNotifier<Account> {
       items.sort((a, b) => a.nom.compareTo(b.nom));
 
   Future<void> setDefault(String id) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},
       error: null,
     );
     try {
       final updated = await _typedRepo.setDefault(id);
+      if (isStale(token)) {
+        return;
+      }
       for (var i = 0; i < allItems.length; i++) {
         if (allItems[i].id == id) {
           allItems[i] = updated;
@@ -48,6 +52,9 @@ class AccountNotifier extends CrudNotifier<Account> {
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -56,6 +63,7 @@ class AccountNotifier extends CrudNotifier<Account> {
   }
 
   Future<void> adjustBalance(String id, double newBalance) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, id},
       error: null,
@@ -68,6 +76,9 @@ class AccountNotifier extends CrudNotifier<Account> {
             .read(appLocalizationsProvider)
             .transactionsValueBalanceAdjustment,
       );
+      if (isStale(token)) {
+        return;
+      }
       final index = allItems.indexWhere((e) => e.id == id);
       if (index != -1) allItems[index] = updated;
       refreshPage();
@@ -75,6 +86,9 @@ class AccountNotifier extends CrudNotifier<Account> {
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,

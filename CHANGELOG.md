@@ -7,6 +7,32 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [6.13.0] - 2026-10-22
+
+### Fixed
+
+- **Mobile app: "Administration" entry of the settings following the previous
+  account for one request** (KKS-559): after signing out of an administrator
+  account and signing in with another account, the settings kept showing, or
+  hiding, the "Administration" entry until the new profile was loaded. The
+  entry now follows the loaded profile only. Nothing was exposed: the
+  administration routes are protected by the API.
+
+### Security
+
+- **Mobile app: a request still in flight at sign-out could fill the next
+  account's screen** (KKS-558): after signing out of A and signing in with B
+  before a response for A had arrived, that response was written into B's
+  lists, home totals or currencies, and B's enabled features could be sent to
+  the server with A's token. Every account-scoped notifier now drops any
+  response that belongs to a previous session.
+- **Mobile app: the previous account's preferences could be applied to the
+  next one** (KKS-562): when the server preferences of A were still loading at
+  sign-out, B could receive them as its own (language, text size, enabled
+  features and tab order), and a preference change started by A could be saved
+  on B's account. Each session now has its own preference request, and
+  responses or writes from a previous session are dropped.
+
 ## [6.12.0] - 2026-10-17
 
 ### Added
@@ -172,7 +198,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 Versions 6.9.0 and earlier are documented in French only, in
 [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0

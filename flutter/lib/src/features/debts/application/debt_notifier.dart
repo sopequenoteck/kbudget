@@ -9,6 +9,7 @@ import 'package:k_budget/src/domain/models/debt.dart';
 import 'package:k_budget/src/domain/models/debt_payment.dart';
 import 'package:k_budget/src/domain/repositories/debt_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/debts/application/debt_list_state.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
@@ -17,7 +18,9 @@ final debtNotifierProvider =
   DebtNotifier.new,
 );
 
-class DebtNotifier extends Notifier<DebtListState> {
+/// Liste des dettes, avec remboursement et report de rappel.
+class DebtNotifier extends Notifier<DebtListState>
+    with SessionGuard {
   static const _pageSize = 20;
   List<Debt> _allItems = [];
 
@@ -26,7 +29,7 @@ class DebtNotifier extends Notifier<DebtListState> {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
     // survit a la reconstruction : le cache local doit etre vide avec l'etat.
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     _allItems = [];
     return const DebtListState();
   }
@@ -34,12 +37,20 @@ class DebtNotifier extends Notifier<DebtListState> {
   DebtRepository get _repo => ref.read(debtRepositoryProvider);
 
   Future<void> loadItems() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll();
+      final items = await _repo.getAll();
+      if (isStale(token)) {
+        return;
+      }
+      _allItems = items;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage(resetPage: true);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -68,13 +79,20 @@ class DebtNotifier extends Notifier<DebtListState> {
   }
 
   Future<void> create(Debt item) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await _repo.create(item);
+      if (isStale(token)) {
+        return;
+      }
       _allItems.add(created);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -83,12 +101,16 @@ class DebtNotifier extends Notifier<DebtListState> {
   }
 
   Future<void> update(Debt item) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, item.id},
       error: null,
     );
     try {
       final updated = await _repo.update(item);
+      if (isStale(token)) {
+        return;
+      }
       final index = _allItems.indexWhere((e) => e.id == item.id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
@@ -97,6 +119,9 @@ class DebtNotifier extends Notifier<DebtListState> {
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -108,6 +133,7 @@ class DebtNotifier extends Notifier<DebtListState> {
     final index = _allItems.indexWhere((e) => e.id == id);
     if (index == -1) return;
     final saved = _allItems[index];
+    final token = session;
 
     _allItems.removeAt(index);
     state = state.copyWith(mutatingIds: {...state.mutatingIds, id});
@@ -115,10 +141,16 @@ class DebtNotifier extends Notifier<DebtListState> {
 
     try {
       await _repo.delete(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       _allItems.insert(index, saved);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
@@ -133,6 +165,7 @@ class DebtNotifier extends Notifier<DebtListState> {
   /// est envoye dans la langue affichee (KKS-423).
   Future<bool> repay(Debt debt, String accountId, double? amount) async {
     final debtId = debt.id;
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, debtId},
       error: null,
@@ -146,6 +179,9 @@ class DebtNotifier extends Notifier<DebtListState> {
             .read(appLocalizationsProvider)
             .debtsValueRepayment(debt.personne),
       );
+      if (isStale(token)) {
+        return false;
+      }
       final index = _allItems.indexWhere((e) => e.id == debtId);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
@@ -155,6 +191,9 @@ class DebtNotifier extends Notifier<DebtListState> {
       );
       return true;
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return false;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(debtId),
         error: ref.read(appLocalizationsProvider).debtsFeedbackRepayError,
@@ -165,12 +204,16 @@ class DebtNotifier extends Notifier<DebtListState> {
 
   Future<bool> snooze(
       String debtId, String reminderDate, String reminderTime) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, debtId},
       error: null,
     );
     try {
       final updated = await _repo.snooze(debtId, reminderDate, reminderTime);
+      if (isStale(token)) {
+        return false;
+      }
       final index = _allItems.indexWhere((e) => e.id == debtId);
       if (index != -1) _allItems[index] = updated;
       _refreshPage();
@@ -179,6 +222,9 @@ class DebtNotifier extends Notifier<DebtListState> {
       );
       return true;
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return false;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(debtId),
         error: ref.read(appLocalizationsProvider).debtsFeedbackSnoozeError,

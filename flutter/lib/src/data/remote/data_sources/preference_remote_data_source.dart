@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_response.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 
 class PreferenceRemoteDataSource {
   final Dio _dio;
@@ -42,6 +43,11 @@ class PreferenceRemoteDataSource {
 
 final preferenceRemoteDataSourceProvider =
     FutureProvider<PreferenceRemoteDataSource>((ref) async {
+  // Chaque session a sa propre instance, donc sa propre lecture en vol
+  // (KKS-562) : sinon un compte recevrait la reponse du precedent. Pas de
+  // `ref.watch` : lu pour la premiere fois depuis un `ref.listen` de
+  // connexion, le fournisseur resterait en chargement a jamais.
+  ref.listen(authNotifierProvider, (_, _) => ref.invalidateSelf());
   final dio = await ref.watch(authenticatedDioProvider.future);
   return PreferenceRemoteDataSource(dio);
 });

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/repository_providers.dart';
@@ -265,6 +267,36 @@ void main() {
   });
 
   group('session', () {
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final sessionContainer = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          transactionRepositoryProvider.overrideWithValue(mockRepo),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      addTearDown(sessionContainer.dispose);
+      final pending = Completer<List<Transaction>>();
+      when(mockRepo.getAll()).thenAnswer((_) => pending.future);
+      final loading = sessionContainer
+          .read(transactionNotifierProvider.notifier)
+          .loadItems();
+
+      // A se deconnecte et B se connecte avant la reponse de A.
+      final auth = sessionContainer.read(authNotifierProvider.notifier)
+          as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      pending.complete([tx1]);
+      await loading;
+
+      final state = sessionContainer.read(transactionNotifierProvider);
+      expect(state.items, isEmpty);
+      expect(state.isLoading, isFalse);
+    });
+
     test('should_resetState_when_sessionEnds', () async {
       final sessionContainer = ProviderContainer(
         overrides: [

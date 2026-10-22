@@ -7,7 +7,7 @@ import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/models/list_state.dart';
 import 'package:k_budget/src/domain/models/transaction.dart';
 import 'package:k_budget/src/domain/repositories/transaction_repository.dart';
-import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
 final transactionNotifierProvider =
@@ -15,7 +15,9 @@ final transactionNotifierProvider =
   TransactionNotifier.new,
 );
 
-class TransactionNotifier extends Notifier<ListState<Transaction>> {
+/// Transactions du compte, paginees cote client.
+class TransactionNotifier extends Notifier<ListState<Transaction>>
+    with SessionGuard {
   static const _pageSize = 20;
   List<Transaction> _allItems = [];
 
@@ -24,7 +26,7 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
     // L'etat appartient a la session : reconstruit a chaque connexion et
     // deconnexion, sinon B heriterait des donnees de A (KKS-546). Le notifier
     // survit a la reconstruction : le cache local doit etre vide avec l'etat.
-    ref.watch(authNotifierProvider);
+    watchSession(ref);
     _allItems = [];
     return const ListState<Transaction>();
   }
@@ -33,12 +35,20 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
       ref.read(transactionRepositoryProvider);
 
   Future<void> loadItems() async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _allItems = await _repo.getAll();
+      final items = await _repo.getAll();
+      if (isStale(token)) {
+        return;
+      }
+      _allItems = items;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage(resetPage: true);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackLoadError,
@@ -61,13 +71,20 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
   }
 
   Future<void> create(Transaction item) async {
+    final token = session;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final created = await _repo.create(item);
+      if (isStale(token)) {
+        return;
+      }
       _allItems.add(created);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -76,12 +93,16 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
   }
 
   Future<void> update(Transaction item) async {
+    final token = session;
     state = state.copyWith(
       mutatingIds: {...state.mutatingIds, item.id},
       error: null,
     );
     try {
       final updated = await _repo.update(item);
+      if (isStale(token)) {
+        return;
+      }
       final index = _allItems.indexWhere((e) => e.id == item.id);
       if (index != -1) _allItems[index] = updated;
       _allItems.sort((a, b) => b.date.compareTo(a.date));
@@ -90,6 +111,9 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
         mutatingIds: {...state.mutatingIds}..remove(item.id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(item.id),
         error: ref.read(appLocalizationsProvider).commonFeedbackSaveError,
@@ -101,6 +125,7 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
     final index = _allItems.indexWhere((e) => e.id == id);
     if (index == -1) return;
     final saved = _allItems[index];
+    final token = session;
 
     _allItems.removeAt(index);
     state = state.copyWith(
@@ -110,10 +135,16 @@ class TransactionNotifier extends Notifier<ListState<Transaction>> {
 
     try {
       await _repo.delete(id);
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       _allItems.insert(index, saved);
       _allItems.sort((a, b) => b.date.compareTo(a.date));
       _refreshPage();

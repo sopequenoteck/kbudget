@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,8 @@ import 'package:k_budget/src/domain/models/subscription.dart';
 import 'package:k_budget/src/domain/models/user.dart';
 import 'package:k_budget/src/features/auth/application/app_lock_notifier.dart';
 import 'package:k_budget/src/features/auth/application/app_lock_state.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
 import 'package:k_budget/src/features/settings/application/data_settings_notifier.dart';
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 import 'package:k_budget/src/features/settings/presentation/settings_hub_screen.dart';
@@ -16,6 +20,8 @@ import 'package:k_budget/src/features/user_profile/application/user_profile_noti
 import 'package:k_budget/src/localization/app_localizations.dart';
 import 'package:k_budget/src/theme/app_theme.dart' as app_theme;
 
+import '../application/language_notifier_test.dart' show FakeAuthNotifier;
+
 class _FakeUserProfile extends UserProfileNotifier {
   _FakeUserProfile({required this.isAdmin});
   final bool isAdmin;
@@ -23,6 +29,21 @@ class _FakeUserProfile extends UserProfileNotifier {
   @override
   Future<User> build() async =>
       User(id: 'u1', email: 'admin@local.test', isAdmin: isAdmin);
+}
+
+/// Profil d'un administrateur A, puis rechargement jamais termine a chaque
+/// changement de session : l'etat reste en chargement avec la valeur de A.
+class _ReloadingUserProfile extends UserProfileNotifier {
+  var _builds = 0;
+
+  @override
+  Future<User> build() async {
+    ref.watch(authNotifierProvider);
+    if (_builds++ == 0) {
+      return const User(id: 'a', email: 'admin@local.test', isAdmin: true);
+    }
+    return Completer<User>().future;
+  }
 }
 
 class _FakeDataSettings extends DataSettingsNotifier {
@@ -225,6 +246,34 @@ void main() {
       expect(find.text('ADMINISTRATION'), findsOneWidget);
       expect(find.text('Utilisateurs'), findsOneWidget);
       expect(find.text('Invitations et gestion des accès'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should_hideAdministration_when_profileReloadsAfterSessionChange',
+        (tester) async {
+      await pumpTall(
+        tester,
+        buildApp(overrides: [
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+          userProfileNotifierProvider.overrideWith(_ReloadingUserProfile.new),
+        ]),
+      );
+      expect(find.text('ADMINISTRATION'), findsOneWidget);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(SettingsHubScreen)),
+      );
+      final auth =
+          container.read(authNotifierProvider.notifier) as FakeAuthNotifier;
+      auth.emit(const AuthState.unauthenticated());
+      await tester.pump();
+      auth.emit(const AuthState.authenticated());
+      await tester.pump();
+
+      expect(find.text('ADMINISTRATION'), findsNothing);
+      expect(find.text('Utilisateurs'), findsNothing);
     });
 
     testWidgets('should_showDeviceSectionWithTwoRows_when_rendered',

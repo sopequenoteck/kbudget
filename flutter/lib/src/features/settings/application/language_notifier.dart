@@ -11,6 +11,7 @@ import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_sou
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/language_state.dart';
 
@@ -61,12 +62,13 @@ final languageNotifierProvider =
 /// Every applied language is stored on the device for the next start.
 ///
 /// The preference is only written by [selectLanguage], never on its own.
-class LanguageNotifier extends Notifier<LanguageState> {
+class LanguageNotifier extends Notifier<LanguageState> with SessionGuard {
   var _systemLanguage = defaultLanguage;
   bool _preferenceLoaded = false;
 
   @override
   LanguageState build() {
+    bindSession(ref);
     _systemLanguage = detectSystemLanguage(ref.watch(systemLocalesProvider));
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next is AuthAuthenticated && previous is! AuthAuthenticated) {
@@ -94,10 +96,14 @@ class LanguageNotifier extends Notifier<LanguageState> {
   }
 
   Future<void> _loadServerPreference() async {
+    final token = session;
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
       final prefs = await dataSource.getPreferences();
+      if (isStale(token)) {
+        return;
+      }
       _preferenceLoaded = true;
       final preference = supportedLanguageOf(prefs.language);
       state = LanguageState(
@@ -116,6 +122,7 @@ class LanguageNotifier extends Notifier<LanguageState> {
   /// failed write restores the previous choice without a message, as Angular
   /// does.
   Future<void> selectLanguage(String? language) async {
+    final token = session;
     final previous = state;
     if (previous.preference == language) {
       return;
@@ -125,22 +132,34 @@ class LanguageNotifier extends Notifier<LanguageState> {
       preference: language,
     );
     try {
-      await _writeServerPreference(language);
+      await _writeServerPreference(language, token);
+      if (isStale(token)) {
+        return;
+      }
       _preferenceLoaded = true;
       await _remember(state.language);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = previous;
     }
   }
 
-  Future<void> _writeServerPreference(String? language) async {
+  Future<void> _writeServerPreference(String? language, int token) async {
     final dataSource =
         await ref.read(preferenceRemoteDataSourceProvider.future);
     if (language == null) {
+      if (isStale(token)) {
+        return;
+      }
       await dataSource.clearLanguage();
       return;
     }
     final prefs = await dataSource.getPreferences();
+    if (isStale(token)) {
+      return;
+    }
     await dataSource.updatePreferences(
       UserPreferenceRequest(
         enabledFeatures: prefs.enabledFeatures,
