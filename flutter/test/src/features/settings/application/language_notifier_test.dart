@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/data/remote/dtos/user_preference_response.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
@@ -81,6 +84,63 @@ class FakePreferenceDataSource extends PreferenceRemoteDataSource {
     language = null;
   }
 }
+
+/// Server preferences whose n-th read answers when `answers[n]` completes.
+class QueuedPreferenceDataSource extends FakePreferenceDataSource {
+  QueuedPreferenceDataSource(this.answers);
+
+  final List<Completer<UserPreferenceResponse>> answers;
+  int calls = 0;
+
+  @override
+  Future<UserPreferenceResponse> getPreferences() => answers[calls++].future;
+}
+
+/// Preferences of an account, as the server answers them.
+UserPreferenceResponse accountPreferences(String? language) =>
+    UserPreferenceResponse(
+      enabledFeatures: const [Feature.budgets],
+      navOrder: Feature.values,
+      language: language,
+    );
+
+/// An answer that is already there.
+Completer<UserPreferenceResponse> readyAnswer(
+  UserPreferenceResponse response,
+) =>
+    Completer<UserPreferenceResponse>()..complete(response);
+
+/// A Dio recording its requests, whose n-th answer arrives when
+/// `answers[n]` completes.
+Dio heldPreferencesDio(
+  List<RequestOptions> requests,
+  List<Completer<Map<String, dynamic>>> answers,
+) {
+  return Dio()
+    ..interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final index = requests.length;
+          requests.add(options);
+          final data = await answers[index].future;
+          handler.resolve(
+            Response<Map<String, dynamic>>(
+              requestOptions: options,
+              statusCode: 200,
+              data: data,
+            ),
+          );
+        },
+      ),
+    );
+}
+
+/// Preferences of an account as JSON, the way the server sends them.
+Map<String, dynamic> preferencesJson({String? language}) => {
+      'enabledFeatures': ['BUDGETS'],
+      'navOrder': ['BUDGETS'],
+      'language': language,
+    };
 
 /// Authentication state driven by the test.
 class FakeAuthNotifier extends AuthNotifier {
@@ -165,6 +225,15 @@ void main() {
       container.read(languageNotifierProvider);
       await pumpEventQueue();
     }
+
+    Future<void> startWith(FakePreferenceDataSource source) async {
+      remote = source;
+      await start();
+    }
+
+    void emit(AuthState next) =>
+        (container.read(authNotifierProvider.notifier) as FakeAuthNotifier)
+            .emit(next);
 
     LanguageNotifier notifier() =>
         container.read(languageNotifierProvider.notifier);
@@ -257,6 +326,125 @@ void main() {
 
       expect(language(), 'fr');
       expect(remote.reads, 1);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final answerA = Completer<UserPreferenceResponse>();
+      final queued = QueuedPreferenceDataSource([
+        answerA,
+        readyAnswer(accountPreferences('en')),
+      ]);
+      container = ProviderContainer(
+        overrides: languageOverrides(
+          config: config,
+          remote: queued,
+          auth: const AuthState.unauthenticated(),
+        ),
+      );
+      addTearDown(container.dispose);
+      container.read(languageNotifierProvider);
+      await pumpEventQueue();
+
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      emit(const AuthState.unauthenticated());
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      answerA.complete(accountPreferences('fr'));
+      await pumpEventQueue();
+
+      expect(queued.calls, 2);
+      expect(language(), 'en');
+      expect(preference(), 'en');
+      expect(config.writes, ['en']);
+    });
+
+    test('should_notWriteServer_when_sessionChangesDuringSelect', () async {
+      final held = Completer<UserPreferenceResponse>();
+      final queued = QueuedPreferenceDataSource([
+        readyAnswer(accountPreferences(null)),
+        held,
+      ]);
+      await startWith(queued);
+
+      final selection = notifier().selectLanguage('fr');
+      await pumpEventQueue();
+      emit(const AuthState.unauthenticated());
+      held.complete(accountPreferences(null));
+      await selection;
+
+      expect(queued.updates, isEmpty);
+      expect(config.writes, ['en']);
+    });
+
+    test('should_notClearLanguage_when_sessionChangesDuringSelect', () async {
+      remote.language = 'fr';
+      await start();
+
+      final selection = notifier().selectLanguage(null);
+      emit(const AuthState.unauthenticated());
+      await selection;
+
+      expect(remote.clears, 0);
+      expect(config.writes, ['fr']);
+    });
+
+    test('should_keepNewAccountLanguage_when_staleWriteFails', () async {
+      final held = Completer<UserPreferenceResponse>();
+      final queued = QueuedPreferenceDataSource([
+        readyAnswer(accountPreferences(null)),
+        held,
+        readyAnswer(accountPreferences('fr')),
+      ]);
+      await startWith(queued);
+
+      final selection = notifier().selectLanguage('fr');
+      await pumpEventQueue();
+      emit(const AuthState.unauthenticated());
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      expect(language(), 'fr');
+      held.completeError(DioException(requestOptions: RequestOptions()));
+      await selection;
+
+      expect(language(), 'fr');
+      expect(preference(), 'fr');
+    });
+
+    test('should_applyNewAccountLanguage_when_previousReadStillInFlight',
+        () async {
+      final requests = <RequestOptions>[];
+      final answerA = Completer<Map<String, dynamic>>();
+      final dio = heldPreferencesDio(requests, [
+        answerA,
+        Completer<Map<String, dynamic>>()
+          ..complete(preferencesJson(language: 'en')),
+      ]);
+      container = ProviderContainer(
+        overrides: [
+          systemLocalesProvider.overrideWithValue(const [Locale('de')]),
+          appConfigRepositoryProvider.overrideWithValue(config),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.unauthenticated()),
+          ),
+          authenticatedDioProvider.overrideWith((ref) async => dio),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(languageNotifierProvider);
+      await pumpEventQueue();
+
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      emit(const AuthState.unauthenticated());
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      answerA.complete(preferencesJson(language: 'fr'));
+      await pumpEventQueue();
+
+      expect(requests, hasLength(2));
+      expect(language(), 'en');
+      expect(preference(), 'en');
     });
 
     test('should_putLanguage_when_languageSelected', () async {

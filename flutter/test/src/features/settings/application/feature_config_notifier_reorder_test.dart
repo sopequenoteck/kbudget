@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/remote/dtos/user_preference_response.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/domain/models/app_config.dart';
 import 'package:k_budget/src/domain/repositories/app_config_repository.dart';
@@ -10,7 +13,8 @@ import 'package:k_budget/src/features/onboarding/application/onboarding_notifier
 import 'package:k_budget/src/features/settings/application/feature_config_notifier.dart';
 
 import '../../../../helpers/display_locale.dart';
-import 'language_notifier_test.dart' show FakePreferenceDataSource, FakeAuthNotifier;
+import 'language_notifier_test.dart'
+    show FakeAuthNotifier, FakePreferenceDataSource, QueuedPreferenceDataSource;
 
 class MockAppConfigRepository implements AppConfigRepository {
   List<Feature> enabledFeatures = [Feature.subscriptions, Feature.debts];
@@ -74,6 +78,21 @@ class MockAppConfigRepository implements AppConfigRepository {
   Future<void> setLanguage(String? language) async {}
 }
 
+/// An answer carrying the features of an account.
+Completer<UserPreferenceResponse> featuresAnswer(
+  List<Feature> features, {
+  bool ready = true,
+}) {
+  final answer = Completer<UserPreferenceResponse>();
+  if (ready) {
+    answer.complete(_featuresOf(features));
+  }
+  return answer;
+}
+
+UserPreferenceResponse _featuresOf(List<Feature> features) =>
+    UserPreferenceResponse(enabledFeatures: features, navOrder: features);
+
 void main() {
   late MockAppConfigRepository mockRepo;
   late ProviderContainer container;
@@ -82,6 +101,9 @@ void main() {
       container.read(featureConfigNotifierProvider.notifier);
 
   FeatureConfigState state() => container.read(featureConfigNotifierProvider);
+
+  FeatureConfigNotifier notifierOf(ProviderContainer from) =>
+      from.read(featureConfigNotifierProvider.notifier);
 
   setUp(() async {
     mockRepo = MockAppConfigRepository();
@@ -103,6 +125,47 @@ void main() {
 
   tearDown(() {
     container.dispose();
+  });
+
+  group('notification settings', () {
+    late FakePreferenceDataSource source;
+
+    setUp(() async {
+      source = FakePreferenceDataSource();
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          displayLocaleOverride(),
+          appConfigRepositoryProvider.overrideWithValue(mockRepo),
+          preferenceRemoteDataSourceProvider
+              .overrideWith((ref) async => source),
+          authNotifierProvider.overrideWith(
+            () => FakeAuthNotifier(const AuthState.authenticated()),
+          ),
+        ],
+      );
+      state();
+      await pumpEventQueue();
+    });
+
+    test('should_syncNotificationTypes_when_updated', () async {
+      await notifier().updateNotificationTypes([NotificationType.debtDue]);
+      await pumpEventQueue();
+
+      expect(state().enabledNotificationTypes, [NotificationType.debtDue]);
+      expect(
+        source.updates.single.enabledNotificationTypes,
+        [NotificationType.debtDue],
+      );
+    });
+
+    test('should_syncTimezone_when_updated', () async {
+      await notifier().updateTimezone('Africa/Abidjan');
+      await pumpEventQueue();
+
+      expect(state().timezone, 'Africa/Abidjan');
+      expect(source.updates.single.timezone, 'Africa/Abidjan');
+    });
   });
 
   group('reorderNavigation', () {
@@ -189,8 +252,11 @@ void main() {
     FeatureConfigState loginState() =>
         loginContainer.read(featureConfigNotifierProvider);
 
-    Future<void> start(AuthState initial) async {
-      remote = FakePreferenceDataSource();
+    Future<void> start(
+      AuthState initial, {
+      FakePreferenceDataSource? source,
+    }) async {
+      remote = source ?? FakePreferenceDataSource();
       auth = FakeAuthNotifier(initial);
       loginContainer = ProviderContainer(
         overrides: [
@@ -252,6 +318,40 @@ void main() {
       await pumpEventQueue();
 
       expect(remote.reads, 1);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final answerA = featuresAnswer(const [], ready: false);
+      final queued = QueuedPreferenceDataSource([
+        answerA,
+        featuresAnswer(const [Feature.budgets]),
+      ]);
+      await start(const AuthState.unauthenticated(), source: queued);
+
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      auth.emit(const AuthState.unauthenticated());
+      auth.emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      answerA.complete(_featuresOf(const [Feature.subscriptions]));
+      await pumpEventQueue();
+
+      expect(queued.calls, 2);
+      expect(loginState().enabledFeatures, [Feature.budgets]);
+      expect(loginState().isLoading, false);
+      expect(mockRepo.enabledFeatures, [Feature.budgets]);
+    });
+
+    test('should_notWriteServer_when_sessionChangesDuringSync', () async {
+      await start(const AuthState.authenticated());
+
+      final toggle = notifierOf(loginContainer).toggleFeature(Feature.budgets);
+      auth.emit(const AuthState.unauthenticated());
+      await toggle;
+      await pumpEventQueue();
+
+      expect(remote.updates, isEmpty);
+      expect(loginState().error, isNull);
     });
 
     test('should_keepFeatures_when_reloadFails', () async {

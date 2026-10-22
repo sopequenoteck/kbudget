@@ -11,8 +11,9 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 /// Riverpod reutilise l'instance du notifier quand `build()` est rejoue a un
 /// changement de session : une requete lancee par le compte precedent reprend
 /// apres son `await` et ecrirait son resultat dans l'etat du compte suivant.
-/// `build()` appelle [watchSession] avec son `ref` ; chaque methode asynchrone
-/// capture [session] avant son premier `await` et abandonne toute ecriture si
+/// `build()` appelle [watchSession] avec son `ref` (ou [bindSession] si le
+/// notifier ne doit pas etre reconstruit) ; chaque methode asynchrone capture
+/// [session] avant son premier `await` et abandonne toute ecriture si
 /// [isStale] le dit.
 ///
 /// La session est lue sur [AuthNotifier.sessionId], qui avance des que l'etat
@@ -26,11 +27,19 @@ import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 mixin SessionGuard {
   late AuthNotifier _auth;
 
+  /// Lie le notifier a la session dans `build()`, sans l'observer : pour un
+  /// notifier qui ne doit pas etre reconstruit au changement de session mais
+  /// doit ignorer une reponse d'une session precedente (KKS-562).
+  @protected
+  void bindSession(Ref<Object?> ref) {
+    _auth = ref.read(authNotifierProvider.notifier);
+  }
+
   /// Observe la session dans `build()` : l'etat est reconstruit a chaque
   /// changement et repart vide (KKS-546).
   @protected
   void watchSession(Ref<Object?> ref) {
-    _auth = ref.read(authNotifierProvider.notifier);
+    bindSession(ref);
     ref.watch(authNotifierProvider);
   }
 

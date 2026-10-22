@@ -11,6 +11,7 @@ import 'package:k_budget/src/data/remote/dtos/user_preference_request.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
 import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
 import 'package:k_budget/src/features/auth/application/auth_state.dart';
+import 'package:k_budget/src/features/common/application/session_guard.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
 import 'package:k_budget/src/features/settings/application/display_locale_provider.dart';
 
@@ -33,9 +34,12 @@ final featureConfigNotifierProvider =
   FeatureConfigNotifier.new,
 );
 
-class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
+/// Fonctionnalites et preferences du compte connecte, lues sur le serveur.
+class FeatureConfigNotifier extends Notifier<FeatureConfigState>
+    with SessionGuard {
   @override
   FeatureConfigState build() {
+    bindSession(ref);
     // The server preference needs a session: read it at each login, not
     // only at start, when no token may exist yet or the account may change
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
@@ -60,11 +64,15 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   }
 
   Future<void> _loadFromServer() async {
+    final token = session;
     try {
       state = state.copyWith(isLoading: true);
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
       final prefs = await dataSource.getPreferences();
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         enabledFeatures: prefs.enabledFeatures,
         navOrder: prefs.navOrder,
@@ -78,8 +86,14 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
       // Sync local config
       final repo = ref.read(appConfigRepositoryProvider);
       await repo.setEnabledFeatures(prefs.enabledFeatures);
+      if (isStale(token)) {
+        return;
+      }
       await repo.setNavOrder(prefs.navOrder);
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: ref.read(appLocalizationsProvider).settingsFeedbackLoadError,
@@ -92,6 +106,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   }
 
   Future<void> toggleFeature(Feature feature) async {
+    final token = session;
     final current = List<Feature>.from(state.enabledFeatures);
     if (current.contains(feature)) {
       current.remove(feature);
@@ -107,6 +122,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     // Sync in background (fire-and-forget, optimistic)
     unawaited(_syncToServer(
       current,
+      token,
       navOrder: state.navOrder,
       enabledNotificationTypes: state.enabledNotificationTypes,
       timezone: state.timezone,
@@ -114,6 +130,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   }
 
   Future<void> reorderNavigation(List<Feature> newOrder) async {
+    final token = session;
     state = state.copyWith(navOrder: newOrder, error: null);
 
     // Persist locally
@@ -123,6 +140,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     // Sync in background
     unawaited(_syncToServer(
       state.enabledFeatures,
+      token,
       navOrder: newOrder,
       enabledNotificationTypes: state.enabledNotificationTypes,
       timezone: state.timezone,
@@ -134,6 +152,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
 
     unawaited(_syncToServer(
       state.enabledFeatures,
+      session,
       navOrder: state.navOrder,
       enabledNotificationTypes: types,
       timezone: state.timezone,
@@ -145,6 +164,7 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
 
     unawaited(_syncToServer(
       state.enabledFeatures,
+      session,
       navOrder: state.navOrder,
       enabledNotificationTypes: state.enabledNotificationTypes,
       timezone: timezone,
@@ -152,7 +172,8 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
   }
 
   Future<void> _syncToServer(
-    List<Feature> features, {
+    List<Feature> features,
+    int token, {
     List<Feature>? navOrder,
     List<NotificationType>? enabledNotificationTypes,
     String? timezone,
@@ -160,6 +181,9 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
     try {
       final dataSource =
           await ref.read(preferenceRemoteDataSourceProvider.future);
+      if (isStale(token)) {
+        return;
+      }
       await dataSource.updatePreferences(
         UserPreferenceRequest(
           enabledFeatures: features,
@@ -169,6 +193,9 @@ class FeatureConfigNotifier extends Notifier<FeatureConfigState> {
         ),
       );
     } on Exception catch (_) {
+      if (isStale(token)) {
+        return;
+      }
       state = state.copyWith(
         error: ref.read(appLocalizationsProvider).settingsFeedbackSaveError,
       );

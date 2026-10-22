@@ -24,6 +24,13 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   dans les listes, les totaux de l'accueil ou les devises de B, et les
   fonctionnalités de B pouvaient partir au serveur avec le jeton de A. Chaque
   notifier par compte ignore désormais toute réponse d'une session précédente.
+- **App mobile : les préférences de l'ancien compte pouvaient s'appliquer au
+  suivant** (KKS-562) : si les préférences serveur de A étaient encore en
+  chargement à la déconnexion, B pouvait les recevoir comme les siennes
+  (langue, taille de texte, fonctionnalités et ordre des onglets), et un
+  changement de préférence lancé par A pouvait être enregistré sur le compte de
+  B. Chaque session a désormais sa propre requête de préférences, et les
+  réponses ou écritures d'une session précédente sont ignorées.
 
 ## [6.12.0] - 2026-10-17
 
