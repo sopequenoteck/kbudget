@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -66,6 +68,35 @@ class FakePreferenceDataSource extends PreferenceRemoteDataSource {
     return _response;
   }
 }
+
+/// Server preferences whose n-th read answers when `answers[n]` completes.
+class QueuedPreferenceDataSource extends FakePreferenceDataSource {
+  QueuedPreferenceDataSource(this.answers);
+
+  final List<Completer<UserPreferenceResponse>> answers;
+  int calls = 0;
+
+  @override
+  Future<UserPreferenceResponse> getPreferences() => answers[calls++].future;
+}
+
+/// Preferences of an account, as the server answers them.
+Completer<UserPreferenceResponse> answerWith(
+  String? textScale, {
+  bool ready = true,
+}) {
+  final answer = Completer<UserPreferenceResponse>();
+  if (ready) {
+    answer.complete(_account(textScale));
+  }
+  return answer;
+}
+
+UserPreferenceResponse _account(String? textScale) => UserPreferenceResponse(
+      enabledFeatures: const [Feature.budgets],
+      navOrder: Feature.values,
+      textScale: textScale,
+    );
 
 /// Authentication state driven by the test.
 class FakeAuthNotifier extends AuthNotifier {
@@ -221,6 +252,41 @@ void main() {
 
       expect(textScale(), TextScale.small);
       expect(remote.reads, 2);
+    });
+
+    test('should_ignoreStaleResponse_when_sessionChangesDuringLoad', () async {
+      final answerA = answerWith(null, ready: false);
+      final queued = QueuedPreferenceDataSource([answerA, answerWith('SMALL')]);
+      remote = queued;
+      await start(auth: const AuthState.unauthenticated());
+
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      emit(const AuthState.unauthenticated());
+      emit(const AuthState.authenticated());
+      await pumpEventQueue();
+      answerA.complete(_account('LARGE'));
+      await pumpEventQueue();
+
+      expect(queued.calls, 2);
+      expect(textScale(), TextScale.small);
+      expect(config.writes, [TextScale.small]);
+    });
+
+    test('should_notWriteServer_when_sessionChangesDuringSync', () async {
+      final held = answerWith(null, ready: false);
+      final queued = QueuedPreferenceDataSource([answerWith(null), held]);
+      remote = queued;
+      await start();
+
+      await notifier().setTextScale(TextScale.small);
+      await pumpEventQueue();
+      expect(queued.calls, 2);
+      emit(const AuthState.unauthenticated());
+      held.complete(_account(null));
+      await pumpEventQueue();
+
+      expect(queued.updates, isEmpty);
     });
 
     test('should_putScale_when_scaleSelected', () async {

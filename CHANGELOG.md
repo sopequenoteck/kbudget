@@ -24,6 +24,12 @@ This project follows [Semantic Versioning](https://semver.org/).
   lists, home totals or currencies, and B's enabled features could be sent to
   the server with A's token. Every account-scoped notifier now drops any
   response that belongs to a previous session.
+- **Mobile app: the previous account's preferences could be applied to the
+  next one** (KKS-562): when the server preferences of A were still loading at
+  sign-out, B could receive them as its own (language, text size, enabled
+  features and tab order), and a preference change started by A could be saved
+  on B's account. Each session now has its own preference request, and
+  responses or writes from a previous session are dropped.
 
 ## [6.12.0] - 2026-10-17
 

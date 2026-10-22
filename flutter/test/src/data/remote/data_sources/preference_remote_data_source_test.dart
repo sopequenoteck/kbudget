@@ -2,10 +2,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/data/remote/data_sources/preference_remote_data_source.dart';
+import 'package:k_budget/src/data/repository_providers.dart';
 import 'package:k_budget/src/domain/enums/enums.dart';
+import 'package:k_budget/src/features/auth/application/auth_notifier.dart';
+import 'package:k_budget/src/features/auth/application/auth_state.dart';
+
+import '../../../features/settings/application/language_notifier_test.dart'
+    show FakeAuthNotifier, heldPreferencesDio, preferencesJson;
 
 const _preferencesBody = <String, dynamic>{
   'enabledFeatures': ['SUBSCRIPTIONS', 'DEBTS'],
@@ -113,6 +122,86 @@ void main() {
       );
 
       expect(requests, hasLength(2));
+    });
+
+    group('preferenceRemoteDataSourceProvider', () {
+      late List<RequestOptions> requests;
+      late List<Completer<Map<String, dynamic>>> answers;
+      late ProviderContainer container;
+
+      void emit(AuthState next) =>
+          (container.read(authNotifierProvider.notifier) as FakeAuthNotifier)
+              .emit(next);
+
+      ProviderContainer start(AuthState auth) {
+        requests = <RequestOptions>[];
+        final dio = heldPreferencesDio(requests, answers);
+        container = ProviderContainer(
+          overrides: [
+            authNotifierProvider.overrideWith(() => FakeAuthNotifier(auth)),
+            authenticatedDioProvider.overrideWith((ref) async => dio),
+          ],
+        );
+        addTearDown(container.dispose);
+        return container;
+      }
+
+      test('should_notShareInFlightRead_when_sessionChanges', () async {
+        answers = [
+          Completer<Map<String, dynamic>>(),
+          Completer<Map<String, dynamic>>()
+            ..complete(preferencesJson(language: 'en')),
+        ];
+        start(const AuthState.authenticated());
+
+        final sourceA =
+            await container.read(preferenceRemoteDataSourceProvider.future);
+        final readA = sourceA.getPreferences();
+        await pumpEventQueue();
+        emit(const AuthState.unauthenticated());
+        emit(const AuthState.authenticated());
+        final sourceB =
+            await container.read(preferenceRemoteDataSourceProvider.future);
+        final readB = sourceB.getPreferences();
+        await pumpEventQueue();
+        answers.first.complete(preferencesJson(language: 'fr'));
+
+        expect(sourceB, isNot(same(sourceA)));
+        expect(requests, hasLength(2));
+        expect((await readB).language, 'en');
+        expect((await readA).language, 'fr');
+      });
+
+      test('should_keepSameSource_when_sessionIsUnchanged', () async {
+        answers = [];
+        start(const AuthState.authenticated());
+
+        final first =
+            await container.read(preferenceRemoteDataSourceProvider.future);
+        final second =
+            await container.read(preferenceRemoteDataSourceProvider.future);
+
+        expect(second, same(first));
+      });
+
+      test('should_resolve_when_firstReadHappensInsideLoginListener',
+          () async {
+        answers = [];
+        start(const AuthState.unauthenticated());
+        final sources = <PreferenceRemoteDataSource>[];
+        container.listen<AuthState>(authNotifierProvider, (previous, next) {
+          unawaited(
+            container
+                .read(preferenceRemoteDataSourceProvider.future)
+                .then(sources.add),
+          );
+        });
+
+        emit(const AuthState.authenticated());
+        await pumpEventQueue();
+
+        expect(sources, hasLength(1));
+      });
     });
 
     test('should_sendDelete_when_languageCleared', () async {
