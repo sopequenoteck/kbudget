@@ -7,6 +7,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [6.13.0] - 2026-10-22
+
 ### Fixed
 
 - **App mobile : entrée « Administration » des réglages suivant l'ancien
@@ -1724,7 +1726,8 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Enums déplacés dans le package `enums/`
 - Mise en conformité complète de l'API (score 100%)
 
-[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...HEAD
+[Unreleased]: https://github.com/sopequenoteck/kbudget/compare/v6.13.0...HEAD
+[6.13.0]: https://github.com/sopequenoteck/kbudget/compare/v6.12.0...v6.13.0
 [6.12.0]: https://github.com/sopequenoteck/kbudget/compare/v6.11.0...v6.12.0
 [6.11.0]: https://github.com/sopequenoteck/kbudget/compare/v6.10.0...v6.11.0
 [6.10.0]: https://github.com/sopequenoteck/kbudget/compare/v6.9.0...v6.10.0
