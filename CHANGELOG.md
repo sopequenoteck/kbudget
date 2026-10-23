@@ -7,6 +7,14 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mobile app: failed administration and exchange-rate actions now say so**
+  (KKS-422): re-enabling a user or revoking an invitation failed silently,
+  saving an exchange rate closed the form even when it failed, and a failed
+  save or deletion hid the whole list of rates. The failure is now shown, the
+  rate form stays open with the error, and the lists stay visible.
+
 ## [6.13.0] - 2026-10-22
 
 ### Fixed

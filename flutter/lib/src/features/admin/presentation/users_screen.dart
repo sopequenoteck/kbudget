@@ -99,33 +99,51 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
     );
   }
 
-  Future<void> _disableUser(String id) async {
+  /// Lance une action sur un element de la liste et annonce son echec :
+  /// l'erreur d'une action ne passe jamais par `state.error`, reserve au
+  /// chargement (KKS-422).
+  Future<void> _runAction(
+    Future<void> Function() action,
+    String Function(AppLocalizations l10n) fallback,
+  ) async {
     try {
-      await ref.read(adminUsersNotifierProvider.notifier).disable(id);
+      await action();
     } on DioException catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       // Le code seul suffit : tester en plus `statusCode == 409` doublait le
       // contrat sans rien y ajouter (KKS-324).
       final l10n = AppLocalizations.of(context)!;
-      final message = errorLabel(
-        l10n,
-        apiErrorCode(e),
-        fallback: l10n.usersFeedbackUserDisableError,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      _showError(errorLabel(l10n, apiErrorCode(e), fallback: fallback(l10n)));
     } on Exception {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.usersFeedbackUserDisableError,
-          ),
-        ),
-      );
+      if (!mounted) {
+        return;
+      }
+      _showError(fallback(AppLocalizations.of(context)!));
     }
   }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _disableUser(String id) => _runAction(
+        () => ref.read(adminUsersNotifierProvider.notifier).disable(id),
+        (l10n) => l10n.usersFeedbackUserDisableError,
+      );
+
+  Future<void> _enableUser(String id) => _runAction(
+        () => ref.read(adminUsersNotifierProvider.notifier).enable(id),
+        (l10n) => l10n.usersFeedbackUserEnableError,
+      );
+
+  Future<void> _revokeInvitation(int id) => _runAction(
+        () => ref.read(invitationsNotifierProvider.notifier).revoke(id),
+        (l10n) => l10n.usersFeedbackInviteRevokeError,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -209,9 +227,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
             onCopyLink: invitation.token != null
                 ? () => _copyLink(invitation.token!)
                 : null,
-            onRevoke: () => ref
-                .read(invitationsNotifierProvider.notifier)
-                .revoke(invitation.id),
+            onRevoke: () => _revokeInvitation(invitation.id),
           );
         },
       ),
@@ -262,8 +278,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen>
             user: user,
             isMutating: isMutating,
             onDisable: () => _disableUser(user.id),
-            onEnable: () =>
-                ref.read(adminUsersNotifierProvider.notifier).enable(user.id),
+            onEnable: () => _enableUser(user.id),
           );
         },
       ),

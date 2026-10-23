@@ -58,7 +58,6 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>>
 
   Future<void> upsert(
       Currency baseCurrency, Currency targetCurrency, double rate) async {
-    final l10n = ref.read(appLocalizationsProvider);
     final token = session;
     try {
       final repository = await _repository;
@@ -82,14 +81,11 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>>
       if (isStale(token)) {
         return;
       }
-      state = state.copyWith(
-        error: l10n.exchangeRatesFeedbackSaveError,
-      );
+      rethrow;
     }
   }
 
   Future<void> delete(Currency baseCurrency, Currency targetCurrency) async {
-    final l10n = ref.read(appLocalizationsProvider);
     final token = session;
     try {
       final repository = await _repository;
@@ -107,9 +103,7 @@ class ExchangeRateNotifier extends Notifier<ListState<ExchangeRate>>
       if (isStale(token)) {
         return;
       }
-      state = state.copyWith(
-        error: l10n.commonFeedbackDeleteError,
-      );
+      rethrow;
     }
   }
 

@@ -64,11 +64,7 @@ class InvitationsNotifier extends Notifier<InvitationListState>
       if (isStale(token)) {
         rethrow;
       }
-      state = state.copyWith(
-        isLoading: false,
-        error:
-            ref.read(appLocalizationsProvider).usersFeedbackInviteCreateError,
-      );
+      state = state.copyWith(isLoading: false);
       rethrow;
     }
   }
@@ -94,9 +90,8 @@ class InvitationsNotifier extends Notifier<InvitationListState>
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error:
-            ref.read(appLocalizationsProvider).usersFeedbackInviteRevokeError,
       );
+      rethrow;
     }
   }
 }

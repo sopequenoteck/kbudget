@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:k_budget/src/features/admin/data/invitation_model.dart';
 import 'package:k_budget/src/features/admin/presentation/users_screen.dart';
 import 'package:k_budget/src/features/onboarding/application/onboarding_notifier.dart';
+import 'package:k_budget/src/localization/app_localizations_fr.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../../helpers/mocks.mocks.dart';
@@ -137,6 +138,65 @@ void main() {
 
       verify(repo.revokeInvitation(1)).called(1);
     });
+
+    group('echec de revocation', () {
+      Future<void> tapRevoke(WidgetTester tester) async {
+        when(repo.listInvitations()).thenAnswer((_) async => [invitation()]);
+        await pumpScreen(tester);
+        await tester.tap(find.byTooltip('Révoquer'));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('should_showFallbackSnackbarAndKeepList_when_revokeThrows', (
+        tester,
+      ) async {
+        when(repo.revokeInvitation(1)).thenThrow(Exception('boom'));
+
+        await tapRevoke(tester);
+
+        expect(
+          find.descendant(
+            of: find.byType(SnackBar),
+            matching: find.text('Impossible de révoquer l\'invitation.'),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('new@example.com'), findsOneWidget);
+      });
+
+      testWidgets('should_showFallbackSnackbar_when_revokeRejectedNoCode', (
+        tester,
+      ) async {
+        when(repo.revokeInvitation(1)).thenThrow(_dioError(null));
+
+        await tapRevoke(tester);
+
+        expect(
+          find.text('Impossible de révoquer l\'invitation.'),
+          findsOneWidget,
+        );
+        expect(find.text('new@example.com'), findsOneWidget);
+      });
+
+      testWidgets('should_showApiErrorLabel_when_revokeRejectedWithCode', (
+        tester,
+      ) async {
+        when(
+          repo.revokeInvitation(1),
+        ).thenThrow(_dioError({'error': 'BAD_REQUEST'}));
+
+        await tapRevoke(tester);
+
+        expect(
+          find.descendant(
+            of: find.byType(SnackBar),
+            matching: find.text(AppLocalizationsFr().errorsApiBadRequest),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('new@example.com'), findsOneWidget);
+      });
+    });
   });
 
   group('onglet utilisateurs', () {
@@ -236,6 +296,68 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(repo.enableUser('u1')).called(1);
+    });
+
+    group('echec de reactivation', () {
+      Future<void> tapEnable(WidgetTester tester) async {
+        when(repo.listUsers()).thenAnswer(
+          (_) async => [adminUser(disabledAt: DateTime(2026, 2, 1))],
+        );
+        await pumpScreen(tester);
+        await openUsersTab(tester);
+        await tester.tap(find.byTooltip('Réactiver'));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('should_showFallbackSnackbarAndKeepList_when_enableThrows', (
+        tester,
+      ) async {
+        when(repo.enableUser('u1')).thenThrow(Exception('boom'));
+
+        await tapEnable(tester);
+
+        expect(
+          find.descendant(
+            of: find.byType(SnackBar),
+            matching: find.text('Impossible de réactiver l\'utilisateur.'),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Alice'), findsOneWidget);
+      });
+
+      testWidgets('should_showFallbackSnackbar_when_enableRejectedNoCode', (
+        tester,
+      ) async {
+        when(repo.enableUser('u1')).thenThrow(_dioError(null));
+
+        await tapEnable(tester);
+
+        expect(
+          find.text('Impossible de réactiver l\'utilisateur.'),
+          findsOneWidget,
+        );
+        expect(find.text('Alice'), findsOneWidget);
+      });
+
+      testWidgets('should_showApiErrorLabel_when_enableRejectedWithCode', (
+        tester,
+      ) async {
+        when(
+          repo.enableUser('u1'),
+        ).thenThrow(_dioError({'error': 'BAD_REQUEST'}));
+
+        await tapEnable(tester);
+
+        expect(
+          find.descendant(
+            of: find.byType(SnackBar),
+            matching: find.text(AppLocalizationsFr().errorsApiBadRequest),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Alice'), findsOneWidget);
+      });
     });
   });
 

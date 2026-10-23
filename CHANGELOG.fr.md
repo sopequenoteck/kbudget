@@ -7,6 +7,15 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **App mobile : les échecs des actions d'administration et de taux de change
+  s'affichent** (KKS-422) : réactiver un compte ou révoquer une invitation
+  échouait sans rien dire, enregistrer un taux fermait le formulaire même en
+  cas d'échec, et un enregistrement ou une suppression ratés masquaient toute la
+  liste des taux. L'échec est désormais annoncé, le formulaire de taux reste
+  ouvert avec l'erreur, et les listes restent affichées.
+
 ## [6.13.0] - 2026-10-22
 
 ### Fixed
