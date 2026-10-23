@@ -15,6 +15,11 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   cas d'échec, et un enregistrement ou une suppression ratés masquaient toute la
   liste des taux. L'échec est désormais annoncé, le formulaire de taux reste
   ouvert avec l'erreur, et les listes restent affichées.
+- **App mobile : nom de catégorie déjà pris et échec de récurrence signalés**
+  (KKS-412) : un nom de catégorie déjà utilisé affichait « Erreur lors de la
+  sauvegarde » sans dire pourquoi ; il est désormais signalé sous le champ du
+  nom, avant tout envoi. Créer une transaction avec une récurrence ne masque
+  plus l'échec de la récurrence.
 
 ## [6.13.0] - 2026-10-22
 

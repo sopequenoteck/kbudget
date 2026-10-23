@@ -269,15 +269,45 @@ void main() {
       expect(state().error, isNull);
     });
 
-    test('should_setError_when_createFails', () async {
+    test('should_rethrowWithoutError_when_createFails', () async {
       when(mockRepo.create(any)).thenThrow(Exception('Server error'));
 
-      await notifier().create(createRequest);
+      await expectLater(
+        notifier().create(createRequest),
+        throwsA(isA<Exception>()),
+      );
 
-      expect(state().error, contains('Server error'));
+      expect(state().error, isNull);
       expect(state().isLoading, false);
       expect(state().items, isEmpty);
       verifyNever(mockRepo.listActive());
+    });
+
+    test('should_setTranslatedError_when_validateFails', () async {
+      when(mockRepo.validate('overdue-1')).thenThrow(Exception('boom'));
+
+      await notifier().validate('overdue-1');
+
+      expect(state().error, 'Erreur lors de la validation');
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_setTranslatedError_when_skipFails', () async {
+      when(mockRepo.skip('overdue-1')).thenThrow(Exception('boom'));
+
+      await notifier().skip('overdue-1');
+
+      expect(state().error, 'Erreur lors du passage');
+      expect(state().mutatingIds, isEmpty);
+    });
+
+    test('should_setTranslatedError_when_deactivateFails', () async {
+      when(mockRepo.deactivate('overdue-1')).thenThrow(Exception('boom'));
+
+      await notifier().deactivate('overdue-1');
+
+      expect(state().error, 'Erreur lors de la désactivation');
+      expect(state().mutatingIds, isEmpty);
     });
 
     test('should_track_mutating_ids', () async {

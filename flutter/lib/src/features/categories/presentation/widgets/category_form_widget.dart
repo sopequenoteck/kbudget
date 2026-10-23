@@ -106,6 +106,12 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
     if (value.length > 30) {
       return l10n.categoriesFormNameMaxLength;
     }
+    final taken = ref
+        .read(categoryNotifierProvider.notifier)
+        .isNameTaken(value, exceptId: widget.category?.id);
+    if (taken) {
+      return l10n.categoriesFormNameDuplicate;
+    }
     return null;
   }
 
@@ -123,8 +129,11 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
   ///   ne lève pas d'exception, n'émet pas [CategoryFormWidget.onSaved].
   /// - Si la validation réussit : appelle [categoryNotifierProvider] `create()`
   ///   ou `update()` selon le mode, puis émet [CategoryFormWidget.onSaved] au succès.
-  /// - En cas d'erreur réseau ou serveur : affiche un [SnackBar], reste sur le
-  ///   formulaire sans propager l'erreur au parent.
+  /// - Si le nom est déjà pris par une autre catégorie chargée : l'erreur
+  ///   s'affiche sous le champ et aucun appel n'est émis.
+  /// - En cas d'erreur après l'appel (réseau, serveur, doublon créé
+  ///   entre-temps) : affiche un [SnackBar] `commonFeedbackSaveError`, reste
+  ///   sur le formulaire sans propager l'erreur au parent.
   Future<void> submit() async {
     setState(() => _showErrors = true);
 
@@ -146,17 +155,8 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
       if (!mounted) return;
       final errorAfterUpdate = ref.read(categoryNotifierProvider).error;
       if (errorAfterUpdate != null) {
-        final isDuplicate = errorAfterUpdate.contains('409') ||
-            errorAfterUpdate.toLowerCase().contains('duplicate') ||
-            errorAfterUpdate.toLowerCase().contains('existe');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isDuplicate
-                  ? l10n.categoriesFormNameDuplicate
-                  : l10n.commonFeedbackSaveError,
-            ),
-          ),
+          SnackBar(content: Text(l10n.commonFeedbackSaveError)),
         );
         return;
       }
@@ -172,17 +172,8 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
       if (!mounted) return;
       final errorAfterCreate = ref.read(categoryNotifierProvider).error;
       if (errorAfterCreate != null) {
-        final isDuplicate = errorAfterCreate.contains('409') ||
-            errorAfterCreate.toLowerCase().contains('duplicate') ||
-            errorAfterCreate.toLowerCase().contains('existe');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isDuplicate
-                  ? l10n.categoriesFormNameDuplicate
-                  : l10n.commonFeedbackSaveError,
-            ),
-          ),
+          SnackBar(content: Text(l10n.commonFeedbackSaveError)),
         );
         return;
       }
@@ -194,6 +185,9 @@ class CategoryFormWidgetState extends ConsumerState<CategoryFormWidget> {
         icone: _selectedEmoji,
         couleur: _selectedColor,
       );
+      // Le nom vient d'entrer dans la liste : le valider encore pendant la
+      // fermeture afficherait « nom deja pris » sur la categorie creee.
+      _showErrors = false;
       widget.onSaved?.call(created);
     }
   }
