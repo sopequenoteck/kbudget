@@ -177,6 +177,76 @@ void main() {
     });
   });
 
+  group('isNameTaken', () {
+    Future<void> load(List<Category> items) async {
+      when(mockRepo.getAll()).thenAnswer((_) async => items);
+      await notifier().loadItems();
+    }
+
+    test('should_returnTrue_when_nameIsIdentical', () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('Alimentation'), isTrue);
+    });
+
+    test('should_returnTrue_when_caseDiffers', () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('aLIMENTATION'), isTrue);
+    });
+
+    test('should_returnTrue_when_nameHasSurroundingSpaces', () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('  Transport  '), isTrue);
+    });
+
+    test('should_returnFalse_when_nameIsFree', () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('Loisirs'), isFalse);
+    });
+
+    test('should_returnFalse_when_onlyOwnCategoryHasName', () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('Alimentation', exceptId: '1'), isFalse);
+    });
+
+    test('should_returnTrue_when_anotherCategoryHasNameWithExceptId',
+        () async {
+      await load([cat1, cat2]);
+
+      expect(notifier().isNameTaken('Transport', exceptId: '1'), isTrue);
+    });
+
+    test('should_returnTrue_when_nameIsSystemCategoryName', () async {
+      await load([cat1, systemCat]);
+
+      expect(notifier().isNameTaken('non catégorisé'), isTrue);
+    });
+
+    test('should_returnFalse_when_noCategoryLoaded', () {
+      expect(notifier().isNameTaken('Alimentation'), isFalse);
+    });
+
+    test('should_searchBeyondFirstPage_when_moreThanOnePageLoaded', () async {
+      final items = List.generate(
+        25,
+        (i) => Category(
+          id: '$i',
+          nom: 'Cat ${i.toString().padLeft(2, '0')}',
+          icone: '📁',
+          couleur: '#000000',
+        ),
+      );
+      await load(items);
+      expect(state().items, hasLength(20));
+
+      expect(notifier().isNameTaken('Cat 24'), isTrue);
+    });
+  });
+
   group('session', () {
     test('should_resetState_when_sessionEnds', () async {
       final sessionContainer = ProviderContainer(

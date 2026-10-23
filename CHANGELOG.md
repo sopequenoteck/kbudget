@@ -14,6 +14,11 @@ This project follows [Semantic Versioning](https://semver.org/).
   saving an exchange rate closed the form even when it failed, and a failed
   save or deletion hid the whole list of rates. The failure is now shown, the
   rate form stays open with the error, and the lists stay visible.
+- **Mobile app: duplicate category name and failed recurring transaction now
+  reported** (KKS-412): a category name already in use showed "Error while
+  saving" instead of saying so; it is now flagged under the name field before
+  anything is sent. Creating a transaction with a recurrence no longer hides a
+  failure of the recurrence.
 
 ## [6.13.0] - 2026-10-22
 

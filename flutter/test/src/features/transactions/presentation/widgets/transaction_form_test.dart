@@ -277,6 +277,40 @@ void main() {
       expect(find.text('Une erreur est survenue'), findsOneWidget);
     });
 
+    testWidgets('should_showRecurringFailedSnackbar_when_recurringCreateFails',
+        (tester) async {
+      when(mockRecurringRepo.create(any)).thenThrow(Exception('boom'));
+      Transaction? savedTx;
+      await tester.pumpWidget(buildApp(
+        onSaved: (tx) async {
+          savedTx = tx;
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextFormField).first, 'Test');
+      await tester.pump();
+      await tester.enterText(find.byKey(const Key('tf_montant')), '10.00');
+      await tester.pump();
+      await tester.tap(find.byTooltip('Récurrence'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Enregistrer'));
+      // Le formulaire reste en cours d'envoi apres un succes (l'appelant le
+      // ferme) : son indicateur anime interdit pumpAndSettle.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(savedTx, isNotNull);
+      verify(mockRecurringRepo.create(any)).called(1);
+      expect(
+        find.text('Transaction créée. Échec de la récurrence.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('should_showErrorSnackbar_when_deleteFails', (tester) async {
       await tester.pumpWidget(buildApp(
         transaction: testTransaction,
