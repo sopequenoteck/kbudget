@@ -39,8 +39,11 @@ class _FakeNotificationNotifier extends NotificationNotifier {
 }
 
 class _FakeRecurringListNotifier extends RecurringListNotifier {
+  final bool fails;
   final List<String> validatedIds = [];
   final List<String> skippedIds = [];
+
+  _FakeRecurringListNotifier({this.fails = false});
 
   @override
   ListState<RecurringTransaction> build() =>
@@ -52,16 +55,26 @@ class _FakeRecurringListNotifier extends RecurringListNotifier {
   @override
   Future<void> validate(String id) async {
     validatedIds.add(id);
+    // Comme le vrai notifier : l'échec se lit dans state.error, sans relance
+    if (fails) {
+      state = state.copyWith(error: 'Erreur du notifier');
+    }
   }
 
   @override
   Future<void> skip(String id) async {
     skippedIds.add(id);
+    if (fails) {
+      state = state.copyWith(error: 'Erreur du notifier');
+    }
   }
 }
 
 class _FakeSubscriptionNotifier extends SubscriptionNotifier {
+  final bool fails;
   final List<String> paidIds = [];
+
+  _FakeSubscriptionNotifier({this.fails = false});
 
   @override
   SubscriptionListState build() => const SubscriptionListState();
@@ -72,6 +85,10 @@ class _FakeSubscriptionNotifier extends SubscriptionNotifier {
   @override
   Future<void> pay(String id) async {
     paidIds.add(id);
+    // Comme le vrai notifier : l'échec est relancé
+    if (fails) {
+      throw Exception('Network error');
+    }
   }
 }
 
@@ -153,6 +170,7 @@ void main() {
     _FakeRecurringListNotifier? recurringNotifier,
     _FakeSubscriptionNotifier? subscriptionNotifier,
     _FakeNotificationNotifier? notificationNotifier,
+    bool asDrawer = false,
   }) {
     final fakeRecurring = recurringNotifier ?? _FakeRecurringListNotifier();
     final fakeSubscription = subscriptionNotifier ?? _FakeSubscriptionNotifier();
@@ -173,9 +191,15 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('fr'),
-        home: const Scaffold(
-          body: NotificationPanel(),
-        ),
+        // Dans l'application, le panneau est l'endDrawer du Scaffold
+        home: asDrawer
+            ? const Scaffold(
+                body: SizedBox.shrink(),
+                endDrawer: NotificationPanel(),
+              )
+            : const Scaffold(
+                body: NotificationPanel(),
+              ),
       ),
     );
   }
@@ -395,6 +419,128 @@ void main() {
 
       expect(fakeNotifier.readIds, ['6']);
       expect(find.byType(NotificationPanel), findsOneWidget);
+    });
+  });
+
+  group('NotificationPanel — retour des actions rapides', () {
+    final recurringState = ListState<NotificationModel>(
+      items: [notifRecurring],
+      isLoading: false,
+    );
+    final subscriptionState = ListState<NotificationModel>(
+      items: [notifSubscription],
+      isLoading: false,
+    );
+
+    Future<void> openPanel(WidgetTester tester, Widget app) async {
+      await tester.pumpWidget(app);
+      await tester.pumpAndSettle();
+      tester.state<ScaffoldState>(find.byType(Scaffold)).openEndDrawer();
+      await tester.pumpAndSettle();
+      expect(find.byType(NotificationPanel), findsOneWidget);
+    }
+
+    Future<void> tapAndSettle(WidgetTester tester, String tooltip) async {
+      await tester.tap(find.byTooltip(tooltip));
+      await tester.pumpAndSettle();
+    }
+
+    void expectClosedWithSnackBar(String message) {
+      expect(find.byType(NotificationPanel), findsNothing);
+      expect(find.text(message), findsOneWidget);
+    }
+
+    testWidgets('should_closePanelAndShowSuccess_when_validateSucceeds',
+        (tester) async {
+      final fake = _FakeRecurringListNotifier();
+      await openPanel(
+        tester,
+        buildApp(recurringState, recurringNotifier: fake, asDrawer: true),
+      );
+
+      await tapAndSettle(tester, 'Valider');
+
+      expect(fake.validatedIds, ['recurring-1']);
+      expectClosedWithSnackBar('Transaction validée');
+    });
+
+    testWidgets('should_closePanelAndShowError_when_validateFails',
+        (tester) async {
+      final fake = _FakeRecurringListNotifier(fails: true);
+      await openPanel(
+        tester,
+        buildApp(recurringState, recurringNotifier: fake, asDrawer: true),
+      );
+
+      await tapAndSettle(tester, 'Valider');
+
+      expectClosedWithSnackBar('Erreur lors de la validation');
+      expect(find.text('Transaction validée'), findsNothing);
+    });
+
+    testWidgets('should_closePanelAndShowSuccess_when_skipSucceeds',
+        (tester) async {
+      final fake = _FakeRecurringListNotifier();
+      await openPanel(
+        tester,
+        buildApp(recurringState, recurringNotifier: fake, asDrawer: true),
+      );
+
+      await tapAndSettle(tester, 'Passer');
+
+      expect(fake.skippedIds, ['recurring-1']);
+      expectClosedWithSnackBar('Occurrence passée');
+    });
+
+    testWidgets('should_closePanelAndShowError_when_skipFails',
+        (tester) async {
+      final fake = _FakeRecurringListNotifier(fails: true);
+      await openPanel(
+        tester,
+        buildApp(recurringState, recurringNotifier: fake, asDrawer: true),
+      );
+
+      await tapAndSettle(tester, 'Passer');
+
+      expectClosedWithSnackBar('Erreur lors du passage');
+      expect(find.text('Occurrence passée'), findsNothing);
+    });
+
+    testWidgets('should_closePanelAndShowSuccess_when_paySucceeds',
+        (tester) async {
+      final fake = _FakeSubscriptionNotifier();
+      await openPanel(
+        tester,
+        buildApp(
+          subscriptionState,
+          subscriptionNotifier: fake,
+          asDrawer: true,
+        ),
+      );
+
+      await tapAndSettle(tester, 'Payer');
+
+      expect(fake.paidIds, ['sub-2']);
+      expectClosedWithSnackBar('Paiement enregistré');
+    });
+
+    testWidgets('should_closePanelAndShowError_when_payFails',
+        (tester) async {
+      final fake = _FakeSubscriptionNotifier(fails: true);
+      await openPanel(
+        tester,
+        buildApp(
+          subscriptionState,
+          subscriptionNotifier: fake,
+          asDrawer: true,
+        ),
+      );
+
+      await tapAndSettle(tester, 'Payer');
+
+      expectClosedWithSnackBar("Impossible d'enregistrer le paiement");
+      expect(find.text('Paiement enregistré'), findsNothing);
+      expect(tester.takeException(), isNull);
     });
   });
 }

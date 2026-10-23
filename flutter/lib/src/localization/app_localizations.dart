@@ -444,6 +444,12 @@ abstract class AppLocalizations {
   /// **'Payment recorded'**
   String get subscriptionsFeedbackPaid;
 
+  /// No description provided for @subscriptionsFeedbackPayError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to record the payment'**
+  String get subscriptionsFeedbackPayError;
+
   /// No description provided for @subscriptionsDetailHistory.
   ///
   /// In en, this message translates to:

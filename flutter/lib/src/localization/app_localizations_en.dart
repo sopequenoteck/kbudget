@@ -201,6 +201,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionsFeedbackPaid => 'Payment recorded';
 
   @override
+  String get subscriptionsFeedbackPayError => 'Unable to record the payment';
+
+  @override
   String get subscriptionsDetailHistory => 'History';
 
   @override

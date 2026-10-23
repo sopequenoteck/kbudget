@@ -19,6 +19,10 @@ This project follows [Semantic Versioning](https://semver.org/).
   saving" instead of saying so; it is now flagged under the name field before
   anything is sent. Creating a transaction with a recurrence no longer hides a
   failure of the recurrence.
+- **Mobile app: Validate, Skip and Pay in the notifications panel now report
+  their outcome** (KKS-415): these actions gave no feedback, and a failed
+  payment was not handled. The panel now closes and a message says whether the
+  action succeeded or failed.
 
 ## [6.13.0] - 2026-10-22
 

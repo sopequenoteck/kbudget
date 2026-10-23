@@ -20,6 +20,10 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
   sauvegarde » sans dire pourquoi ; il est désormais signalé sous le champ du
   nom, avant tout envoi. Créer une transaction avec une récurrence ne masque
   plus l'échec de la récurrence.
+- **App mobile : Valider, Passer et Payer du panneau de notifications
+  annoncent leur issue** (KKS-415) : ces actions ne donnaient aucun retour, et
+  un échec de paiement n'était pas géré. Le panneau se ferme désormais et un
+  message indique si l'action a réussi ou échoué.
 
 ## [6.13.0] - 2026-10-22
 
