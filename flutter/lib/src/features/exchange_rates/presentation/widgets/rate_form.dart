@@ -37,6 +37,7 @@ class _RateFormState extends ConsumerState<RateForm> {
   late final TextEditingController _rateController;
   bool _showErrors = false;
   bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   void initState() {
@@ -91,7 +92,10 @@ class _RateFormState extends ConsumerState<RateForm> {
     final rateError = _validateRate(_rateController.text, l10n);
     if (rateError != null) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+    });
     try {
       final rate = double.parse(_rateController.text.replaceAll(',', '.'));
       await ref.read(exchangeRateListProvider.notifier).upsert(
@@ -102,10 +106,10 @@ class _RateFormState extends ConsumerState<RateForm> {
       if (mounted) widget.onSaved();
     } on Exception {
       if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.exchangeRatesFeedbackSaveError)),
-        );
+        setState(() {
+          _isSubmitting = false;
+          _submitError = l10n.exchangeRatesFeedbackSaveError;
+        });
       }
     }
   }
@@ -211,6 +215,21 @@ class _RateFormState extends ConsumerState<RateForm> {
           ),
         ),
         const SizedBox(height: AppSpacing.space8),
+
+        // Echec d'enregistrement : reste dans le formulaire
+        if (_submitError != null) ...[
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              _submitError!,
+              style: TextStyle(
+                fontSize: AppTypography.sizeXs,
+                color: colorScheme.error,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.space2),
+        ],
 
         // Bouton Enregistrer
         FilledButton(

@@ -78,9 +78,18 @@ class _CurrencySettingsScreenState
     ) ?? false;
 
     if (!confirmed || !mounted) return;
-    await ref
-        .read(exchangeRateListProvider.notifier)
-        .delete(rate.baseCurrency, rate.targetCurrency);
+    try {
+      await ref
+          .read(exchangeRateListProvider.notifier)
+          .delete(rate.baseCurrency, rate.targetCurrency);
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.commonFeedbackDeleteError)),
+      );
+    }
   }
 
   Future<void> _confirmRemoveCurrency(Currency currency) async {

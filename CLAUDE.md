@@ -142,7 +142,7 @@ Source de verite : [`DESIGN.md`](DESIGN.md). Quiet utility dark-first. 4 canaux 
 
 ### Patterns obligatoires
 
-- **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`
+- **CRUD Notifier** : `Notifier<ListState<T>>` avec `loadItems()`, `create()`, `update()`, `delete()`, `loadMore()` — pagination client-side via `_refreshPage()`. `state.error` est reserve aux erreurs de chargement, qu'un ecran affiche a la place de la liste : une action en echec relance l'exception et l'ecran l'annonce (snackbar, ou message dans le formulaire si l'action part d'une modale, ou une snackbar passerait dessous) (KKS-422)
 - **ListState\<T\>** : Freezed model generique (`items`, `isLoading`, `error`, `currentPage`, `hasMore`, `mutatingIds`)
 - **Repository abstrait** : Interface dans `domain/repositories/`, implementation remote (Dio) dans `features/[feature]/data/`
 - **Repositories** : providers dans `data/repository_providers.dart`, implementation remote unique (Dio). Plus de mode autonome ni de Drift depuis KKS-335 ; aucun stockage local n'est une source de verite (cache de lecture : KKS-507)
