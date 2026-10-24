@@ -204,6 +204,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionsFeedbackPaid => 'Paiement enregistré';
 
   @override
+  String get subscriptionsFeedbackPayError =>
+      'Impossible d\'enregistrer le paiement';
+
+  @override
   String get subscriptionsDetailHistory => 'Historique';
 
   @override

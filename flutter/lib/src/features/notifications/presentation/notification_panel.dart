@@ -360,28 +360,80 @@ class _NotificationPanelState extends ConsumerState<NotificationPanel> {
     }
   }
 
-  Future<void> _onValidateRecurringAction(NotificationModel notification) async {
-    if (notification.entityId == null) return;
-    if (!notification.read) {
-      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
-    }
-    await ref.read(recurringListNotifierProvider.notifier).validate(notification.entityId!);
+  Future<void> _onValidateRecurringAction(NotificationModel notification) =>
+      _runQuickAction(
+        notification,
+        (container, id) => _runRecurring(container, (n) => n.validate(id)),
+        (l10n) => l10n.recurringFeedbackValidatedOne,
+        (l10n) => l10n.recurringFeedbackValidationError,
+      );
+
+  Future<void> _onSkipRecurringAction(NotificationModel notification) =>
+      _runQuickAction(
+        notification,
+        (container, id) => _runRecurring(container, (n) => n.skip(id)),
+        (l10n) => l10n.recurringFeedbackSkipped,
+        (l10n) => l10n.recurringFeedbackSkipFailed,
+      );
+
+  Future<void> _onPaySubscriptionAction(NotificationModel notification) =>
+      _runQuickAction(
+        notification,
+        (container, id) async {
+          try {
+            await container.read(subscriptionNotifierProvider.notifier).pay(id);
+            return true;
+          } on Exception {
+            return false;
+          }
+        },
+        (l10n) => l10n.subscriptionsFeedbackPaid,
+        (l10n) => l10n.subscriptionsFeedbackPayError,
+      );
+
+  /// Lance une action de recurrence, qui signale son echec dans `state.error`
+  /// au lieu de lever, et dit si elle a reussi.
+  Future<bool> _runRecurring(
+    ProviderContainer container,
+    Future<void> Function(RecurringListNotifier notifier) run,
+  ) async {
+    await run(container.read(recurringListNotifierProvider.notifier));
+    return container.read(recurringListNotifierProvider).error == null;
   }
 
-  Future<void> _onSkipRecurringAction(NotificationModel notification) async {
-    if (notification.entityId == null) return;
-    if (!notification.read) {
-      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+  /// Marque la notification lue, lance l'action, ferme le panneau puis
+  /// annonce l'issue (une snackbar passerait sous le panneau ouvert, KKS-415).
+  /// Messenger, textes et conteneur sont pris avant le premier `await` : une
+  /// fois le panneau ferme, ni `context` ni `ref` ne sont plus utilisables.
+  Future<void> _runQuickAction(
+    NotificationModel notification,
+    Future<bool> Function(ProviderContainer container, String id) action,
+    String Function(AppLocalizations l10n) successMessage,
+    String Function(AppLocalizations l10n) failureMessage,
+  ) async {
+    final id = notification.entityId;
+    if (id == null) {
+      return;
     }
-    await ref.read(recurringListNotifierProvider.notifier).skip(notification.entityId!);
-  }
-
-  Future<void> _onPaySubscriptionAction(NotificationModel notification) async {
-    if (notification.entityId == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final container = ProviderScope.containerOf(context, listen: false);
     if (!notification.read) {
-      await ref.read(notificationNotifierProvider.notifier).markAsRead(notification.id);
+      await ref.read(notificationNotifierProvider.notifier).markAsRead(
+            notification.id,
+          );
     }
-    await ref.read(subscriptionNotifierProvider.notifier).pay(notification.entityId!);
+    final succeeded = await action(container, id);
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          succeeded ? successMessage(l10n) : failureMessage(l10n),
+        ),
+      ),
+    );
   }
 
   void _onDeleteAll(AppLocalizations l10n) {

@@ -65,11 +65,13 @@ class RecurringListNotifier
         return;
       }
       await _refreshList();
-    } catch (e) {
+    } on Exception {
       if (isStale(token)) {
         return;
       }
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      // L'echec est annonce par l'appelant (KKS-422), pas porte par l'etat.
+      state = state.copyWith(isLoading: false);
+      rethrow;
     }
   }
 
@@ -92,13 +94,15 @@ class RecurringListNotifier
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception {
       if (isStale(token)) {
         return;
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: e.toString(),
+        error: ref
+            .read(appLocalizationsProvider)
+            .recurringFeedbackValidationError,
       );
     }
   }
@@ -122,13 +126,13 @@ class RecurringListNotifier
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception {
       if (isStale(token)) {
         return;
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: e.toString(),
+        error: ref.read(appLocalizationsProvider).recurringFeedbackSkipFailed,
       );
     }
   }
@@ -177,13 +181,15 @@ class RecurringListNotifier
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
       );
-    } on Exception catch (e) {
+    } on Exception {
       if (isStale(token)) {
         return;
       }
       state = state.copyWith(
         mutatingIds: {...state.mutatingIds}..remove(id),
-        error: e.toString(),
+        error: ref
+            .read(appLocalizationsProvider)
+            .recurringFeedbackDeactivateError,
       );
     }
   }

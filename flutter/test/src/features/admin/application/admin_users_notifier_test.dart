@@ -89,15 +89,17 @@ void main() {
       expect(state.error, isNull);
     });
 
-    test('should_setTranslatedErrorWithoutDetail_when_enableFails', () async {
-      when(repo.enableUser('u1')).thenThrow(Exception('secret detail'));
+    test('should_rethrowWithoutStateError_when_enableFails', () async {
+      when(repo.listUsers()).thenAnswer((_) async => [adminUser()]);
+      await notifier().loadItems();
+      when(repo.enableUser('u1')).thenThrow(Exception('boom'));
 
-      await notifier().enable('u1');
+      await expectLater(notifier().enable('u1'), throwsException);
 
       final state = container.read(adminUsersNotifierProvider);
-      expect(state.error, l10n.usersFeedbackUserEnableError);
-      expect(state.error, isNot(contains('secret detail')));
+      expect(state.error, isNull);
       expect(state.mutatingIds, isEmpty);
+      expect(state.items, hasLength(1));
     });
   });
 
